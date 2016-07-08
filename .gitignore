@@ -76,3 +76,6 @@ uwsgi.log
 
 # Environment variable
 .env
+
+# macOS
+.DS_Store
