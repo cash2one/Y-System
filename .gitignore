@@ -42,7 +42,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*,cover
+*.cover
 .hypothesis/
 
 # Translations
@@ -60,3 +60,19 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# Virtual environment
+venv/
+
+# SQLite database
+*.sqlite
+*.db
+
+# uWSGI configuration
+uwsgi-conf.ini
+
+# Supervisor log
+uwsgi.log
+
+# Environment variable
+.env
