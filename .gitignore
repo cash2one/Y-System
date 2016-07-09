@@ -79,3 +79,6 @@ uwsgi.log
 
 # macOS
 .DS_Store
+
+# Windows
+Thumbs.db
