@@ -5,19 +5,19 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    # SECRET_KEY = os.environ.get('SECRET_KEY')
-    # SSL_DISABLE = os.environ.get('SSL_DISABLE')
-    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
-    SQLALCHEMY_RECORD_QUERIES = True
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAIL_SERVER = 'smtp.exmail.qq.com'
-    MAIL_PORT = 465
-    MAIL_USE_SSL = True
-    # MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    # MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    # YSYS_MAIL_SUBJECT_PREFIX = os.environ.get('YSYS_MAIL_SUBJECT_PREFIX')
-    # YSYS_MAIL_SENDER = os.environ.get('YSYS_MAIL_SENDER')
-    # YSYS_ADMIN = os.environ.get('YSYS_ADMIN')
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SSL_DISABLE = os.environ.get('SSL_DISABLE')
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = os.environ.get('SQLALCHEMY_COMMIT_ON_TEARDOWN')
+    SQLALCHEMY_RECORD_QUERIES = os.environ.get('SQLALCHEMY_RECORD_QUERIES')
+    SQLALCHEMY_TRACK_MODIFICATIONS = os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS')
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')
+    MAIL_PORT = os.environ.get('MAIL_PORT')
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    YSYS_MAIL_SUBJECT_PREFIX = os.environ.get('YSYS_MAIL_SUBJECT_PREFIX')
+    YSYS_MAIL_SENDER = os.environ.get('YSYS_MAIL_SENDER')
+    YSYS_ADMIN = os.environ.get('YSYS_ADMIN')
 
     @staticmethod
     def init_app(app):
