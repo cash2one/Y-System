@@ -40,14 +40,19 @@
     <!-- Following Menu -->
     <div class="ui large top fixed borderless hidden menu">
         <div class="ui container">
-            <a class="item" href="./"><img class="logo" src="{{ url_for('static', filename='images/logo-dark.png') }}"></a>
+            <div class="item">
+                <img class="ui mini image" src="{{ url_for('static', filename='images/logo-dark.png') }}">
+            </div>
             <a class="item" href="./"><i class="home icon"></i> 主页</a>
             <a class="item" href="./#projects"><i class="flag icon"></i> Projects</a>
             <a class="item" href="http://lab.y-english.org/" target="_blank"><i class="flask icon"></i> Laboratory</a>
-            <div class="right menu">
+<!--             <div class="right menu">
                 <div class="item">
                     <a class="ui primary button">登录</a>
                 </div>
+            </div> -->
+            <div class="right item">
+                <a class="ui primary button">登录</a>
             </div>
         </div>
     </div>
@@ -66,7 +71,9 @@
             <div class="ui container">
                 <div class="ui large borderless inverted menu">
                     <a class="toc item"><i class="sidebar icon"></i></a>
-                    <a class="item" href="./"><img class="logo" src="{{ url_for('static', filename='images/logo-white.png') }}"></a>
+                    <div class="item" href="./">
+                        <img class="ui mini image" src="{{ url_for('static', filename='images/logo-white.png') }}">
+                    </div>
                     <a class="item" href="./"><i class="home icon"></i> 主页</a>
                     <a class="item" href="./#projects"><i class="flag icon"></i> Projects</a>
                     <a class="item" href="http://lab.y-english.org/" target="_blank"><i class="flask icon"></i> Laboratory</a>
