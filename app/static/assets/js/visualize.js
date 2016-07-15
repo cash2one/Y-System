@@ -37,7 +37,7 @@ $('#copyright')
   .html(
    function(){
      var date = new Date();
-     return '&copy; 2011-' +  date.getFullYear() + ' 北京云英一语教育咨询有限公司 版权所有';
+     return '<i class="copyright icon"></i> 2011-' +  date.getFullYear() + ' 北京云英一语教育咨询有限公司 版权所有';
    }
   )
 ;
