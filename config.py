@@ -7,6 +7,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.exmail.qq.com'
     MAIL_PORT = 465
     MAIL_USE_SSL = True
@@ -42,7 +43,7 @@ class ProductionConfig(Config):
         secure = None
         if getattr(cls, 'MAIL_USERNAME', None) is not None:
             credentials = (cls.MAIL_USERNAME, cls.MAIL_PASSWORD)
-            if getattr(cls, 'MAIL_USE_TLS', None):
+            if getattr(cls, 'MAIL_USE_SSL', None):
                 secure = ()
         mail_handler = SMTPHandler(
             mailhost=(cls.MAIL_SERVER, cls.MAIL_PORT),
