@@ -45,6 +45,14 @@
     margin: 3em 0em;
 }
 
+.ui.logo.image {
+    width: 22px;
+    margin-right: 0.5em;
+}
+.item.logo span {
+    font-size: 22px;
+}
+
 .quote.stripe.segment {
     padding: 0em;
 }
