@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
 
     <!-- Site Properties -->
-    <title>{% block title %}{% end block %} &middot; Y-System &middot; 云英语教育服务支撑系统</title>
+    <title>{% block title %}{% endblock %} &middot; Y-System &middot; 云英语教育服务支撑系统</title>
     <meta name="author" content="iROCKBUNNY" />
     <meta name="description" content="Y-System: Y-English Education Service Support System" />
     <meta name="keywords" content="Y-English, Y-System, English, Education" />
@@ -33,17 +33,17 @@
         s.parentNode.insertBefore(hm, s);
     })();
     </script>
-    {% end block %}
+    {% endblock %}
 </head>
 <body>
     {% block body %}
     {% block nav %}
-    {% end block %}
+    {% endblock %}
     {% block content %}
-    {% end block %}
+    {% endblock %}
     {% block footer %}
-    {% end block %}
-    {% end block %}
+    {% endblock %}
+    {% endblock %}
 
     {% block scripts %}
     <!-- jQuery -->
@@ -57,6 +57,6 @@
 
     <!-- Visualize JS -->
     <script src="{{ url_for('static', filename='assets/js/visualize.js') }}"></script>
-    {% end block %}
+    {% endblock %}
 </body>
 </html>
