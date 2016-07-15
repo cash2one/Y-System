@@ -53,7 +53,9 @@
     <!-- Semantic UI JS -->
     <script src="{{ url_for('static', filename='assets/semantic/semantic.min.js') }}"></script>
 
+    <!-- Moment.js -->
     {{ moment.include_moment() }}
+    {{ moment.locale('cn') }}
 
     <!-- Visualize JS -->
     <script src="{{ url_for('static', filename='assets/js/visualize.js') }}"></script>
