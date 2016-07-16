@@ -5,10 +5,12 @@
     padding: 1em 0em;
 }
 .masthead h1.ui.header {
-    margin-top: 3em;
     margin-bottom: 0em;
     font-size: 4em;
     font-weight: normal;
+}
+.masthead h1.ui.logo.header {
+    margin-top: 2em;
 }
 .masthead h1.ui.header img.ui.centered.image {
     margin: auto;

@@ -9,10 +9,11 @@
 
 {% block page_masthead %}
 <div class="ui text container">
-    <h1 class="ui inverted header">
+    <h1 class="ui inverted logo header">
         <img class="ui centered image" src="{{ url_for('static', filename='images/logo-white.png') }}">
     </h1>
-    <h2>云英语教育服务支撑系统</h2>
+    <h1 class="ui inverted header">云英语</h1>
+    <h2>一个不背单词的GRE工程化解决方案</h2>
     <a class="ui huge inverted yellow basic button" href="#products">Get Started <i class="right arrow icon"></i></a>
 </div>
 {% endblock %}
@@ -21,49 +22,61 @@
 <div id="products" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
-            <div class="center aligned column">
+            <div class="eight wide column">
                 <h3 class="ui header">词汇建造师</h3>
-                <p>Y-System Demo</p>
-                <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="projects" class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="center aligned column">
+                <p>“词汇建造师”（Vocabulary Builder, VB）系“云英语”推出的首个学术（技术）产品，在世界范围内首次将“历史比较语言学”、“原始印欧语”和“词源学”成功融入英文词汇和阅读教学，针对GRE、TOEFL、IELTS、SAT、考研等各类英文考试，使学习者能够在200小时内构建起超过20k+的学术阅读词汇体系，深入提升学术语言能力。同时“词汇建造师”调用了“云英语”自主研发的云语言数据库的部分内容，其词汇释义经过系统重订，能够在相当程度上解决跨语言交流障碍。“词汇建造师”也兼提升多学科阅读能力，且为扩充至印欧诸语种预留接口。“词汇建造师”VB是参加“Y-GRE平台”等实用型产品研修必须掌握的先导技术。</p>
                 <h3 class="ui header">Y-GRE平台</h3>
-                <p>Y-System Demo</p>
-                <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
+                <p>“Y-GRE平台”是“云英语”研发的高端学术产品。平台旨在从全新的技术和制度两方面，辅助参与者力争Verbal Reasoning 160+的理想成绩，同时培养高级学术阅读能力。未参加过“VB研修”者从此平台收益的概率将大大降低。截至目前Y-GRE内测总人数已将近800人，成绩反馈情况：V平均157.5，Q平均167.6，GRE总平均325.1。</p>
+            </div>
+            <div class="six wide right floated column">
+                <img class="ui large bordered rounded image" src="{{ url_for('static', filename='images/white-image.png') }}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="center aligned column">
+                <a class="ui huge button">Check Them Out</a>
             </div>
         </div>
     </div>
 </div>
 
-<div id="projects" class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="center aligned column">
-                <h3 class="ui header">GRE备考框架</h3>
-                <p>Y-System Demo</p>
-                <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
+
+<div class="ui vertical stripe quote segment">
+    <div class="ui equal width stackable internally celled grid">
+        <div class="center aligned row">
+            <div class="column">
+                <h3>“打破困局，以科学方法构建词汇体系。”</h3>
+                <p>That is what they all say about us</p>
+            </div>
+            <div class="column">
+                <h3>“当V170的成绩最后显示在屏幕上的时候，我的感觉是——有些虚实莫辨。”</h3>
+                <p>
+                    <img class="ui avatar image" src="{{ url_for('static', filename='images/avatars/huangdi.jpg') }}">
+                    <b>黄笛</b>
+                    &middot;
+                    V170/Q169
+                    &middot;
+                    北京大学哲学系2009本
+                    &middot;
+                    大陆首个新GRE Verbal满分
+                </p>
             </div>
         </div>
     </div>
 </div>
 
-<div id="projects" class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="center aligned column">
-                <h3 class="ui header">Y-System</h3>
-                <p>Y-System Demo</p>
-                <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
-            </div>
-        </div>
-    </div>
+<div class="ui vertical stripe segment">
+<div class="ui text container">
+<h3 class="ui header">Breaking The Grid, Grabs Your Attention</h3>
+<p>Instead of focusing on content creation and hard work, we have learned how to master the art of doing nothing by providing massive amounts of whitespace and generic content that can seem massive, monolithic and worth your attention.</p>
+<a class="ui large button">Read More</a>
+<h4 class="ui horizontal header divider">
+<a href="#">Case Studies</a>
+</h4>
+<h3 class="ui header">Did We Tell You About Our Bananas?</h3>
+<p>Yes I know you probably disregarded the earlier boasts as non-sequitur filler content, but its really true. It took years of gene splicing and combinatory DNA research, but our bananas can really dance.</p>
+<a class="ui large button">I'm Still Quite Interested</a>
+</div>
 </div>
 {% endblock %}
 
