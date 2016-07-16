@@ -2,6 +2,10 @@
 
 {% block title %}主页{% endblock %}
 
+{% block customized_styles %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize.css') }}">
+{% endblock %}
+
 {% block page_content_header %}
 <div class="ui text container">
     <h1 class="ui inverted header"><img src="{{ url_for('static', filename='images/logo-white.png') }}"></h1>
@@ -58,4 +62,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block customized_scripts %}
+<script src="{{ url_for('static', filename='assets/js/visualize.js') }}"></script>
 {% endblock %}

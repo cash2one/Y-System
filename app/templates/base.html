@@ -17,7 +17,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/semantic/semantic.min.css') }}">
 
     <!-- Customized CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize.css') }}">
+    {% block customized_styles %}
+    {% endblock %}
 
     <!-- Favicons -->
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
@@ -134,8 +135,10 @@
     {{ moment.include_moment() }}
     {{ moment.locale('cn') }}
 
-    <!-- Visualize JS -->
-    <script src="{{ url_for('static', filename='assets/js/visualize.js') }}"></script>
+    <!-- Customized JS -->
+    {% block customized_scripts %}
+    {% endblock %}
+
     {% endblock %}
 </body>
 </html>
