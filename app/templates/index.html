@@ -3,10 +3,11 @@
 {% block title %}主页{% endblock %}
 
 {% block customized_styles %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize.css') }}">
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-index.css') }}">
 {% endblock %}
 
-{% block page_content_header %}
+{% block page_masthead %}
 <div class="ui text container">
     <h1 class="ui inverted header"><img src="{{ url_for('static', filename='images/logo-white.png') }}"></h1>
     <h2>云英语教育服务支撑系统</h2>
@@ -65,5 +66,5 @@
 {% endblock %}
 
 {% block customized_scripts %}
-<script src="{{ url_for('static', filename='assets/js/visualize.js') }}"></script>
+{{ super() }}
 {% endblock %}

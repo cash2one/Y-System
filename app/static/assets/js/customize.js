@@ -1,4 +1,4 @@
-// visualize.js
+// customize.js
 
 $(document)
   .ready(function() {
@@ -32,7 +32,7 @@ $('#wechat-qr-code-click')
   })
 ;
 
-// copyright
+// footer copyright
 $('#copyright')
   .html(
    function(){

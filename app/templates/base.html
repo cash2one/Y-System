@@ -18,6 +18,7 @@
 
     <!-- Customized CSS -->
     {% block customized_styles %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize.css') }}">
     {% endblock %}
 
     <!-- Favicons -->
@@ -76,7 +77,7 @@
                     <a class="right item" href="#"><i class="sign in icon"></i> 登录</a>
                 </div>
             </div>
-            {% block page_content_header %}
+            {% block page_masthead %}
             {% endblock %}
         </div>
 
@@ -137,6 +138,7 @@
 
     <!-- Customized JS -->
     {% block customized_scripts %}
+    <script src="{{ url_for('static', filename='assets/js/customize.js') }}"></script>
     {% endblock %}
 
     {% endblock %}
