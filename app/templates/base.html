@@ -44,9 +44,7 @@
                 <img class="ui logo image" src="{{ url_for('static', filename='images/logo-dark.png') }}">
                 <span>Y-System</span>
             </div>
-            <a class="item" href="./"><i class="home icon"></i> 主页</a>
-            <a class="item" href="./#projects"><i class="flag icon"></i> Projects</a>
-            <a class="item" href="http://lab.y-english.org/" target="_blank"><i class="lab icon"></i> Laboratory</a>
+            <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 主页</a>
             <a class="right item" href="#"><i class="sign in icon"></i> 登录</a>
         </div>
     </div>
@@ -59,9 +57,7 @@
                 <div class="content">Y-System</div>
             </h2>
         </div>
-        <a class="item" href="./"><i class="home icon"></i> 主页</a>
-        <a class="item" href="./#projects"><i class="flag icon"></i> Projects</a>
-        <a class="item" href="http://lab.y-english.org/" target="_blank"><i class="lab icon"></i> Laboratory</a>
+        <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 主页</a>
         <a class="item" href="#"><i class="sign in icon"></i> 登录</a>
     </div>
 
@@ -75,67 +71,16 @@
                         <img class="ui logo image" src="{{ url_for('static', filename='images/logo-white.png') }}">
                         <span>Y-System</span>
                     </div>
-                    <a class="item" href="./"><i class="home icon"></i> 主页</a>
-                    <a class="item" href="./#projects"><i class="flag icon"></i> Projects</a>
-                    <a class="item" href="http://lab.y-english.org/" target="_blank"><i class="lab icon"></i> Laboratory</a>
+                    <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 主页</a>
                     <a class="right item" href="#"><i class="sign in icon"></i> 登录</a>
                 </div>
             </div>
-            <div class="ui text container">
-                <h1 class="ui inverted header"><img src="{{ url_for('static', filename='images/logo-white.png') }}"></h1>
-                <h2>云英语教育服务支撑系统</h2>
-                <a class="ui huge inverted yellow basic button" href="./#projects">Get Started <i class="right arrow icon"></i></a>
-            </div>
+            {% block page_content_header %}
+            {% endblock %}
         </div>
 
-        <div id="projects" class="ui vertical stripe segment">
-            <div class="ui middle aligned stackable grid container">
-                <div class="row">
-                    <div class="center aligned column">
-                        <h3 class="ui header">Y-System</h3>
-                        <p>Y-System Demo</p>
-                        <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="projects" class="ui vertical stripe segment">
-            <div class="ui middle aligned stackable grid container">
-                <div class="row">
-                    <div class="center aligned column">
-                        <h3 class="ui header">Y-System</h3>
-                        <p>Y-System Demo</p>
-                        <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="projects" class="ui vertical stripe segment">
-            <div class="ui middle aligned stackable grid container">
-                <div class="row">
-                    <div class="center aligned column">
-                        <h3 class="ui header">Y-System</h3>
-                        <p>Y-System Demo</p>
-                        <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="projects" class="ui vertical stripe segment">
-            <div class="ui middle aligned stackable grid container">
-                <div class="row">
-                    <div class="center aligned column">
-                        <h3 class="ui header">Y-System</h3>
-                        <p>Y-System Demo</p>
-                        <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        {% block page_content %}
+        {% endblock %}
 
         <div class="ui inverted vertical footer segment">
             <div class="ui container">
@@ -167,7 +112,7 @@
                         <h4 class="ui inverted header">云英语教育服务支撑系统 &middot; Y-System</h4>
                         <div class="ui inverted link list">
                             <a id="copyright" class="item"></a>
-                            <a class="item" href="http://j.map.baidu.com/ukltC"><i class="marker icon"></i> 北京 &middot; 海淀 &middot; 五道口 &middot; 华清商务会馆1707室</a>
+                            <a class="item" href="http://j.map.baidu.com/ukltC" target="_blank"><i class="marker icon"></i> 北京 &middot; 海淀 &middot; 五道口 &middot; 华清商务会馆1707室</a>
                             <a class="item" href="http://www.miitbeian.gov.cn/" target="_blank"><i class="protect icon"></i> 京ICP备11017771号</a>
                         </div>
                     </div>
