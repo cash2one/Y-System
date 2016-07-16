@@ -49,12 +49,17 @@
     margin: 3em 0em;
 }
 
+.stats.stripe.segment,
 .quote.stripe.segment {
     padding: 0em;
 }
+.stats.stripe.segment .grid .column,
 .quote.stripe.segment .grid .column {
     padding-top: 5em;
     padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
 }
 
 
