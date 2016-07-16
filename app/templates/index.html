@@ -8,15 +8,15 @@
 {% endblock %}
 
 {% block following_menu %}
-<a class="item" href="#products"><i class="lightbulb icon"></i> 解决方案</a>
+<a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
 {% endblock %}
 
 {% block sidebar_menu %}
-<a class="item" href="#products"><i class="lightbulb icon"></i> 解决方案</a>
+<a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
 {% endblock %}
 
 {% block menu %}
-<a class="item" href="#products"><i class="lightbulb icon"></i> 解决方案</a>
+<a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
 {% endblock %}
 
 {% block page_masthead %}
@@ -26,7 +26,7 @@
     </h1>
     <h1 class="ui inverted header">云英语</h1>
     <h2>不背单词的GRE工程化解决方案</h2>
-    <a class="ui huge inverted yellow basic button" href="#products">开始了解 <i class="right arrow icon"></i></a>
+    <a class="ui huge inverted yellow basic button" href="{{ url_for('main.index') }}#products">开始了解 <i class="right arrow icon"></i></a>
 </div>
 {% endblock %}
 
