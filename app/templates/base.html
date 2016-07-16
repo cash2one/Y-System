@@ -16,6 +16,9 @@
     <!-- Semantic UI CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/semantic/semantic.min.css') }}">
 
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/font-awesome.min.css') }}">
+
     <!-- Customized CSS -->
     {% block customized_styles %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize.css') }}">
@@ -106,7 +109,7 @@
                     <div class="three wide column">
                         <h4 class="ui inverted header">关于我们</h4>
                         <div class="ui inverted link list">
-                            <a class="item"><i class="phone icon"></i> +86 10-82863898</a>
+                            <a class="item"><i class="fa fa-phone fa-fw"></i> +86 10-82863898</a>
                             <a class="item" href="mailto:service@y-english.org?subject=Mail From Y-System Website"><i class="at icon"></i> service@y-english.org</a>
                             <a id="wechat-qr-code-click" class="item"><i class="wechat icon"></i> 微信公众号</a>
                             <a class="item" href="http://lab.y-english.org" target="_blank"><i class="lab icon"></i> 实验室</a>
