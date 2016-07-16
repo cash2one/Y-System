@@ -20,10 +20,6 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
 
-    print app.debug
-    print app.testing
-    print app.config['SSL_DISABLE']
-
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         from flask_sslify import SSLify
         sslify = SSLify(app)
