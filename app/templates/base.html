@@ -50,6 +50,7 @@
                 <span>云英语</span>
             </div>
             <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 主页</a>
+            <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
             {% block following_menu %}
             {% endblock %}
             <a class="right item" href="#"><i class="sign in icon"></i> 登录</a>
@@ -65,6 +66,7 @@
             </h2>
         </div>
         <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 主页</a>
+        <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
         {% block sidebar_menu %}
         {% endblock %}
         <a class="item" href="#"><i class="sign in icon"></i> 登录</a>
@@ -81,6 +83,7 @@
                         <span>云英语</span>
                     </div>
                     <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 主页</a>
+                    <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
                     {% block menu %}
                     {% endblock %}
                     <a class="right item" href="#"><i class="sign in icon"></i> 登录</a>
