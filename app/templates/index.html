@@ -9,18 +9,20 @@
 
 {% block page_masthead %}
 <div class="ui text container">
-    <h1 class="ui inverted header"><img src="{{ url_for('static', filename='images/logo-white.png') }}"></h1>
+    <h1 class="ui inverted header">
+        <img class="ui centered image" src="{{ url_for('static', filename='images/logo-white.png') }}">
+    </h1>
     <h2>云英语教育服务支撑系统</h2>
-    <a class="ui huge inverted yellow basic button" href="./#projects">Get Started <i class="right arrow icon"></i></a>
+    <a class="ui huge inverted yellow basic button" href="#products">Get Started <i class="right arrow icon"></i></a>
 </div>
 {% endblock %}
 
 {% block page_content %}
-<div id="projects" class="ui vertical stripe segment">
+<div id="products" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="center aligned column">
-                <h3 class="ui header">Y-System</h3>
+                <h3 class="ui header">词汇建造师</h3>
                 <p>Y-System Demo</p>
                 <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
             </div>
@@ -32,7 +34,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="center aligned column">
-                <h3 class="ui header">Y-System</h3>
+                <h3 class="ui header">Y-GRE平台</h3>
                 <p>Y-System Demo</p>
                 <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
             </div>
@@ -44,7 +46,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="center aligned column">
-                <h3 class="ui header">Y-System</h3>
+                <h3 class="ui header">GRE备考框架</h3>
                 <p>Y-System Demo</p>
                 <a class="ui disabled huge black basic button" href="https://github.com/Y-Lab/Y-System" target="_blank"><i class="github icon"></i> View the GitHub Project</a>
             </div>
