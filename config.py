@@ -30,6 +30,11 @@ class DevelopmentConfig(Config):
         'sqlite:///' + os.path.join(basedir, 'ysys-beta.sqlite')
 
 
+class BetaConfig(Config):
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'ysys-beta.sqlite')
+
+
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'ysys_prod.sqlite')
@@ -59,8 +64,9 @@ class ProductionConfig(Config):
 
 
 config = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
+    'dev': DevelopmentConfig,
+    'beta': BetaConfig,
+    'prod': ProductionConfig,
 
     'default': DevelopmentConfig
 }
