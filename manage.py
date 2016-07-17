@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8');
+
 import os
 
 if os.path.exists('.env'):
@@ -10,7 +14,7 @@ if os.path.exists('.env'):
             os.environ[var[0]] = var[1]
 
 from app import create_app, db
-from app.models import User, Role
+from app.models import User, Role, Permission
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -24,6 +28,27 @@ def make_shell_context():
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
+
+@manager.command
+def deploy():
+    """Run deployment tasks."""
+    from flask.ext.migrate import upgrade
+    from app.models import Role, BookingState, RentalType, iPadCapacity
+
+    # migrate database to latest revision
+    upgrade()
+
+    # create user roles
+    Role.insert_roles()
+
+    # create booking states
+    BookingState.insert_booking_states()
+
+    # create rental types
+    RentalType.insert_rental_types()
+
+    # create iPad capacities
+    iPadCapacity.insert_ipad_capacities
 
 if __name__ == '__main__':
     manager.run()

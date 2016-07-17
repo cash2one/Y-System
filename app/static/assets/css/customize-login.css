@@ -15,6 +15,9 @@
 .masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:hover {
     color: #fff;
 }
+.masthead.segment .ui.inverted.form .ui.inverted.segment .ui.flask.message {
+    display: block;
+}
 
 @media only screen and (max-width: 767px) {
     .masthead.segment .ui.grid {

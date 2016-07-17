@@ -17,10 +17,10 @@
 {% endblock %}
 
 {% block page_masthead %}
+{{ super() }}
 <div class="ui middle aligned center aligned grid">
     <div class="column">
         <h2 class="ui inverted header">登录账户</h2>
-        <!-- <form method="POST" action="/" class="ui inverted form"> -->
         <form method="POST" action="{{ url_for('auth.login') }}" class="ui inverted form">
             <div class="ui inverted segment">
                 {{ form.hidden_tag() }}
@@ -53,6 +53,13 @@
                 <div class="field">
                     {{ form.submit(class='ui fluid huge inverted submit button') }}
                 </div>
+                {% for message in get_flashed_messages() %}
+                <div class="ui flask negative message">
+                    <ul class="list">
+                        <li>{{ message }}</li>
+                    </ul>
+                </div>
+                {% endfor %}
                 <div class="ui error message"></div>
             </div>
         </form>
