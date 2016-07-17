@@ -1,1 +1,17 @@
 /* customize-login.css */
+
+.masthead.segment .ui.grid {
+    height: 100%;
+    margin-top: 100px;
+    margin-bottom: 50px;
+}
+.masthead.segment .column {
+    max-width: 450px;
+}
+
+
+@media only screen and (max-width: 700px) {
+    .masthead.segment .ui.grid {
+        margin-bottom: 0;
+    }
+}

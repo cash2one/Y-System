@@ -8,10 +8,29 @@
 {% endblock %}
 
 {% block page_masthead %}
-<div class="ui text container">
-    <h1 class="ui inverted header">403</h1>
-    <h2>啊！好像访问不鸟呢！(>_<)</h2>
-    <a class="ui huge inverted yellow basic button" href="{{ url_for('main.index') }}"><i class="left arrow icon"></i> 回到首页</a>
+<div class="ui middle aligned center aligned grid">
+    <div class="column">
+        <h2 class="ui inverted header">登录账户</h2>
+        <form class="ui inverted form">
+            <div class="ui inverted segment">
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="at icon"></i>
+                        <input type="text" name="email" placeholder="邮箱">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="lock icon"></i>
+                        <input type="password" name="password" placeholder="密码">
+                    </div>
+                </div>
+                <div class="ui fluid huge inverted submit button"><i class="sign in icon"></i> 登录</div>
+                <div class="ui error message"></div>
+                <div class="ui message">账户尚未激活？<a href="#">去激活</a></div>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
 

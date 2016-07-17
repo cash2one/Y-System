@@ -10,11 +10,11 @@ $(document)
                         rules: [
                             {
                                 type   : 'empty',
-                                prompt : 'Please enter your e-mail'
+                                prompt : '请输入您的电子邮箱地址'
                             },
                             {
                                 type   : 'email',
-                                prompt : 'Please enter a valid e-mail'
+                                prompt : '请输入一个有效的电子邮箱地址'
                             }
                         ]
                     },
@@ -23,11 +23,11 @@ $(document)
                         rules: [
                             {
                                 type   : 'empty',
-                                prompt : 'Please enter your password'
+                                prompt : '请输入您的密码'
                             },
                             {
                                 type   : 'length[6]',
-                                prompt : 'Your password must be at least 6 characters'
+                                prompt : '密码长度至少为6位'
                             }
                         ]
                     }
