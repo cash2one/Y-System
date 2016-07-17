@@ -6,7 +6,7 @@ from . import auth
 from .. import db
 from ..models import User, Activation
 from ..email import send_email
-from .forms import LoginForm, ActivationForm, RegistrationForm, ChangePasswordForm, PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
+from .forms import LoginForm, ActivationForm, ChangePasswordForm, PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
 
 
 @auth.before_app_request

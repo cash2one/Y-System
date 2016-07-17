@@ -32,11 +32,11 @@ manager.add_command('db', MigrateCommand)
 @manager.command
 def deploy():
     """Run deployment tasks."""
-    from flask.ext.migrate import upgrade
+    # from flask_migrate import upgrade
     from app.models import Role, BookingState, RentalType, iPadCapacity
 
     # migrate database to latest revision
-    upgrade()
+    # upgrade()
 
     # create user roles
     Role.insert_roles()
@@ -48,7 +48,7 @@ def deploy():
     RentalType.insert_rental_types()
 
     # create iPad capacities
-    iPadCapacity.insert_ipad_capacities
+    iPadCapacity.insert_ipad_capacities()
 
 if __name__ == '__main__':
     manager.run()
