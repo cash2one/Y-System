@@ -41,3 +41,12 @@ $('#copyright')
    }
   )
 ;
+
+// footer contacts
+$('#contacts-footer-link')
+    .on('click', function () {
+        $('#contacts-dimmer')
+            .dimmer('show')
+        ;
+    })
+;

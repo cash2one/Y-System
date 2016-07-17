@@ -30,6 +30,9 @@
     background: none;
 }
 
+#contacts-dimmer div.item {
+    font-size: 2em;
+}
 
 @media only screen and (max-width: 700px) {
     .ui.fixed.menu {
@@ -41,5 +44,8 @@
     }
     .borderless.inverted.menu .toc.item {
         display: block;
+    }
+    #contacts-dimmer div.item {
+        font-size: 1em;
     }
 }
