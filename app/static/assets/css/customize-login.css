@@ -8,7 +8,13 @@
 .masthead.segment .column {
     max-width: 450px;
 }
-
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link {
+    color: rgba(255,255,255,.5);
+}
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:active,
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:hover {
+    color: #fff;
+}
 
 @media only screen and (max-width: 700px) {
     .masthead.segment .ui.grid {

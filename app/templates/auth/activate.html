@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}激活{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-activate.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui middle aligned center aligned grid">
+    <div class="column">
+        <h2 class="ui inverted header">激活账户</h2>
+        <form method="POST" class="ui inverted form">
+            <div class="ui inverted segment">
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="user icon"></i>
+                        {{ form.name(placeholder='姓名') }}
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="key icon"></i>
+                        {{ form.activation_code(placeholder='激活码') }}
+                    </div>
+                </div>
+                {{ form.submit(class='ui fluid huge inverted submit button') }}
+                <div class="ui error message"></div>
+                <div class="ui list">
+                    <div class="item">已经激活账户？<a href="#">点击登录账户</a></div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/customize-activate.js') }}"></script>
+{% endblock %}

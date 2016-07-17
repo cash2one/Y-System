@@ -8,10 +8,16 @@ from ..models import User
 
 
 class LoginForm(Form):
-    email = StringField('Email', validators=[Required(), Length(1, 64), Email()])
-    password = PasswordField('Password', validators=[Required()])
-    remember_me = BooleanField('Keep me logged in')
-    submit = SubmitField('Log In')
+    email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email()])
+    password = PasswordField(u'密码', validators=[Required(), Length(6, 64)])
+    remember_me = BooleanField(u'记住我')
+    submit = SubmitField(u'登录')
+
+
+class ActivationForm(Form):
+    name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
+    activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
+    submit = SubmitField(u'激活')
 
 
 class RegistrationForm(Form):
