@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, abort, flash, request, cur
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import main
-# from .forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm
+from .forms import EditProfileForm, EditProfileAdminForm
 from .. import db
 from ..models import Permission, Role, User
 from ..decorators import admin_required, permission_required
@@ -38,13 +38,6 @@ def index():
 @login_required
 def profile():
     return render_template('profile.html')
-
-
-# @main.route('/user/<user_id>')
-# @login_required
-# def user(user_id):
-#     user = User.query.filter_by(id=user_id).first_or_404()
-#     return render_template('user.html', user=user)
 
 
 # @main.route('/edit-profile', methods=['GET', 'POST'])
