@@ -38,7 +38,7 @@
                 </div>
                 <div class="three fields">
                     <div class="inline field">
-                        <div class="ui large checkbox">
+                        <div class="ui checkbox">
                             {{ form.remember_me() }}
                             {{ form.remember_me.label() }}
                         </div>
@@ -47,14 +47,14 @@
                         <a class="link" href="#">重设密码</a>
                     </div>
                     <div class="field">
-                        <a class="link" href="#">激活账户</a>
+                        <a class="link" href="{{ url_for('auth.activate') }}">激活账户</a>
                     </div>
                 </div>
                 <div class="field">
                     {{ form.submit(class='ui fluid huge inverted submit button') }}
                 </div>
                 {% for message in get_flashed_messages() %}
-                <div class="ui flask negative message">
+                <div class="ui flask info message">
                     <ul class="list">
                         <li>{{ message }}</li>
                     </ul>

@@ -4,7 +4,7 @@ from flask_wtf import Form
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import Required, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
-from ..models import User
+from ..models import Activation, User
 
 
 class LoginForm(Form):
@@ -17,18 +17,15 @@ class LoginForm(Form):
 class ActivationForm(Form):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
-    email = StringField('Email', validators=[Required(), Length(1, 64), Email()])
-    password = PasswordField('Password', validators=[Required(), EqualTo('password2', message='Passwords must match.')])
-    password2 = PasswordField('Confirm password', validators=[Required()])
+    email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email()])
+    password = PasswordField(u'密码', validators=[Required(), EqualTo('password2')])
+    password2 = PasswordField(u'确认密码', validators=[Required()])
+    eula = BooleanField(u'同意云英语条款', validators=[Required()])
     submit = SubmitField(u'激活')
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
-            raise ValidationError('Email already registered.')
-
-    def validate_username(self, field):
-        if User.query.filter_by(username=field.data).first():
-            raise ValidationError('Username already in use.')
+            raise ValidationError(u'%s已经做注册' % field.data)
 
 
 # class RegistrationForm(Form):

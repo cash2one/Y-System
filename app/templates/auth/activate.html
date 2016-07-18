@@ -11,8 +11,9 @@
 <div class="ui middle aligned center aligned grid">
     <div class="column">
         <h2 class="ui inverted header">激活账户</h2>
-        <form method="POST" class="ui inverted form">
+        <form method="POST" action="{{ url_for('auth.activate') }}" class="ui inverted form">
             <div class="ui inverted segment">
+                {{ form.hidden_tag() }}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="user icon"></i>
@@ -25,11 +26,54 @@
                         {{ form.activation_code(placeholder='激活码') }}
                     </div>
                 </div>
-                {{ form.submit(class='ui fluid huge inverted submit button') }}
-                <div class="ui error message"></div>
-                <div class="ui list">
-                    <div class="item">已经激活账户？<a href="#">点击登录账户</a></div>
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="at icon"></i>
+                        {{ form.email(placeholder='邮箱') }}
+                    </div>
                 </div>
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="lock icon"></i>
+                        {{ form.password(placeholder='密码') }}
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="lock icon"></i>
+                        {{ form.password2(placeholder='确认密码') }}
+                    </div>
+                </div>
+                <div class="two fields">
+                    <div class="inline field">
+                        <div class="ui checkbox">
+                            {{ form.eula() }}
+                            {{ form.eula.label() }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <span>已经激活？</span>
+                        <a class="link" href="{{ url_for('auth.login') }}">登录账户</a>
+                    </div>
+                </div>
+                <div class="field">
+                    {{ form.submit(class='ui fluid huge inverted submit button') }}
+                </div>
+                {% if form.errors.email %}
+                <div class="ui flask info message">
+                    <ul class="list">
+                        <li>{{ form.errors.email }}</li>
+                    </ul>
+                </div>
+                {% endif %}
+                {% for message in get_flashed_messages() %}
+                <div class="ui flask info message">
+                    <ul class="list">
+                        <li>{{ message }}</li>
+                    </ul>
+                </div>
+                {% endfor %}
+                <div class="ui error message"></div>
             </div>
         </form>
     </div>

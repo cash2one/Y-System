@@ -51,13 +51,14 @@ def activate():
         activations = Activation.query.filter_by(name=form.name.data).all()
         for activation in activations:
             if activation.verify_activation_code(form.activation_code.data):
-                user = User(email=form.email.data, username=form.username.data, password=form.password.data)
+                user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
                 db.session.add(user)
                 db.session.commit()
                 token = user.generate_confirmation_token()
-                send_email(user.email, u'确认邮箱账户', 'auth/email/confirm', user=user, token=token)
-                # flash('一封确认邮件已经发送到您的邮箱。')
+                send_email(user.email, u'确认邮箱账户', 'auth/mail/confirm', user=user, token=token)
+                flash('一封确认邮件已经发送到您的邮箱')
                 return redirect(url_for('auth.login'))
+        flash('无法激活')
     return render_template('auth/activate.html', form=form)
 
 

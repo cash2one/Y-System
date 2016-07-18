@@ -194,6 +194,7 @@ class User(UserMixin, db.Model):
     registered_classes = db.relationship('Registration', foreign_keys=[Registration.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     booked_periods = db.relationship('Booking', foreign_keys=[Booking.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     rented_ipads = db.relationship('Rental', foreign_keys=[Rental.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
+    punches = db.relationship('Punch', backref='punch', lazy='dynamic')
 
     # def __init__(self, **kwargs):
     #     super(User, self).__init__(**kwargs)
@@ -398,6 +399,18 @@ class Lesson(db.Model):
         return '<Lesson %r>' % self.name
 
 
+class NextLesson(db.Model):
+    __tablename__ = 'next_lessons'
+    id = db.Column(db.Integer, primary_key=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), unique=True, index=True)
+    next_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __repr__(self):
+        return '<Next Video %r, %r>' % (self.video_id, self.next_video_id)
+
+
 class Video(db.Model):
     __tablename__ = 'videos'
     id = db.Column(db.Integer, primary_key=True)
@@ -408,6 +421,18 @@ class Video(db.Model):
 
     def __repr__(self):
         return '<Video %r>' % self.name
+
+
+class NextVideo(db.Model):
+    __tablename__ = 'next_videos'
+    id = db.Column(db.Integer, primary_key=True)
+    video_id = db.Column(db.Integer, db.ForeignKey('videos.id'), unique=True, index=True)
+    next_video_id = db.Column(db.Integer, db.ForeignKey('videos.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __repr__(self):
+        return '<Next Video %r, %r>' % (self.video_id, self.next_video_id)
 
 
 class Punch(db.Model):
