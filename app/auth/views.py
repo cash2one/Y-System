@@ -58,7 +58,7 @@ def activate():
                     db.session.add(user)
                     db.session.commit()
                     token = user.generate_confirmation_token()
-                    send_email(user.email, u'确认邮箱账户', 'auth/mail/confirm', user=user, token=token)
+                    send_email(user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=user, token=token)
                     flash(u'激活成功')
                     flash(u'一封确认邮件已经发送到您的邮箱')
                     return redirect(url_for('auth.login'))
@@ -85,7 +85,7 @@ def confirm(token):
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
-    send_email(current_user.email, 'Confirm Your Account', 'auth/email/confirm', user=current_user, token=token)
+    send_email(current_user.email, '确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
     flash(u'一封新的确认邮件已经发送到您的邮箱')
     return redirect(url_for('main.index'))
 
