@@ -26,12 +26,23 @@
                         {{ form.activation_code(placeholder='激活码') }}
                     </div>
                 </div>
+                {% with email_errors = form.email.errors %}
+                {% if email_errors %}
+                <div class="field error">
+                    <div class="ui large left icon input">
+                        <i class="at icon"></i>
+                        {{ form.email(placeholder='邮箱') }}
+                    </div>
+                </div>
+                {% else %}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="at icon"></i>
                         {{ form.email(placeholder='邮箱') }}
                     </div>
                 </div>
+                {% endif %}
+                {% endwith %}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="lock icon"></i>
@@ -59,21 +70,29 @@
                 <div class="field">
                     {{ form.submit(class='ui fluid huge inverted submit button') }}
                 </div>
-                {% if form.errors.email %}
-                <div class="ui flask info message">
+                <div class="ui error message"></div>
+                {% with email_errors = form.email.errors %}
+                {% if email_errors %}
+                <div class="ui flask negative message">
                     <ul class="list">
-                        <li>{{ form.errors.email }}</li>
+                        {% for error in email_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
                     </ul>
                 </div>
                 {% endif %}
-                {% for message in get_flashed_messages() %}
-                <div class="ui flask info message">
+                {% endwith %}
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="ui flask negative message">
                     <ul class="list">
+                        {% for message in messages %}
                         <li>{{ message }}</li>
+                        {% endfor %}
                     </ul>
                 </div>
-                {% endfor %}
-                <div class="ui error message"></div>
+                {% endif %}
+                {% endwith %}
             </div>
         </form>
     </div>

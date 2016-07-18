@@ -36,27 +36,25 @@ class Role(db.Model):
 
     @staticmethod
     def insert_roles():
-        roles = {
-            u'用户': (Permission.LOGIN, True),
-            u'VB学员': (Permission.LOGIN | Permission.BOOK_VB_1, False),
-            u'联报学员1类': (Permission.LOGIN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, False),
-            u'联报学员2类': (Permission.LOGIN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, False),
-            u'联报学员A类': (Permission.LOGIN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, False),
-            u'预约协管员': (Permission.LOGIN | Permission.MODERATE_BOOKING, False),
-            u'iPad借阅协管员': (Permission.LOGIN | Permission.MODERATE_RENTAL, False),
-            u'时段协管员': (Permission.LOGIN | Permission.MODERATE_PERIOD, False),
-            u'iPad内容协管员': (Permission.LOGIN | Permission.MODERATE_IPAD, False),
-            u'用户协管员': (Permission.LOGIN | Permission.MODERATE_USER, False),
-            u'志愿者': (Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, False),
-            u'管理员': (Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, False),
-            u'开发人员': (0xffffffff, False)
-        }
+        roles = [
+            (u'用户', Permission.LOGIN, True, ),
+            (u'VB学员', Permission.LOGIN | Permission.BOOK_VB_1, False, ),
+            (u'联报学员1类', Permission.LOGIN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, False, ),
+            (u'联报学员2类', Permission.LOGIN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, False, ),
+            (u'联报学员A类', Permission.LOGIN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, False, ),
+            (u'预约协管员', Permission.LOGIN | Permission.MODERATE_BOOKING, False, ),
+            (u'iPad借阅协管员', Permission.LOGIN | Permission.MODERATE_RENTAL, False, ),
+            (u'时段协管员', Permission.LOGIN | Permission.MODERATE_PERIOD, False, ),
+            (u'iPad内容协管员', Permission.LOGIN | Permission.MODERATE_IPAD, False, ),
+            (u'用户协管员', Permission.LOGIN | Permission.MODERATE_USER, False, ),
+            (u'志愿者', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, False, ),
+            (u'管理员', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, False, ),
+            (u'开发人员', 0xffffffff, False, ),
+        ]
         for r in roles:
-            role = Role.query.filter_by(name=r).first()
+            role = Role.query.filter_by(name=r[0]).first()
             if role is None:
-                role = Role(name=r)
-            role.permissions = roles[r][0]
-            role.default = roles[r][1]
+                role = Role(name=r[0], permissions=r[1], default=r[2])
             db.session.add(role)
         db.session.commit()
 
@@ -71,8 +69,15 @@ class Activation(db.Model):
     activation_code_hash = db.Column(db.String(128))
     activated = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    vb_class = db.Column(db.String(64))
+    y_gre_class = db.Column(db.String(64))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __init__(self, **kwargs):
+        super(Activation, self).__init__(**kwargs)
+        if self.role_id is None:
+            self.role_id = Role.query.filter_by(default=True).first()
 
     @property
     def activation_code(self):
@@ -109,19 +114,18 @@ class BookingState(db.Model):
 
     @staticmethod
     def insert_booking_states():
-        booking_states = {
-            u'预约': (True, ),
-            u'排队': (False, ),
-            u'赴约': (False, ),
-            u'迟到': (False, ),
-            u'爽约': (False, ),
-            u'取消': (False, )
-        }
+        booking_states = [
+            (u'预约', True, ),
+            (u'排队', False, ),
+            (u'赴约', False, ),
+            (u'迟到', False, ),
+            (u'爽约', False, ),
+            (u'取消', False, ),
+        ]
         for bs in booking_states:
-            booking_state = BookingState.query.filter_by(name=bs).first()
+            booking_state = BookingState.query.filter_by(name=bs[0]).first()
             if booking_state is None:
-                booking_state = BookingState(name=bs)
-            booking_state.default = booking_states[bs][0]
+                booking_state = BookingState(name=bs[0], default=bs[1])
             db.session.add(booking_state)
         db.session.commit()
 
@@ -153,13 +157,13 @@ class RentalType(db.Model):
     @staticmethod
     def insert_rental_types():
         rental_types = [
-            u'借出',
-            u'回收',
+            (u'借出', ),
+            (u'回收', ),
         ]
         for rt in rental_types:
-            rental_type = RentalType.query.filter_by(name=rt).first()
+            rental_type = RentalType.query.filter_by(name=rt[0]).first()
             if rental_type is None:
-                rental_type = RentalType(name=rt)
+                rental_type = RentalType(name=rt[0])
             db.session.add(rental_type)
         db.session.commit()
 
@@ -346,13 +350,13 @@ class iPadCapacity(db.Model):
     @staticmethod
     def insert_ipad_capacities():
         ipad_capacities = [
-            '16GB',
-            '64GB',
+            ('16GB', ),
+            ('64GB', ),
         ]
         for ic in ipad_capacities:
-            ipad_capacity = iPadCapacity.query.filter_by(name=ic).first()
+            ipad_capacity = iPadCapacity.query.filter_by(name=ic[0]).first()
             if ipad_capacity is None:
-                ipad_capacity = iPadCapacity(name=ic)
+                ipad_capacity = iPadCapacity(name=ic[0])
             db.session.add(ipad_capacity)
         db.session.commit()
 

@@ -53,14 +53,18 @@
                 <div class="field">
                     {{ form.submit(class='ui fluid huge inverted submit button') }}
                 </div>
-                {% for message in get_flashed_messages() %}
+                <div class="ui error message"></div>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
                 <div class="ui flask info message">
                     <ul class="list">
+                        {% for message in messages %}
                         <li>{{ message }}</li>
+                        {% endfor %}
                     </ul>
                 </div>
-                {% endfor %}
-                <div class="ui error message"></div>
+                {% endif %}
+                {% endwith %}
             </div>
         </form>
     </div>

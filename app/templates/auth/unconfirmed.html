@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}确认邮箱{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-unconfirmed.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+{{ super() }}
+<div class="ui text container">
+    <h1 class="ui inverted header">404</h1>
+    <h2>啊咧？页面不存在喏！(>_<)</h2>
+    <a class="ui huge inverted yellow basic button" href="{{ url_for('main.index') }}"><i class="left arrow icon"></i> 回到首页</a>
+</div>
+{% endblock %}
+
+<!-- {% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/customize-unconfirmed.js') }}"></script>
+{% endblock %} -->
