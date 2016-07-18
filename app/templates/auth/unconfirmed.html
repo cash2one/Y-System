@@ -13,5 +13,24 @@
     <h1 class="ui inverted header">确认邮箱</h1>
     <h2>请点击确认邮件中的链接以确认邮箱，或者</h2>
     <a class="ui huge inverted yellow basic button" href="{{ url_for('auth.resend_confirmation') }}"><i class="send icon"></i> 重发确认邮件</a>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="ui big icon info message">
+        <i class="inbox icon"></i>
+        <i class="close icon"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+
+
 </div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/customize-unconfirmed.js') }}"></script>
 {% endblock %}

@@ -40,7 +40,6 @@ def login():
 @login_required
 def logout():
     logout_user()
-    # flash('You have been logged out.')
     return redirect(url_for('main.index'))
 
 
@@ -62,10 +61,10 @@ def activate():
                     flash(u'激活成功')
                     flash(u'一封确认邮件已经发送到您的邮箱')
                     return redirect(url_for('auth.login'))
-                flash(u'%s的云英语已处于激活状态' % form.name.data)
+                flash(u'%s的云英语账户已处于激活状态' % form.name.data)
                 flash(u'请直接登录')
                 return redirect(url_for('auth.login'))
-        flash(u'激活信息不存在')
+        flash(u'激活信息有误或者不存在')
     return render_template('auth/activate.html', form=form)
 
 
@@ -77,7 +76,7 @@ def confirm(token):
     if current_user.confirm(token):
         flash(u'您的账户邮箱确认成功！')
     else:
-        flash(u'确认连接无效或者已经过期')
+        flash(u'确认链接无效或者已经过期')
     return redirect(url_for('main.index'))
 
 
@@ -85,7 +84,7 @@ def confirm(token):
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
-    send_email(current_user.email, '确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
+    send_email(current_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
     flash(u'一封新的确认邮件已经发送到您的邮箱')
     return redirect(url_for('main.index'))
 

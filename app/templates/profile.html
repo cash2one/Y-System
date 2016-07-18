@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_user.name }}{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-profile.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    <h1 class="ui inverted header">{{ current_user.name }}</h1>
+    <h2>这是你的云英语主页</h2>
+    <a class="ui huge inverted yellow basic button" href="{{ url_for('main.index') }}"><i class="left arrow icon"></i> 回到首页</a>
+</div>
+{% endblock %}

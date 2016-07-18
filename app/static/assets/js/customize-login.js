@@ -31,6 +31,11 @@ $(document)
                             }
                         ]
                     }
+                    remember_me: {
+                        identifier  : 'remember_me',
+                        optional    : true,
+                        ]
+                    }
                 }
             })
         ;

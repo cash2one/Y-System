@@ -24,12 +24,23 @@
         <form method="POST" action="{{ url_for('auth.login') }}" class="ui inverted form">
             <div class="ui inverted segment">
                 {{ form.hidden_tag() }}
+                {% with email_errors = form.email.errors %}
+                {% if email_errors %}
+                <div class="field error">
+                    <div class="ui large left icon input">
+                        <i class="at icon"></i>
+                        {{ form.email(placeholder='邮箱') }}
+                    </div>
+                </div>
+                {% else %}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="at icon"></i>
                         {{ form.email(placeholder='邮箱') }}
                     </div>
                 </div>
+                {% endif %}
+                {% endwith %}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="lock icon"></i>
@@ -44,7 +55,7 @@
                         </div>
                     </div>
                     <div class="field">
-                        <a class="link" href="#">重设密码</a>
+                        <a class="link" href="#">忘记密码</a>
                     </div>
                     <div class="field">
                         <a class="link" href="{{ url_for('auth.activate') }}">激活账户</a>
@@ -54,6 +65,17 @@
                     {{ form.submit(class='ui fluid huge inverted submit button') }}
                 </div>
                 <div class="ui error message"></div>
+                {% with email_errors = form.email.errors %}
+                {% if email_errors %}
+                <div class="ui flask negative message">
+                    <ul class="list">
+                        {% for error in email_errors %}
+                        <li>请输入一个有效的电子邮箱地址</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% endwith %}
                 {% with messages = get_flashed_messages() %}
                 {% if messages %}
                 <div class="ui flask negative message">
