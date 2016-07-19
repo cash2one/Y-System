@@ -1,13 +1,13 @@
 """initial
 
-Revision ID: ba3a2da98976
+Revision ID: c9ef249a479f
 Revises: None
-Create Date: 2016-07-19 07:59:29.369905
+Create Date: 2016-07-19 09:20:10.535711
 
 """
 
 # revision identifiers, used by Alembic.
-revision = 'ba3a2da98976'
+revision = 'c9ef249a479f'
 down_revision = None
 
 from alembic import op
@@ -113,11 +113,13 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('start_time', sa.DateTime(), nullable=True),
     sa.Column('end_time', sa.DateTime(), nullable=True),
+    sa.Column('date', sa.Date(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.Column('operator_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['operator_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_periods_date'), 'periods', ['date'], unique=False)
     op.create_table('bookings',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -232,6 +234,7 @@ def downgrade():
     op.drop_table('next_lessons')
     op.drop_table('ipad_contents')
     op.drop_table('bookings')
+    op.drop_index(op.f('ix_periods_date'), table_name='periods')
     op.drop_table('periods')
     op.drop_table('lessons')
     op.drop_table('ipads')
