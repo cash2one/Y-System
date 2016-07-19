@@ -93,7 +93,7 @@ class Activation(db.Model):
         for a in activations:
             activation = Activation.query.filter_by(name=a[0]).first()
             if activation is None:
-                activation = Activation(name=a[0], activation_code=a[1], role_id=Role.query.filter_by(name=a[2]).first().id, vb_class=a[3], y_gre_class=a[4], operator_id=u'1')
+                activation = Activation(name=a[0], activation_code=str(a[1]), role_id=Role.query.filter_by(name=a[2]).first().id, vb_class=a[3], y_gre_class=a[4], operator_id=u'1')
                 db.session.add(activation)
         db.session.commit()
 
