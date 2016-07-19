@@ -86,9 +86,10 @@ class Activation(db.Model):
 
     @staticmethod
     def insert_activations():
-        activations = [
-            (u'渠通', u'26027X', u'开发人员', u'VB-A-011', u'Y-GRE-006'),
-        ]
+        import xlrd
+        data = xlrd.open_workbook('initial-activations.xlsx')
+        table = data.sheet_by_index(0)
+        activations = [table.row_values(row) for row in range(table.nrows) if row >= 1]
         for a in activations:
             activation = Activation.query.filter_by(name=a[0]).first()
             if activation is None:
@@ -361,6 +362,7 @@ class Period(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
+    date = db.Column(db.Date, index=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     booked_users = db.relationship('Booking', foreign_keys=[Booking.period_id], backref=db.backref('period', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
