@@ -19,8 +19,10 @@ def before_request():
 
 @auth.route('/unconfirmed')
 def unconfirmed():
-    if current_user.is_anonymous or current_user.confirmed:
+    if current_user.is_anonymous:
         return redirect(url_for('main.index'))
+    if current_user.confirmed:
+        return redirect(url_for('main.profile'))
     return render_template('auth/unconfirmed.html')
 
 
@@ -31,7 +33,8 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
-            return redirect(request.args.get('next') or url_for('main.index'))
+            # flash('欢迎登录云英语教育服务支撑系统！')
+            return redirect(request.args.get('next') or url_for('main.profile'))
         flash('无效的用户名或密码')
     return render_template('auth/login.html', form=form)
 
@@ -58,8 +61,8 @@ def activate():
                     db.session.commit()
                     token = user.generate_confirmation_token()
                     send_email(user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=user, token=token)
-                    flash(u'激活成功')
-                    flash(u'一封确认邮件已经发送到您的邮箱')
+                    flash(u'激活成功，请登录！')
+                    # flash(u'一封确认邮件已经发送到您的邮箱')
                     return redirect(url_for('auth.login'))
                 flash(u'%s的云英语账户已处于激活状态' % form.name.data)
                 flash(u'请直接登录')
@@ -72,12 +75,13 @@ def activate():
 @login_required
 def confirm(token):
     if current_user.confirmed:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.profile'))
     if current_user.confirm(token):
-        flash(u'您的账户邮箱确认成功！')
+        flash(u'您的邮箱账户确认成功！')
     else:
         flash(u'确认链接无效或者已经过期')
-    return redirect(url_for('main.index'))
+        return redirect(url_for('auth.unconfirmed'))
+    return redirect(url_for('main.profile'))
 
 
 @auth.route('/confirm')

@@ -30,32 +30,31 @@ class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
 
     @staticmethod
     def insert_roles():
         roles = [
-            (u'用户', Permission.LOGIN, True, ),
-            (u'VB学员', Permission.LOGIN | Permission.BOOK_VB_1, False, ),
-            (u'联报学员1类', Permission.LOGIN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, False, ),
-            (u'联报学员2类', Permission.LOGIN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, False, ),
-            (u'联报学员A类', Permission.LOGIN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, False, ),
-            (u'预约协管员', Permission.LOGIN | Permission.MODERATE_BOOKING, False, ),
-            (u'iPad借阅协管员', Permission.LOGIN | Permission.MODERATE_RENTAL, False, ),
-            (u'时段协管员', Permission.LOGIN | Permission.MODERATE_PERIOD, False, ),
-            (u'iPad内容协管员', Permission.LOGIN | Permission.MODERATE_IPAD, False, ),
-            (u'用户协管员', Permission.LOGIN | Permission.MODERATE_USER, False, ),
-            (u'志愿者', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, False, ),
-            (u'管理员', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, False, ),
-            (u'开发人员', 0xffffffff, False, ),
+            (u'用户', Permission.LOGIN, ),
+            (u'VB学员', Permission.LOGIN | Permission.BOOK_VB_1, ),
+            (u'联报学员1类', Permission.LOGIN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, ),
+            (u'联报学员2类', Permission.LOGIN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, ),
+            (u'联报学员A类', Permission.LOGIN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, ),
+            (u'预约协管员', Permission.LOGIN | Permission.MODERATE_BOOKING, ),
+            (u'iPad借阅协管员', Permission.LOGIN | Permission.MODERATE_RENTAL, ),
+            (u'时段协管员', Permission.LOGIN | Permission.MODERATE_PERIOD, ),
+            (u'iPad内容协管员', Permission.LOGIN | Permission.MODERATE_IPAD, ),
+            (u'用户协管员', Permission.LOGIN | Permission.MODERATE_USER, ),
+            (u'志愿者', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, ),
+            (u'管理员', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, ),
+            (u'开发人员', 0xffffffff, ),
         ]
         for r in roles:
             role = Role.query.filter_by(name=r[0]).first()
             if role is None:
-                role = Role(name=r[0], permissions=r[1], default=r[2])
-            db.session.add(role)
+                role = Role(name=r[0], permissions=r[1])
+                db.session.add(role)
         db.session.commit()
 
     def __repr__(self):
@@ -74,11 +73,6 @@ class Activation(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    def __init__(self, **kwargs):
-        super(Activation, self).__init__(**kwargs)
-        if self.role_id is None:
-            self.role_id = Role.query.filter_by(default=True).first()
-
     @property
     def activation_code(self):
         raise AttributeError('activation_code is not a readable attribute')
@@ -89,6 +83,18 @@ class Activation(db.Model):
 
     def verify_activation_code(self, activation_code):
         return check_password_hash(self.activation_code_hash, activation_code)
+
+    @staticmethod
+    def insert_activations():
+        activations = [
+            (u'渠通', u'26027X', u'开发人员', u'VB-A-011', u'Y-GRE-006'),
+        ]
+        for a in activations:
+            activation = Activation.query.filter_by(name=a[0]).first()
+            if activation is None:
+                activation = Activation(name=a[0], activation_code=a[1], role_id=Role.query.filter_by(name=a[2]).first().id, vb_class=a[3], y_gre_class=a[4], operator_id=u'1')
+                db.session.add(activation)
+        db.session.commit()
 
     def __repr__(self):
         return '<Activation %r>' % self.name
@@ -109,24 +115,23 @@ class BookingState(db.Model):
     __tablename__ = 'booking_states'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    default = db.Column(db.Boolean, default=False, index=True)
     bookings = db.relationship('Booking', backref='booking_state', lazy='dynamic')
 
     @staticmethod
     def insert_booking_states():
         booking_states = [
-            (u'预约', True, ),
-            (u'排队', False, ),
-            (u'赴约', False, ),
-            (u'迟到', False, ),
-            (u'爽约', False, ),
-            (u'取消', False, ),
+            (u'预约', ),
+            (u'排队', ),
+            (u'赴约', ),
+            (u'迟到', ),
+            (u'爽约', ),
+            (u'取消', ),
         ]
         for bs in booking_states:
             booking_state = BookingState.query.filter_by(name=bs[0]).first()
             if booking_state is None:
-                booking_state = BookingState(name=bs[0], default=bs[1])
-            db.session.add(booking_state)
+                booking_state = BookingState(name=bs[0])
+                db.session.add(booking_state)
         db.session.commit()
 
     def __repr__(self):
@@ -164,7 +169,7 @@ class RentalType(db.Model):
             rental_type = RentalType.query.filter_by(name=rt[0]).first()
             if rental_type is None:
                 rental_type = RentalType(name=rt[0])
-            db.session.add(rental_type)
+                db.session.add(rental_type)
         db.session.commit()
 
     def __repr__(self):
@@ -199,14 +204,6 @@ class User(UserMixin, db.Model):
     booked_periods = db.relationship('Booking', foreign_keys=[Booking.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     rented_ipads = db.relationship('Rental', foreign_keys=[Rental.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     punches = db.relationship('Punch', backref='punch', lazy='dynamic')
-
-    # def __init__(self, **kwargs):
-    #     super(User, self).__init__(**kwargs)
-    #     if self.role is None:
-    #         if self.email == current_app.config['YSYS_ADMIN']:
-    #             self.role = Role.query.filter_by(permissions=0xffffffff).first()
-    #         if self.role is None:
-    #             self.role = Role.query.filter_by(default=True).first()
 
     @property
     def password(self):
@@ -273,8 +270,7 @@ class User(UserMixin, db.Model):
         return True
 
     def can(self, permissions):
-        return self.role is not None and \
-            (self.role.permissions & permissions) == permissions
+        return self.role is not None and (self.role.permissions & permissions) == permissions
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
@@ -297,6 +293,14 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(data['id'])
 
+    @staticmethod
+    def insert_admin():
+        admin = User.query.filter_by(email=current_app.config['YSYS_ADMIN']).first()
+        if admin is None:
+            admin = User(email=current_app.config['YSYS_ADMIN'], name=u'超级管理员', role_id=Role.query.filter_by(name=u'开发人员').first().id, password=current_app.config['YSYS_ADMIN_PASSWORD'])
+            db.session.add(admin)
+            db.session.commit()
+
     def __repr__(self):
         return '<User %r, %r>' % (self.name, self.email)
 
@@ -316,10 +320,34 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+class ClassType(db.Model):
+    __tablename__ = 'class_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True)
+    classes = db.relationship('Class', backref='class_type', lazy='dynamic')
+
+    @staticmethod
+    def insert_rental_types():
+        class_types = [
+            (u'VB', ),
+            (u'Y-GRE', ),
+        ]
+        for ct in class_types:
+            class_type = ClassType.query.filter_by(name=ct[0]).first()
+            if class_type is None:
+                class_type = ClassType(name=ct[0])
+                db.session.add(class_type)
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Class Type %r>' % self.name
+
+
 class Class(db.Model):
     __tablename__ = 'classes'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
+    class_type_id = db.Column(db.Integer, db.ForeignKey('class_types.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     registered_users = db.relationship('Registration', foreign_keys=[Registration.class_id], backref=db.backref('class', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
@@ -357,7 +385,7 @@ class iPadCapacity(db.Model):
             ipad_capacity = iPadCapacity.query.filter_by(name=ic[0]).first()
             if ipad_capacity is None:
                 ipad_capacity = iPadCapacity(name=ic[0])
-            db.session.add(ipad_capacity)
+                db.session.add(ipad_capacity)
         db.session.commit()
 
     def __repr__(self):

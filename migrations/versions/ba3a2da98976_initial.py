@@ -1,13 +1,13 @@
-"""initial migration
+"""initial
 
-Revision ID: 8b4705e1aa57
+Revision ID: ba3a2da98976
 Revises: None
-Create Date: 2016-07-18 18:40:03.827625
+Create Date: 2016-07-19 07:59:29.369905
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '8b4705e1aa57'
+revision = 'ba3a2da98976'
 down_revision = None
 
 from alembic import op
@@ -19,11 +19,15 @@ def upgrade():
     op.create_table('booking_states',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
-    sa.Column('default', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.create_index(op.f('ix_booking_states_default'), 'booking_states', ['default'], unique=False)
+    op.create_table('class_types',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=64), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
+    )
     op.create_table('ipad_capacities',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
@@ -39,12 +43,10 @@ def upgrade():
     op.create_table('roles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
-    sa.Column('default', sa.Boolean(), nullable=True),
     sa.Column('permissions', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.create_index(op.f('ix_roles_default'), 'roles', ['default'], unique=False)
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=64), nullable=True),
@@ -65,6 +67,8 @@ def upgrade():
     sa.Column('activation_code_hash', sa.String(length=128), nullable=True),
     sa.Column('activated', sa.Boolean(), nullable=True),
     sa.Column('role_id', sa.Integer(), nullable=True),
+    sa.Column('vb_class', sa.String(length=64), nullable=True),
+    sa.Column('y_gre_class', sa.String(length=64), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.Column('operator_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['operator_id'], ['users.id'], ),
@@ -75,8 +79,10 @@ def upgrade():
     op.create_table('classes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
+    sa.Column('class_type_id', sa.Integer(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.Column('operator_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['class_type_id'], ['class_types.id'], ),
     sa.ForeignKeyConstraint(['operator_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
@@ -235,10 +241,9 @@ def downgrade():
     op.drop_index(op.f('ix_users_name'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
-    op.drop_index(op.f('ix_roles_default'), table_name='roles')
     op.drop_table('roles')
     op.drop_table('rental_types')
     op.drop_table('ipad_capacities')
-    op.drop_index(op.f('ix_booking_states_default'), table_name='booking_states')
+    op.drop_table('class_types')
     op.drop_table('booking_states')
     ### end Alembic commands ###
