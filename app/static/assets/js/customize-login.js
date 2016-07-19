@@ -30,6 +30,10 @@ $(document)
                                 prompt : '密码长度至少为6位'
                             }
                         ]
+                    },
+                    remember_me: {
+                        identifier  : 'remember_me',
+                        optional    : true
                     }
                 }
             })
