@@ -11,7 +11,7 @@ from . import db, login_manager
 
 
 class Permission:
-    LOGIN            = 0b00000000000000000000000000000001
+    VIEW             = 0b00000000000000000000000000000001
     BOOK_VB_1        = 0b00000000000000000000000000000010
     BOOK_VB_2        = 0b00000000000000000000000000000100
     BOOK_VB_A        = 0b00000000000000000000000000001000
@@ -29,25 +29,25 @@ class Permission:
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.Unicode(64), unique=True)
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
 
     @staticmethod
     def insert_roles():
         roles = [
-            (u'用户', Permission.LOGIN, ),
-            (u'VB学员', Permission.LOGIN | Permission.BOOK_VB_1, ),
-            (u'联报学员1类', Permission.LOGIN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, ),
-            (u'联报学员2类', Permission.LOGIN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, ),
-            (u'联报学员A类', Permission.LOGIN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, ),
-            (u'预约协管员', Permission.LOGIN | Permission.MODERATE_BOOKING, ),
-            (u'iPad借阅协管员', Permission.LOGIN | Permission.MODERATE_RENTAL, ),
-            (u'时段协管员', Permission.LOGIN | Permission.MODERATE_PERIOD, ),
-            (u'iPad内容协管员', Permission.LOGIN | Permission.MODERATE_IPAD, ),
-            (u'用户协管员', Permission.LOGIN | Permission.MODERATE_USER, ),
-            (u'志愿者', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, ),
-            (u'管理员', Permission.LOGIN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, ),
+            (u'用户', Permission.VIEW, ),
+            (u'VB学员', Permission.VIEW | Permission.BOOK_VB_1, ),
+            (u'联报学员1类', Permission.VIEW | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, ),
+            (u'联报学员2类', Permission.VIEW | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, ),
+            (u'联报学员A类', Permission.VIEW | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, ),
+            (u'预约协管员', Permission.VIEW | Permission.MODERATE_BOOKING, ),
+            (u'iPad借阅协管员', Permission.VIEW | Permission.MODERATE_RENTAL, ),
+            (u'时段协管员', Permission.VIEW | Permission.MODERATE_PERIOD, ),
+            (u'iPad内容协管员', Permission.VIEW | Permission.MODERATE_IPAD, ),
+            (u'用户协管员', Permission.VIEW | Permission.MODERATE_USER, ),
+            (u'志愿者', Permission.VIEW | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, ),
+            (u'管理员', Permission.VIEW | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, ),
             (u'开发人员', 0xffffffff, ),
         ]
         for r in roles:
@@ -58,20 +58,18 @@ class Role(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Role %r>' % self.name
+        return '<Role %s>' % self.name
 
 
 class Activation(db.Model):
     __tablename__ = 'activations'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), index=True)
+    name = db.Column(db.Unicode(64), index=True)
     activation_code_hash = db.Column(db.String(128))
     activated = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    vb_class = db.Column(db.String(64))
-    y_gre_class = db.Column(db.String(64))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    vb_class = db.Column(db.Unicode(64))
+    y_gre_class = db.Column(db.Unicode(64))
 
     @property
     def activation_code(self):
@@ -93,20 +91,19 @@ class Activation(db.Model):
         for a in activations:
             activation = Activation.query.filter_by(name=a[0]).first()
             if activation is None:
-                activation = Activation(name=a[0], activation_code=str(a[1]), role_id=Role.query.filter_by(name=a[2]).first().id, vb_class=a[3], y_gre_class=a[4], operator_id=u'1')
+                activation = Activation(name=a[0], activation_code=str(a[1]), role_id=Role.query.filter_by(name=a[2]).first().id, vb_class=a[3], y_gre_class=a[4])
+                print u'导入激活信息', a[0], a[2], a[3], a[4]
                 db.session.add(activation)
         db.session.commit()
 
     def __repr__(self):
-        return '<Activation %r>' % self.name
+        return '<Activation %s>' % self.name
 
 
 class Registration(db.Model):
     __tablename__ = 'registrations'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     class_id = db.Column(db.Integer, db.ForeignKey('classes.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Registration %r, %r>' % (self.user_id, self.class_id)
@@ -115,8 +112,8 @@ class Registration(db.Model):
 class BookingState(db.Model):
     __tablename__ = 'booking_states'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    bookings = db.relationship('Booking', backref='booking_state', lazy='dynamic')
+    name = db.Column(db.Unicode(64), unique=True)
+    bookings = db.relationship('Booking', backref='state', lazy='dynamic')
 
     @staticmethod
     def insert_booking_states():
@@ -136,7 +133,7 @@ class BookingState(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Booking State %r>' % self.name
+        return '<Booking State %s>' % self.name
 
 
 class Booking(db.Model):
@@ -145,10 +142,6 @@ class Booking(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     period_id = db.Column(db.Integer, db.ForeignKey('periods.id'), primary_key=True)
     booking_state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    cancel_timestamp = db.Column(db.DateTime)
-    cancel_operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Booking %r, %r>' % (self.user_id, self.period_id)
@@ -157,8 +150,8 @@ class Booking(db.Model):
 class RentalType(db.Model):
     __tablename__ = 'rental_types'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    rentals = db.relationship('Rental', backref='rental_type', lazy='dynamic')
+    name = db.Column(db.Unicode(64), unique=True)
+    rentals = db.relationship('Rental', backref='type', lazy='dynamic')
 
     @staticmethod
     def insert_rental_types():
@@ -174,7 +167,7 @@ class RentalType(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Rental Type %r>' % self.name
+        return '<Rental Type %s>' % self.name
 
 
 class Rental(db.Model):
@@ -185,7 +178,7 @@ class Rental(db.Model):
     booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'))
     rental_type_id = db.Column(db.Integer, db.ForeignKey('rental_types.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Rental %r, %r>' % (self.user_id, self.ipad_id)
@@ -195,7 +188,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
-    name = db.Column(db.String(64), index=True)
+    name = db.Column(db.Unicode(64), index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
@@ -204,7 +197,7 @@ class User(UserMixin, db.Model):
     registered_classes = db.relationship('Registration', foreign_keys=[Registration.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     booked_periods = db.relationship('Booking', foreign_keys=[Booking.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     rented_ipads = db.relationship('Rental', foreign_keys=[Rental.user_id], backref=db.backref('user', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
-    punches = db.relationship('Punch', backref='punch', lazy='dynamic')
+    punches = db.relationship('Punch', backref='user', lazy='dynamic')
 
     @property
     def password(self):
@@ -281,8 +274,7 @@ class User(UserMixin, db.Model):
         db.session.add(self)
 
     def generate_auth_token(self, expiration):
-        s = Serializer(current_app.config['SECRET_KEY'],
-                       expires_in=expiration)
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps({'id': self.id}).decode('ascii')
 
     @staticmethod
@@ -303,7 +295,7 @@ class User(UserMixin, db.Model):
             db.session.commit()
 
     def __repr__(self):
-        return '<User %r, %r>' % (self.name, self.email)
+        return '<User %s, %r>' % (self.name, self.email)
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -324,8 +316,8 @@ def load_user(user_id):
 class ClassType(db.Model):
     __tablename__ = 'class_types'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    classes = db.relationship('Class', backref='class_type', lazy='dynamic')
+    name = db.Column(db.Unicode(64), unique=True)
+    classes = db.relationship('Class', backref='type', lazy='dynamic')
 
     @staticmethod
     def insert_rental_types():
@@ -341,20 +333,18 @@ class ClassType(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Class Type %r>' % self.name
+        return '<Class Type %s>' % self.name
 
 
 class Class(db.Model):
     __tablename__ = 'classes'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.Unicode(64), unique=True)
     class_type_id = db.Column(db.Integer, db.ForeignKey('class_types.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     registered_users = db.relationship('Registration', foreign_keys=[Registration.class_id], backref=db.backref('class', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
-        return '<Class %r>' % self.name
+        return '<Class %s>' % self.name
 
 
 class Period(db.Model):
@@ -374,14 +364,14 @@ class Period(db.Model):
 class iPadCapacity(db.Model):
     __tablename__ = 'ipad_capacities'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    ipads = db.relationship('iPad', backref='ipad_capacity', lazy='dynamic')
+    name = db.Column(db.Unicode(64), unique=True)
+    ipads = db.relationship('iPad', backref='capacity', lazy='dynamic')
 
     @staticmethod
     def insert_ipad_capacities():
         ipad_capacities = [
-            ('16GB', ),
-            ('64GB', ),
+            (u'16GB', ),
+            (u'64GB', ),
         ]
         for ic in ipad_capacities:
             ipad_capacity = iPadCapacity.query.filter_by(name=ic[0]).first()
@@ -391,15 +381,38 @@ class iPadCapacity(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<iPad Capacity %r>' % self.name
+        return '<iPad Capacity %s>' % self.name
+
+
+class iPadState(db.Model):
+    __tablename__ = 'ipad_states'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True)
+    ipads = db.relationship('iPad', backref='state', lazy='dynamic')
+
+    @staticmethod
+    def insert_ipad_states():
+        ipad_states = [
+            (u'借出', ),
+            (u'归还', ),
+            (u'维护', ),
+            (u'退役', ),
+        ]
+        for s in ipad_states:
+            ipad_state = iPadState.query.filter_by(name=s[0]).first()
+            if ipad_state is None:
+                ipad_state = iPadState(name=s[0])
+                db.session.add(ipad_state)
+        db.session.commit()
+
+    def __repr__(self):
+        return '<iPad State %s>' % self.name
 
 
 class iPadContent(db.Model):
     __tablename__ = 'ipad_contents'
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<iPad Content %r, %r>' % (self.ipad_id, self.lesson_id)
@@ -408,29 +421,26 @@ class iPadContent(db.Model):
 class iPad(db.Model):
     __tablename__ = 'ipads'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.Unicode(64), unique=True)
     serial = db.Column(db.String(12), unique=True)
     ipad_capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    ipad_state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
     lessons_included = db.relationship('iPadContent', foreign_keys=[iPadContent.ipad_id], backref=db.backref('ipad', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
     rented_users = db.relationship('Rental', foreign_keys=[Rental.ipad_id], backref=db.backref('ipad', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
-        return '<iPad %r, %r>' % (self.name, self.serial)
+        return '<iPad %s, %s>' % (self.name, self.serial)
 
 
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.Unicode(64), unique=True)
     videos = db.relationship('Video', backref='lesson', lazy='dynamic')
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     occupied_ipads = db.relationship('iPadContent', foreign_keys=[iPadContent.lesson_id], backref=db.backref('lesson', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
-        return '<Lesson %r>' % self.name
+        return '<Lesson %s>' % self.name
 
 
 class NextLesson(db.Model):
@@ -438,8 +448,6 @@ class NextLesson(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), unique=True, index=True)
     next_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Next Video %r, %r>' % (self.video_id, self.next_video_id)
@@ -448,13 +456,11 @@ class NextLesson(db.Model):
 class Video(db.Model):
     __tablename__ = 'videos'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.Unicode(64), unique=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<Video %r>' % self.name
+        return '<Video %s>' % self.name
 
 
 class NextVideo(db.Model):
@@ -462,8 +468,6 @@ class NextVideo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     video_id = db.Column(db.Integer, db.ForeignKey('videos.id'), unique=True, index=True)
     next_video_id = db.Column(db.Integer, db.ForeignKey('videos.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Next Video %r, %r>' % (self.video_id, self.next_video_id)
@@ -481,3 +485,38 @@ class Punch(db.Model):
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user_id, self.video_id)
 
+
+class OperationType(db.Model):
+    __tablename__ = 'operation_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True)
+    operations = db.relationship('Operation', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_operation_types():
+        operation_types = [
+            (u'增加', ),
+            (u'修改', ),
+            (u'删除', ),
+        ]
+        for ot in operation_types:
+            operation_type = OperationType.query.filter_by(name=ot[0]).first()
+            if operation_type is None:
+                operation_type = OperationType(name=ot[0])
+                db.session.add(operation_type)
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Operation Type %s>' % self.name
+
+
+class Operation(db.Model):
+    __tablename__ = 'operations'
+    id = db.Column(db.Integer, primary_key=True)
+    log = db.Column(db.UnicodeText)
+    operation_type_id = db.Column(db.Integer, db.ForeignKey('operation_types.id'))
+    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Operation Log %s>' % self.log

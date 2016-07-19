@@ -1,9 +1,8 @@
 <p>亲爱的 <b>{{ user.name }}</b>：</p>
 <p>您好！</p>
-<p>您已经成功激活了您的<b>云英语账户</b>！</p>
-<p>请 <a href="{{ url_for('auth.confirm', token=token, _external=True) }}">点击这里</a> 来确认您的注册邮箱真实有效。</p>
+<p>请 <a href="{{ url_for('auth.change_email', token=token, _external=True) }}">点击这里</a> 来确认您的注册邮箱真实有效。</p>
 <p>或者，您可以将以下链接复制到浏览器地址栏以确认您的注册邮箱：</p>
-<p>{{ url_for('auth.confirm', token=token, _external=True) }}</p>
+<p>{{ url_for('auth.change_email', token=token, _external=True) }}</p>
 <p>此致</p>
 <p>敬礼！</p>
 <p><b>云英语团队</b></p>

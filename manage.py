@@ -34,27 +34,26 @@ manager.add_command('db', MigrateCommand)
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
-    from app.models import Role, BookingState, RentalType, iPadCapacity, User, Activation
+    from app.models import Role, BookingState, RentalType, iPadCapacity, iPadState, OperationType, User, Activation
 
     # migrate database to latest revision
     upgrade()
 
-    # create user roles
+    # insert initial data
     Role.insert_roles()
 
-    # create booking states
     BookingState.insert_booking_states()
 
-    # create rental types
     RentalType.insert_rental_types()
 
-    # create iPad capacities
     iPadCapacity.insert_ipad_capacities()
 
-    # create admin
+    iPadState.insert_ipad_states()
+
+    OperationType.insert_operation_types()
+
     User.insert_admin()
 
-    # create activations
     Activation.insert_activations()
 
 
