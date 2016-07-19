@@ -39,7 +39,7 @@ $('#copyright')
     .html(
          function(){
              var date = new Date();
-             return '<i class="fa fa-copyright fa-fw"></i> 2011-' +  date.getFullYear() + ' 北京云英一语教育咨询有限公司 版权所有';
+             return '<i class="fa fa-copyright fa-fw"></i> 2011-' +  date.getFullYear() + ' 云英语 版权所有';
          }
     )
 ;
