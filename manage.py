@@ -34,7 +34,7 @@ manager.add_command('db', MigrateCommand)
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
-    from app.models import Role, BookingState, RentalType, iPadCapacity, Activation, User
+    from app.models import Role, BookingState, RentalType, iPadCapacity, User, Activation
 
     # migrate database to latest revision
     upgrade()
@@ -51,11 +51,12 @@ def deploy():
     # create iPad capacities
     iPadCapacity.insert_ipad_capacities()
 
+    # create admin
+    User.insert_admin()
+
     # create activations
     Activation.insert_activations()
 
-    # create admin
-    User.insert_admin()
 
 if __name__ == '__main__':
     manager.run()
