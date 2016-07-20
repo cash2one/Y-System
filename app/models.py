@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import datetime, time
 import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -11,19 +11,19 @@ from . import db, login_manager
 
 
 class Permission:
-    FORBIDDEN        = 0b00000000000000000000000000000000
-    BOOK_VB_1        = 0b00000000000000000000000000000001
-    BOOK_VB_2        = 0b00000000000000000000000000000010
-    BOOK_VB_A        = 0b00000000000000000000000000000100
-    BOOK_Y_GRE_1     = 0b00000000000000000000000000001000
-    BOOK_Y_GRE_A     = 0b00000000000000000000000000010000
-    MODERATE_BOOKING = 0b00000000000000000000000000100000
-    MODERATE_RENTAL  = 0b00000000000000000000000001000000
-    MODERATE_PERIOD  = 0b00000000000000000000000010000000
-    MODERATE_IPAD    = 0b00000000000000000000000100000000
-    MODERATE_USER    = 0b00000000000000000000001000000000
-    MODERATE_AUTH    = 0b00000000000000000000010000000000
-    ADMINISTER       = 0b10000000000000000000000000000000
+    FORBIDDEN      = 0b00000000000000000000000000000000
+    BOOK_VB_1      = 0b00000000000000000000000000000001
+    BOOK_VB_2      = 0b00000000000000000000000000000010
+    BOOK_VB_A      = 0b00000000000000000000000000000100
+    BOOK_Y_GRE_1   = 0b00000000000000000000000000001000
+    BOOK_Y_GRE_A   = 0b00000000000000000000000000010000
+    MANAGE_BOOKING = 0b00000000000000000000000000100000
+    MANAGE_RENTAL  = 0b00000000000000000000000001000000
+    MANAGE_PERIOD  = 0b00000000000000000000000010000000
+    MANAGE_IPAD    = 0b00000000000000000000000100000000
+    MANAGE_USER    = 0b00000000000000000000001000000000
+    MANAGE_AUTH    = 0b00000000000000000000010000000000
+    ADMINISTER     = 0b10000000000000000000000000000000
 
 
 class Role(db.Model):
@@ -41,20 +41,21 @@ class Role(db.Model):
             (u'Y-GRE 普通', Permission.FORBIDDEN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, ),
             (u'Y-GRE VB2', Permission.FORBIDDEN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, ),
             (u'Y-GRE A权限', Permission.FORBIDDEN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, ),
-            (u'预约协管员', Permission.FORBIDDEN | Permission.MODERATE_BOOKING, ),
-            (u'iPad借阅协管员', Permission.FORBIDDEN | Permission.MODERATE_RENTAL, ),
-            (u'时段协管员', Permission.FORBIDDEN | Permission.MODERATE_PERIOD, ),
-            (u'iPad内容协管员', Permission.FORBIDDEN | Permission.MODERATE_IPAD, ),
-            (u'用户协管员', Permission.FORBIDDEN | Permission.MODERATE_USER, ),
-            (u'志愿者', Permission.FORBIDDEN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, ),
-            (u'管理员', Permission.FORBIDDEN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, ),
+            (u'预约协管员', Permission.FORBIDDEN | Permission.MANAGE_BOOKING, ),
+            (u'iPad借阅协管员', Permission.FORBIDDEN | Permission.MANAGE_RENTAL, ),
+            (u'时段协管员', Permission.FORBIDDEN | Permission.MANAGE_PERIOD, ),
+            (u'iPad内容协管员', Permission.FORBIDDEN | Permission.MANAGE_IPAD, ),
+            (u'用户协管员', Permission.FORBIDDEN | Permission.MANAGE_USER, ),
+            (u'志愿者', Permission.FORBIDDEN | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_PERIOD | Permission.MANAGE_USER, ),
+            (u'管理员', Permission.FORBIDDEN | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_PERIOD | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
             (u'开发人员', 0xffffffff, ),
         ]
-        for r in roles:
-            role = Role.query.filter_by(name=r[0]).first()
+        for R in roles:
+            role = Role.query.filter_by(name=R[0]).first()
             if role is None:
-                role = Role(name=r[0], permissions=r[1])
+                role = Role(name=R[0], permissions=R[1])
                 db.session.add(role)
+                print u'导入用户角色信息', R[0]
         db.session.commit()
 
     def __repr__(self):
@@ -81,11 +82,12 @@ class CourseType(db.Model):
             (u'VB', ),
             (u'Y-GRE', ),
         ]
-        for ct in course_types:
-            course_type = CourseType.query.filter_by(name=ct[0]).first()
+        for CT in course_types:
+            course_type = CourseType.query.filter_by(name=CT[0]).first()
             if course_type is None:
-                course_type = CourseType(name=ct[0])
+                course_type = CourseType(name=CT[0])
                 db.session.add(course_type)
+                print u'导入课程类型信息', CT[0]
         db.session.commit()
 
     def __repr__(self):
@@ -111,15 +113,15 @@ class Course(db.Model):
         data = xlrd.open_workbook('initial-courses.xlsx')
         table = data.sheet_by_index(0)
         courses = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for c in courses:
-            course = Course.query.filter_by(name=c[0]).first()
+        for C in courses:
+            course = Course.query.filter_by(name=C[0]).first()
             if course is None:
                 course = Course(
-                    name=c[0],
-                    type_id=CourseType.query.filter_by(name=c[1]).first().id
+                    name=C[0],
+                    type_id=CourseType.query.filter_by(name=C[1]).first().id
                 )
-                print u'导入班级信息', c[0], c[1]
                 db.session.add(course)
+                print u'导入课程信息', C[0], C[1]
         db.session.commit()
 
     def __repr__(self):
@@ -153,28 +155,28 @@ class Activation(db.Model):
         data = xlrd.open_workbook('initial-activations.xlsx')
         table = data.sheet_by_index(0)
         activations = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for a in activations:
-            if isinstance(a[1], float):
-                a[1] = int(a[1])
-            activation = Activation.query.filter_by(name=a[0]).first()
+        for A in activations:
+            if isinstance(A[1], float):
+                A[1] = int(A[1])
+            activation = Activation.query.filter_by(name=A[0]).first()
             if activation is None:
-                if Course.query.filter_by(name=a[3]).first():
-                    vb_course_id = Course.query.filter_by(name=a[3]).first().id
+                if Course.query.filter_by(name=A[3]).first():
+                    vb_course_id = Course.query.filter_by(name=A[3]).first().id
                 else:
                     vb_course_id = None
-                if Course.query.filter_by(name=a[4]).first():
-                    y_gre_course_id = Course.query.filter_by(name=a[4]).first().id
+                if Course.query.filter_by(name=A[4]).first():
+                    y_gre_course_id = Course.query.filter_by(name=A[4]).first().id
                 else:
                     y_gre_course_id = None
                 activation = Activation(
-                    name=a[0],
-                    activation_code=str(a[1]),
-                    role_id=Role.query.filter_by(name=a[2]).first().id,
+                    name=A[0],
+                    activation_code=str(A[1]),
+                    role_id=Role.query.filter_by(name=A[2]).first().id,
                     vb_course_id=vb_course_id,
                     y_gre_course_id=y_gre_course_id
                 )
-                print u'导入激活信息', a[0], a[2], a[3], a[4]
                 db.session.add(activation)
+                print u'导入激活信息', A[0], A[2], A[3], A[4]
         db.session.commit()
 
     def __repr__(self):
@@ -192,16 +194,18 @@ class BookingState(db.Model):
         booking_states = [
             (u'预约', ),
             (u'排队', ),
+            (u'失效', ),
             (u'赴约', ),
             (u'迟到', ),
             (u'爽约', ),
             (u'取消', ),
         ]
-        for bs in booking_states:
-            booking_state = BookingState.query.filter_by(name=bs[0]).first()
+        for BS in booking_states:
+            booking_state = BookingState.query.filter_by(name=BS[0]).first()
             if booking_state is None:
-                booking_state = BookingState(name=bs[0])
+                booking_state = BookingState(name=BS[0])
                 db.session.add(booking_state)
+                print u'导入预约状态信息', BS[0]
         db.session.commit()
 
     def __repr__(self):
@@ -212,11 +216,8 @@ class Booking(db.Model):
     __tablename__ = 'bookings'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    period_id = db.Column(db.Integer, db.ForeignKey('periods.id'), primary_key=True)
-    booking_state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
-
-    def __repr__(self):
-        return '<Booking %r, %r>' % (self.user_id, self.period_id)
+    schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), primary_key=True)
+    state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
 
 
 class RentalType(db.Model):
@@ -231,11 +232,12 @@ class RentalType(db.Model):
             (u'借出', ),
             (u'回收', ),
         ]
-        for rt in rental_types:
-            rental_type = RentalType.query.filter_by(name=rt[0]).first()
+        for RT in rental_types:
+            rental_type = RentalType.query.filter_by(name=RT[0]).first()
             if rental_type is None:
-                rental_type = RentalType(name=rt[0])
+                rental_type = RentalType(name=RT[0])
                 db.session.add(rental_type)
+                print u'导入借阅类型信息', RT[0]
         db.session.commit()
 
     def __repr__(self):
@@ -247,8 +249,8 @@ class Rental(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
-    booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'))
-    rental_type_id = db.Column(db.Integer, db.ForeignKey('rental_types.id'))
+    # booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('rental_types.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -273,7 +275,7 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    booked_periods = db.relationship(
+    booked_schedules = db.relationship(
         'Booking',
         foreign_keys=[Booking.user_id],
         backref=db.backref('user', lazy='joined'),
@@ -403,6 +405,47 @@ class User(UserMixin, db.Model):
             .join(CourseType, CourseType.id == Course.type_id)\
             .filter(CourseType.name == u'Y-GRE').first()
 
+    @property
+    def valid_bookings(self):
+        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'预约')
+
+    @property
+    def wait_bookings(self):
+        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'排队')
+
+    @property
+    def invalid_bookings(self):
+        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'失效')
+
+    @property
+    def keep_bookings(self):
+        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'赴约')
+
+    @property
+    def late_bookings(self):
+        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'迟到')
+
+    @property
+    def miss_bookings(self):
+        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'爽约')
+
+    @property
+    def cancel_bookings(self):
+        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'取消')
 
     @staticmethod
     def insert_admin():
@@ -416,6 +459,7 @@ class User(UserMixin, db.Model):
             )
             db.session.add(admin)
             db.session.commit()
+            print u'初始化开发人员信息'
 
     def __repr__(self):
         return '<User %s, %r>' % (self.name, self.email)
@@ -439,21 +483,59 @@ def load_user(user_id):
 class Period(db.Model):
     __tablename__ = 'periods'
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, index=True)
-    start_time = db.Column(db.DateTime)
-    end_time = db.Column(db.DateTime)
-    availabe = db.Column(db.Boolean, default=False)
+    name = db.Column(db.Unicode(64), unique=True)
+    start_time = db.Column(db.Time)
+    end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+
+    @staticmethod
+    def insert_periods():
+        periods = [
+            (u'VB淡季上午', time(9, 0), time(15, 0), u'VB', ),
+            (u'VB淡季下午', time(15, 0), time(21, 0), u'VB', ),
+            (u'VB旺季时段1', time(8, 0), time(11, 30), u'VB', ),
+            (u'VB旺季时段2', time(11, 30), time(15, 0), u'VB', ),
+            (u'VB旺季时段3', time(15, 0), time(18, 30), u'VB', ),
+            (u'VB旺季时段4', time(18, 30), time(22, 0), u'VB', ),
+            (u'Y-GRE淡季上午', time(9, 0), time(15, 0), u'Y-GRE', ),
+            (u'Y-GRE淡季下午', time(15, 0), time(21, 0), u'Y-GRE', ),
+            (u'Y-GRE旺季上午', time(8, 0), time(15, 0), u'Y-GRE', ),
+            (u'Y-GRE旺季下午', time(15, 0), time(22, 0), u'Y-GRE', ),
+        ]
+        for P in periods:
+            period = Period.query.filter_by(name=P[0]).first()
+            if period is None:
+                period = Period(
+                    name=P[0],
+                    start_time=P[1],
+                    end_time=P[2],
+                    type_id=CourseType.query.filter_by(name=P[3]).first().id
+                )
+                db.session.add(period)
+                print u'导入时段信息', P[0], P[1], P[2], P[3]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Period %r>' % self.name
+
+
+class Schedule(db.Model):
+    __tablename__ = 'schedules'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, index=True)
+    period_id = db.Column(db.Integer, db.ForeignKey('periods.id'))
+    quota = db.Column(db.Integer, default=0)
+    availabe = db.Column(db.Boolean, default=False)
     booked_users = db.relationship(
         'Booking',
-        foreign_keys=[Booking.period_id],
-        backref=db.backref('period', lazy='joined'),
+        foreign_keys=[Booking.schedule_id],
+        backref=db.backref('schedule', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
 
     def __repr__(self):
-        return '<Period %r, %r>' % (self.start_time, self.end_time)
+        return '<Schedule %r>' % self.date
 
 
 class iPadCapacity(db.Model):
@@ -468,11 +550,12 @@ class iPadCapacity(db.Model):
             (u'16GB', ),
             (u'64GB', ),
         ]
-        for ic in ipad_capacities:
-            ipad_capacity = iPadCapacity.query.filter_by(name=ic[0]).first()
+        for PC in ipad_capacities:
+            ipad_capacity = iPadCapacity.query.filter_by(name=PC[0]).first()
             if ipad_capacity is None:
-                ipad_capacity = iPadCapacity(name=ic[0])
+                ipad_capacity = iPadCapacity(name=PC[0])
                 db.session.add(ipad_capacity)
+                print u'导入iPad容量信息', PC[0]
         db.session.commit()
 
     def __repr__(self):
@@ -490,14 +573,16 @@ class iPadState(db.Model):
         ipad_states = [
             (u'待机', ),
             (u'借出', ),
+            (u'候补', ),
             (u'维护', ),
             (u'退役', ),
         ]
-        for s in ipad_states:
-            ipad_state = iPadState.query.filter_by(name=s[0]).first()
+        for PS in ipad_states:
+            ipad_state = iPadState.query.filter_by(name=PS[0]).first()
             if ipad_state is None:
-                ipad_state = iPadState(name=s[0])
+                ipad_state = iPadState(name=PS[0])
                 db.session.add(ipad_state)
+                print u'导入iPad状态信息', PS[0]
         db.session.commit()
 
     def __repr__(self):
@@ -516,11 +601,12 @@ class Room(db.Model):
             (u'1103', ),
             (u'1707', ),
         ]
-        for r in rooms:
-            room = Room.query.filter_by(name=r[0]).first()
+        for R in rooms:
+            room = Room.query.filter_by(name=R[0]).first()
             if room is None:
-                room = Room(name=r[0])
+                room = Room(name=R[0])
                 db.session.add(room)
+                print u'导入房间信息', R[0]
         db.session.commit()
 
     def __repr__(self):
@@ -531,6 +617,25 @@ class iPadContent(db.Model):
     __tablename__ = 'ipad_contents'
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+
+    @staticmethod
+    def insert_ipad_contents():
+        import xlrd
+        data = xlrd.open_workbook('initial-ipad-contents.xlsx')
+        table = data.sheet_by_index(0)
+        lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in table.row_values(0) if Lesson.query.filter_by(name=value).first()]
+        ipad_contents = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+        for PC in ipad_contents:
+            P_id = iPad.query.filter_by(name=PC[0]).first().id
+            for L_exist, L_id in zip(PC[1:], lesson_ids):
+                if L_exist:
+                    ipad_content = iPadContent(
+                        ipad_id=P_id,
+                        lesson_id=L_id,
+                    )
+                    db.session.add(ipad_content)
+                    print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
+        db.session.commit()
 
 
 class iPad(db.Model):
@@ -562,19 +667,19 @@ class iPad(db.Model):
         data = xlrd.open_workbook('initial-ipads.xlsx')
         table = data.sheet_by_index(0)
         ipads = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for p in ipads:
-            if isinstance(p[3], float):
-                p[3] = int(p[3])
-            ipad = iPad.query.filter_by(name=p[0]).first()
+        for P in ipads:
+            if isinstance(P[3], float):
+                P[3] = int(P[3])
+            ipad = iPad.query.filter_by(name=P[0]).first()
             if ipad is None:
                 ipad = iPad(
-                    name=p[0],
-                    serial=p[1],
-                    capacity_id=iPadCapacity.query.filter_by(name=p[2]).first().id,
-                    room_id=Room.query.filter_by(name=str(p[3])).first().id,
-                    state_id=iPadState.query.filter_by(name=u'待机').first().id
+                    name=P[0],
+                    serial=P[1],
+                    capacity_id=iPadCapacity.query.filter_by(name=P[2]).first().id,
+                    room_id=Room.query.filter_by(name=str(P[3])).first().id,
+                    state_id=iPadState.query.filter_by(name=P[4]).first().id
                 )
-                print u'导入iPad信息', p[0], p[1], p[2], p[3]
+                print u'导入iPad信息', P[0], P[1], P[2], P[3], P[4]
                 db.session.add(ipad)
         db.session.commit()
 
@@ -586,6 +691,41 @@ class AdjacentLesson(db.Model):
     __tablename__ = 'adjacent_lessons'
     previous_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), unique=True, primary_key=True)
     next_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), unique=True, primary_key=True)
+
+    @staticmethod
+    def insert_adjacent_lessons():
+        adjacent_lessons = [
+            (u'VB总论', u'L1', ),
+            (u'L1', u'L2', ),
+            (u'L2', u'L3', ),
+            (u'L3', u'L4', ),
+            (u'L4', u'L5', ),
+            (u'L5', u'L6', ),
+            (u'L6', u'L7', ),
+            (u'L7', u'L8', ),
+            (u'L8', u'L9', ),
+            (u'GRE总论', u'1st', ),
+            (u'1st', u'2nd', ),
+            (u'2nd', u'3rd', ),
+            (u'3rd', u'4th', ),
+            (u'4th', u'5th', ),
+            (u'5th', u'6th', ),
+            (u'6th', u'7th', ),
+            (u'7th', u'8th', ),
+            (u'8th', u'9th', ),
+            (u'9th', u'Test', ),
+            (u'Test', u'AW总论', ),
+        ]
+        for AL in adjacent_lessons:
+            adjacent_lesson = AdjacentLesson.query.filter_by(previous_id=Lesson.query.filter_by(name=AL[0]).first().id).first()
+            if adjacent_lesson is None:
+                adjacent_lesson = AdjacentLesson(
+                    previous_id=Lesson.query.filter_by(name=AL[0]).first().id,
+                    next_id=Lesson.query.filter_by(name=AL[1]).first().id
+                )
+                db.session.add(adjacent_lesson)
+                print u'导入课程关联信息', AL[0], AL[1]
+        db.session.commit()
 
 
 class Lesson(db.Model):
@@ -643,11 +783,15 @@ class Lesson(db.Model):
             (u'Test', u'Y-GRE', ),
             (u'AW总论', u'Y-GRE', ),
         ]
-        for l in lessons:
-            lesson = Lesson.query.filter_by(name=l[0]).first()
+        for L in lessons:
+            lesson = Lesson.query.filter_by(name=L[0]).first()
             if lesson is None:
-                lesson = Lesson(name=l[0], type_id=CourseType.query.filter_by(name=l[1]).first().id)
+                lesson = Lesson(
+                    name=L[0],
+                    type_id=CourseType.query.filter_by(name=L[1]).first().id
+                )
                 db.session.add(lesson)
+                print u'导入课程信息', L[0], L[1]
         db.session.commit()
 
     def __repr__(self):
@@ -658,6 +802,121 @@ class AdjacentSection(db.Model):
     __tablename__ = 'adjacent_sections'
     previous_id = db.Column(db.Integer, db.ForeignKey('sections.id'), unique=True, primary_key=True)
     next_id = db.Column(db.Integer, db.ForeignKey('sections.id'), unique=True, primary_key=True)
+
+    @staticmethod
+    def insert_adjacent_sections():
+        adjacent_sections = [
+            (u'0.11', u'0.12', ),
+            (u'0.12', u'0.13', ),
+            (u'0.13', u'0.14', ),
+            (u'0.14', u'0.21', ),
+            (u'0.21', u'0.22', ),
+            (u'0.22', u'0.23', ),
+            (u'0.23', u'0.24', ),
+            (u'0.24', u'0.31', ),
+            (u'0.31', u'0.32', ),
+            (u'0.32', u'0.33', ),
+            (u'0.33', u'0.34', ),
+            (u'0.34', u'0.41', ),
+            (u'0.41', u'0.42', ),
+            (u'0.42', u'0.43', ),
+            (u'0.43', u'0.44', ),
+            (u'0.44', u'1.1', ),
+            (u'1.1', u'1.2', ),
+            (u'1.2', u'1.3', ),
+            (u'1.3', u'1.4', ),
+            (u'1.4', u'1.5', ),
+            (u'1.5', u'1.6', ),
+            (u'1.6', u'1.7', ),
+            (u'1.7', u'1.8', ),
+            (u'1.8', u'2.1', ),
+            (u'2.1', u'2.2', ),
+            (u'2.2', u'2.3', ),
+            (u'2.3', u'2.4', ),
+            (u'2.4', u'2.5', ),
+            (u'2.5', u'2.6', ),
+            (u'2.6', u'2.7', ),
+            (u'2.7', u'2.8', ),
+            (u'2.8', u'3.1', ),
+            (u'3.1', u'3.2', ),
+            (u'3.2', u'3.3', ),
+            (u'3.3', u'3.4', ),
+            (u'3.4', u'3.5', ),
+            (u'3.5', u'3.6', ),
+            (u'3.6', u'3.7', ),
+            (u'3.7', u'3.8', ),
+            (u'3.8', u'4.1', ),
+            (u'4.1', u'4.2', ),
+            (u'4.2', u'4.3', ),
+            (u'4.3', u'4.4', ),
+            (u'4.4', u'4.5', ),
+            (u'4.5', u'4.6', ),
+            (u'4.6', u'4.7', ),
+            (u'4.7', u'4.8', ),
+            (u'4.8', u'5.1', ),
+            (u'5.1', u'5.2', ),
+            (u'5.2', u'5.3', ),
+            (u'5.3', u'5.4', ),
+            (u'5.4', u'5.5', ),
+            (u'5.5', u'5.6', ),
+            (u'5.6', u'5.7', ),
+            (u'5.7', u'5.8', ),
+            (u'5.8', u'6.1', ),
+            (u'6.1', u'6.2', ),
+            (u'6.2', u'6.3', ),
+            (u'6.3', u'6.4', ),
+            (u'6.4', u'6.5', ),
+            (u'6.5', u'6.6', ),
+            (u'6.6', u'6.7', ),
+            (u'6.7', u'6.8', ),
+            (u'6.8', u'7.1', ),
+            (u'7.1', u'7.2', ),
+            (u'7.2', u'7.3', ),
+            (u'7.3', u'7.4', ),
+            (u'7.4', u'7.5', ),
+            (u'7.5', u'7.6', ),
+            (u'7.6', u'7.7', ),
+            (u'7.7', u'7.8', ),
+            (u'7.8', u'8.1', ),
+            (u'8.1', u'8.2', ),
+            (u'8.2', u'8.3', ),
+            (u'8.3', u'8.4', ),
+            (u'8.4', u'8.5', ),
+            (u'8.5', u'8.6', ),
+            (u'8.6', u'8.7', ),
+            (u'8.7', u'8.8', ),
+            (u'8.8', u'8.9', ),
+            (u'8.9', u'9.1', ),
+            (u'9.1', u'9.2', ),
+            (u'9.2', u'9.3', ),
+            (u'9.3', u'9.4', ),
+            (u'9.4', u'9.5', ),
+            (u'9.5', u'9.6', ),
+            (u'9.6', u'9.7', ),
+            (u'9.7', u'9.8', ),
+            (u'9.8', u'9.9', ),
+            (u'GRE总论', u'1st', ),
+            (u'1st', u'2nd', ),
+            (u'2nd', u'3rd', ),
+            (u'3rd', u'4th', ),
+            (u'4th', u'5th', ),
+            (u'5th', u'6th', ),
+            (u'6th', u'7th', ),
+            (u'7th', u'8th', ),
+            (u'8th', u'9th', ),
+            (u'9th', u'Test', ),
+            (u'Test', u'AW总论', ),
+        ]
+        for AS in adjacent_sections:
+            adjacent_section = AdjacentSection.query.filter_by(previous_id=Section.query.filter_by(name=AS[0]).first().id).first()
+            if adjacent_section is None:
+                adjacent_section = AdjacentSection(
+                    previous_id=Section.query.filter_by(name=AS[0]).first().id,
+                    next_id=Section.query.filter_by(name=AS[1]).first().id
+                )
+                db.session.add(adjacent_section)
+                print u'导入节关联信息', AS[0], AS[1]
+        db.session.commit()
 
 
 class Section(db.Model):
@@ -787,11 +1046,15 @@ class Section(db.Model):
             (u'Test', u'Test', ),
             (u'AW总论', u'AW总论', ),
         ]
-        for s in sections:
-            section = Section.query.filter_by(name=s[0]).first()
+        for S in sections:
+            section = Section.query.filter_by(name=S[0]).first()
             if section is None:
-                section = Section(name=s[0], lesson_id=Lesson.query.filter_by(name=s[1]).first().id)
+                section = Section(
+                    name=S[0],
+                    lesson_id=Lesson.query.filter_by(name=S[1]).first().id
+                )
                 db.session.add(section)
+                print u'导入节信息', S[0], S[1]
         db.session.commit()
 
     def __repr__(self):
@@ -824,11 +1087,12 @@ class OperationType(db.Model):
             (u'修改', ),
             (u'删除', ),
         ]
-        for ot in operation_types:
-            operation_type = OperationType.query.filter_by(name=ot[0]).first()
+        for OT in operation_types:
+            operation_type = OperationType.query.filter_by(name=OT[0]).first()
             if operation_type is None:
-                operation_type = OperationType(name=ot[0])
+                operation_type = OperationType(name=OT[0])
                 db.session.add(operation_type)
+                print u'导入操作类型信息', OT[0]
         db.session.commit()
 
     def __repr__(self):

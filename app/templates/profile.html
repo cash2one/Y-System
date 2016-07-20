@@ -23,31 +23,75 @@
     {% endif %}
     {% endwith %}
     <h1 class="ui inverted header"><i class="archive icon"></i> {{ current_user.name }}的研习档案</h1>
+    <div class="ui inverted horizontal list">
+        <div class="item">
+            <i class="group icon"></i>
+            <div class="content">
+                <div class="header">用户群组</div>
+                <div class="description">{{ current_user.role.name }}</div>
+            </div>
+        </div>
+        <div class="item">
+            <i class="student icon"></i>
+            <div class="content">
+                <div class="header">VB班</div>
+                <div class="description">{{ current_user.vb_course.name }}</div>
+            </div>
+        </div>
+        <div class="item">
+            <i class="student icon"></i>
+            <div class="content">
+                <div class="header">Y-GRE班</div>
+                <div class="description">{{ current_user.y_gre_course.name }}</div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block page_content %}
-<div id="products" class="ui vertical stripe stats segment">
+<div class="ui vertical stripe stats segment">
     <div class="ui equal width stackable internally celled grid">
         <div class="center aligned row">
             <div class="column">
                 <div class="ui statistic">
-                    <div class="label">VB研习</div>
-                    <div class="value">100</div>
-                    <div class="label">小时</div>
+                    <div class="label">即将开始</div>
+                    <div class="value">{{ current_user.valid_bookings.count() }}</div>
+                    <div class="label">次</div>
                 </div>
             </div>
             <div class="column">
                 <div class="ui statistic">
-                    <div class="label">Y-GRE研习</div>
-                    <div class="value">150</div>
-                    <div class="label">小时</div>
+                    <div class="label">排队中</div>
+                    <div class="value">{{ current_user.wait_bookings.count() }}</div>
+                    <div class="label">次</div>
                 </div>
             </div>
             <div class="column">
                 <div class="ui statistic">
-                    <div class="label">视频赴约</div>
-                    <div class="value">57</div>
+                    <div class="label">赴约</div>
+                    <div class="value">{{ current_user.keep_bookings.count() }}</div>
+                    <div class="label">次</div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="ui statistic">
+                    <div class="label">爽约</div>
+                    <div class="value">{{ current_user.miss_bookings.count() }}</div>
+                    <div class="label">次</div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="ui statistic">
+                    <div class="label">取消预约</div>
+                    <div class="value">{{ current_user.cancel_bookings.count() }}</div>
+                    <div class="label">次</div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="ui statistic">
+                    <div class="label">迟到</div>
+                    <div class="value">{{ current_user.late_bookings.count() }}</div>
                     <div class="label">次</div>
                 </div>
             </div>
@@ -58,57 +102,20 @@
 <div class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
-            <div class="eight wide column">
-                <h3 class="ui header">词汇建造师</h3>
-                <div class="ui bulleted list">
-                    <div class="item">20K+可扩展的学术阅读词汇体系</div>
-                    <div class="item">历史比较方法与词源学</div>
-                    <div class="item">摒弃背单词恶习</div>
-                    <div class="item">系统重定义单词释义</div>
-                    <div class="item">深入本质理解英文</div>
-                    <div class="item">多语种接口</div>
-                </div>
-                <h3 class="ui header">Y-GRE平台</h3>
-                <div class="ui bulleted list">
-                    <div class="item">基于VB的学术阅读词汇体构建</div>
-                    <div class="item">预测式图景阅读</div>
-                    <div class="item">学科背景预处理</div>
-                    <div class="item">模块化自适应学习体系</div>
-                    <div class="item">缺陷干预和分数预测</div>
-                </div>
-            </div>
-            <div class="six wide right floated column">
-                <img class="ui large bordered rounded image" src="{{ url_for('static', filename='images/photos/room1707.jpg') }}">
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe quote segment">
-    <div class="ui equal width stackable internally celled grid">
-        <div class="center aligned row">
             <div class="column">
-                <h3>“95%的云英语注册者GRE Verbal成绩超过150分，平均提升12分。”</h3>
-                <p><i class="big pie chart icon"></i> 根据2011年云英语成立以来的数据统计</p>
-            </div>
-            <div class="column">
-                <h3>“当V170的成绩最后显示在屏幕上的时候，我的感觉是——有些虚实莫辨。”</h3>
-                <p>
-                    <img class="ui avatar image" src="{{ url_for('static', filename='images/avatars/huangdi.jpg') }}">
-                    <b>黄笛</b>
-                    <span>大陆首个新GRE Verbal满分</span>
-                </p>
+                <h3 class="ui header"><i class="flag icon"></i> 里程碑</h3>
             </div>
         </div>
     </div>
 </div>
 
 <div class="ui vertical stripe segment">
-    <div class="ui text container">
-        <h3 class="ui header">关于云英语</h3>
-        <p>云英语是一家从事语言教学研究和致力于学术产业化的机构。自2011年由北大清华校友创始成立，云英语始终倡导将语言学学术领域诸多研究成果实用化、普及化，透过跨学科视角，改进语言教学体系，无缝连接世界文化。</p>
-        <p>云英语研修基地主要面向向北大、清华等一流高校学生和教师，旨在提供最高端的产品，服务于近邻社区的学术生活。</p>
-        <a id="contacts-button" class="ui large button">联系我们</a>
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="checked calendar icon"></i> 预约记录</h3>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
