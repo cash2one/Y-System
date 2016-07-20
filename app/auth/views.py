@@ -150,7 +150,7 @@ def change_email_request():
             token = current_user.generate_email_change_token(new_email)
             send_email(new_email, u'确认您的邮箱账户', 'auth/mail/change_email', user=current_user, token=token)
             flash(u'一封确认邮件已经发送至您的邮箱')
-            return redirect(url_for('main.profile'))
+            return redirect(url_for('auth.change_email_request'))
         else:
             flash(u'无效的用户名或密码')
     return render_template("auth/change_email.html", form=form)

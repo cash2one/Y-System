@@ -11,18 +11,18 @@ from . import db, login_manager
 
 
 class Permission:
-    VIEW             = 0b00000000000000000000000000000001
-    BOOK_VB_1        = 0b00000000000000000000000000000010
-    BOOK_VB_2        = 0b00000000000000000000000000000100
-    BOOK_VB_A        = 0b00000000000000000000000000001000
-    BOOK_Y_GRE_1     = 0b00000000000000000000000000010000
-    BOOK_Y_GRE_A     = 0b00000000000000000000000000100000
-    MODERATE_BOOKING = 0b00000000000000000000000001000000
-    MODERATE_RENTAL  = 0b00000000000000000000000010000000
-    MODERATE_PERIOD  = 0b00000000000000000000000100000000
-    MODERATE_IPAD    = 0b00000000000000000000001000000000
-    MODERATE_USER    = 0b00000000000000000000010000000000
-    MODERATE_AUTH    = 0b00000000000000000000100000000000
+    FORBIDDEN        = 0b00000000000000000000000000000000
+    BOOK_VB_1        = 0b00000000000000000000000000000001
+    BOOK_VB_2        = 0b00000000000000000000000000000010
+    BOOK_VB_A        = 0b00000000000000000000000000000100
+    BOOK_Y_GRE_1     = 0b00000000000000000000000000001000
+    BOOK_Y_GRE_A     = 0b00000000000000000000000000010000
+    MODERATE_BOOKING = 0b00000000000000000000000000100000
+    MODERATE_RENTAL  = 0b00000000000000000000000001000000
+    MODERATE_PERIOD  = 0b00000000000000000000000010000000
+    MODERATE_IPAD    = 0b00000000000000000000000100000000
+    MODERATE_USER    = 0b00000000000000000000001000000000
+    MODERATE_AUTH    = 0b00000000000000000000010000000000
     ADMINISTER       = 0b10000000000000000000000000000000
 
 
@@ -36,18 +36,18 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = [
-            (u'用户', Permission.VIEW, ),
-            (u'VB学员', Permission.VIEW | Permission.BOOK_VB_1, ),
-            (u'联报学员1类', Permission.VIEW | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, ),
-            (u'联报学员2类', Permission.VIEW | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, ),
-            (u'联报学员A类', Permission.VIEW | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, ),
-            (u'预约协管员', Permission.VIEW | Permission.MODERATE_BOOKING, ),
-            (u'iPad借阅协管员', Permission.VIEW | Permission.MODERATE_RENTAL, ),
-            (u'时段协管员', Permission.VIEW | Permission.MODERATE_PERIOD, ),
-            (u'iPad内容协管员', Permission.VIEW | Permission.MODERATE_IPAD, ),
-            (u'用户协管员', Permission.VIEW | Permission.MODERATE_USER, ),
-            (u'志愿者', Permission.VIEW | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, ),
-            (u'管理员', Permission.VIEW | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, ),
+            (u'禁止预约', Permission.FORBIDDEN, ),
+            (u'单VB', Permission.FORBIDDEN | Permission.BOOK_VB_1, ),
+            (u'Y-GRE 普通', Permission.FORBIDDEN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, ),
+            (u'Y-GRE VB2', Permission.FORBIDDEN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, ),
+            (u'Y-GRE A权限', Permission.FORBIDDEN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, ),
+            (u'预约协管员', Permission.FORBIDDEN | Permission.MODERATE_BOOKING, ),
+            (u'iPad借阅协管员', Permission.FORBIDDEN | Permission.MODERATE_RENTAL, ),
+            (u'时段协管员', Permission.FORBIDDEN | Permission.MODERATE_PERIOD, ),
+            (u'iPad内容协管员', Permission.FORBIDDEN | Permission.MODERATE_IPAD, ),
+            (u'用户协管员', Permission.FORBIDDEN | Permission.MODERATE_USER, ),
+            (u'志愿者', Permission.FORBIDDEN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_USER, ),
+            (u'管理员', Permission.FORBIDDEN | Permission.MODERATE_BOOKING | Permission.MODERATE_RENTAL | Permission.MODERATE_PERIOD | Permission.MODERATE_IPAD | Permission.MODERATE_USER | Permission.MODERATE_AUTH, ),
             (u'开发人员', 0xffffffff, ),
         ]
         for r in roles:
@@ -318,6 +318,7 @@ class ClassType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True)
     classes = db.relationship('Class', backref='type', lazy='dynamic')
+    periods = db.relationship('Period', backref='type', lazy='dynamic')
 
     @staticmethod
     def insert_rental_types():
@@ -350,11 +351,11 @@ class Class(db.Model):
 class Period(db.Model):
     __tablename__ = 'periods'
     id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date, index=True)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
-    date = db.Column(db.Date, index=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    availabe = db.Column(db.Boolean, default=False)
+    period_type = db.Column(db.Integer, db.ForeignKey('class_types.id'))
     booked_users = db.relationship('Booking', foreign_keys=[Booking.period_id], backref=db.backref('period', lazy='joined'), lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
