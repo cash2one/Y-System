@@ -83,6 +83,6 @@ uwsgi.log
 # Windows
 Thumbs.db
 
-# Initial activation data file
-initial-activations.xls
-initial-activations.xlsx
+# Initial data files
+*initial-*.xlsx
+

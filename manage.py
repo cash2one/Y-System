@@ -15,7 +15,6 @@ if os.path.exists('.env'):
             os.environ[var[0]] = var[1]
 
 from app import create_app, db
-from app.models import Activation
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -25,7 +24,7 @@ migrate = Migrate(app, db)
 
 
 def make_shell_context():
-    return dict(app=app, db=db, Activation=Activation)
+    return dict(app=app, db=db)
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
@@ -34,7 +33,7 @@ manager.add_command('db', MigrateCommand)
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
-    from app.models import Role, BookingState, RentalType, iPadCapacity, iPadState, OperationType, User, Activation
+    from app.models import Role, BookingState, RentalType, iPadCapacity, iPadState, Room, iPad, OperationType, CourseType, Course, User, Activation, Lesson, Section
 
     # migrate database to latest revision
     upgrade()
@@ -50,11 +49,23 @@ def deploy():
 
     iPadState.insert_ipad_states()
 
+    Room.insert_rooms()
+
+    iPad.insert_ipads()
+
     OperationType.insert_operation_types()
+
+    CourseType.insert_course_types()
+
+    Course.insert_courses()
 
     User.insert_admin()
 
     Activation.insert_activations()
+
+    Lesson.insert_lessons()
+
+    Section.insert_sections()
 
 
 if __name__ == '__main__':

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from flask import render_template, redirect, request, url_for, flash
+from flask import current_app, render_template, redirect, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
 from ..email import send_email
-from ..models import User, Activation
+from ..models import User, Activation, Course
 
 
 @auth.before_app_request
@@ -58,6 +58,14 @@ def activate():
                     db.session.add(activation)
                     user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
                     db.session.add(user)
+                    if activation.vb_course_id:
+                        vb_course = Course.query.filter_by(id=activation.vb_course_id).first()
+                        if vb_course:
+                            user.register(course=vb_course)
+                    if activation.y_gre_course_id:
+                        y_gre_course = Course.query.filter_by(id=activation.y_gre_course_id).first()
+                        if y_gre_course:
+                            user.register(course=y_gre_course)
                     db.session.commit()
                     token = user.generate_confirmation_token()
                     send_email(user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=user, token=token)
@@ -77,6 +85,7 @@ def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.profile'))
     if current_user.confirm(token):
+        send_email(current_app.config['YSYS_ADMIN'], u'新用户：%s（%s）' % (current_user.name, current_user.email), 'auth/mail/new_user', user=current_user)
         flash(u'您的邮箱账户确认成功！')
     else:
         flash(u'确认链接无效或者已经过期')

@@ -1,0 +1,5 @@
+姓名：{{ user.name }}
+邮箱：{{ user.email }}
+权限：{{ user.role.name }}
+VB班：{{ user.vb_course.name }}
+Y-GRE班：{{ user.y_gre_course.name }}
