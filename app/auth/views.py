@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from flask import current_app, render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
 from ..email import send_email
-from ..models import User, Activation, Course
+from ..models import Permission, User, Role, Activation, Course
 
 
 @auth.before_app_request
@@ -85,7 +85,9 @@ def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.profile'))
     if current_user.confirm(token):
-        send_email(current_app.config['YSYS_ADMIN'], u'新用户：%s（%s）' % (current_user.name, current_user.email), 'auth/mail/new_user', user=current_user)
+        for user in User.query.all():
+            if user.can(Permission.MANAGE_USER):
+                send_email(user.email, u'新用户：%s（%s）' % (current_user.name, current_user.email), 'auth/mail/new_user', user=current_user)
         flash(u'您的邮箱账户确认成功！')
     else:
         flash(u'确认链接无效或者已经过期')

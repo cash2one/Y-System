@@ -51,8 +51,55 @@
             </div>
             <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
             {% if current_user.is_authenticated %}
+            <a class="item" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研习档案</a>
             {% else %}
             <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
+            {% endif %}
+            {% if current_user.can(Permission.BOOK) %}
+            <div class="ui dropdown item">
+                <i class="calendar icon"></i>
+                课程预约
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    {% if current_user.can(Permission.BOOK_VB) %}
+                    <a class="item" href="{{ url_for('book.vb') }}"><i class="add to calendar icon"></i> 预约VB课程</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.BOOK_Y_GRE) %}
+                    <a class="item" href="{{ url_for('book.y_gre') }}"><i class="add to calendar icon"></i> 预约Y-GRE课程</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if current_user.can(Permission.MANAGE) %}
+            <div class="ui dropdown item">
+                <i class="settings icon"></i>
+                系统管理
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    {% if current_user.can(Permission.MANAGE_BOOKING) %}
+                    <a class="item" href="#"><i class="calendar icon"></i> 预约管理</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
+                    <a class="item" href="#"><i class="tasks icon"></i> 时段管理</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.MANAGE_RENTAL) %}
+                    <a class="item" href="#"><i class="exchange icon"></i> iPad借阅管理</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.MANAGE_IPAD) %}
+                    <a class="item" href="#"><i class="tablet icon"></i> iPad内容管理</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.MANAGE_USER) %}
+                    <a class="item" href="#"><i class="user icon"></i> 用户管理</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.MANAGE_AUTH) %}
+                    <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.ADMINISTER) %}
+                    <div class="divider"></div>
+                    <a class="item" href="#"><i class="bomb icon"></i> 高级功能</a>
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
             {% block following_menu %}
             {% endblock %}
@@ -63,8 +110,6 @@
                 {{ current_user.name }}
                 <i class="dropdown icon"></i>
                 <div class="menu">
-                    <a class="item" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研习档案</a>
-                    <div class="divider"></div>
                     <div class="header">账户设置</div>
                     <a class="item" href="{{ url_for('auth.change_email_request') }}"><i class="at icon"></i> 修改邮箱</a>
                     <a class="item" href="{{ url_for('auth.change_password') }}"><i class="lock icon"></i> 修改密码</a>
@@ -93,9 +138,50 @@
         {% else %}
         <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
         {% endif %}
+        {% if current_user.can(Permission.BOOK) %}
+        <div class="item">
+            <div class="header">课程预约</div>
+            <div class="menu">
+                {% if current_user.can(Permission.BOOK_VB) %}
+                <a class="item" href="{{ url_for('book.vb') }}"><i class="add to calendar icon"></i> 预约VB课程</a>
+                {% endif %}
+                {% if current_user.can(Permission.BOOK_Y_GRE) %}
+                <a class="item" href="{{ url_for('book.y_gre') }}"><i class="add to calendar icon"></i> 预约Y-GRE课程</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if current_user.can(Permission.MANAGE) %}
+        <div class="item">
+            <div class="header">系统管理</div>
+            <div class="menu">
+                {% if current_user.can(Permission.MANAGE_BOOKING) %}
+                <a class="item" href="#"><i class="calendar icon"></i> 预约管理</a>
+                {% endif %}
+                {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
+                <a class="item" href="#"><i class="tasks icon"></i> 时段管理</a>
+                {% endif %}
+                {% if current_user.can(Permission.MANAGE_RENTAL) %}
+                <a class="item" href="#"><i class="exchange icon"></i> iPad借阅管理</a>
+                {% endif %}
+                {% if current_user.can(Permission.MANAGE_IPAD) %}
+                <a class="item" href="#"><i class="tablet icon"></i> iPad内容管理</a>
+                {% endif %}
+                {% if current_user.can(Permission.MANAGE_USER) %}
+                <a class="item" href="#"><i class="user icon"></i> 用户管理</a>
+                {% endif %}
+                {% if current_user.can(Permission.MANAGE_AUTH) %}
+                <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
+                {% endif %}
+                {% if current_user.can(Permission.ADMINISTER) %}
+                <div class="divider"></div>
+                <a class="item" href="#"><i class="bomb icon"></i> 高级功能</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
         {% block sidebar_menu %}
         {% endblock %}
-        <div class="divider"></div>
         {% block sidebar_menu_auth %}
         {% if current_user.is_authenticated %}
         <div class="item">
@@ -125,8 +211,55 @@
                     </div>
                     <a class="item" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
                     {% if current_user.is_authenticated %}
+                    <a class="item" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研习档案</a>
                     {% else %}
                     <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.BOOK) %}
+                    <div class="ui dropdown item">
+                        <i class="calendar icon"></i>
+                        课程预约
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            {% if current_user.can(Permission.BOOK_VB) %}
+                            <a class="item" href="{{ url_for('book.vb') }}"><i class="add to calendar icon"></i> 预约VB课程</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.BOOK_Y_GRE) %}
+                            <a class="item" href="{{ url_for('book.y_gre') }}"><i class="add to calendar icon"></i> 预约Y-GRE课程</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if current_user.can(Permission.MANAGE) %}
+                    <div class="ui dropdown item">
+                        <i class="settings icon"></i>
+                        系统管理
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            {% if current_user.can(Permission.MANAGE_BOOKING) %}
+                            <a class="item" href="#"><i class="calendar icon"></i> 预约管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
+                            <a class="item" href="#"><i class="tasks icon"></i> 时段管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.MANAGE_RENTAL) %}
+                            <a class="item" href="#"><i class="exchange icon"></i> iPad借阅管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.MANAGE_IPAD) %}
+                            <a class="item" href="#"><i class="tablet icon"></i> iPad内容管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.MANAGE_USER) %}
+                            <a class="item" href="#"><i class="user icon"></i> 用户管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.MANAGE_AUTH) %}
+                            <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.ADMINISTER) %}
+                            <div class="divider"></div>
+                            <a class="item" href="#"><i class="bomb icon"></i> 高级功能</a>
+                            {% endif %}
+                        </div>
+                    </div>
                     {% endif %}
                     {% block menu %}
                     {% endblock %}
@@ -137,8 +270,6 @@
                         {{ current_user.name }}
                         <i class="dropdown icon"></i>
                         <div class="menu">
-                            <a class="item" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研习档案</a>
-                            <div class="divider"></div>
                             <div class="header">账户设置</div>
                             <a class="item" href="{{ url_for('auth.change_email_request') }}"><i class="at icon"></i> 修改邮箱</a>
                             <a class="item" href="{{ url_for('auth.change_password') }}"><i class="lock icon"></i> 修改密码</a>

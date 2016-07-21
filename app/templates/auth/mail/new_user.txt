@@ -3,3 +3,5 @@
 权限：{{ user.role.name }}
 VB班：{{ user.vb_course.name }}
 Y-GRE班：{{ user.y_gre_course.name }}
+
+温馨提示：请不要回复本邮件。

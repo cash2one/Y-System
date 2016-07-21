@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}预约VB课程{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-book-vb.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="add to calendar icon"></i> 预约VB课程</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>时段</th>
+                            <th>名额</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if schedules.count() %}
+                        {% for schedule in schedules %}
+                        <tr>
+                            <td>{{ schedule.date }}</td>
+                            <td>{{ schedule.period.start_time }} - {{ schedule.period.end_time }}</td>
+                            {% if schedule.booked_users.count() < schedule.quota %}
+                            <td>{{ schedule.booked_users.count() }} / {{ schedule.quota }}</td>
+                            {% else %}
+                            <td class="negative">{{ schedule.booked_users.count() }} / {{ schedule.quota }}</td>
+                            {% endif %}
+                            {% if schedule.is_booked_by(current_user) %}
+                            <td>{{ current_user.booking_state(schedule).name }}</td>
+                            <td><a class="ui basic negative button" href="{{ url_for('book.unbook_vb', schedule_id=schedule.id) }}"><i class="remove from calendar icon"></i> 取消</a></td>
+                            {% else %}
+                            {% if schedule.booked_users.count() < schedule.quota %}
+                            <td>未预约</td>
+                            <td><a class="ui basic primary button" href="{{ url_for('book.book_vb', schedule_id=schedule.id) }}"><i class="add to calendar icon"></i> 预约</a></td>
+                            {% else %}
+                            <td>未预约</td>
+                            <td><a class="ui basic secondary button" href="{{ url_for('book.wait_vb', schedule_id=schedule.id) }}"><i class="wait icon"></i> 排队</a></td>
+                            {% endif %}
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr class="disabled">
+                            <td>无</td>
+                            <td>无</td>
+                            <td>无</td>
+                            <td>无</td>
+                            <td><a class="ui basic button"><i class="add to calendar icon"></i> 预约</a></td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-book-vb.js') }}"></script>
+{% endblock %}

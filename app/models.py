@@ -11,19 +11,20 @@ from . import db, login_manager
 
 
 class Permission:
-    FORBIDDEN      = 0b00000000000000000000000000000000
-    BOOK_VB_1      = 0b00000000000000000000000000000001
-    BOOK_VB_2      = 0b00000000000000000000000000000010
-    BOOK_VB_A      = 0b00000000000000000000000000000100
-    BOOK_Y_GRE_1   = 0b00000000000000000000000000001000
-    BOOK_Y_GRE_A   = 0b00000000000000000000000000010000
-    MANAGE_BOOKING = 0b00000000000000000000000000100000
-    MANAGE_RENTAL  = 0b00000000000000000000000001000000
-    MANAGE_PERIOD  = 0b00000000000000000000000010000000
-    MANAGE_IPAD    = 0b00000000000000000000000100000000
-    MANAGE_USER    = 0b00000000000000000000001000000000
-    MANAGE_AUTH    = 0b00000000000000000000010000000000
-    ADMINISTER     = 0b10000000000000000000000000000000
+    FORBIDDEN       = 0b00000000000000000000000000000000
+    BOOK            = 0b00000000000000000000000000000001
+    BOOK_VB         = 0b00000000000000000000000000000010
+    BOOK_Y_GRE      = 0b00000000000000000000000000000100
+    BOOK_VB_2       = 0b00000000000000000000000000001000
+    BOOK_ANY        = 0b00000000000000000000000000010000
+    MANAGE          = 0b00000000000000000000000000100000
+    MANAGE_BOOKING  = 0b00000000000000000000000001000000
+    MANAGE_RENTAL   = 0b00000000000000000000000010000000
+    MANAGE_SCHEDULE = 0b00000000000000000000000100000000
+    MANAGE_IPAD     = 0b00000000000000000000001000000000
+    MANAGE_USER     = 0b00000000000000000000010000000000
+    MANAGE_AUTH     = 0b00000000000000000000100000000000
+    ADMINISTER      = 0b10000000000000000000000000000000
 
 
 class Role(db.Model):
@@ -37,17 +38,17 @@ class Role(db.Model):
     def insert_roles():
         roles = [
             (u'禁止预约', Permission.FORBIDDEN, ),
-            (u'单VB', Permission.FORBIDDEN | Permission.BOOK_VB_1, ),
-            (u'Y-GRE 普通', Permission.FORBIDDEN | Permission.BOOK_VB_1 | Permission.BOOK_Y_GRE_1, ),
-            (u'Y-GRE VB2', Permission.FORBIDDEN | Permission.BOOK_VB_2 | Permission.BOOK_Y_GRE_1, ),
-            (u'Y-GRE A权限', Permission.FORBIDDEN | Permission.BOOK_VB_A | Permission.BOOK_Y_GRE_A, ),
-            (u'预约协管员', Permission.FORBIDDEN | Permission.MANAGE_BOOKING, ),
-            (u'iPad借阅协管员', Permission.FORBIDDEN | Permission.MANAGE_RENTAL, ),
-            (u'时段协管员', Permission.FORBIDDEN | Permission.MANAGE_PERIOD, ),
-            (u'iPad内容协管员', Permission.FORBIDDEN | Permission.MANAGE_IPAD, ),
-            (u'用户协管员', Permission.FORBIDDEN | Permission.MANAGE_USER, ),
-            (u'志愿者', Permission.FORBIDDEN | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_PERIOD | Permission.MANAGE_USER, ),
-            (u'管理员', Permission.FORBIDDEN | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_PERIOD | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
+            (u'单VB', Permission.BOOK | Permission.BOOK_VB, ),
+            (u'Y-GRE 普通', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE, ),
+            (u'Y-GRE VB2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
+            (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
+            (u'预约协管员', Permission.MANAGE | Permission.MANAGE_BOOKING, ),
+            (u'iPad借阅协管员', Permission.MANAGE | Permission.MANAGE_RENTAL, ),
+            (u'时段协管员', Permission.MANAGE | Permission.MANAGE_SCHEDULE, ),
+            (u'iPad内容协管员', Permission.MANAGE | Permission.MANAGE_IPAD, ),
+            (u'用户协管员', Permission.MANAGE | Permission.MANAGE_USER, ),
+            (u'志愿者', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_USER, ),
+            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
             (u'开发人员', 0xffffffff, ),
         ]
         for R in roles:
@@ -214,10 +215,10 @@ class BookingState(db.Model):
 
 class Booking(db.Model):
     __tablename__ = 'bookings'
-    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), primary_key=True)
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class RentalType(db.Model):
@@ -393,57 +394,89 @@ class User(UserMixin, db.Model):
 
     @property
     def vb_course(self):
-        return Course.query.join(Registration, Registration.course_id == Course.id)\
-            .filter(Registration.user_id == self.id)\
+        return Course.query\
+            .join(Registration, Registration.course_id == Course.id)\
             .join(CourseType, CourseType.id == Course.type_id)\
-            .filter(CourseType.name == u'VB').first()
+            .filter(Registration.user_id == self.id)\
+            .filter(CourseType.name == u'VB')\
+            .first()
 
     @property
     def y_gre_course(self):
-        return Course.query.join(Registration, Registration.course_id == Course.id)\
-            .filter(Registration.user_id == self.id)\
+        return Course.query\
+            .join(Registration, Registration.course_id == Course.id)\
             .join(CourseType, CourseType.id == Course.type_id)\
-            .filter(CourseType.name == u'Y-GRE').first()
+            .filter(Registration.user_id == self.id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .first()
+
+    def book(self, schedule, state_name):
+        if schedule.available and not self.booked(schedule):
+            b = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first())
+            db.session.add(b)
+
+    def unbook(self, schedule):
+        b =self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        if b:
+            db.session.delete(b)
+
+    def booked(self, schedule):
+        return self.booked_schedules.filter_by(schedule_id=schedule.id).first() is not None
+
+    def booking_state(self, schedule):
+        return BookingState.query\
+            .join(Booking, Booking.state_id == BookingState.id)\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .filter(Schedule.id == schedule.id)\
+            .filter(Booking.user_id == self.id)\
+            .first()
 
     @property
     def valid_bookings(self):
-        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'预约')
 
     @property
     def wait_bookings(self):
-        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'排队')
 
     @property
     def invalid_bookings(self):
-        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'失效')
 
     @property
     def keep_bookings(self):
-        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'赴约')
 
     @property
     def late_bookings(self):
-        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'迟到')
 
     @property
     def miss_bookings(self):
-        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'爽约')
 
     @property
     def cancel_bookings(self):
-        return Booking.query.join(BookingState, BookingState.id == Booking.state_id)\
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'取消')
 
@@ -487,20 +520,21 @@ class Period(db.Model):
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
 
     @staticmethod
     def insert_periods():
         periods = [
-            (u'VB淡季上午', time(9, 0), time(15, 0), u'VB', ),
-            (u'VB淡季下午', time(15, 0), time(21, 0), u'VB', ),
-            (u'VB旺季时段1', time(8, 0), time(11, 30), u'VB', ),
-            (u'VB旺季时段2', time(11, 30), time(15, 0), u'VB', ),
-            (u'VB旺季时段3', time(15, 0), time(18, 30), u'VB', ),
-            (u'VB旺季时段4', time(18, 30), time(22, 0), u'VB', ),
-            (u'Y-GRE淡季上午', time(9, 0), time(15, 0), u'Y-GRE', ),
-            (u'Y-GRE淡季下午', time(15, 0), time(21, 0), u'Y-GRE', ),
-            (u'Y-GRE旺季上午', time(8, 0), time(15, 0), u'Y-GRE', ),
-            (u'Y-GRE旺季下午', time(15, 0), time(22, 0), u'Y-GRE', ),
+            (u'（淡季）VB上午', time(9, 0), time(15, 0), u'VB', ),
+            (u'（淡季）VB下午', time(15, 0), time(21, 0), u'VB', ),
+            (u'（旺季）VB时段1', time(8, 0), time(11, 30), u'VB', ),
+            (u'（旺季）VB时段2', time(11, 30), time(15, 0), u'VB', ),
+            (u'（旺季）VB时段3', time(15, 0), time(18, 30), u'VB', ),
+            (u'（旺季）VB时段4', time(18, 30), time(22, 0), u'VB', ),
+            (u'（淡季）Y-GRE上午', time(9, 0), time(15, 0), u'Y-GRE', ),
+            (u'（淡季）Y-GRE下午', time(15, 0), time(21, 0), u'Y-GRE', ),
+            (u'（旺季）Y-GRE上午', time(8, 0), time(15, 0), u'Y-GRE', ),
+            (u'（旺季）Y-GRE下午', time(15, 0), time(22, 0), u'Y-GRE', ),
         ]
         for P in periods:
             period = Period.query.filter_by(name=P[0]).first()
@@ -525,7 +559,7 @@ class Schedule(db.Model):
     date = db.Column(db.Date, index=True)
     period_id = db.Column(db.Integer, db.ForeignKey('periods.id'))
     quota = db.Column(db.Integer, default=0)
-    availabe = db.Column(db.Boolean, default=False)
+    available = db.Column(db.Boolean, default=False)
     booked_users = db.relationship(
         'Booking',
         foreign_keys=[Booking.schedule_id],
@@ -533,6 +567,9 @@ class Schedule(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def is_booked_by(self, user):
+        return self.booked_users.filter_by(user_id=user.id).first() is not None
 
     def __repr__(self):
         return '<Schedule %r>' % self.date
@@ -629,12 +666,13 @@ class iPadContent(db.Model):
             P_id = iPad.query.filter_by(name=PC[0]).first().id
             for L_exist, L_id in zip(PC[1:], lesson_ids):
                 if L_exist:
-                    ipad_content = iPadContent(
-                        ipad_id=P_id,
-                        lesson_id=L_id,
-                    )
-                    db.session.add(ipad_content)
-                    print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
+                    if iPadContent.query.filter_by(ipad_id=P_id, lesson_id=L_id).first() is None:
+                        ipad_content = iPadContent(
+                            ipad_id=P_id,
+                            lesson_id=L_id,
+                        )
+                        db.session.add(ipad_content)
+                        print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
         db.session.commit()
 
 
