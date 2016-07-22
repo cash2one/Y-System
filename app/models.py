@@ -573,6 +573,14 @@ class Period(db.Model):
             hour -= 24
         return time(hour, self.end_time.minute, self.end_time.second)
 
+    @property
+    def start_time_str(self):
+        return self.start_time.strftime('%H:%M')
+
+    @property
+    def end_time_str(self):
+        return self.end_time.strftime('%H:%M')
+
     @staticmethod
     def insert_periods():
         periods = [
@@ -630,6 +638,17 @@ class Schedule(db.Model):
     def increase_quota(self):
         self.quota += 1
         db.session.add(self)
+        wb = Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .filter(Schedule.id == self.id)\
+            .filter(BookingState.name == u'排队')\
+            .order_by(Booking.timestamp.desc())\
+            .first()
+        if wb:
+            wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
+            db.session.add(wb)
+            return User.query.filter_by(id=wb.user_id).first()
 
     def decrease_quota(self):
         if self.quota > 0:

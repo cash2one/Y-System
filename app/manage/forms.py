@@ -24,4 +24,4 @@ class NewScheduleForm(Form):
     def __init__(self, *args, **kwargs):
         super(NewScheduleForm, self).__init__(*args, **kwargs)
         self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(10)]
-        self.period.choices = [(period.id, u'%s时段：%s - %s' % (period.type.name, period.start_time.strftime('%H:%M'), period.end_time.strftime('%H:%M'))) for period in Period.query.order_by(Period.id).all()]
+        self.period.choices = [(period.id, u'%s时段：%s - %s' % (period.type.name, period.start_time_str, period.end_time_str)) for period in Period.query.order_by(Period.id).all()]

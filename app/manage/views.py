@@ -7,6 +7,7 @@ from flask_sqlalchemy import get_debug_queries
 from . import manage
 from .forms import NewScheduleForm
 from .. import db
+from ..email import send_email
 from ..models import Permission, Booking, Schedule
 from ..decorators import admin_required, permission_required
 
@@ -39,14 +40,14 @@ def schedule():
     if form.validate_on_submit():
         day = date(int(form.date.data[:4]), int(form.date.data[5:7]), int(form.date.data[8:]))
         for period_id in form.period.data:
-            s = Schedule.query.filter_by(date=day, period_id=period_id).first()
-            if s:
-                flash(u'该时段已存在：%s，%s时段：%s - %s' % (s.date, s.period.type.name, s.period.start_time, s.period.end_time))
+            schedule = Schedule.query.filter_by(date=day, period_id=period_id).first()
+            if schedule:
+                flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
             else:
-                s = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data)
-                db.session.add(s)
+                schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data)
+                db.session.add(schedule)
                 db.session.commit()
-                flash(u'添加时段：%s，%s时段：%s - %s' % (s.date, s.period.type.name, s.period.start_time, s.period.end_time))
+                flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
         return redirect(url_for('manage.schedule'))
     page = request.args.get('page', 1, type=int)
     show_out_of_date = False
@@ -133,7 +134,9 @@ def increase_schedule_quota(id):
     if schedule.out_of_date:
         flash(u'所选时段已经过期')
         return redirect(url_for('manage.schedule'))
-    schedule.increase_quota()
+    candidate = schedule.increase_quota()
+    if candidate:
+        send_email(candidate.email, u'您已成功预约%s课程' % schedule.period.type.name, 'book/mail/booking', user=candidate, schedule=schedule)
     flash(u'所选时段名额+1')
     return redirect(url_for('manage.schedule'))
 
