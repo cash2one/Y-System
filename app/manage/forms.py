@@ -1,43 +1,27 @@
 # -*- coding: utf-8 -*-
 
+from datetime import date, timedelta
 from flask_wtf import Form
-from wtforms import StringField, TextAreaField, BooleanField, SelectField, SubmitField
-from wtforms.validators import Required, Length, Email, Regexp
+from wtforms import StringField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
+from wtforms.validators import Required, NumberRange
 from wtforms import ValidationError
-from ..models import Role, User
+from ..models import Period
 
 
-class NameForm(Form):
-    name = StringField('What is your name?', validators=[Required()])
-    submit = SubmitField('Submit')
+def NextDayString(days, short=False):
+    day = date.today() + timedelta(days=1) * days
+    if short:
+        return day.strftime('%Y-%m-%d')
+    return day.strftime('%Y-%m-%d %a')
 
+class NewScheduleForm(Form):
+    date = SelectField(u'日期', coerce=unicode)
+    period = SelectMultipleField(u'时段', coerce=int)
+    quota = IntegerField(u'名额', validators=[Required(), NumberRange(min=1)])
+    publish_now = BooleanField(u'立即发布')
+    submit = SubmitField(u'提交')
 
-class EditProfileForm(Form):
-    name = StringField('Real name', validators=[Length(0, 64)])
-    location = StringField('Location', validators=[Length(0, 64)])
-    about_me = TextAreaField('About me')
-    submit = SubmitField('Submit')
-
-
-class EditProfileAdminForm(Form):
-    email = StringField('Email', validators=[Required(), Length(1, 64), Email()])
-    username = StringField('Username', validators=[Required(), Length(1, 64), Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0, 'Usernames must have only letters, numbers, dots or underscores')])
-    confirmed = BooleanField('Confirmed')
-    role = SelectField('Role', coerce=int)
-    name = StringField('Real name', validators=[Length(0, 64)])
-    location = StringField('Location', validators=[Length(0, 64)])
-    about_me = TextAreaField('About me')
-    submit = SubmitField('Submit')
-
-    def __init__(self, user, *args, **kwargs):
-        super(EditProfileAdminForm, self).__init__(*args, **kwargs)
-        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.name).all()]
-        self.user = user
-
-    def validate_email(self, field):
-        if field.data != self.user.email and User.query.filter_by(email=field.data).first():
-            raise ValidationError('Email already registered.')
-
-    def validate_username(self, field):
-        if field.data != self.user.username and User.query.filter_by(username=field.data).first():
-            raise ValidationError('Username already in use.')
+    def __init__(self, *args, **kwargs):
+        super(NewScheduleForm, self).__init__(*args, **kwargs)
+        self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(10)]
+        self.period.choices = [(period.id, u'%s时段：%s - %s' % (period.type.name, period.start_time.strftime('%H:%M'), period.end_time.strftime('%H:%M'))) for period in Period.query.order_by(Period.id).all()]

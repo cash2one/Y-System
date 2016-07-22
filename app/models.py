@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime, time
+from datetime import datetime, date, time
 import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -220,6 +220,11 @@ class Booking(db.Model):
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    @property
+    def canceled(self):
+        return self.state.name == u'取消'
+
+
 
 class RentalType(db.Model):
     __tablename__ = 'rental_types'
@@ -412,16 +417,35 @@ class User(UserMixin, db.Model):
 
     def book(self, schedule, state_name):
         if schedule.available and not self.booked(schedule):
-            b = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first())
+            b = Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first()
+            if b:
+                b.state_id = BookingState.query.filter_by(name=state_name).first().id
+            else:
+                b = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first())
             db.session.add(b)
 
     def unbook(self, schedule):
+        # mark booking state as canceled
         b =self.booked_schedules.filter_by(schedule_id=schedule.id).first()
         if b:
-            db.session.delete(b)
+            b.state_id = BookingState.query.filter_by(name=u'取消').first().id
+            db.session.add(b)
+        # transfer to candidate if exist
+        wb = Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .filter(Schedule.id == schedule.id)\
+            .filter(BookingState.name == u'排队')\
+            .order_by(Booking.timestamp.desc())\
+            .first()
+        if wb:
+            wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
+            db.session.add(wb)
+            return User.query.filter_by(id=wb.user_id).first()
 
     def booked(self, schedule):
-        return self.booked_schedules.filter_by(schedule_id=schedule.id).first() is not None
+        return (self.booked_schedules.filter_by(schedule_id=schedule.id).first() is not None) and\
+            (Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first().canceled is False)
 
     def booking_state(self, schedule):
         return BookingState.query\
@@ -430,6 +454,15 @@ class User(UserMixin, db.Model):
             .filter(Schedule.id == schedule.id)\
             .filter(Booking.user_id == self.id)\
             .first()
+
+    def booking_success(self, schedule):
+        return BookingState.query\
+            .join(Booking, Booking.state_id == BookingState.id)\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .filter(Schedule.id == schedule.id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'预约')\
+            .first() is not None
 
     @property
     def valid_bookings(self):
@@ -522,6 +555,24 @@ class Period(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
 
+    @property
+    def start_time_utc(self):
+        hour = self.start_time.hour - current_app.config['UTC_OFFSET']
+        while hour < 0:
+            hour += 24
+        while hour > 24:
+            hour -= 24
+        return time(hour, self.start_time.minute, self.start_time.second)
+
+    @property
+    def end_time_utc(self):
+        hour = self.end_time.hour - current_app.config['UTC_OFFSET']
+        while hour < 0:
+            hour += 24
+        while hour > 24:
+            hour -= 24
+        return time(hour, self.end_time.minute, self.end_time.second)
+
     @staticmethod
     def insert_periods():
         periods = [
@@ -568,8 +619,42 @@ class Schedule(db.Model):
         cascade='all, delete-orphan'
     )
 
+    def publish(self):
+        self.available = True
+        db.session.add(self)
+
+    def retract(self):
+        self.available = False
+        db.session.add(self)
+
+    def increase_quota(self):
+        self.quota += 1
+        db.session.add(self)
+
+    def decrease_quota(self):
+        if self.quota > 0:
+            self.quota += -1
+            db.session.add(self)
+
+    @property
+    def today(self):
+        return self.date == date.today()
+
+    @property
+    def out_of_date(self):
+        return self.date < date.today()
+
     def is_booked_by(self, user):
-        return self.booked_users.filter_by(user_id=user.id).first() is not None
+        return (self.booked_users.filter_by(user_id=user.id).first() is not None) and\
+            (Booking.query.filter_by(user_id=user.id, schedule_id=self.id).first().canceled == False)
+
+    @property
+    def valid_bookings(self):
+        return Booking.query\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Schedule.id == self.id)\
+            .filter(BookingState.name != u'取消')
 
     def __repr__(self):
         return '<Schedule %r>' % self.date

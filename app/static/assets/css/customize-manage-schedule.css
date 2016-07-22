@@ -1,4 +1,4 @@
-/* customize-book-y-gre.css */
+/* customize-manage-schedule.css */
 
 .masthead.segment {
     min-height: 300px;
@@ -28,6 +28,7 @@
 .ui.vertical.stripe .floated.image {
     clear: both;
 }
+.ui.vertical.stripe .ui.tabular.menu,
 .ui.vertical.stripe .ui.statistic .label,
 .ui.vertical.stripe p,
 .ui.vertical.stripe .ui.table {
@@ -35,6 +36,9 @@
 }
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.table .ui.buttons {
+    margin-left: 10px;
 }
 
 .stats.stripe.segment,

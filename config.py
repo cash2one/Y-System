@@ -20,6 +20,9 @@ class Config:
     YSYS_ADMIN = os.environ.get('YSYS_ADMIN')
     YSYS_ADMIN_PASSWORD = os.environ.get('YSYS_ADMIN_PASSWORD')
     YSYS_SLOW_DB_QUERY_TIME=0.5
+    UTC_OFFSET = 8
+    RECORD_PER_PAGE = 20
+
 
     @staticmethod
     def init_app(app):

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}预约管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-booking.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="calendar icon"></i> 预约管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">预约记录</h3>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>用户</th>
+                            <th>时段</th>
+                            <th>状态</th>
+                            <th>操作时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if bookings %}
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
+                            <td>{{ booking.user.name }}（{{ booking.user.email }}）</td>
+                            <td>{{ moment(booking.schedule.period.start_time_utc).format('H:mm') }} - {{ moment(booking.schedule.period.end_time_utc).format('H:mm') }}</td>
+                            <td>{{ booking.state.name }}</td>
+                            <td>{{ moment(booking.timestamp).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td><a class="ui basic primary button" href="#"><i class="setting icon"></i> 操作</a></td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr class="disabled">
+                            <td>无</td>
+                            <td>无</td>
+                            <td>无</td>
+                            <td>无</td>
+                            <td>无</td>
+                            <td>无</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.booking') }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-booking.js') }}"></script>
+{% endblock %}

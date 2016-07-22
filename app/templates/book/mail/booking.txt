@@ -1,0 +1,19 @@
+亲爱的{{ user.name }}：
+
+您好！
+
+您已经成功预约了{{ schedule.period.type.name }}课程！
+
+日期：{{ schedule.date }}
+
+时段：{{ schedule.period.start_time }} - {{ schedule.period.end_time }}
+
+课程：{{ schedule.period.type.name }}
+
+此致
+
+敬礼！
+
+云英语团队
+
+温馨提示：请不要回复本邮件。

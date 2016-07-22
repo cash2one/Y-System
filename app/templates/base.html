@@ -77,10 +77,10 @@
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     {% if current_user.can(Permission.MANAGE_BOOKING) %}
-                    <a class="item" href="#"><i class="calendar icon"></i> 预约管理</a>
+                    <a class="item" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
-                    <a class="item" href="#"><i class="tasks icon"></i> 时段管理</a>
+                    <a class="item" href="{{ url_for('manage.schedule') }}"><i class="tasks icon"></i> 时段管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_RENTAL) %}
                     <a class="item" href="#"><i class="exchange icon"></i> iPad借阅管理</a>
@@ -156,10 +156,10 @@
             <div class="header">系统管理</div>
             <div class="menu">
                 {% if current_user.can(Permission.MANAGE_BOOKING) %}
-                <a class="item" href="#"><i class="calendar icon"></i> 预约管理</a>
+                <a class="item" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
-                <a class="item" href="#"><i class="tasks icon"></i> 时段管理</a>
+                <a class="item" href="{{ url_for('manage.schedule') }}"><i class="tasks icon"></i> 时段管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_RENTAL) %}
                 <a class="item" href="#"><i class="exchange icon"></i> iPad借阅管理</a>
@@ -237,10 +237,10 @@
                         <i class="dropdown icon"></i>
                         <div class="menu">
                             {% if current_user.can(Permission.MANAGE_BOOKING) %}
-                            <a class="item" href="#"><i class="calendar icon"></i> 预约管理</a>
+                            <a class="item" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
-                            <a class="item" href="#"><i class="tasks icon"></i> 时段管理</a>
+                            <a class="item" href="{{ url_for('manage.schedule') }}"><i class="tasks icon"></i> 时段管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_RENTAL) %}
                             <a class="item" href="#"><i class="exchange icon"></i> iPad借阅管理</a>
@@ -353,7 +353,7 @@
 
     <!-- Moment.js -->
     {{ moment.include_moment() }}
-    {{ moment.locale('cn') }}
+    {{ moment.locale('zh-CN') }}
 
     <!-- Customized JS -->
     {% block customized_scripts %}

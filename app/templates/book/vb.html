@@ -44,19 +44,24 @@
                     <tbody>
                         {% if schedules.count() %}
                         {% for schedule in schedules %}
+                        {% if not schedule.out_of_date and not schedule.today %}
                         <tr>
-                            <td>{{ schedule.date }}</td>
-                            <td>{{ schedule.period.start_time }} - {{ schedule.period.end_time }}</td>
-                            {% if schedule.booked_users.count() < schedule.quota %}
-                            <td>{{ schedule.booked_users.count() }} / {{ schedule.quota }}</td>
+                            <td>{{ moment(schedule.date).format('YYYY-M-D ddd') }}</td>
+                            <td>{{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}</td>
+                            {% if schedule.valid_bookings.count() < schedule.quota %}
+                            <td>{{ schedule.valid_bookings.count() }} / {{ schedule.quota }}</td>
                             {% else %}
-                            <td class="negative">{{ schedule.booked_users.count() }} / {{ schedule.quota }}</td>
+                            <td class="negative">{{ schedule.valid_bookings.count() }} / {{ schedule.quota }}</td>
                             {% endif %}
                             {% if schedule.is_booked_by(current_user) %}
-                            <td>{{ current_user.booking_state(schedule).name }}</td>
+                            {% if current_user.booking_success(schedule) %}
+                            <td class="positive">{{ current_user.booking_state(schedule).name }}</td>
+                            {% else %}
+                            <td class="warning">{{ current_user.booking_state(schedule).name }}</td>
+                            {% endif %}
                             <td><a class="ui basic negative button" href="{{ url_for('book.unbook_vb', schedule_id=schedule.id) }}"><i class="remove from calendar icon"></i> 取消</a></td>
                             {% else %}
-                            {% if schedule.booked_users.count() < schedule.quota %}
+                            {% if schedule.valid_bookings.count() < schedule.quota %}
                             <td>未预约</td>
                             <td><a class="ui basic primary button" href="{{ url_for('book.book_vb', schedule_id=schedule.id) }}"><i class="add to calendar icon"></i> 预约</a></td>
                             {% else %}
@@ -65,6 +70,7 @@
                             {% endif %}
                             {% endif %}
                         </tr>
+                        {% endif %}
                         {% endfor %}
                         {% else %}
                         <tr class="disabled">
@@ -72,7 +78,7 @@
                             <td>无</td>
                             <td>无</td>
                             <td>无</td>
-                            <td><a class="ui basic button"><i class="add to calendar icon"></i> 预约</a></td>
+                            <td>无</td>
                         </tr>
                         {% endif %}
                     </tbody>
