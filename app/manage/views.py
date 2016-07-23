@@ -32,6 +32,76 @@ def booking():
     return render_template('manage/booking.html', bookings=bookings, pagination=pagination)
 
 
+@manage.route('/booking/set-state-valid/<int:user_id>/<int:schedule_id>')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_valid(user_id, schedule_id):
+    booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    booking.set_state(u'预约')
+    db.session.commit()
+    return redirect(url_for('manage.booking'))
+
+
+@manage.route('/booking/set-state-wait/<int:user_id>/<int:schedule_id>')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_wait(user_id, schedule_id):
+    booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    booking.set_state(u'排队')
+    db.session.commit()
+    return redirect(url_for('manage.booking'))
+
+
+@manage.route('/booking/set-state-invalid/<int:user_id>/<int:schedule_id>')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_invalid(user_id, schedule_id):
+    booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    booking.set_state(u'失效')
+    db.session.commit()
+    return redirect(url_for('manage.booking'))
+
+
+@manage.route('/booking/set-state-kept/<int:user_id>/<int:schedule_id>')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_kept(user_id, schedule_id):
+    booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    booking.set_state(u'赴约')
+    db.session.commit()
+    return redirect(url_for('manage.booking'))
+
+
+@manage.route('/booking/set-state-late/<int:user_id>/<int:schedule_id>')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_late(user_id, schedule_id):
+    booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    booking.set_state(u'迟到')
+    db.session.commit()
+    return redirect(url_for('manage.booking'))
+
+
+@manage.route('/booking/set-state-miss/<int:user_id>/<int:schedule_id>')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_miss(user_id, schedule_id):
+    booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    booking.set_state(u'爽约')
+    db.session.commit()
+    return redirect(url_for('manage.booking'))
+
+
+@manage.route('/booking/set-state-canceled/<int:user_id>/<int:schedule_id>')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_canceled(user_id, schedule_id):
+    booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    booking.set_state(u'取消')
+    db.session.commit()
+    return redirect(url_for('manage.booking'))
+
+
 @manage.route('/schedule', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
@@ -67,7 +137,7 @@ def schedule():
     return render_template('manage/schedule.html', form=form, schedules=schedules, show_out_of_date=show_out_of_date, pagination=pagination)
 
 
-@manage.route('/up-to-date-schedule')
+@manage.route('/schedule/up-to-date')
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def up_to_date_schedule():
@@ -76,7 +146,7 @@ def up_to_date_schedule():
     return resp
 
 
-@manage.route('/out-of-date-schedule')
+@manage.route('/schedule/out-of-date')
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def out_of_date_schedule():
@@ -85,7 +155,7 @@ def out_of_date_schedule():
     return resp
 
 
-@manage.route('/publish-schedule/<int:id>')
+@manage.route('/schedule/publish/<int:id>')
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def publish_schedule(id):
@@ -104,7 +174,7 @@ def publish_schedule(id):
     return redirect(url_for('manage.schedule'))
 
 
-@manage.route('/retract-schedule/<int:id>')
+@manage.route('/schedule/retract/<int:id>')
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def retract_schedule(id):
@@ -123,7 +193,7 @@ def retract_schedule(id):
     return redirect(url_for('manage.schedule'))
 
 
-@manage.route('/increase-schedule-quota/<int:id>')
+@manage.route('/schedule/increase-quota/<int:id>')
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def increase_schedule_quota(id):
@@ -141,7 +211,7 @@ def increase_schedule_quota(id):
     return redirect(url_for('manage.schedule'))
 
 
-@manage.route('/decrease-schedule-quota/<int:id>')
+@manage.route('/schedule/decrease-quota/<int:id>')
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def decrease_schedule_quota(id):

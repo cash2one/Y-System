@@ -32,7 +32,7 @@ def vb():
     return render_template('book/vb.html', schedules=schedules)
 
 
-@book.route('/book-vb/<schedule_id>')
+@book.route('/vb/book/<schedule_id>')
 @login_required
 @permission_required(Permission.BOOK_VB)
 def book_vb(schedule_id):
@@ -54,7 +54,7 @@ def book_vb(schedule_id):
     return redirect(url_for('book.vb'))
 
 
-@book.route('/wait-vb/<schedule_id>')
+@book.route('/vb/wait/<schedule_id>')
 @login_required
 @permission_required(Permission.BOOK_VB)
 def wait_vb(schedule_id):
@@ -76,7 +76,7 @@ def wait_vb(schedule_id):
     return redirect(url_for('book.vb'))
 
 
-@book.route('/unbook-vb/<schedule_id>')
+@book.route('/vb/unbook/<schedule_id>')
 @login_required
 @permission_required(Permission.BOOK_VB)
 def unbook_vb(schedule_id):
@@ -114,7 +114,7 @@ def y_gre():
     return render_template('book/y_gre.html', schedules=schedules)
 
 
-@book.route('/book-y-gre/<schedule_id>')
+@book.route('/y-gre/book/<schedule_id>')
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def book_y_gre(schedule_id):
@@ -136,7 +136,7 @@ def book_y_gre(schedule_id):
     return redirect(url_for('book.y_gre'))
 
 
-@book.route('/wait-y-gre/<schedule_id>')
+@book.route('/y-gre/wait/<schedule_id>')
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def wait_y_gre(schedule_id):
@@ -158,7 +158,7 @@ def wait_y_gre(schedule_id):
     return redirect(url_for('book.y_gre'))
 
 
-@book.route('/unbook-y-gre/<schedule_id>')
+@book.route('/y-gre/unbook/<schedule_id>')
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def unbook_y_gre(schedule_id):

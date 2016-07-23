@@ -38,6 +38,7 @@
                         <tr>
                             <th>日期</th>
                             <th>用户</th>
+                            <th>课程</th>
                             <th>时段</th>
                             <th>状态</th>
                             <th>操作时间</th>
@@ -50,14 +51,44 @@
                         <tr>
                             <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td>{{ booking.user.name }}（{{ booking.user.email }}）</td>
+                            <td>{{ booking.schedule.period.type.name }}</td>
                             <td>{{ moment(booking.schedule.period.start_time_utc).format('H:mm') }} - {{ moment(booking.schedule.period.end_time_utc).format('H:mm') }}</td>
                             <td>{{ booking.state.name }}</td>
                             <td>{{ moment(booking.timestamp).format('YYYY-M-D H:mm:ss') }}</td>
-                            <td><a class="ui basic primary button" href="#"><i class="setting icon"></i> 操作</a></td>
+                            <td>
+                                <div class="ui simple dropdown button">
+                                    <i class="wrench icon"></i>
+                                    操作
+                                    <div class="menu">
+                                        {% if not booking.valid %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_valid', user_id=booking.user_id, schedule_id=booking.schedule_id) }}"><i class="add to calendar icon"></i> 预约</a>
+                                        {% endif %}
+                                        {% if not booking.waited %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_wait', user_id=booking.user_id, schedule_id=booking.schedule_id) }}"><i class="wait icon"></i> 候选</a>
+                                        {% endif %}
+                                        {% if not booking.canceled %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_canceled', user_id=booking.user_id, schedule_id=booking.schedule_id) }}"><i class="remove from calendar icon"></i> 取消</a>
+                                        {% endif %}
+                                        {% if not booking.kept %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_kept', user_id=booking.user_id, schedule_id=booking.schedule_id) }}"><i class="smile icon"></i> 赴约</a>
+                                        {% endif %}
+                                        {% if not booking.late %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_late', user_id=booking.user_id, schedule_id=booking.schedule_id) }}"><i class="meh icon"></i> 迟到</a>
+                                        {% endif %}
+                                        {% if not booking.missed %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_miss', user_id=booking.user_id, schedule_id=booking.schedule_id) }}"><i class="frown icon"></i> 爽约</a>
+                                        {% endif %}
+                                        {% if not booking.invalid %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_invalid', user_id=booking.user_id, schedule_id=booking.schedule_id) }}"><i class="delete calendar icon"></i> 失效</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                         {% endfor %}
                         {% else %}
                         <tr class="disabled">
+                            <td>无</td>
                             <td>无</td>
                             <td>无</td>
                             <td>无</td>

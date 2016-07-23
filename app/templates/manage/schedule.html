@@ -23,7 +23,7 @@
     </div>
     {% endif %}
     {% endwith %}
-    <h1 class="ui inverted header"><i class="calendar icon"></i> 时段管理</h1>
+    <h1 class="ui inverted header"><i class="tasks icon"></i> 时段管理</h1>
 </div>
 {% endblock %}
 
@@ -58,6 +58,15 @@
                     {{ form.submit(class='ui primary button') }}
                     <div class="ui error message"></div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
                 <h3 id="schedules" class="header">时段信息</h3>
                 <div class="ui tabular menu">
                     {% if not show_out_of_date %}

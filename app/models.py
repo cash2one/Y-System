@@ -220,10 +220,42 @@ class Booking(db.Model):
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def ping(self):
+        self.timestamp = datetime.utcnow()
+        db.session.add(self)
+
+    def set_state(self, state_name):
+        self.state_id = BookingState.query.filter_by(name=state_name).first().id
+        self.ping()
+        db.session.add(self)
+
+    @property
+    def valid(self):
+        return self.state.name == u'预约'
+
+    @property
+    def waited(self):
+        return self.state.name == u'排队'
+
+    @property
+    def invalid(self):
+        return self.state.name == u'失效'
+
+    @property
+    def kept(self):
+        return self.state.name == u'赴约'
+
+    @property
+    def late(self):
+        return self.state.name == u'迟到'
+
+    @property
+    def missed(self):
+        return self.state.name == u'爽约'
+
     @property
     def canceled(self):
         return self.state.name == u'取消'
-
 
 
 class RentalType(db.Model):
@@ -420,6 +452,7 @@ class User(UserMixin, db.Model):
             b = Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first()
             if b:
                 b.state_id = BookingState.query.filter_by(name=state_name).first().id
+                b.ping()
             else:
                 b = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first())
             db.session.add(b)
@@ -440,6 +473,7 @@ class User(UserMixin, db.Model):
             .first()
         if wb:
             wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
+            wb.ping()
             db.session.add(wb)
             return User.query.filter_by(id=wb.user_id).first()
 
@@ -581,6 +615,14 @@ class Period(db.Model):
     def end_time_str(self):
         return self.end_time.strftime('%H:%M')
 
+    @property
+    def alias(self):
+        return u'%s：%s - %s' % (self.type.name, self.start_time_str, self.end_time_str)
+
+    @property
+    def alias2(self):
+        return u'%s - %s' % (self.start_time_str, self.end_time_str)
+
     @staticmethod
     def insert_periods():
         periods = [
@@ -647,6 +689,7 @@ class Schedule(db.Model):
             .first()
         if wb:
             wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
+            wb.ping()
             db.session.add(wb)
             return User.query.filter_by(id=wb.user_id).first()
 

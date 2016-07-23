@@ -6,7 +6,7 @@
 
 日期：{{ schedule.date }}
 
-时段：{{ schedule.period.start_time_str }} - {{ schedule.period.end_time_str }}
+时段：{{ schedule.period.alias2 }}
 
 课程：{{ schedule.period.type.name }}
 
