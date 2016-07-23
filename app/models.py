@@ -228,6 +228,19 @@ class Booking(db.Model):
         self.state_id = BookingState.query.filter_by(name=state_name).first().id
         self.ping()
         db.session.add(self)
+        if state_name == u'取消' and self.schedule.unstarted:
+            wb = Booking.query\
+                .join(BookingState, BookingState.id == Booking.state_id)\
+                .join(Schedule, Schedule.id == Booking.schedule_id)\
+                .filter(Schedule.id == self.schedule_id)\
+                .filter(BookingState.name == u'排队')\
+                .order_by(Booking.timestamp.desc())\
+                .first()
+            if wb:
+                wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
+                wb.ping()
+                db.session.add(wb)
+                return User.query.filter_by(id=wb.user_id).first()
 
     @property
     def valid(self):
@@ -498,6 +511,52 @@ class User(UserMixin, db.Model):
             .filter(BookingState.name == u'预约')\
             .first() is not None
 
+    def booking_vb_same_day(self, schedule):
+        valid_bookings = Booking.query\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Period, Period.id == Schedule.period_id)\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(Schedule.date == schedule.date)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'预约')\
+            .filter(CourseType.name == u'VB')\
+            .count()
+        waited_bookings = Booking.query\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Period, Period.id == Schedule.period_id)\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(Schedule.date == schedule.date)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'排队')\
+            .filter(CourseType.name == u'VB')\
+            .count()
+        return valid_bookings + waited_bookings
+
+    def booking_y_gre_same_day(self, schedule):
+        valid_bookings = Booking.query\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Period, Period.id == Schedule.period_id)\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(Schedule.date == schedule.date)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'预约')\
+            .filter(CourseType.name == u'Y-GRE')\
+            .count()
+        waited_bookings = Booking.query\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Period, Period.id == Schedule.period_id)\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(Schedule.date == schedule.date)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'排队')\
+            .filter(CourseType.name == u'Y-GRE')\
+            .count()
+        return valid_bookings + waited_bookings
+
     @property
     def valid_bookings(self):
         return Booking.query\
@@ -617,7 +676,7 @@ class Period(db.Model):
 
     @property
     def alias(self):
-        return u'%s：%s - %s' % (self.type.name, self.start_time_str, self.end_time_str)
+        return u'%s时段：%s - %s' % (self.type.name, self.start_time_str, self.end_time_str)
 
     @property
     def alias2(self):
@@ -705,6 +764,35 @@ class Schedule(db.Model):
     @property
     def out_of_date(self):
         return self.date < date.today()
+
+    @property
+    def time_state(self):
+        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
+        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
+        if datetime.now() < start_time:
+            return u'未开始'
+        if start_time <= datetime.now() and datetime.now() <= end_time:
+            return u'进行中'
+        if end_time < datetime.now():
+            return u'已结束'
+
+    @property
+    def unstarted(self):
+        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
+        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
+        return datetime.now() < start_time
+
+    @property
+    def started(self):
+        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
+        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
+        return start_time <= datetime.now() and datetime.now() <= end_time
+
+    @property
+    def ended(self):
+        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
+        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
+        return end_time < datetime.now()
 
     def is_booked_by(self, user):
         return (self.booked_users.filter_by(user_id=user.id).first() is not None) and\

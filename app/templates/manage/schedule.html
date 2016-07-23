@@ -89,62 +89,44 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if schedules %}
                         {% for schedule in schedules %}
                         <tr>
                             <td>{{ moment(schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td>{{ schedule.period.type.name }}</td>
                             <td>{{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}</td>
-                            {% if schedule.valid_bookings.count() < schedule.quota %}
                             <td {% if schedule.valid_bookings.count() >= schedule.quota %}class="negative"{% endif %}>
                                 {{ schedule.valid_bookings.count() }} / {{ schedule.quota }}
-                                <div class="ui small basic icon buttons">
-                                    <a class="ui button" href="{{ url_for('manage.increase_schedule_quota', id=schedule.id) }}"><i class="plus icon"></i></a>
+                                {% if schedule.out_of_date %}
+                                <div class="ui small icon buttons">
+                                    <div class="ui disabled button"><i class="plus icon"></i></div>
+                                    <div class="ui disabled button"><i class="minus icon"></i></div>
+                                </div>
+                                {% else %}
+                                <div class="ui small icon buttons">
+                                    <a class="ui button" href="{{ url_for('manage.increase_schedule_quota', id=schedule.id, page=pagination.page) }}"><i class="plus icon"></i></a>
                                     {% if schedule.quota <= 0 %}
-                                    <div class="ui disabled button"><i class="minus icon"></i><div>
+                                    <div class="ui disabled button"><i class="minus icon"></i></div>
                                     {% else %}
-                                    <a class="ui button" href="{{ url_for('manage.decrease_schedule_quota', id=schedule.id) }}"><i class="minus icon"></i></a>
+                                    <a class="ui button" href="{{ url_for('manage.decrease_schedule_quota', id=schedule.id, page=pagination.page) }}"><i class="minus icon"></i></a>
                                     {% endif %}
                                 </div>
+                                {% endif %}
                             </td>
-                            {% else %}
-                            <td class="negative">
-                                {{ schedule.valid_bookings.count() }} / {{ schedule.quota }}
-                                <div class="ui small basic icon buttons">
-                                    <a class="ui button" href="{{ url_for('manage.increase_schedule_quota', id=schedule.id) }}"><i class="plus icon"></i></a>
-                                    {% if schedule.quota <= 0 %}
-                                    <div class="ui disabled button"><i class="minus icon"></i><div>
-                                    {% else %}
-                                    <a class="ui button" href="{{ url_for('manage.decrease_schedule_quota', id=schedule.id) }}"><i class="minus icon"></i></a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            {% endif %}
                             {% if schedule.out_of_date %}
                             <td class="negative">已过期</td>
-                            <td><div class="ui basic disabled button"><i class="setting icon"></i> 操作</div></td>
+                            <td><div class="ui disabled button"><i class="setting icon"></i> 操作</div></td>
                             {% else %}
                             {% if schedule.available %}
-                            <td class="positve">已发布</td>
-                            <td><a class="ui basic negative button" href="{{ url_for('manage.retract_schedule', id=schedule.id) }}"><i class="undo icon"></i> 撤销</a>
+                            <td class="positive">已发布</td>
+                            <td><a class="ui negative button" href="{{ url_for('manage.retract_schedule', id=schedule.id, page=pagination.page) }}"><i class="undo icon"></i> 撤销</a>
                             </td>
                             {% else %}
                             <td>未发布</td>
-                            <td><a class="ui basic primary button" href="{{ url_for('manage.publish_schedule', id=schedule.id) }}"><i class="send icon"></i> 发布</a></td>
+                            <td><a class="ui primary button" href="{{ url_for('manage.publish_schedule', id=schedule.id, page=pagination.page) }}"><i class="send icon"></i> 发布</a></td>
                             {% endif %}
                             {% endif %}
                         </tr>
                         {% endfor %}
-                        {% else %}
-                        <tr class="disabled">
-                            <td>无</td>
-                            <td>无</td>
-                            <td>无</td>
-                            <td>无</td>
-                            <td>无</td>
-                            <td>无</td>
-                        </tr>
-                        {% endif %}
                     </tbody>
                 </table>
                 {% if pagination %}

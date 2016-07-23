@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block title %}预约Y-GRE课程{% endblock %}
 
@@ -42,9 +43,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if schedules.count() %}
                         {% for schedule in schedules %}
-                        {% if not schedule.out_of_date and not schedule.today %}
+                        {% if schedule.unstarted %}
                         <tr>
                             <td>{{ moment(schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td>{{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}</td>
@@ -59,30 +59,24 @@
                             {% else %}
                             <td class="warning">{{ current_user.booking_state(schedule).name }}</td>
                             {% endif %}
-                            <td><a class="ui basic negative button" href="{{ url_for('book.unbook_y_gre', schedule_id=schedule.id) }}"><i class="remove from calendar icon"></i> 取消</a></td>
+                            <td><a class="ui negative button" href="{{ url_for('book.unbook_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="remove from calendar icon"></i> 取消</a></td>
                             {% else %}
                             {% if schedule.valid_bookings.count() < schedule.quota %}
                             <td>未预约</td>
-                            <td><a class="ui basic primary button" href="{{ url_for('book.book_y_gre', schedule_id=schedule.id) }}"><i class="add to calendar icon"></i> 预约</a></td>
+                            <td><a class="ui primary button" href="{{ url_for('book.book_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="add to calendar icon"></i> 预约</a></td>
                             {% else %}
                             <td>未预约</td>
-                            <td><a class="ui basic secondary button" href="{{ url_for('book.wait_y_gre', schedule_id=schedule.id) }}"><i class="wait icon"></i> 排队</a></td>
+                            <td><a class="ui button" href="{{ url_for('book.wait_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="wait icon"></i> 排队</a></td>
                             {% endif %}
                             {% endif %}
                         </tr>
                         {% endif %}
                         {% endfor %}
-                        {% else %}
-                        <tr class="disabled">
-                            <td>无</td>
-                            <td>无</td>
-                            <td>无</td>
-                            <td>无</td>
-                            <td>无</td>
-                        </tr>
-                        {% endif %}
                     </tbody>
                 </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'book.y_gre') }}
+                {% endif %}
             </div>
         </div>
     </div>
