@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}用户管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-user.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="user icon"></i> 用户管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div id="users" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">用户列表</h3>
+                <div class="ui tabular menu">
+                    {% if show_users %}
+                    <a class="item active" href="{{ url_for('manage.users') }}">用户</a>
+                    <a class="item" href="{{ url_for('manage.activations') }}">激活状态</a>
+                    {% endif %}
+                    {% if show_activations %}
+                    <a class="item" href="{{ url_for('manage.users') }}">用户</a>
+                    <a class="item active" href="{{ url_for('manage.activations') }}">激活状态</a>
+                    {% endif %}
+                </div>
+                {% if show_users %}
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>用户组</th>
+                            <th>VB班</th>
+                            <th>Y-GRE班</th>
+                            <th>激活时间</th>
+                            <th>上次登录</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>
+                                {{ user.email }}
+                                {% if user.confirmed %}
+                                <i class="check circle icon"></i>
+                                {% else %}
+                                <i class="remove circle icon"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.role.name }}</td>
+                            <td>{{ user.vb_course.name }}</td>
+                            <td>{{ user.y_gre_course.name }}</td>
+                            <td>{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui mini button" href="#"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button" href="#"><i class="trash outline icon"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination_users %}
+                {{ macros.pagination_widget(pagination_users, 'manage.user') }}
+                {% endif %}
+                {% endif %}
+                {% if show_activations %}
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>用户组</th>
+                            <th>VB班</th>
+                            <th>Y-GRE班</th>
+                            <th>激活状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activation in activations %}
+                        <tr>
+                            <td>{{ activation.name }}</td>
+                            <td>{{ activation.role.name }}</td>
+                            <td>{{ activation.vb_course.name }}</td>
+                            <td>{{ activation.y_gre_course.name }}</td>
+                            {% if activation.activated %}
+                            <td class="positive">已激活</td>
+                            {% else %}
+                            <td class="negative">未激活</td>
+                            {% endif %}
+                            <td>
+                                {% if activation.activated %}
+                                <div class="ui mini icon disabled buttons">
+                                    <div class="ui mini disabled button"><i class="edit icon"></i></div>
+                                    <div class="ui mini negative disabled button"><i class="trash outline icon"></i></div>
+                                </div>
+                                {% else %}
+                                <div class="ui mini icon buttons">
+                                    <a class="ui mini button" href="{{ url_for('manage.edit_activation', id=activation.id) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button" href="{{ url_for('manage.delete_activation', id=activation.id) }}"><i class="trash outline icon"></i></a>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination_activations %}
+                {{ macros.pagination_widget(pagination_activations, 'manage.user') }}
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">添加用户激活信息</h3>
+                <form id="new-activation" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="three wide field">
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='姓名') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.activation_code.label() }}
+                            {{ form.activation_code(placeholder='激活码') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.role.label() }}
+                            {{ form.role(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.vb_course.label() }}
+                            {{ form.vb_course(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.y_gre_course.label() }}
+                            {{ form.y_gre_course(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-user.js') }}"></script>
+{% endblock %}

@@ -5,7 +5,7 @@ from flask_wtf import Form
 from wtforms import StringField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length
 from wtforms import ValidationError
-from ..models import Period, iPad, iPadCapacity, iPadState, Room, Lesson
+from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Course
 
 
 def NextDayString(days, short=False):
@@ -25,7 +25,7 @@ class NewScheduleForm(Form):
     def __init__(self, *args, **kwargs):
         super(NewScheduleForm, self).__init__(*args, **kwargs)
         self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(10)]
-        self.period.choices = [(period.id, period.alias) for period in Period.query.order_by(Period.id).all()]
+        self.period.choices = [(period.id, period.alias) for period in Period.query.order_by(Period.id.asc()).all()]
 
 
 class NewiPadForm(Form):
@@ -40,11 +40,11 @@ class NewiPadForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(NewiPadForm, self).__init__(*args, **kwargs)
-        self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id).all()]
-        self.room.choices = [(room.id, room.name) for room in Room.query.order_by(Room.id).all()]
-        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id).all()]
-        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'VB']
-        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'Y-GRE']
+        self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
+        self.room.choices = [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
+        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all()]
+        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
 
     def validate_serial(self, field):
         if iPad.query.filter_by(serial=field.data).first():
@@ -53,7 +53,7 @@ class NewiPadForm(Form):
 
 class EditiPadForm(Form):
     alias = StringField(u'编号')
-    serial = StringField(u'序列号', validators=[Required()])
+    serial = StringField(u'序列号', validators=[Required(message=u'请输入iPad序列号')])
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
@@ -63,11 +63,11 @@ class EditiPadForm(Form):
 
     def __init__(self, ipad, *args, **kwargs):
         super(EditiPadForm, self).__init__(*args, **kwargs)
-        self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id).all()]
-        self.room.choices = [(room.id, room.name) for room in Room.query.order_by(Room.id).all()]
-        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id).all()]
-        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'VB']
-        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'Y-GRE']
+        self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
+        self.room.choices = [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
+        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all()]
+        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
         self.ipad = ipad
 
     def validate_serial(self, field):
@@ -86,5 +86,43 @@ class FilteriPadForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(FilteriPadForm, self).__init__(*args, **kwargs)
-        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'VB']
-        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'Y-GRE']
+        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
+
+
+class NewActivationForm(Form):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
+    role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班级', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班级', coerce=int)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewActivationForm, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.vb_course.choices = [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+
+class EditActivationForm(Form):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
+    role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班级', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班级', coerce=int)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditActivationForm, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.vb_course.choices = [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+
+class DeleteActivationForm(Form):
+    submit = SubmitField(u'提交')
+
+
+class EditUserForm(Form):
+    submit = SubmitField(u'提交')

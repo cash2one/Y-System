@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, date
+from sqlalchemy import or_
 from flask import render_template, redirect, url_for, flash, current_app, make_response, request
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm
+from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, User, Booking, Schedule, Period, iPad, iPadContent, Room
+from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room
 from ..decorators import admin_required, permission_required
 
 
@@ -480,3 +481,118 @@ def filter_ipad():
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=lesson_id).all()]) for lesson_id in lesson_ids])
             ipads = [iPad.query.filter_by(id=ipad_id).first() for ipad_id in ipad_ids]
     return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
+
+
+@manage.route('/user', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_USER)
+def user():
+    form = NewActivationForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        activation_code = form.activation_code.data
+        role_id = form.role.data
+        vb_course_id = form.vb_course.data
+        y_gre_course_id = form.y_gre_course.data
+        if Role.query.filter_by(id=role_id).first().name == u'单VB':
+            activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id)
+            db.session.add(activation)
+        elif y_gre_course_id == 0:
+            flash(u'请选择%s的Y-GRE班级' % name)
+            return redirect(url_for('manage.user'))
+        else:
+            activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id)
+            db.session.add(activation)
+        db.session.commit()
+        flash(u'%s用户：%s添加成功' % (activation.role.name, activation.name))
+        return redirect(url_for('manage.user'))
+    page = request.args.get('page', 1, type=int)
+    show_users = True
+    show_activations = False
+    if current_user.is_authenticated:
+        show_users = bool(request.cookies.get('show_users', '1'))
+        show_activations = bool(request.cookies.get('show_activations', ''))
+    pagination_users = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(or_(
+            Role.name == u'单VB',
+            Role.name == u'Y-GRE 普通',
+            Role.name == u'Y-GRE VBx2',
+            Role.name == u'Y-GRE A权限'
+        ))\
+        .order_by(User.last_seen.desc())\
+        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    users = pagination_users.items
+    pagination_activations = Activation.query\
+        .join(Role, Role.id == Activation.role_id)\
+        .filter(or_(
+            Role.name == u'单VB',
+            Role.name == u'Y-GRE 普通',
+            Role.name == u'Y-GRE VBx2',
+            Role.name == u'Y-GRE A权限'
+        ))\
+        .order_by(Activation.id.desc())\
+        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    activations = pagination_activations.items
+    return render_template('manage/user.html', users=users, activations=activations, form=form, show_users=show_users, show_activations=show_activations, pagination_users=pagination_users, pagination_activations=pagination_activations)
+
+
+@manage.route('/user/users')
+@login_required
+@permission_required(Permission.MANAGE_USER)
+def users():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_users', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_activations', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/user/activations')
+@login_required
+@permission_required(Permission.MANAGE_USER)
+def activations():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activations', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/edit-activation/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_USER)
+def edit_activation(id):
+    activation = Activation.query.get_or_404(id)
+    form = EditActivationForm()
+    if form.validate_on_submit():
+        activation.name = form.name.data
+        activation.activation_code = form.activation_code.data
+        activation.role_id = form.role.data
+        activation.vb_course_id = form.vb_course.data
+        activation.y_gre_course_id = form.y_gre_course.data
+        db.session.add(activation)
+        db.session.commit()
+        flash(u'%s的激活信息已更新' % activation.name)
+        return redirect(url_for('manage.user'))
+    form.name.data = activation.name
+    form.activation_code.data = None
+    form.role.data = activation.role_id
+    form.vb_course.data = activation.vb_course_id
+    form.y_gre_course.data = activation.y_gre_course_id
+    return render_template('manage/edit_activation.html', form=form, activation=activation)
+
+
+@manage.route('/delete-activation/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_USER)
+def delete_activation(id):
+    activation = Activation.query.get_or_404(id)
+    name = activation.name
+    form = DeleteActivationForm(activation=activation)
+    if form.validate_on_submit():
+        db.session.delete(activation)
+        db.session.commit()
+        flash(u'已删除%s的激活邀请' % name)
+        return redirect(url_for('manage.user'))
+    return render_template('manage/delete_activation.html', form=form, activation=activation)
+
+

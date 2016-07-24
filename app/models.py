@@ -33,6 +33,7 @@ class Role(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
+    activations = db.relationship('Activation', backref='role', lazy='dynamic')
 
     @staticmethod
     def insert_roles():
@@ -40,7 +41,7 @@ class Role(db.Model):
             (u'禁止预约', Permission.FORBIDDEN, ),
             (u'单VB', Permission.BOOK | Permission.BOOK_VB, ),
             (u'Y-GRE 普通', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE, ),
-            (u'Y-GRE VB2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
+            (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
             (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
             (u'预约协管员', Permission.MANAGE | Permission.MANAGE_BOOKING, ),
             (u'iPad借阅协管员', Permission.MANAGE | Permission.MANAGE_RENTAL, ),
@@ -149,6 +150,14 @@ class Activation(db.Model):
 
     def verify_activation_code(self, activation_code):
         return check_password_hash(self.activation_code_hash, activation_code)
+
+    @property
+    def vb_course(self):
+        return Course.query.filter_by(id=self.vb_course_id).first()
+
+    @property
+    def y_gre_course(self):
+        return Course.query.filter_by(id=self.y_gre_course_id).first()
 
     @staticmethod
     def insert_activations():

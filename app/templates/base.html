@@ -89,7 +89,7 @@
                     <a class="item" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad内容管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_USER) %}
-                    <a class="item" href="#"><i class="user icon"></i> 用户管理</a>
+                    <a class="item" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_AUTH) %}
                     <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
@@ -176,7 +176,7 @@
                 <a class="item" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad内容管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_USER) %}
-                <a class="item" href="#"><i class="user icon"></i> 用户管理</a>
+                <a class="item" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_AUTH) %}
                 <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
@@ -265,7 +265,7 @@
                             <a class="item" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad内容管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_USER) %}
-                            <a class="item" href="#"><i class="user icon"></i> 用户管理</a>
+                            <a class="item" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_AUTH) %}
                             <a class="item" href="#"><i class="users icon"></i> 权限管理</a>

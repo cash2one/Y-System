@@ -47,7 +47,17 @@
                     {{ form.submit(class='ui primary button') }}
                     <div class="ui error message"></div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
                 {% if ipads %}
+                <h3 class="header">筛选结果</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -98,7 +108,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <h3 class="header">暂无结果</h3>
+                <h3 class="header">暂无筛选结果</h3>
                 {% endif %}
             </div>
         </div>

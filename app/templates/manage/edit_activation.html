@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}编辑用户激活信息{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-activation.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑用户激活信息</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">编辑用户激活信息</h3>
+                <form id="edit-activation" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="three wide field">
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='姓名') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.activation_code.label() }}
+                            {{ form.activation_code(placeholder='激活码') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.role.label() }}
+                            {{ form.role(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.vb_course.label() }}
+                            {{ form.vb_course(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.y_gre_course.label() }}
+                            {{ form.y_gre_course(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-activation.js') }}"></script>
+{% endblock %}

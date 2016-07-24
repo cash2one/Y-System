@@ -50,32 +50,28 @@ def logout():
 def activate():
     form = ActivationForm()
     if form.validate_on_submit():
-        activations = Activation.query.filter_by(name=form.name.data).all()
+        activations = Activation.query.filter_by(name=form.name.data, activated=False).all()
         for activation in activations:
             if activation.verify_activation_code(form.activation_code.data):
-                if not activation.activated:
-                    activation.activated = True
-                    db.session.add(activation)
-                    user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
-                    db.session.add(user)
-                    if activation.vb_course_id:
-                        vb_course = Course.query.filter_by(id=activation.vb_course_id).first()
-                        if vb_course:
-                            user.register(course=vb_course)
-                    if activation.y_gre_course_id:
-                        y_gre_course = Course.query.filter_by(id=activation.y_gre_course_id).first()
-                        if y_gre_course:
-                            user.register(course=y_gre_course)
-                    db.session.commit()
-                    token = user.generate_confirmation_token()
-                    send_email(user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=user, token=token)
-                    flash(u'激活成功，请登录！')
-                    flash(u'一封确认邮件已经发送至您的邮箱')
-                    return redirect(url_for('auth.login'))
-                flash(u'%s的云英语账户已处于激活状态' % form.name.data)
-                flash(u'请直接登录')
+                activation.activated = True
+                db.session.add(activation)
+                user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
+                db.session.add(user)
+                if activation.vb_course_id:
+                    vb_course = Course.query.filter_by(id=activation.vb_course_id).first()
+                    if vb_course:
+                        user.register(course=vb_course)
+                if activation.y_gre_course_id:
+                    y_gre_course = Course.query.filter_by(id=activation.y_gre_course_id).first()
+                    if y_gre_course:
+                        user.register(course=y_gre_course)
+                db.session.commit()
+                token = user.generate_confirmation_token()
+                send_email(user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=user, token=token)
+                flash(u'激活成功，请登录！')
+                flash(u'一封确认邮件已经发送至您的邮箱')
                 return redirect(url_for('auth.login'))
-        flash(u'激活信息有误或者不存在')
+        flash(u'激活信息有误，或账户已处于激活状态')
     return render_template('auth/activate.html', form=form)
 
 
