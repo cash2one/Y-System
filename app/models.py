@@ -891,7 +891,6 @@ class Room(db.Model):
     @staticmethod
     def insert_rooms():
         rooms = [
-            (u'无', ),
             (u'1103', ),
             (u'1707', ),
         ]

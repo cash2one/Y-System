@@ -6,7 +6,7 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm
+from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, EditAuthForm, EditAuthFormAdmin
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room, Course
@@ -26,27 +26,27 @@ def after_request(response):
 @permission_required(Permission.MANAGE_BOOKING)
 def booking():
     page = request.args.get('page', 1, type=int)
-    show_today = True
-    show_future = False
-    show_history = False
+    show_today_booking = True
+    show_future_booking = False
+    show_history_booking = False
     if current_user.is_authenticated:
-        show_today = bool(request.cookies.get('show_today', '1'))
-        show_future = bool(request.cookies.get('show_future', ''))
-        show_history = bool(request.cookies.get('show_history', ''))
-    if show_today:
+        show_today_booking = bool(request.cookies.get('show_today_booking', '1'))
+        show_future_booking = bool(request.cookies.get('show_future_booking', ''))
+        show_history_booking = bool(request.cookies.get('show_history_booking', ''))
+    if show_today_booking:
         query = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.date == date.today())\
             .order_by(Schedule.period_id.asc())\
             .order_by(Booking.timestamp.desc())
-    if show_history:
+    if show_history_booking:
         query = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.date < date.today())\
             .order_by(Schedule.date.desc())\
             .order_by(Schedule.period_id.asc())\
             .order_by(Booking.timestamp.desc())
-    if show_future:
+    if show_future_booking:
         query = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.date > date.today())\
@@ -55,7 +55,7 @@ def booking():
             .order_by(Booking.timestamp.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     bookings = pagination.items
-    return render_template('manage/booking.html', bookings=bookings, show_today=show_today, show_future=show_future, show_history=show_history, pagination=pagination)
+    return render_template('manage/booking.html', bookings=bookings, show_today_booking=show_today_booking, show_future_booking=show_future_booking, show_history_booking=show_history_booking, pagination=pagination)
 
 
 @manage.route('/booking/today')
@@ -63,9 +63,9 @@ def booking():
 @permission_required(Permission.MANAGE_BOOKING)
 def today_booking():
     resp = make_response(redirect(url_for('manage.booking')))
-    resp.set_cookie('show_today', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_future', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_booking', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_future_booking', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_booking', '', max_age=30*24*60*60)
     return resp
 
 
@@ -74,9 +74,9 @@ def today_booking():
 @permission_required(Permission.MANAGE_BOOKING)
 def future_booking():
     resp = make_response(redirect(url_for('manage.booking')))
-    resp.set_cookie('show_today', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_history', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_booking', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_history_booking', '', max_age=30*24*60*60)
     return resp
 
 
@@ -85,9 +85,9 @@ def future_booking():
 @permission_required(Permission.MANAGE_BOOKING)
 def history_booking():
     resp = make_response(redirect(url_for('manage.booking')))
-    resp.set_cookie('show_today', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_booking', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_booking', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -189,20 +189,20 @@ def schedule():
                     flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
         return redirect(url_for('manage.schedule'))
     page = request.args.get('page', 1, type=int)
-    show_today = True
-    show_future = False
-    show_history = False
+    show_today_schedule = True
+    show_future_schedule = False
+    show_history_schedule = False
     if current_user.is_authenticated:
-        show_today = bool(request.cookies.get('show_today', '1'))
-        show_future = bool(request.cookies.get('show_future', ''))
-        show_history = bool(request.cookies.get('show_history', ''))
-    if show_today:
+        show_today_schedule = bool(request.cookies.get('show_today_schedule', '1'))
+        show_future_schedule = bool(request.cookies.get('show_future_schedule', ''))
+        show_history_schedule = bool(request.cookies.get('show_history_schedule', ''))
+    if show_today_schedule:
         query = Schedule.query\
             .filter(Schedule.date == date.today())
-    if show_future:
+    if show_future_schedule:
         query = Schedule.query\
             .filter(Schedule.date > date.today())
-    if show_history:
+    if show_history_schedule:
         query = Schedule.query\
             .filter(Schedule.date < date.today())
     pagination = query\
@@ -210,7 +210,7 @@ def schedule():
         .order_by(Schedule.period_id.asc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
-    return render_template('manage/schedule.html', form=form, schedules=schedules, show_today=show_today, show_future=show_future, show_history=show_history, pagination=pagination)
+    return render_template('manage/schedule.html', form=form, schedules=schedules, show_today_schedule=show_today_schedule, show_future_schedule=show_future_schedule, show_history_schedule=show_history_schedule, pagination=pagination)
 
 
 @manage.route('/schedule/today')
@@ -218,9 +218,9 @@ def schedule():
 @permission_required(Permission.MANAGE_BOOKING)
 def today_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
-    resp.set_cookie('show_today', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_future', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_schedule', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_future_schedule', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_schedule', '', max_age=30*24*60*60)
     return resp
 
 
@@ -229,9 +229,9 @@ def today_schedule():
 @permission_required(Permission.MANAGE_BOOKING)
 def future_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
-    resp.set_cookie('show_today', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_history', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_schedule', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_history_schedule', '', max_age=30*24*60*60)
     return resp
 
 
@@ -240,9 +240,9 @@ def future_schedule():
 @permission_required(Permission.MANAGE_BOOKING)
 def history_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
-    resp.set_cookie('show_today', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_schedule', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_schedule', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -331,6 +331,8 @@ def ipad():
         serial = form.serial.data.upper()
         capacity_id = form.capacity.data
         room_id = form.room.data
+        if room_id == 0:
+            room_id = None
         state_id = form.state.data
         ipad = iPad.query.filter_by(serial=serial).first()
         if ipad:
@@ -365,9 +367,7 @@ def ipad():
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')
     if show_others:
-        query = iPad.query\
-            .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'无')
+        query = iPad.query.filter_by(room_id=None)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
     return render_template('manage/ipad.html', form=form, ipads=ipads, show_all=show_all, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
@@ -431,7 +431,10 @@ def edit_ipad(id):
         ipad.alias = form.alias.data
         ipad.serial = form.serial.data.upper()
         ipad.capacity_id = form.capacity.data
-        ipad.room_id = form.room.data
+        if form.room.data == 0:
+            ipad.room_id = None
+        else:
+            ipad.room_id = form.room.data
         ipad.state_id = form.state.data
         db.session.add(ipad)
         db.session.commit()
@@ -493,16 +496,13 @@ def user():
         activation_code = form.activation_code.data
         role_id = form.role.data
         vb_course_id = form.vb_course.data
+        if vb_course_id == 0:
+            vb_course_id = None
         y_gre_course_id = form.y_gre_course.data
-        if Role.query.filter_by(id=role_id).first().name == u'单VB':
-            activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id)
-            db.session.add(activation)
-        elif y_gre_course_id == 0:
-            flash(u'请选择%s的Y-GRE班级' % name)
-            return redirect(url_for('manage.user'))
-        else:
-            activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id)
-            db.session.add(activation)
+        if y_gre_course_id == 0:
+            y_gre_course_id = None
+        activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id)
+        db.session.add(activation)
         db.session.commit()
         flash(u'%s用户：%s添加成功' % (activation.role.name, activation.name))
         return redirect(url_for('manage.user'))
@@ -515,6 +515,7 @@ def user():
     pagination_users = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(or_(
+            Role.name == u'禁止预约',
             Role.name == u'单VB',
             Role.name == u'Y-GRE 普通',
             Role.name == u'Y-GRE VBx2',
@@ -526,6 +527,7 @@ def user():
     pagination_activations = Activation.query\
         .join(Role, Role.id == Activation.role_id)\
         .filter(or_(
+            Role.name == u'禁止预约',
             Role.name == u'单VB',
             Role.name == u'Y-GRE 普通',
             Role.name == u'Y-GRE VBx2',
@@ -606,10 +608,14 @@ def edit_user(id):
         user.name = form.name.data
         user.email = form.email.data
         user.role_id = form.role.data
-        user.unregister(user.vb_course)
-        user.register(Course.query.filter_by(id=form.vb_course.data).first())
-        user.unregister(user.y_gre_course)
-        user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+        if user.vb_course:
+            user.unregister(user.vb_course)
+        if form.vb_course.data:
+            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+        if user.y_gre_course:
+            user.unregister(user.y_gre_course)
+        if form.y_gre_course.data:
+            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
@@ -617,6 +623,189 @@ def edit_user(id):
     form.name.data = user.name
     form.email.data = user.email
     form.role.data = user.role_id
-    form.vb_course.data = user.vb_course.id
-    form.y_gre_course.data = user.y_gre_course.id
+    if user.vb_course:
+        form.vb_course.data = user.vb_course.id
+    if user.y_gre_course:
+        form.y_gre_course.data = user.y_gre_course.id
     return render_template('manage/edit_user.html', form=form, user=user)
+
+
+@manage.route('/auth')
+@login_required
+@permission_required(Permission.MANAGE_AUTH)
+def auth():
+    page = request.args.get('page', 1, type=int)
+    show_auth_managers = True
+    show_auth_users = False
+    if current_user.is_authenticated:
+        show_auth_managers = bool(request.cookies.get('show_auth_managers', '1'))
+        show_auth_users = bool(request.cookies.get('show_auth_users', ''))
+    if show_auth_managers:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(or_(
+                Role.name == u'预约协管员',
+                Role.name == u'iPad借阅协管员',
+                Role.name == u'时段协管员',
+                Role.name == u'iPad内容协管员',
+                Role.name == u'用户协管员',
+                Role.name == u'志愿者'
+            ))\
+            .order_by(User.last_seen.desc())
+    if show_auth_users:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(or_(
+                Role.name == u'禁止预约',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限'
+            ))\
+            .order_by(User.last_seen.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    users = pagination.items
+    return render_template('manage/auth.html', users=users, show_auth_managers=show_auth_managers, show_auth_users=show_auth_users, pagination=pagination)
+
+
+@manage.route('/auth/managers')
+@login_required
+@permission_required(Permission.MANAGE_AUTH)
+def auth_managers():
+    resp = make_response(redirect(url_for('manage.auth')))
+    resp.set_cookie('show_auth_managers', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_users', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/auth/users')
+@login_required
+@permission_required(Permission.MANAGE_AUTH)
+def auth_users():
+    resp = make_response(redirect(url_for('manage.auth')))
+    resp.set_cookie('show_auth_managers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_users', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/edit-auth/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_AUTH)
+def edit_auth(id):
+    user = User.query.get_or_404(id)
+    form = EditAuthForm(user=user)
+    if form.validate_on_submit():
+        user.name = form.name.data
+        user.email = form.email.data
+        user.role_id = form.role.data
+        if user.vb_course:
+            user.unregister(user.vb_course)
+        if form.vb_course.data:
+            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+        if user.y_gre_course:
+            user.unregister(user.y_gre_course)
+        if form.y_gre_course.data:
+            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+        db.session.add(user)
+        db.session.commit()
+        flash(u'%s的账户信息已更新' % user.name)
+        return redirect(url_for('manage.auth'))
+    form.name.data = user.name
+    form.email.data = user.email
+    form.role.data = user.role_id
+    if user.vb_course:
+        form.vb_course.data = user.vb_course.id
+    if user.y_gre_course:
+        form.y_gre_course.data = user.y_gre_course.id
+    return render_template('manage/edit_auth.html', form=form, user=user)
+
+
+@manage.route('/auth-admin')
+@login_required
+@permission_required(Permission.ADMINISTER)
+def auth_admin():
+    page = request.args.get('page', 1, type=int)
+    show_auth_managers_admin = True
+    show_auth_users_admin = False
+    if current_user.is_authenticated:
+        show_auth_managers_admin = bool(request.cookies.get('show_auth_managers_admin', '1'))
+        show_auth_users_admin = bool(request.cookies.get('show_auth_users_admin', ''))
+    if show_auth_managers_admin:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(or_(
+                Role.name == u'预约协管员',
+                Role.name == u'iPad借阅协管员',
+                Role.name == u'时段协管员',
+                Role.name == u'iPad内容协管员',
+                Role.name == u'用户协管员',
+                Role.name == u'志愿者',
+                Role.name == u'管理员'
+            ))\
+            .order_by(User.last_seen.desc())
+    if show_auth_users_admin:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(or_(
+                Role.name == u'禁止预约',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限'
+            ))\
+            .order_by(User.last_seen.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    users = pagination.items
+    return render_template('manage/auth_admin.html', users=users, show_auth_managers_admin=show_auth_managers_admin, show_auth_users_admin=show_auth_users_admin, pagination=pagination)
+
+
+@manage.route('/auth/managers-admin')
+@login_required
+@permission_required(Permission.ADMINISTER)
+def auth_managers_admin():
+    resp = make_response(redirect(url_for('manage.auth_admin')))
+    resp.set_cookie('show_auth_managers_admin', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_users_admin', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/auth/users-admin')
+@login_required
+@permission_required(Permission.ADMINISTER)
+def auth_users_admin():
+    resp = make_response(redirect(url_for('manage.auth_admin')))
+    resp.set_cookie('show_auth_managers_admin', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_users_admin', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/edit-auth-admin/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.ADMINISTER)
+def edit_auth_admin(id):
+    user = User.query.get_or_404(id)
+    form = EditAuthFormAdmin(user=user)
+    if form.validate_on_submit():
+        user.name = form.name.data
+        user.email = form.email.data
+        user.role_id = form.role.data
+        if user.vb_course:
+            user.unregister(user.vb_course)
+        if form.vb_course.data:
+            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+        if user.y_gre_course:
+            user.unregister(user.y_gre_course)
+        if form.y_gre_course.data:
+            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+        db.session.add(user)
+        db.session.commit()
+        flash(u'%s的账户信息已更新' % user.name)
+        return redirect(url_for('manage.auth'))
+    form.name.data = user.name
+    form.email.data = user.email
+    form.role.data = user.role_id
+    if user.vb_course:
+        form.vb_course.data = user.vb_course.id
+    if user.y_gre_course:
+        form.y_gre_course.data = user.y_gre_course.id
+    return render_template('manage/edit_auth_admin.html', form=form, user=user)

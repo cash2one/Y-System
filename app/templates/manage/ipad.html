@@ -35,28 +35,28 @@
                 <h3 class="header">iPad内容</h3>
                 <div class="ui tabular menu">
                     {% if show_all %}
-                    <a class="item active" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
-                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
-                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
-                    <a class="item" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    <a class="item active" href="{{ url_for('manage.all_ipads') }}">全部</a>
+                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
+                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
+                    <a class="item" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
                     {% if show_1103 %}
-                    <a class="item" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
-                    <a class="item active" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
-                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
-                    <a class="item" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    <a class="item" href="{{ url_for('manage.all_ipads') }}">全部</a>
+                    <a class="item active" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
+                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
+                    <a class="item" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
                     {% if show_1707 %}
-                    <a class="item" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
-                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
-                    <a class="item active" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
-                    <a class="item" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    <a class="item" href="{{ url_for('manage.all_ipads') }}">全部</a>
+                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
+                    <a class="item active" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
+                    <a class="item" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
                     {% if show_others %}
-                    <a class="item" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
-                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
-                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
-                    <a class="item active" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    <a class="item" href="{{ url_for('manage.all_ipads') }}">全部</a>
+                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
+                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
+                    <a class="item active" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">

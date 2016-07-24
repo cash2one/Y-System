@@ -92,11 +92,11 @@
                     <a class="item" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_AUTH) %}
-                    <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
+                    <a class="item" href="{{ url_for('manage.auth') }}"><i class="users icon"></i> 权限管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.ADMINISTER) %}
                     <div class="divider"></div>
-                    <a class="item" href="#"><i class="bomb icon"></i> 高级功能</a>
+                    <a class="item" href="{{ url_for('manage.auth_admin') }}"><i class="bomb icon"></i> 高级权限</a>
                     {% endif %}
                 </div>
             </div>
@@ -105,6 +105,7 @@
                 查询功能
                 <i class="dropdown icon"></i>
                 <div class="menu">
+                    <a class="item" href="#"><i class="find icon"></i> 检索用户</a>
                     <a class="item" href="{{ url_for('manage.filter_ipad') }}"><i class="filter icon"></i> 筛选iPad</a>
                 </div>
             </div>
@@ -115,7 +116,7 @@
             {% if current_user.is_authenticated %}
             <div class="ui right dropdown item">
                 <i class="user icon"></i>
-                {{ current_user.name }}
+                {{ current_user.name }} [{{ current_user.role.name }}]
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     <div class="header">账户设置</div>
@@ -179,20 +180,19 @@
                 <a class="item" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_AUTH) %}
-                <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
+                <a class="item" href="{{ url_for('manage.auth') }}"><i class="users icon"></i> 权限管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.ADMINISTER) %}
                 <div class="divider"></div>
-                <a class="item" href="#"><i class="bomb icon"></i> 高级功能</a>
+                <a class="item" href="{{ url_for('manage.auth_admin') }}"><i class="bomb icon"></i> 高级权限</a>
                 {% endif %}
             </div>
         </div>
         <div class="item">
             <div class="header">查询功能</div>
             <div class="menu">
-                {% if current_user.can(Permission.MANAGE_IPAD) %}
+                <a class="item" href="#"><i class="find icon"></i> 检索用户</a>
                 <a class="item" href="{{ url_for('manage.filter_ipad') }}"><i class="filter icon"></i> 筛选iPad</a>
-                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -268,11 +268,11 @@
                             <a class="item" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_AUTH) %}
-                            <a class="item" href="#"><i class="users icon"></i> 权限管理</a>
+                            <a class="item" href="{{ url_for('manage.auth') }}"><i class="users icon"></i> 权限管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.ADMINISTER) %}
                             <div class="divider"></div>
-                            <a class="item" href="#"><i class="bomb icon"></i> 高级功能</a>
+                            <a class="item" href="{{ url_for('manage.auth_admin') }}"><i class="bomb icon"></i> 高级权限</a>
                             {% endif %}
                         </div>
                     </div>
@@ -281,9 +281,8 @@
                         查询功能
                         <i class="dropdown icon"></i>
                         <div class="menu">
-                            {% if current_user.can(Permission.MANAGE_IPAD) %}
+                            <a class="item" href="#"><i class="find icon"></i> 检索用户</a>
                             <a class="item" href="{{ url_for('manage.filter_ipad') }}"><i class="filter icon"></i> 筛选iPad</a>
-                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
@@ -293,7 +292,7 @@
                     {% if current_user.is_authenticated %}
                     <div class="ui right dropdown item">
                         <i class="user icon"></i>
-                        {{ current_user.name }}
+                        {{ current_user.name }} [{{ current_user.role.name }}]
                         <i class="dropdown icon"></i>
                         <div class="menu">
                             <div class="header">账户设置</div>

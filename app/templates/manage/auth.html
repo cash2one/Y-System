@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}权限管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-auth.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="users icon"></i> 权限管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div id="users" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">用户列表</h3>
+                <div class="ui tabular menu">
+                    {% if show_auth_managers %}
+                    <a class="item active" href="{{ url_for('manage.auth_managers') }}">管理员</a>
+                    <a class="item" href="{{ url_for('manage.auth_users') }}">普通用户</a>
+                    {% endif %}
+                    {% if show_auth_users %}
+                    <a class="item" href="{{ url_for('manage.auth_managers') }}">管理员</a>
+                    <a class="item active" href="{{ url_for('manage.auth_users') }}">普通用户</a>
+                    {% endif %}
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>用户组</th>
+                            <th>VB班</th>
+                            <th>Y-GRE班</th>
+                            <th>激活时间</th>
+                            <th>上次登录</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>
+                                {{ user.email }}
+                                {% if user.confirmed %}
+                                <i class="check circle icon"></i>
+                                {% else %}
+                                <i class="remove circle icon"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.role.name }}</td>
+                            <td>{{ user.vb_course.name }}</td>
+                            <td>{{ user.y_gre_course.name }}</td>
+                            <td>{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>
+                                <a class="ui mini button" href="{{ url_for('manage.edit_auth', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.auth') }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-auth.js') }}"></script>
+{% endblock %}

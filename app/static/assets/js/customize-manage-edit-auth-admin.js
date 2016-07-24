@@ -1,4 +1,4 @@
-// customize-manage-user.js
+// customize-manage-edit-auth-admin.js
 
 $('select.dropdown')
   .dropdown()
@@ -19,7 +19,7 @@ $('.message .close')
 
 $(document)
     .ready(function() {
-        $('#new-activation')
+        $('#edit-auth-admin')
             .form({
                 fields: {
                     name: {
@@ -31,16 +31,25 @@ $(document)
                             }
                         ]
                     },
-                    activation_code: {
-                        identifier  : 'activation_code',
+                    email: {
+                        identifier  : 'email',
                         rules: [
                             {
                                 type   : 'empty',
-                                prompt : '请填写激活码'
+                                prompt : '请输入您的电子邮箱地址'
                             },
                             {
-                                type   : 'length[6]',
-                                prompt : '激活码至少为6位'
+                                type   : 'email',
+                                prompt : '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier  : 'role',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请选择用户组'
                             }
                         ]
                     }
