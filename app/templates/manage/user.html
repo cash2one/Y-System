@@ -36,11 +36,11 @@
                 <div class="ui tabular menu">
                     {% if show_users %}
                     <a class="item active" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item" href="{{ url_for('manage.activations') }}">激活状态</a>
+                    <a class="item" href="{{ url_for('manage.activations') }}">激活信息</a>
                     {% endif %}
                     {% if show_activations %}
                     <a class="item" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item active" href="{{ url_for('manage.activations') }}">激活状态</a>
+                    <a class="item active" href="{{ url_for('manage.activations') }}">激活信息</a>
                     {% endif %}
                 </div>
                 {% if show_users %}
@@ -75,10 +75,7 @@
                             <td>{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</td>
                             <td>{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</td>
                             <td>
-                                <div class="ui mini icon buttons">
-                                    <a class="ui mini button" href="#"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button" href="#"><i class="trash outline icon"></i></a>
-                                </div>
+                                <a class="ui mini button" href="{{ url_for('manage.edit_user', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
                             </td>
                         </tr>
                         {% endfor %}

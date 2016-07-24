@@ -6,10 +6,10 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm
+from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room
+from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room, Course
 from ..decorators import admin_required, permission_required
 
 
@@ -596,3 +596,27 @@ def delete_activation(id):
     return render_template('manage/delete_activation.html', form=form, activation=activation)
 
 
+@manage.route('/edit-user/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_USER)
+def edit_user(id):
+    user = User.query.get_or_404(id)
+    form = EditUserForm(user=user)
+    if form.validate_on_submit():
+        user.name = form.name.data
+        user.email = form.email.data
+        user.role_id = form.role.data
+        user.unregister(user.vb_course)
+        user.register(Course.query.filter_by(id=form.vb_course.data).first())
+        user.unregister(user.y_gre_course)
+        user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+        db.session.add(user)
+        db.session.commit()
+        flash(u'%s的账户信息已更新' % user.name)
+        return redirect(url_for('manage.user'))
+    form.name.data = user.name
+    form.email.data = user.email
+    form.role.data = user.role_id
+    form.vb_course.data = user.vb_course.id
+    form.y_gre_course.data = user.y_gre_course.id
+    return render_template('manage/edit_user.html', form=form, user=user)

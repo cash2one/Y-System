@@ -3,7 +3,7 @@
 from datetime import date, timedelta
 from flask_wtf import Form
 from wtforms import StringField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
-from wtforms.validators import Required, NumberRange, Length
+from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
 from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Course
 
@@ -125,4 +125,20 @@ class DeleteActivationForm(Form):
 
 
 class EditUserForm(Form):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班级', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班级', coerce=int)
     submit = SubmitField(u'提交')
+
+    def __init__(self, user, *args, **kwargs):
+        super(EditUserForm, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+        self.user = user
+
+    def validate_email(self, field):
+        if field.data != self.user.email and User.query.filter_by(email=field.data).first():
+            raise ValidationError(u'%s已经被注册' % field.data)

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}编辑用户激活信息{% endblock %}
+{% block title %}编辑用户账户信息{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-activation.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-user.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
@@ -22,7 +22,7 @@
     </div>
     {% endif %}
     {% endwith %}
-    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑用户激活信息</h1>
+    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑用户账户信息</h1>
 </div>
 {% endblock %}
 
@@ -31,8 +31,8 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">编辑用户激活信息</h3>
-                <form id="edit-activation" method="POST" class="ui form">
+                <h3 class="header">编辑用户账户信息</h3>
+                <form id="edit-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="three wide field">
@@ -40,8 +40,8 @@
                             {{ form.name(placeholder='姓名') }}
                         </div>
                         <div class="four wide field">
-                            {{ form.activation_code.label() }}
-                            {{ form.activation_code(placeholder='激活码') }}
+                            {{ form.email.label() }}
+                            {{ form.email(placeholder='邮箱') }}
                         </div>
                         <div class="three wide field">
                             {{ form.role.label() }}
@@ -59,6 +59,17 @@
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel" href="{{ url_for('manage.user') }}">取消</a>
                     <div class="ui error message"></div>
+                    {% with email_errors = form.email.errors %}
+                    {% if email_errors %}
+                    <div class="ui flask negative message">
+                        <ul class="list">
+                            {% for error in email_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </form>
             </div>
         </div>
@@ -69,5 +80,5 @@
 {% block customized_scripts %}
 {{ super() }}
 <script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-activation.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-user.js') }}"></script>
 {% endblock %}
