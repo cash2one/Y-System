@@ -73,7 +73,7 @@
                 <div class="ui flask negative message">
                     <ul class="list">
                         {% for error in email_errors %}
-                        <li>请输入一个有效的电子邮箱地址</li>
+                        <li>{{ error }}</li>
                         {% endfor %}
                     </ul>
                 </div>

@@ -1,4 +1,4 @@
-/* customize-manage-ipad.css */
+/* customize-manage-delete-ipad.css */
 
 .masthead.segment {
     min-height: 300px;
@@ -42,6 +42,9 @@
 }
 .ui.vertical.stripe .ui.form .ui.flask.message {
     display: block;
+}
+.ui.vertical.stripe .ui.form .ui.button.cancel {
+    margin-left: 5px;
 }
 
 .stats.stripe.segment,

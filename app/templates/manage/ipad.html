@@ -64,6 +64,7 @@
                         <tr>
                             <th>编号</th>
                             <th>序列号</th>
+                            <th>容量</th>
                             <th>VB内容</th>
                             <th>Y-GRE内容</th>
                             <th>状态</th>
@@ -75,6 +76,7 @@
                         <tr>
                             <td>{{ ipad.alias }}</td>
                             <td><code>{{ ipad.serial }}</code></td>
+                            <td>{{ ipad.capacity.name }}</td>
                             <td>
                                 {% for lesson in ipad.has_lessons %}
                                 {% if lesson.type.name == 'VB' %}
@@ -91,7 +93,10 @@
                             </td>
                             <td>{{ ipad.state.name }}</td>
                             <td>
-                                <a class="ui button" href="#"><i class="edit icon"></i> 编辑</a>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui mini button" href="{{ url_for('manage.edit_ipad', id=ipad.id) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button" href="{{ url_for('manage.delete_ipad', id=ipad.id) }}"><i class="trash outline icon"></i></a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -110,7 +115,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">新增iPad</h3>
-                <form method="POST" class="ui form">
+                <form id="new-ipad" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="three wide field">
@@ -146,6 +151,17 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <div class="ui error message"></div>
+                    {% with serial_errors = form.serial.errors %}
+                    {% if serial_errors %}
+                    <div class="ui flask negative message">
+                        <ul class="list">
+                            {% for error in serial_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </form>
             </div>
         </div>

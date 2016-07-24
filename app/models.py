@@ -882,6 +882,7 @@ class Room(db.Model):
     @staticmethod
     def insert_rooms():
         rooms = [
+            (u'无', ),
             (u'1103', ),
             (u'1707', ),
         ]
@@ -946,13 +947,45 @@ class iPad(db.Model):
         cascade='all, delete-orphan'
     )
 
+    def add_lesson(self, lesson_id):
+        if not self.has_lesson(lesson_id):
+            pc = iPadContent(ipad_id=self.id, lesson_id=lesson_id)
+            db.session.add(pc)
+
+    def remove_lesson(self, lesson_id):
+        if self.has_lesson(lesson_id):
+            pc = iPadContent.query.filter_by(ipad_id=self.id, lesson_id=lesson_id).first()
+            db.session.delete(pc)
+
+    def has_lesson(self, lesson_id):
+        return iPadContent.query.filter_by(ipad_id=self.id, lesson_id=lesson_id).first() is not None
+
     @property
     def has_lessons(self):
         return Lesson.query\
             .join(iPadContent, iPadContent.lesson_id == Lesson.id)\
-            .join(iPad, iPad.id == iPadContent.ipad_id)\
-            .filter(iPad.id == self.id)\
+            .filter(iPadContent.ipad_id == self.id)\
             .order_by(Lesson.id.asc())
+
+    @property
+    def vb_lesson_ids_included(self):
+        vb_lessons = Lesson.query\
+            .join(iPadContent, iPadContent.lesson_id == Lesson.id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(iPadContent.ipad_id == self.id)\
+            .filter(CourseType.name == u'VB')\
+            .order_by(Lesson.id.asc())
+        return [vb_lesson.id for vb_lesson in vb_lessons]
+
+    @property
+    def y_gre_lesson_ids_included(self):
+        y_gre_lessons = Lesson.query\
+            .join(iPadContent, iPadContent.lesson_id == Lesson.id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(iPadContent.ipad_id == self.id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .order_by(Lesson.id.asc())
+        return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
 
     @staticmethod
     def insert_ipads():
@@ -966,7 +999,7 @@ class iPad(db.Model):
             ipad = iPad.query.filter_by(serial=P[1]).first()
             if ipad is None:
                 ipad = iPad(
-                    serial=P[1],
+                    serial=P[1].upper(),
                     alias=P[0],
                     capacity_id=iPadCapacity.query.filter_by(name=P[2]).first().id,
                     room_id=Room.query.filter_by(name=str(P[3])).first().id,

@@ -81,12 +81,12 @@
                             <td {% if schedule.full %}class="negative"{% endif %}>
                                 {{ schedule.occupied_quota }} / {{ schedule.quota }}
                                 {% if schedule.out_of_date %}
-                                <div class="ui small icon buttons">
+                                <div class="ui mini icon buttons">
                                     <div class="ui disabled button"><i class="plus icon"></i></div>
                                     <div class="ui disabled button"><i class="minus icon"></i></div>
                                 </div>
                                 {% else %}
-                                <div class="ui small icon buttons">
+                                <div class="ui mini icon buttons">
                                     <a class="ui button" href="{{ url_for('manage.increase_schedule_quota', id=schedule.id, page=pagination.page) }}"><i class="plus icon"></i></a>
                                     {% if schedule.quota <= 0 %}
                                     <div class="ui disabled button"><i class="minus icon"></i></div>
@@ -98,15 +98,15 @@
                             </td>
                             {% if schedule.out_of_date %}
                             <td class="negative">已过期</td>
-                            <td><div class="ui disabled button"><i class="setting icon"></i> 操作</div></td>
+                            <td><div class="ui disabled mini button"><i class="setting icon"></i> 操作</div></td>
                             {% else %}
                             {% if schedule.available %}
                             <td class="positive">已发布</td>
-                            <td><a class="ui negative button" href="{{ url_for('manage.retract_schedule', id=schedule.id, page=pagination.page) }}"><i class="undo icon"></i> 撤销</a>
+                            <td><a class="ui negative mini button" href="{{ url_for('manage.retract_schedule', id=schedule.id, page=pagination.page) }}"><i class="undo icon"></i> 撤销</a>
                             </td>
                             {% else %}
                             <td>未发布</td>
-                            <td><a class="ui primary button" href="{{ url_for('manage.publish_schedule', id=schedule.id, page=pagination.page) }}"><i class="send icon"></i> 发布</a></td>
+                            <td><a class="ui primary mini button" href="{{ url_for('manage.publish_schedule', id=schedule.id, page=pagination.page) }}"><i class="send icon"></i> 发布</a></td>
                             {% endif %}
                             {% endif %}
                         </tr>

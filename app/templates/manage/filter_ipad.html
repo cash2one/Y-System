@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}筛选iPad{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-filter-ipad.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="filter icon"></i> 筛选iPad</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">筛选iPad</h3>
+                <form id="filter-ipad" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.vb_lessons.label() }}
+                            {{ form.vb_lessons(class='ui search dropdown') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.y_gre_lessons.label() }}
+                            {{ form.y_gre_lessons(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
+                {% if ipads %}
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>序列号</th>
+                            <th>容量</th>
+                            <th>VB内容</th>
+                            <th>Y-GRE内容</th>
+                            <th>房间</th>
+                            <th>状态</th>
+                            {% if current_user.can(Permission.MANAGE_IPAD) %}
+                            <th>操作</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ipad in ipads %}
+                        <tr>
+                            <td>{{ ipad.alias }}</td>
+                            <td><code>{{ ipad.serial }}</code></td>
+                            <td>{{ ipad.capacity.name }}</td>
+                            <td>
+                                {% for lesson in ipad.has_lessons %}
+                                {% if lesson.type.name == 'VB' %}
+                                <div class="ui teal label">{{ lesson.name }}</div>
+                                {% endif%}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for lesson in ipad.has_lessons %}
+                                {% if lesson.type.name == 'Y-GRE' %}
+                                <div class="ui red label">{{ lesson.name }}</div>
+                                {% endif%}
+                                {% endfor %}
+                            </td>
+                            <td>{{ ipad.room.name }}</td>
+                            <td>{{ ipad.state.name }}</td>
+                            {% if current_user.can(Permission.MANAGE_IPAD) %}
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui mini button" href="{{ url_for('manage.edit_ipad', id=ipad.id) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button" href="{{ url_for('manage.delete_ipad', id=ipad.id) }}"><i class="trash outline icon"></i></a>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <h3 class="header">暂无结果</h3>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-filter-ipad.js') }}"></script>
+{% endblock %}

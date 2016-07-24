@@ -3,9 +3,9 @@
 from datetime import date, timedelta
 from flask_wtf import Form
 from wtforms import StringField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
-from wtforms.validators import Required, NumberRange
+from wtforms.validators import Required, NumberRange, Length
 from wtforms import ValidationError
-from ..models import Period, iPadCapacity, iPadState, Room, Lesson
+from ..models import Period, iPad, iPadCapacity, iPadState, Room, Lesson
 
 
 def NextDayString(days, short=False):
@@ -30,7 +30,7 @@ class NewScheduleForm(Form):
 
 class NewiPadForm(Form):
     alias = StringField(u'编号')
-    serial = StringField(u'序列号', validators=[Required()])
+    serial = StringField(u'序列号', validators=[Required(message=u'请输入iPad序列号')])
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
@@ -43,5 +43,48 @@ class NewiPadForm(Form):
         self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id).all()]
         self.room.choices = [(room.id, room.name) for room in Room.query.order_by(Room.id).all()]
         self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id).all()]
+        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'Y-GRE']
+
+    def validate_serial(self, field):
+        if iPad.query.filter_by(serial=field.data).first():
+            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
+
+
+class EditiPadForm(Form):
+    alias = StringField(u'编号')
+    serial = StringField(u'序列号', validators=[Required()])
+    capacity = SelectField(u'容量', coerce=int)
+    room = SelectField(u'房间', coerce=int)
+    state = SelectField(u'状态', coerce=int)
+    vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
+    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, ipad, *args, **kwargs):
+        super(EditiPadForm, self).__init__(*args, **kwargs)
+        self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id).all()]
+        self.room.choices = [(room.id, room.name) for room in Room.query.order_by(Room.id).all()]
+        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id).all()]
+        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'Y-GRE']
+        self.ipad = ipad
+
+    def validate_serial(self, field):
+        if field.data != self.ipad.serial and iPad.query.filter_by(serial=field.data).first():
+            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
+
+
+class DeleteiPadForm(Form):
+    submit = SubmitField(u'提交')
+
+
+class FilteriPadForm(Form):
+    vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
+    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
+    submit = SubmitField(u'筛选')
+
+    def __init__(self, *args, **kwargs):
+        super(FilteriPadForm, self).__init__(*args, **kwargs)
         self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id).all() if lesson.type.name == u'Y-GRE']

@@ -5,10 +5,10 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm
+from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, User, Booking, Schedule, Period, iPad, Room
+from ..models import Permission, User, Booking, Schedule, Period, iPad, iPadContent, Room
 from ..decorators import admin_required, permission_required
 
 
@@ -320,26 +320,28 @@ def decrease_schedule_quota(id):
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
 
-@manage.route('/ipad')
+@manage.route('/ipad', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_IPAD)
 def ipad():
     form = NewiPadForm()
     if form.validate_on_submit():
-        # day = date(int(form.date.data[:4]), int(form.date.data[5:7]), int(form.date.data[8:]))
-        # for period_id in form.period.data:
-        #     schedule = Schedule.query.filter_by(date=day, period_id=period_id).first()
-        #     if schedule:
-        #         flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
-        #     else:
-        #         period = Period.query.filter_by(id=period_id).first()
-        #         if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
-        #             flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time))
-        #         else:
-        #             schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data)
-        #             db.session.add(schedule)
-        #             db.session.commit()
-        #             flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
+        alias = form.alias.data
+        serial = form.serial.data.upper()
+        capacity_id = form.capacity.data
+        room_id = form.room.data
+        state_id = form.state.data
+        ipad = iPad.query.filter_by(serial=serial).first()
+        if ipad:
+            flash(u'序列号为%s的iPad已存在' % serial)
+            return redirect(url_for('manage.ipad'))
+        ipad = iPad(serial=serial, alias=alias, capacity_id=capacity_id, room_id=room_id, state_id=state_id)
+        db.session.add(ipad)
+        db.session.commit()
+        for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
+            ipad.add_lesson(lesson_id)
+        db.session.commit()
+        flash(u'成功添加序列号为%s的iPad' % serial)
         return redirect(url_for('manage.ipad'))
     page = request.args.get('page', 1, type=int)
     show_all = True
@@ -363,7 +365,8 @@ def ipad():
             .filter(Room.name == u'1707')
     if show_others:
         query = iPad.query\
-            .filter_by(room_id=None)
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'无')
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
     return render_template('manage/ipad.html', form=form, ipads=ipads, show_all=show_all, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
@@ -415,3 +418,65 @@ def other_ipads():
     resp.set_cookie('show_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_others', '1', max_age=30*24*60*60)
     return resp
+
+
+@manage.route('/edit-ipad/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def edit_ipad(id):
+    ipad = iPad.query.get_or_404(id)
+    form = EditiPadForm(ipad=ipad)
+    if form.validate_on_submit():
+        ipad.alias = form.alias.data
+        ipad.serial = form.serial.data.upper()
+        ipad.capacity_id = form.capacity.data
+        ipad.room_id = form.room.data
+        ipad.state_id = form.state.data
+        db.session.add(ipad)
+        db.session.commit()
+        for pc in ipad.lessons_included:
+            ipad.remove_lesson(pc.lesson_id)
+        for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
+            ipad.add_lesson(lesson_id)
+        db.session.commit()
+        flash(u'iPad信息已更新')
+        return redirect(url_for('manage.ipad'))
+    form.alias.data = ipad.alias
+    form.serial.data = ipad.serial
+    form.capacity.data = ipad.capacity_id
+    form.room.data = ipad.room_id
+    form.state.data = ipad.state_id
+    form.vb_lessons.data = ipad.vb_lesson_ids_included
+    form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included
+    return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
+
+
+@manage.route('/delete-ipad/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def delete_ipad(id):
+    ipad = iPad.query.get_or_404(id)
+    form = DeleteiPadForm(ipad=ipad)
+    if form.validate_on_submit():
+        ipad_serial = ipad.serial
+        for pc in ipad.lessons_included:
+            ipad.remove_lesson(pc.lesson_id)
+        db.session.delete(ipad)
+        db.session.commit()
+        flash(u'已删除序列号为%s的iPad' % ipad_serial)
+        return redirect(url_for('manage.ipad'))
+    return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
+
+
+@manage.route('/filter-ipad', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def filter_ipad():
+    ipads = []
+    form = FilteriPadForm()
+    if form.validate_on_submit():
+        lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
+        if len(lesson_ids):
+            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=lesson_id).all()]) for lesson_id in lesson_ids])
+            ipads = [iPad.query.filter_by(id=ipad_id).first() for ipad_id in ipad_ids]
+    return render_template('manage/filter_ipad.html', form=form, ipads=ipads)

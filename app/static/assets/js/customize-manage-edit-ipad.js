@@ -1,4 +1,4 @@
-// customize-manage-ipad.js
+// customize-manage-edit-ipad.js
 
 $('select.dropdown')
   .dropdown()
@@ -19,7 +19,7 @@ $('.message .close')
 
 $(document)
     .ready(function() {
-        $('#new-ipad')
+        $('#edit-ipad')
             .form({
                 fields: {
                     alias: {
