@@ -28,53 +28,26 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="ui vertical stripe segment">
+<div id="schedules" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">新建预约时段</h3>
-                <form method="POST" class="ui big form">
-                    {{ form.hidden_tag() }}
-                    <div class="three fields">
-                        <div class="five wide field">
-                            {{ form.date.label() }}
-                            {{ form.date(class='ui dropdown') }}
-                        </div>
-                        <div class="nine wide field">
-                            {{ form.period.label() }}
-                            {{ form.period(class='ui search dropdown') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.quota.label() }}
-                            {{ form.quota(placeholder='0') }}
-                        </div>
-                    </div>
-                    <div class="field">
-                        <div class="ui toggle checkbox">
-                            {{ form.publish_now() }}
-                            {{ form.publish_now.label() }}
-                        </div>
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 id="schedules" class="header">时段信息</h3>
+                <h3 class="header">时段信息</h3>
                 <div class="ui tabular menu">
-                    {% if not show_out_of_date %}
-                    <a class="item active" href="{{ url_for('manage.up_to_date_schedule') }}#schedules">未过期时段</a>
-                    <a class="item" href="{{ url_for('manage.out_of_date_schedule') }}#schedules">已过期时段</a>
-                    {% else %}
-                    <a class="item" href="{{ url_for('manage.up_to_date_schedule') }}#schedules">未过期时段</a>
-                    <a class="item active" href="{{ url_for('manage.out_of_date_schedule') }}#schedules">已过期时段</a>
+                    {% if show_today %}
+                    <a class="item active" href="{{ url_for('manage.today_schedule') }}#schedules">当日时段</a>
+                    <a class="item" href="{{ url_for('manage.future_schedule') }}#schedules">未来时段</a>
+                    <a class="item" href="{{ url_for('manage.history_schedule') }}#schedules">历史时段</a>
+                    {% endif %}
+                    {% if show_future %}
+                    <a class="item" href="{{ url_for('manage.today_schedule') }}#schedules">当日时段</a>
+                    <a class="item active" href="{{ url_for('manage.future_schedule') }}#schedules">未来时段</a>
+                    <a class="item" href="{{ url_for('manage.history_schedule') }}#schedules">历史时段</a>
+                    {% endif %}
+                    {% if show_history %}
+                    <a class="item" href="{{ url_for('manage.today_schedule') }}#schedules">当日时段</a>
+                    <a class="item" href="{{ url_for('manage.future_schedule') }}#schedules">未来时段</a>
+                    <a class="item active" href="{{ url_for('manage.history_schedule') }}#schedules">历史时段</a>
                     {% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">
@@ -93,9 +66,20 @@
                         <tr>
                             <td>{{ moment(schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td>{{ schedule.period.type.name }}</td>
-                            <td>{{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}</td>
-                            <td {% if schedule.valid_bookings.count() >= schedule.quota %}class="negative"{% endif %}>
-                                {{ schedule.valid_bookings.count() }} / {{ schedule.quota }}
+                            <td>
+                                {% if schedule.unstarted %}
+                                <div class="ui teal label">{{ schedule.time_state }}</div>
+                                {% endif %}
+                                {% if schedule.started %}
+                                <div class="ui red label">{{ schedule.time_state }}</div>
+                                {% endif %}
+                                {% if schedule.ended %}
+                                <div class="ui label">{{ schedule.time_state }}</div>
+                                {% endif %}
+                                {{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}
+                            </td>
+                            <td {% if schedule.full %}class="negative"{% endif %}>
+                                {{ schedule.occupied_quota }} / {{ schedule.quota }}
                                 {% if schedule.out_of_date %}
                                 <div class="ui small icon buttons">
                                     <div class="ui disabled button"><i class="plus icon"></i></div>
@@ -132,6 +116,41 @@
                 {% if pagination %}
                 {{ macros.pagination_widget(pagination, 'manage.schedule') }}
                 {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">新建预约时段</h3>
+                <form method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="five wide field">
+                            {{ form.date.label() }}
+                            {{ form.date(class='ui dropdown') }}
+                        </div>
+                        <div class="nine wide field">
+                            {{ form.period.label() }}
+                            {{ form.period(class='ui search dropdown') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.quota.label() }}
+                            {{ form.quota(placeholder='0') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="ui toggle checkbox">
+                            {{ form.publish_now() }}
+                            {{ form.publish_now.label() }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
             </div>
         </div>
     </div>

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}iPad内容管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-ipad.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="tablet icon"></i> iPad内容管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div id="ipads" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">iPad内容</h3>
+                <div class="ui tabular menu">
+                    {% if show_all %}
+                    <a class="item active" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
+                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
+                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
+                    <a class="item" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    {% endif %}
+                    {% if show_1103 %}
+                    <a class="item" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
+                    <a class="item active" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
+                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
+                    <a class="item" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    {% endif %}
+                    {% if show_1707 %}
+                    <a class="item" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
+                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
+                    <a class="item active" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
+                    <a class="item" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    {% endif %}
+                    {% if show_others %}
+                    <a class="item" href="{{ url_for('manage.all_ipads') }}#ipads">全部</a>
+                    <a class="item" href="{{ url_for('manage.room_1103_ipads') }}#ipads">1103</a>
+                    <a class="item" href="{{ url_for('manage.room_1707_ipads') }}#ipads">1707</a>
+                    <a class="item active" href="{{ url_for('manage.other_ipads') }}#ipads">其它</a>
+                    {% endif %}
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>编号</th>
+                            <th>序列号</th>
+                            <th>VB内容</th>
+                            <th>Y-GRE内容</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ipad in ipads %}
+                        <tr>
+                            <td>{{ ipad.alias }}</td>
+                            <td><code>{{ ipad.serial }}</code></td>
+                            <td>
+                                {% for lesson in ipad.has_lessons %}
+                                {% if lesson.type.name == 'VB' %}
+                                <div class="ui teal label">{{ lesson.name }}</div>
+                                {% endif%}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for lesson in ipad.has_lessons %}
+                                {% if lesson.type.name == 'Y-GRE' %}
+                                <div class="ui red label">{{ lesson.name }}</div>
+                                {% endif%}
+                                {% endfor %}
+                            </td>
+                            <td>{{ ipad.state.name }}</td>
+                            <td>
+                                <a class="ui button" href="#"><i class="edit icon"></i> 编辑</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.ipad') }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">新增iPad</h3>
+                <form method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="three wide field">
+                            {{ form.alias.label() }}
+                            {{ form.alias(placeholder='编号') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.serial.label() }}
+                            {{ form.serial(placeholder='序列号') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.capacity.label() }}
+                            {{ form.capacity(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.room.label() }}
+                            {{ form.room(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.state.label() }}
+                            {{ form.state(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.vb_lessons.label() }}
+                            {{ form.vb_lessons(class='ui search dropdown') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.y_gre_lessons.label() }}
+                            {{ form.y_gre_lessons(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-ipad.js') }}"></script>
+{% endblock %}

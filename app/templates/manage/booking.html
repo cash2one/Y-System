@@ -28,11 +28,11 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="ui vertical stripe segment">
+<div id="bookings" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 id="bookings" class="header">预约记录</h3>
+                <h3 class="header">预约记录</h3>
                 <div class="ui tabular menu">
                     {% if show_today %}
                     <a class="item active" href="{{ url_for('manage.today_booking') }}#bookings">当日预约记录</a>
@@ -103,10 +103,10 @@
                                 <i class="delete icon"></i>
                                 {% endif %}
                                 {{ booking.state.name }}
-                                {% if booking.schedule.valid_bookings.count() < booking.schedule.quota %}
-                                <div class="ui label">{{ booking.schedule.valid_bookings.count() }} / {{ booking.schedule.quota }}</div>
+                                {% if booking.schedule.full %}
+                                <div class="ui red label">{{ booking.schedule.occupied_quota }} / {{ booking.schedule.quota }}</div>
                                 {% else %}
-                                <div class="ui red label">{{ booking.schedule.valid_bookings.count() }} / {{ booking.schedule.quota }}</div>
+                                <div class="ui label">{{ booking.schedule.occupied_quota }} / {{ booking.schedule.quota }}</div>
                                 {% endif %}
                             </td>
                             <td>{{ moment(booking.timestamp).format('YYYY-M-D H:mm:ss') }}</td>
@@ -117,17 +117,16 @@
                                     <div class="menu">
                                     {% if booking.schedule.unstarted %}
                                         {% if booking.valid %}
-                                        <a class="item" href="{{ url_for('manage.set_booking_state_canceled', user_id=booking.user_id, schedule_id=booking.schedule_id, ) }}"><i class="remove from calendar icon"></i> 取消</a>
                                         <a class="item" href="{{ url_for('manage.set_booking_state_canceled', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="remove from calendar icon"></i> 取消</a>
                                         {% endif %}
                                         {% if booking.waited %}
                                         <a class="item" href="{{ url_for('manage.set_booking_state_canceled', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="remove from calendar icon"></i> 取消</a>
                                         {% endif %}
                                         {% if booking.canceled %}
-                                        {% if booking.schedule.valid_bookings.count() < booking.schedule.quota %}
-                                        <a class="item" href="{{ url_for('manage.set_booking_state_valid', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="add to calendar icon"></i> 预约</a>
-                                        {% else %}
+                                        {% if booking.schedule.full %}
                                         <a class="item" href="{{ url_for('manage.set_booking_state_wait', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="wait icon"></i> 候选</a>
+                                        {% else %}
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_valid', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="add to calendar icon"></i> 预约</a>
                                         {% endif %}
                                         {% endif %}
                                     {% endif %}

@@ -1,13 +1,13 @@
 """empty message
 
-Revision ID: c22b0aea3fa0
+Revision ID: 41c1247899f8
 Revises: None
-Create Date: 2016-07-21 19:13:05.158231
+Create Date: 2016-07-24 15:24:25.506881
 
 """
 
 # revision identifiers, used by Alembic.
-revision = 'c22b0aea3fa0'
+revision = '41c1247899f8'
 down_revision = None
 
 from alembic import op
@@ -75,8 +75,8 @@ def upgrade():
     op.create_index(op.f('ix_courses_name'), 'courses', ['name'], unique=True)
     op.create_table('ipads',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('serial', sa.Unicode(length=12), nullable=True),
+    sa.Column('alias', sa.Unicode(length=64), nullable=True),
     sa.Column('capacity_id', sa.Integer(), nullable=True),
     sa.Column('room_id', sa.Integer(), nullable=True),
     sa.Column('state_id', sa.Integer(), nullable=True),
@@ -85,7 +85,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['state_id'], ['ipad_states.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_ipads_name'), 'ipads', ['name'], unique=True)
+    op.create_index(op.f('ix_ipads_alias'), 'ipads', ['alias'], unique=False)
     op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=True)
     op.create_table('lessons',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -207,14 +207,14 @@ def upgrade():
     sa.UniqueConstraint('previous_id')
     )
     op.create_table('bookings',
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('schedule_id', sa.Integer(), nullable=False),
     sa.Column('state_id', sa.Integer(), nullable=True),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['schedule_id'], ['schedules.id'], ),
     sa.ForeignKeyConstraint(['state_id'], ['booking_states.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id', 'user_id', 'schedule_id')
+    sa.PrimaryKeyConstraint('user_id', 'schedule_id')
     )
     op.create_table('punches',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -255,7 +255,7 @@ def downgrade():
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')
     op.drop_index(op.f('ix_ipads_serial'), table_name='ipads')
-    op.drop_index(op.f('ix_ipads_name'), table_name='ipads')
+    op.drop_index(op.f('ix_ipads_alias'), table_name='ipads')
     op.drop_table('ipads')
     op.drop_index(op.f('ix_courses_name'), table_name='courses')
     op.drop_table('courses')

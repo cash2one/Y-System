@@ -44,15 +44,26 @@
                     </thead>
                     <tbody>
                         {% for schedule in schedules %}
-                        {% if schedule.unstarted %}
                         <tr>
                             <td>{{ moment(schedule.date).format('YYYY-M-D ddd') }}</td>
-                            <td>{{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}</td>
-                            {% if schedule.valid_bookings.count() < schedule.quota %}
-                            <td>{{ schedule.valid_bookings.count() }} / {{ schedule.quota }}</td>
+                            <td>
+                                {% if schedule.unstarted %}
+                                <div class="ui teal label">{{ schedule.time_state }}</div>
+                                {% endif %}
+                                {% if schedule.started %}
+                                <div class="ui red label">{{ schedule.time_state }}</div>
+                                {% endif %}
+                                {% if schedule.ended %}
+                                <div class="ui label">{{ schedule.time_state }}</div>
+                                {% endif %}
+                                {{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}
+                            </td>
+                            {% if schedule.full %}
+                            <td class="negative">{{ schedule.occupied_quota }} / {{ schedule.quota }}</td>
                             {% else %}
-                            <td class="negative">{{ schedule.valid_bookings.count() }} / {{ schedule.quota }}</td>
+                            <td>{{ schedule.occupied_quota }} / {{ schedule.quota }}</td>
                             {% endif %}
+                            {% if schedule.unstarted %}
                             {% if schedule.is_booked_by(current_user) %}
                             {% if current_user.booking_success(schedule) %}
                             <td class="positive">{{ current_user.booking_state(schedule).name }}</td>
@@ -61,16 +72,34 @@
                             {% endif %}
                             <td><a class="ui negative button" href="{{ url_for('book.unbook_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="remove from calendar icon"></i> 取消</a></td>
                             {% else %}
-                            {% if schedule.valid_bookings.count() < schedule.quota %}
+                            {% if schedule.full %}
                             <td>未预约</td>
-                            <td><a class="ui primary button" href="{{ url_for('book.book_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="add to calendar icon"></i> 预约</a></td>
+                            <td><a class="ui teal button" href="{{ url_for('book.wait_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="wait icon"></i> 排队</a></td>
                             {% else %}
                             <td>未预约</td>
-                            <td><a class="ui button" href="{{ url_for('book.wait_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="wait icon"></i> 排队</a></td>
+                            <td><a class="ui primary button" href="{{ url_for('book.book_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="add to calendar icon"></i> 预约</a></td>
+                            {% endif %}
+                            {% endif %}
+                            {% endif %}
+                            {% if schedule.started %}
+                            {% if schedule.is_booked_by(current_user) %}
+                            <td>{{ current_user.booking_state(schedule).name }}</td>
+                            <td><a class="ui negative button" href="{{ url_for('book.miss_y_gre', schedule_id=schedule.id, page=pagination.page) }}"><i class="remove from calendar icon"></i> 取消</a></td>
+                            {% else %}
+                            <td>未预约</td>
+                            <td><div class="ui disabled button"><i class="ban icon"></i> 无</div></td>
+                            {% endif %}
+                            {% endif %}
+                            {% if schedule.ended %}
+                            {% if schedule.is_booked_by(current_user) %}
+                            <td>{{ current_user.booking_state(schedule).name }}</td>
+                            <td><div class="ui disabled button"><i class="ban icon"></i> 无</div></td>
+                            {% else %}
+                            <td>未预约</td>
+                            <td><div class="ui disabled button"><i class="ban icon"></i> 无</div></td>
                             {% endif %}
                             {% endif %}
                         </tr>
-                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>

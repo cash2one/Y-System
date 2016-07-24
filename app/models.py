@@ -490,6 +490,12 @@ class User(UserMixin, db.Model):
             db.session.add(wb)
             return User.query.filter_by(id=wb.user_id).first()
 
+    def miss(self, schedule):
+        b =self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        if b:
+            b.state_id = BookingState.query.filter_by(name=u'爽约').first().id
+            db.session.add(b)
+
     def booked(self, schedule):
         return (self.booked_schedules.filter_by(schedule_id=schedule.id).first() is not None) and\
             (Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first().canceled is False)
@@ -778,33 +784,39 @@ class Schedule(db.Model):
 
     @property
     def unstarted(self):
-        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
-        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
-        return datetime.now() < start_time
+        return datetime.now() < datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
 
     @property
     def started(self):
-        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
-        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
-        return start_time <= datetime.now() and datetime.now() <= end_time
+        return datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) <= datetime.now() and datetime.now() <= datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
 
     @property
     def ended(self):
-        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
-        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
-        return end_time < datetime.now()
+        return datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute) < datetime.now()
 
     def is_booked_by(self, user):
         return (self.booked_users.filter_by(user_id=user.id).first() is not None) and\
             (Booking.query.filter_by(user_id=user.id, schedule_id=self.id).first().canceled == False)
 
     @property
-    def valid_bookings(self):
-        return Booking.query\
+    def occupied_quota(self):
+        valid_bookings = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Schedule.id == self.id)\
-            .filter(BookingState.name != u'取消')
+            .filter(BookingState.name == u'预约')\
+            .count()
+        waited_bookings = Booking.query\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Schedule.id == self.id)\
+            .filter(BookingState.name == u'排队')\
+            .count()
+        return valid_bookings + waited_bookings
+
+    @property
+    def full(self):
+        return self.occupied_quota >= self.quota
 
     def __repr__(self):
         return '<Schedule %r>' % self.date
@@ -898,7 +910,7 @@ class iPadContent(db.Model):
         lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in table.row_values(0) if Lesson.query.filter_by(name=value).first()]
         ipad_contents = [table.row_values(row) for row in range(table.nrows) if row >= 1]
         for PC in ipad_contents:
-            P_id = iPad.query.filter_by(name=PC[0]).first().id
+            P_id = iPad.query.filter_by(alias=PC[0]).first().id
             for L_exist, L_id in zip(PC[1:], lesson_ids):
                 if L_exist:
                     if iPadContent.query.filter_by(ipad_id=P_id, lesson_id=L_id).first() is None:
@@ -914,8 +926,8 @@ class iPadContent(db.Model):
 class iPad(db.Model):
     __tablename__ = 'ipads'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
     serial = db.Column(db.Unicode(12), unique=True, index=True)
+    alias = db.Column(db.Unicode(64), index=True)
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
@@ -934,6 +946,14 @@ class iPad(db.Model):
         cascade='all, delete-orphan'
     )
 
+    @property
+    def has_lessons(self):
+        return Lesson.query\
+            .join(iPadContent, iPadContent.lesson_id == Lesson.id)\
+            .join(iPad, iPad.id == iPadContent.ipad_id)\
+            .filter(iPad.id == self.id)\
+            .order_by(Lesson.id.asc())
+
     @staticmethod
     def insert_ipads():
         import xlrd
@@ -943,21 +963,21 @@ class iPad(db.Model):
         for P in ipads:
             if isinstance(P[3], float):
                 P[3] = int(P[3])
-            ipad = iPad.query.filter_by(name=P[0]).first()
+            ipad = iPad.query.filter_by(serial=P[1]).first()
             if ipad is None:
                 ipad = iPad(
-                    name=P[0],
                     serial=P[1],
+                    alias=P[0],
                     capacity_id=iPadCapacity.query.filter_by(name=P[2]).first().id,
                     room_id=Room.query.filter_by(name=str(P[3])).first().id,
                     state_id=iPadState.query.filter_by(name=P[4]).first().id
                 )
-                print u'导入iPad信息', P[0], P[1], P[2], P[3], P[4]
+                print u'导入iPad信息', P[1], P[0], P[2], P[3], P[4]
                 db.session.add(ipad)
         db.session.commit()
 
     def __repr__(self):
-        return '<iPad %s, %s>' % (self.name, self.serial)
+        return '<iPad %s, %s>' % (self.alias, self.serial)
 
 
 class AdjacentLesson(db.Model):

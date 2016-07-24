@@ -29,8 +29,9 @@ def vb():
         .join(CourseType, CourseType.id == Period.type_id)\
         .filter(CourseType.name == u'VB')\
         .filter(Schedule.available == True)\
+        .filter(Schedule.date >= date.today())\
         .order_by(Schedule.date.asc())\
-        .order_by(Period.name.asc())
+        .order_by(Period.id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     return render_template('book/vb.html', schedules=schedules, pagination=pagination)
@@ -47,8 +48,11 @@ def book_vb(schedule_id):
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.vb', page=request.args.get('page')))
-    if schedule.out_of_date or schedule.today:
-        flash(u'所选时段已不能预约')
+    if not schedule.unstarted:
+        flash(u'所选时段已不接受预约')
+        return redirect(url_for('book.vb', page=request.args.get('page')))
+    if schedule.full:
+        flash(u'该时段名额已经约满')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约')
@@ -64,6 +68,7 @@ def book_vb(schedule_id):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     current_user.book(schedule, u'预约')
+    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule)
     flash(u'预约成功！')
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
@@ -79,8 +84,11 @@ def wait_vb(schedule_id):
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.vb', page=request.args.get('page')))
-    if schedule.out_of_date or schedule.today:
-        flash(u'所选时段已不能预约')
+    if not schedule.unstarted:
+        flash(u'所选时段已不接受预约')
+        return redirect(url_for('book.vb', page=request.args.get('page')))
+    if not schedule.full:
+        flash(u'该时段仍有名额，请直接预约')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约')
@@ -111,15 +119,37 @@ def unbook_vb(schedule_id):
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.vb', page=request.args.get('page')))
-    if schedule.out_of_date or schedule.today:
-        flash(u'所选时段已不能预约')
+    if not schedule.unstarted:
+        flash(u'所选时段已不能自行取消')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     candidate = current_user.unbook(schedule)
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s课程' % schedule.period.alias, 'book/mail/booking', user=candidate, schedule=schedule)
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule)
+    flash(u'取消成功！')
+    return redirect(url_for('book.vb', page=request.args.get('page')))
+
+
+@book.route('/vb/miss/<schedule_id>')
+@login_required
+@permission_required(Permission.BOOK_VB)
+def miss_vb(schedule_id):
+    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    if schedule is None:
+        flash(u'无效的预约时段')
+        return redirect(url_for('book.vb', page=request.args.get('page')))
+    if not schedule.available:
+        flash(u'所选时段尚未开放')
+        return redirect(url_for('book.vb', page=request.args.get('page')))
+    if not schedule.started:
+        flash(u'所选时段已不能自行取消')
+        return redirect(url_for('book.vb', page=request.args.get('page')))
+    if not current_user.booked(schedule):
+        flash(u'您目前尚未预约该时段')
+        return redirect(url_for('book.vb', page=request.args.get('page')))
+    current_user.miss(schedule)
     flash(u'取消成功！')
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
@@ -136,7 +166,7 @@ def y_gre():
         .filter(Schedule.available == True)\
         .filter(Schedule.date >= date.today())\
         .order_by(Schedule.date.asc())\
-        .order_by(Period.name.asc())
+        .order_by(Period.id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     return render_template('book/y_gre.html', schedules=schedules, pagination=pagination)
@@ -153,8 +183,11 @@ def book_y_gre(schedule_id):
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
-    if schedule.out_of_date or schedule.today:
-        flash(u'所选时段已不能预约')
+    if not schedule.unstarted:
+        flash(u'所选时段已不接受预约')
+        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    if schedule.full:
+        flash(u'该时段名额已经约满')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约')
@@ -167,6 +200,7 @@ def book_y_gre(schedule_id):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~' % same_day_bookings)
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
     current_user.book(schedule, u'预约')
+    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule)
     flash(u'预约成功！')
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 
@@ -182,8 +216,11 @@ def wait_y_gre(schedule_id):
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
-    if schedule.out_of_date or schedule.today:
-        flash(u'所选时段已不能预约')
+    if not schedule.unstarted:
+        flash(u'所选时段已不接受预约')
+        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    if not schedule.full:
+        flash(u'该时段仍有名额，请直接预约')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约')
@@ -211,16 +248,36 @@ def unbook_y_gre(schedule_id):
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
-    if schedule.out_of_date or schedule.today:
-        flash(u'所选时段已不能预约')
+    if not schedule.unstarted:
+        flash(u'所选时段已不能自行取消')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
     candidate = current_user.unbook(schedule)
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s课程' % schedule.period.alias, 'book/mail/booking', user=candidate, schedule=schedule)
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule)
     flash(u'取消成功！')
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 
 
+@book.route('/y_gre/miss/<schedule_id>')
+@login_required
+@permission_required(Permission.BOOK_Y_GRE)
+def miss_y_gre(schedule_id):
+    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    if schedule is None:
+        flash(u'无效的预约时段')
+        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    if not schedule.available:
+        flash(u'所选时段尚未开放')
+        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    if not schedule.started:
+        flash(u'所选时段已不能自行取消')
+        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    if not current_user.booked(schedule):
+        flash(u'您目前尚未预约该时段')
+        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    current_user.miss(schedule)
+    flash(u'取消成功！')
+    return redirect(url_for('book.y_gre', page=request.args.get('page')))
