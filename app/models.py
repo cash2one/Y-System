@@ -280,28 +280,28 @@ class Booking(db.Model):
         return self.state.name == u'取消'
 
 
-class RentalType(db.Model):
-    __tablename__ = 'rental_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    rentals = db.relationship('Rental', backref='type', lazy='dynamic')
+# class RentalType(db.Model):
+#     __tablename__ = 'rental_types'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     rentals = db.relationship('Rental', backref='type', lazy='dynamic')
 
-    @staticmethod
-    def insert_rental_types():
-        rental_types = [
-            (u'借出', ),
-            (u'回收', ),
-        ]
-        for RT in rental_types:
-            rental_type = RentalType.query.filter_by(name=RT[0]).first()
-            if rental_type is None:
-                rental_type = RentalType(name=RT[0])
-                db.session.add(rental_type)
-                print u'导入借阅类型信息', RT[0]
-        db.session.commit()
+#     @staticmethod
+#     def insert_rental_types():
+#         rental_types = [
+#             (u'借出', ),
+#             (u'回收', ),
+#         ]
+#         for RT in rental_types:
+#             rental_type = RentalType.query.filter_by(name=RT[0]).first()
+#             if rental_type is None:
+#                 rental_type = RentalType(name=RT[0])
+#                 db.session.add(rental_type)
+#                 print u'导入借阅类型信息', RT[0]
+#         db.session.commit()
 
-    def __repr__(self):
-        return '<Rental Type %s>' % self.name
+#     def __repr__(self):
+#         return '<Rental Type %s>' % self.name
 
 
 class Rental(db.Model):
@@ -310,9 +310,12 @@ class Rental(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
     # booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'))
-    type_id = db.Column(db.Integer, db.ForeignKey('rental_types.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # type_id = db.Column(db.Integer, db.ForeignKey('rental_types.id'))
+    returned = db.Column(db.Boolean, default=False)
+    rent_time = db.Column(db.DateTime, default=datetime.utcnow)
+    rent_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    return_time = db.Column(db.DateTime, default=datetime.utcnow)
+    return_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Rental %r, %r>' % (self.user_id, self.ipad_id)

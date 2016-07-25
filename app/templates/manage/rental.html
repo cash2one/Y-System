@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}iPad借阅管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="exchange icon"></i> iPad借阅管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div id="users" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">iPad借阅列表</h3>
+                <div class="ui tabular menu">
+                    {% if show_today_rental %}
+                    <a class="item active" href="{{ url_for('manage.rental_today') }}">当日借阅记录</a>
+                    <a class="item" href="{{ url_for('manage.rental_history') }}">历史借阅记录</a>
+                    {% endif %}
+                    {% if show_history_rental %}
+                    <a class="item" href="{{ url_for('manage.rental_today') }}">当日借阅记录</a>
+                    <a class="item active" href="{{ url_for('manage.rental_history') }}">历史借阅记录</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-rental.js') }}"></script>
+{% endblock %}

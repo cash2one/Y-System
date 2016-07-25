@@ -742,7 +742,7 @@ def auth_admin():
                 Role.name == u'志愿者',
                 Role.name == u'管理员'
             ))\
-            .order_by(User.last_seen.desc())
+            .order_by(Role.id.desc())
     if show_auth_users_admin:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
@@ -809,3 +809,12 @@ def edit_auth_admin(id):
     if user.y_gre_course:
         form.y_gre_course.data = user.y_gre_course.id
     return render_template('manage/edit_auth_admin.html', form=form, user=user)
+
+
+@manage.route('/rental')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental():
+    return render_template('manage/rental.html')
+
+
