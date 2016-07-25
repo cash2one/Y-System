@@ -68,7 +68,8 @@ def book_vb(schedule_id):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     current_user.book(schedule, u'预约')
-    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule)
+    booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
+    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！')
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
@@ -127,7 +128,8 @@ def unbook_vb(schedule_id):
         return redirect(url_for('book.vb', page=request.args.get('page')))
     candidate = current_user.unbook(schedule)
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule)
+        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
     flash(u'取消成功！')
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
@@ -200,7 +202,8 @@ def book_y_gre(schedule_id):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~' % same_day_bookings)
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
     current_user.book(schedule, u'预约')
-    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule)
+    booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
+    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！')
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 
@@ -256,7 +259,8 @@ def unbook_y_gre(schedule_id):
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
     candidate = current_user.unbook(schedule)
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule)
+        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
     flash(u'取消成功！')
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 

@@ -24,7 +24,7 @@ class NewScheduleForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(NewScheduleForm, self).__init__(*args, **kwargs)
-        self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(10)]
+        self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(30)]
         self.period.choices = [(period.id, period.alias) for period in Period.query.order_by(Period.id.asc()).all()]
 
 

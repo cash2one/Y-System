@@ -36,7 +36,6 @@ def deploy():
     from flask_migrate import upgrade
     from app.models import Role
     from app.models import BookingState
-    from app.models import RentalType
     from app.models import iPadCapacity
     from app.models import iPadState
     from app.models import Room
@@ -59,7 +58,6 @@ def deploy():
     # insert initial data
     Role.insert_roles()
     BookingState.insert_booking_states()
-    RentalType.insert_rental_types()
     iPadCapacity.insert_ipad_capacities()
     iPadState.insert_ipad_states()
     Room.insert_rooms()

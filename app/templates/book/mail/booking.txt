@@ -10,6 +10,8 @@
 
 课程：{{ schedule.period.type.name }}
 
+预约码：{{ qrcode(booking.booking_code) }}
+
 此致
 
 敬礼！

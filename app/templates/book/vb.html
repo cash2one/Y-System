@@ -66,7 +66,13 @@
                             {% if schedule.unstarted %}
                             {% if schedule.is_booked_by(current_user) %}
                             {% if current_user.booking_success(schedule) %}
-                            <td class="positive">{{ current_user.booking_state(schedule).name }}</td>
+                            <td class="positive">
+                                {{ current_user.booking_state(schedule).name }}
+                                <a id="booking-qr-code-click-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}"><i class="large qrcode icon"></i></a>
+                                <div id="booking-qr-code-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}" class="ui flowing popup top left transition hidden">
+                                    <img class="ui small image" src="{{ qrcode(current_user.booking(schedule).booking_code) }}">
+                                </div>
+                            </td>
                             {% else %}
                             <td class="warning">{{ current_user.booking_state(schedule).name }}</td>
                             {% endif %}
@@ -116,4 +122,16 @@
 {{ super() }}
 <script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/customize-book-vb.js') }}"></script>
+<script>
+    {% for schedule in schedules %}
+    {% if current_user.booking_success(schedule) %}
+    $('#booking-qr-code-click-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}')
+        .popup({
+            popup : $('#booking-qr-code-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}'),
+            on    : 'click'
+        })
+    ;
+    {% endif %}
+    {% endfor %}
+</script>
 {% endblock %}

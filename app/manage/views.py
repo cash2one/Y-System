@@ -9,7 +9,7 @@ from . import manage
 from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, EditAuthForm, EditAuthFormAdmin
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room, Course
+from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room, Course, Rental
 from ..decorators import admin_required, permission_required
 
 
@@ -101,7 +101,7 @@ def set_booking_state_valid(user_id, schedule_id):
         return redirect(url_for('manage.booking', page=request.args.get('page')))
     booking.set_state(u'预约')
     db.session.commit()
-    send_email(booking.user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=booking.user, schedule=booking.schedule)
+    send_email(booking.user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=booking.user, schedule=booking.schedule, booking=booking)
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -163,7 +163,7 @@ def set_booking_state_canceled(user_id, schedule_id):
     candidate = booking.set_state(u'取消')
     db.session.commit()
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=booking.schedule)
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=candidate, schedule=booking.schedule, booking=booking)
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -297,7 +297,8 @@ def increase_schedule_quota(id):
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     candidate = schedule.increase_quota()
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule)
+        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
     flash(u'所选时段名额+1')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -815,6 +816,59 @@ def edit_auth_admin(id):
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
 def rental():
-    return render_template('manage/rental.html')
+    page = request.args.get('page', 1, type=int)
+    show_today_rental = True
+    show_history_rental = False
+    if current_user.is_authenticated:
+        show_today_rental = bool(request.cookies.get('show_today_rental', '1'))
+        show_history_rental = bool(request.cookies.get('show_history_rental', ''))
+    if show_today_rental:
+        query = Rental.query\
+            .filter(Rental.date == date.today())\
+            .order_by(Rental.rent_time.desc())
+    if show_history_rental:
+        query = Rental.query\
+            .filter(Rental.date < date.today())\
+            .order_by(Rental.date.desc())\
+            .order_by(Rental.return_time.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    rentals = pagination.items
+    return render_template('manage/rental.html', rentals=rentals, show_today_rental=show_today_rental, show_history_rental=show_history_rental, pagination=pagination)
+
+
+@manage.route('/rental/today')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_today():
+    resp = make_response(redirect(url_for('manage.rental')))
+    resp.set_cookie('show_today_rental', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rental', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/rental/history')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_history():
+    resp = make_response(redirect(url_for('manage.rental')))
+    resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rental', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/rental/rent')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_rent():
+    return render_template('manage/rental_rent.html')
+
+
+@manage.route('/rental/return')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_return():
+    return render_template('manage/rental_return.html')
+
+
 
 

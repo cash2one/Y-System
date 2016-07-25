@@ -22,27 +22,39 @@
     </div>
     {% endif %}
     {% endwith %}
-    <h1 class="ui inverted header"><i class="archive icon"></i> {{ current_user.name }}的研修档案</h1>
+    <h1 class="ui inverted header"><i class="archive icon"></i> {{ user.name }}的研修档案</h1>
     <div class="ui inverted relaxed horizontal list">
         <div class="item">
             <i class="group icon"></i>
             <div class="content">
                 <div class="header">用户组</div>
-                <div class="description">{{ current_user.role.name }}</div>
+                <div class="description">{{ user.role.name }}</div>
             </div>
         </div>
         <div class="item">
             <i class="student icon"></i>
             <div class="content">
                 <div class="header">VB班</div>
-                <div class="description">{{ current_user.vb_course.name }}</div>
+                <div class="description">
+                    {% if user.vb_course %}
+                    {{ user.vb_course.name }}
+                    {% else %}
+                    无
+                    {% endif %}
+                </div>
             </div>
         </div>
         <div class="item">
             <i class="student icon"></i>
             <div class="content">
                 <div class="header">Y-GRE班</div>
-                <div class="description">{{ current_user.y_gre_course.name }}</div>
+                <div class="description">
+                    {% if user.y_gre_course %}
+                    {{ user.y_gre_course.name }}
+                    {% else %}
+                    无
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -56,42 +68,42 @@
             <div class="column">
                 <div class="ui statistic">
                     <div class="label">即将开始</div>
-                    <div class="value">{{ current_user.valid_bookings.count() }}</div>
+                    <div class="value">{{ user.valid_bookings.count() }}</div>
                     <div class="label">次</div>
                 </div>
             </div>
             <div class="column">
                 <div class="ui statistic">
                     <div class="label">排队中</div>
-                    <div class="value">{{ current_user.wait_bookings.count() }}</div>
+                    <div class="value">{{ user.wait_bookings.count() }}</div>
                     <div class="label">次</div>
                 </div>
             </div>
             <div class="column">
                 <div class="ui statistic">
                     <div class="label">赴约</div>
-                    <div class="value">{{ current_user.keep_bookings.count() }}</div>
+                    <div class="value">{{ user.keep_bookings.count() }}</div>
                     <div class="label">次</div>
                 </div>
             </div>
             <div class="column">
                 <div class="ui statistic">
                     <div class="label">爽约</div>
-                    <div class="value">{{ current_user.miss_bookings.count() }}</div>
+                    <div class="value">{{ user.miss_bookings.count() }}</div>
                     <div class="label">次</div>
                 </div>
             </div>
             <div class="column">
                 <div class="ui statistic">
                     <div class="label">取消</div>
-                    <div class="value">{{ current_user.cancel_bookings.count() }}</div>
+                    <div class="value">{{ user.cancel_bookings.count() }}</div>
                     <div class="label">次</div>
                 </div>
             </div>
             <div class="column">
                 <div class="ui statistic">
                     <div class="label">迟到</div>
-                    <div class="value">{{ current_user.late_bookings.count() }}</div>
+                    <div class="value">{{ user.late_bookings.count() }}</div>
                     <div class="label">次</div>
                 </div>
             </div>

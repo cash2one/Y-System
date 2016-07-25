@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, date, time
+from sqlalchemy import or_
 import hashlib
+import base64
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
@@ -228,6 +230,11 @@ class Booking(db.Model):
     schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), primary_key=True)
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    booking_code = db.Column(db.String(64), unique=True, index=True)
+
+    def __init__(self, **kwargs):
+        super(Booking, self).__init__(**kwargs)
+        self.booking_code = base64.urlsafe_b64encode(hashlib.pbkdf2_hmac('sha256', 'booking_hash' + str(self.user_id) + str(self.schedule_id) + str(self.timestamp), current_app.config['SECRET_KEY'], 100000, dklen=48))
 
     def ping(self):
         self.timestamp = datetime.utcnow()
@@ -280,41 +287,17 @@ class Booking(db.Model):
         return self.state.name == u'取消'
 
 
-# class RentalType(db.Model):
-#     __tablename__ = 'rental_types'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     rentals = db.relationship('Rental', backref='type', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_rental_types():
-#         rental_types = [
-#             (u'借出', ),
-#             (u'回收', ),
-#         ]
-#         for RT in rental_types:
-#             rental_type = RentalType.query.filter_by(name=RT[0]).first()
-#             if rental_type is None:
-#                 rental_type = RentalType(name=RT[0])
-#                 db.session.add(rental_type)
-#                 print u'导入借阅类型信息', RT[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<Rental Type %s>' % self.name
-
-
 class Rental(db.Model):
     __tablename__ = 'rentals'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
+    date = db.Column(db.Date, default=date.today())
     # booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'))
-    # type_id = db.Column(db.Integer, db.ForeignKey('rental_types.id'))
     returned = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
     rent_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    return_time = db.Column(db.DateTime, default=datetime.utcnow)
+    return_time = db.Column(db.DateTime)
     return_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
@@ -324,7 +307,7 @@ class Rental(db.Model):
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(64), unique=True, index=True)
+    email = db.Column(db.Unicode(64), unique=True, index=True)
     name = db.Column(db.Unicode(64), index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
@@ -349,6 +332,20 @@ class User(UserMixin, db.Model):
         'Rental',
         foreign_keys=[Rental.user_id],
         backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    manage_ipads_rent = db.relationship(
+        'Rental',
+        foreign_keys=[Rental.user_id],
+        backref=db.backref('rent_agent', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    manage_ipads_return = db.relationship(
+        'Rental',
+        foreign_keys=[Rental.user_id],
+        backref=db.backref('return_agent', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
@@ -511,6 +508,9 @@ class User(UserMixin, db.Model):
     def booked(self, schedule):
         return (self.booked_schedules.filter_by(schedule_id=schedule.id).first() is not None) and\
             (Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first().canceled is False)
+
+    def booking(self, schedule):
+        return Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first()
 
     def booking_state(self, schedule):
         return BookingState.query\
@@ -812,19 +812,17 @@ class Schedule(db.Model):
 
     @property
     def occupied_quota(self):
-        valid_bookings = Booking.query\
+        return Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Schedule.id == self.id)\
-            .filter(BookingState.name == u'预约')\
+            .filter(or_(
+                BookingState.name == u'预约',
+                BookingState.name == u'排队',
+                BookingState.name == u'赴约',
+                BookingState.name == u'迟到'
+            ))\
             .count()
-        waited_bookings = Booking.query\
-            .join(Schedule, Schedule.id == Booking.schedule_id)\
-            .join(BookingState, BookingState.id == Booking.state_id)\
-            .filter(Schedule.id == self.id)\
-            .filter(BookingState.name == u'排队')\
-            .count()
-        return valid_bookings + waited_bookings
 
     @property
     def full(self):

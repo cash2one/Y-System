@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block title %}iPad借阅管理{% endblock %}
 
@@ -27,21 +28,73 @@
 {% endblock %}
 
 {% block page_content %}
+<div id="rentals" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="center aligned row">
+            <div class="column">
+                <div class="ui massive buttons">
+                    <a class="ui primary labeled icon button" href="{{ url_for('manage.rental_rent') }}"><i class="upload icon"></i> 借出iPad</a>
+                    <div class="or" data-text="或"></div>
+                    <a class="ui positive right labeled icon button" href="{{ url_for('manage.rental_return') }}">回收iPad <i class="download icon"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="users" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">iPad借阅列表</h3>
+                <h3 class="header">iPad借阅记录</h3>
                 <div class="ui tabular menu">
                     {% if show_today_rental %}
-                    <a class="item active" href="{{ url_for('manage.rental_today') }}">当日借阅记录</a>
-                    <a class="item" href="{{ url_for('manage.rental_history') }}">历史借阅记录</a>
+                    <a class="item active" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item" href="{{ url_for('manage.rental_history') }}">历史记录</a>
                     {% endif %}
                     {% if show_history_rental %}
-                    <a class="item" href="{{ url_for('manage.rental_today') }}">当日借阅记录</a>
-                    <a class="item active" href="{{ url_for('manage.rental_history') }}">历史借阅记录</a>
+                    <a class="item" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item active" href="{{ url_for('manage.rental_history') }}">历史记录</a>
                     {% endif %}
                 </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>iPad</th>
+                            <th>借出时间</th>
+                            <th>借出经办人</th>
+                            <th>归还时间</th>
+                            <th>归还经办人</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rental in rentals %}
+                        <tr>
+                            <td>{{ rental.user.name }}</td>
+                            <td>
+                                {{ rental.ipad.alias }}
+                                [<code>{{ rental.ipad.serial }}</code>]
+                            </td>
+                            <td>{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>{{ rental.rent_agent.user.name }}</td>
+                            <td>{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>{{ rental.return_agent.user.name }}</td>
+                            <td>
+                                {% if rental.returned %}
+                                归还
+                                {% else %}
+                                借出
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.rental') }}
+                {% endif %}
             </div>
         </div>
     </div>
