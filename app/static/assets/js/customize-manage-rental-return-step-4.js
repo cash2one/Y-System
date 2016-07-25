@@ -1,4 +1,4 @@
-// customize-manage-rental-rent.js
+// customize-manage-rental-return-step-4.js
 
 $('select.dropdown')
   .dropdown()

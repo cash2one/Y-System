@@ -88,7 +88,7 @@
                                 {% else %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button" href="{{ url_for('manage.increase_schedule_quota', id=schedule.id, page=pagination.page) }}"><i class="plus icon"></i></a>
-                                    {% if schedule.quota <= 0 %}
+                                    {% if schedule.quota <= 0 or schedule.quota <= schedule.occupied_quota %}
                                     <div class="ui disabled button"><i class="minus icon"></i></div>
                                     {% else %}
                                     <a class="ui button" href="{{ url_for('manage.decrease_schedule_quota', id=schedule.id, page=pagination.page) }}"><i class="minus icon"></i></a>

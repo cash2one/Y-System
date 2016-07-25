@@ -289,7 +289,7 @@ class Booking(db.Model):
 
 class Rental(db.Model):
     __tablename__ = 'rentals'
-    id = db.Column(db.Integer, primary_key=True)
+    # id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
     date = db.Column(db.Date, default=date.today())
@@ -624,6 +624,33 @@ class User(UserMixin, db.Model):
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'取消')
 
+    @property
+    def fitted_ipads(self):
+        return iPad.query\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .join(Punch, Punch.lesson_id == iPadContent.lesson_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(Punch.timestamp == self.last_punch.timestamp)\
+            .filter(or_(
+                iPadState.name == u'待机',
+                iPadState.name == u'候补',
+            ))\
+            .order_by(iPad.id.asc())
+
+    @property
+    def has_unreturned_ipads(self):
+        return Rental.query.filter_by(user_id=self.id, returned=False).count() > 0
+
+
+    @property
+    def last_punch(self):
+        return Punch.query\
+            .filter_by(user_id=self.id)\
+            .order_by(Punch.timestamp.desc())\
+            .first()
+
+
     @staticmethod
     def insert_admin():
         admin = User.query.filter_by(email=current_app.config['YSYS_ADMIN']).first()
@@ -956,6 +983,10 @@ class iPad(db.Model):
         cascade='all, delete-orphan'
     )
 
+    def set_state(self, state_name):
+        self.state_id = iPadState.query.filter_by(name=state_name).first().name
+        db.session.add(self)
+
     def add_lesson(self, lesson_id):
         if not self.has_lesson(lesson_id):
             pc = iPadContent(ipad_id=self.id, lesson_id=lesson_id)
@@ -1030,7 +1061,7 @@ class AdjacentLesson(db.Model):
     @staticmethod
     def insert_adjacent_lessons():
         adjacent_lessons = [
-            (u'VB总论', u'L1', ),
+            (u'总论', u'L1', ),
             (u'L1', u'L2', ),
             (u'L2', u'L3', ),
             (u'L3', u'L4', ),
@@ -1095,7 +1126,7 @@ class Lesson(db.Model):
     @staticmethod
     def insert_lessons():
         lessons = [
-            (u'VB总论', u'VB', ),
+            (u'总论', u'VB', ),
             (u'L1', u'VB', ),
             (u'L2', u'VB', ),
             (u'L3', u'VB', ),
@@ -1278,22 +1309,22 @@ class Section(db.Model):
     @staticmethod
     def insert_sections():
         sections = [
-            (u'0.11', u'VB总论', ),
-            (u'0.12', u'VB总论', ),
-            (u'0.13', u'VB总论', ),
-            (u'0.14', u'VB总论', ),
-            (u'0.21', u'VB总论', ),
-            (u'0.22', u'VB总论', ),
-            (u'0.23', u'VB总论', ),
-            (u'0.24', u'VB总论', ),
-            (u'0.31', u'VB总论', ),
-            (u'0.32', u'VB总论', ),
-            (u'0.33', u'VB总论', ),
-            (u'0.34', u'VB总论', ),
-            (u'0.41', u'VB总论', ),
-            (u'0.42', u'VB总论', ),
-            (u'0.43', u'VB总论', ),
-            (u'0.44', u'VB总论', ),
+            (u'0.11', u'总论', ),
+            (u'0.12', u'总论', ),
+            (u'0.13', u'总论', ),
+            (u'0.14', u'总论', ),
+            (u'0.21', u'总论', ),
+            (u'0.22', u'总论', ),
+            (u'0.23', u'总论', ),
+            (u'0.24', u'总论', ),
+            (u'0.31', u'总论', ),
+            (u'0.32', u'总论', ),
+            (u'0.33', u'总论', ),
+            (u'0.34', u'总论', ),
+            (u'0.41', u'总论', ),
+            (u'0.42', u'总论', ),
+            (u'0.43', u'总论', ),
+            (u'0.44', u'总论', ),
             (u'1.1', u'L1', ),
             (u'1.2', u'L1', ),
             (u'1.3', u'L1', ),
@@ -1398,11 +1429,11 @@ class Section(db.Model):
 
 class Punch(db.Model):
     __tablename__ = 'punches'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    rental_id = db.Column(db.Integer, db.ForeignKey('rentals.id'))
-    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
-    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'))
+    # id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    # rental_id = db.Column(db.Integer, db.ForeignKey('rentals.id'))
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

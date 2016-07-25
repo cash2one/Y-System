@@ -5,7 +5,7 @@ from flask_wtf import Form
 from wtforms import StringField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Course
+from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course
 
 
 def NextDayString(days, short=False):
@@ -182,3 +182,73 @@ class EditAuthFormAdmin(Form):
     def validate_email(self, field):
         if field.data != self.user.email and User.query.filter_by(email=field.data).first():
             raise ValidationError(u'%s已经被注册' % field.data)
+
+
+class BookingCodeForm(Form):
+    booking_code = StringField(u'预约码', validators=[Required(message=u'请输入预约码')])
+    submit = SubmitField(u'下一步')
+
+
+class RentiPadForm(Form):
+    ipad = SelectField(u'可用iPad', coerce=int)
+    submit = SubmitField(u'下一步')
+
+    def __init__(self, user, *args, **kwargs):
+        super(RentiPadForm, self).__init__(*args, **kwargs)
+        self.ipad.choices = [(ipad.id, u'%s %s %s：%s' % (ipad.alias, ipad.state.name, ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in ipad.has_lessons]))) for ipad in user.fitted_ipads if ipad.state.name in [u'待机', u'候补']]
+
+
+class RentiPadFormAlt(Form):
+    email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    submit = SubmitField(u'下一步')
+
+
+class ConfirmiPadForm(Form):
+    root = BooleanField(u'引导式访问状态正常')
+    battery = BooleanField(u'电量充足')
+    volume = BooleanField(u'音量已经复位')
+    brightness = BooleanField(u'亮度已经复位')
+    playback_speed = BooleanField(u'播放速度已经复位')
+    show_menu = BooleanField(u'画面停留在目录状态')
+    clean = BooleanField(u'屏幕已清洁')
+    serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
+    submit = SubmitField(u'确认并提交')
+
+
+class iPadSerialForm(Form):
+    root = BooleanField(u'引导式访问状态正常')
+    battery = BooleanField(u'电量充足')
+    volume = BooleanField(u'音量已经复位')
+    brightness = BooleanField(u'亮度已经复位')
+    playback_speed = BooleanField(u'播放速度已经复位')
+    show_menu = BooleanField(u'画面停留在目录状态')
+    clean = BooleanField(u'屏幕已清洁')
+    serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
+    submit = SubmitField(u'下一步')
+
+
+class PunchLessonForm(Form):
+    lesson = SelectField(u'课程进度', coerce=int)
+    submit = SubmitField(u'下一步')
+
+    def __init__(self, user, *args, **kwargs):
+        super(PunchLessonForm, self).__init__(*args, **kwargs)
+        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.lesson_id]
+
+
+class PunchSectionForm(Form):
+    section = SelectField(u'视频进度', coerce=int)
+    submit = SubmitField(u'下一步')
+
+    def __init__(self, user, lesson, *args, **kwargs):
+        super(PunchSectionForm, self).__init__(*args, **kwargs)
+        self.section.choices = [(section.id, u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
+
+
+class ConfirmPunchForm(Form):
+    submit = SubmitField(u'确认并提交')
+
+
+
+
+

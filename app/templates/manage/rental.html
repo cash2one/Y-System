@@ -33,9 +33,9 @@
         <div class="center aligned row">
             <div class="column">
                 <div class="ui massive buttons">
-                    <a class="ui primary labeled icon button" href="{{ url_for('manage.rental_rent') }}"><i class="upload icon"></i> 借出iPad</a>
+                    <a class="ui primary labeled icon button" href="{{ url_for('manage.rental_rent_step_1') }}"><i class="upload icon"></i> 借出iPad</a>
                     <div class="or" data-text="或"></div>
-                    <a class="ui positive right labeled icon button" href="{{ url_for('manage.rental_return') }}">回收iPad <i class="download icon"></i></a>
+                    <a class="ui positive right labeled icon button" href="{{ url_for('manage.rental_return_step_1') }}">回收iPad <i class="download icon"></i></a>
                 </div>
             </div>
         </div>
@@ -78,16 +78,14 @@
                                 [<code>{{ rental.ipad.serial }}</code>]
                             </td>
                             <td>{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</td>
-                            <td>{{ rental.rent_agent.user.name }}</td>
+                            <td>{{ rental.rent_agent.name }}</td>
                             <td>{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</td>
-                            <td>{{ rental.return_agent.user.name }}</td>
-                            <td>
-                                {% if rental.returned %}
-                                归还
-                                {% else %}
-                                借出
-                                {% endif %}
-                            </td>
+                            <td>{{ rental.return_agent.name }}</td>
+                            {% if rental.returned %}
+                            <td class="positive">归还</td>
+                            {% else %}
+                            <td class="negative">借出</td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

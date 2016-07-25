@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}回收iPad{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-return-step-2.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="download icon"></i> 回收iPad</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <div class="ui two column grid">
+                    <div class="column">
+                        <div class="ui fluid vertical steps">
+                            <div class="completed step">
+                                <i class="barcode icon"></i>
+                                <div class="content">
+                                    <div class="title">已回收iPad</div>
+                                </div>
+                            </div>
+                            <div class="active step">
+                                <i class="student icon"></i>
+                                <div class="content">
+                                    <div class="title">选择课程进度信息</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="record icon"></i>
+                                <div class="content">
+                                    <div class="title">选择视频进度信息</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="save icon"></i>
+                                <div class="content">
+                                    <div class="title">确认并保存</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="ui big list">
+                            <div class="item">{{ user.name }}（{{ user.email }}）</div>
+                            <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
+                        </div>
+                        <form id="make-punch" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="field">
+                                {{ form.lesson.label() }}
+                                {{ form.lesson(class='ui search dropdown') }}
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                            <a class="ui button" href="{{ url_for('manage.rental') }}">取消</a>
+                            <div class="ui error message"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-return-step-2.js') }}"></script>
+{% endblock %}

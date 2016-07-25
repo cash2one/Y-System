@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}回收iPad{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-return-step-1.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="download icon"></i> 回收iPad</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <div class="ui two column grid">
+                    <div class="column">
+                        <div class="ui fluid vertical steps">
+                            <div class="active step">
+                                <i class="barcode icon"></i>
+                                <div class="content">
+                                    <div class="title">扫码确认</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="student icon"></i>
+                                <div class="content">
+                                    <div class="title">选择课程进度信息</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="record icon"></i>
+                                <div class="content">
+                                    <div class="title">选择视频进度信息</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="save icon"></i>
+                                <div class="content">
+                                    <div class="title">确认并保存</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <form id="find-ipad" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="field">
+                                {{ form.serial.label() }}
+                                {{ form.serial(placeholder='iPad序列号') }}
+                            </div>
+                            <div class="two fields">
+                                <div class="field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.root() }}
+                                        {{ form.root.label() }}
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.battery() }}
+                                        {{ form.battery.label() }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="two fields">
+                                <div class="field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.volume() }}
+                                        {{ form.volume.label() }}
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.brightness() }}
+                                        {{ form.brightness.label() }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="two fields">
+                                <div class="field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.playback_speed() }}
+                                        {{ form.playback_speed.label() }}
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.show_menu() }}
+                                        {{ form.show_menu.label() }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <div class="ui toggle checkbox">
+                                    {{ form.clean() }}
+                                    {{ form.clean.label() }}
+                                </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                            <a class="ui button" href="{{ url_for('manage.rental') }}">取消</a>
+                            <div class="ui error message"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-return-step-1.js') }}"></script>
+{% endblock %}
