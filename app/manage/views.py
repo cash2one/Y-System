@@ -9,7 +9,7 @@ from . import manage
 from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room, Course, Rental, Lesson, Section, Punch
+from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadState, iPadContent, Room, Course, Rental, Lesson, Section, Punch
 from ..decorators import admin_required, permission_required
 
 
@@ -350,15 +350,27 @@ def ipad():
         db.session.commit()
         flash(u'成功添加序列号为%s的iPad' % serial)
         return redirect(url_for('manage.ipad'))
+    maintain_num = iPad.query\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadState.name == u'维护')\
+        .count()
+    charge_num = iPad.query\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadState.name == u'充电')\
+        .count()
     page = request.args.get('page', 1, type=int)
     show_all = True
     show_1103 = False
     show_1707 = False
+    show_maintain = False
+    show_charge = False
     show_others = False
     if current_user.is_authenticated:
         show_all = bool(request.cookies.get('show_all', '1'))
         show_1103 = bool(request.cookies.get('show_1103', ''))
         show_1707 = bool(request.cookies.get('show_1707', ''))
+        show_maintain = bool(request.cookies.get('show_maintain', ''))
+        show_charge = bool(request.cookies.get('show_charge', ''))
         show_others = bool(request.cookies.get('show_others', ''))
     if show_all:
         query = iPad.query
@@ -370,11 +382,19 @@ def ipad():
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')
+    if show_maintain:
+        query = iPad.query\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadState.name == u'维护')
+    if show_charge:
+        query = iPad.query\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadState.name == u'充电')
     if show_others:
         query = iPad.query.filter_by(room_id=None)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    return render_template('manage/ipad.html', form=form, ipads=ipads, show_all=show_all, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
+    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_1103=show_1103, show_1707=show_1707, show_maintain=show_maintain, show_charge=show_charge, show_others=show_others, pagination=pagination)
 
 
 @manage.route('/ipad/all')
@@ -385,6 +405,8 @@ def all_ipads():
     resp.set_cookie('show_all', '1', max_age=30*24*60*60)
     resp.set_cookie('show_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
     resp.set_cookie('show_others', '', max_age=30*24*60*60)
     return resp
 
@@ -397,6 +419,8 @@ def room_1103_ipads():
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
     resp.set_cookie('show_1103', '1', max_age=30*24*60*60)
     resp.set_cookie('show_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
     resp.set_cookie('show_others', '', max_age=30*24*60*60)
     return resp
 
@@ -409,6 +433,36 @@ def room_1707_ipads():
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
     resp.set_cookie('show_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/maintain')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def maintain_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_maintain', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/charge')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def charge_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_charge', '1', max_age=30*24*60*60)
     resp.set_cookie('show_others', '', max_age=30*24*60*60)
     return resp
 
@@ -421,6 +475,8 @@ def other_ipads():
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
     resp.set_cookie('show_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
     resp.set_cookie('show_others', '1', max_age=30*24*60*60)
     return resp
 
@@ -1026,11 +1082,17 @@ def rental_return_step_1():
         if rental is None:
             flash(u'没有序列号为%s的iPad的借阅记录' % serial)
             return redirect(url_for('manage.rental_return_step_1'))
-        rental.returned = True
-        rental.return_time = datetime.utcnow()
-        rental.return_agent_id = current_user.id
-        db.session.add(rental)
-        ipad.set_state(u'待机')
+        if not form.root.data:
+            rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
+            db.session.commit()
+            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name))
+            return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
+        if not form.battery.data:
+            rental.set_returned(return_agent_id=current_user.id, ipad_state=u'充电')
+            db.session.commit()
+            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name))
+            return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
+        rental.set_returned(return_agent_id=current_user.id)
         db.session.commit()
         flash(u'已回收序列号为%s的iPad' % serial)
         return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))

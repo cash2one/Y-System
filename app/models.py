@@ -298,6 +298,15 @@ class Rental(db.Model):
     return_time = db.Column(db.DateTime)
     return_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def set_returned(self, return_agent_id, ipad_state=u'待机'):
+        self.returned = True
+        self.return_time = datetime.utcnow()
+        self.return_agent_id = return_agent_id
+        db.session.add(self)
+        ipad = iPad.query.filter_by(id=self.ipad_id).first()
+        ipad.set_state(ipad_state)
+
+
     def __repr__(self):
         return '<Rental %r, %r>' % (self.user_id, self.ipad_id)
 
@@ -896,6 +905,7 @@ class iPadState(db.Model):
             (u'借出', ),
             (u'候补', ),
             (u'维护', ),
+            (u'充电', ),
             (u'退役', ),
         ]
         for PS in ipad_states:
@@ -984,7 +994,7 @@ class iPad(db.Model):
     )
 
     def set_state(self, state_name):
-        self.state_id = iPadState.query.filter_by(name=state_name).first().name
+        self.state_id = iPadState.query.filter_by(name=state_name).first().id
         db.session.add(self)
 
     def add_lesson(self, lesson_id):

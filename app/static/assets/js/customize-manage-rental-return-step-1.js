@@ -22,24 +22,6 @@ $(document)
         $('#find-ipad')
             .form({
                 fields: {
-                    root: {
-                        identifier  : 'root',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认引导式访问状态正常'
-                            }
-                        ]
-                    },
-                    battery: {
-                        identifier  : 'battery',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认电量充足'
-                            }
-                        ]
-                    },
                     volume: {
                         identifier  : 'volume',
                         rules: [
