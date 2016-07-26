@@ -41,6 +41,7 @@
                             <th>用户组</th>
                             <th>VB班</th>
                             <th>Y-GRE班</th>
+                            <th>进度</th>
                             <th>激活时间</th>
                             <th>上次登录</th>
                             {% if current_user.can(Permission.MANAGE_USER) %}
@@ -63,6 +64,7 @@
                             <td>{{ user.role.name }}</td>
                             <td>{{ user.vb_course.name }}</td>
                             <td>{{ user.y_gre_course.name }}</td>
+                            <td>{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</td>
                             <td>{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</td>
                             <td>{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</td>
                             {% if current_user.can(Permission.MANAGE_USER) %}
