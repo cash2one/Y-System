@@ -6,7 +6,7 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room, Course, Rental, Lesson, Section, Punch
@@ -478,7 +478,7 @@ def delete_ipad(id):
 
 @manage.route('/filter-ipad', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(Permission.MANAGE)
 def filter_ipad():
     ipads = []
     form = FilteriPadForm()
@@ -632,6 +632,32 @@ def edit_user(id):
     if user.y_gre_course:
         form.y_gre_course.data = user.y_gre_course.id
     return render_template('manage/edit_user.html', form=form, user=user)
+
+
+@manage.route('/find-user', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE)
+def find_user():
+    users = []
+    form = FindUserForm()
+    if form.validate_on_submit():
+        name_or_email = form.name_or_email.data
+        if name_or_email:
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name == name_or_email,
+                    User.email == name_or_email
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限'
+                ))\
+                .order_by(User.last_seen.desc())
+    return render_template('manage/find_user.html', form=form, users=users)
 
 
 @manage.route('/auth')
@@ -921,6 +947,7 @@ def rental_rent_step_3(user_id, ipad_id):
             return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=ipad_id))
         rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
         db.session.add(rental)
+        ipad.set_state(u'借出')
         db.session.commit()
         flash(u'iPad借出信息登记成功')
         return redirect(url_for('manage.rental'))
@@ -1003,6 +1030,7 @@ def rental_return_step_1():
         rental.return_time = datetime.utcnow()
         rental.return_agent_id = current_user.id
         db.session.add(rental)
+        ipad.set_state(u'待机')
         db.session.commit()
         flash(u'已回收序列号为%s的iPad' % serial)
         return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))

@@ -144,6 +144,11 @@ class EditUserForm(Form):
             raise ValidationError(u'%s已经被注册' % field.data)
 
 
+class FindUserForm(Form):
+    name_or_email = StringField(u'用户姓名或者邮箱', validators=[Required(message=u'请输入用户姓名或者邮箱'), Length(1, 64)])
+    submit = SubmitField(u'检索')
+
+
 class EditAuthForm(Form):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])

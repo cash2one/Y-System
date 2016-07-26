@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}回收iPad{% endblock %}
+{% block title %}更新进度{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -22,7 +22,7 @@
     </div>
     {% endif %}
     {% endwith %}
-    <h1 class="ui inverted header"><i class="download icon"></i> 回收iPad</h1>
+    <h1 class="ui inverted header"><i class="refresh icon"></i> 更新进度</h1>
 </div>
 {% endblock %}
 
@@ -71,8 +71,8 @@
                                 {{ form.section.label() }}
                                 {{ form.section(class='ui search dropdown') }}
                             </div>
+                            <a class="ui button" href="{{ url_for('manage.rental_return_step_2', user_id=user.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
-                            <a class="ui button" href="{{ url_for('manage.rental') }}">取消</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>
