@@ -198,7 +198,7 @@ class RentiPadForm(Form):
         self.ipad.choices = [(ipad.id, u'%s %s %s：%s' % (ipad.alias, ipad.state.name, ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in ipad.has_lessons]))) for ipad in user.fitted_ipads if ipad.state.name in [u'待机', u'候补']]
 
 
-class RentiPadFormAlt(Form):
+class RentalEmailForm(Form):
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'下一步')
 

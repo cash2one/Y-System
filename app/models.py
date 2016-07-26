@@ -1429,9 +1429,7 @@ class Section(db.Model):
 
 class Punch(db.Model):
     __tablename__ = 'punches'
-    # id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    # rental_id = db.Column(db.Integer, db.ForeignKey('rentals.id'))
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

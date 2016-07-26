@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}借出iPad{% endblock %}
+{% block title %}回收iPad{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-rent-step-2.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-return-step-4.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
@@ -22,7 +22,7 @@
     </div>
     {% endif %}
     {% endwith %}
-    <h1 class="ui inverted header"><i class="upload icon"></i> 借出iPad</h1>
+    <h1 class="ui inverted header"><i class="download icon"></i> 回收iPad</h1>
 </div>
 {% endblock %}
 
@@ -40,16 +40,22 @@
                                     <div class="title">邮箱有效</div>
                                 </div>
                             </div>
-                            <div class="active step">
-                                <i class="tablet icon"></i>
+                            <div class="completed step">
+                                <i class="student icon"></i>
                                 <div class="content">
-                                    <div class="title">选取iPad</div>
+                                    <div class="title">课程进度信息：{{ lesson.type.name }} - {{ lesson.name }}</div>
                                 </div>
                             </div>
-                            <div class="disabled step">
-                                <i class="barcode icon"></i>
+                            <div class="completed step">
+                                <i class="record icon"></i>
                                 <div class="content">
-                                    <div class="title">扫码确认</div>
+                                    <div class="title">视频进度信息：{{ lesson.name }} - {{ section.name }}</div>
+                                </div>
+                            </div>
+                            <div class="active step">
+                                <i class="save icon"></i>
+                                <div class="content">
+                                    <div class="title">确认并保存</div>
                                 </div>
                             </div>
                         </div>
@@ -57,16 +63,13 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">进度：{{user.last_punch.section.lesson.type.name}} - {{user.last_punch.section.lesson.name}} - {{ user.last_punch.section.name }}</div>
+                            <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
+                            <div class="item">更新进度：{{ lesson.type.name }} - {{ lesson.name }} - {{ section.name }}</div>
                         </div>
-                        <form id="select-ipad" method="POST" class="ui form">
+                        <form id="punch-section" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <div class="field">
-                                {{ form.ipad.label() }}
-                                {{ form.ipad(class='ui search dropdown') }}
-                            </div>
-                            <a class="ui button" href="{{ url_for('manage.rental_rent_step_1_alt') }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
+                            <a class="ui button" href="{{ url_for('manage.rental') }}">取消</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>
@@ -80,5 +83,5 @@
 {% block customized_scripts %}
 {{ super() }}
 <script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-rent-step-2.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-return-step-4.js') }}"></script>
 {% endblock %}

@@ -117,6 +117,7 @@
                             </div>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button" href="{{ url_for('manage.rental') }}">取消</a>
+                            <a href="{{ url_for('manage.rental_return_step_1_alt') }}">只更新进度？</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>

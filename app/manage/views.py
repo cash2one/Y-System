@@ -6,7 +6,7 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentiPadFormAlt, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadContent, Room, Course, Rental, Lesson, Section, Punch
@@ -931,7 +931,7 @@ def rental_rent_step_3(user_id, ipad_id):
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_rent_step_1_alt():
-    form = RentiPadFormAlt()
+    form = RentalEmailForm()
     if form.validate_on_submit():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
@@ -1049,3 +1049,63 @@ def rental_return_step_4(user_id, lesson_id, section_id):
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_return_step_4.html', user=user, lesson=lesson, section=section, form=form)
+
+
+@manage.route('/rental/return/step-1-alt', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_return_step_1_alt():
+    form = RentalEmailForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            flash(u'邮箱不存在')
+            return redirect(url_for('manage.rental_return_step_1_alt'))
+        return redirect(url_for('manage.rental_return_step_2_alt', user_id=user.id))
+    return render_template('manage/rental_return_step_1_alt.html', form=form)
+
+
+@manage.route('/rental/return/step-2-alt/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_return_step_2_alt(user_id):
+    user = User.query.get_or_404(user_id)
+    form = PunchLessonForm(user=user)
+    if form.validate_on_submit():
+        lesson_id = form.lesson.data
+        return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, lesson_id=lesson_id))
+    return render_template('manage/rental_return_step_2_alt.html', user=user, form=form)
+
+
+@manage.route('/rental/return/step-3-alt/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_return_step_3_alt(user_id, lesson_id):
+    user = User.query.get_or_404(user_id)
+    lesson = Lesson.query.get_or_404(lesson_id)
+    form = PunchSectionForm(user=user, lesson=lesson)
+    if form.validate_on_submit():
+        section_id = form.section.data
+        return redirect(url_for('manage.rental_return_step_4_alt', user_id=user_id, lesson_id=lesson_id, section_id=section_id))
+    return render_template('manage/rental_return_step_3_alt.html', user=user, lesson=lesson, form=form)
+
+
+@manage.route('/rental/return/step-4-alt/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_return_step_4_alt(user_id, lesson_id, section_id):
+    user = User.query.get_or_404(user_id)
+    lesson = Lesson.query.get_or_404(lesson_id)
+    section = Section.query.get_or_404(section_id)
+    form = ConfirmPunchForm()
+    if form.validate_on_submit():
+        punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
+        db.session.add(punch)
+        db.session.commit()
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
+        return redirect(url_for('manage.rental'))
+    return render_template('manage/rental_return_step_4_alt.html', user=user, lesson=lesson, section=section, form=form)
+
+
+
