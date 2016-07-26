@@ -289,11 +289,9 @@ class Booking(db.Model):
 
 class Rental(db.Model):
     __tablename__ = 'rentals'
-    # id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
     date = db.Column(db.Date, default=date.today())
-    # booking_id = db.Column(db.Integer, db.ForeignKey('bookings.id'))
     returned = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
     rent_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -376,6 +374,8 @@ class User(UserMixin, db.Model):
             return False
         self.confirmed = True
         db.session.add(self)
+        initial_punch = Punch(user_id=self.id, lesson_id=1, section_id=1)
+        db.session.add(initial_punch)
         return True
 
     def generate_reset_token(self, expiration=3600):
