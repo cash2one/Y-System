@@ -53,7 +53,7 @@ def deploy():
     from app.models import Period
 
     # migrate database to latest revision
-    # upgrade()
+    upgrade()
 
     # insert initial data
     Role.insert_roles()
