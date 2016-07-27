@@ -141,6 +141,8 @@ class Activation(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     vb_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     @property
     def activation_code(self):
@@ -357,6 +359,7 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     punches = db.relationship('Punch', backref='user', lazy='dynamic')
+    invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
 
     @property
     def password(self):

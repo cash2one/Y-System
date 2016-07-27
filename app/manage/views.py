@@ -561,7 +561,7 @@ def user():
         y_gre_course_id = form.y_gre_course.data
         if y_gre_course_id == 0:
             y_gre_course_id = None
-        activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id)
+        activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id, inviter_id=current_user.id)
         db.session.add(activation)
         db.session.commit()
         flash(u'%s用户：%s添加成功' % (activation.role.name, activation.name))
@@ -593,7 +593,7 @@ def user():
             Role.name == u'Y-GRE VBx2',
             Role.name == u'Y-GRE A权限'
         ))\
-        .order_by(Activation.id.desc())\
+        .order_by(Activation.timestamp.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     activations = pagination_activations.items
     return render_template('manage/user.html', users=users, activations=activations, form=form, show_users=show_users, show_activations=show_activations, pagination_users=pagination_users, pagination_activations=pagination_activations)
