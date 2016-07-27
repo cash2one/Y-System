@@ -44,7 +44,7 @@ def profile():
         .limit(10)
     query = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
-        .filter(Schedule.date > date.today())\
+        # .filter(Schedule.date > date.today())\
         .filter(Booking.user_id == current_user.id)\
         .order_by(Schedule.date.desc())\
         .order_by(Schedule.period_id.asc())
@@ -65,7 +65,7 @@ def profile_user(user_id):
         .limit(10)
     query = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
-        .filter(Schedule.date > date.today())\
+        # .filter(Schedule.date > date.today())\
         .filter(Booking.user_id == user.id)\
         .order_by(Schedule.date.asc())\
         .order_by(Schedule.period_id.asc())
