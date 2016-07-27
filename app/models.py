@@ -230,7 +230,7 @@ class Booking(db.Model):
     schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), primary_key=True)
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    booking_code = db.Column(db.String(128), unique=True, index=True)
+    booking_code = db.Column(db.String(64), unique=True, index=True)
 
     def ping(self):
         self.timestamp = datetime.utcnow()
@@ -481,7 +481,7 @@ class User(UserMixin, db.Model):
                 b.state_id = BookingState.query.filter_by(name=state_name).first().id
                 b.ping()
             else:
-                booking_code = base64.urlsafe_b64encode(hashlib.pbkdf2_hmac('sha256', 'booking_hash' + str(self.id) + str(schedule.id) + str(datetime.utcnow), current_app.config['SECRET_KEY'], 100000, dklen=96))
+                booking_code = base64.urlsafe_b64encode(hashlib.pbkdf2_hmac('sha256', 'booking_hash' + str(self.id) + str(schedule.id) + str(datetime.utcnow), current_app.config['SECRET_KEY'], 100000, dklen=48))
                 b = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first(), booking_code=booking_code)
             db.session.add(b)
 
