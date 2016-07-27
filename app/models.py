@@ -230,11 +230,11 @@ class Booking(db.Model):
     schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), primary_key=True)
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    booking_code = db.Column(db.String(64), unique=True, index=True)
+    booking_code = db.Column(db.String(128), unique=True, index=True)
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
-        self.booking_code = base64.urlsafe_b64encode(hashlib.pbkdf2_hmac('sha256', 'booking_hash' + str(self.user_id) + str(self.schedule_id) + str(self.timestamp), current_app.config['SECRET_KEY'], 100000, dklen=48))
+        self.booking_code = str(self.user_id) + '-' + str(self.schedule_id) + '-' + str(self.timestamp) + '-' + base64.urlsafe_b64encode(hashlib.pbkdf2_hmac('sha256', 'booking_hash' + str(self.user_id) + str(self.schedule_id) + str(self.timestamp), current_app.config['SECRET_KEY'], 100000, dklen=48))
 
     def ping(self):
         self.timestamp = datetime.utcnow()
