@@ -4,7 +4,6 @@ from os import urandom
 from datetime import datetime, date, time
 from sqlalchemy import or_
 import hashlib
-import base64
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
