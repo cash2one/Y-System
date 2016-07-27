@@ -36,7 +36,6 @@ class DevelopmentConfig(Config):
 
 
 class BetaConfig(Config):
-    DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'ysys-beta.sqlite')
 
