@@ -4,10 +4,6 @@ $('select.dropdown')
   .dropdown()
 ;
 
-$('table')
-    .tablesort()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)

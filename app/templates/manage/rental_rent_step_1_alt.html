@@ -4,7 +4,7 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-rent-step-1-alt.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-rent-step-1.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
@@ -40,13 +40,13 @@
                                     <div class="title">输入邮箱查询用户</div>
                                 </div>
                             </div>
-                            <div class="step">
+                            <div class="disabled step">
                                 <i class="tablet icon"></i>
                                 <div class="content">
                                     <div class="title">选取iPad</div>
                                 </div>
                             </div>
-                            <div class="step">
+                            <div class="disabled step">
                                 <i class="barcode icon"></i>
                                 <div class="content">
                                     <div class="title">扫码确认</div>
@@ -87,6 +87,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/customize-manage-rental-rent-step-1-alt.js') }}"></script>
 {% endblock %}

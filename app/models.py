@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from os import urandom
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from sqlalchemy import or_
 import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -837,9 +837,15 @@ class Schedule(db.Model):
     def unstarted(self):
         return datetime.now() < datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
 
+    def unstarted_n_min(self, n_min):
+        return datetime.now() < datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) + timedelta(minutes=n_min)
+
     @property
     def started(self):
         return datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) <= datetime.now() and datetime.now() <= datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
+
+    def started_n_min(self, n_min):
+        return datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) + timedelta(minutes=n_min) <= datetime.now() and datetime.now() <= datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
 
     @property
     def ended(self):

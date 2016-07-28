@@ -149,6 +149,24 @@ class FindUserForm(Form):
     submit = SubmitField(u'检索')
 
 
+class EditPunchLessonForm(Form):
+    lesson = SelectField(u'课程进度', coerce=int)
+    submit = SubmitField(u'下一步')
+
+    def __init__(self, *args, **kwargs):
+        super(EditPunchLessonForm, self).__init__(*args, **kwargs)
+        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+
+
+class EditPunchSectionForm(Form):
+    section = SelectField(u'视频进度', coerce=int)
+    submit = SubmitField(u'下一步')
+
+    def __init__(self, lesson, *args, **kwargs):
+        super(EditPunchSectionForm, self).__init__(*args, **kwargs)
+        self.section.choices = [(section.id, u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
+
+
 class EditAuthForm(Form):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])

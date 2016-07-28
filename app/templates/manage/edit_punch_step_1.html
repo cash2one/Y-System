@@ -4,7 +4,7 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-return-step-3.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-punch-step-1.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
@@ -34,19 +34,13 @@
                 <div class="ui two column grid">
                     <div class="column">
                         <div class="ui fluid vertical steps">
-                            <div class="completed step">
-                                <i class="barcode icon"></i>
-                                <div class="content">
-                                    <div class="title">已回收iPad</div>
-                                </div>
-                            </div>
-                            <div class="completed step">
+                            <div class="active step">
                                 <i class="student icon"></i>
                                 <div class="content">
-                                    <div class="title">课程进度信息：{{ lesson.type.name }} - {{ lesson.name }}</div>
+                                    <div class="title">选择课程进度信息</div>
                                 </div>
                             </div>
-                            <div class="active step">
+                            <div class="disabled step">
                                 <i class="record icon"></i>
                                 <div class="content">
                                     <div class="title">选择视频进度信息</div>
@@ -65,13 +59,13 @@
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
                             <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
                         </div>
-                        <form id="punch-section" method="POST" class="ui form">
+                        <form id="make-punch" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="field">
-                                {{ form.section.label() }}
-                                {{ form.section(class='ui search dropdown') }}
+                                {{ form.lesson.label() }}
+                                {{ form.lesson(class='ui search dropdown') }}
                             </div>
-                            <a class="ui button" href="{{ url_for('manage.rental_return_step_2', user_id=user.id) }}">上一步</a>
+                            <a class="ui button" href="{{ url_for('manage.find_user') }}">取消</a>
                             {{ form.submit(class='ui primary button') }}
                             <div class="ui error message"></div>
                         </form>
@@ -85,5 +79,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-return-step-3.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-punch-step-1.js') }}"></script>
 {% endblock %}

@@ -1,4 +1,4 @@
-// customize-manage-rental-return-step-3.js
+// customize-manage-edit-punch-step-2.js
 
 $('select.dropdown')
   .dropdown()

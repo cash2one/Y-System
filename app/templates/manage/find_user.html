@@ -64,7 +64,12 @@
                             <td>{{ user.role.name }}</td>
                             <td>{{ user.vb_course.name }}</td>
                             <td>{{ user.y_gre_course.name }}</td>
-                            <td>{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</td>
+                            <td>
+                                {{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}
+                                {% if current_user.can(Permission.MANAGE_USER) %}
+                                <a class="ui mini icon button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id) }}"><i class="edit icon"></i></a>
+                                {% endif %}
+                            </td>
                             <td>{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</td>
                             <td>{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</td>
                             {% if current_user.can(Permission.MANAGE_USER) %}

@@ -4,7 +4,7 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-return-step-3.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-punch-step-2.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
@@ -34,12 +34,6 @@
                 <div class="ui two column grid">
                     <div class="column">
                         <div class="ui fluid vertical steps">
-                            <div class="completed step">
-                                <i class="barcode icon"></i>
-                                <div class="content">
-                                    <div class="title">已回收iPad</div>
-                                </div>
-                            </div>
                             <div class="completed step">
                                 <i class="student icon"></i>
                                 <div class="content">
@@ -71,7 +65,7 @@
                                 {{ form.section.label() }}
                                 {{ form.section(class='ui search dropdown') }}
                             </div>
-                            <a class="ui button" href="{{ url_for('manage.rental_return_step_2', user_id=user.id) }}">上一步</a>
+                            <a class="ui button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <div class="ui error message"></div>
                         </form>
@@ -85,5 +79,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-return-step-3.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-punch-step-2.js') }}"></script>
 {% endblock %}

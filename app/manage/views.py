@@ -6,7 +6,7 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadState, iPadContent, Room, Course, Rental, Lesson, Section, Punch
@@ -690,6 +690,60 @@ def edit_user(id):
     return render_template('manage/edit_user.html', form=form, user=user)
 
 
+@manage.route('/edit-punch/step-1/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def edit_punch_step_1(user_id):
+    user = User.query.get_or_404(user_id)
+    form = EditPunchLessonForm()
+    if form.validate_on_submit():
+        lesson_id = form.lesson.data
+        return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=lesson_id))
+    form.lesson.data = user.last_punch.lesson_id
+    return render_template('manage/edit_punch_step_1.html', user=user, form=form)
+
+
+@manage.route('/edit-punch/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def edit_punch_step_2(user_id, lesson_id):
+    user = User.query.get_or_404(user_id)
+    lesson = Lesson.query.get_or_404(lesson_id)
+    form = EditPunchSectionForm(lesson=lesson)
+    if form.validate_on_submit():
+        section_id = form.section.data
+        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, lesson_id=lesson_id, section_id=section_id))
+    return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form)
+
+
+@manage.route('/edit-punch/step-3/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def edit_punch_step_3(user_id, lesson_id, section_id):
+    user = User.query.get_or_404(user_id)
+    lesson = Lesson.query.get_or_404(lesson_id)
+    section = Section.query.get_or_404(section_id)
+    form = ConfirmPunchForm()
+    if form.validate_on_submit():
+        punch = Punch.query\
+            .filter_by(user_id=user_id, lesson_id=lesson_id, section_id=section_id)\
+            .first()
+        if punch is not None:
+            punches = Punch.query\
+                .filter(Punch.timestamp > punch.timestamp)\
+                .all()
+            for pun in punches:
+                db.session.delete(pun)
+            punch.timestamp = datetime.utcnow()
+        else:
+            punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
+        db.session.add(punch)
+        db.session.commit()
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
+        return redirect(url_for('manage.find_user'))
+    return render_template('manage/edit_punch_step_3.html', user=user, lesson=lesson, section=section, form=form)
+
+
 @manage.route('/find-user', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
@@ -961,10 +1015,10 @@ def rental_rent_step_1():
         if booking.schedule.ended:
             booking.set_state(u'爽约')
             db.session.commit()
-        if booking.schedule.started:
+        if booking.schedule.started_n_min(n_min=current_app.config['TOLERATE_MINUTES']):
             booking.set_state(u'迟到')
             db.session.commit()
-        if booking.schedule.unstarted:
+        if booking.schedule.unstarted_n_min(n_min=current_app.config['TOLERATE_MINUTES']):
             booking.set_state(u'赴约')
             db.session.commit()
         return redirect(url_for('manage.rental_rent_step_2', user_id=booking.user_id))
