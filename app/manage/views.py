@@ -394,7 +394,8 @@ def ipad():
         query = iPad.query.filter_by(room_id=None)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
+    ipad_contents = [{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]
+    return render_template('manage/ipad.html', form=form, ipads=ipads, ipad_contents=ipad_contents, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
 
 
 @manage.route('/ipad/all')
@@ -544,6 +545,15 @@ def filter_ipad():
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=lesson_id).all()]) for lesson_id in lesson_ids])
             ipads = [iPad.query.filter_by(id=ipad_id).first() for ipad_id in ipad_ids]
     return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
+
+
+@manage.route('/ipad/contents')
+@login_required
+@permission_required(Permission.MANAGE)
+def ipad_contents():
+    ipad_contents = [{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]
+    return render_template('manage/ipad_contents.html', ipad_contents=ipad_contents)
+
 
 
 @manage.route('/user', methods=['GET', 'POST'])

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}iPad内容排布表{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-ipad-contents.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="table icon"></i> iPad内容排布表</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr class="center aligned">
+                            <th><i class="tablet icon"></i></th>
+                            <th>VB总论</th>
+                            <th>L1</th>
+                            <th>L2</th>
+                            <th>L3</th>
+                            <th>L4</th>
+                            <th>L5</th>
+                            <th>L6</th>
+                            <th>L7</th>
+                            <th>L8</th>
+                            <th>L9</th>
+                            <th>GRE总论</th>
+                            <th>1st</th>
+                            <th>2nd</th>
+                            <th>3rd</th>
+                            <th>4th</th>
+                            <th>5th</th>
+                            <th>6th</th>
+                            <th>7th</th>
+                            <th>8th</th>
+                            <th>9th</th>
+                            <th>Test</th>
+                            <th>AW总论</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ipad in ipad_contents %}
+                        <tr class="center aligned">
+                            <td>{{ ipad['alias'] }}</td>
+                            {% for content in ipad['lessons'] %}
+                            {% if content %}
+                            <td><i class="green checkmark icon"></i></td>
+                            {% else %}
+                            <td></td>
+                            {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-ipad-contents.js') }}"></script>
+{% endblock %}
