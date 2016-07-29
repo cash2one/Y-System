@@ -703,6 +703,7 @@ class Period(db.Model):
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    show = db.Column(db.Boolean, default=False)
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
 
     @property
@@ -738,6 +739,11 @@ class Period(db.Model):
     @property
     def alias2(self):
         return u'%s - %s' % (self.start_time_str, self.end_time_str)
+
+    @property
+    def used(self):
+        return Schedule.query.filter_by(period_id=self.id).first() is not None
+
 
     @staticmethod
     def insert_periods():

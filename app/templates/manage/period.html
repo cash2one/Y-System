@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}时段模板管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-period.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="tasks icon"></i> 时段模板管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div id="periods" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">时段模板</h3>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>时段名称</th>
+                            <th>开始时间</th>
+                            <th>结束时间</th>
+                            <th>时段类型</th>
+                            <th>启用状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for period in periods %}
+                        <tr>
+                            <td>{{ period.name }}</td>
+                            <td>{{ moment(period.start_time_utc).format('H:mm') }}</td>
+                            <td>{{ moment(period.end_time_utc).format('H:mm') }}</td>
+                            <td>{{ period.type.name }}</td>
+                            {% if period.show %}
+                            <td class="positive">启用</td>
+                            {% else %}
+                            <td>未启用</td>
+                            {% endif %}
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui mini button" href="{{ url_for('manage.edit_period', id=period.id) }}"><i class="edit icon"></i></a>
+                                    {% if period.used %}
+                                    <div class="ui mini disabled negative button"><i class="trash outline icon"></i></div>
+                                    {% else %}
+                                    <a class="ui mini negative button" href="{{ url_for('manage.delete_period', id=period.id) }}"><i class="trash outline icon"></i></a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.period') }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">新建时段模板</h3>
+                <form method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="four wide field">
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='时段名称') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.start_time.label() }}
+                            {{ form.start_time(class='ui search dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.end_time.label() }}
+                            {{ form.end_time(class='ui search dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.period_type.label() }}
+                            {{ form.period_type(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="ui toggle checkbox">
+                            {{ form.show() }}
+                            {{ form.show.label() }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <a class="ui button" href="{{ url_for('manage.schedule') }}">管理时段信息</a>
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-period.js') }}"></script>
+{% endblock %}

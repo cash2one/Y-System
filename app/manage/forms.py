@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 from flask_wtf import Form
 from wtforms import StringField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course
+from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType
 
 
 def NextDayString(days, short=False):
     day = date.today() + timedelta(days=1) * days
     if short:
-        return day.strftime('%Y-%m-%d')
-    return day.strftime('%Y-%m-%d %a')
+        return day.strftime(u'%Y-%m-%d')
+    return day.strftime(u'%Y-%m-%d %a')
+
+
+def NextHalfHourString(halfHours, startHour=6):
+    t = time(startHour + halfHours/2, (halfHours % 2) * 30)
+    return t.strftime(u'%H:%M')
 
 
 class NewScheduleForm(Form):
@@ -25,7 +30,41 @@ class NewScheduleForm(Form):
     def __init__(self, *args, **kwargs):
         super(NewScheduleForm, self).__init__(*args, **kwargs)
         self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(30)]
-        self.period.choices = [(period.id, period.alias) for period in Period.query.order_by(Period.id.asc()).all()]
+        self.period.choices = [(period.id, period.alias) for period in Period.query.order_by(Period.id.asc()).all() if period.show]
+
+
+class NewPeriodForm(Form):
+    name = StringField(u'时段名称', validators=[Required(message=u'请输入时段名称')])
+    start_time = SelectField(u'开始时间', coerce=unicode)
+    end_time = SelectField(u'结束时间', coerce=unicode)
+    period_type = SelectField(u'时段类型', coerce=int)
+    show = BooleanField(u'显示为可选')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewPeriodForm, self).__init__(*args, **kwargs)
+        self.start_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.end_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.period_type.choices = [(period_type.id, period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class EditPeriodForm(Form):
+    name = StringField(u'时段名称', validators=[Required(message=u'请输入时段名称')])
+    start_time = SelectField(u'开始时间', coerce=unicode)
+    end_time = SelectField(u'结束时间', coerce=unicode)
+    period_type = SelectField(u'时段类型', coerce=int)
+    show = BooleanField(u'显示为可选')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditPeriodForm, self).__init__(*args, **kwargs)
+        self.start_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.end_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.period_type.choices = [(period_type.id, period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class DeletePeriodForm(Form):
+    submit = SubmitField(u'删除')
 
 
 class NewiPadForm(Form):
@@ -76,7 +115,7 @@ class EditiPadForm(Form):
 
 
 class DeleteiPadForm(Form):
-    submit = SubmitField(u'提交')
+    submit = SubmitField(u'删除')
 
 
 class FilteriPadForm(Form):
@@ -121,7 +160,7 @@ class EditActivationForm(Form):
 
 
 class DeleteActivationForm(Form):
-    submit = SubmitField(u'提交')
+    submit = SubmitField(u'删除')
 
 
 class EditUserForm(Form):

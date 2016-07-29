@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}编辑时段模板信息{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-period.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑时段模板信息</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">编辑时段模板信息</h3>
+                <form id="edit-period" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="four wide field">
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='时段名称') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.start_time.label() }}
+                            {{ form.start_time(class='ui search dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.end_time.label() }}
+                            {{ form.end_time(class='ui search dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.period_type.label() }}
+                            {{ form.period_type(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="ui toggle checkbox">
+                            {{ form.show() }}
+                            {{ form.show.label() }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <a class="ui button cancel" href="{{ url_for('manage.period') }}">取消</a>
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-period.js') }}"></script>
+{% endblock %}

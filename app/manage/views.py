@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime, date
+from datetime import datetime, date, time
 from sqlalchemy import or_
 from flask import render_template, redirect, url_for, flash, current_app, make_response, request
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadState, iPadContent, Room, Course, Rental, Lesson, Section, Punch
@@ -173,7 +173,7 @@ def set_booking_state_canceled(user_id, schedule_id):
 def schedule():
     form = NewScheduleForm()
     if form.validate_on_submit():
-        day = date(int(form.date.data[:4]), int(form.date.data[5:7]), int(form.date.data[8:]))
+        day = date(*[int(x) for x in form.date.data.split('-')])
         for period_id in form.period.data:
             schedule = Schedule.query.filter_by(date=day, period_id=period_id).first()
             if schedule:
@@ -323,6 +323,84 @@ def decrease_schedule_quota(id):
     schedule.decrease_quota()
     flash(u'所选时段名额-1')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
+
+
+@manage.route('/period', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_SCHEDULE)
+def period():
+    form = NewPeriodForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        start_time = time(*[int(x) for x in form.start_time.data.split(':')])
+        end_time = time(*[int(x) for x in form.end_time.data.split(':')])
+        type_id = form.period_type.data
+        show = form.show.data
+        if start_time >= end_time:
+            flash(u'无法添加时段模板：%s，时间设置有误' % name)
+            return redirect(url_for('manage.period'))
+        period = Period(name=name, start_time=start_time, end_time=end_time, type_id=type_id, show=show)
+        db.session.add(period)
+        db.session.commit()
+        flash(u'已添加时段模板：%s' % name)
+        return redirect(url_for('manage.period'))
+    page = request.args.get('page', 1, type=int)
+    query = Period.query
+    pagination = query\
+        .order_by(Period.id.asc())\
+        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    periods = pagination.items
+    return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
+
+
+@manage.route('/edit-period/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_SCHEDULE)
+def edit_period(id):
+    period = Period.query.get_or_404(id)
+    form = EditPeriodForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        start_time = time(*[int(x) for x in form.start_time.data.split(':')])
+        end_time = time(*[int(x) for x in form.end_time.data.split(':')])
+        type_id = form.period_type.data
+        show = form.show.data
+        if start_time >= end_time:
+            flash(u'无法更新时段模板：%s，时间设置有误' % name)
+            return redirect(url_for('manage.edit_period', id=period.id))
+        period.name = name
+        period.start_time = start_time
+        period.end_time = end_time
+        period.type_id = type_id
+        period.show = show
+        db.session.add(period)
+        db.session.commit()
+        flash(u'已更新时段模板：%s' % name)
+        return redirect(url_for('manage.period'))
+    form.name.data = period.name
+    form.start_time.data = period.start_time.strftime(u'%H:%M')
+    form.end_time.data = period.end_time.strftime(u'%H:%M')
+    form.period_type.data = period.type_id
+    form.show.data = period.show
+    return render_template('manage/edit_period.html', form=form, period=period)
+
+
+@manage.route('/delete-period/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_SCHEDULE)
+def delete_period(id):
+    period = Period.query.get_or_404(id)
+    name = period.name
+    form = DeletePeriodForm()
+    if form.validate_on_submit():
+        if period.used:
+            flash(u'时段模板“%s”已被使用中，无法删除' % name)
+            return redirect(url_for('manage.period'))
+        db.session.delete(period)
+        db.session.commit()
+        flash(u'已删除时段模板：%s' % name)
+        return redirect(url_for('manage.period'))
+    return render_template('manage/delete_period.html', form=form, period=period)
 
 
 @manage.route('/ipad', methods=['GET', 'POST'])

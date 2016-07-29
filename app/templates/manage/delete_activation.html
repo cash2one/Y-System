@@ -34,7 +34,7 @@
                 <h3 class="header">确定要删除{{ activation.name }}的激活邀请？</h3>
                 <form method="POST" class="ui form">
                     {{ form.hidden_tag() }}
-                    {{ form.submit(class='ui primary button') }}
+                    {{ form.submit(class='ui negative button') }}
                     <a class="ui button cancel" href="{{ url_for('manage.user') }}">取消</a>
                     <div class="ui error message"></div>
                 </form>
@@ -46,6 +46,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/customize-manage-delete-activation.js') }}"></script>
 {% endblock %}
