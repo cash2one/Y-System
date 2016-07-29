@@ -238,7 +238,7 @@ class Booking(db.Model):
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
         booking_hash = generate_password_hash(str(datetime.utcnow))
-        self.booking_code = urlsafe_b64encode(booking_hash[-36:] + urandom(60))
+        self.booking_code = urlsafe_b64encode(booking_hash[-40:] + urandom(56))
 
     def ping(self):
         self.timestamp = datetime.utcnow()
