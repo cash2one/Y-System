@@ -3,6 +3,7 @@
 from os import urandom
 from datetime import datetime, date, time, timedelta
 from sqlalchemy import or_
+from base64 import urlsafe_b64encode
 import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -236,7 +237,8 @@ class Booking(db.Model):
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
-        self.booking_code = generate_password_hash(str(datetime.utcnow) + urandom(100))
+        booking_hash = generate_password_hash(str(datetime.utcnow))
+        self.booking_code = urlsafe_b64encode(booking_hash[-36:] + urandom(60))
 
     def ping(self):
         self.timestamp = datetime.utcnow()
