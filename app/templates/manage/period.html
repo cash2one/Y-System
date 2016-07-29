@@ -40,7 +40,7 @@
                             <th>开始时间</th>
                             <th>结束时间</th>
                             <th>时段类型</th>
-                            <th>启用状态</th>
+                            <th>可选状态</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -52,9 +52,9 @@
                             <td>{{ moment(period.end_time_utc).format('H:mm') }}</td>
                             <td>{{ period.type.name }}</td>
                             {% if period.show %}
-                            <td class="positive">启用</td>
+                            <td class="positive">可选</td>
                             {% else %}
-                            <td>未启用</td>
+                            <td>不可选</td>
                             {% endif %}
                             <td>
                                 <div class="ui mini icon buttons">
