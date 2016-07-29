@@ -741,6 +741,10 @@ class Period(db.Model):
         return u'%s - %s' % (self.start_time_str, self.end_time_str)
 
     @property
+    def alias3(self):
+        return u'%s：%s - %s' % (self.name, self.start_time_str, self.end_time_str)
+
+    @property
     def used(self):
         return Schedule.query.filter_by(period_id=self.id).first() is not None
 
