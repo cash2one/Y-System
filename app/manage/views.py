@@ -9,7 +9,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, Schedule, Period, iPad, iPadState, iPadContent, Room, Course, Rental, Lesson, Section, Punch
+from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, Room, Course, Rental, Lesson, Section, Punch
 from ..decorators import admin_required, permission_required
 
 
