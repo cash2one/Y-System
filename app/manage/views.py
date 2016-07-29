@@ -95,13 +95,30 @@ def history_booking():
 @login_required
 @permission_required(Permission.MANAGE_BOOKING)
 def set_booking_state_valid(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     if booking.schedule.full:
         flash(u'该时段名额已经约满')
         return redirect(url_for('manage.booking', page=request.args.get('page')))
     booking.set_state(u'预约')
     db.session.commit()
-    send_email(booking.user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=booking.user, schedule=booking.schedule, booking=booking)
+    send_email(user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=user, schedule=schedule, booking=booking)
+    booked_ipads = Booking.query\
+        .join(Punch, Punch.user_id == Booking.user_id)\
+        .join(BookingState, BookingState.id == Booking.state_id)\
+        .filter(Booking.schedule_id == schedule_id)\
+        .filter(BookingState.name == u'预约')\
+        .filter(Punch.lesson_id == user.last_punch.lesson_id)
+    available_ipads = iPad.query\
+        .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadContent.lesson_id == user.last_punch.lesson_id)\
+        .filter(iPadState.name != u'退役')
+    if booked_ipads.count() >= available_ipads.count():
+        for manager in User.query.all():
+            if manager.can(Permission.MANAGE_IPAD):
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -159,11 +176,28 @@ def set_booking_state_missed(user_id, schedule_id):
 @login_required
 @permission_required(Permission.MANAGE_BOOKING)
 def set_booking_state_canceled(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     candidate = booking.set_state(u'取消')
     db.session.commit()
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=candidate, schedule=booking.schedule, booking=booking)
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        booked_ipads = Booking.query\
+            .join(Punch, Punch.user_id == Booking.user_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.schedule_id == schedule_id)\
+            .filter(BookingState.name == u'预约')\
+            .filter(Punch.lesson_id == candidate.last_punch.lesson_id)
+        available_ipads = iPad.query\
+            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadContent.lesson_id == candidate.last_punch.lesson_id)\
+            .filter(iPadState.name != u'退役')
+        if booked_ipads.count() >= available_ipads.count():
+            for manager in User.query.all():
+                if manager.can(Permission.MANAGE_IPAD):
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -288,7 +322,7 @@ def retract_schedule(id):
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def increase_schedule_quota(id):
-    schedule = Schedule.query.filter_by(id=id).first()
+    schedule = Schedule.query.get_or_404(id=id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
@@ -299,6 +333,21 @@ def increase_schedule_quota(id):
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        booked_ipads = Booking.query\
+            .join(Punch, Punch.user_id == Booking.user_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.schedule_id == schedule_id)\
+            .filter(BookingState.name == u'预约')\
+            .filter(Punch.lesson_id == candidate.last_punch.lesson_id)
+        available_ipads = iPad.query\
+            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadContent.lesson_id == candidate.last_punch.lesson_id)\
+            .filter(iPadState.name != u'退役')
+        if booked_ipads.count() >= available_ipads.count():
+            for manager in User.query.all():
+                if manager.can(Permission.MANAGE_IPAD):
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'所选时段名额+1')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -307,7 +356,7 @@ def increase_schedule_quota(id):
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def decrease_schedule_quota(id):
-    schedule = Schedule.query.filter_by(id=id).first()
+    schedule = Schedule.query.get_or_404(id=id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))

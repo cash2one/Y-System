@@ -7,7 +7,7 @@ from flask_sqlalchemy import get_debug_queries
 from . import book
 from .. import db
 from ..email import send_email
-from ..models import Permission, Schedule, Period, CourseType, Booking, BookingState
+from ..models import Permission, User, Schedule, Period, CourseType, Booking, BookingState, iPadState, iPad, iPadContent, Punch
 from ..decorators import admin_required, permission_required
 
 
@@ -71,6 +71,21 @@ def book_vb(schedule_id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！')
+    booked_ipads = Booking.query\
+        .join(Punch, Punch.user_id == Booking.user_id)\
+        .join(BookingState, BookingState.id == Booking.state_id)\
+        .filter(Booking.schedule_id == schedule_id)\
+        .filter(BookingState.name == u'预约')\
+        .filter(Punch.lesson_id == current_user.last_punch.lesson_id)
+    available_ipads = iPad.query\
+        .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadContent.lesson_id == current_user.last_punch.lesson_id)\
+        .filter(iPadState.name != u'退役')
+    if booked_ipads.count() >= available_ipads.count():
+        for manager in User.query.all():
+            if manager.can(Permission.MANAGE_IPAD):
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
 
@@ -130,6 +145,21 @@ def unbook_vb(schedule_id):
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        booked_ipads = Booking.query\
+            .join(Punch, Punch.user_id == Booking.user_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.schedule_id == schedule_id)\
+            .filter(BookingState.name == u'预约')\
+            .filter(Punch.lesson_id == candidate.last_punch.lesson_id)
+        available_ipads = iPad.query\
+            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadContent.lesson_id == candidate.last_punch.lesson_id)\
+            .filter(iPadState.name != u'退役')
+        if booked_ipads.count() >= available_ipads.count():
+            for manager in User.query.all():
+                if manager.can(Permission.MANAGE_IPAD):
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'取消成功！')
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
@@ -205,6 +235,21 @@ def book_y_gre(schedule_id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！')
+    booked_ipads = Booking.query\
+        .join(Punch, Punch.user_id == Booking.user_id)\
+        .join(BookingState, BookingState.id == Booking.state_id)\
+        .filter(Booking.schedule_id == schedule_id)\
+        .filter(BookingState.name == u'预约')\
+        .filter(Punch.lesson_id == current_user.last_punch.lesson_id)
+    available_ipads = iPad.query\
+        .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadContent.lesson_id == current_user.last_punch.lesson_id)\
+        .filter(iPadState.name != u'退役')
+    if booked_ipads.count() >= available_ipads.count():
+        for manager in User.query.all():
+            if manager.can(Permission.MANAGE_IPAD):
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 
 
@@ -261,6 +306,21 @@ def unbook_y_gre(schedule_id):
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        booked_ipads = Booking.query\
+            .join(Punch, Punch.user_id == Booking.user_id)\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .filter(Booking.schedule_id == schedule_id)\
+            .filter(BookingState.name == u'预约')\
+            .filter(Punch.lesson_id == candidate.last_punch.lesson_id)
+        available_ipads = iPad.query\
+            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadContent.lesson_id == candidate.last_punch.lesson_id)\
+            .filter(iPadState.name != u'退役')
+        if booked_ipads.count() >= available_ipads.count():
+            for manager in User.query.all():
+                if manager.can(Permission.MANAGE_IPAD):
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'取消成功！')
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 
