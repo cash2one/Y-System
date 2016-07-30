@@ -1,3 +1,7 @@
+预约日期：{{ schedule.date }}
+
+预约时段：{{ schedule.period.alias2 }}
+
 课程：{{ lesson.type.name }} - {{ lesson.name }}
 
 预约数量：{{ booked_ipads.count() }}

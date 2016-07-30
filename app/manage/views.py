@@ -118,7 +118,7 @@ def set_booking_state_valid(user_id, schedule_id):
     if booked_ipads.count() >= available_ipads.count():
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -197,7 +197,7 @@ def set_booking_state_canceled(user_id, schedule_id):
         if booked_ipads.count() >= available_ipads.count():
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -347,7 +347,7 @@ def increase_schedule_quota(id):
         if booked_ipads.count() >= available_ipads.count():
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'所选时段名额+1')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 

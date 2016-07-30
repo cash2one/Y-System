@@ -41,7 +41,7 @@ def vb():
 @login_required
 @permission_required(Permission.BOOK_VB)
 def book_vb(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    schedule = Schedule.query.get_or_404(schedule_id)
     if schedule is None:
         flash(u'无效的预约时段')
         return redirect(url_for('book.vb', page=request.args.get('page')))
@@ -85,7 +85,7 @@ def book_vb(schedule_id):
     if booked_ipads.count() >= available_ipads.count():
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
 
@@ -128,7 +128,7 @@ def wait_vb(schedule_id):
 @login_required
 @permission_required(Permission.BOOK_VB)
 def unbook_vb(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    schedule = Schedule.query.get_or_404(schedule_id)
     if schedule is None:
         flash(u'无效的预约时段')
         return redirect(url_for('book.vb', page=request.args.get('page')))
@@ -159,7 +159,7 @@ def unbook_vb(schedule_id):
         if booked_ipads.count() >= available_ipads.count():
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'取消成功！')
     return redirect(url_for('book.vb', page=request.args.get('page')))
 
@@ -208,7 +208,7 @@ def y_gre():
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def book_y_gre(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    schedule = Schedule.query.get_or_404(schedule_id)
     if schedule is None:
         flash(u'无效的预约时段')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
@@ -249,7 +249,7 @@ def book_y_gre(schedule_id):
     if booked_ipads.count() >= available_ipads.count():
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 
 
@@ -289,7 +289,7 @@ def wait_y_gre(schedule_id):
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def unbook_y_gre(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
+    schedule = Schedule.query.get_or_404(schedule_id)
     if schedule is None:
         flash(u'无效的预约时段')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
@@ -320,7 +320,7 @@ def unbook_y_gre(schedule_id):
         if booked_ipads.count() >= available_ipads.count():
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'取消成功！')
     return redirect(url_for('book.y_gre', page=request.args.get('page')))
 
