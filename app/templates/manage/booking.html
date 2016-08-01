@@ -176,7 +176,7 @@
                 {% if pagination %}
                 {{ macros.pagination_widget(pagination, 'manage.booking') }}
                 {% endif %}
-                <a class="ui basic button" href="{{ url_for('manage.set_booking_state_missed_all') }}"><i class="repeat icon"></i> 批量标记爽约</a>
+                <a class="ui button" href="{{ url_for('manage.set_booking_state_missed_all') }}"><i class="repeat icon"></i> 批量标记爽约</a>
             </div>
         </div>
     </div>
