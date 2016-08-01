@@ -201,6 +201,30 @@ def set_booking_state_canceled(user_id, schedule_id):
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
+@manage.route('/booking/set-state-missed-all')
+@login_required
+@permission_required(Permission.MANAGE_BOOKING)
+def set_booking_state_missed_all():
+    history_unmarked_missed_bookings = Booking.query\
+        .join(BookingState, BookingState.id == Booking.state_id)\
+        .join(Schedule, Schedule.id == Booking.schedule_id)\
+        .filter(BookingState.name == u'预约')\
+        .filter(Schedule.date < date.today())\
+        .all()
+    today_unmarked_missed_bookings = Booking.query\
+        .join(BookingState, BookingState.id == Booking.state_id)\
+        .join(Schedule, Schedule.id == Booking.schedule_id)\
+        .join(Period, Period.id == Schedule.period_id)\
+        .filter(BookingState.name == u'预约')\
+        .filter(Schedule.date == date.today())\
+        .filter(Period.end_time < time(datetime.now().hour, datetime.now().minute, datetime.now().second, datetime.now().microsecond))\
+        .all()
+    for booking in history_unmarked_missed_bookings + today_unmarked_missed_bookings:
+        booking.set_state(u'爽约')
+    db.session.commit()
+    return redirect(url_for('manage.booking', page=request.args.get('page')))
+
+
 @manage.route('/schedule', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
