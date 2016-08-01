@@ -150,7 +150,7 @@
                                         <a class="item" href="{{ url_for('manage.set_booking_state_missed', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="frown icon"></i> 爽约</a>
                                         {% endif %}
                                         {% if not booking.invalid %}
-                                        <a class="item" href="{{ url_for('manage.set_booking_state_invalid', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="frown icon"></i> 失效</a>
+                                        <a class="item" href="{{ url_for('manage.set_booking_state_invalid', user_id=booking.user_id, schedule_id=booking.schedule_id, page=pagination.page) }}"><i class="delete calendar icon"></i> 失效</a>
                                         {% endif %}
                                     {% endif %}
                                     {% if booking.schedule.ended %}
