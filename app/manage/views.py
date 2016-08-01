@@ -201,6 +201,16 @@ def set_booking_state_canceled(user_id, schedule_id):
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
+def time_now(utcOffset=0):
+    hour = datetime.utcnow().hour + utcOffset
+    if hour >= 24:
+        hour -= 24
+    minute = datetime.utcnow().minute
+    second = datetime.utcnow().second
+    microsecond = datetime.utcnow().microsecond
+    return time(hour, minute, second, microsecond)
+
+
 @manage.route('/booking/set-state-missed-all')
 @login_required
 @permission_required(Permission.MANAGE_BOOKING)
@@ -217,7 +227,7 @@ def set_booking_state_missed_all():
         .join(Period, Period.id == Schedule.period_id)\
         .filter(BookingState.name == u'预约')\
         .filter(Schedule.date == date.today())\
-        .filter(Period.end_time < time(datetime.now().hour, datetime.now().minute, datetime.now().second, datetime.now().microsecond))\
+        .filter(Period.end_time < time_now(utcOffset=current_app.config['UTC_OFFSET']))\
         .all()
     for booking in history_unmarked_missed_bookings + today_unmarked_missed_bookings:
         booking.set_state(u'爽约')
