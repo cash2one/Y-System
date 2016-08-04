@@ -248,7 +248,7 @@ def set_booking_state_missed_all():
     for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
         booking.set_state(u'失效')
     db.session.commit()
-    flash(u'标记：爽约%s条；失效%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)))
+    flash(u'标记爽约：%s条；标记失效：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)))
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
