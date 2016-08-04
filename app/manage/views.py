@@ -231,6 +231,22 @@ def set_booking_state_missed_all():
         .all()
     for booking in history_unmarked_missed_bookings + today_unmarked_missed_bookings:
         booking.set_state(u'爽约')
+    history_unmarked_waited_bookings = Booking.query\
+        .join(BookingState, BookingState.id == Booking.state_id)\
+        .join(Schedule, Schedule.id == Booking.schedule_id)\
+        .filter(BookingState.name == u'排队')\
+        .filter(Schedule.date < date.today())\
+        .all()
+    today_unmarked_waited_bookings = Booking.query\
+        .join(BookingState, BookingState.id == Booking.state_id)\
+        .join(Schedule, Schedule.id == Booking.schedule_id)\
+        .join(Period, Period.id == Schedule.period_id)\
+        .filter(BookingState.name == u'排队')\
+        .filter(Schedule.date == date.today())\
+        .filter(Period.end_time < time_now(utcOffset=current_app.config['UTC_OFFSET']))\
+        .all()
+    for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
+        booking.set_state(u'失效')
     db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
