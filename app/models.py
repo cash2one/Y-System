@@ -271,6 +271,18 @@ class Booking(db.Model):
         return self.state.name == u'排队'
 
     @property
+    def queue_position(self):
+        if not self.waited:
+            return 0
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .filter(Schedule.id == self.schedule_id)\
+            .filter(BookingState.name == u'排队')\
+            .filter(Booking.timestamp < self.timestamp)\
+            .count() + 1
+
+    @property
     def invalid(self):
         return self.state.name == u'失效'
 
