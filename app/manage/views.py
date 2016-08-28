@@ -373,7 +373,7 @@ def retract_schedule(id):
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def increase_schedule_quota(id):
-    schedule = Schedule.query.get_or_404(id=id)
+    schedule = Schedule.query.get_or_404(id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
@@ -407,7 +407,7 @@ def increase_schedule_quota(id):
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def decrease_schedule_quota(id):
-    schedule = Schedule.query.get_or_404(id=id)
+    schedule = Schedule.query.get_or_404(id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
