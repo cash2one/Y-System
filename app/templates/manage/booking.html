@@ -56,7 +56,10 @@
                             <th>日期</th>
                             <th>用户</th>
                             <th>课程</th>
+                            {% if show_history_booking %}
+                            {% else %}
                             <th>进度</th>
+                            {% endif %}
                             <th>时段</th>
                             <th>状态</th>
                             <th>操作时间</th>
@@ -69,7 +72,10 @@
                             <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td>{{ booking.user.name }}（{{ booking.user.email }}）</td>
                             <td>{{ booking.schedule.period.type.name }}</td>
+                            {% if show_history_booking %}
+                            {% else %}
                             <td>{{ booking.user.last_punch.lesson.name }} - {{ booking.user.last_punch.section.name }}</td>
+                            {% endif %}
                             <td>
                                 {% if booking.schedule.unstarted %}
                                 <div class="ui teal label">{{ booking.schedule.time_state }}</div>
