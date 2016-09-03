@@ -65,7 +65,7 @@
                                 {{ form.section.label() }}
                                 {{ form.section(class='ui search dropdown') }}
                             </div>
-                            <a class="ui button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id) }}">上一步</a>
+                            <a class="ui button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <div class="ui error message"></div>
                         </form>

@@ -74,7 +74,12 @@
                             <td>{{ booking.schedule.period.type.name }}</td>
                             {% if show_history_booking %}
                             {% else %}
-                            <td>{{ booking.user.last_punch.lesson.name }} - {{ booking.user.last_punch.section.name }}</td>
+                            <td>
+                                {{ booking.user.last_punch.lesson.name }} - {{ booking.user.last_punch.section.name }}
+                                {% if current_user.can(Permission.MANAGE_USER) %}
+                                <a class="ui mini icon button" href="{{ url_for('manage.edit_punch_step_1', user_id=booking.user.id, next=url_for('manage.booking')) }}"><i class="refresh icon"></i></a>
+                                {% endif %}
+                            </td>
                             {% endif %}
                             <td>
                                 {% if booking.schedule.unstarted %}

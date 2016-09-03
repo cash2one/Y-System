@@ -854,7 +854,7 @@ def edit_user(id):
     form = EditUserForm(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
-        user.email = form.email.data
+        # user.email = form.email.data
         user.role_id = form.role.data
         if user.vb_course:
             user.unregister(user.vb_course)
@@ -867,7 +867,7 @@ def edit_user(id):
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
-        return redirect(url_for('manage.user'))
+        return redirect(request.args.get('next') or url_for('manage.user'))
     form.name.data = user.name
     form.email.data = user.email
     form.role.data = user.role_id
@@ -886,9 +886,9 @@ def edit_punch_step_1(user_id):
     form = EditPunchLessonForm()
     if form.validate_on_submit():
         lesson_id = form.lesson.data
-        return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=lesson_id))
+        return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=lesson_id, next=request.args.get('next')))
     form.lesson.data = user.last_punch.lesson_id
-    return render_template('manage/edit_punch_step_1.html', user=user, form=form)
+    return render_template('manage/edit_punch_step_1.html', user=user, form=form, next=request.args.get('next'))
 
 
 @manage.route('/edit-punch/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
@@ -900,8 +900,8 @@ def edit_punch_step_2(user_id, lesson_id):
     form = EditPunchSectionForm(lesson=lesson)
     if form.validate_on_submit():
         section_id = form.section.data
-        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, lesson_id=lesson_id, section_id=section_id))
-    return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form)
+        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, lesson_id=lesson_id, section_id=section_id, next=request.args.get('next')))
+    return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form, next=request.args.get('next'))
 
 
 @manage.route('/edit-punch/step-3/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
@@ -917,26 +917,43 @@ def edit_punch_step_3(user_id, lesson_id, section_id):
             .filter_by(user_id=user_id, lesson_id=lesson_id, section_id=section_id)\
             .first()
         if punch is not None:
-            punches = Punch.query\
-                .filter(Punch.timestamp > punch.timestamp)\
-                .all()
-            for pun in punches:
-                db.session.delete(pun)
+            # punches = Punch.query\
+            #     .filter(Punch.timestamp > punch.timestamp)\
+            #     .all()
+            # for pun in punches:
+            #     db.session.delete(pun)
             punch.timestamp = datetime.utcnow()
         else:
             punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
         db.session.commit()
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
-        return redirect(url_for('manage.find_user'))
-    return render_template('manage/edit_punch_step_3.html', user=user, lesson=lesson, section=section, form=form)
+        return redirect(request.args.get('next') or url_for('manage.find_user'))
+    return render_template('manage/edit_punch_step_3.html', user=user, lesson=lesson, section=section, form=form, next=request.args.get('next'))
 
 
 @manage.route('/find-user', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
 def find_user():
-    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        users = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(or_(
+                User.name == name_or_email,
+                User.email == name_or_email
+            ))\
+            .filter(or_(
+                Role.name == u'禁止预约',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限'
+            ))\
+            .order_by(User.last_seen.desc())
+    else:
+        users = []
     form = FindUserForm()
     if form.validate_on_submit():
         name_or_email = form.name_or_email.data
@@ -955,7 +972,8 @@ def find_user():
                     Role.name == u'Y-GRE A权限'
                 ))\
                 .order_by(User.last_seen.desc())
-    return render_template('manage/find_user.html', form=form, users=users)
+    form.name_or_email.data = name_or_email
+    return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
 
 
 @manage.route('/auth')

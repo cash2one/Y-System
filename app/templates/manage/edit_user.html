@@ -39,7 +39,7 @@
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide field disabled">
                             {{ form.email.label() }}
                             {{ form.email(placeholder='邮箱') }}
                         </div>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <a class="ui button cancel" href="{{ url_for('manage.user') }}">取消</a>
+                    <a class="ui button cancel" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                     <div class="ui error message"></div>
                     {% with email_errors = form.email.errors %}
                     {% if email_errors %}
