@@ -60,7 +60,10 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>{{ user.name }}</td>
+                            <td>
+                                {{ user.name }}
+                                <a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank"><i class="info circle icon"></i></a>
+                            </td>
                             <td>
                                 {{ user.email }}
                                 {% if user.confirmed %}

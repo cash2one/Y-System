@@ -52,7 +52,10 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>{{ user.name }}</td>
+                            <td>
+                                {{ user.name }}
+                                <a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank"><i class="info circle icon"></i></a>
+                            </td>
                             <td>
                                 {{ user.email }}
                                 {% if user.confirmed %}
@@ -67,7 +70,7 @@
                             <td>
                                 {{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}
                                 {% if current_user.can(Permission.MANAGE_USER) %}
-                                <a class="ui mini icon button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id) }}"><i class="refresh icon"></i></a>
+                                <a class="ui mini icon button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
                             <td>{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</td>
