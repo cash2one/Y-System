@@ -118,17 +118,10 @@
                             {% endif %}
                             <td>
                                 {% if activation.activated %}
-                                {% if current_user.can(Permission.ADMINISTER) %}
-                                <div class="ui mini icon buttons">
-                                    <a class="ui mini button" href="{{ url_for('manage.edit_activation', id=activation.id) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button" href="{{ url_for('manage.delete_activation', id=activation.id) }}"><i class="trash outline icon"></i></a>
-                                </div>
-                                {% else %}
                                 <div class="ui mini icon disabled buttons">
                                     <div class="ui mini disabled button"><i class="edit icon"></i></div>
                                     <div class="ui mini negative disabled button"><i class="trash outline icon"></i></div>
                                 </div>
-                                {% endif %}
                                 {% else %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui mini button" href="{{ url_for('manage.edit_activation', id=activation.id) }}"><i class="edit icon"></i></a>

@@ -188,7 +188,8 @@ class Activation(db.Model):
                     activation_code=str(A[1]),
                     role_id=Role.query.filter_by(name=A[2]).first().id,
                     vb_course_id=vb_course_id,
-                    y_gre_course_id=y_gre_course_id
+                    y_gre_course_id=y_gre_course_id,
+                    inviter_id=1
                 )
                 db.session.add(activation)
                 print u'导入激活信息', A[0], A[2], A[3], A[4]
@@ -683,13 +684,13 @@ class User(UserMixin, db.Model):
         if admin is None:
             admin = User(
                 email=current_app.config['YSYS_ADMIN'],
-                name=u'超级管理员',
+                name=u'系统管理员',
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD']
             )
             db.session.add(admin)
             db.session.commit()
-            print u'初始化开发人员信息'
+            print u'初始化系统管理员信息'
 
     def __repr__(self):
         return '<User %s, %r>' % (self.name, self.email)
