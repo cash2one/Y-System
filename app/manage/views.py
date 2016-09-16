@@ -1042,7 +1042,7 @@ def edit_auth(id):
     form = EditAuthForm(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
-        user.email = form.email.data
+        # user.email = form.email.data
         user.role_id = form.role.data
         if user.vb_course:
             user.unregister(user.vb_course)
@@ -1133,7 +1133,7 @@ def edit_auth_admin(id):
     form = EditAuthFormAdmin(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
-        user.email = form.email.data
+        # user.email = form.email.data
         user.role_id = form.role.data
         if user.vb_course:
             user.unregister(user.vb_course)
