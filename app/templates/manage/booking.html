@@ -70,7 +70,9 @@
                         {% for booking in bookings %}
                         <tr>
                             <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
-                            <td>{{ booking.user.name }}（{{ booking.user.email }}）</td>
+                            <td>
+                                <a href="{{ url_for('main.profile_user', user_id=booking.user.id) }}" target="_blank" title="{{ booking.user.name }}（{{ booking.user.email }}）">{{ booking.user.name }}</a>
+                            </td>
                             <td>{{ booking.schedule.period.type.name }}</td>
                             {% if show_history_booking %}
                             {% else %}
