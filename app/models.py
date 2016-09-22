@@ -133,6 +133,12 @@ class Course(db.Model):
         return '<Course %s>' % self.name
 
 
+class UserActivation(db.Model):
+    __tablename__ = 'user_activations'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    activation_id = db.Column(db.Integer, db.ForeignKey('activations.id'), primary_key=True)
+
+
 class Activation(db.Model):
     __tablename__ = 'activations'
     id = db.Column(db.Integer, primary_key=True)
@@ -144,6 +150,13 @@ class Activation(db.Model):
     y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    activated_users = db.relationship(
+        'UserActivation',
+        foreign_keys=[UserActivation.activation_id],
+        backref=db.backref('activation', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     @property
     def activation_code(self):
@@ -163,6 +176,10 @@ class Activation(db.Model):
     @property
     def y_gre_course(self):
         return Course.query.filter_by(id=self.y_gre_course_id).first()
+
+    @property
+    def activated_user(self):
+        return self.activated_users.first()
 
     @staticmethod
     def insert_activations():
@@ -323,9 +340,8 @@ class Rental(db.Model):
         ipad = iPad.query.filter_by(id=self.ipad_id).first()
         ipad.set_state(ipad_state)
 
-
     def __repr__(self):
-        return '<Rental %r, %r>' % (self.user_id, self.ipad_id)
+        return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
 class User(UserMixin, db.Model):
@@ -375,6 +391,13 @@ class User(UserMixin, db.Model):
     )
     punches = db.relationship('Punch', backref='user', lazy='dynamic')
     invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
+    activation = db.relationship(
+        'UserActivation',
+        foreign_keys=[UserActivation.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     @property
     def password(self):
@@ -477,6 +500,10 @@ class User(UserMixin, db.Model):
 
     def is_registering(self, course):
         return self.registered.filter_by(course_id=course.id).first() is not None
+
+    def add_user_activation(self, activation):
+        ua = UserActivation(user_id=self.id, activation_id=activation.id)
+        db.session.add(ua)
 
     @property
     def vb_course(self):

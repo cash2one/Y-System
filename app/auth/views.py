@@ -66,6 +66,7 @@ def activate():
                     if y_gre_course:
                         user.register(course=y_gre_course)
                 db.session.commit()
+                user.add_user_activation(activation=activation)
                 token = user.generate_confirmation_token()
                 send_email(user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=user, token=token)
                 flash(u'激活成功，请登录！')

@@ -104,7 +104,13 @@
                     <tbody>
                         {% for activation in activations %}
                         <tr>
-                            <td>{{ activation.name }}</td>
+                            <td>
+                                {% if activation.activated %}
+                                <a href="{{ url_for('main.profile_user', user_id=activation.activated_user.user_id) }}" target="_blank" title="{{ activation.activated_user.user.name }}（{{ activation.activated_user.user.email }}）">{{ activation.name }}</a>
+                                {% else %}
+                                {{ activation.name }}
+                                {% endif %}
+                            </td>
                             <td>{{ activation.role.name }}</td>
                             <td>{{ activation.vb_course.name }}</td>
                             <td>{{ activation.y_gre_course.name }}</td>
