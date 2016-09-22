@@ -424,8 +424,6 @@ class User(UserMixin, db.Model):
             return False
         self.confirmed = True
         db.session.add(self)
-        initial_punch = Punch(user_id=self.id, lesson_id=1, section_id=1)
-        db.session.add(initial_punch)
         return True
 
     def generate_reset_token(self, expiration=3600):
@@ -504,6 +502,10 @@ class User(UserMixin, db.Model):
     def add_user_activation(self, activation):
         ua = UserActivation(user_id=self.id, activation_id=activation.id)
         db.session.add(ua)
+
+    def add_initial_punch(self):
+        initial_punch = Punch(user_id=self.id, lesson_id=1, section_id=1)
+        db.session.add(initial_punch)
 
     @property
     def vb_course(self):
