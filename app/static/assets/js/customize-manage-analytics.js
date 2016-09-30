@@ -12,10 +12,3 @@ $('.message .close')
         ;
     })
 ;
-
-$('#analytics-iframe')
-    .load(function() {
-        var analyticsDashboardHeight = $(this).contents().find('body').height();
-        $(this).height(analyticsDashboardHeight);
-    })
-;
