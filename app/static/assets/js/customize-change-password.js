@@ -1,9 +1,14 @@
 // customize-change-password.js
 
+function submitForm() {
+    $(this).form('submit');
+};
+
 $(document)
     .ready(function() {
         $('.ui.form')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     old_password: {
                         identifier  : 'old_password',

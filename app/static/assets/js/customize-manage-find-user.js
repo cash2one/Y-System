@@ -17,10 +17,15 @@ $('.message .close')
     })
 ;
 
+function submitForm() {
+    $(this).form('submit');
+};
+
 $(document)
     .ready(function() {
         $('#find-user')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     name_or_email: {
                         identifier  : 'name_or_email',

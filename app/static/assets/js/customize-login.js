@@ -1,9 +1,14 @@
 // customize-login.js
 
+function submitForm() {
+    $(this).form('submit');
+};
+
 $(document)
     .ready(function() {
         $('.ui.form')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     email: {
                         identifier  : 'email',
