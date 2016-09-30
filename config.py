@@ -19,6 +19,7 @@ class Config:
     YSYS_MAIL_SENDER = os.environ.get('YSYS_MAIL_SENDER')
     YSYS_ADMIN = os.environ.get('YSYS_ADMIN')
     YSYS_ADMIN_PASSWORD = os.environ.get('YSYS_ADMIN_PASSWORD')
+    ANALYTICS_TOKEN = os.environ.get('ANALYTICS_TOKEN')
     YSYS_SLOW_DB_QUERY_TIME=0.5
     UTC_OFFSET = 8
     RECORD_PER_PAGE = 20

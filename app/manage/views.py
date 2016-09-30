@@ -976,6 +976,14 @@ def find_user():
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
 
 
+@manage.route('/analytics')
+@login_required
+@permission_required(Permission.MANAGE)
+def analytics():
+    analytics_token = current_app.config['ANALYTICS_TOKEN']
+    return render_template('manage/analytics.html', analytics_token=analytics_token)
+
+
 @manage.route('/auth')
 @login_required
 @permission_required(Permission.MANAGE_AUTH)
