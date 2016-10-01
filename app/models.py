@@ -1009,8 +1009,8 @@ class Room(db.Model):
 
 class iPadContent(db.Model):
     __tablename__ = 'ipad_contents'
-    ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
-    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+    ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True, index=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True, index=True)
 
     @staticmethod
     def insert_ipad_contents():
