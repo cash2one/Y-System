@@ -1,9 +1,5 @@
 // customize-change-password.js
 
-function submitForm() {
-    $(this).form('submit');
-};
-
 $(document)
     .ready(function() {
         $('.ui.form')

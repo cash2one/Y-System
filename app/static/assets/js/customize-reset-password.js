@@ -1,9 +1,5 @@
 // customize-reset-password.js
 
-function submitForm() {
-    $(this).form('submit');
-};
-
 $(document)
     .ready(function() {
         $('.ui.form')

@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#find-user')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     email: {
                         identifier  : 'email',

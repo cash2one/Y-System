@@ -52,3 +52,8 @@ $('#contacts-footer-link')
         ;
     })
 ;
+
+// submit form
+function submitForm() {
+    $(this).form('submit');
+};

@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#booking-code')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     booking_code: {
                         identifier  : 'booking_code',
