@@ -733,7 +733,6 @@ def ipad_contents():
     return render_template('manage/ipad_contents.html', ipad_contents=ipad_contents)
 
 
-
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_USER)
