@@ -72,7 +72,9 @@
                     <tbody>
                         {% for rental in rentals %}
                         <tr>
-                            <td>{{ rental.user.name }}</td>
+                            <td>
+                                <a href="{{ url_for('main.profile_user', user_id=rental.user.id) }}" target="_blank">{{ rental.user.name }}</a>
+                            </td>
                             <td>
                                 {{ rental.ipad.alias }}
                                 [<code>{{ rental.ipad.serial }}</code>]
