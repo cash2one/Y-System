@@ -55,5 +55,19 @@ $('#contacts-footer-link')
 
 // submit form
 function submitForm() {
-    $(this).form('submit');
+    $('#loading-dimmer')
+        .dimmer('show')
+    ;
+    $(this)
+        .form('submit')
+    ;
 };
+
+// loading dimmer
+$('.waiting')
+    .on('click', function () {
+        $('#loading-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
