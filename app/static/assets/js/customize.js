@@ -64,7 +64,7 @@ function submitForm() {
 };
 
 // loading dimmer
-$('.waiting')
+$('.loading')
     .on('click', function () {
         $('#loading-dimmer')
             .dimmer('show')
