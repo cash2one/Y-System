@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#confirm-ipad')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     root: {
                         identifier  : 'root',

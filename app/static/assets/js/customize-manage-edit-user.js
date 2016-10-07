@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#edit-user')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     name: {
                         identifier  : 'name',

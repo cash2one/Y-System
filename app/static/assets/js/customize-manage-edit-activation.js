@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#edit-activation')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     name: {
                         identifier  : 'name',

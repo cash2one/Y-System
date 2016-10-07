@@ -25,6 +25,7 @@ $(document)
     .ready(function() {
         $('.ui.form')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     name: {
                         identifier  : 'name',

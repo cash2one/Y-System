@@ -21,6 +21,7 @@ $(document)
     .ready(function() {
         $('#new-ipad')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     alias: {
                         identifier  : 'alias',

@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#find-ipad')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     volume: {
                         identifier  : 'volume',

@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#edit-ipad')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     alias: {
                         identifier  : 'alias',

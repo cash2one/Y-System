@@ -21,6 +21,7 @@ $(document)
     .ready(function() {
         $('#new-activation')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     name: {
                         identifier  : 'name',

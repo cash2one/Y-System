@@ -17,6 +17,7 @@ $(document)
     .ready(function() {
         $('#edit-auth-admin')
             .form({
+                onSuccess: submitForm,
                 fields: {
                     name: {
                         identifier  : 'name',
