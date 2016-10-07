@@ -149,7 +149,9 @@ class Activation(db.Model):
     vb_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), default=1)
+    initial_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), default=1)
+    initial_section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), default=1)
     activated_users = db.relationship(
         'UserActivation',
         foreign_keys=[UserActivation.activation_id],
@@ -190,6 +192,8 @@ class Activation(db.Model):
         for A in activations:
             if isinstance(A[1], float):
                 A[1] = int(A[1])
+            if isinstance(A[6], float):
+                A[6] = str(A[6])
             activation = Activation.query.filter_by(name=A[0]).first()
             if activation is None:
                 if Course.query.filter_by(name=A[3]).first():
@@ -205,11 +209,18 @@ class Activation(db.Model):
                     activation_code=str(A[1]),
                     role_id=Role.query.filter_by(name=A[2]).first().id,
                     vb_course_id=vb_course_id,
-                    y_gre_course_id=y_gre_course_id,
-                    inviter_id=1
+                    y_gre_course_id=y_gre_course_id
                 )
+                if Section.query.filter_by(name=A[6]).first():
+                    initial_section = Section.query.filter_by(name=A[6]).first()
+                    activation.initial_lesson_id = initial_section.lesson.id
+                    activation.initial_section_id = initial_section.id
+                elif Lesson.query.filter_by(name=A[5]).first():
+                    initial_lesson = Lesson.query.filter_by(name=A[5]).first()
+                    activation.initial_lesson_id = initial_lesson.id
+                    activation.initial_section_id = initial_lesson.first_section.id
                 db.session.add(activation)
-                print u'导入激活信息', A[0], A[2], A[3], A[4]
+                print u'导入激活信息', A[0], A[2], A[3], A[4], A[5], A[6]
         db.session.commit()
 
     def __repr__(self):
@@ -503,8 +514,8 @@ class User(UserMixin, db.Model):
         ua = UserActivation(user_id=self.id, activation_id=activation.id)
         db.session.add(ua)
 
-    def add_initial_punch(self):
-        initial_punch = Punch(user_id=self.id, lesson_id=1, section_id=1)
+    def add_initial_punch(self, activation):
+        initial_punch = Punch(user_id=self.id, lesson_id=activation.initial_lesson_id, section_id=activation.initial_section_id)
         db.session.add(initial_punch)
 
     @property
@@ -1174,6 +1185,7 @@ class Lesson(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     punches = db.relationship('Punch', backref='lesson', lazy='dynamic')
+    activations = db.relationship('Activation', backref='initial_lesson', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
@@ -1195,6 +1207,14 @@ class Lesson(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    @property
+    def first_section(self):
+        return Section.query\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .filter(Section.id == self.id)\
+            .order_by(Section.id.asc())\
+            .first()
 
     @staticmethod
     def insert_lessons():
@@ -1364,6 +1384,7 @@ class Section(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     punches = db.relationship('Punch', backref='section', lazy='dynamic')
+    activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
     previous = db.relationship(
         'AdjacentSection',
         foreign_keys=[AdjacentSection.next_id],

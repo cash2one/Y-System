@@ -102,6 +102,7 @@
                             <th>初始权限</th>
                             <th>初始VB班</th>
                             <th>初始Y-GRE班</th>
+                            <th>初始进度</th>
                             <th>邀请人</th>
                             <th>邀请时间</th>
                             <th>激活状态</th>
@@ -121,6 +122,7 @@
                             <td>{{ activation.role.name }}</td>
                             <td>{{ activation.vb_course.name }}</td>
                             <td>{{ activation.y_gre_course.name }}</td>
+                            <td>{{ activation.initial_lesson.name }} - {{ activation.initial_section.name }}</td>
                             <td>{{ activation.inviter.name }}</td>
                             <td>{{ moment(activation.timestamp).format('YYYY-M-D H:mm:ss') }}</td>
                             {% if activation.activated %}
