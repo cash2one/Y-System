@@ -81,7 +81,7 @@
             {% if current_user.is_authenticated %}
             <a class="item loading" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研修档案</a>
             {% else %}
-            <a class="item loading" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
+            <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
             {% endif %}
             {% if current_user.can(Permission.BOOK) %}
             <div class="ui dropdown item">
@@ -175,7 +175,7 @@
         {% if current_user.is_authenticated %}
         <a class="item loading" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研修档案</a>
         {% else %}
-        <a class="item loading" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
+        <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
         {% endif %}
         {% if current_user.can(Permission.BOOK) %}
         <div class="item">
@@ -261,7 +261,7 @@
                     {% if current_user.is_authenticated %}
                     <a class="item loading" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研修档案</a>
                     {% else %}
-                    <a class="item loading" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
+                    <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
                     {% endif %}
                     {% if current_user.can(Permission.BOOK) %}
                     <div class="ui dropdown item">
