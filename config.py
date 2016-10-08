@@ -17,7 +17,7 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     YSYS_MAIL_SUBJECT_PREFIX = os.environ.get('YSYS_MAIL_SUBJECT_PREFIX')
     YSYS_MAIL_SENDER = os.environ.get('YSYS_MAIL_SENDER')
-    YSYS_ADMIN = os.environ.get('YSYS_ADMIN')
+    YSYS_ADMIN = unicode(os.environ.get('YSYS_ADMIN'))
     YSYS_ADMIN_PASSWORD = os.environ.get('YSYS_ADMIN_PASSWORD')
     ANALYTICS_TOKEN = os.environ.get('ANALYTICS_TOKEN')
     YSYS_SLOW_DB_QUERY_TIME=0.5

@@ -193,7 +193,7 @@ class Activation(db.Model):
             if isinstance(A[1], float):
                 A[1] = int(A[1])
             if isinstance(A[6], float):
-                A[6] = str(A[6])
+                A[6] = unicode(A[6])
             activation = Activation.query.filter_by(name=A[0]).first()
             if activation is None:
                 if Course.query.filter_by(name=A[3]).first():
