@@ -35,19 +35,19 @@
                 <h3 class="header">时段信息</h3>
                 <div class="ui tabular menu">
                     {% if show_today_schedule %}
-                    <a class="item active" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
-                    <a class="item" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
-                    <a class="item" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
+                    <a class="item active laoding" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
+                    <a class="item loading" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
+                    <a class="item loading" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
                     {% endif %}
                     {% if show_future_schedule %}
-                    <a class="item" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
-                    <a class="item active" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
-                    <a class="item" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
+                    <a class="item loading" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
+                    <a class="item active laoding" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
+                    <a class="item loading" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
                     {% endif %}
                     {% if show_history_schedule %}
-                    <a class="item" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
-                    <a class="item" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
-                    <a class="item active" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
+                    <a class="item loading" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
+                    <a class="item loading" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
+                    <a class="item active laoding" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
                     {% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">

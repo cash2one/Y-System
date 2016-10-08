@@ -35,12 +35,12 @@
                 <h3 class="header">用户列表</h3>
                 <div class="ui tabular menu">
                     {% if show_users %}
-                    <a class="item active" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item" href="{{ url_for('manage.activations') }}">激活信息</a>
+                    <a class="item active loading" href="{{ url_for('manage.users') }}">用户</a>
+                    <a class="item loading" href="{{ url_for('manage.activations') }}">激活信息</a>
                     {% endif %}
                     {% if show_activations %}
-                    <a class="item" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item active" href="{{ url_for('manage.activations') }}">激活信息</a>
+                    <a class="item loading" href="{{ url_for('manage.users') }}">用户</a>
+                    <a class="item active loading" href="{{ url_for('manage.activations') }}">激活信息</a>
                     {% endif %}
                 </div>
                 {% if show_users %}

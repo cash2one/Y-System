@@ -49,12 +49,12 @@
                 <h3 class="header">iPad借阅记录</h3>
                 <div class="ui tabular menu">
                     {% if show_today_rental %}
-                    <a class="item active" href="{{ url_for('manage.rental_today') }}">当日记录</a>
-                    <a class="item" href="{{ url_for('manage.rental_history') }}">历史记录</a>
+                    <a class="item active laoding" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item loading" href="{{ url_for('manage.rental_history') }}">历史记录</a>
                     {% endif %}
                     {% if show_history_rental %}
-                    <a class="item" href="{{ url_for('manage.rental_today') }}">当日记录</a>
-                    <a class="item active" href="{{ url_for('manage.rental_history') }}">历史记录</a>
+                    <a class="item loading" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item active laoding" href="{{ url_for('manage.rental_history') }}">历史记录</a>
                     {% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">

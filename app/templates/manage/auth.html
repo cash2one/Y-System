@@ -35,12 +35,12 @@
                 <h3 class="header">用户列表</h3>
                 <div class="ui tabular menu">
                     {% if show_auth_managers %}
-                    <a class="item active" href="{{ url_for('manage.auth_managers') }}">管理员</a>
-                    <a class="item" href="{{ url_for('manage.auth_users') }}">普通用户</a>
+                    <a class="item active loading" href="{{ url_for('manage.auth_managers') }}">管理员</a>
+                    <a class="item loading" href="{{ url_for('manage.auth_users') }}">普通用户</a>
                     {% endif %}
                     {% if show_auth_users %}
-                    <a class="item" href="{{ url_for('manage.auth_managers') }}">管理员</a>
-                    <a class="item active" href="{{ url_for('manage.auth_users') }}">普通用户</a>
+                    <a class="item loading" href="{{ url_for('manage.auth_managers') }}">管理员</a>
+                    <a class="item active loading" href="{{ url_for('manage.auth_users') }}">普通用户</a>
                     {% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">
