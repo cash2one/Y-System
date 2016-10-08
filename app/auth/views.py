@@ -55,23 +55,26 @@ def activate():
             if activation.verify_activation_code(form.activation_code.data):
                 activation.activated = True
                 db.session.add(activation)
-                user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
-                db.session.add(user)
+                new_user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
+                db.session.add(new_user)
                 if activation.vb_course_id:
                     vb_course = Course.query.filter_by(id=activation.vb_course_id).first()
                     if vb_course:
-                        user.register(course=vb_course)
+                        new_user.register(course=vb_course)
                 if activation.y_gre_course_id:
                     y_gre_course = Course.query.filter_by(id=activation.y_gre_course_id).first()
                     if y_gre_course:
-                        user.register(course=y_gre_course)
+                        new_user.register(course=y_gre_course)
                 db.session.commit()
-                user.add_user_activation(activation=activation)
-                user.add_initial_punch(activation=activation)
-                token = user.generate_confirmation_token()
-                send_email(user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=user, token=token)
+                new_user.add_user_activation(activation=activation)
+                new_user.add_initial_punch(activation=activation)
+                token = new_user.generate_confirmation_token()
+                send_email(new_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=new_user, token=token)
                 flash(u'激活成功，请登录！')
                 flash(u'一封确认邮件已经发送至您的邮箱')
+                for user in User.query.all():
+                    if user.can(Permission.MANAGE_USER):
+                        send_email(user.email, u'新用户：%s（%s）' % (new_user.name, new_user.email), 'auth/mail/new_user', user=new_user)
                 return redirect(url_for('auth.login'))
         flash(u'激活信息有误，或账户已处于激活状态')
     return render_template('auth/activate.html', form=form)
@@ -83,9 +86,6 @@ def confirm(token):
     if current_user.confirmed:
         return redirect(url_for('main.profile'))
     if current_user.confirm(token):
-        for user in User.query.all():
-            if user.can(Permission.MANAGE_USER):
-                send_email(user.email, u'新用户：%s（%s）' % (current_user.name, current_user.email), 'auth/mail/new_user', user=current_user)
         flash(u'您的邮箱账户确认成功！')
     else:
         flash(u'确认链接无效或者已经过期')

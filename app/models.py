@@ -709,7 +709,6 @@ class User(UserMixin, db.Model):
     def has_unreturned_ipads(self):
         return Rental.query.filter_by(user_id=self.id, returned=False).count() > 0
 
-
     @property
     def last_punch(self):
         return Punch.query\
@@ -717,6 +716,14 @@ class User(UserMixin, db.Model):
             .order_by(Punch.timestamp.desc())\
             .first()
 
+    @property
+    def invited_by(self):
+        return Activation.query\
+            .join(UserActivation, UserActivation.activation_id == Activation.id)\
+            .join(User, User.id == UserActivation.user_id)\
+            .filter(User.id == self.id)\
+            .first()\
+            .inviter
 
     @staticmethod
     def insert_admin():

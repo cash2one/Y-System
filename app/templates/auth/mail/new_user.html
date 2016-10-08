@@ -3,4 +3,6 @@
 <p>权限：{{ user.role.name }}</p>
 <p>VB班：{{ user.vb_course.name }}</p>
 <p>Y-GRE班：{{ user.y_gre_course.name }}</p>
+<p>初始进度：{{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</p>
+<p>邀请人：{{ user.invited_by.name }}（{{ user.invited_by.email }}）</p>
 <p><small>温馨提示：请不要回复本邮件。</small></p>
