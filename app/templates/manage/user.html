@@ -81,8 +81,8 @@
                                 <a class="ui mini icon button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user')) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
-                            <td>{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</td>
-                            <td>{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>{{ moment(user.member_since).fromNow() }}</td>
+                            <td>{{ moment(user.last_seen).fromNow() }}</td>
                             <td>
                                 <a class="ui mini button" href="{{ url_for('manage.edit_user', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
                             </td>
@@ -124,7 +124,7 @@
                             <td>{{ activation.y_gre_course.name }}</td>
                             <td>{{ activation.initial_lesson.name }} - {{ activation.initial_section.name }}</td>
                             <td>{{ activation.inviter.name }}</td>
-                            <td>{{ moment(activation.timestamp).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>{{ moment(activation.timestamp).fromNow() }}</td>
                             {% if activation.activated %}
                             <td class="positive">已激活</td>
                             {% else %}

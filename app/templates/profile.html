@@ -129,7 +129,7 @@
                     <tbody>
                         {% for punch in punches %}
                         <tr>
-                            <td>{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>{{ moment(punch.timestamp).fromNow() }}</td>
                             <td>{{ punch.lesson.type.name }}</td>
                             <td>{{ punch.lesson.name }}</td>
                             <td>{{ punch.section.name }}</td>
