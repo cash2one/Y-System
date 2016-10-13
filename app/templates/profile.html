@@ -210,6 +210,8 @@
                                 <div id="booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}" class="ui flowing popup top left transition hidden">
                                     <img class="ui small image" src="{{ qrcode(booking.booking_code) }}">
                                 </div>
+                                {% else %}
+                                N/A
                                 {% endif %}
                             </td>
                         </tr>
