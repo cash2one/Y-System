@@ -73,15 +73,22 @@
                         {% for rental in rentals %}
                         <tr>
                             <td>
-                                <a href="{{ url_for('main.profile_user', user_id=rental.user.id) }}" target="_blank">{{ rental.user.name }}</a>
+                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=rental.user.id) }}" target="_blank">{{ rental.user.name }}</a>
+                                <div class="ui popup popup-content">{{ rental.user.name }}（{{ rental.user.email }}）</div>
                             </td>
                             <td>
                                 {{ rental.ipad.alias }}
                                 [<code>{{ rental.ipad.serial }}</code>]
                             </td>
-                            <td>{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(rental.rent_time).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
                             <td>{{ rental.rent_agent.name }}</td>
-                            <td>{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
                             <td>{{ rental.return_agent.name }}</td>
                             {% if rental.returned %}
                             <td class="positive">归还</td>

@@ -73,8 +73,14 @@
                             <td>{{ user.role.name }}</td>
                             <td>{{ user.vb_course.name }}</td>
                             <td>{{ user.y_gre_course.name }}</td>
-                            <td>{{ moment(user.member_since).fromNow() }}</td>
-                            <td>{{ moment(user.last_seen).fromNow() }}</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(user.member_since).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(user.last_seen).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
                             <td>
                                 <a class="ui mini button" href="{{ url_for('manage.edit_auth', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
                             </td>

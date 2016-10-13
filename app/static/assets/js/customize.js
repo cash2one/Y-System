@@ -71,3 +71,10 @@ $('.loading')
         ;
     })
 ;
+
+// popup
+$('.popup-trigger')
+    .popup({
+        popup: '.popup-content'
+    })
+;

@@ -81,8 +81,14 @@
                                 <a class="ui mini icon button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user')) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
-                            <td>{{ moment(user.member_since).fromNow() }}</td>
-                            <td>{{ moment(user.last_seen).fromNow() }}</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(user.member_since).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(user.last_seen).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
                             <td>
                                 <a class="ui mini button" href="{{ url_for('manage.edit_user', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
                             </td>
@@ -114,7 +120,8 @@
                         <tr>
                             <td>
                                 {% if activation.activated %}
-                                <a href="{{ url_for('main.profile_user', user_id=activation.activated_user.user_id) }}" target="_blank" title="{{ activation.activated_user.user.name }}（{{ activation.activated_user.user.email }}）">{{ activation.name }}</a>
+                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=activation.activated_user.user_id) }}" target="_blank">{{ activation.name }}</a>
+                                <div class="ui popup popup-content">{{ activation.name }}（{{ activation.activated_user.user.email }}）</div>
                                 {% else %}
                                 {{ activation.name }}
                                 {% endif %}
@@ -124,7 +131,10 @@
                             <td>{{ activation.y_gre_course.name }}</td>
                             <td>{{ activation.initial_lesson.name }} - {{ activation.initial_section.name }}</td>
                             <td>{{ activation.inviter.name }}</td>
-                            <td>{{ moment(activation.timestamp).fromNow() }}</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(activation.timestamp).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(activation.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
                             {% if activation.activated %}
                             <td class="positive">已激活</td>
                             {% else %}

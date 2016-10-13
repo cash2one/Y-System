@@ -71,7 +71,8 @@
                         <tr>
                             <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td>
-                                <a href="{{ url_for('main.profile_user', user_id=booking.user.id) }}" target="_blank" title="{{ booking.user.name }}（{{ booking.user.email }}）">{{ booking.user.name }}</a>
+                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=booking.user.id) }}" target="_blank">{{ booking.user.name }}</a>
+                                <div class="ui popup popup-content">{{ booking.user.name }}（{{ booking.user.email }}）</div>
                             </td>
                             <td>{{ booking.schedule.period.type.name }}</td>
                             {% if show_history_booking %}
@@ -130,7 +131,10 @@
                                 </div>
                                 {% endif %}
                             </td>
-                            <td>{{ moment(booking.timestamp).fromNow() }}</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(booking.timestamp).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(booking.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
                             <td>
                                 <div class="ui simple dropdown mini button">
                                     <i class="wrench icon"></i>
