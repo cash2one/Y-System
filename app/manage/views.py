@@ -1155,7 +1155,7 @@ def edit_auth_admin(id):
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
-        return redirect(url_for('manage.auth'))
+        return redirect(url_for('manage.auth_admin'))
     form.name.data = user.name
     form.email.data = user.email
     form.role.data = user.role_id
