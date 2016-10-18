@@ -121,7 +121,7 @@
                             <td>
                                 {% if activation.activated %}
                                 <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=activation.activated_user.user_id) }}" target="_blank">{{ activation.name }}</a>
-                                <div class="ui popup popup-content">{{ activation.name }}（{{ activation.activated_user.user.email }}）</div>
+                                <div class="ui flowing popup popup-content">{{ activation.name }}（{{ activation.activated_user.user.email }}）</div>
                                 {% else %}
                                 {{ activation.name }}
                                 {% endif %}

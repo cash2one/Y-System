@@ -1002,7 +1002,8 @@ def auth():
                 Role.name == u'时段协管员',
                 Role.name == u'iPad内容协管员',
                 Role.name == u'用户协管员',
-                Role.name == u'志愿者'
+                Role.name == u'志愿者',
+                Role.name == u'管理员'
             ))\
             .order_by(User.last_seen.desc())
     if show_auth_users:
@@ -1093,7 +1094,8 @@ def auth_admin():
                 Role.name == u'iPad内容协管员',
                 Role.name == u'用户协管员',
                 Role.name == u'志愿者',
-                Role.name == u'管理员'
+                Role.name == u'管理员',
+                Role.name == u'开发人员'
             ))\
             .order_by(Role.id.desc())
     if show_auth_users_admin:

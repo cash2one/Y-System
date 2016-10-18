@@ -216,7 +216,8 @@ class EditAuthForm(Form):
 
     def __init__(self, user, *args, **kwargs):
         super(EditAuthForm, self).__init__(*args, **kwargs)
-        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'管理员', u'开发人员']]
+        # self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'管理员', u'开发人员']]
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
         self.user = user
@@ -236,7 +237,8 @@ class EditAuthFormAdmin(Form):
 
     def __init__(self, user, *args, **kwargs):
         super(EditAuthFormAdmin, self).__init__(*args, **kwargs)
-        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+        # self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all()]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
         self.user = user
