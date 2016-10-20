@@ -1,2 +1,0 @@
--r common.txt
-xlrd>=1.0.0
