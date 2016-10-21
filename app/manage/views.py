@@ -573,7 +573,6 @@ def ipad():
         query = iPad.query.filter_by(room_id=None)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    # ipad_contents = [{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]
     return render_template('manage/ipad.html', form=form, ipads=ipads, ipad_contents=ipad_contents, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
 
 
