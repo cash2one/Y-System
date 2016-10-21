@@ -2,6 +2,7 @@
 
 from datetime import datetime, date, time
 from sqlalchemy import or_
+import json
 from flask import render_template, redirect, url_for, flash, current_app, make_response, request
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
@@ -9,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, Room, Course, Rental, Lesson, Section, Punch
+from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch
 from ..decorators import admin_required, permission_required
 
 
@@ -526,7 +527,7 @@ def ipad():
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
         db.session.commit()
-        # ipad.update_contents_json()
+        iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial)
         return redirect(url_for('manage.ipad'))
     maintain_num = iPad.query\
@@ -573,7 +574,7 @@ def ipad():
         query = iPad.query.filter_by(room_id=None)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    return render_template('manage/ipad.html', form=form, ipads=ipads, ipad_contents=ipad_contents, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
+    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
 
 
 @manage.route('/ipad/all')
@@ -682,7 +683,7 @@ def edit_ipad(id):
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
         db.session.commit()
-        # ipad.update_contents_json()
+        iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新')
         return redirect(url_for('manage.ipad'))
     form.alias.data = ipad.alias
@@ -707,6 +708,7 @@ def delete_ipad(id):
             ipad.remove_lesson(pc.lesson_id)
         db.session.delete(ipad)
         db.session.commit()
+        iPadContentJSON.mark_out_of_date()
         flash(u'已删除序列号为%s的iPad' % ipad_serial)
         return redirect(url_for('manage.ipad'))
     return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
@@ -730,8 +732,10 @@ def filter_ipad():
 @login_required
 @permission_required(Permission.MANAGE)
 def ipad_contents():
-    ipad_contents = [{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]
-    return render_template('manage/ipad_contents.html', ipad_contents=ipad_contents)
+    ipad_contents = iPadContentJSON.query.get_or_404(1)
+    if ipad_contents.out_of_date:
+        iPadContentJSON.update()
+    return render_template('manage/ipad_contents.html', ipad_contents=json.loads(ipad_contents.json_string))
 
 
 @manage.route('/user', methods=['GET', 'POST'])

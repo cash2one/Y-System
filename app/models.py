@@ -5,7 +5,7 @@ from datetime import datetime, date, time, timedelta
 from sqlalchemy import or_
 from base64 import urlsafe_b64encode
 import hashlib
-# import json
+import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
@@ -1050,9 +1050,38 @@ class iPadContent(db.Model):
                         db.session.add(ipad_content)
                         print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
         db.session.commit()
-        # for ipad in iPad.query.all():
-        #     ipad.update_contents_json()
-        # db.session.commit()
+        iPadContentJSON.update()
+        db.session.commit()
+
+
+class iPadContentJSON(db.Model):
+    __tablename__ = 'ipad_contents_json'
+    id = db.Column(db.Integer, primary_key=True)
+    json_string = db.Column(db.UnicodeText)
+    out_of_date = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def update():
+        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]))
+        pc_json = iPadContentJSON.query.filter_by(id=1).first()
+        if pc_json is not None:
+            pc_json.json_string = json_string
+            pc_json.out_of_date = False
+        else:
+            pc_json = iPadContentJSON(json_string=json_string, out_of_date=False)
+        db.session.add(pc_json)
+
+    @staticmethod
+    def mark_out_of_date():
+        pc_json = iPadContentJSON.query.filter_by(id=1).first()
+        if pc_json is not None:
+            pc_json.out_of_date = True
+        else:
+            pc_json = iPadContentJSON(out_of_date=True)
+        db.session.add(pc_json)
+
+    def __repr__(self):
+        return '<iPadContentJSON %s>' % self.json_string
 
 
 class iPad(db.Model):
@@ -1063,7 +1092,6 @@ class iPad(db.Model):
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
-    # contents_json = db.Column(db.UnicodeText)
     lessons_included = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.ipad_id],
@@ -1095,15 +1123,6 @@ class iPad(db.Model):
 
     def has_lesson(self, lesson_id):
         return iPadContent.query.filter_by(ipad_id=self.id, lesson_id=lesson_id).first() is not None
-
-    # def update_contents_json(self):
-    #     self.contents_json = unicode(json.dumps(
-    #             {
-    #                 'vb': [lesson.name for lesson in self.has_vb_lessons],
-    #                 'y_gre': [lesson.name for lesson in self.has_y_gre_lessons],
-    #             }
-    #         ))
-    #     db.session.add(self)
 
     @property
     def has_lessons(self):
