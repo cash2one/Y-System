@@ -128,7 +128,7 @@ def set_booking_state_valid(user_id, schedule_id):
 def set_booking_state_wait(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'排队')
-    db.session.commit()
+    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -138,7 +138,7 @@ def set_booking_state_wait(user_id, schedule_id):
 def set_booking_state_invalid(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'失效')
-    db.session.commit()
+    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -148,7 +148,7 @@ def set_booking_state_invalid(user_id, schedule_id):
 def set_booking_state_kept(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'赴约')
-    db.session.commit()
+    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -158,7 +158,7 @@ def set_booking_state_kept(user_id, schedule_id):
 def set_booking_state_late(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'迟到')
-    db.session.commit()
+    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -168,7 +168,7 @@ def set_booking_state_late(user_id, schedule_id):
 def set_booking_state_missed(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'爽约')
-    db.session.commit()
+    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -526,6 +526,7 @@ def ipad():
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
         db.session.commit()
+        # ipad.update_contents_json()
         flash(u'成功添加序列号为%s的iPad' % serial)
         return redirect(url_for('manage.ipad'))
     maintain_num = iPad.query\
@@ -572,7 +573,7 @@ def ipad():
         query = iPad.query.filter_by(room_id=None)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    ipad_contents = [{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]
+    # ipad_contents = [{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]
     return render_template('manage/ipad.html', form=form, ipads=ipads, ipad_contents=ipad_contents, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
 
 
@@ -682,6 +683,7 @@ def edit_ipad(id):
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
         db.session.commit()
+        # ipad.update_contents_json()
         flash(u'iPad信息已更新')
         return redirect(url_for('manage.ipad'))
     form.alias.data = ipad.alias
@@ -1229,13 +1231,13 @@ def rental_rent_step_1():
             return redirect(url_for('manage.rental_rent_step_1'))
         if booking.schedule.ended:
             booking.set_state(u'爽约')
-            db.session.commit()
+            # db.session.commit()
         if booking.schedule.started_n_min(n_min=current_app.config['TOLERATE_MINUTES']):
             booking.set_state(u'迟到')
-            db.session.commit()
+            # db.session.commit()
         if booking.schedule.unstarted_n_min(n_min=current_app.config['TOLERATE_MINUTES']):
             booking.set_state(u'赴约')
-            db.session.commit()
+            # db.session.commit()
         return redirect(url_for('manage.rental_rent_step_2', user_id=booking.user_id))
     return render_template('manage/rental_rent_step_1.html', form=form)
 
@@ -1273,7 +1275,7 @@ def rental_rent_step_3(user_id, ipad_id):
         rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
-        db.session.commit()
+        # db.session.commit()
         flash(u'iPad借出信息登记成功')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3.html', user=user, ipad=ipad, form=form)
@@ -1327,7 +1329,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
-        db.session.commit()
+        # db.session.commit()
         flash(u'iPad借出信息登记成功')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3_alt.html', user=user, ipad=ipad, form=form)

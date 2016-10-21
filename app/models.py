@@ -5,6 +5,7 @@ from datetime import datetime, date, time, timedelta
 from sqlalchemy import or_
 from base64 import urlsafe_b64encode
 import hashlib
+# import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
@@ -1049,6 +1050,9 @@ class iPadContent(db.Model):
                         db.session.add(ipad_content)
                         print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
         db.session.commit()
+        # for ipad in iPad.query.all():
+        #     ipad.update_contents_json()
+        # db.session.commit()
 
 
 class iPad(db.Model):
@@ -1059,6 +1063,7 @@ class iPad(db.Model):
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
+    # contents_json = db.Column(db.UnicodeText)
     lessons_included = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.ipad_id],
@@ -1091,6 +1096,15 @@ class iPad(db.Model):
     def has_lesson(self, lesson_id):
         return iPadContent.query.filter_by(ipad_id=self.id, lesson_id=lesson_id).first() is not None
 
+    # def update_contents_json(self):
+    #     self.contents_json = unicode(json.dumps(
+    #             {
+    #                 'vb': [lesson.name for lesson in self.has_vb_lessons],
+    #                 'y_gre': [lesson.name for lesson in self.has_y_gre_lessons],
+    #             }
+    #         ))
+    #     db.session.add(self)
+
     @property
     def has_lessons(self):
         return Lesson.query\
@@ -1099,23 +1113,31 @@ class iPad(db.Model):
             .order_by(Lesson.id.asc())
 
     @property
-    def vb_lesson_ids_included(self):
-        vb_lessons = Lesson.query\
+    def has_vb_lessons(self):
+        return Lesson.query\
             .join(iPadContent, iPadContent.lesson_id == Lesson.id)\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(iPadContent.ipad_id == self.id)\
             .filter(CourseType.name == u'VB')\
             .order_by(Lesson.id.asc())
-        return [vb_lesson.id for vb_lesson in vb_lessons]
 
     @property
-    def y_gre_lesson_ids_included(self):
-        y_gre_lessons = Lesson.query\
+    def has_y_gre_lessons(self):
+        return Lesson.query\
             .join(iPadContent, iPadContent.lesson_id == Lesson.id)\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(iPadContent.ipad_id == self.id)\
             .filter(CourseType.name == u'Y-GRE')\
             .order_by(Lesson.id.asc())
+
+    @property
+    def vb_lesson_ids_included(self):
+        vb_lessons = self.has_vb_lessons
+        return [vb_lesson.id for vb_lesson in vb_lessons]
+
+    @property
+    def y_gre_lesson_ids_included(self):
+        y_gre_lessons = self.has_y_gre_lessons
         return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
 
     @staticmethod
