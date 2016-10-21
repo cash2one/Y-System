@@ -32,7 +32,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">确定要删除{{ activation.name }}的激活邀请？</h3>
-                <form method="POST" class="ui form">
+                <form id="delete-activation" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     {{ form.submit(class='ui negative button') }}
                     <a class="ui button cancel" href="{{ url_for('manage.user') }}">取消</a>

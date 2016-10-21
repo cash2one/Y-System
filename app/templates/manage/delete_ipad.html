@@ -32,7 +32,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">确定要删除序列号为<code>{{ ipad.serial }}</code>的iPad？</h3>
-                <form method="POST" class="ui form">
+                <form id="delete-ipad" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     {{ form.submit(class='ui negative button') }}
                     <a class="ui button cancel" href="{{ url_for('manage.ipad') }}">取消</a>

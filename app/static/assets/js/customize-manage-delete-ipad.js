@@ -12,3 +12,13 @@ $('.message .close')
         ;
     })
 ;
+
+$(document)
+    .ready(function() {
+        $('#delete-ipad')
+            .form({
+                onSuccess: submitForm
+            })
+        ;
+    })
+;
