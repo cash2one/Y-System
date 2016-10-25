@@ -1410,7 +1410,13 @@ def rental_return_step_4(user_id, lesson_id, section_id):
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
-        punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
+        punch = Punch.query\
+            .filter_by(user_id=user_id, lesson_id=lesson_id, section_id=section_id)\
+            .first()
+        if punch is not None:
+            punch.timestamp = datetime.utcnow()
+        else:
+            punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
         db.session.commit()
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
@@ -1467,7 +1473,13 @@ def rental_return_step_4_alt(user_id, lesson_id, section_id):
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
-        punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
+        punch = Punch.query\
+            .filter_by(user_id=user_id, lesson_id=lesson_id, section_id=section_id)\
+            .first()
+        if punch is not None:
+            punch.timestamp = datetime.utcnow()
+        else:
+            punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
         db.session.commit()
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))

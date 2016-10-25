@@ -58,11 +58,11 @@
                             {% endif %}
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui mini button" href="{{ url_for('manage.edit_period', id=period.id) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_period', id=period.id) }}"><i class="edit icon"></i></a>
                                     {% if period.used %}
                                     <div class="ui mini disabled negative button"><i class="trash outline icon"></i></div>
                                     {% else %}
-                                    <a class="ui mini negative button" href="{{ url_for('manage.delete_period', id=period.id) }}"><i class="trash outline icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_period', id=period.id) }}"><i class="trash outline icon"></i></a>
                                     {% endif %}
                                 </div>
                             </td>
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <a class="ui button" href="{{ url_for('manage.schedule') }}">管理时段信息</a>
+                    <a class="ui button loading-trigger" href="{{ url_for('manage.schedule') }}">管理时段信息</a>
                     <div class="ui error message"></div>
                 </form>
             </div>
