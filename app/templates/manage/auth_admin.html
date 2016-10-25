@@ -35,12 +35,12 @@
                 <h3 class="header">用户列表</h3>
                 <div class="ui tabular menu">
                     {% if show_auth_managers_admin %}
-                    <a class="item active loading" href="{{ url_for('manage.auth_managers_admin') }}">管理员</a>
-                    <a class="item loading" href="{{ url_for('manage.auth_users_admin') }}">普通用户</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.auth_managers_admin') }}">管理员</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.auth_users_admin') }}">普通用户</a>
                     {% endif %}
                     {% if show_auth_users_admin %}
-                    <a class="item loading" href="{{ url_for('manage.auth_managers_admin') }}">管理员</a>
-                    <a class="item active loading" href="{{ url_for('manage.auth_users_admin') }}">普通用户</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.auth_managers_admin') }}">管理员</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.auth_users_admin') }}">普通用户</a>
                     {% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">
@@ -82,7 +82,7 @@
                                 <div class="ui popup popup-content">{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
-                                <a class="ui mini button" href="{{ url_for('manage.edit_auth_admin', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_auth_admin', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
                             </td>
                         </tr>
                         {% endfor %}

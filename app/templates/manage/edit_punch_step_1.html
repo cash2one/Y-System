@@ -59,13 +59,13 @@
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
                             <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
                         </div>
-                        <form id="make-punch" method="POST" class="ui form">
+                        <form id="punch-lesson" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="field">
                                 {{ form.lesson.label() }}
                                 {{ form.lesson(class='ui search dropdown') }}
                             </div>
-                            <a class="ui button" href="{{ request.args.get('next') or url_for('manage.find_user') }}">取消</a>
+                            <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.find_user') }}">取消</a>
                             {{ form.submit(class='ui primary button') }}
                             <div class="ui error message"></div>
                         </form>

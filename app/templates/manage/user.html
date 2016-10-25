@@ -35,12 +35,12 @@
                 <h3 class="header">用户列表</h3>
                 <div class="ui tabular menu">
                     {% if show_users %}
-                    <a class="item active loading" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item loading" href="{{ url_for('manage.activations') }}">激活信息</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.users') }}">用户</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.activations') }}">激活信息</a>
                     {% endif %}
                     {% if show_activations %}
-                    <a class="item loading" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item active loading" href="{{ url_for('manage.activations') }}">激活信息</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.users') }}">用户</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.activations') }}">激活信息</a>
                     {% endif %}
                 </div>
                 {% if show_users %}
@@ -78,7 +78,7 @@
                             <td>
                                 {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}
                                 {% if current_user.can(Permission.MANAGE_USER) %}
-                                <a class="ui mini icon button" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user')) }}"><i class="refresh icon"></i></a>
+                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user')) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -90,7 +90,7 @@
                                 <div class="ui popup popup-content">{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
-                                <a class="ui mini button" href="{{ url_for('manage.edit_user', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -148,8 +148,8 @@
                                 </div>
                                 {% else %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui mini button" href="{{ url_for('manage.edit_activation', id=activation.id) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button" href="{{ url_for('manage.delete_activation', id=activation.id) }}"><i class="trash outline icon"></i></a>
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_activation', id=activation.id) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_activation', id=activation.id) }}"><i class="trash outline icon"></i></a>
                                 </div>
                                 {% endif %}
                             </td>

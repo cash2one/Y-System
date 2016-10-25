@@ -12,3 +12,13 @@ $('.message .close')
         ;
     })
 ;
+
+$(document)
+    .ready(function() {
+        $('#select-ipad')
+            .form({
+                onSuccess: submitForm
+            })
+        ;
+    })
+;

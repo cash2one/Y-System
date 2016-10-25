@@ -35,7 +35,7 @@
                 <form id="delete-ipad" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     {{ form.submit(class='ui negative button') }}
-                    <a class="ui button cancel" href="{{ url_for('manage.ipad') }}">取消</a>
+                    <a class="ui button cancel loading-trigger" href="{{ url_for('manage.ipad') }}">取消</a>
                     <div class="ui error message"></div>
                 </form>
             </div>

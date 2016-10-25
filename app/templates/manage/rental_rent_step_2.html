@@ -65,7 +65,7 @@
                                 {{ form.ipad.label() }}
                                 {{ form.ipad(class='ui search dropdown') }}
                             </div>
-                            <a class="ui button" href="{{ url_for('manage.rental_rent_step_1') }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_1') }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <div class="ui error message"></div>
                         </form>

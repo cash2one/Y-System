@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import date, time, timedelta
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import StringField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
@@ -20,7 +20,7 @@ def NextHalfHourString(halfHours, startHour=6):
     return t.strftime(u'%H:%M')
 
 
-class NewScheduleForm(Form):
+class NewScheduleForm(FlaskForm):
     date = SelectField(u'日期', coerce=unicode)
     period = SelectMultipleField(u'时段', coerce=int)
     quota = IntegerField(u'名额', validators=[Required(), NumberRange(min=1)])
@@ -33,7 +33,7 @@ class NewScheduleForm(Form):
         self.period.choices = [(period.id, period.alias3) for period in Period.query.order_by(Period.id.asc()).all() if period.show]
 
 
-class NewPeriodForm(Form):
+class NewPeriodForm(FlaskForm):
     name = StringField(u'时段名称', validators=[Required(message=u'请输入时段名称')])
     start_time = SelectField(u'开始时间', coerce=unicode)
     end_time = SelectField(u'结束时间', coerce=unicode)
@@ -48,7 +48,7 @@ class NewPeriodForm(Form):
         self.period_type.choices = [(period_type.id, period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
-class EditPeriodForm(Form):
+class EditPeriodForm(FlaskForm):
     name = StringField(u'时段名称', validators=[Required(message=u'请输入时段名称')])
     start_time = SelectField(u'开始时间', coerce=unicode)
     end_time = SelectField(u'结束时间', coerce=unicode)
@@ -63,11 +63,11 @@ class EditPeriodForm(Form):
         self.period_type.choices = [(period_type.id, period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
-class DeletePeriodForm(Form):
+class DeletePeriodForm(FlaskForm):
     submit = SubmitField(u'删除')
 
 
-class NewiPadForm(Form):
+class NewiPadForm(FlaskForm):
     alias = StringField(u'编号')
     serial = StringField(u'序列号', validators=[Required(message=u'请输入iPad序列号')])
     capacity = SelectField(u'容量', coerce=int)
@@ -90,7 +90,7 @@ class NewiPadForm(Form):
             raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
 
 
-class EditiPadForm(Form):
+class EditiPadForm(FlaskForm):
     alias = StringField(u'编号')
     serial = StringField(u'序列号', validators=[Required(message=u'请输入iPad序列号')])
     capacity = SelectField(u'容量', coerce=int)
@@ -114,11 +114,11 @@ class EditiPadForm(Form):
             raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
 
 
-class DeleteiPadForm(Form):
+class DeleteiPadForm(FlaskForm):
     submit = SubmitField(u'删除')
 
 
-class FilteriPadForm(Form):
+class FilteriPadForm(FlaskForm):
     vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
     submit = SubmitField(u'筛选')
@@ -129,7 +129,7 @@ class FilteriPadForm(Form):
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
 
 
-class NewActivationForm(Form):
+class NewActivationForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
     role = SelectField(u'用户组', coerce=int)
@@ -144,7 +144,7 @@ class NewActivationForm(Form):
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
-class EditActivationForm(Form):
+class EditActivationForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
     role = SelectField(u'用户组', coerce=int)
@@ -159,11 +159,11 @@ class EditActivationForm(Form):
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
-class DeleteActivationForm(Form):
+class DeleteActivationForm(FlaskForm):
     submit = SubmitField(u'删除')
 
 
-class EditUserForm(Form):
+class EditUserForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户组', coerce=int)
@@ -183,12 +183,12 @@ class EditUserForm(Form):
             raise ValidationError(u'%s已经被注册' % field.data)
 
 
-class FindUserForm(Form):
+class FindUserForm(FlaskForm):
     name_or_email = StringField(u'用户姓名或者邮箱', validators=[Required(message=u'请输入用户姓名或者邮箱'), Length(1, 64)])
     submit = SubmitField(u'检索')
 
 
-class EditPunchLessonForm(Form):
+class EditPunchLessonForm(FlaskForm):
     lesson = SelectField(u'课程进度', coerce=int)
     submit = SubmitField(u'下一步')
 
@@ -197,7 +197,7 @@ class EditPunchLessonForm(Form):
         self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
 
 
-class EditPunchSectionForm(Form):
+class EditPunchSectionForm(FlaskForm):
     section = SelectField(u'视频进度', coerce=int)
     submit = SubmitField(u'下一步')
 
@@ -206,7 +206,7 @@ class EditPunchSectionForm(Form):
         self.section.choices = [(section.id, u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
 
 
-class EditAuthForm(Form):
+class EditAuthForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户组', coerce=int)
@@ -227,7 +227,7 @@ class EditAuthForm(Form):
             raise ValidationError(u'%s已经被注册' % field.data)
 
 
-class EditAuthFormAdmin(Form):
+class EditAuthFormAdmin(FlaskForm):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户组', coerce=int)
@@ -248,12 +248,12 @@ class EditAuthFormAdmin(Form):
             raise ValidationError(u'%s已经被注册' % field.data)
 
 
-class BookingCodeForm(Form):
+class BookingCodeForm(FlaskForm):
     booking_code = StringField(u'预约码', validators=[Required(message=u'请输入预约码')])
     submit = SubmitField(u'下一步')
 
 
-class RentiPadForm(Form):
+class RentiPadForm(FlaskForm):
     ipad = SelectField(u'可用iPad', coerce=int)
     submit = SubmitField(u'下一步')
 
@@ -262,12 +262,12 @@ class RentiPadForm(Form):
         self.ipad.choices = [(ipad.id, u'%s %s %s：%s' % (ipad.alias, ipad.state.name, ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in ipad.has_lessons]))) for ipad in user.fitted_ipads if ipad.state.name in [u'待机', u'候补']]
 
 
-class RentalEmailForm(Form):
+class RentalEmailForm(FlaskForm):
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'下一步')
 
 
-class ConfirmiPadForm(Form):
+class ConfirmiPadForm(FlaskForm):
     root = BooleanField(u'引导式访问状态正常')
     battery = BooleanField(u'电量充足')
     volume = BooleanField(u'音量已经复位')
@@ -279,7 +279,7 @@ class ConfirmiPadForm(Form):
     submit = SubmitField(u'确认并提交')
 
 
-class iPadSerialForm(Form):
+class iPadSerialForm(FlaskForm):
     root = BooleanField(u'引导式访问状态正常')
     battery = BooleanField(u'电量充足')
     volume = BooleanField(u'音量已经复位')
@@ -291,7 +291,7 @@ class iPadSerialForm(Form):
     submit = SubmitField(u'下一步')
 
 
-class PunchLessonForm(Form):
+class PunchLessonForm(FlaskForm):
     lesson = SelectField(u'课程进度', coerce=int)
     submit = SubmitField(u'下一步')
 
@@ -300,7 +300,7 @@ class PunchLessonForm(Form):
         self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.lesson_id]
 
 
-class PunchSectionForm(Form):
+class PunchSectionForm(FlaskForm):
     section = SelectField(u'视频进度', coerce=int)
     submit = SubmitField(u'下一步')
 
@@ -309,7 +309,7 @@ class PunchSectionForm(Form):
         self.section.choices = [(section.id, u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
 
 
-class ConfirmPunchForm(Form):
+class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
 
 

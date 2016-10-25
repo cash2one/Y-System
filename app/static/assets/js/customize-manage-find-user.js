@@ -17,10 +17,6 @@ $('.message .close')
     })
 ;
 
-function submitForm() {
-    $(this).form('submit');
-};
-
 $(document)
     .ready(function() {
         $('#find-user')

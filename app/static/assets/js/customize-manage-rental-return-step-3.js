@@ -12,3 +12,13 @@ $('.message .close')
         ;
     })
 ;
+
+$(document)
+    .ready(function() {
+        $('#punch-section')
+            .form({
+                onSuccess: submitForm
+            })
+        ;
+    })
+;
