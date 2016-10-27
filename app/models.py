@@ -1060,8 +1060,10 @@ class iPadContent(db.Model):
                         db.session.add(ipad_content)
                         print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
         db.session.commit()
-        iPadContentJSON.update()
-        db.session.commit()
+        ipad_contents = iPadContentJSON.query.get_or_404(1)
+        if ipad_contents.out_of_date:
+            iPadContentJSON.update()
+            db.session.commit()
 
 
 class iPadContentJSON(db.Model):

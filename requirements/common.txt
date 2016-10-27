@@ -16,7 +16,6 @@ Jinja2==2.8
 Mako==1.0.4
 MarkupSafe==0.23
 Pillow==3.4.2
-pyBarcode==0.7
 python-editor==1.0.1
 qrcode==5.3
 six==1.10.0
