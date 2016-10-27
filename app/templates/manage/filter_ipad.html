@@ -31,6 +31,21 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <form id="filter-ipad" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.vb_lessons.label() }}
+                            {{ form.vb_lessons(class='ui search dropdown') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.y_gre_lessons.label() }}
+                            {{ form.y_gre_lessons(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
                 {% if ipads %}
                 <h3 class="header">筛选结果</h3>
                 <table class="ui very basic sortable selectable celled table">
@@ -85,31 +100,6 @@
                 {% else %}
                 <h3 class="header">暂无筛选结果</h3>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="header">筛选iPad</h3>
-                <form id="filter-ipad" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.vb_lessons.label() }}
-                            {{ form.vb_lessons(class='ui search dropdown') }}
-                        </div>
-                        <div class="eight wide field">
-                            {{ form.y_gre_lessons.label() }}
-                            {{ form.y_gre_lessons(class='ui search dropdown') }}
-                        </div>
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
-                </form>
             </div>
         </div>
     </div>

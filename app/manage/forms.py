@@ -184,7 +184,7 @@ class EditUserForm(FlaskForm):
 
 
 class FindUserForm(FlaskForm):
-    name_or_email = StringField(u'用户姓名或者邮箱', validators=[Required(message=u'请输入用户姓名或者邮箱'), Length(1, 64)])
+    name_or_email = StringField(u'用户姓名 或 邮箱', validators=[Required(message=u'请输入用户姓名或者邮箱'), Length(1, 64)])
     submit = SubmitField(u'检索')
 
 
