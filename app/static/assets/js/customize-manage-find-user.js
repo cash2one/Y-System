@@ -37,3 +37,13 @@ $(document)
         ;
     })
 ;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: 'find-user/suggestions/?keyword={query}'
+        },
+        // selectFirstResult: true,
+        showNoResults: false
+    })
+;

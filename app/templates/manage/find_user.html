@@ -35,7 +35,10 @@
                     {{ form.hidden_tag() }}
                     <div class="field">
                         {{ form.name_or_email.label() }}
-                        {{ form.name_or_email(placeholder='输入用户姓名/邮箱') }}
+                        <div class="ui search">
+                            {{ form.name_or_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
+                            <div class="results"></div>
+                        </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <div class="ui error message"></div>
