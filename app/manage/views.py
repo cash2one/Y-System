@@ -3,7 +3,7 @@
 from datetime import datetime, date, time
 from sqlalchemy import or_
 import json
-from flask import render_template, redirect, url_for, flash, current_app, make_response, request
+from flask import render_template, redirect, url_for, flash, current_app, make_response, request, jsonify
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
@@ -940,33 +940,39 @@ def edit_punch_step_3(user_id, lesson_id, section_id):
 @login_required
 @permission_required(Permission.MANAGE)
 def find_user():
+    users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        users = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(or_(
-                User.name == name_or_email,
-                User.email == name_or_email
-            ))\
-            .filter(or_(
-                Role.name == u'禁止预约',
-                Role.name == u'单VB',
-                Role.name == u'Y-GRE 普通',
-                Role.name == u'Y-GRE VBx2',
-                Role.name == u'Y-GRE A权限'
-            ))\
-            .order_by(User.last_seen.desc())
-    else:
-        users = []
-    form = FindUserForm()
-    if form.validate_on_submit():
-        name_or_email = form.name_or_email.data
-        if name_or_email:
+        if current_user.can(Permission.ADMINISTER):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(or_(
-                    User.name == name_or_email,
-                    User.email == name_or_email
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .order_by(User.last_seen.desc())
+        elif current_user.can(Permission.MANAGE_AUTH):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'管理员'
+                ))\
+                .order_by(User.last_seen.desc())
+        else:
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
                     Role.name == u'禁止预约',
@@ -976,8 +982,99 @@ def find_user():
                     Role.name == u'Y-GRE A权限'
                 ))\
                 .order_by(User.last_seen.desc())
+    form = FindUserForm()
+    if form.validate_on_submit():
+        name_or_email = form.name_or_email.data
+        if name_or_email:
+            if current_user.can(Permission.ADMINISTER):
+                users = User.query\
+                    .join(Role, Role.id == User.role_id)\
+                    .filter(or_(
+                        User.name.like('%' + name_or_email + '%'),
+                        User.email.like('%' + name_or_email + '%')
+                    ))\
+                    .order_by(User.last_seen.desc())
+            elif current_user.can(Permission.MANAGE_AUTH):
+                users = User.query\
+                    .join(Role, Role.id == User.role_id)\
+                    .filter(or_(
+                        User.name.like('%' + name_or_email + '%'),
+                        User.email.like('%' + name_or_email + '%')
+                    ))\
+                    .filter(or_(
+                        Role.name == u'禁止预约',
+                        Role.name == u'单VB',
+                        Role.name == u'Y-GRE 普通',
+                        Role.name == u'Y-GRE VBx2',
+                        Role.name == u'Y-GRE A权限',
+                        Role.name == u'管理员'
+                    ))\
+                    .order_by(User.last_seen.desc())
+            else:
+                users = User.query\
+                    .join(Role, Role.id == User.role_id)\
+                    .filter(or_(
+                        User.name.like('%' + name_or_email + '%'),
+                        User.email.like('%' + name_or_email + '%')
+                    ))\
+                    .filter(or_(
+                        Role.name == u'禁止预约',
+                        Role.name == u'单VB',
+                        Role.name == u'Y-GRE 普通',
+                        Role.name == u'Y-GRE VBx2',
+                        Role.name == u'Y-GRE A权限'
+                    ))\
+                    .order_by(User.last_seen.desc())
     form.name_or_email.data = name_or_email
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
+
+
+@manage.route('/find-user/suggestions/')
+@permission_required(Permission.MANAGE)
+def suggest_user():
+    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        if current_user.can(Permission.ADMINISTER):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .order_by(User.last_seen.desc())
+        elif current_user.can(Permission.MANAGE_AUTH):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'管理员'
+                ))\
+                .order_by(User.last_seen.desc())
+        else:
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限'
+                ))\
+                .order_by(User.last_seen.desc())
+    return jsonify({'results': [user.to_json_suggestion for user in users]})
 
 
 @manage.route('/analytics')

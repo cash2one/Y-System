@@ -726,6 +726,14 @@ class User(UserMixin, db.Model):
             .first()\
             .inviter
 
+    @property
+    def to_json_suggestion(self):
+        json_suggestion = {
+            'title': self.name,
+            'description': self.email,
+        }
+        return json_suggestion
+
     @staticmethod
     def insert_admin():
         admin = User.query.filter_by(email=current_app.config['YSYS_ADMIN']).first()
@@ -738,6 +746,8 @@ class User(UserMixin, db.Model):
             )
             db.session.add(admin)
             db.session.commit()
+            initial_punch = Punch(user_id=admin.id, lesson_id=1, section_id=1)
+            db.session.add(initial_punch)
             print u'初始化系统管理员信息'
 
     def __repr__(self):

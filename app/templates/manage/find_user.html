@@ -31,6 +31,18 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <form id="find-user" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="field">
+                        {{ form.name_or_email.label() }}
+                        <div class="ui search">
+                            {{ form.name_or_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
+                            <div class="results"></div>
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
                 {% if users %}
                 <h3 class="header">检索结果</h3>
                 <table class="ui very basic sortable selectable celled table">
@@ -92,25 +104,6 @@
                 {% else %}
                 <h3 class="header">暂无检索结果</h3>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="header">检索用户</h3>
-                <form id="find-user" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="field">
-                        {{ form.name_or_email.label() }}
-                        {{ form.name_or_email(placeholder='输入姓名或者邮箱') }}
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
-                </form>
             </div>
         </div>
     </div>
