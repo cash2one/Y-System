@@ -74,7 +74,7 @@ var option = {
 visitSummaryChart.setOption(option);
 visitSummaryChart.showLoading();
 function updateVisitSummaryChart() {
-    $.getJSON('https://dev.y-english.org/analytics/?callback=?', {
+    $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getUniqueVisitors',
         'idSite': '1',
@@ -100,7 +100,7 @@ function updateVisitSummaryChart() {
             }]
         });
     });
-    $.getJSON('https://dev.y-english.org/analytics/?callback=?', {
+    $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getVisits',
         'idSite': '1',
@@ -121,7 +121,7 @@ function updateVisitSummaryChart() {
             }]
         });
     });
-    $.getJSON('https://dev.y-english.org/analytics/?callback=?', {
+    $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getActions',
         'idSite': '1',
