@@ -14,6 +14,39 @@ $('.message .close')
 ;
 
 // visit
+$.getJSON(analyticsAPIurl, {
+    'module': 'API',
+    'method': 'VisitsSummary.getUniqueVisitors',
+    'idSite': '1',
+    'period': 'day',
+    'date': 'yesterday',
+    'format': 'JSON',
+    'token_auth': analyticsToken
+}, function(data) {
+    $('#yesterday-visitors-stat').text(data.value);
+});
+$.getJSON(analyticsAPIurl, {
+    'module': 'API',
+    'method': 'VisitsSummary.getVisits',
+    'idSite': '1',
+    'period': 'day',
+    'date': 'yesterday',
+    'format': 'JSON',
+    'token_auth': analyticsToken
+}, function(data) {
+    $('#yesterday-visits-stat').text(data.value);
+});
+$.getJSON(analyticsAPIurl, {
+    'module': 'API',
+    'method': 'VisitsSummary.getActions',
+    'idSite': '1',
+    'period': 'day',
+    'date': 'yesterday',
+    'format': 'JSON',
+    'token_auth': analyticsToken
+}, function(data) {
+    $('#yesterday-actions-stat').text(data.value);
+});
 function updateVisit() {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
@@ -48,39 +81,6 @@ function updateVisit() {
     }, function(data) {
         $('#today-actions-stat').text(data.value);
     });
-    $.getJSON(analyticsAPIurl, {
-        'module': 'API',
-        'method': 'VisitsSummary.getUniqueVisitors',
-        'idSite': '1',
-        'period': 'day',
-        'date': 'yesterday',
-        'format': 'JSON',
-        'token_auth': analyticsToken
-    }, function(data) {
-        $('#yesterday-visitors-stat').text(data.value);
-    });
-    $.getJSON(analyticsAPIurl, {
-        'module': 'API',
-        'method': 'VisitsSummary.getVisits',
-        'idSite': '1',
-        'period': 'day',
-        'date': 'yesterday',
-        'format': 'JSON',
-        'token_auth': analyticsToken
-    }, function(data) {
-        $('#yesterday-visits-stat').text(data.value);
-    });
-    $.getJSON(analyticsAPIurl, {
-        'module': 'API',
-        'method': 'VisitsSummary.getActions',
-        'idSite': '1',
-        'period': 'day',
-        'date': 'yesterday',
-        'format': 'JSON',
-        'token_auth': analyticsToken
-    }, function(data) {
-        $('#yesterday-actions-stat').text(data.value);
-    });
 };
 updateVisit();
 setInterval(updateVisit, 15000);
@@ -94,6 +94,18 @@ var option = {
     },
     tooltip: {
         trigger: 'axis'
+    },
+    toolbox: {
+        showTitle: false,
+        feature: {
+            restore: {},
+            magicType: {
+                type: ['bar', 'line']
+            },
+            saveAsImage: {
+                excludeComponents: ['toolbox', 'dataZoom']
+            }
+        }
     },
     legend: {
         data: ['访客数', '访问次数', '浏览次数'],
