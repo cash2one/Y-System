@@ -102,6 +102,9 @@ var option = {
             magicType: {
                 type: ['bar', 'line']
             },
+            dataView: {
+                readOnly: true
+            },
             saveAsImage: {
                 excludeComponents: ['toolbox', 'dataZoom']
             }
@@ -179,7 +182,6 @@ function updateVisitSummaryChart() {
             },
             series: [{
                 name: '访客数',
-                type: 'bar',
                 data: visitors
             }]
         });
@@ -200,7 +202,6 @@ function updateVisitSummaryChart() {
         visitSummaryChart.setOption({
             series: [{
                 name: '访问次数',
-                type: 'bar',
                 data: visits
             }]
         });
@@ -221,7 +222,6 @@ function updateVisitSummaryChart() {
         visitSummaryChart.setOption({
             series: [{
                 name: '浏览次数',
-                type: 'bar',
                 data: actions
             }]
         });
