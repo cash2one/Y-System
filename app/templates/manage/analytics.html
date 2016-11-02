@@ -91,6 +91,7 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script src="{{ url_for('static', filename='assets/js/countUp.min.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/echarts.min.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/macarons.js') }}"></script>
 <script>
