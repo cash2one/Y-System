@@ -41,7 +41,7 @@ $(document)
 $('.ui.search')
     .search({
         apiSettings: {
-            url: 'find-user/suggestions/?keyword={query}'
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/user/?keyword={query}'
         },
         // selectFirstResult: true,
         showNoResults: false
