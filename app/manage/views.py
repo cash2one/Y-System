@@ -129,7 +129,6 @@ def set_booking_state_valid(user_id, schedule_id):
 def set_booking_state_wait(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'排队')
-    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -139,7 +138,6 @@ def set_booking_state_wait(user_id, schedule_id):
 def set_booking_state_invalid(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'失效')
-    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -149,7 +147,6 @@ def set_booking_state_invalid(user_id, schedule_id):
 def set_booking_state_kept(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'赴约')
-    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -159,7 +156,6 @@ def set_booking_state_kept(user_id, schedule_id):
 def set_booking_state_late(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'迟到')
-    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -169,7 +165,6 @@ def set_booking_state_late(user_id, schedule_id):
 def set_booking_state_missed(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'爽约')
-    # db.session.commit()
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -1029,54 +1024,6 @@ def find_user():
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
 
 
-@manage.route('/find-user/suggestions/')
-@permission_required(Permission.MANAGE)
-def suggest_user():
-    users = []
-    name_or_email = request.args.get('keyword')
-    if name_or_email:
-        if current_user.can(Permission.ADMINISTER):
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .order_by(User.last_seen.desc())
-        elif current_user.can(Permission.MANAGE_AUTH):
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'禁止预约',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'管理员'
-                ))\
-                .order_by(User.last_seen.desc())
-        else:
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'禁止预约',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限'
-                ))\
-                .order_by(User.last_seen.desc())
-    return jsonify({'results': [user.to_json_suggestion for user in users]})
-
-
 @manage.route('/analytics')
 @login_required
 @permission_required(Permission.MANAGE)
@@ -1331,13 +1278,10 @@ def rental_rent_step_1():
             return redirect(url_for('manage.rental_rent_step_1'))
         if booking.schedule.ended:
             booking.set_state(u'爽约')
-            # db.session.commit()
         if booking.schedule.started_n_min(n_min=current_app.config['TOLERATE_MINUTES']):
             booking.set_state(u'迟到')
-            # db.session.commit()
         if booking.schedule.unstarted_n_min(n_min=current_app.config['TOLERATE_MINUTES']):
             booking.set_state(u'赴约')
-            # db.session.commit()
         return redirect(url_for('manage.rental_rent_step_2', user_id=booking.user_id))
     return render_template('manage/rental_rent_step_1.html', form=form)
 
@@ -1375,7 +1319,6 @@ def rental_rent_step_3(user_id, ipad_id):
         rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
-        # db.session.commit()
         flash(u'iPad借出信息登记成功')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3.html', user=user, ipad=ipad, form=form)
@@ -1429,7 +1372,6 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
-        # db.session.commit()
         flash(u'iPad借出信息登记成功')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3_alt.html', user=user, ipad=ipad, form=form)
@@ -1584,4 +1526,97 @@ def rental_return_step_4_alt(user_id, lesson_id, section_id):
     return render_template('manage/rental_return_step_4_alt.html', user=user, lesson=lesson, section=section, form=form)
 
 
+@manage.route('/suggest/user/')
+@permission_required(Permission.MANAGE)
+def suggest_user():
+    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        if current_user.can(Permission.ADMINISTER):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .order_by(User.last_seen.desc())
+        elif current_user.can(Permission.MANAGE_AUTH):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'管理员'
+                ))\
+                .order_by(User.last_seen.desc())
+        else:
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限'
+                ))\
+                .order_by(User.last_seen.desc())
+    return jsonify({'results': [user.to_json_suggestion() for user in users]})
 
+
+@manage.route('/suggest/email/')
+@permission_required(Permission.MANAGE)
+def suggest_email():
+    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        if current_user.can(Permission.ADMINISTER):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .order_by(User.last_seen.desc())
+        elif current_user.can(Permission.MANAGE_AUTH):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'管理员'
+                ))\
+                .order_by(User.last_seen.desc())
+        else:
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限'
+                ))\
+                .order_by(User.last_seen.desc())
+    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users]})
