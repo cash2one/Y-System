@@ -726,12 +726,17 @@ class User(UserMixin, db.Model):
             .first()\
             .inviter
 
-    @property
-    def to_json_suggestion(self):
-        json_suggestion = {
-            'title': self.name,
-            'description': self.email,
-        }
+    def to_json_suggestion(self, suggest_email=False):
+        if suggest_email:
+            json_suggestion = {
+                'title': self.email,
+                'description': self.name,
+            }
+        else:
+            json_suggestion = {
+                'title': self.name,
+                'description': self.email,
+            }
         return json_suggestion
 
     @staticmethod
