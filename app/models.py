@@ -730,7 +730,7 @@ class User(UserMixin, db.Model):
         if suggest_email:
             json_suggestion = {
                 'title': self.email,
-                'description': self.name,
+                'description': '%s（%s）' % (self.name, self.role.name),
             }
         else:
             json_suggestion = {
