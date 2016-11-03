@@ -322,8 +322,8 @@ function normalizeSymbolSize(val, data) {
     if (val === 0) {
         return 0;
     } else {
-        var max = 50;
-        var min = 5;
+        var max = 40;
+        var min = 10;
         var data_max = Math.max(...data.map(function(item) {
             return item[2];
         }));
@@ -340,7 +340,7 @@ function normalizeSymbolSize(val, data) {
 function updateVisitHourlyChart() {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
-        'method': 'VisitTime.getVisitInformationPerLocalTime',
+        'method': 'VisitTime.getVisitInformationPerServerTime',
         'idSite': '1',
         'period': 'day',
         'date': 'last7',
