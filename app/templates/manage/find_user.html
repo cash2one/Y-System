@@ -36,10 +36,7 @@
                     <div class="field">
                         {{ form.name_or_email.label() }}
                         <div class="ui search">
-                            <div class="ui left icon input">
-                                <i class="users icon"></i>
-                                {{ form.name_or_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                            </div>
+                            {{ form.name_or_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
                             <div class="results"></div>
                         </div>
                     </div>

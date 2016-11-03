@@ -34,6 +34,8 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             # flash('欢迎登录云英语教育服务支撑系统！')
+            if user.can(Permission.MANAGE):
+                return redirect(request.args.get('next') or url_for('manage.summary'))
             return redirect(request.args.get('next') or url_for('main.profile'))
         flash('无效的用户名或密码')
     return render_template('auth/login.html', form=form)

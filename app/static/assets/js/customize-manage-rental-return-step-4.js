@@ -1,9 +1,5 @@
 // customize-manage-rental-return-step-4.js
 
-$('select.dropdown')
-  .dropdown()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)

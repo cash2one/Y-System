@@ -1,17 +1,5 @@
 // customize-manage-period.js
 
-$('select.dropdown')
-  .dropdown()
-;
-
-$('.ui.checkbox')
-  .checkbox()
-;
-
-$('table')
-    .tablesort()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)
@@ -19,6 +7,18 @@ $('.message .close')
             .transition('fade')
         ;
     })
+;
+
+$('select.dropdown')
+    .dropdown()
+;
+
+$('.ui.checkbox')
+    .checkbox()
+;
+
+$('table')
+    .tablesort()
 ;
 
 $(document)

@@ -22,6 +22,13 @@ def after_request(response):
     return response
 
 
+@manage.route('/summary')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary():
+    return render_template('manage/summary.html')
+
+
 @manage.route('/booking')
 @login_required
 @permission_required(Permission.MANAGE_BOOKING)

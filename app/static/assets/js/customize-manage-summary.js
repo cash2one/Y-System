@@ -1,12 +1,4 @@
-// customize-manage-rental.js
-
-$('select.dropdown')
-  .dropdown()
-;
-
-$('table')
-    .tablesort()
-;
+// customize-manage-summary.js
 
 $('.message .close')
     .on('click', function() {

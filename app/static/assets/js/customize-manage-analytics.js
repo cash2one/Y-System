@@ -1,9 +1,5 @@
 // customize-manage-analytics.js
 
-$('select.dropdown')
-  .dropdown()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)
