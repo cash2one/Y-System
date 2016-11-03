@@ -26,7 +26,58 @@ def after_request(response):
 @login_required
 @permission_required(Permission.MANAGE)
 def summary():
-    return render_template('manage/summary.html')
+    show_1103 = True
+    show_1707 = False
+    show_others = False
+    if current_user.is_authenticated:
+        show_1103 = bool(request.cookies.get('show_1103', '1'))
+        show_1707 = bool(request.cookies.get('show_1707', ''))
+        show_others = bool(request.cookies.get('show_others', ''))
+    if show_1103:
+        query = iPad.query\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1103')
+    if show_1707:
+        query = iPad.query\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1707')
+    if show_others:
+        query = iPad.query.filter_by(room_id=None)
+    ipads = query.order_by(iPad.alias.asc()).all()
+    return render_template('manage/summary.html', ipads=ipads, show_1103=show_1103, show_1707=show_1707, show_others=show_others)
+
+
+@manage.route('/summary/ipad/1103')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary_room_1103_ipads():
+    resp = make_response(redirect(url_for('manage.summary')))
+    resp.set_cookie('show_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/summary/ipad/1707')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary_room_1707_ipads():
+    resp = make_response(redirect(url_for('manage.summary')))
+    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/summary/ipad/others')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary_other_ipads():
+    resp = make_response(redirect(url_for('manage.summary')))
+    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_others', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/booking')
@@ -303,7 +354,7 @@ def schedule():
 
 @manage.route('/schedule/today')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_SCHEDULE)
 def today_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '1', max_age=30*24*60*60)
@@ -314,7 +365,7 @@ def today_schedule():
 
 @manage.route('/schedule/future')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_SCHEDULE)
 def future_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
@@ -325,7 +376,7 @@ def future_schedule():
 
 @manage.route('/schedule/history')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_SCHEDULE)
 def history_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
@@ -581,7 +632,7 @@ def ipad():
 
 @manage.route('/ipad/all')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def all_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_all', '1', max_age=30*24*60*60)
@@ -595,7 +646,7 @@ def all_ipads():
 
 @manage.route('/ipad/maintain')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def maintain_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
@@ -609,7 +660,7 @@ def maintain_ipads():
 
 @manage.route('/ipad/charge')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def charge_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
@@ -623,7 +674,7 @@ def charge_ipads():
 
 @manage.route('/ipad/1103')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def room_1103_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
@@ -637,7 +688,7 @@ def room_1103_ipads():
 
 @manage.route('/ipad/1707')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def room_1707_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
@@ -651,7 +702,7 @@ def room_1707_ipads():
 
 @manage.route('/ipad/others')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def other_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_all', '', max_age=30*24*60*60)
