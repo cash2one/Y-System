@@ -726,7 +726,7 @@ class User(UserMixin, db.Model):
             .first()\
             .inviter
 
-    def to_json_suggestion(self, suggest_email=False):
+    def to_json_suggestion(self, suggest_email=False, include_url=False):
         if suggest_email:
             json_suggestion = {
                 'title': self.email,
@@ -737,6 +737,8 @@ class User(UserMixin, db.Model):
                 'title': self.name,
                 'description': self.email,
             }
+        if include_url:
+            json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
         return json_suggestion
 
     @staticmethod

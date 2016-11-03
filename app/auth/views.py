@@ -22,6 +22,8 @@ def unconfirmed():
     if current_user.is_anonymous:
         return redirect(url_for('main.index'))
     if current_user.confirmed:
+        if current_user.can(Permission.MANAGE):
+            return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     return render_template('auth/unconfirmed.html')
 
@@ -86,12 +88,16 @@ def activate():
 @login_required
 def confirm(token):
     if current_user.confirmed:
+        if current_user.can(Permission.MANAGE):
+            return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！')
     else:
         flash(u'确认链接无效或者已经过期')
         return redirect(url_for('auth.unconfirmed'))
+    if current_user.can(Permission.MANAGE):
+        return redirect(url_for('manage.summary'))
     return redirect(url_for('main.profile'))
 
 
@@ -101,7 +107,7 @@ def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
     flash(u'一封新的确认邮件已经发送至您的邮箱')
-    return redirect(url_for('main.index'))
+    return redirect(url_for('auth.unconfirmed'))
 
 
 @auth.route('/change-password', methods=['GET', 'POST'])
@@ -113,6 +119,8 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             flash(u'修改密码成功')
+            if current_user.can(Permission.MANAGE):
+                return redirect(url_for('manage.summary'))
             return redirect(url_for('main.profile'))
         else:
             flash(u'密码有误')
@@ -137,6 +145,8 @@ def reset_password_request():
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if not current_user.is_anonymous:
+        if current_user.can(Permission.MANAGE):
+            return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
@@ -174,4 +184,6 @@ def change_email(token):
         flash('修改邮箱成功')
     else:
         flash('请求无效')
+    if current_user.can(Permission.MANAGE):
+        return redirect(url_for('manage.summary'))
     return redirect(url_for('main.profile'))
