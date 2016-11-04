@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}iPad内容管理{% endblock %}
+{% block title %}iPad管理{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -23,7 +23,7 @@
     </div>
     {% endif %}
     {% endwith %}
-    <h1 class="ui inverted header"><i class="tablet icon"></i> iPad内容管理</h1>
+    <h1 class="ui inverted header"><i class="tablet icon"></i> iPad管理</h1>
 </div>
 {% endblock %}
 
@@ -34,7 +34,7 @@
             <div class="column">
                 <h3 class="header">iPad内容</h3>
                 <div class="ui tabular menu">
-                    {% if show_all %}
+                    {% if show_ipad_all %}
                     <a class="item active loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
@@ -52,12 +52,12 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
-                    {% if show_maintain %}
+                    {% if show_ipad_maintain %}
                     <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
                     <a class="item active loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui red label">{{ maintain_num }}</div>
+                        <div class="ui orange label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
@@ -70,7 +70,7 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
-                    {% if show_charge %}
+                    {% if show_ipad_charge %}
                     <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
@@ -81,14 +81,14 @@
                     <a class="item active loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui teal label">{{ charge_num }}</div>
+                        <div class="ui green label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
-                    {% if show_1103 %}
+                    {% if show_ipad_1103 %}
                     <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
@@ -106,7 +106,7 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
-                    {% if show_1707 %}
+                    {% if show_ipad_1707 %}
                     <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
@@ -124,7 +124,7 @@
                     <a class="item active loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
                     {% endif %}
-                    {% if show_others %}
+                    {% if show_ipad_others %}
                     <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
@@ -162,18 +162,26 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>
-                                {% for lesson in ipad.has_lessons %}
-                                {% if lesson.type.name == 'VB' %}
+                                {% with lessons = ipad.has_vb_lessons %}
+                                {% if lessons.count() %}
+                                {% for lesson in lessons %}
                                 <div class="ui teal label">{{ lesson.name }}</div>
-                                {% endif%}
                                 {% endfor %}
+                                {% else %}
+                                无
+                                {% endif %}
+                                {% endwith %}
                             </td>
                             <td>
-                                {% for lesson in ipad.has_lessons %}
-                                {% if lesson.type.name == 'Y-GRE' %}
+                                {% with lessons = ipad.has_y_gre_lessons %}
+                                {% if lessons.count() %}
+                                {% for lesson in lessons %}
                                 <div class="ui red label">{{ lesson.name }}</div>
-                                {% endif%}
                                 {% endfor %}
+                                {% else %}
+                                无
+                                {% endif %}
+                                {% endwith %}
                             </td>
                             <td>{{ ipad.state.name }}</td>
                             <td>

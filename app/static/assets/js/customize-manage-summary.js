@@ -9,6 +9,10 @@ $('.message .close')
     })
 ;
 
+$('.ui.accordion')
+    .accordion()
+;
+
 $('.ui.search')
     .search({
         apiSettings: {

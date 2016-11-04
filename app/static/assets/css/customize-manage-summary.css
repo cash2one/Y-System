@@ -68,3 +68,74 @@
         margin-top: 20px;
     }
 }
+
+
+.ui.cards .red.card .ipad-basic-info.content {
+    background-color: #DB2828;
+}
+.ui.cards .orange.card .ipad-basic-info.content {
+    background-color: #F2711C;
+}
+.ui.cards .yellow.card .ipad-basic-info.content {
+    background-color: #FBBD08;
+}
+.ui.cards .olive.card .ipad-basic-info.content {
+    background-color: #B5CC18;
+}
+.ui.cards .green.card .ipad-basic-info.content {
+    background-color: #21BA45;
+}
+.ui.cards .teal.card .ipad-basic-info.content {
+    background-color: #00B5AD;
+}
+.ui.cards .blue.card .ipad-basic-info.content {
+    background-color: #2185D0;
+}
+.ui.cards .violet.card .ipad-basic-info.content {
+    background-color: #6435C9;
+}
+.ui.cards .purple.card .ipad-basic-info.content {
+    background-color: #A333C8;
+}
+.ui.cards .pink.card .ipad-basic-info.content {
+    background-color: #E03997;
+}
+.ui.cards .brown.card .ipad-basic-info.content {
+    background-color: #A5673F;
+}
+.ui.cards .grey.card .ipad-basic-info.content {
+    background-color: #767676;
+}
+.ui.cards .black.card .ipad-basic-info.content {
+    background-color: #1B1C1D;
+}
+.ui.cards .red.card .ipad-basic-info.content .header,
+.ui.cards .orange.card .ipad-basic-info.content .header,
+.ui.cards .yellow.card .ipad-basic-info.content .header,
+.ui.cards .olive.card .ipad-basic-info.content .header,
+.ui.cards .green.card .ipad-basic-info.content .header,
+.ui.cards .teal.card .ipad-basic-info.content .header,
+.ui.cards .blue.card .ipad-basic-info.content .header,
+.ui.cards .violet.card .ipad-basic-info.content .header,
+.ui.cards .purple.card .ipad-basic-info.content .header,
+.ui.cards .pink.card .ipad-basic-info.content .header,
+.ui.cards .brown.card .ipad-basic-info.content .header,
+.ui.cards .grey.card .ipad-basic-info.content .header,
+.ui.cards .black.card .ipad-basic-info.content .header {
+    color: #FFF;
+}
+.ui.cards .red.card .ipad-basic-info.content .meta,
+.ui.cards .orange.card .ipad-basic-info.content .meta,
+.ui.cards .yellow.card .ipad-basic-info.content .meta,
+.ui.cards .olive.card .ipad-basic-info.content .meta,
+.ui.cards .green.card .ipad-basic-info.content .meta,
+.ui.cards .teal.card .ipad-basic-info.content .meta,
+.ui.cards .blue.card .ipad-basic-info.content .meta,
+.ui.cards .violet.card .ipad-basic-info.content .meta,
+.ui.cards .purple.card .ipad-basic-info.content .meta,
+.ui.cards .pink.card .ipad-basic-info.content .meta,
+.ui.cards .brown.card .ipad-basic-info.content .meta,
+.ui.cards .grey.card .ipad-basic-info.content .meta,
+.ui.cards .black.card .ipad-basic-info.content .meta {
+    color: rgba(255,255,255,.6);
+}

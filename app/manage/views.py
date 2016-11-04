@@ -26,25 +26,25 @@ def after_request(response):
 @login_required
 @permission_required(Permission.MANAGE)
 def summary():
-    show_1103 = True
-    show_1707 = False
-    show_others = False
+    show_summary_ipad_1103 = True
+    show_summary_ipad_1707 = False
+    show_summary_ipad_others = False
     if current_user.is_authenticated:
-        show_1103 = bool(request.cookies.get('show_1103', '1'))
-        show_1707 = bool(request.cookies.get('show_1707', ''))
-        show_others = bool(request.cookies.get('show_others', ''))
-    if show_1103:
+        show_summary_ipad_1103 = bool(request.cookies.get('show_summary_ipad_1103', '1'))
+        show_summary_ipad_1707 = bool(request.cookies.get('show_summary_ipad_1707', ''))
+        show_summary_ipad_others = bool(request.cookies.get('show_summary_ipad_others', ''))
+    if show_summary_ipad_1103:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1103')
-    if show_1707:
+    if show_summary_ipad_1707:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')
-    if show_others:
+    if show_summary_ipad_others:
         query = iPad.query.filter_by(room_id=None)
-    ipads = query.order_by(iPad.alias.asc()).all()
-    return render_template('manage/summary.html', ipads=ipads, show_1103=show_1103, show_1707=show_1707, show_others=show_others)
+    ipads = query.order_by(iPad.alias.asc())
+    return render_template('manage/summary.html', ipads=ipads, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
 
 
 @manage.route('/summary/ipad/1103')
@@ -52,9 +52,9 @@ def summary():
 @permission_required(Permission.MANAGE)
 def summary_room_1103_ipads():
     resp = make_response(redirect(url_for('manage.summary')))
-    resp.set_cookie('show_1103', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
@@ -63,9 +63,9 @@ def summary_room_1103_ipads():
 @permission_required(Permission.MANAGE)
 def summary_room_1707_ipads():
     resp = make_response(redirect(url_for('manage.summary')))
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
@@ -74,9 +74,9 @@ def summary_room_1707_ipads():
 @permission_required(Permission.MANAGE)
 def summary_other_ipads():
     resp = make_response(redirect(url_for('manage.summary')))
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_others', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -592,42 +592,42 @@ def ipad():
         .filter(iPadState.name == u'充电')\
         .count()
     page = request.args.get('page', 1, type=int)
-    show_all = True
-    show_maintain = False
-    show_charge = False
-    show_1103 = False
-    show_1707 = False
-    show_others = False
+    show_ipad_all = True
+    show_ipad_maintain = False
+    show_ipad_charge = False
+    show_ipad_1103 = False
+    show_ipad_1707 = False
+    show_ipad_others = False
     if current_user.is_authenticated:
-        show_all = bool(request.cookies.get('show_all', '1'))
-        show_maintain = bool(request.cookies.get('show_maintain', ''))
-        show_charge = bool(request.cookies.get('show_charge', ''))
-        show_1103 = bool(request.cookies.get('show_1103', ''))
-        show_1707 = bool(request.cookies.get('show_1707', ''))
-        show_others = bool(request.cookies.get('show_others', ''))
-    if show_all:
+        show_ipad_all = bool(request.cookies.get('show_ipad_all', '1'))
+        show_ipad_maintain = bool(request.cookies.get('show_ipad_maintain', ''))
+        show_ipad_charge = bool(request.cookies.get('show_ipad_charge', ''))
+        show_ipad_1103 = bool(request.cookies.get('show_ipad_1103', ''))
+        show_ipad_1707 = bool(request.cookies.get('show_ipad_1707', ''))
+        show_ipad_others = bool(request.cookies.get('show_ipad_others', ''))
+    if show_ipad_all:
         query = iPad.query
-    if show_maintain:
+    if show_ipad_maintain:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
             .filter(iPadState.name == u'维护')
-    if show_charge:
+    if show_ipad_charge:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
             .filter(iPadState.name == u'充电')
-    if show_1103:
+    if show_ipad_1103:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1103')
-    if show_1707:
+    if show_ipad_1707:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')
-    if show_others:
+    if show_ipad_others:
         query = iPad.query.filter_by(room_id=None)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
+    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_ipad_all=show_ipad_all, show_ipad_maintain=show_ipad_maintain, show_ipad_charge=show_ipad_charge, show_ipad_1103=show_ipad_1103, show_ipad_1707=show_ipad_1707, show_ipad_others=show_ipad_others, pagination=pagination)
 
 
 @manage.route('/ipad/all')
@@ -635,12 +635,12 @@ def ipad():
 @permission_required(Permission.MANAGE_IPAD)
 def all_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
@@ -649,12 +649,12 @@ def all_ipads():
 @permission_required(Permission.MANAGE_IPAD)
 def maintain_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
@@ -663,12 +663,12 @@ def maintain_ipads():
 @permission_required(Permission.MANAGE_IPAD)
 def charge_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
@@ -677,12 +677,12 @@ def charge_ipads():
 @permission_required(Permission.MANAGE_IPAD)
 def room_1103_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
@@ -691,12 +691,12 @@ def room_1103_ipads():
 @permission_required(Permission.MANAGE_IPAD)
 def room_1707_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
@@ -705,12 +705,12 @@ def room_1707_ipads():
 @permission_required(Permission.MANAGE_IPAD)
 def other_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '1', max_age=30*24*60*60)
     return resp
 
 

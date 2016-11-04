@@ -33,43 +33,93 @@
             <div class="column">
                 <h3 class="ui header"><i class="tablet icon"></i> iPad状态</h3>
                 <div class="ui tabular menu">
-                    {% if show_1103 %}
+                    {% if show_summary_ipad_1103 %}
                     <a class="item active loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
                     {% endif %}
-                    {% if show_1707 %}
+                    {% if show_summary_ipad_1707 %}
                     <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
                     <a class="item active loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
                     {% endif %}
-                    {% if show_others %}
+                    {% if show_summary_ipad_others %}
                     <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
                     <a class="item active loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
                     {% endif %}
                 </div>
                 {% if ipads %}
-                <div class="ui stackable five column grid">
+                <div class="ui five stackable cards">
                     {% for ipad in ipads %}
-                    <div class="column">
-                        <div>{{ ipad.alias }}</div>
-                        <div>{{ ipad.capacity.name }}</div>
-                        <div><code>{{ ipad.serial }}</code></div>
-                        <div>{{ ipad.state.name }}</div>
-                        <div>
-                            {% for lesson in ipad.has_lessons %}
-                            {% if lesson.type.name == 'VB' %}
-                            <div class="ui teal label">{{ lesson.name }}</div>
-                            {% endif%}
-                            {% endfor %}
+                    {% if ipad.state.name == '待机' %}
+                    <div class="blue card">
+                    {% elif ipad.state.name == '借出' %}
+                    <div class="teal card">
+                    {% elif ipad.state.name == '候补' %}
+                    <div class="grey card">
+                    {% elif ipad.state.name == '维护' %}
+                    <div class="orange card">
+                    {% elif ipad.state.name == '充电' %}
+                    <div class="green card">
+                    {% elif ipad.state.name == '退役' %}
+                    <div class="black card">
+                    {% else %}
+                    <div class="card">
+                    {% endif %}
+                        <div class="ipad-basic-info content">
+                            <div class="header">
+                                {{ ipad.alias }}
+                                {% if ipad.state.name == '借出' %}
+                                <span class="right floated">{{ ipad.now_rented_by.name }}</span>
+                                {% else %}
+                                <span class="right floated">{{ ipad.state.name }}</span>
+                                {% endif %}
+                            </div>
+                        <div class="meta">
+                            <span><code>{{ ipad.serial }}</code></span>
+                            <span class="right floated">{{ ipad.capacity.name }}</span>
                         </div>
-                        <div>
-                            {% for lesson in ipad.has_lessons %}
-                            {% if lesson.type.name == 'Y-GRE' %}
-                            <div class="ui red label">{{ lesson.name }}</div>
-                            {% endif%}
-                            {% endfor %}
+                        </div>
+                        <div class="content">
+                            <div class="description">
+                                <div class="ui accordion">
+                                    <div class="title">
+                                    <i class="dropdown icon"></i>
+                                    VB内容
+                                    </div>
+                                    <div class="content">
+                                        {% with lessons = ipad.has_vb_lessons %}
+                                        {% if lessons.count() %}
+                                        <div class="ui horizontal divided list">
+                                            {% for lesson in lessons %}
+                                            <div class="item">{{ lesson.name }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        无
+                                        {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                    <div class="title">
+                                    <i class="dropdown icon"></i>
+                                    Y-GRE内容
+                                    </div>
+                                    <div class="content">
+                                        {% with lessons = ipad.has_y_gre_lessons %}
+                                        {% if lessons.count() %}
+                                        <div class="ui horizontal divided list">
+                                            {% for lesson in lessons %}
+                                            <div class="item">{{ lesson.name }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        无
+                                        {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}

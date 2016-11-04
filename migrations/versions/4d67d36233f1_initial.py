@@ -1,13 +1,13 @@
 """initial
 
-Revision ID: 16cb6a4b2bdb
+Revision ID: 4d67d36233f1
 Revises: None
-Create Date: 2016-10-07 07:36:49.844089
+Create Date: 2016-11-04 16:29:27.159714
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '16cb6a4b2bdb'
+revision = '4d67d36233f1'
 down_revision = None
 
 from alembic import op
@@ -34,6 +34,12 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_ipad_capacities_name'), 'ipad_capacities', ['name'], unique=True)
+    op.create_table('ipad_contents_json',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('json_string', sa.UnicodeText(), nullable=True),
+    sa.Column('out_of_date', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('ipad_states',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -150,8 +156,9 @@ def upgrade():
     sa.PrimaryKeyConstraint('user_id', 'course_id')
     )
     op.create_table('rentals',
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('ipad_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('ipad_id', sa.Integer(), nullable=True),
     sa.Column('date', sa.Date(), nullable=True),
     sa.Column('returned', sa.Boolean(), nullable=True),
     sa.Column('rent_time', sa.DateTime(), nullable=True),
@@ -162,7 +169,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['rent_agent_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['return_agent_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'ipad_id')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('schedules',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -283,6 +290,7 @@ def downgrade():
     op.drop_table('operation_types')
     op.drop_index(op.f('ix_ipad_states_name'), table_name='ipad_states')
     op.drop_table('ipad_states')
+    op.drop_table('ipad_contents_json')
     op.drop_index(op.f('ix_ipad_capacities_name'), table_name='ipad_capacities')
     op.drop_table('ipad_capacities')
     op.drop_index(op.f('ix_course_types_name'), table_name='course_types')

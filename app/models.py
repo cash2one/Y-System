@@ -335,8 +335,9 @@ class Booking(db.Model):
 
 class Rental(db.Model):
     __tablename__ = 'rentals'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'))
     date = db.Column(db.Date, default=date.today())
     returned = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
@@ -1067,8 +1068,12 @@ class iPadContent(db.Model):
                         db.session.add(ipad_content)
                         print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
         db.session.commit()
-        ipad_contents = iPadContentJSON.query.get_or_404(1)
-        if ipad_contents.out_of_date:
+        ipad_contents = iPadContentJSON.query.filter_by(id=1).first()
+        if ipad_contents is not None:
+            if ipad_contents.out_of_date:
+                iPadContentJSON.update()
+                db.session.commit()
+        else:
             iPadContentJSON.update()
             db.session.commit()
 
@@ -1177,6 +1182,16 @@ class iPad(db.Model):
     def y_gre_lesson_ids_included(self):
         y_gre_lessons = self.has_y_gre_lessons
         return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
+
+    @property
+    def now_rented_by(self):
+        return User.query\
+            .join(Rental, Rental.user_id == User.id)\
+            .join(iPad, iPad.id == Rental.ipad_id)\
+            .filter(Rental.date == date.today())\
+            .filter(Rental.returned == False)\
+            .filter(iPad.id == self.id)\
+            .first()
 
     @staticmethod
     def insert_ipads():
