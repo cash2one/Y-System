@@ -36,13 +36,16 @@ def summary():
     if show_summary_ipad_1103:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1103')
+            .filter(Room.name == u'1103')\
+            .filter(iPad.deleted == False)
     if show_summary_ipad_1707:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1707')
+            .filter(Room.name == u'1707')\
+            .filter(iPad.deleted == False)
     if show_summary_ipad_others:
-        query = iPad.query.filter_by(room_id=None)
+        query = iPad.query\
+            .filter_by(room_id=None, deleted=False)
     ipads = query.order_by(iPad.alias.asc())
     return render_template('manage/summary.html', ipads=ipads, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
 
@@ -318,7 +321,7 @@ def schedule():
             if schedule:
                 flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
             else:
-                period = Period.query.filter_by(id=period_id).first()
+                period = Period.query.get_or_404(period_id)
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time))
                 else:
@@ -389,7 +392,7 @@ def history_schedule():
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def publish_schedule(id):
-    schedule = Schedule.query.filter_by(id=id).first()
+    schedule = Schedule.query.get(id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
@@ -408,7 +411,7 @@ def publish_schedule(id):
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def retract_schedule(id):
-    schedule = Schedule.query.filter_by(id=id).first()
+    schedule = Schedule.query.get(id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
@@ -574,7 +577,7 @@ def ipad():
         if ipad:
             flash(u'序列号为%s的iPad已存在' % serial)
             return redirect(url_for('manage.ipad'))
-        ipad = iPad(serial=serial, alias=alias, capacity_id=capacity_id, room_id=room_id, state_id=state_id)
+        ipad = iPad(serial=serial, alias=alias, capacity_id=capacity_id, room_id=room_id, state_id=state_id, last_modified_by=current_user.id)
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
@@ -606,25 +609,31 @@ def ipad():
         show_ipad_1707 = bool(request.cookies.get('show_ipad_1707', ''))
         show_ipad_others = bool(request.cookies.get('show_ipad_others', ''))
     if show_ipad_all:
-        query = iPad.query
+        query = iPad.query\
+            .filter_by(deleted=False)
     if show_ipad_maintain:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadState.name == u'维护')
+            .filter(iPadState.name == u'维护')\
+            .filter(iPad.deleted == False)
     if show_ipad_charge:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadState.name == u'充电')
+            .filter(iPadState.name == u'充电')\
+            .filter(iPad.deleted == False)
     if show_ipad_1103:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1103')
+            .filter(Room.name == u'1103')\
+            .filter(iPad.deleted == False)
     if show_ipad_1707:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1707')
+            .filter(Room.name == u'1707')\
+            .filter(iPad.deleted == False)
     if show_ipad_others:
-        query = iPad.query.filter_by(room_id=None)
+        query = iPad.query\
+            .filter_by(room_id=None, deleted=False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
     return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_ipad_all=show_ipad_all, show_ipad_maintain=show_ipad_maintain, show_ipad_charge=show_ipad_charge, show_ipad_1103=show_ipad_1103, show_ipad_1707=show_ipad_1707, show_ipad_others=show_ipad_others, pagination=pagination)
@@ -729,6 +738,8 @@ def edit_ipad(id):
         else:
             ipad.room_id = form.room.data
         ipad.state_id = form.state.data
+        ipad.last_modified = datetime.utcnow()
+        ipad.last_modified_by = current_user.id
         db.session.add(ipad)
         db.session.commit()
         for pc in ipad.lessons_included:
@@ -738,7 +749,7 @@ def edit_ipad(id):
         db.session.commit()
         iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新')
-        return redirect(url_for('manage.ipad'))
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
     form.serial.data = ipad.serial
     form.capacity.data = ipad.capacity_id
@@ -757,13 +768,10 @@ def delete_ipad(id):
     form = DeleteiPadForm(ipad=ipad)
     if form.validate_on_submit():
         ipad_serial = ipad.serial
-        for pc in ipad.lessons_included:
-            ipad.remove_lesson(pc.lesson_id)
-        db.session.delete(ipad)
-        db.session.commit()
+        ipad.safe_delete(modified_by=current_user)
         iPadContentJSON.mark_out_of_date()
         flash(u'已删除序列号为%s的iPad' % ipad_serial)
-        return redirect(url_for('manage.ipad'))
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
     return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
 
 
@@ -777,7 +785,7 @@ def filter_ipad():
         lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
         if len(lesson_ids):
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=lesson_id).all()]) for lesson_id in lesson_ids])
-            ipads = [iPad.query.filter_by(id=ipad_id).first() for ipad_id in ipad_ids]
+            ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
     return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
 
 
@@ -916,11 +924,11 @@ def edit_user(id):
         if user.vb_course:
             user.unregister(user.vb_course)
         if form.vb_course.data:
-            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+            user.register(Course.query.get(form.vb_course.data))
         if user.y_gre_course:
             user.unregister(user.y_gre_course)
         if form.y_gre_course.data:
-            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+            user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
@@ -1162,11 +1170,11 @@ def edit_auth(id):
         if user.vb_course:
             user.unregister(user.vb_course)
         if form.vb_course.data:
-            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+            user.register(Course.query.get(form.vb_course.data))
         if user.y_gre_course:
             user.unregister(user.y_gre_course)
         if form.y_gre_course.data:
-            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+            user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
@@ -1254,11 +1262,11 @@ def edit_auth_admin(id):
         if user.vb_course:
             user.unregister(user.vb_course)
         if form.vb_course.data:
-            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+            user.register(Course.query.get(form.vb_course.data))
         if user.y_gre_course:
             user.unregister(user.y_gre_course)
         if form.y_gre_course.data:
-            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+            user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
@@ -1415,6 +1423,9 @@ def rental_rent_step_2_alt(user_id):
 def rental_rent_step_3_alt(user_id, ipad_id):
     user = User.query.get_or_404(user_id)
     ipad = iPad.query.get_or_404(ipad_id)
+    if ipad.deleted:
+        flash(u'序列号为%s的iPad不存在，请重新选择' % ipad.serial)
+        return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user_id))
     form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data

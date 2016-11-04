@@ -36,8 +36,13 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     permissions = db.Column(db.Integer)
+    deleted = db.Column(db.Boolean, default=False)
     users = db.relationship('User', backref='role', lazy='dynamic')
     activations = db.relationship('Activation', backref='role', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_roles():
@@ -78,9 +83,14 @@ class CourseType(db.Model):
     __tablename__ = 'course_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    deleted = db.Column(db.Boolean, default=False)
     lessons = db.relationship('Lesson', backref='type', lazy='dynamic')
     courses = db.relationship('Course', backref='type', lazy='dynamic')
     periods = db.relationship('Period', backref='type', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_course_types():
@@ -105,6 +115,7 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    deleted = db.Column(db.Boolean, default=False)
     registered_users = db.relationship(
         'Registration',
         foreign_keys=[Registration.course_id],
@@ -112,6 +123,10 @@ class Course(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_courses():
@@ -150,9 +165,10 @@ class Activation(db.Model):
     vb_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), default=1)
+    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     initial_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), default=1)
     initial_section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), default=1)
+    deleted = db.Column(db.Boolean, default=False)
     activated_users = db.relationship(
         'UserActivation',
         foreign_keys=[UserActivation.activation_id],
@@ -184,6 +200,10 @@ class Activation(db.Model):
     def activated_user(self):
         return self.activated_users.first()
 
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
+
     @staticmethod
     def insert_activations():
         import xlrd
@@ -210,7 +230,8 @@ class Activation(db.Model):
                     activation_code=str(A[1]),
                     role_id=Role.query.filter_by(name=A[2]).first().id,
                     vb_course_id=vb_course_id,
-                    y_gre_course_id=y_gre_course_id
+                    y_gre_course_id=y_gre_course_id,
+                    inviter_id=1
                 )
                 if Section.query.filter_by(name=A[6]).first():
                     initial_section = Section.query.filter_by(name=A[6]).first()
@@ -232,7 +253,12 @@ class BookingState(db.Model):
     __tablename__ = 'booking_states'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    deleted = db.Column(db.Boolean, default=False)
     bookings = db.relationship('Booking', backref='state', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_booking_states():
@@ -267,7 +293,7 @@ class Booking(db.Model):
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
-        booking_hash = generate_password_hash(str(datetime.utcnow))
+        booking_hash = generate_password_hash(str(datetime.utcnow()))
         self.booking_code = urlsafe_b64encode(booking_hash[-40:] + urandom(56))
 
     def ping(self):
@@ -344,6 +370,7 @@ class Rental(db.Model):
     rent_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     return_time = db.Column(db.DateTime)
     return_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
 
     def set_returned(self, return_agent_id, ipad_state=u'待机'):
         self.returned = True
@@ -352,6 +379,10 @@ class Rental(db.Model):
         db.session.add(self)
         ipad = iPad.query.filter_by(id=self.ipad_id).first()
         ipad.set_state(ipad_state)
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     def __repr__(self):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
@@ -367,6 +398,7 @@ class User(UserMixin, db.Model):
     confirmed = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    deleted = db.Column(db.Boolean, default=False)
     registered = db.relationship(
         'Registration',
         foreign_keys=[Registration.user_id],
@@ -381,6 +413,7 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
     rented_ipads = db.relationship(
         'Rental',
         foreign_keys=[Rental.user_id],
@@ -498,6 +531,10 @@ class User(UserMixin, db.Model):
         except:
             return None
         return User.query.get(data['id'])
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     def register(self, course):
         if not self.is_registering(course):
@@ -705,6 +742,7 @@ class User(UserMixin, db.Model):
                 iPadState.name == u'待机',
                 iPadState.name == u'候补',
             ))\
+            .filter(iPad.deleted == False)\
             .order_by(iPad.id.asc())
 
     @property
@@ -785,7 +823,12 @@ class Period(db.Model):
     end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     show = db.Column(db.Boolean, default=False)
+    deleted = db.Column(db.Boolean, default=False)
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @property
     def start_time_utc(self):
@@ -829,7 +872,6 @@ class Period(db.Model):
     def used(self):
         return Schedule.query.filter_by(period_id=self.id).first() is not None
 
-
     @staticmethod
     def insert_periods():
         periods = [
@@ -868,6 +910,7 @@ class Schedule(db.Model):
     period_id = db.Column(db.Integer, db.ForeignKey('periods.id'))
     quota = db.Column(db.Integer, default=0)
     available = db.Column(db.Boolean, default=False)
+    deleted = db.Column(db.Boolean, default=False)
     booked_users = db.relationship(
         'Booking',
         foreign_keys=[Booking.schedule_id],
@@ -875,6 +918,10 @@ class Schedule(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     def publish(self):
         self.available = True
@@ -972,13 +1019,20 @@ class iPadCapacity(db.Model):
     __tablename__ = 'ipad_capacities'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    deleted = db.Column(db.Boolean, default=False)
     ipads = db.relationship('iPad', backref='capacity', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_ipad_capacities():
         ipad_capacities = [
             (u'16GB', ),
+            (u'32GB', ),
             (u'64GB', ),
+            (u'128GB', ),
         ]
         for PC in ipad_capacities:
             ipad_capacity = iPadCapacity.query.filter_by(name=PC[0]).first()
@@ -996,7 +1050,12 @@ class iPadState(db.Model):
     __tablename__ = 'ipad_states'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    deleted = db.Column(db.Boolean, default=False)
     ipads = db.relationship('iPad', backref='state', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_ipad_states():
@@ -1024,7 +1083,12 @@ class Room(db.Model):
     __tablename__ = 'rooms'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    deleted = db.Column(db.Boolean, default=False)
     ipads = db.relationship('iPad', backref='room', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_rooms():
@@ -1068,7 +1132,7 @@ class iPadContent(db.Model):
                         db.session.add(ipad_content)
                         print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
         db.session.commit()
-        ipad_contents = iPadContentJSON.query.filter_by(id=1).first()
+        ipad_contents = iPadContentJSON.query.get(1)
         if ipad_contents is not None:
             if ipad_contents.out_of_date:
                 iPadContentJSON.update()
@@ -1076,6 +1140,7 @@ class iPadContent(db.Model):
         else:
             iPadContentJSON.update()
             db.session.commit()
+        print u'将iPad内容信息转换成JSON格式'
 
 
 class iPadContentJSON(db.Model):
@@ -1086,8 +1151,8 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def update():
-        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]))
-        pc_json = iPadContentJSON.query.filter_by(id=1).first()
+        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()]))
+        pc_json = iPadContentJSON.query.get(1)
         if pc_json is not None:
             pc_json.json_string = json_string
             pc_json.out_of_date = False
@@ -1097,7 +1162,7 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def mark_out_of_date():
-        pc_json = iPadContentJSON.query.filter_by(id=1).first()
+        pc_json = iPadContentJSON.query.get(1)
         if pc_json is not None:
             pc_json.out_of_date = True
         else:
@@ -1116,6 +1181,9 @@ class iPad(db.Model):
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
+    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
+    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
     lessons_included = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.ipad_id],
@@ -1130,6 +1198,12 @@ class iPad(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self, modified_by):
+        last_modified = datetime.utcnow()
+        last_modified_by = modified_by.id
+        self.deleted = True
+        db.session.add(self)
 
     def set_state(self, state_name):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
@@ -1208,8 +1282,9 @@ class iPad(db.Model):
                     serial=P[1].upper(),
                     alias=P[0],
                     capacity_id=iPadCapacity.query.filter_by(name=P[2]).first().id,
-                    room_id=Room.query.filter_by(name=str(P[3])).first().id,
-                    state_id=iPadState.query.filter_by(name=P[4]).first().id
+                    room_id=Room.query.filter_by(name=unicode(str(P[3]))).first().id,
+                    state_id=iPadState.query.filter_by(name=P[4]).first().id,
+                    last_modified_by=1
                 )
                 print u'导入iPad信息', P[1], P[0], P[2], P[3], P[4]
                 db.session.add(ipad)
@@ -1265,6 +1340,7 @@ class Lesson(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    deleted = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     punches = db.relationship('Punch', backref='lesson', lazy='dynamic')
     activations = db.relationship('Activation', backref='initial_lesson', lazy='dynamic')
@@ -1289,6 +1365,10 @@ class Lesson(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @property
     def first_section(self):
@@ -1465,6 +1545,7 @@ class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+    deleted = db.Column(db.Boolean, default=False)
     punches = db.relationship('Punch', backref='section', lazy='dynamic')
     activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
     previous = db.relationship(
@@ -1481,6 +1562,10 @@ class Section(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_sections():
@@ -1618,7 +1703,12 @@ class OperationType(db.Model):
     __tablename__ = 'operation_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    deleted = db.Column(db.Boolean, default=False)
     operations = db.relationship('Operation', backref='type', lazy='dynamic')
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_operation_types():
@@ -1646,6 +1736,11 @@ class Operation(db.Model):
     operation_type_id = db.Column(db.Integer, db.ForeignKey('operation_types.id'))
     operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    deleted = db.Column(db.Boolean, default=False)
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     def __repr__(self):
         return '<Operation Log %s>' % self.log

@@ -81,7 +81,7 @@ class NewiPadForm(FlaskForm):
         super(NewiPadForm, self).__init__(*args, **kwargs)
         self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(0, u'无')] + [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
-        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all()]
+        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
         self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
 
@@ -311,8 +311,4 @@ class PunchSectionForm(FlaskForm):
 
 class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
-
-
-
-
 

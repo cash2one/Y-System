@@ -57,7 +57,7 @@
                     <a class="item active loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui orange label">{{ maintain_num }}</div>
+                        <div class="ui red label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
@@ -152,6 +152,8 @@
                             <th>VB内容</th>
                             <th>Y-GRE内容</th>
                             <th>状态</th>
+                            <th>上次维护</th>
+                            <th>维护人</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -176,7 +178,7 @@
                                 {% with lessons = ipad.has_y_gre_lessons %}
                                 {% if lessons.count() %}
                                 {% for lesson in lessons %}
-                                <div class="ui red label">{{ lesson.name }}</div>
+                                <div class="ui orange label">{{ lesson.name }}</div>
                                 {% endfor %}
                                 {% else %}
                                 无
@@ -184,6 +186,11 @@
                                 {% endwith %}
                             </td>
                             <td>{{ ipad.state.name }}</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(ipad.last_modified).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(ipad.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ ipad.modified_by.name }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_ipad', id=ipad.id) }}"><i class="edit icon"></i></a>
