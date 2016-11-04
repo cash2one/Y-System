@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch
@@ -325,7 +325,7 @@ def schedule():
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time))
                 else:
-                    schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data)
+                    schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data, last_modified_by=current_user.id)
                     db.session.add(schedule)
                     db.session.commit()
                     flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
@@ -402,7 +402,7 @@ def publish_schedule(id):
     if schedule.available:
         flash(u'所选时段已经发布')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    schedule.publish()
+    schedule.publish(modified_by=current_user)
     flash(u'发布成功！')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -421,7 +421,7 @@ def retract_schedule(id):
     if not schedule.available:
         flash(u'所选时段尚未发布')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    schedule.retract()
+    schedule.retract(modified_by=current_user)
     flash(u'撤销成功！')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -437,7 +437,7 @@ def increase_schedule_quota(id):
     if schedule.out_of_date:
         flash(u'所选时段已经过期')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    candidate = schedule.increase_quota()
+    candidate = schedule.increase_quota(modified_by=current_user)
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
@@ -477,7 +477,7 @@ def decrease_schedule_quota(id):
     if schedule.quota <= schedule.occupied_quota:
         flash(u'所选时段名额不可少于预约人数')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    schedule.decrease_quota()
+    schedule.decrease_quota(modified_by=current_user)
     flash(u'所选时段名额-1')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -496,13 +496,13 @@ def period():
         if start_time >= end_time:
             flash(u'无法添加时段模板：%s，时间设置有误' % name)
             return redirect(url_for('manage.period'))
-        period = Period(name=name, start_time=start_time, end_time=end_time, type_id=type_id, show=show)
+        period = Period(name=name, start_time=start_time, end_time=end_time, type_id=type_id, show=show, last_modified_by=current_user.id)
         db.session.add(period)
         db.session.commit()
         flash(u'已添加时段模板：%s' % name)
         return redirect(url_for('manage.period'))
     page = request.args.get('page', 1, type=int)
-    query = Period.query
+    query = Period.query.filter_by(deleted=False)
     pagination = query\
         .order_by(Period.id.asc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -530,6 +530,8 @@ def edit_period(id):
         period.end_time = end_time
         period.type_id = type_id
         period.show = show
+        period.last_modified = datetime.utcnow()
+        period.last_modified_by = current_user.id
         db.session.add(period)
         db.session.commit()
         flash(u'已更新时段模板：%s' % name)
@@ -550,11 +552,7 @@ def delete_period(id):
     name = period.name
     form = DeletePeriodForm()
     if form.validate_on_submit():
-        if period.used:
-            flash(u'时段模板“%s”已被使用中，无法删除' % name)
-            return redirect(url_for('manage.period'))
-        db.session.delete(period)
-        db.session.commit()
+        period.safe_delete(modified_by=current_user)
         flash(u'已删除时段模板：%s' % name)
         return redirect(url_for('manage.period'))
     return render_template('manage/delete_period.html', form=form, period=period)
@@ -803,7 +801,12 @@ def ipad_contents():
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def user():
-    form = NewActivationForm()
+    if current_user.can(Permission.ADMINISTER):
+        form = NewActivationFormAdmin()
+    elif current_user.can(Permission.MANAGE_AUTH):
+        form = NewActivationFormAuth()
+    else:
+        form = NewActivationForm()
     if form.validate_on_submit():
         name = form.name.data
         activation_code = form.activation_code.data
@@ -837,17 +840,40 @@ def user():
         .order_by(User.last_seen.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination_users.items
-    pagination_activations = Activation.query\
-        .join(Role, Role.id == Activation.role_id)\
-        .filter(or_(
-            Role.name == u'禁止预约',
-            Role.name == u'单VB',
-            Role.name == u'Y-GRE 普通',
-            Role.name == u'Y-GRE VBx2',
-            Role.name == u'Y-GRE A权限'
-        ))\
-        .order_by(Activation.timestamp.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    if current_user.can(Permission.ADMINISTER):
+        pagination_activations = Activation.query\
+            .join(Role, Role.id == Activation.role_id)\
+            .filter(Activation.deleted == False)\
+            .order_by(Activation.timestamp.desc())\
+            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    elif current_user.can(Permission.MANAGE_AUTH):
+        pagination_activations = Activation.query\
+            .join(Role, Role.id == Activation.role_id)\
+            .filter(or_(
+                Role.name == u'禁止预约',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限',
+                Role.name == u'协管员',
+                Role.name == u'管理员'
+            ))\
+            .filter(Activation.deleted == False)\
+            .order_by(Activation.timestamp.desc())\
+            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    else:
+        pagination_activations = Activation.query\
+            .join(Role, Role.id == Activation.role_id)\
+            .filter(or_(
+                Role.name == u'禁止预约',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限'
+            ))\
+            .filter(Activation.deleted == False)\
+            .order_by(Activation.timestamp.desc())\
+            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     activations = pagination_activations.items
     return render_template('manage/user.html', users=users, activations=activations, form=form, show_users=show_users, show_activations=show_activations, pagination_users=pagination_users, pagination_activations=pagination_activations)
 
@@ -877,13 +903,21 @@ def activations():
 @permission_required(Permission.MANAGE_USER)
 def edit_activation(id):
     activation = Activation.query.get_or_404(id)
-    form = EditActivationForm()
+    if current_user.can(Permission.ADMINISTER):
+        form = EditActivationFormAdmin()
+    elif current_user.can(Permission.MANAGE_AUTH):
+        form = EditActivationFormAuth()
+    else:
+        form = EditActivationForm()
     if form.validate_on_submit():
         activation.name = form.name.data
         activation.activation_code = form.activation_code.data
         activation.role_id = form.role.data
         activation.vb_course_id = form.vb_course.data
         activation.y_gre_course_id = form.y_gre_course.data
+        if activation.activated:
+            flash(u'该账户已经激活，不能更新。')
+            return redirect(url_for('manage.user'))
         db.session.add(activation)
         db.session.commit()
         flash(u'%s的激活信息已更新' % activation.name)
@@ -904,8 +938,10 @@ def delete_activation(id):
     name = activation.name
     form = DeleteActivationForm(activation=activation)
     if form.validate_on_submit():
-        db.session.delete(activation)
-        db.session.commit()
+        if activation.activated:
+            flash(u'该账户已经激活，无法删除。')
+            return redirect(url_for('manage.user'))
+        activation.safe_delete()
         flash(u'已删除%s的激活邀请' % name)
         return redirect(url_for('manage.user'))
     return render_template('manage/delete_activation.html', form=form, activation=activation)
@@ -1025,6 +1061,7 @@ def find_user():
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
                 .order_by(User.last_seen.desc())
@@ -1068,6 +1105,7 @@ def find_user():
                         Role.name == u'Y-GRE 普通',
                         Role.name == u'Y-GRE VBx2',
                         Role.name == u'Y-GRE A权限',
+                        Role.name == u'协管员',
                         Role.name == u'管理员'
                     ))\
                     .order_by(User.last_seen.desc())
@@ -1112,12 +1150,7 @@ def auth():
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(or_(
-                Role.name == u'预约协管员',
-                Role.name == u'iPad借阅协管员',
-                Role.name == u'时段协管员',
-                Role.name == u'iPad内容协管员',
-                Role.name == u'用户协管员',
-                Role.name == u'志愿者',
+                Role.name == u'协管员',
                 Role.name == u'管理员'
             ))\
             .order_by(User.last_seen.desc())
@@ -1203,12 +1236,7 @@ def auth_admin():
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(or_(
-                Role.name == u'预约协管员',
-                Role.name == u'iPad借阅协管员',
-                Role.name == u'时段协管员',
-                Role.name == u'iPad内容协管员',
-                Role.name == u'用户协管员',
-                Role.name == u'志愿者',
+                Role.name == u'协管员',
                 Role.name == u'管理员',
                 Role.name == u'开发人员'
             ))\
@@ -1622,6 +1650,7 @@ def suggest_user():
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
                 .order_by(User.last_seen.desc())
@@ -1670,6 +1699,7 @@ def suggest_email():
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
                 .order_by(User.last_seen.desc())
@@ -1718,6 +1748,7 @@ def search_user():
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
                 .order_by(User.last_seen.desc())

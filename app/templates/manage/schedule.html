@@ -58,6 +58,8 @@
                             <th>时段</th>
                             <th>预约状态</th>
                             <th>发布状态</th>
+                            <th>上次操作</th>
+                            <th>操作人</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -98,14 +100,29 @@
                             </td>
                             {% if schedule.out_of_date %}
                             <td class="negative">已过期</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(schedule.last_modified).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(schedule.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ schedule.modified_by.name }}</td>
                             <td><div class="ui disabled mini button"><i class="setting icon"></i> 操作</div></td>
                             {% else %}
                             {% if schedule.available %}
                             <td class="positive">已发布</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(schedule.last_modified).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(schedule.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ schedule.modified_by.name }}</td>
                             <td><a class="ui negative mini button loading-trigger" href="{{ url_for('manage.retract_schedule', id=schedule.id, page=pagination.page) }}"><i class="undo icon"></i> 撤销</a>
                             </td>
                             {% else %}
                             <td>未发布</td>
+                            <td>
+                                <div class="popup-trigger">{{ moment(schedule.last_modified).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(schedule.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ schedule.modified_by.name }}</td>
                             <td><a class="ui primary mini button loading-trigger" href="{{ url_for('manage.publish_schedule', id=schedule.id, page=pagination.page) }}"><i class="send icon"></i> 发布</a></td>
                             {% endif %}
                             {% endif %}

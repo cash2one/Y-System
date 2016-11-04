@@ -42,9 +42,6 @@ def vb():
 @permission_required(Permission.BOOK_VB)
 def book_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.vb', page=request.args.get('page')))
@@ -93,10 +90,7 @@ def book_vb(schedule_id):
 @login_required
 @permission_required(Permission.BOOK_VB)
 def wait_vb(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+    schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.vb', page=request.args.get('page')))
@@ -129,9 +123,6 @@ def wait_vb(schedule_id):
 @permission_required(Permission.BOOK_VB)
 def unbook_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.vb', page=request.args.get('page')))
@@ -168,10 +159,7 @@ def unbook_vb(schedule_id):
 @login_required
 @permission_required(Permission.BOOK_VB)
 def miss_vb(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+    schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.vb', page=request.args.get('page')))
@@ -209,9 +197,6 @@ def y_gre():
 @permission_required(Permission.BOOK_Y_GRE)
 def book_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
@@ -257,10 +242,7 @@ def book_y_gre(schedule_id):
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def wait_y_gre(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
@@ -290,9 +272,6 @@ def wait_y_gre(schedule_id):
 @permission_required(Permission.BOOK_Y_GRE)
 def unbook_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))
@@ -329,10 +308,7 @@ def unbook_y_gre(schedule_id):
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def miss_y_gre(schedule_id):
-    schedule = Schedule.query.filter_by(id=schedule_id).first()
-    if schedule is None:
-        flash(u'无效的预约时段')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放')
         return redirect(url_for('book.y_gre', page=request.args.get('page')))

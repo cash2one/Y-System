@@ -71,8 +71,20 @@
                                 {% endif %}
                             </td>
                             <td>{{ user.role.name }}</td>
-                            <td>{{ user.vb_course.name }}</td>
-                            <td>{{ user.y_gre_course.name }}</td>
+                            <td>
+                                {% if user.vb_course %}
+                                {{ user.vb_course.name }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.y_gre_course %}
+                                {{ user.y_gre_course.name }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </td>
                             <td>
                                 <div class="popup-trigger">{{ moment(user.member_since).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</div>

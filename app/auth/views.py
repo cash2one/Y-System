@@ -62,11 +62,11 @@ def activate():
                 new_user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
                 db.session.add(new_user)
                 if activation.vb_course_id:
-                    vb_course = Course.query.filter_by(id=activation.vb_course_id).first()
+                    vb_course = Course.query.get(activation.vb_course_id)
                     if vb_course:
                         new_user.register(course=vb_course)
                 if activation.y_gre_course_id:
-                    y_gre_course = Course.query.filter_by(id=activation.y_gre_course_id).first()
+                    y_gre_course = Course.query.get(activation.y_gre_course_id)
                     if y_gre_course:
                         new_user.register(course=y_gre_course)
                 db.session.commit()
