@@ -1,5 +1,9 @@
 // customize-login.js
 
+$('.ui.checkbox')
+    .checkbox()
+;
+
 $(document)
     .ready(function() {
         $('.ui.form')

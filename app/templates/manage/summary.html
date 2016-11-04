@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}系统实况{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-summary.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="ui big icon info message">
+            <i class="info circle icon"></i>
+            <i class="close icon"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <h1 class="ui inverted header"><i class="dashboard icon"></i> 系统实况</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="tablet icon"></i> iPad状态</h3>
+                <div class="ui tabular menu">
+                    {% if show_summary_ipad_1103 %}
+                    <a class="item active loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
+                    {% endif %}
+                    {% if show_summary_ipad_1707 %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
+                    {% endif %}
+                    {% if show_summary_ipad_others %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
+                    {% endif %}
+                </div>
+                {% if ipads %}
+                <div class="ui five stackable cards">
+                    {% for ipad in ipads %}
+                    {% if ipad.state.name == '待机' %}
+                    <div class="blue card">
+                    {% elif ipad.state.name == '借出' %}
+                    {% if ipad.now_rented_by.last_punch.lesson.type.name == 'VB' %}
+                    <div class="teal card">
+                    {% elif ipad.now_rented_by.last_punch.lesson.type.name == 'Y-GRE' %}
+                    <div class="orange card">
+                    {% else %}
+                    <div class="card">
+                    {% endif %}
+                    {% elif ipad.state.name == '候补' %}
+                    <div class="black card">
+                    {% elif ipad.state.name == '维护' %}
+                    <div class="red card">
+                    {% elif ipad.state.name == '充电' %}
+                    <div class="green card">
+                    {% elif ipad.state.name == '退役' %}
+                    <div class="grey card">
+                    {% else %}
+                    <div class="card">
+                    {% endif %}
+                        <div class="ipad-basic-info content">
+                            <div class="header">
+                                {{ ipad.alias }}
+                                {% if ipad.state.name == '借出' %}
+                                <span class="right floated">{{ ipad.now_rented_by.name }}</span>
+                                {% else %}
+                                <span class="right floated">{{ ipad.state.name }}</span>
+                                {% endif %}
+                            </div>
+                        <div class="meta">
+                            <span><code>{{ ipad.serial }}</code></span>
+                            <span class="right floated">{{ ipad.capacity.name }}</span>
+                        </div>
+                        </div>
+                        <div class="content">
+                            <div class="description">
+                                <div class="ui accordion">
+                                    <div class="title">
+                                    <i class="dropdown icon"></i>
+                                    VB内容
+                                    </div>
+                                    <div class="content">
+                                        {% with lessons = ipad.has_vb_lessons %}
+                                        {% if lessons.count() %}
+                                        <div class="ui horizontal divided list">
+                                            {% for lesson in lessons %}
+                                            <div class="item">{{ lesson.name }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        无
+                                        {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                    <div class="title">
+                                    <i class="dropdown icon"></i>
+                                    Y-GRE内容
+                                    </div>
+                                    <div class="content">
+                                        {% with lessons = ipad.has_y_gre_lessons %}
+                                        {% if lessons.count() %}
+                                        <div class="ui horizontal divided list">
+                                            {% for lesson in lessons %}
+                                            <div class="item">{{ lesson.name }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% else %}
+                                        无
+                                        {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="extra content">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="user icon"></i> 查询用户研修档案</h3>
+                <div class="ui search">
+                    <div class="ui left icon input">
+                        <input class="prompt" type="text" placeholder="姓名/邮箱">
+                        <i class="user icon"></i>
+                    </div>
+                    <div class="results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/customize-manage-summary.js') }}"></script>
+{% endblock %}

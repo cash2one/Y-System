@@ -41,6 +41,8 @@
                             <th>结束时间</th>
                             <th>时段类型</th>
                             <th>可选状态</th>
+                            <th>上次操作</th>
+                            <th>操作人</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -57,13 +59,14 @@
                             <td>不可选</td>
                             {% endif %}
                             <td>
+                                <div class="popup-trigger">{{ moment(period.last_modified).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(period.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ period.modified_by.name }}</td>
+                            <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_period', id=period.id) }}"><i class="edit icon"></i></a>
-                                    {% if period.used %}
-                                    <div class="ui mini disabled negative button"><i class="trash outline icon"></i></div>
-                                    {% else %}
                                     <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_period', id=period.id) }}"><i class="trash outline icon"></i></a>
-                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

@@ -1,9 +1,5 @@
 // customize-manage-analytics.js
 
-$('select.dropdown')
-  .dropdown()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)
@@ -259,7 +255,7 @@ visitHourlyChart.setOption({
     tooltip: {
         position: 'top',
         formatter: function (params) {
-            return params.seriesName + ': ' + params.value[2] + ' in ' + params.value[0] + ' of ' + params.value[1];
+            return params.value[1] + ' ' + params.value[0] + '<br />' + params.seriesName + ': ' + params.value[2];
         }
     },
     toolbox: {

@@ -1,13 +1,13 @@
 """initial
 
-Revision ID: 16cb6a4b2bdb
+Revision ID: d1688cc22636
 Revises: None
-Create Date: 2016-10-07 07:36:49.844089
+Create Date: 2016-11-05 04:38:34.027101
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '16cb6a4b2bdb'
+revision = 'd1688cc22636'
 down_revision = None
 
 from alembic import op
@@ -34,18 +34,18 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_ipad_capacities_name'), 'ipad_capacities', ['name'], unique=True)
+    op.create_table('ipad_contents_json',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('json_string', sa.UnicodeText(), nullable=True),
+    sa.Column('out_of_date', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('ipad_states',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_ipad_states_name'), 'ipad_states', ['name'], unique=True)
-    op.create_table('operation_types',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_operation_types_name'), 'operation_types', ['name'], unique=True)
     op.create_table('roles',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -67,20 +67,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_courses_name'), 'courses', ['name'], unique=True)
-    op.create_table('ipads',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('serial', sa.Unicode(length=12), nullable=True),
-    sa.Column('alias', sa.Unicode(length=64), nullable=True),
-    sa.Column('capacity_id', sa.Integer(), nullable=True),
-    sa.Column('room_id', sa.Integer(), nullable=True),
-    sa.Column('state_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['capacity_id'], ['ipad_capacities.id'], ),
-    sa.ForeignKeyConstraint(['room_id'], ['rooms.id'], ),
-    sa.ForeignKeyConstraint(['state_id'], ['ipad_states.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_ipads_alias'), 'ipads', ['alias'], unique=False)
-    op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=True)
     op.create_table('lessons',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -89,17 +75,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_lessons_name'), 'lessons', ['name'], unique=True)
-    op.create_table('periods',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('start_time', sa.Time(), nullable=True),
-    sa.Column('end_time', sa.Time(), nullable=True),
-    sa.Column('type_id', sa.Integer(), nullable=True),
-    sa.Column('show', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
-    )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.Unicode(length=64), nullable=True),
@@ -114,33 +89,38 @@ def upgrade():
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_name'), 'users', ['name'], unique=False)
-    op.create_table('adjacent_lessons',
-    sa.Column('previous_id', sa.Integer(), nullable=False),
-    sa.Column('next_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['next_id'], ['lessons.id'], ),
-    sa.ForeignKeyConstraint(['previous_id'], ['lessons.id'], ),
-    sa.PrimaryKeyConstraint('previous_id', 'next_id'),
-    sa.UniqueConstraint('next_id'),
-    sa.UniqueConstraint('previous_id')
-    )
-    op.create_table('ipad_contents',
-    sa.Column('ipad_id', sa.Integer(), nullable=False),
-    sa.Column('lesson_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['ipad_id'], ['ipads.id'], ),
-    sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
-    sa.PrimaryKeyConstraint('ipad_id', 'lesson_id')
-    )
-    op.create_index(op.f('ix_ipad_contents_ipad_id'), 'ipad_contents', ['ipad_id'], unique=False)
-    op.create_index(op.f('ix_ipad_contents_lesson_id'), 'ipad_contents', ['lesson_id'], unique=False)
-    op.create_table('operations',
+    op.create_table('ipads',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('log', sa.UnicodeText(), nullable=True),
-    sa.Column('operation_type_id', sa.Integer(), nullable=True),
-    sa.Column('operator_id', sa.Integer(), nullable=True),
-    sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['operation_type_id'], ['operation_types.id'], ),
-    sa.ForeignKeyConstraint(['operator_id'], ['users.id'], ),
+    sa.Column('serial', sa.Unicode(length=12), nullable=True),
+    sa.Column('alias', sa.Unicode(length=64), nullable=True),
+    sa.Column('capacity_id', sa.Integer(), nullable=True),
+    sa.Column('room_id', sa.Integer(), nullable=True),
+    sa.Column('state_id', sa.Integer(), nullable=True),
+    sa.Column('last_modified', sa.DateTime(), nullable=True),
+    sa.Column('last_modified_by', sa.Integer(), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['capacity_id'], ['ipad_capacities.id'], ),
+    sa.ForeignKeyConstraint(['last_modified_by'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['room_id'], ['rooms.id'], ),
+    sa.ForeignKeyConstraint(['state_id'], ['ipad_states.id'], ),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_ipads_alias'), 'ipads', ['alias'], unique=False)
+    op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=True)
+    op.create_table('periods',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('start_time', sa.Time(), nullable=True),
+    sa.Column('end_time', sa.Time(), nullable=True),
+    sa.Column('type_id', sa.Integer(), nullable=True),
+    sa.Column('show', sa.Boolean(), nullable=True),
+    sa.Column('last_modified', sa.DateTime(), nullable=True),
+    sa.Column('last_modified_by', sa.Integer(), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['last_modified_by'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('registrations',
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -149,31 +129,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('user_id', 'course_id')
     )
-    op.create_table('rentals',
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('ipad_id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=True),
-    sa.Column('returned', sa.Boolean(), nullable=True),
-    sa.Column('rent_time', sa.DateTime(), nullable=True),
-    sa.Column('rent_agent_id', sa.Integer(), nullable=True),
-    sa.Column('return_time', sa.DateTime(), nullable=True),
-    sa.Column('return_agent_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['ipad_id'], ['ipads.id'], ),
-    sa.ForeignKeyConstraint(['rent_agent_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['return_agent_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'ipad_id')
-    )
-    op.create_table('schedules',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=True),
-    sa.Column('period_id', sa.Integer(), nullable=True),
-    sa.Column('quota', sa.Integer(), nullable=True),
-    sa.Column('available', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['period_id'], ['periods.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_schedules_date'), 'schedules', ['date'], unique=False)
     op.create_table('sections',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -194,6 +149,7 @@ def upgrade():
     sa.Column('inviter_id', sa.Integer(), nullable=True),
     sa.Column('initial_lesson_id', sa.Integer(), nullable=True),
     sa.Column('initial_section_id', sa.Integer(), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['initial_lesson_id'], ['lessons.id'], ),
     sa.ForeignKeyConstraint(['initial_section_id'], ['sections.id'], ),
     sa.ForeignKeyConstraint(['inviter_id'], ['users.id'], ),
@@ -203,15 +159,54 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_activations_name'), 'activations', ['name'], unique=False)
-    op.create_table('adjacent_sections',
-    sa.Column('previous_id', sa.Integer(), nullable=False),
-    sa.Column('next_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['next_id'], ['sections.id'], ),
-    sa.ForeignKeyConstraint(['previous_id'], ['sections.id'], ),
-    sa.PrimaryKeyConstraint('previous_id', 'next_id'),
-    sa.UniqueConstraint('next_id'),
-    sa.UniqueConstraint('previous_id')
+    op.create_table('ipad_contents',
+    sa.Column('ipad_id', sa.Integer(), nullable=False),
+    sa.Column('lesson_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['ipad_id'], ['ipads.id'], ),
+    sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
+    sa.PrimaryKeyConstraint('ipad_id', 'lesson_id')
     )
+    op.create_index(op.f('ix_ipad_contents_ipad_id'), 'ipad_contents', ['ipad_id'], unique=False)
+    op.create_index(op.f('ix_ipad_contents_lesson_id'), 'ipad_contents', ['lesson_id'], unique=False)
+    op.create_table('punches',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('lesson_id', sa.Integer(), nullable=False),
+    sa.Column('section_id', sa.Integer(), nullable=False),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
+    sa.ForeignKeyConstraint(['section_id'], ['sections.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('user_id', 'lesson_id', 'section_id')
+    )
+    op.create_table('rentals',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('ipad_id', sa.Integer(), nullable=True),
+    sa.Column('date', sa.Date(), nullable=True),
+    sa.Column('returned', sa.Boolean(), nullable=True),
+    sa.Column('rent_time', sa.DateTime(), nullable=True),
+    sa.Column('rent_agent_id', sa.Integer(), nullable=True),
+    sa.Column('return_time', sa.DateTime(), nullable=True),
+    sa.Column('return_agent_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['ipad_id'], ['ipads.id'], ),
+    sa.ForeignKeyConstraint(['rent_agent_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['return_agent_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('schedules',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('date', sa.Date(), nullable=True),
+    sa.Column('period_id', sa.Integer(), nullable=True),
+    sa.Column('quota', sa.Integer(), nullable=True),
+    sa.Column('available', sa.Boolean(), nullable=True),
+    sa.Column('last_modified', sa.DateTime(), nullable=True),
+    sa.Column('last_modified_by', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['last_modified_by'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['period_id'], ['periods.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_schedules_date'), 'schedules', ['date'], unique=False)
     op.create_table('bookings',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('schedule_id', sa.Integer(), nullable=False),
@@ -224,16 +219,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('user_id', 'schedule_id')
     )
     op.create_index(op.f('ix_bookings_booking_code'), 'bookings', ['booking_code'], unique=True)
-    op.create_table('punches',
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('lesson_id', sa.Integer(), nullable=False),
-    sa.Column('section_id', sa.Integer(), nullable=False),
-    sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
-    sa.ForeignKeyConstraint(['section_id'], ['sections.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'lesson_id', 'section_id')
-    )
     op.create_table('user_activations',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('activation_id', sa.Integer(), nullable=False),
@@ -247,42 +232,38 @@ def upgrade():
 def downgrade():
     ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('user_activations')
-    op.drop_table('punches')
     op.drop_index(op.f('ix_bookings_booking_code'), table_name='bookings')
     op.drop_table('bookings')
-    op.drop_table('adjacent_sections')
+    op.drop_index(op.f('ix_schedules_date'), table_name='schedules')
+    op.drop_table('schedules')
+    op.drop_table('rentals')
+    op.drop_table('punches')
+    op.drop_index(op.f('ix_ipad_contents_lesson_id'), table_name='ipad_contents')
+    op.drop_index(op.f('ix_ipad_contents_ipad_id'), table_name='ipad_contents')
+    op.drop_table('ipad_contents')
     op.drop_index(op.f('ix_activations_name'), table_name='activations')
     op.drop_table('activations')
     op.drop_index(op.f('ix_sections_name'), table_name='sections')
     op.drop_table('sections')
-    op.drop_index(op.f('ix_schedules_date'), table_name='schedules')
-    op.drop_table('schedules')
-    op.drop_table('rentals')
     op.drop_table('registrations')
-    op.drop_table('operations')
-    op.drop_index(op.f('ix_ipad_contents_lesson_id'), table_name='ipad_contents')
-    op.drop_index(op.f('ix_ipad_contents_ipad_id'), table_name='ipad_contents')
-    op.drop_table('ipad_contents')
-    op.drop_table('adjacent_lessons')
-    op.drop_index(op.f('ix_users_name'), table_name='users')
-    op.drop_index(op.f('ix_users_email'), table_name='users')
-    op.drop_table('users')
     op.drop_table('periods')
-    op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
-    op.drop_table('lessons')
     op.drop_index(op.f('ix_ipads_serial'), table_name='ipads')
     op.drop_index(op.f('ix_ipads_alias'), table_name='ipads')
     op.drop_table('ipads')
+    op.drop_index(op.f('ix_users_name'), table_name='users')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('users')
+    op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
+    op.drop_table('lessons')
     op.drop_index(op.f('ix_courses_name'), table_name='courses')
     op.drop_table('courses')
     op.drop_index(op.f('ix_rooms_name'), table_name='rooms')
     op.drop_table('rooms')
     op.drop_index(op.f('ix_roles_name'), table_name='roles')
     op.drop_table('roles')
-    op.drop_index(op.f('ix_operation_types_name'), table_name='operation_types')
-    op.drop_table('operation_types')
     op.drop_index(op.f('ix_ipad_states_name'), table_name='ipad_states')
     op.drop_table('ipad_states')
+    op.drop_table('ipad_contents_json')
     op.drop_index(op.f('ix_ipad_capacities_name'), table_name='ipad_capacities')
     op.drop_table('ipad_capacities')
     op.drop_index(op.f('ix_course_types_name'), table_name='course_types')

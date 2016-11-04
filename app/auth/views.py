@@ -22,6 +22,8 @@ def unconfirmed():
     if current_user.is_anonymous:
         return redirect(url_for('main.index'))
     if current_user.confirmed:
+        if current_user.can(Permission.MANAGE):
+            return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     return render_template('auth/unconfirmed.html')
 
@@ -34,6 +36,8 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             # flash('欢迎登录云英语教育服务支撑系统！')
+            if user.can(Permission.MANAGE):
+                return redirect(request.args.get('next') or url_for('manage.summary'))
             return redirect(request.args.get('next') or url_for('main.profile'))
         flash('无效的用户名或密码')
     return render_template('auth/login.html', form=form)
@@ -58,11 +62,11 @@ def activate():
                 new_user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
                 db.session.add(new_user)
                 if activation.vb_course_id:
-                    vb_course = Course.query.filter_by(id=activation.vb_course_id).first()
+                    vb_course = Course.query.get(activation.vb_course_id)
                     if vb_course:
                         new_user.register(course=vb_course)
                 if activation.y_gre_course_id:
-                    y_gre_course = Course.query.filter_by(id=activation.y_gre_course_id).first()
+                    y_gre_course = Course.query.get(activation.y_gre_course_id)
                     if y_gre_course:
                         new_user.register(course=y_gre_course)
                 db.session.commit()
@@ -84,12 +88,16 @@ def activate():
 @login_required
 def confirm(token):
     if current_user.confirmed:
+        if current_user.can(Permission.MANAGE):
+            return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！')
     else:
         flash(u'确认链接无效或者已经过期')
         return redirect(url_for('auth.unconfirmed'))
+    if current_user.can(Permission.MANAGE):
+        return redirect(url_for('manage.summary'))
     return redirect(url_for('main.profile'))
 
 
@@ -99,7 +107,7 @@ def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
     flash(u'一封新的确认邮件已经发送至您的邮箱')
-    return redirect(url_for('main.index'))
+    return redirect(url_for('auth.unconfirmed'))
 
 
 @auth.route('/change-password', methods=['GET', 'POST'])
@@ -111,6 +119,8 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             flash(u'修改密码成功')
+            if current_user.can(Permission.MANAGE):
+                return redirect(url_for('manage.summary'))
             return redirect(url_for('main.profile'))
         else:
             flash(u'密码有误')
@@ -135,6 +145,8 @@ def reset_password_request():
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if not current_user.is_anonymous:
+        if current_user.can(Permission.MANAGE):
+            return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
@@ -172,4 +184,6 @@ def change_email(token):
         flash('修改邮箱成功')
     else:
         flash('请求无效')
+    if current_user.can(Permission.MANAGE):
+        return redirect(url_for('manage.summary'))
     return redirect(url_for('main.profile'))

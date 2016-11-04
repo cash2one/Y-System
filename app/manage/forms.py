@@ -30,7 +30,7 @@ class NewScheduleForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewScheduleForm, self).__init__(*args, **kwargs)
         self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(30)]
-        self.period.choices = [(period.id, period.alias3) for period in Period.query.order_by(Period.id.asc()).all() if period.show]
+        self.period.choices = [(period.id, period.alias3) for period in Period.query.order_by(Period.id.asc()).all() if (period.show and not period.deleted)]
 
 
 class NewPeriodForm(FlaskForm):
@@ -81,7 +81,7 @@ class NewiPadForm(FlaskForm):
         super(NewiPadForm, self).__init__(*args, **kwargs)
         self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(0, u'无')] + [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
-        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all()]
+        self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
         self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
 
@@ -144,6 +144,36 @@ class NewActivationForm(FlaskForm):
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
+class NewActivationFormAuth(FlaskForm):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
+    role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班', coerce=int)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewActivationFormAuth, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+
+class NewActivationFormAdmin(FlaskForm):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
+    role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班', coerce=int)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewActivationFormAdmin, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all()]
+        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+
 class EditActivationForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
@@ -155,6 +185,36 @@ class EditActivationForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditActivationForm, self).__init__(*args, **kwargs)
         self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'禁止预约', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+
+class EditActivationFormAuth(FlaskForm):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
+    role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班', coerce=int)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditActivationFormAuth, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+
+class EditActivationFormAdmin(FlaskForm):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    activation_code = StringField(u'激活码', validators=[Required(message=u'请输入激活码'), Length(6, 64)])
+    role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班', coerce=int)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditActivationFormAdmin, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all()]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
@@ -216,7 +276,6 @@ class EditAuthForm(FlaskForm):
 
     def __init__(self, user, *args, **kwargs):
         super(EditAuthForm, self).__init__(*args, **kwargs)
-        # self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'管理员', u'开发人员']]
         self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
@@ -237,7 +296,6 @@ class EditAuthFormAdmin(FlaskForm):
 
     def __init__(self, user, *args, **kwargs):
         super(EditAuthFormAdmin, self).__init__(*args, **kwargs)
-        # self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all()]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
@@ -311,8 +369,4 @@ class PunchSectionForm(FlaskForm):
 
 class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
-
-
-
-
 

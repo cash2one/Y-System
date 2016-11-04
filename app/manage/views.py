@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, EditActivationForm, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch
@@ -20,6 +20,67 @@ def after_request(response):
         if query.duration >= current_app.config['YSYS_SLOW_DB_QUERY_TIME']:
             current_app.logger.warning('Slow query: %s\nParameters: %s\nDuration: %fs\nContext: %s\n' % (query.statement, query.parameters, query.duration, query.context))
     return response
+
+
+@manage.route('/summary')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary():
+    show_summary_ipad_1103 = True
+    show_summary_ipad_1707 = False
+    show_summary_ipad_others = False
+    if current_user.is_authenticated:
+        show_summary_ipad_1103 = bool(request.cookies.get('show_summary_ipad_1103', '1'))
+        show_summary_ipad_1707 = bool(request.cookies.get('show_summary_ipad_1707', ''))
+        show_summary_ipad_others = bool(request.cookies.get('show_summary_ipad_others', ''))
+    if show_summary_ipad_1103:
+        query = iPad.query\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1103')\
+            .filter(iPad.deleted == False)
+    if show_summary_ipad_1707:
+        query = iPad.query\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1707')\
+            .filter(iPad.deleted == False)
+    if show_summary_ipad_others:
+        query = iPad.query\
+            .filter_by(room_id=None, deleted=False)
+    ipads = query.order_by(iPad.alias.asc())
+    return render_template('manage/summary.html', ipads=ipads, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
+
+
+@manage.route('/summary/ipad/1103')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary_room_1103_ipads():
+    resp = make_response(redirect(url_for('manage.summary')))
+    resp.set_cookie('show_summary_ipad_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/summary/ipad/1707')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary_room_1707_ipads():
+    resp = make_response(redirect(url_for('manage.summary')))
+    resp.set_cookie('show_summary_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/summary/ipad/others')
+@login_required
+@permission_required(Permission.MANAGE)
+def summary_other_ipads():
+    resp = make_response(redirect(url_for('manage.summary')))
+    resp.set_cookie('show_summary_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_summary_ipad_others', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/booking')
@@ -260,11 +321,11 @@ def schedule():
             if schedule:
                 flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
             else:
-                period = Period.query.filter_by(id=period_id).first()
+                period = Period.query.get_or_404(period_id)
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time))
                 else:
-                    schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data)
+                    schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data, last_modified_by=current_user.id)
                     db.session.add(schedule)
                     db.session.commit()
                     flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
@@ -296,7 +357,7 @@ def schedule():
 
 @manage.route('/schedule/today')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_SCHEDULE)
 def today_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '1', max_age=30*24*60*60)
@@ -307,7 +368,7 @@ def today_schedule():
 
 @manage.route('/schedule/future')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_SCHEDULE)
 def future_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
@@ -318,7 +379,7 @@ def future_schedule():
 
 @manage.route('/schedule/history')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_SCHEDULE)
 def history_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
@@ -331,7 +392,7 @@ def history_schedule():
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def publish_schedule(id):
-    schedule = Schedule.query.filter_by(id=id).first()
+    schedule = Schedule.query.get(id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
@@ -341,7 +402,7 @@ def publish_schedule(id):
     if schedule.available:
         flash(u'所选时段已经发布')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    schedule.publish()
+    schedule.publish(modified_by=current_user)
     flash(u'发布成功！')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -350,7 +411,7 @@ def publish_schedule(id):
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def retract_schedule(id):
-    schedule = Schedule.query.filter_by(id=id).first()
+    schedule = Schedule.query.get(id)
     if schedule is None:
         flash(u'该预约时段不存在')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
@@ -360,7 +421,7 @@ def retract_schedule(id):
     if not schedule.available:
         flash(u'所选时段尚未发布')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    schedule.retract()
+    schedule.retract(modified_by=current_user)
     flash(u'撤销成功！')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -376,7 +437,7 @@ def increase_schedule_quota(id):
     if schedule.out_of_date:
         flash(u'所选时段已经过期')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    candidate = schedule.increase_quota()
+    candidate = schedule.increase_quota(modified_by=current_user)
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
@@ -416,7 +477,7 @@ def decrease_schedule_quota(id):
     if schedule.quota <= schedule.occupied_quota:
         flash(u'所选时段名额不可少于预约人数')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
-    schedule.decrease_quota()
+    schedule.decrease_quota(modified_by=current_user)
     flash(u'所选时段名额-1')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
@@ -435,13 +496,13 @@ def period():
         if start_time >= end_time:
             flash(u'无法添加时段模板：%s，时间设置有误' % name)
             return redirect(url_for('manage.period'))
-        period = Period(name=name, start_time=start_time, end_time=end_time, type_id=type_id, show=show)
+        period = Period(name=name, start_time=start_time, end_time=end_time, type_id=type_id, show=show, last_modified_by=current_user.id)
         db.session.add(period)
         db.session.commit()
         flash(u'已添加时段模板：%s' % name)
         return redirect(url_for('manage.period'))
     page = request.args.get('page', 1, type=int)
-    query = Period.query
+    query = Period.query.filter_by(deleted=False)
     pagination = query\
         .order_by(Period.id.asc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -469,6 +530,8 @@ def edit_period(id):
         period.end_time = end_time
         period.type_id = type_id
         period.show = show
+        period.last_modified = datetime.utcnow()
+        period.last_modified_by = current_user.id
         db.session.add(period)
         db.session.commit()
         flash(u'已更新时段模板：%s' % name)
@@ -489,11 +552,7 @@ def delete_period(id):
     name = period.name
     form = DeletePeriodForm()
     if form.validate_on_submit():
-        if period.used:
-            flash(u'时段模板“%s”已被使用中，无法删除' % name)
-            return redirect(url_for('manage.period'))
-        db.session.delete(period)
-        db.session.commit()
+        period.safe_delete(modified_by=current_user)
         flash(u'已删除时段模板：%s' % name)
         return redirect(url_for('manage.period'))
     return render_template('manage/delete_period.html', form=form, period=period)
@@ -516,7 +575,7 @@ def ipad():
         if ipad:
             flash(u'序列号为%s的iPad已存在' % serial)
             return redirect(url_for('manage.ipad'))
-        ipad = iPad(serial=serial, alias=alias, capacity_id=capacity_id, room_id=room_id, state_id=state_id)
+        ipad = iPad(serial=serial, alias=alias, capacity_id=capacity_id, room_id=room_id, state_id=state_id, last_modified_by=current_user.id)
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
@@ -534,125 +593,131 @@ def ipad():
         .filter(iPadState.name == u'充电')\
         .count()
     page = request.args.get('page', 1, type=int)
-    show_all = True
-    show_maintain = False
-    show_charge = False
-    show_1103 = False
-    show_1707 = False
-    show_others = False
+    show_ipad_all = True
+    show_ipad_maintain = False
+    show_ipad_charge = False
+    show_ipad_1103 = False
+    show_ipad_1707 = False
+    show_ipad_others = False
     if current_user.is_authenticated:
-        show_all = bool(request.cookies.get('show_all', '1'))
-        show_maintain = bool(request.cookies.get('show_maintain', ''))
-        show_charge = bool(request.cookies.get('show_charge', ''))
-        show_1103 = bool(request.cookies.get('show_1103', ''))
-        show_1707 = bool(request.cookies.get('show_1707', ''))
-        show_others = bool(request.cookies.get('show_others', ''))
-    if show_all:
-        query = iPad.query
-    if show_maintain:
+        show_ipad_all = bool(request.cookies.get('show_ipad_all', '1'))
+        show_ipad_maintain = bool(request.cookies.get('show_ipad_maintain', ''))
+        show_ipad_charge = bool(request.cookies.get('show_ipad_charge', ''))
+        show_ipad_1103 = bool(request.cookies.get('show_ipad_1103', ''))
+        show_ipad_1707 = bool(request.cookies.get('show_ipad_1707', ''))
+        show_ipad_others = bool(request.cookies.get('show_ipad_others', ''))
+    if show_ipad_all:
+        query = iPad.query\
+            .filter_by(deleted=False)
+    if show_ipad_maintain:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadState.name == u'维护')
-    if show_charge:
+            .filter(iPadState.name == u'维护')\
+            .filter(iPad.deleted == False)
+    if show_ipad_charge:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadState.name == u'充电')
-    if show_1103:
+            .filter(iPadState.name == u'充电')\
+            .filter(iPad.deleted == False)
+    if show_ipad_1103:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1103')
-    if show_1707:
+            .filter(Room.name == u'1103')\
+            .filter(iPad.deleted == False)
+    if show_ipad_1707:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1707')
-    if show_others:
-        query = iPad.query.filter_by(room_id=None)
+            .filter(Room.name == u'1707')\
+            .filter(iPad.deleted == False)
+    if show_ipad_others:
+        query = iPad.query\
+            .filter_by(room_id=None, deleted=False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_all=show_all, show_maintain=show_maintain, show_charge=show_charge, show_1103=show_1103, show_1707=show_1707, show_others=show_others, pagination=pagination)
+    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_ipad_all=show_ipad_all, show_ipad_maintain=show_ipad_maintain, show_ipad_charge=show_ipad_charge, show_ipad_1103=show_ipad_1103, show_ipad_1707=show_ipad_1707, show_ipad_others=show_ipad_others, pagination=pagination)
 
 
 @manage.route('/ipad/all')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def all_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/ipad/maintain')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def maintain_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/ipad/charge')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def charge_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/ipad/1103')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def room_1103_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/ipad/1707')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def room_1707_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/ipad/others')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(Permission.MANAGE_IPAD)
 def other_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_others', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -671,6 +736,8 @@ def edit_ipad(id):
         else:
             ipad.room_id = form.room.data
         ipad.state_id = form.state.data
+        ipad.last_modified = datetime.utcnow()
+        ipad.last_modified_by = current_user.id
         db.session.add(ipad)
         db.session.commit()
         for pc in ipad.lessons_included:
@@ -680,7 +747,7 @@ def edit_ipad(id):
         db.session.commit()
         iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新')
-        return redirect(url_for('manage.ipad'))
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
     form.serial.data = ipad.serial
     form.capacity.data = ipad.capacity_id
@@ -699,13 +766,10 @@ def delete_ipad(id):
     form = DeleteiPadForm(ipad=ipad)
     if form.validate_on_submit():
         ipad_serial = ipad.serial
-        for pc in ipad.lessons_included:
-            ipad.remove_lesson(pc.lesson_id)
-        db.session.delete(ipad)
-        db.session.commit()
+        ipad.safe_delete(modified_by=current_user)
         iPadContentJSON.mark_out_of_date()
         flash(u'已删除序列号为%s的iPad' % ipad_serial)
-        return redirect(url_for('manage.ipad'))
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
     return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
 
 
@@ -719,7 +783,7 @@ def filter_ipad():
         lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
         if len(lesson_ids):
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=lesson_id).all()]) for lesson_id in lesson_ids])
-            ipads = [iPad.query.filter_by(id=ipad_id).first() for ipad_id in ipad_ids]
+            ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
     return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
 
 
@@ -737,7 +801,12 @@ def ipad_contents():
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def user():
-    form = NewActivationForm()
+    if current_user.can(Permission.ADMINISTER):
+        form = NewActivationFormAdmin()
+    elif current_user.can(Permission.MANAGE_AUTH):
+        form = NewActivationFormAuth()
+    else:
+        form = NewActivationForm()
     if form.validate_on_submit():
         name = form.name.data
         activation_code = form.activation_code.data
@@ -771,17 +840,40 @@ def user():
         .order_by(User.last_seen.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination_users.items
-    pagination_activations = Activation.query\
-        .join(Role, Role.id == Activation.role_id)\
-        .filter(or_(
-            Role.name == u'禁止预约',
-            Role.name == u'单VB',
-            Role.name == u'Y-GRE 普通',
-            Role.name == u'Y-GRE VBx2',
-            Role.name == u'Y-GRE A权限'
-        ))\
-        .order_by(Activation.timestamp.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    if current_user.can(Permission.ADMINISTER):
+        pagination_activations = Activation.query\
+            .join(Role, Role.id == Activation.role_id)\
+            .filter(Activation.deleted == False)\
+            .order_by(Activation.timestamp.desc())\
+            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    elif current_user.can(Permission.MANAGE_AUTH):
+        pagination_activations = Activation.query\
+            .join(Role, Role.id == Activation.role_id)\
+            .filter(or_(
+                Role.name == u'禁止预约',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限',
+                Role.name == u'协管员',
+                Role.name == u'管理员'
+            ))\
+            .filter(Activation.deleted == False)\
+            .order_by(Activation.timestamp.desc())\
+            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    else:
+        pagination_activations = Activation.query\
+            .join(Role, Role.id == Activation.role_id)\
+            .filter(or_(
+                Role.name == u'禁止预约',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限'
+            ))\
+            .filter(Activation.deleted == False)\
+            .order_by(Activation.timestamp.desc())\
+            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     activations = pagination_activations.items
     return render_template('manage/user.html', users=users, activations=activations, form=form, show_users=show_users, show_activations=show_activations, pagination_users=pagination_users, pagination_activations=pagination_activations)
 
@@ -811,13 +903,21 @@ def activations():
 @permission_required(Permission.MANAGE_USER)
 def edit_activation(id):
     activation = Activation.query.get_or_404(id)
-    form = EditActivationForm()
+    if current_user.can(Permission.ADMINISTER):
+        form = EditActivationFormAdmin()
+    elif current_user.can(Permission.MANAGE_AUTH):
+        form = EditActivationFormAuth()
+    else:
+        form = EditActivationForm()
     if form.validate_on_submit():
         activation.name = form.name.data
         activation.activation_code = form.activation_code.data
         activation.role_id = form.role.data
         activation.vb_course_id = form.vb_course.data
         activation.y_gre_course_id = form.y_gre_course.data
+        if activation.activated:
+            flash(u'该账户已经激活，不能更新。')
+            return redirect(url_for('manage.user'))
         db.session.add(activation)
         db.session.commit()
         flash(u'%s的激活信息已更新' % activation.name)
@@ -838,8 +938,10 @@ def delete_activation(id):
     name = activation.name
     form = DeleteActivationForm(activation=activation)
     if form.validate_on_submit():
-        db.session.delete(activation)
-        db.session.commit()
+        if activation.activated:
+            flash(u'该账户已经激活，无法删除。')
+            return redirect(url_for('manage.user'))
+        activation.safe_delete()
         flash(u'已删除%s的激活邀请' % name)
         return redirect(url_for('manage.user'))
     return render_template('manage/delete_activation.html', form=form, activation=activation)
@@ -858,11 +960,11 @@ def edit_user(id):
         if user.vb_course:
             user.unregister(user.vb_course)
         if form.vb_course.data:
-            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+            user.register(Course.query.get(form.vb_course.data))
         if user.y_gre_course:
             user.unregister(user.y_gre_course)
         if form.y_gre_course.data:
-            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+            user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
@@ -959,6 +1061,7 @@ def find_user():
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
                 .order_by(User.last_seen.desc())
@@ -1002,6 +1105,7 @@ def find_user():
                         Role.name == u'Y-GRE 普通',
                         Role.name == u'Y-GRE VBx2',
                         Role.name == u'Y-GRE A权限',
+                        Role.name == u'协管员',
                         Role.name == u'管理员'
                     ))\
                     .order_by(User.last_seen.desc())
@@ -1046,12 +1150,7 @@ def auth():
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(or_(
-                Role.name == u'预约协管员',
-                Role.name == u'iPad借阅协管员',
-                Role.name == u'时段协管员',
-                Role.name == u'iPad内容协管员',
-                Role.name == u'用户协管员',
-                Role.name == u'志愿者',
+                Role.name == u'协管员',
                 Role.name == u'管理员'
             ))\
             .order_by(User.last_seen.desc())
@@ -1104,11 +1203,11 @@ def edit_auth(id):
         if user.vb_course:
             user.unregister(user.vb_course)
         if form.vb_course.data:
-            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+            user.register(Course.query.get(form.vb_course.data))
         if user.y_gre_course:
             user.unregister(user.y_gre_course)
         if form.y_gre_course.data:
-            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+            user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
@@ -1137,12 +1236,7 @@ def auth_admin():
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(or_(
-                Role.name == u'预约协管员',
-                Role.name == u'iPad借阅协管员',
-                Role.name == u'时段协管员',
-                Role.name == u'iPad内容协管员',
-                Role.name == u'用户协管员',
-                Role.name == u'志愿者',
+                Role.name == u'协管员',
                 Role.name == u'管理员',
                 Role.name == u'开发人员'
             ))\
@@ -1196,11 +1290,11 @@ def edit_auth_admin(id):
         if user.vb_course:
             user.unregister(user.vb_course)
         if form.vb_course.data:
-            user.register(Course.query.filter_by(id=form.vb_course.data).first())
+            user.register(Course.query.get(form.vb_course.data))
         if user.y_gre_course:
             user.unregister(user.y_gre_course)
         if form.y_gre_course.data:
-            user.register(Course.query.filter_by(id=form.y_gre_course.data).first())
+            user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name)
@@ -1357,6 +1451,9 @@ def rental_rent_step_2_alt(user_id):
 def rental_rent_step_3_alt(user_id, ipad_id):
     user = User.query.get_or_404(user_id)
     ipad = iPad.query.get_or_404(ipad_id)
+    if ipad.deleted:
+        flash(u'序列号为%s的iPad不存在，请重新选择' % ipad.serial)
+        return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user_id))
     form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
@@ -1553,6 +1650,7 @@ def suggest_user():
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
                 .order_by(User.last_seen.desc())
@@ -1601,6 +1699,7 @@ def suggest_email():
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
                 .order_by(User.last_seen.desc())
@@ -1620,3 +1719,52 @@ def suggest_email():
                 ))\
                 .order_by(User.last_seen.desc())
     return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users]})
+
+
+@manage.route('/search/user/')
+@permission_required(Permission.MANAGE)
+def search_user():
+    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        if current_user.can(Permission.ADMINISTER):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .order_by(User.last_seen.desc())
+        elif current_user.can(Permission.MANAGE_AUTH):
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员',
+                    Role.name == u'管理员'
+                ))\
+                .order_by(User.last_seen.desc())
+        else:
+            users = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .filter(or_(
+                    Role.name == u'禁止预约',
+                    Role.name == u'单VB',
+                    Role.name == u'Y-GRE 普通',
+                    Role.name == u'Y-GRE VBx2',
+                    Role.name == u'Y-GRE A权限'
+                ))\
+                .order_by(User.last_seen.desc())
+    return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users]})

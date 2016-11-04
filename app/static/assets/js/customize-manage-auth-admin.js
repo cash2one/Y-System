@@ -1,13 +1,5 @@
 // customize-manage-auth-admin.js
 
-$('select.dropdown')
-  .dropdown()
-;
-
-$('table')
-    .tablesort()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)
@@ -15,4 +7,12 @@ $('.message .close')
             .transition('fade')
         ;
     })
+;
+
+$('select.dropdown')
+    .dropdown()
+;
+
+$('table')
+    .tablesort()
 ;

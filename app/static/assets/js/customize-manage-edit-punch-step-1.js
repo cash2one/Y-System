@@ -1,9 +1,5 @@
 // customize-manage-edit-punch-step-1.js
 
-$('select.dropdown')
-  .dropdown()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)
@@ -11,6 +7,10 @@ $('.message .close')
             .transition('fade')
         ;
     })
+;
+
+$('select.dropdown')
+    .dropdown()
 ;
 
 $(document)

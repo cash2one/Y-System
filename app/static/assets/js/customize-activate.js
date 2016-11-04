@@ -1,5 +1,9 @@
 // customize-activate.js
 
+$('.ui.checkbox')
+    .checkbox()
+;
+
 $(document)
     .ready(function() {
         $('.ui.form')

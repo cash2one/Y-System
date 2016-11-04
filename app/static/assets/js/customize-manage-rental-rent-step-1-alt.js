@@ -1,9 +1,5 @@
 // customize-manage-rental-rent-step-1-alt.js
 
-$('select.dropdown')
-  .dropdown()
-;
-
 $('.message .close')
     .on('click', function() {
         $(this)

@@ -1,4 +1,4 @@
-// customize-profile.js
+// customize-manage-summary.js
 
 $('.message .close')
     .on('click', function() {
@@ -9,8 +9,8 @@ $('.message .close')
     })
 ;
 
-$('table')
-    .tablesort()
+$('.ui.accordion')
+    .accordion()
 ;
 
 $('.ui.search')

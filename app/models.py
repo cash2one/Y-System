@@ -47,12 +47,7 @@ class Role(db.Model):
             (u'Y-GRE 普通', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE, ),
             (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
             (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
-            (u'预约协管员', Permission.MANAGE | Permission.MANAGE_BOOKING, ),
-            (u'iPad借阅协管员', Permission.MANAGE | Permission.MANAGE_RENTAL, ),
-            (u'时段协管员', Permission.MANAGE | Permission.MANAGE_SCHEDULE, ),
-            (u'iPad内容协管员', Permission.MANAGE | Permission.MANAGE_IPAD, ),
-            (u'用户协管员', Permission.MANAGE | Permission.MANAGE_USER, ),
-            (u'志愿者', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_USER, ),
+            (u'协管员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER, ),
             (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
             (u'开发人员', 0xffffffff, ),
         ]
@@ -150,9 +145,10 @@ class Activation(db.Model):
     vb_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), default=1)
+    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     initial_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), default=1)
     initial_section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), default=1)
+    deleted = db.Column(db.Boolean, default=False)
     activated_users = db.relationship(
         'UserActivation',
         foreign_keys=[UserActivation.activation_id],
@@ -174,15 +170,21 @@ class Activation(db.Model):
 
     @property
     def vb_course(self):
-        return Course.query.filter_by(id=self.vb_course_id).first()
+        if self.vb_course_id:
+            return Course.query.get(self.vb_course_id)
 
     @property
     def y_gre_course(self):
-        return Course.query.filter_by(id=self.y_gre_course_id).first()
+        if self.y_gre_course_id:
+            return Course.query.get(self.y_gre_course_id)
 
     @property
     def activated_user(self):
         return self.activated_users.first()
+
+    def safe_delete(self):
+        self.deleted = True
+        db.session.add(self)
 
     @staticmethod
     def insert_activations():
@@ -210,7 +212,8 @@ class Activation(db.Model):
                     activation_code=str(A[1]),
                     role_id=Role.query.filter_by(name=A[2]).first().id,
                     vb_course_id=vb_course_id,
-                    y_gre_course_id=y_gre_course_id
+                    y_gre_course_id=y_gre_course_id,
+                    inviter_id=User.query.get(1).id
                 )
                 if Section.query.filter_by(name=A[6]).first():
                     initial_section = Section.query.filter_by(name=A[6]).first()
@@ -267,7 +270,7 @@ class Booking(db.Model):
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
-        booking_hash = generate_password_hash(str(datetime.utcnow))
+        booking_hash = generate_password_hash(str(datetime.utcnow()))
         self.booking_code = urlsafe_b64encode(booking_hash[-40:] + urandom(56))
 
     def ping(self):
@@ -290,7 +293,7 @@ class Booking(db.Model):
                 wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
                 wb.ping()
                 db.session.add(wb)
-                return User.query.filter_by(id=wb.user_id).first()
+                return User.query.get(wb.user_id)
 
     @property
     def valid(self):
@@ -335,8 +338,9 @@ class Booking(db.Model):
 
 class Rental(db.Model):
     __tablename__ = 'rentals'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'))
     date = db.Column(db.Date, default=date.today())
     returned = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
@@ -349,7 +353,7 @@ class Rental(db.Model):
         self.return_time = datetime.utcnow()
         self.return_agent_id = return_agent_id
         db.session.add(self)
-        ipad = iPad.query.filter_by(id=self.ipad_id).first()
+        ipad = iPad.query.get(self.ipad_id)
         ipad.set_state(ipad_state)
 
     def __repr__(self):
@@ -380,6 +384,9 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
+    modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
+    modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
     rented_ipads = db.relationship(
         'Rental',
         foreign_keys=[Rental.user_id],
@@ -565,7 +572,7 @@ class User(UserMixin, db.Model):
             wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
             wb.ping()
             db.session.add(wb)
-            return User.query.filter_by(id=wb.user_id).first()
+            return User.query.get(wb.user_id)
 
     def miss(self, schedule):
         b =self.booked_schedules.filter_by(schedule_id=schedule.id).first()
@@ -704,6 +711,7 @@ class User(UserMixin, db.Model):
                 iPadState.name == u'待机',
                 iPadState.name == u'候补',
             ))\
+            .filter(iPad.deleted == False)\
             .order_by(iPad.id.asc())
 
     @property
@@ -726,17 +734,19 @@ class User(UserMixin, db.Model):
             .first()\
             .inviter
 
-    def to_json_suggestion(self, suggest_email=False):
+    def to_json_suggestion(self, suggest_email=False, include_url=False):
         if suggest_email:
             json_suggestion = {
                 'title': self.email,
-                'description': self.name,
+                'description': '%s（%s）' % (self.name, self.role.name),
             }
         else:
             json_suggestion = {
                 'title': self.name,
                 'description': self.email,
             }
+        if include_url:
+            json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
         return json_suggestion
 
     @staticmethod
@@ -782,7 +792,16 @@ class Period(db.Model):
     end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     show = db.Column(db.Boolean, default=False)
+    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
+    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
+
+    def safe_delete(self, modified_by):
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        self.deleted = True
+        db.session.add(self)
 
     @property
     def start_time_utc(self):
@@ -826,7 +845,6 @@ class Period(db.Model):
     def used(self):
         return Schedule.query.filter_by(period_id=self.id).first() is not None
 
-
     @staticmethod
     def insert_periods():
         periods = [
@@ -848,7 +866,8 @@ class Period(db.Model):
                     name=P[0],
                     start_time=P[1],
                     end_time=P[2],
-                    type_id=CourseType.query.filter_by(name=P[3]).first().id
+                    type_id=CourseType.query.filter_by(name=P[3]).first().id,
+                    last_modified_by=User.query.get(1).id
                 )
                 db.session.add(period)
                 print u'导入时段信息', P[0], P[1], P[2], P[3]
@@ -865,6 +884,8 @@ class Schedule(db.Model):
     period_id = db.Column(db.Integer, db.ForeignKey('periods.id'))
     quota = db.Column(db.Integer, default=0)
     available = db.Column(db.Boolean, default=False)
+    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
+    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     booked_users = db.relationship(
         'Booking',
         foreign_keys=[Booking.schedule_id],
@@ -873,16 +894,22 @@ class Schedule(db.Model):
         cascade='all, delete-orphan'
     )
 
-    def publish(self):
+    def publish(self, modified_by):
         self.available = True
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
         db.session.add(self)
 
-    def retract(self):
+    def retract(self, modified_by):
         self.available = False
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
         db.session.add(self)
 
-    def increase_quota(self):
+    def increase_quota(self, modified_by):
         self.quota += 1
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
         db.session.add(self)
         wb = Booking.query\
             .join(BookingState, BookingState.id == Booking.state_id)\
@@ -895,11 +922,13 @@ class Schedule(db.Model):
             wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
             wb.ping()
             db.session.add(wb)
-            return User.query.filter_by(id=wb.user_id).first()
+            return User.query.get(wb.user_id)
 
-    def decrease_quota(self):
+    def decrease_quota(self, modified_by):
         if self.quota > 0:
             self.quota += -1
+            self.last_modified = datetime.utcnow()
+            self.last_modified_by = modified_by.id
             db.session.add(self)
 
     @property
@@ -975,7 +1004,9 @@ class iPadCapacity(db.Model):
     def insert_ipad_capacities():
         ipad_capacities = [
             (u'16GB', ),
+            (u'32GB', ),
             (u'64GB', ),
+            (u'128GB', ),
         ]
         for PC in ipad_capacities:
             ipad_capacity = iPadCapacity.query.filter_by(name=PC[0]).first()
@@ -1063,12 +1094,17 @@ class iPadContent(db.Model):
                             lesson_id=L_id,
                         )
                         db.session.add(ipad_content)
-                        print u'导入iPad内容信息', PC[0], Lesson.query.filter_by(id=L_id).first().name
+                        print u'导入iPad内容信息', PC[0], Lesson.query.get(L_id).name
         db.session.commit()
-        ipad_contents = iPadContentJSON.query.get_or_404(1)
-        if ipad_contents.out_of_date:
+        ipad_contents = iPadContentJSON.query.get(1)
+        if ipad_contents is not None:
+            if ipad_contents.out_of_date:
+                iPadContentJSON.update()
+                db.session.commit()
+        else:
             iPadContentJSON.update()
             db.session.commit()
+        print u'将iPad内容信息转换成JSON格式'
 
 
 class iPadContentJSON(db.Model):
@@ -1079,8 +1115,8 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def update():
-        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.order_by(iPad.id.asc()).all()]))
-        pc_json = iPadContentJSON.query.filter_by(id=1).first()
+        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()]))
+        pc_json = iPadContentJSON.query.get(1)
         if pc_json is not None:
             pc_json.json_string = json_string
             pc_json.out_of_date = False
@@ -1090,7 +1126,7 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def mark_out_of_date():
-        pc_json = iPadContentJSON.query.filter_by(id=1).first()
+        pc_json = iPadContentJSON.query.get(1)
         if pc_json is not None:
             pc_json.out_of_date = True
         else:
@@ -1109,6 +1145,9 @@ class iPad(db.Model):
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
+    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
+    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
     lessons_included = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.ipad_id],
@@ -1123,6 +1162,12 @@ class iPad(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self, modified_by):
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        self.deleted = True
+        db.session.add(self)
 
     def set_state(self, state_name):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
@@ -1176,6 +1221,16 @@ class iPad(db.Model):
         y_gre_lessons = self.has_y_gre_lessons
         return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
 
+    @property
+    def now_rented_by(self):
+        return User.query\
+            .join(Rental, Rental.user_id == User.id)\
+            .join(iPad, iPad.id == Rental.ipad_id)\
+            .filter(Rental.date == date.today())\
+            .filter(Rental.returned == False)\
+            .filter(iPad.id == self.id)\
+            .first()
+
     @staticmethod
     def insert_ipads():
         import xlrd
@@ -1191,8 +1246,9 @@ class iPad(db.Model):
                     serial=P[1].upper(),
                     alias=P[0],
                     capacity_id=iPadCapacity.query.filter_by(name=P[2]).first().id,
-                    room_id=Room.query.filter_by(name=str(P[3])).first().id,
-                    state_id=iPadState.query.filter_by(name=P[4]).first().id
+                    room_id=Room.query.filter_by(name=unicode(str(P[3]))).first().id,
+                    state_id=iPadState.query.filter_by(name=P[4]).first().id,
+                    last_modified_by=User.query.get(1).id
                 )
                 print u'导入iPad信息', P[1], P[0], P[2], P[3], P[4]
                 db.session.add(ipad)
@@ -1200,47 +1256,6 @@ class iPad(db.Model):
 
     def __repr__(self):
         return '<iPad %s, %s>' % (self.alias, self.serial)
-
-
-class AdjacentLesson(db.Model):
-    __tablename__ = 'adjacent_lessons'
-    previous_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), unique=True, primary_key=True)
-    next_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), unique=True, primary_key=True)
-
-    @staticmethod
-    def insert_adjacent_lessons():
-        adjacent_lessons = [
-            (u'总论', u'L1', ),
-            (u'L1', u'L2', ),
-            (u'L2', u'L3', ),
-            (u'L3', u'L4', ),
-            (u'L4', u'L5', ),
-            (u'L5', u'L6', ),
-            (u'L6', u'L7', ),
-            (u'L7', u'L8', ),
-            (u'L8', u'L9', ),
-            (u'GRE总论', u'1st', ),
-            (u'1st', u'2nd', ),
-            (u'2nd', u'3rd', ),
-            (u'3rd', u'4th', ),
-            (u'4th', u'5th', ),
-            (u'5th', u'6th', ),
-            (u'6th', u'7th', ),
-            (u'7th', u'8th', ),
-            (u'8th', u'9th', ),
-            (u'9th', u'Test', ),
-            (u'Test', u'AW总论', ),
-        ]
-        for AL in adjacent_lessons:
-            adjacent_lesson = AdjacentLesson.query.filter_by(previous_id=Lesson.query.filter_by(name=AL[0]).first().id).first()
-            if adjacent_lesson is None:
-                adjacent_lesson = AdjacentLesson(
-                    previous_id=Lesson.query.filter_by(name=AL[0]).first().id,
-                    next_id=Lesson.query.filter_by(name=AL[1]).first().id
-                )
-                db.session.add(adjacent_lesson)
-                print u'导入课程关联信息', AL[0], AL[1]
-        db.session.commit()
 
 
 class Lesson(db.Model):
@@ -1255,20 +1270,6 @@ class Lesson(db.Model):
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
         backref=db.backref('lesson', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    previous = db.relationship(
-        'AdjacentLesson',
-        foreign_keys=[AdjacentLesson.next_id],
-        backref=db.backref('next', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    next = db.relationship(
-        'AdjacentLesson',
-        foreign_keys=[AdjacentLesson.previous_id],
-        backref=db.backref('previous', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
@@ -1322,127 +1323,6 @@ class Lesson(db.Model):
         return '<Lesson %s>' % self.name
 
 
-class AdjacentSection(db.Model):
-    __tablename__ = 'adjacent_sections'
-    previous_id = db.Column(db.Integer, db.ForeignKey('sections.id'), unique=True, primary_key=True)
-    next_id = db.Column(db.Integer, db.ForeignKey('sections.id'), unique=True, primary_key=True)
-
-    @staticmethod
-    def insert_adjacent_sections():
-        adjacent_sections = [
-            (u'0.11', u'0.12', ),
-            (u'0.12', u'0.13', ),
-            (u'0.13', u'0.14', ),
-            (u'0.14', u'0.21', ),
-            (u'0.21', u'0.22', ),
-            (u'0.22', u'0.23', ),
-            (u'0.23', u'0.24', ),
-            (u'0.24', u'0.31', ),
-            (u'0.31', u'0.32', ),
-            (u'0.32', u'0.33', ),
-            (u'0.33', u'0.34', ),
-            (u'0.34', u'0.41', ),
-            (u'0.41', u'0.42', ),
-            (u'0.42', u'0.43', ),
-            (u'0.43', u'0.44', ),
-            (u'0.44', u'1.1', ),
-            (u'1.1', u'1.2', ),
-            (u'1.2', u'1.3', ),
-            (u'1.3', u'1.4', ),
-            (u'1.4', u'1.5', ),
-            (u'1.5', u'1.6', ),
-            (u'1.6', u'1.7', ),
-            (u'1.7', u'1.8', ),
-            (u'1.8', u'2.1', ),
-            (u'2.1', u'2.2', ),
-            (u'2.2', u'2.3', ),
-            (u'2.3', u'2.4', ),
-            (u'2.4', u'2.5', ),
-            (u'2.5', u'2.6', ),
-            (u'2.6', u'2.7', ),
-            (u'2.7', u'2.8', ),
-            (u'2.8', u'3.1', ),
-            (u'3.1', u'3.2', ),
-            (u'3.2', u'3.3', ),
-            (u'3.3', u'3.4', ),
-            (u'3.4', u'3.5', ),
-            (u'3.5', u'3.6', ),
-            (u'3.6', u'3.7', ),
-            (u'3.7', u'3.8', ),
-            (u'3.8', u'4.1', ),
-            (u'4.1', u'4.2', ),
-            (u'4.2', u'4.3', ),
-            (u'4.3', u'4.4', ),
-            (u'4.4', u'4.5', ),
-            (u'4.5', u'4.6', ),
-            (u'4.6', u'4.7', ),
-            (u'4.7', u'4.8', ),
-            (u'4.8', u'5.1', ),
-            (u'5.1', u'5.2', ),
-            (u'5.2', u'5.3', ),
-            (u'5.3', u'5.4', ),
-            (u'5.4', u'5.5', ),
-            (u'5.5', u'5.6', ),
-            (u'5.6', u'5.7', ),
-            (u'5.7', u'5.8', ),
-            (u'5.8', u'6.1', ),
-            (u'6.1', u'6.2', ),
-            (u'6.2', u'6.3', ),
-            (u'6.3', u'6.4', ),
-            (u'6.4', u'6.5', ),
-            (u'6.5', u'6.6', ),
-            (u'6.6', u'6.7', ),
-            (u'6.7', u'6.8', ),
-            (u'6.8', u'7.1', ),
-            (u'7.1', u'7.2', ),
-            (u'7.2', u'7.3', ),
-            (u'7.3', u'7.4', ),
-            (u'7.4', u'7.5', ),
-            (u'7.5', u'7.6', ),
-            (u'7.6', u'7.7', ),
-            (u'7.7', u'7.8', ),
-            (u'7.8', u'8.1', ),
-            (u'8.1', u'8.2', ),
-            (u'8.2', u'8.3', ),
-            (u'8.3', u'8.4', ),
-            (u'8.4', u'8.5', ),
-            (u'8.5', u'8.6', ),
-            (u'8.6', u'8.7', ),
-            (u'8.7', u'8.8', ),
-            (u'8.8', u'8.9', ),
-            (u'8.9', u'9.1', ),
-            (u'9.1', u'9.2', ),
-            (u'9.2', u'9.3', ),
-            (u'9.3', u'9.4', ),
-            (u'9.4', u'9.5', ),
-            (u'9.5', u'9.6', ),
-            (u'9.6', u'9.7', ),
-            (u'9.7', u'9.8', ),
-            (u'9.8', u'9.9', ),
-            (u'GRE总论', u'1st', ),
-            (u'1st', u'2nd', ),
-            (u'2nd', u'3rd', ),
-            (u'3rd', u'4th', ),
-            (u'4th', u'5th', ),
-            (u'5th', u'6th', ),
-            (u'6th', u'7th', ),
-            (u'7th', u'8th', ),
-            (u'8th', u'9th', ),
-            (u'9th', u'Test', ),
-            (u'Test', u'AW总论', ),
-        ]
-        for AS in adjacent_sections:
-            adjacent_section = AdjacentSection.query.filter_by(previous_id=Section.query.filter_by(name=AS[0]).first().id).first()
-            if adjacent_section is None:
-                adjacent_section = AdjacentSection(
-                    previous_id=Section.query.filter_by(name=AS[0]).first().id,
-                    next_id=Section.query.filter_by(name=AS[1]).first().id
-                )
-                db.session.add(adjacent_section)
-                print u'导入节关联信息', AS[0], AS[1]
-        db.session.commit()
-
-
 class Section(db.Model):
     __tablename__ = 'sections'
     id = db.Column(db.Integer, primary_key=True)
@@ -1450,20 +1330,6 @@ class Section(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     punches = db.relationship('Punch', backref='section', lazy='dynamic')
     activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
-    previous = db.relationship(
-        'AdjacentSection',
-        foreign_keys=[AdjacentSection.next_id],
-        backref=db.backref('next', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    next = db.relationship(
-        'AdjacentSection',
-        foreign_keys=[AdjacentSection.previous_id],
-        backref=db.backref('previous', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
 
     @staticmethod
     def insert_sections():
@@ -1596,39 +1462,3 @@ class Punch(db.Model):
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user.name, self.section.name)
 
-
-class OperationType(db.Model):
-    __tablename__ = 'operation_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    operations = db.relationship('Operation', backref='type', lazy='dynamic')
-
-    @staticmethod
-    def insert_operation_types():
-        operation_types = [
-            (u'增加', ),
-            (u'修改', ),
-            (u'删除', ),
-        ]
-        for OT in operation_types:
-            operation_type = OperationType.query.filter_by(name=OT[0]).first()
-            if operation_type is None:
-                operation_type = OperationType(name=OT[0])
-                db.session.add(operation_type)
-                print u'导入操作类型信息', OT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Operation Type %s>' % self.name
-
-
-class Operation(db.Model):
-    __tablename__ = 'operations'
-    id = db.Column(db.Integer, primary_key=True)
-    log = db.Column(db.UnicodeText)
-    operation_type_id = db.Column(db.Integer, db.ForeignKey('operation_types.id'))
-    operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return '<Operation Log %s>' % self.log
