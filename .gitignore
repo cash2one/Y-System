@@ -66,6 +66,7 @@ venv/
 
 # SQLite database
 *.sqlite
+*.sqlite-journal
 *.db
 
 # uWSGI configuration
