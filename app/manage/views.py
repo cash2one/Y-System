@@ -1488,7 +1488,7 @@ def rental_return_step_1():
         if ipad.state.name != u'借出':
             flash(u'序列号为%s的iPad处于%s状态，尚未借出' % (serial, ipad.state.name))
             return redirect(url_for('manage.rental_return_step_1'))
-        rental = Rental.query.filter_by(ipad_id=ipad.id).first()
+        rental = Rental.query.filter_by(ipad_id=ipad.id, returned=False).first()
         if rental is None:
             flash(u'没有序列号为%s的iPad的借阅记录' % serial)
             return redirect(url_for('manage.rental_return_step_1'))
@@ -1768,3 +1768,10 @@ def search_user():
                 ))\
                 .order_by(User.last_seen.desc())
     return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users]})
+
+
+@manage.route('/info/ipad/<int:id>')
+@permission_required(Permission.MANAGE)
+def ipad_info(id):
+    ipad = iPad.query.get_or_404(id)
+    return jsonify(ipad.to_json_info())
