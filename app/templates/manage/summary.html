@@ -52,81 +52,18 @@
                 {% if ipads %}
                 <div class="ui five stackable cards">
                     {% for ipad in ipads %}
-                    {% if ipad.state.name == '待机' %}
-                    <div class="blue card">
-                    {% elif ipad.state.name == '借出' %}
-                    {% if ipad.now_rented_by.last_punch.lesson.type.name == 'VB' %}
-                    <div class="teal card">
-                    {% elif ipad.now_rented_by.last_punch.lesson.type.name == 'Y-GRE' %}
-                    <div class="orange card">
-                    {% else %}
-                    <div class="card">
-                    {% endif %}
-                    {% elif ipad.state.name == '候补' %}
-                    <div class="black card">
-                    {% elif ipad.state.name == '维护' %}
-                    <div class="red card">
-                    {% elif ipad.state.name == '充电' %}
-                    <div class="green card">
-                    {% elif ipad.state.name == '退役' %}
-                    <div class="grey card">
-                    {% else %}
-                    <div class="card">
-                    {% endif %}
+                    <div id="ipad-{{ ipad.id }}" class="card">
                         <div class="ipad-basic-info content">
                             <div class="header">
-                                {{ ipad.alias }}
-                                {% if ipad.state.name == '借出' %}
-                                <span class="right floated">{{ ipad.now_rented_by.name }}</span>
-                                {% else %}
-                                <span class="right floated">{{ ipad.state.name }}</span>
-                                {% endif %}
+                                <span id="ipad-alias-{{ ipad.id }}">{{ ipad.alias }}</span>
+                                <span id="ipad-state-{{ ipad.id }}" class="right floated">{{ ipad.state.name }}</span>
                             </div>
-                        <div class="meta">
-                            <span><code>{{ ipad.serial }}</code></span>
-                            <span class="right floated">{{ ipad.capacity.name }}</span>
-                        </div>
-                        </div>
-                        <div class="content">
-                            <div class="description">
-                                <div class="ui accordion">
-                                    <div class="title">
-                                    <i class="dropdown icon"></i>
-                                    VB内容
-                                    </div>
-                                    <div class="content">
-                                        {% with lessons = ipad.has_vb_lessons %}
-                                        {% if lessons.count() %}
-                                        <div class="ui horizontal divided list">
-                                            {% for lesson in lessons %}
-                                            <div class="item">{{ lesson.name }}</div>
-                                            {% endfor %}
-                                        </div>
-                                        {% else %}
-                                        无
-                                        {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                    <div class="title">
-                                    <i class="dropdown icon"></i>
-                                    Y-GRE内容
-                                    </div>
-                                    <div class="content">
-                                        {% with lessons = ipad.has_y_gre_lessons %}
-                                        {% if lessons.count() %}
-                                        <div class="ui horizontal divided list">
-                                            {% for lesson in lessons %}
-                                            <div class="item">{{ lesson.name }}</div>
-                                            {% endfor %}
-                                        </div>
-                                        {% else %}
-                                        无
-                                        {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                </div>
+                            <div class="meta">
+                                <span><code id="ipad-serial-{{ ipad.id }}">{{ ipad.serial }}</code></span>
+                                <span id="ipad-capacity-{{ ipad.id }}" class="right floated">{{ ipad.capacity.name }}</span>
                             </div>
                         </div>
+                        <div class="content"></div>
                         <div class="extra content">
                         </div>
                     </div>

@@ -387,27 +387,6 @@ class User(UserMixin, db.Model):
     modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
     modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
-    rented_ipads = db.relationship(
-        'Rental',
-        foreign_keys=[Rental.user_id],
-        backref=db.backref('user', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    manage_ipads_rent = db.relationship(
-        'Rental',
-        foreign_keys=[Rental.user_id],
-        backref=db.backref('rent_agent', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    manage_ipads_return = db.relationship(
-        'Rental',
-        foreign_keys=[Rental.user_id],
-        backref=db.backref('return_agent', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
     punches = db.relationship('Punch', backref='user', lazy='dynamic')
     invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
     activation = db.relationship(
@@ -1155,13 +1134,7 @@ class iPad(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    rented_users = db.relationship(
-        'Rental',
-        foreign_keys=[Rental.ipad_id],
-        backref=db.backref('ipad', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
+    rentals = db.relationship('Rental', backref='ipad', lazy='dynamic')
 
     def safe_delete(self, modified_by):
         self.last_modified = datetime.utcnow()
@@ -1226,10 +1199,25 @@ class iPad(db.Model):
         return User.query\
             .join(Rental, Rental.user_id == User.id)\
             .join(iPad, iPad.id == Rental.ipad_id)\
-            .filter(Rental.date == date.today())\
             .filter(Rental.returned == False)\
             .filter(iPad.id == self.id)\
             .first()
+
+    def to_json_info(self):
+        json_info = {
+            'serial': self.serial,
+            'alias': self.alias,
+            'capacity': self.capacity.name,
+            'state': {
+                'name': self.state.name,
+                'color': self.state.name,
+                'display': self.state.name,
+            },
+        }
+        if self.now_rented_by:
+            json_info['state']['display'] = self.now_rented_by.name
+            json_info['state']['color'] = self.now_rented_by.last_punch.lesson.type.name
+        return json_info
 
     @staticmethod
     def insert_ipads():
