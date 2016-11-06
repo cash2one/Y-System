@@ -49,27 +49,7 @@
                     <a class="item active loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
                     {% endif %}
                 </div>
-                {% if ipads %}
-                <div class="ui five stackable cards">
-                    {% for ipad in ipads %}
-                    <div id="ipad-{{ ipad.id }}" class="card">
-                        <div class="ipad-basic-info content">
-                            <div class="header">
-                                <span id="ipad-alias-{{ ipad.id }}">{{ ipad.alias }}</span>
-                                <span id="ipad-state-{{ ipad.id }}" class="right floated">{{ ipad.state.name }}</span>
-                            </div>
-                            <div class="meta">
-                                <span><code id="ipad-serial-{{ ipad.id }}">{{ ipad.serial }}</code></span>
-                                <span id="ipad-capacity-{{ ipad.id }}" class="right floated">{{ ipad.capacity.name }}</span>
-                            </div>
-                        </div>
-                        <div class="content"></div>
-                        <div class="extra content">
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                <div id="ipads" class="ui five stackable cards"></div>
             </div>
         </div>
     </div>
@@ -95,5 +75,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script>
+    var roomID = '{{ room_id }}';
+</script>
 <script src="{{ url_for('static', filename='assets/js/customize-manage-summary.js') }}"></script>
 {% endblock %}

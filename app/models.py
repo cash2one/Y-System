@@ -22,6 +22,7 @@ class Permission:
     BOOK_VB_2       = 0b0000000000000000000000000001000
     BOOK_ANY        = 0b0000000000000000000000000010000
     MANAGE          = 0b0000000000000000000000000100000
+    # MANAGE_MESSAGE  = 0b0000000000000000000000000000000
     MANAGE_BOOKING  = 0b0000000000000000000000001000000
     MANAGE_RENTAL   = 0b0000000000000000000000010000000
     MANAGE_SCHEDULE = 0b0000000000000000000000100000000
@@ -335,6 +336,14 @@ class Booking(db.Model):
     def canceled(self):
         return self.state.name == u'取消'
 
+    def to_json(self):
+        booking_json = {
+            'user': self.user.to_json(),
+            'schedule': self.schedule.to_json(),
+            'code': self.booking_code,
+        }
+        return booking_json
+
 
 class Rental(db.Model):
     __tablename__ = 'rentals'
@@ -381,6 +390,27 @@ class User(UserMixin, db.Model):
         'Booking',
         foreign_keys=[Booking.user_id],
         backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    rented_ipads = db.relationship(
+        'Rental',
+        foreign_keys=[Rental.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    manage_ipads_rent = db.relationship(
+        'Rental',
+        foreign_keys=[Rental.user_id],
+        backref=db.backref('rent_agent', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    manage_ipads_return = db.relationship(
+        'Rental',
+        foreign_keys=[Rental.user_id],
+        backref=db.backref('return_agent', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
@@ -713,20 +743,31 @@ class User(UserMixin, db.Model):
             .first()\
             .inviter
 
+    def to_json(self):
+        user_json = {
+            'name': self.name,
+            'email': self.email,
+            'role': self.role.name,
+            'last_punch': self.last_punch.to_json(),
+            'last_seen': self.last_seen.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'url': url_for('main.profile_user', user_id=self.id),
+        }
+        return user_json
+
     def to_json_suggestion(self, suggest_email=False, include_url=False):
         if suggest_email:
-            json_suggestion = {
+            user_json_suggestion = {
                 'title': self.email,
-                'description': '%s（%s）' % (self.name, self.role.name),
+                'description': '%s[%s]' % (self.name, self.role.name),
             }
         else:
-            json_suggestion = {
+            user_json_suggestion = {
                 'title': self.name,
                 'description': self.email,
             }
         if include_url:
-            json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
-        return json_suggestion
+            user_json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
+        return user_json_suggestion
 
     @staticmethod
     def insert_admin():
@@ -820,9 +861,20 @@ class Period(db.Model):
     def alias3(self):
         return u'%s：%s - %s' % (self.name, self.start_time_str, self.end_time_str)
 
-    @property
-    def used(self):
-        return Schedule.query.filter_by(period_id=self.id).first() is not None
+    def to_json(self):
+        period_json = {
+            'name': self.name,
+            'start_time': self.start_time_str,
+            'end_time': self.end_time_str,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'alias3': self.alias3,
+            'type': self.type.show,
+            'show': self.show,
+            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'last_modified_by': self.modified_by.name,
+        }
+        return period_json
 
     @staticmethod
     def insert_periods():
@@ -968,6 +1020,17 @@ class Schedule(db.Model):
     @property
     def full(self):
         return self.occupied_quota >= self.quota
+
+    def to_json(self):
+        schedule_json = {
+            'date': self.date,
+            'period': self.period.to_json(),
+            'quota': self.quota,
+            'available': self.available,
+            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'last_modified_by': self.modified_by.name,
+        }
+        return schedule_json
 
     def __repr__(self):
         return '<Schedule %r>' % self.date
@@ -1203,21 +1266,18 @@ class iPad(db.Model):
             .filter(iPad.id == self.id)\
             .first()
 
-    def to_json_info(self):
-        json_info = {
+    def to_json(self):
+        ipad_json = {
             'serial': self.serial,
             'alias': self.alias,
             'capacity': self.capacity.name,
-            'state': {
-                'name': self.state.name,
-                'color': self.state.name,
-                'display': self.state.name,
-            },
+            'state': self.state.name,
+            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'last_modified_by': self.modified_by.name,
         }
-        if self.now_rented_by:
-            json_info['state']['display'] = self.now_rented_by.name
-            json_info['state']['color'] = self.now_rented_by.last_punch.lesson.type.name
-        return json_info
+        if self.state.name == u'借出':
+            ipad_json['now_rented_by'] = self.now_rented_by.to_json()
+        return ipad_json
 
     @staticmethod
     def insert_ipads():
@@ -1446,6 +1506,26 @@ class Punch(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.lesson.name, self.section.name)
+
+    @property
+    def alias2(self):
+        return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.section.name)
+
+    def to_json(self):
+        punch_json = {
+            'user': self.user.name,
+            'course_type': self.lesson.type.name,
+            'lesson': self.lesson.name,
+            'section': self.section.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        }
+        return punch_json
 
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user.name, self.section.name)

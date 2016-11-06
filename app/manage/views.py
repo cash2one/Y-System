@@ -34,20 +34,12 @@ def summary():
         show_summary_ipad_1707 = bool(request.cookies.get('show_summary_ipad_1707', ''))
         show_summary_ipad_others = bool(request.cookies.get('show_summary_ipad_others', ''))
     if show_summary_ipad_1103:
-        query = iPad.query\
-            .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1103')\
-            .filter(iPad.deleted == False)
+        room_id = Room.query.filter_by(name=u'1103').first().id
     if show_summary_ipad_1707:
-        query = iPad.query\
-            .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1707')\
-            .filter(iPad.deleted == False)
+        room_id = Room.query.filter_by(name=u'1707').first().id
     if show_summary_ipad_others:
-        query = iPad.query\
-            .filter_by(room_id=None, deleted=False)
-    ipads = query.order_by(iPad.alias.asc())
-    return render_template('manage/summary.html', ipads=ipads, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
+        room_id = 0
+    return render_template('manage/summary.html', room_id=room_id, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
 
 
 @manage.route('/summary/ipad/1103')
@@ -81,6 +73,22 @@ def summary_other_ipads():
     resp.set_cookie('show_summary_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_summary_ipad_others', '1', max_age=30*24*60*60)
     return resp
+
+
+@manage.route('/summary/ipad/room/<int:room_id>')
+@permission_required(Permission.MANAGE)
+def summary_room(room_id):
+    ipads = []
+    if room_id == 0:
+        ipads = iPad.query\
+            .filter_by(room_id=None, deleted=False)\
+            .order_by(iPad.alias.asc())
+    else:
+        room_id = Room.query.get_or_404(room_id).id
+        ipads = iPad.query\
+            .filter_by(room_id=room_id, deleted=False)\
+            .order_by(iPad.alias.asc())
+    return jsonify({'ipads': [ipad.to_json() for ipad in ipads]})
 
 
 @manage.route('/booking')
@@ -304,7 +312,6 @@ def set_booking_state_missed_all():
         .all()
     for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
         booking.set_state(u'失效')
-    db.session.commit()
     flash(u'标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)))
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
@@ -1236,8 +1243,6 @@ def auth_admin():
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(or_(
-                Role.name == u'协管员',
-                Role.name == u'管理员',
                 Role.name == u'开发人员'
             ))\
             .order_by(Role.id.desc())
@@ -1249,7 +1254,9 @@ def auth_admin():
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
-                Role.name == u'Y-GRE A权限'
+                Role.name == u'Y-GRE A权限',
+                Role.name == u'协管员',
+                Role.name == u'管理员'
             ))\
             .order_by(User.last_seen.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -1410,7 +1417,7 @@ def rental_rent_step_3(user_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name)
             return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=ipad_id))
-        rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
         flash(u'iPad借出信息登记成功')
@@ -1466,7 +1473,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name)
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
-        rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
         flash(u'iPad借出信息登记成功')
@@ -1768,10 +1775,3 @@ def search_user():
                 ))\
                 .order_by(User.last_seen.desc())
     return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users]})
-
-
-@manage.route('/info/ipad/<int:id>')
-@permission_required(Permission.MANAGE)
-def ipad_info(id):
-    ipad = iPad.query.get_or_404(id)
-    return jsonify(ipad.to_json_info())
