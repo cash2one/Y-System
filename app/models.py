@@ -268,7 +268,6 @@ class Booking(db.Model):
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     booking_code = db.Column(db.String(128), unique=True, index=True)
-    assigned_ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'))
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
@@ -750,7 +749,7 @@ class User(UserMixin, db.Model):
             'email': self.email,
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
-            'last_seen': self.last_seen,
+            'last_seen': self.last_seen.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'url': url_for('main.profile_user', user_id=self.id),
         }
         return user_json
@@ -872,8 +871,8 @@ class Period(db.Model):
             'alias3': self.alias3,
             'type': self.type.show,
             'show': self.show,
-            'last_modified_at': self.last_modified,
-            'last_modified_by': self.last_modified_by.name,
+            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'last_modified_by': self.modified_by.name,
         }
         return period_json
 
@@ -1028,8 +1027,8 @@ class Schedule(db.Model):
             'period': self.period.to_json(),
             'quota': self.quota,
             'available': self.available,
-            'last_modified_at': self.last_modified,
-            'last_modified_by': self.last_modified_by.name,
+            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'last_modified_by': self.modified_by.name,
         }
         return schedule_json
 
@@ -1267,44 +1266,17 @@ class iPad(db.Model):
             .filter(iPad.id == self.id)\
             .first()
 
-    @property
-    def today_assigned_bookings(self):
-        return Booking.query\
-            .join(Schedule, Schedule.id == Booking.schedule_id)\
-            .join(Period, Period.id == Schedule.period_id)\
-            .join(BookingState, BookingState.id == Booking.state_id)\
-            .filter(Schedule.date == date.today())\
-            .filter(Booking.assigned_ipad_id == self.id)\
-            .filter(BookingState.name == u'预约')\
-            .order_by(Period.id.asc())
-
     def to_json(self):
-        color = {
-            u'待机': u'blue',
-            u'借出': u'yellow',
-            u'VB': u'teal',
-            u'Y-GRE': u'orange',
-            u'候补': u'black',
-            u'维护': u'red',
-            u'充电': u'green',
-            u'退役': u'grey',
-        }
         ipad_json = {
             'serial': self.serial,
             'alias': self.alias,
             'capacity': self.capacity.name,
-            'state': {
-                'name': self.state.name,
-                'css_color': color[self.state.name],
-                'html_display': self.state.name,
-            },
-            'now_rented_by': None,
-            'today_assigned_bookings': [booking.to_json() for booking in self.today_assigned_bookings],
+            'state': self.state.name,
+            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'last_modified_by': self.modified_by.name,
         }
         if self.state.name == u'借出':
             ipad_json['now_rented_by'] = self.now_rented_by.to_json()
-            ipad_json['state']['html_display'] = u'[%s]%s' % (self.now_rented_by.last_punch.lesson.type.name, self.now_rented_by.name)
-            ipad_json['state']['css_color'] = color[self.now_rented_by.last_punch.lesson.type.name]
         return ipad_json
 
     @staticmethod
@@ -1546,10 +1518,12 @@ class Punch(db.Model):
     def to_json(self):
         punch_json = {
             'user': self.user.name,
+            'course_type': self.lesson.type.name,
             'lesson': self.lesson.name,
             'section': self.section.name,
             'alias': self.alias,
-            'punched_at': self.timestamp,
+            'alias2': self.alias2,
+            'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json
 

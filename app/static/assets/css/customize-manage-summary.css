@@ -28,7 +28,9 @@
 .ui.vertical.stripe .floated.image {
     clear: both;
 }
-.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe .ui.statistic .label {
+    font-size: 1.2em;
+}
 .ui.vertical.stripe p,
 .ui.vertical.stripe .ui.table {
     /*font-size: 1.2em;*/
@@ -69,7 +71,9 @@
     }
 }
 
-
+.ui.cards .card .ipad-basic-info.content .header .right.floated a {
+    color: #FFF;
+}
 .ui.cards .red.card .ipad-basic-info.content {
     background-color: #DB2828;
 }
