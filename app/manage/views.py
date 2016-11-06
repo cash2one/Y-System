@@ -34,20 +34,12 @@ def summary():
         show_summary_ipad_1707 = bool(request.cookies.get('show_summary_ipad_1707', ''))
         show_summary_ipad_others = bool(request.cookies.get('show_summary_ipad_others', ''))
     if show_summary_ipad_1103:
-        query = iPad.query\
-            .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1103')\
-            .filter(iPad.deleted == False)
+        room_id = Room.query.filter_by(name=u'1103').first().id
     if show_summary_ipad_1707:
-        query = iPad.query\
-            .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1707')\
-            .filter(iPad.deleted == False)
+        room_id = Room.query.filter_by(name=u'1707').first().id
     if show_summary_ipad_others:
-        query = iPad.query\
-            .filter_by(room_id=None, deleted=False)
-    ipads = query.order_by(iPad.alias.asc())
-    return render_template('manage/summary.html', ipads=ipads, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
+        room_id = 0
+    return render_template('manage/summary.html', room_id=room_id, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
 
 
 @manage.route('/summary/ipad/1103')
@@ -81,6 +73,19 @@ def summary_other_ipads():
     resp.set_cookie('show_summary_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_summary_ipad_others', '1', max_age=30*24*60*60)
     return resp
+
+
+@manage.route('/summary/ipad/room/<int:room_id>')
+@permission_required(Permission.MANAGE)
+def summary_room(room_id):
+    ipads = iPad.query\
+        .filter_by(room_id=room_id, deleted=False)\
+        .order_by(iPad.alias.asc())
+    if room_id == 0:
+        ipads = iPad.query\
+            .filter_by(room_id=None, deleted=False)\
+            .order_by(iPad.alias.asc())
+    return jsonify({'ipads': [ipad.to_json_info() for ipad in ipads]})
 
 
 @manage.route('/booking')
@@ -1768,10 +1773,3 @@ def search_user():
                 ))\
                 .order_by(User.last_seen.desc())
     return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users]})
-
-
-@manage.route('/info/ipad/<int:id>')
-@permission_required(Permission.MANAGE)
-def ipad_info(id):
-    ipad = iPad.query.get_or_404(id)
-    return jsonify(ipad.to_json_info())

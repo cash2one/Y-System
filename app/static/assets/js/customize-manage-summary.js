@@ -35,24 +35,54 @@ var iPadStates = {
     '退役': 'grey',
 };
 function updateCards() {
-    $('.card')
-        .each(function() {
-            var iPadID = $(this).attr('id').replace('ipad-', '');
-            var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/info/ipad/' + iPadID;
-            $.getJSON(url, function(data) {
-                $('#ipad-' + iPadID)
-                    .removeClass('red orange yellow olive green teal blue violet purple pink brown grey black')
-                    .addClass(iPadStates[data.state.color]);
-                $('#ipad-alias-' + iPadID)
-                    .text(data.alias);
-                $('#ipad-state-' + iPadID)
-                    .text(data.state.display);
-                $('#ipad-serial-' + iPadID)
-                    .text(data.serial);
-                $('#ipad-capacity-' + iPadID)
-                    .text(data.capacity);
-            });
-        });
+    var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/' + roomID;
+    $.getJSON(url, function(data) {
+        for (var i in data.ipads) {
+            $('#ipads')
+                .append(
+                    $('<div>')
+                        .addClass(iPadStates[data.ipads[i].state.color])
+                        .addClass('card')
+                        .append(
+                            $('<div>')
+                                .addClass('ipad-basic-info content')
+                                .append(
+                                    $('<div>')
+                                        .addClass('header')
+                                        .append(
+                                            $('<span>')
+                                                .text(data.ipads[i].alias)
+                                        )
+                                        .append(
+                                            $('<span>')
+                                                .addClass('right floated')
+                                                .text(data.ipads[i].state.display)
+                                        )
+                                )
+                                .append(
+                                    $('<div>').addClass('meta')
+                                        .append(
+                                            $('<code>')
+                                                .text(data.ipads[i].serial)
+                                        )
+                                        .append(
+                                            $('<span>')
+                                                .addClass('right floated')
+                                                .text(data.ipads[i].capacity)
+                                        )
+                                )
+                        )
+                        .append(
+                            $('<div>')
+                                .addClass('content')
+                        )
+                        .append(
+                            $('<div>')
+                                .addClass('extra content')
+                        )
+                );
+        };
+    });
 };
 updateCards();
 setInterval(updateCards, 15000);
