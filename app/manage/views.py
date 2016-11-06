@@ -78,14 +78,17 @@ def summary_other_ipads():
 @manage.route('/summary/ipad/room/<int:room_id>')
 @permission_required(Permission.MANAGE)
 def summary_room(room_id):
-    ipads = iPad.query\
-        .filter_by(room_id=room_id, deleted=False)\
-        .order_by(iPad.alias.asc())
+    ipads = []
     if room_id == 0:
         ipads = iPad.query\
             .filter_by(room_id=None, deleted=False)\
             .order_by(iPad.alias.asc())
-    return jsonify({'ipads': [ipad.to_json_info() for ipad in ipads]})
+    else:
+        room_id = Room.query.get_or_404(room_id).id
+        ipads = iPad.query\
+            .filter_by(room_id=room_id, deleted=False)\
+            .order_by(iPad.alias.asc())
+    return jsonify({'ipads': [ipad.to_json() for ipad in ipads]})
 
 
 @manage.route('/booking')
@@ -309,7 +312,6 @@ def set_booking_state_missed_all():
         .all()
     for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
         booking.set_state(u'失效')
-    db.session.commit()
     flash(u'标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)))
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
@@ -1241,8 +1243,6 @@ def auth_admin():
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(or_(
-                Role.name == u'协管员',
-                Role.name == u'管理员',
                 Role.name == u'开发人员'
             ))\
             .order_by(Role.id.desc())
@@ -1254,7 +1254,9 @@ def auth_admin():
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
-                Role.name == u'Y-GRE A权限'
+                Role.name == u'Y-GRE A权限',
+                Role.name == u'协管员',
+                Role.name == u'管理员'
             ))\
             .order_by(User.last_seen.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -1415,7 +1417,7 @@ def rental_rent_step_3(user_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name)
             return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=ipad_id))
-        rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
         flash(u'iPad借出信息登记成功')
@@ -1471,7 +1473,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name)
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
-        rental = Rental(user=user, ipad=ipad, rent_agent_id=current_user.id)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
         flash(u'iPad借出信息登记成功')

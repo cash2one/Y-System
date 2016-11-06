@@ -24,24 +24,15 @@ $('.ui.search')
 ;
 
 // update iPad info
-var iPadStates = {
-    '待机': 'blue',
-    '借出': 'yellow',
-    'VB': 'teal',
-    'Y-GRE': 'orange',
-    '候补': 'black',
-    '维护': 'red',
-    '充电': 'green',
-    '退役': 'grey',
-};
 function updateCards() {
     var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/' + roomID;
     $.getJSON(url, function(data) {
+        $('.card').remove();
         for (var i in data.ipads) {
             $('#ipads')
                 .append(
                     $('<div>')
-                        .addClass(iPadStates[data.ipads[i].state.color])
+                        .addClass(data.ipads[i].state.css_color)
                         .addClass('card')
                         .append(
                             $('<div>')
@@ -56,7 +47,7 @@ function updateCards() {
                                         .append(
                                             $('<span>')
                                                 .addClass('right floated')
-                                                .text(data.ipads[i].state.display)
+                                                .text(data.ipads[i].state.html_display)
                                         )
                                 )
                                 .append(
