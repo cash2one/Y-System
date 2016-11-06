@@ -22,13 +22,13 @@ class Permission:
     BOOK_VB_2       = 0b0000000000000000000000000001000
     BOOK_ANY        = 0b0000000000000000000000000010000
     MANAGE          = 0b0000000000000000000000000100000
-    # MANAGE_MESSAGE  = 0b0000000000000000000000000000000
     MANAGE_BOOKING  = 0b0000000000000000000000001000000
     MANAGE_RENTAL   = 0b0000000000000000000000010000000
     MANAGE_SCHEDULE = 0b0000000000000000000000100000000
     MANAGE_IPAD     = 0b0000000000000000000001000000000
     MANAGE_USER     = 0b0000000000000000000010000000000
     MANAGE_AUTH     = 0b0000000000000000000100000000000
+    MANAGE_MESSAGE  = 0b0000000000000000001000000000000
     ADMINISTER      = 0b1000000000000000000000000000000
 
 
@@ -49,7 +49,7 @@ class Role(db.Model):
             (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
             (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
             (u'协管员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER, ),
-            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
+            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH | Permission.MANAGE_MESSAGE, ),
             (u'开发人员', 0xffffffff, ),
         ]
         for R in roles:
@@ -417,6 +417,7 @@ class User(UserMixin, db.Model):
     modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
     modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
+    modified_messages = db.relationship('Message', backref='modified_by', lazy='dynamic')
     punches = db.relationship('Punch', backref='user', lazy='dynamic')
     invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
     activation = db.relationship(
@@ -1530,3 +1531,48 @@ class Punch(db.Model):
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user.name, self.section.name)
 
+
+class MessageType(db.Model):
+    __tablename__ = 'message_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    messages = db.relationship('Message', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_message_types():
+        message_types = [
+            (u'登录提示', ),
+            (u'预约提示', ),
+            (u'预约VB提示', ),
+            (u'预约Y-GRE提示', ),
+        ]
+        for MT in message_types:
+            message_type = MessageType.query.filter_by(name=MT[0]).first()
+            if message_type is None:
+                message_type = MessageType(name=MT[0])
+                db.session.add(message_type)
+                print u'导入消息类型', MT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<MessageType %s>' % self.name
+
+
+class Message(db.Model):
+    __tablename__ = 'messages'
+    id = db.Column(db.Integer, primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('message_types.id'), primary_key=True)
+    body = db.Column(db.UnicodeText)
+    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
+    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    show = db.Column(db.Boolean, default=False)
+    deleted = db.Column(db.Boolean, default=False)
+
+    def safe_delete(self, modified_by):
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        self.deleted = True
+        db.session.add(self)
+
+    def __repr__(self):
+        return '<Message %s>' % self.body
