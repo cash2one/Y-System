@@ -104,6 +104,35 @@
         </div>
     </div>
 </div>
+
+{% if announcements %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="announcement icon"></i> 通知</h3>
+                <div class="ui divided items">
+                    {% for announcement in announcements %}
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">{{ announcement.title }}</div>
+                            <div class="meta">发布人：{{ announcement.modified_by.name }}</div>
+                            <div class="description">
+                                <p>{{ announcement.body }}</p>
+                            </div>
+                            <div class="extra">
+                                <i class="notched circle loading icon"></i>
+                                {{ moment(announcement.last_modified).fromNow() }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block customized_scripts %}

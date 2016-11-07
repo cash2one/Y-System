@@ -30,7 +30,9 @@ def vb():
         .filter(Announcement.deleted == False)\
         .all()
     for announcement in announcements:
-        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+        if not current_user.notified_by(announcement=announcement):
+            flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+            announcement.notify(reader=current_user)
     page = request.args.get('page', 1, type=int)
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\
@@ -42,7 +44,7 @@ def vb():
         .order_by(Period.id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
-    return render_template('book/vb.html', schedules=schedules, pagination=pagination)
+    return render_template('book/vb.html', schedules=schedules, pagination=pagination, announcements=announcements)
 
 
 @book.route('/vb/book/<schedule_id>')
@@ -193,7 +195,9 @@ def y_gre():
         .filter(Announcement.deleted == False)\
         .all()
     for announcement in announcements:
-        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+        if not current_user.notified_by(announcement=announcement):
+            flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+            announcement.notify(reader=current_user)
     page = request.args.get('page', 1, type=int)
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\
@@ -205,7 +209,7 @@ def y_gre():
         .order_by(Period.id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
-    return render_template('book/y_gre.html', schedules=schedules, pagination=pagination)
+    return render_template('book/y_gre.html', schedules=schedules, pagination=pagination, announcements=announcements)
 
 
 @book.route('/y-gre/book/<schedule_id>')

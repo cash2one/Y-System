@@ -33,7 +33,9 @@ def summary():
         .filter(Announcement.deleted == False)\
         .all()
     for announcement in announcements:
-        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+        if not current_user.notified_by(announcement=announcement):
+            flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+            announcement.notify(reader=current_user)
     show_summary_ipad_1103 = True
     show_summary_ipad_1707 = False
     show_summary_ipad_others = False
@@ -47,7 +49,7 @@ def summary():
         room_id = Room.query.filter_by(name=u'1707').first().id
     if show_summary_ipad_others:
         room_id = 0
-    return render_template('manage/summary.html', room_id=room_id, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others)
+    return render_template('manage/summary.html', room_id=room_id, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others, announcements=announcements)
 
 
 @manage.route('/summary/ipad/1103')
@@ -1641,8 +1643,13 @@ def announcement():
         body = form.body.data
         type_id = form.announcement_type.data
         show = form.show.data
-        announcement = Announcement(title=title, body=body, type_id=type_id, show=show, last_modified_by=current_user.id)
+        announcement = Announcement(title=title, body=body, type_id=type_id, last_modified_by=current_user.id)
         db.session.add(announcement)
+        db.session.commit()
+        if show:
+            announcement.publish(modified_by=current_user)
+        else:
+            announcement.clean_up()
         flash(u'已添加通知：“%s”' % title, category='success')
         return redirect(url_for('manage.announcement'))
     page = request.args.get('page', 1, type=int)
@@ -1700,10 +1707,14 @@ def edit_announcement(id):
         announcement.title = title
         announcement.body = body
         announcement.type_id = type_id
-        announcement.show = show
         announcement.last_modified = datetime.utcnow()
         announcement.last_modified_by = current_user.id
         db.session.add(announcement)
+        db.session.commit()
+        if show:
+            announcement.publish(modified_by=current_user)
+        else:
+            announcement.clean_up()
         flash(u'已更新通知：“%s”' % title, category='success')
         return redirect(url_for('manage.announcement'))
     form.title.data = announcement.title

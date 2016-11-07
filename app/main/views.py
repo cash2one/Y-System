@@ -44,7 +44,9 @@ def profile():
         .filter(Announcement.deleted == False)\
         .all()
     for announcement in announcements:
-        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+        if not current_user.notified_by(announcement=announcement):
+            flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+            announcement.notify(reader=current_user)
     page = request.args.get('page', 1, type=int)
     punches = Punch.query\
         .filter_by(user_id=current_user.id)\
@@ -57,7 +59,7 @@ def profile():
         .order_by(Schedule.period_id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     bookings = pagination.items
-    return render_template('profile.html', user=current_user, punches=punches, bookings=bookings, pagination=pagination)
+    return render_template('profile.html', user=current_user, punches=punches, bookings=bookings, pagination=pagination, announcements=announcements)
 
 
 @main.route('/profile/<int:user_id>')

@@ -369,6 +369,12 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
+class UserAnnouncement(db.Model):
+    __tablename__ = 'user_announcements'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    announcement_id = db.Column(db.Integer, db.ForeignKey('announcements.id'), primary_key=True)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -418,6 +424,13 @@ class User(UserMixin, db.Model):
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
     modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
+    read_announcements = db.relationship(
+        'UserAnnouncement',
+        foreign_keys=[UserAnnouncement.user_id],
+        backref=db.backref('reader', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     punches = db.relationship('Punch', backref='user', lazy='dynamic')
     invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
     activation = db.relationship(
@@ -744,6 +757,9 @@ class User(UserMixin, db.Model):
             .first()\
             .inviter
 
+    def notified_by(self, announcement):
+        return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
+
     def to_json(self):
         user_json = {
             'name': self.name,
@@ -819,10 +835,10 @@ class Period(db.Model):
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
 
     def safe_delete(self, modified_by):
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
         self.show = False
         self.deleted = True
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
         db.session.add(self)
 
     @property
@@ -1202,9 +1218,9 @@ class iPad(db.Model):
     rentals = db.relationship('Rental', backref='ipad', lazy='dynamic')
 
     def safe_delete(self, modified_by):
+        self.deleted = True
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
-        self.deleted = True
         db.session.add(self)
 
     def set_state(self, state_name):
@@ -1570,15 +1586,24 @@ class Announcement(db.Model):
     last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     show = db.Column(db.Boolean, default=False)
     deleted = db.Column(db.Boolean, default=False)
+    users_notified = db.relationship(
+        'UserAnnouncement',
+        foreign_keys=[UserAnnouncement.announcement_id],
+        backref=db.backref('announcement', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     def safe_delete(self, modified_by):
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.clean_up()
         self.show = False
         self.deleted = True
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
         db.session.add(self)
 
     def publish(self, modified_by):
+        self.clean_up()
         if self.type.name == u'登录通知':
             announcements = Announcement.query\
                 .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
@@ -1592,10 +1617,22 @@ class Announcement(db.Model):
         db.session.add(self)
 
     def retract(self, modified_by):
+        self.clean_up()
         self.show = False
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
         db.session.add(self)
+
+    def notify(self, reader):
+        log = UserAnnouncement(user_id=reader.id, announcement_id=self.id)
+        db.session.add(log)
+
+    def clean_up(self):
+        logs = UserAnnouncement.query\
+            .filter_by(announcement_id=self.id)\
+            .all()
+        for log in logs:
+            db.session.delete(log)
 
     def __repr__(self):
         return '<Announcement %s>' % self.title
