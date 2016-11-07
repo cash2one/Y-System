@@ -1,13 +1,13 @@
 """initial
 
-Revision ID: 5ba27cd02152
+Revision ID: d3406f2aea7b
 Revises: None
-Create Date: 2016-11-07 21:56:00.101487
+Create Date: 2016-11-08 04:43:49.356836
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '5ba27cd02152'
+revision = 'd3406f2aea7b'
 down_revision = None
 
 from alembic import op
@@ -226,6 +226,13 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_schedules_date'), 'schedules', ['date'], unique=False)
+    op.create_table('user_announcements',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('announcement_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['announcement_id'], ['announcements.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('user_id', 'announcement_id')
+    )
     op.create_table('bookings',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('schedule_id', sa.Integer(), nullable=False),
@@ -253,6 +260,7 @@ def downgrade():
     op.drop_table('user_activations')
     op.drop_index(op.f('ix_bookings_booking_code'), table_name='bookings')
     op.drop_table('bookings')
+    op.drop_table('user_announcements')
     op.drop_index(op.f('ix_schedules_date'), table_name='schedules')
     op.drop_table('schedules')
     op.drop_table('rentals')
