@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block title %}编辑iPad信息{% endblock %}
 
@@ -9,19 +10,7 @@
 
 {% block page_masthead %}
 <div class="ui text container">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div id="message-container">
-        {% for message in messages %}
-        <div class="ui big icon info message">
-            <i class="info circle icon"></i>
-            <i class="close icon"></i>
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
+    {{ macros.message_widget() }}
     <h1 class="ui inverted header"><i class="edit icon"></i> 编辑iPad信息</h1>
 </div>
 {% endblock %}

@@ -79,7 +79,11 @@
             </div>
             <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
             {% if current_user.is_authenticated %}
-            <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研修档案</a>
+            {% if current_user.can(Permission.MANAGE) %}
+            <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
+            {% else %}
+            <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
+            {% endif %}
             {% else %}
             <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
             {% endif %}
@@ -104,8 +108,6 @@
                 系统管理
                 <i class="dropdown icon"></i>
                 <div class="menu">
-                    <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
-                    <div class="divider"></div>
                     {% if current_user.can(Permission.MANAGE_BOOKING) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                     {% endif %}
@@ -117,6 +119,9 @@
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_IPAD) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
+                    {% endif %}
+                    {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_USER) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
@@ -151,6 +156,10 @@
                 {{ current_user.name }} [{{ current_user.role.name }}]
                 <i class="dropdown icon"></i>
                 <div class="menu">
+                    {% if current_user.can(Permission.MANAGE) %}
+                    <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
+                    <div class="divider"></div>
+                    {% endif %}
                     <div class="header">账户设置</div>
                     <a class="item loading-trigger" href="{{ url_for('auth.change_email_request') }}"><i class="at icon"></i> 修改邮箱</a>
                     <a class="item loading-trigger" href="{{ url_for('auth.change_password') }}"><i class="lock icon"></i> 修改密码</a>
@@ -175,7 +184,11 @@
         </div>
         <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
         {% if current_user.is_authenticated %}
-        <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研修档案</a>
+        {% if current_user.can(Permission.MANAGE) %}
+        <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
+        {% else %}
+        <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
+        {% endif %}
         {% else %}
         <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
         {% endif %}
@@ -196,7 +209,6 @@
         <div class="item">
             <div class="header">系统管理</div>
             <div class="menu">
-                <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
                 {% if current_user.can(Permission.MANAGE_BOOKING) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                 {% endif %}
@@ -208,6 +220,9 @@
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_IPAD) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
+                {% endif %}
+                {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_USER) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
@@ -234,6 +249,9 @@
         {% endblock %}
         {% block sidebar_menu_auth %}
         {% if current_user.is_authenticated %}
+        {% if current_user.can(Permission.MANAGE) %}
+        <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
+        {% endif %}
         <div class="item">
             <div class="header">账户设置</div>
             <div class="menu">
@@ -261,7 +279,11 @@
                     </div>
                     <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
                     {% if current_user.is_authenticated %}
-                    <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 研修档案</a>
+                    {% if current_user.can(Permission.MANAGE) %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
+                    {% else %}
+                    <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
+                    {% endif %}
                     {% else %}
                     <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
                     {% endif %}
@@ -286,8 +308,6 @@
                         系统管理
                         <i class="dropdown icon"></i>
                         <div class="menu">
-                            <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
-                            <div class="divider"></div>
                             {% if current_user.can(Permission.MANAGE_BOOKING) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                             {% endif %}
@@ -299,6 +319,9 @@
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_IPAD) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                            <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_USER) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
@@ -333,6 +356,10 @@
                         {{ current_user.name }} [{{ current_user.role.name }}]
                         <i class="dropdown icon"></i>
                         <div class="menu">
+                            {% if current_user.can(Permission.MANAGE) %}
+                            <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
+                            <div class="divider"></div>
+                            {% endif %}
                             <div class="header">账户设置</div>
                             <a class="item loading-trigger" href="{{ url_for('auth.change_email_request') }}"><i class="at icon"></i> 修改邮箱</a>
                             <a class="item loading-trigger" href="{{ url_for('auth.change_password') }}"><i class="lock icon"></i> 修改密码</a>

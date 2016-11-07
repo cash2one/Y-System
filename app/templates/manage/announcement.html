@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}通知管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-announcement.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="announcement icon"></i> 通知管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div id="messages" class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">通知</h3>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>通知标题</th>
+                            <th>通知内容</th>
+                            <th>通知类型</th>
+                            <th>发布状态</th>
+                            <th>上次操作</th>
+                            <th>操作人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for announcement in announcements %}
+                        <tr>
+                            <td>{{ announcement.title }}</td>
+                            <td>{{ announcement.body }}</td>
+                            <td>{{ announcement.type.name }}</td>
+                            {% if announcement.show %}
+                            <td class="positive">发布中</td>
+                            {% else %}
+                            <td>未发布</td>
+                            {% endif %}
+                            <td>
+                                <div class="popup-trigger">{{ moment(announcement.last_modified).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(announcement.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ announcement.modified_by.name }}</td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    {% if announcement.show %}
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id) }}" title="撤回"><i class="undo icon"></i></a>
+                                    {% else %}
+                                    <a class="ui mini primary button loading-trigger" href="{{ url_for('manage.publish_announcement', id=announcement.id) }}" title="发布"><i class="send icon"></i></a>
+                                    {% endif %}
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_announcement', id=announcement.id) }}"><i class="trash outline icon"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.announcement') }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">新建通知</h3>
+                <form method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="twelve wide field">
+                            {{ form.title.label() }}
+                            {{ form.title(placeholder='通知标题') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.announcement_type.label() }}
+                            {{ form.announcement_type(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.body.label() }}
+                        {{ form.body(placeholder='通知内容') }}
+                    </div>
+                    <div class="field">
+                        <div class="ui toggle checkbox">
+                            {{ form.show() }}
+                            {{ form.show.label() }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-announcement.js') }}"></script>
+{% endblock %}

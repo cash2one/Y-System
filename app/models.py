@@ -22,13 +22,13 @@ class Permission:
     BOOK_VB_2       = 0b0000000000000000000000000001000
     BOOK_ANY        = 0b0000000000000000000000000010000
     MANAGE          = 0b0000000000000000000000000100000
-    # MANAGE_MESSAGE  = 0b0000000000000000000000000000000
     MANAGE_BOOKING  = 0b0000000000000000000000001000000
     MANAGE_RENTAL   = 0b0000000000000000000000010000000
     MANAGE_SCHEDULE = 0b0000000000000000000000100000000
     MANAGE_IPAD     = 0b0000000000000000000001000000000
     MANAGE_USER     = 0b0000000000000000000010000000000
     MANAGE_AUTH     = 0b0000000000000000000100000000000
+    MANAGE_ANNOUNCE = 0b0000000000000000001000000000000
     ADMINISTER      = 0b1000000000000000000000000000000
 
 
@@ -49,7 +49,7 @@ class Role(db.Model):
             (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
             (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
             (u'协管员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER, ),
-            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
+            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH | Permission.MANAGE_ANNOUNCE ),
             (u'开发人员', 0xffffffff, ),
         ]
         for R in roles:
@@ -369,6 +369,12 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
+class UserAnnouncement(db.Model):
+    __tablename__ = 'user_announcements'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    announcement_id = db.Column(db.Integer, db.ForeignKey('announcements.id'), primary_key=True)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -417,6 +423,14 @@ class User(UserMixin, db.Model):
     modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
     modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
+    modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
+    read_announcements = db.relationship(
+        'UserAnnouncement',
+        foreign_keys=[UserAnnouncement.user_id],
+        backref=db.backref('reader', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     punches = db.relationship('Punch', backref='user', lazy='dynamic')
     invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
     activation = db.relationship(
@@ -743,6 +757,9 @@ class User(UserMixin, db.Model):
             .first()\
             .inviter
 
+    def notified_by(self, announcement):
+        return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
+
     def to_json(self):
         user_json = {
             'name': self.name,
@@ -818,9 +835,10 @@ class Period(db.Model):
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
 
     def safe_delete(self, modified_by):
+        self.show = False
+        self.deleted = True
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
-        self.deleted = True
         db.session.add(self)
 
     @property
@@ -1200,9 +1218,9 @@ class iPad(db.Model):
     rentals = db.relationship('Rental', backref='ipad', lazy='dynamic')
 
     def safe_delete(self, modified_by):
+        self.deleted = True
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
-        self.deleted = True
         db.session.add(self)
 
     def set_state(self, state_name):
@@ -1530,3 +1548,91 @@ class Punch(db.Model):
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user.name, self.section.name)
 
+
+class AnnouncementType(db.Model):
+    __tablename__ = 'announcement_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    announcements = db.relationship('Announcement', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_announcement_types():
+        announcement_types = [
+            (u'登录通知', ),
+            (u'用户主页通知', ),
+            (u'管理主页通知', ),
+            (u'预约VB通知', ),
+            (u'预约Y-GRE通知', ),
+        ]
+        for AT in announcement_types:
+            announcement_type = AnnouncementType.query.filter_by(name=AT[0]).first()
+            if announcement_type is None:
+                announcement_type = AnnouncementType(name=AT[0])
+                db.session.add(announcement_type)
+                print u'导入通知类型', AT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<AnnouncementType %s>' % self.name
+
+
+class Announcement(db.Model):
+    __tablename__ = 'announcements'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Unicode(64))
+    body = db.Column(db.UnicodeText)
+    type_id = db.Column(db.Integer, db.ForeignKey('announcement_types.id'))
+    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
+    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    show = db.Column(db.Boolean, default=False)
+    deleted = db.Column(db.Boolean, default=False)
+    users_notified = db.relationship(
+        'UserAnnouncement',
+        foreign_keys=[UserAnnouncement.announcement_id],
+        backref=db.backref('announcement', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    def safe_delete(self, modified_by):
+        self.clean_up()
+        self.show = False
+        self.deleted = True
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        db.session.add(self)
+
+    def publish(self, modified_by):
+        self.clean_up()
+        if self.type.name == u'登录通知':
+            announcements = Announcement.query\
+                .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
+                .filter(AnnouncementType.name == u'登录通知')\
+                .all()
+            for announcement in announcements:
+                announcement.retract(modified_by=modified_by)
+        self.show = True
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        db.session.add(self)
+
+    def retract(self, modified_by):
+        self.clean_up()
+        self.show = False
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        db.session.add(self)
+
+    def notify(self, reader):
+        log = UserAnnouncement(user_id=reader.id, announcement_id=self.id)
+        db.session.add(log)
+
+    def clean_up(self):
+        logs = UserAnnouncement.query\
+            .filter_by(announcement_id=self.id)\
+            .all()
+        for log in logs:
+            db.session.delete(log)
+
+    def __repr__(self):
+        return '<Announcement %s>' % self.title

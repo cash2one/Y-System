@@ -122,8 +122,8 @@ function updateCards() {
                 } else {
                     $('#ipad-' + i).addClass('yellow');
                     $('#ipad-state-' + i).html('<i class="upload icon"></i>' + data.ipads[i].state);
-                    $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
                     $('#ipad-content-' + i + ' .statistic').addClass('yellow');
+                    $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
                 };
             } else if (data.ipads[i].state == '候补') {
                 $('#ipad-' + i).addClass('grey');
@@ -150,4 +150,4 @@ function updateCards() {
     });
 };
 updateCards();
-setInterval(updateCards, 15000);
+// setInterval(updateCards, 15000);
