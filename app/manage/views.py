@@ -169,7 +169,7 @@ def set_booking_state_valid(user_id, schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     if booking.schedule.full:
-        flash(u'该时段名额已经约满')
+        flash(u'该时段名额已经约满', category='error')
         return redirect(url_for('manage.booking', page=request.args.get('page')))
     booking.set_state(u'预约')
     db.session.commit()
@@ -312,7 +312,7 @@ def set_booking_state_missed_all():
         .all()
     for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
         booking.set_state(u'失效')
-    flash(u'标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)))
+    flash(u'标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)), category='info')
     return redirect(url_for('manage.booking', page=request.args.get('page')))
 
 
@@ -326,16 +326,16 @@ def schedule():
         for period_id in form.period.data:
             schedule = Schedule.query.filter_by(date=day, period_id=period_id).first()
             if schedule:
-                flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
+                flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='error')
             else:
                 period = Period.query.get_or_404(period_id)
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
-                    flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time))
+                    flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time), category='error')
                 else:
                     schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data, last_modified_by=current_user.id)
                     db.session.add(schedule)
                     db.session.commit()
-                    flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time))
+                    flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='success')
         return redirect(url_for('manage.schedule'))
     page = request.args.get('page', 1, type=int)
     show_today_schedule = True
@@ -401,16 +401,16 @@ def history_schedule():
 def publish_schedule(id):
     schedule = Schedule.query.get(id)
     if schedule is None:
-        flash(u'该预约时段不存在')
+        flash(u'该预约时段不存在', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.out_of_date:
-        flash(u'所选时段已经过期')
+        flash(u'所选时段已经过期', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.available:
-        flash(u'所选时段已经发布')
+        flash(u'所选时段已经发布', category='warning')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     schedule.publish(modified_by=current_user)
-    flash(u'发布成功！')
+    flash(u'发布成功！', category='success')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
 
@@ -420,16 +420,16 @@ def publish_schedule(id):
 def retract_schedule(id):
     schedule = Schedule.query.get(id)
     if schedule is None:
-        flash(u'该预约时段不存在')
+        flash(u'该预约时段不存在', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.out_of_date:
-        flash(u'所选时段已经过期')
+        flash(u'所选时段已经过期', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if not schedule.available:
-        flash(u'所选时段尚未发布')
+        flash(u'所选时段尚未发布', category='warning')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     schedule.retract(modified_by=current_user)
-    flash(u'撤销成功！')
+    flash(u'撤销成功！', category='success')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
 
@@ -439,10 +439,10 @@ def retract_schedule(id):
 def increase_schedule_quota(id):
     schedule = Schedule.query.get_or_404(id)
     if schedule is None:
-        flash(u'该预约时段不存在')
+        flash(u'该预约时段不存在', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.out_of_date:
-        flash(u'所选时段已经过期')
+        flash(u'所选时段已经过期', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     candidate = schedule.increase_quota(modified_by=current_user)
     if candidate:
@@ -463,7 +463,7 @@ def increase_schedule_quota(id):
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
-    flash(u'所选时段名额+1')
+    flash(u'所选时段名额+1', category='success')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
 
@@ -473,19 +473,19 @@ def increase_schedule_quota(id):
 def decrease_schedule_quota(id):
     schedule = Schedule.query.get_or_404(id)
     if schedule is None:
-        flash(u'该预约时段不存在')
+        flash(u'该预约时段不存在', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.out_of_date:
-        flash(u'所选时段已经过期')
+        flash(u'所选时段已经过期', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.quota == 0:
-        flash(u'所选时段名额已经为0')
+        flash(u'所选时段名额已经为0', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.quota <= schedule.occupied_quota:
-        flash(u'所选时段名额不可少于预约人数')
+        flash(u'所选时段名额不可少于预约人数', category='error')
         return redirect(url_for('manage.schedule', page=request.args.get('page')))
     schedule.decrease_quota(modified_by=current_user)
-    flash(u'所选时段名额-1')
+    flash(u'所选时段名额-1', category='success')
     return redirect(url_for('manage.schedule', page=request.args.get('page')))
 
 
@@ -501,11 +501,11 @@ def period():
         type_id = form.period_type.data
         show = form.show.data
         if start_time >= end_time:
-            flash(u'无法添加时段模板：%s，时间设置有误' % name)
+            flash(u'无法添加时段模板：%s，时间设置有误' % name, category='error')
             return redirect(url_for('manage.period'))
         period = Period(name=name, start_time=start_time, end_time=end_time, type_id=type_id, show=show, last_modified_by=current_user.id)
         db.session.add(period)
-        flash(u'已添加时段模板：%s' % name)
+        flash(u'已添加时段模板：%s' % name, category='success')
         return redirect(url_for('manage.period'))
     page = request.args.get('page', 1, type=int)
     query = Period.query.filter_by(deleted=False)
@@ -529,7 +529,7 @@ def edit_period(id):
         type_id = form.period_type.data
         show = form.show.data
         if start_time >= end_time:
-            flash(u'无法更新时段模板：%s，时间设置有误' % name)
+            flash(u'无法更新时段模板：%s，时间设置有误' % name, category='error')
             return redirect(url_for('manage.edit_period', id=period.id))
         period.name = name
         period.start_time = start_time
@@ -539,7 +539,7 @@ def edit_period(id):
         period.last_modified = datetime.utcnow()
         period.last_modified_by = current_user.id
         db.session.add(period)
-        flash(u'已更新时段模板：%s' % name)
+        flash(u'已更新时段模板：%s' % name, category='success')
         return redirect(url_for('manage.period'))
     form.name.data = period.name
     form.start_time.data = period.start_time.strftime(u'%H:%M')
@@ -558,7 +558,7 @@ def delete_period(id):
     form = DeletePeriodForm()
     if form.validate_on_submit():
         period.safe_delete(modified_by=current_user)
-        flash(u'已删除时段模板：%s' % name)
+        flash(u'已删除时段模板：%s' % name, category='success')
         return redirect(url_for('manage.period'))
     return render_template('manage/delete_period.html', form=form, period=period)
 
@@ -578,7 +578,7 @@ def ipad():
         state_id = form.state.data
         ipad = iPad.query.filter_by(serial=serial).first()
         if ipad:
-            flash(u'序列号为%s的iPad已存在' % serial)
+            flash(u'序列号为%s的iPad已存在' % serial, category='error')
             return redirect(url_for('manage.ipad'))
         ipad = iPad(serial=serial, alias=alias, capacity_id=capacity_id, room_id=room_id, state_id=state_id, last_modified_by=current_user.id)
         db.session.add(ipad)
@@ -586,7 +586,7 @@ def ipad():
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
         iPadContentJSON.mark_out_of_date()
-        flash(u'成功添加序列号为%s的iPad' % serial)
+        flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad'))
     maintain_num = iPad.query\
         .join(iPadState, iPadState.id == iPad.state_id)\
@@ -749,7 +749,7 @@ def edit_ipad(id):
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
         iPadContentJSON.mark_out_of_date()
-        flash(u'iPad信息已更新')
+        flash(u'iPad信息已更新', category='success')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
     form.serial.data = ipad.serial
@@ -771,7 +771,7 @@ def delete_ipad(id):
         ipad_serial = ipad.serial
         ipad.safe_delete(modified_by=current_user)
         iPadContentJSON.mark_out_of_date()
-        flash(u'已删除序列号为%s的iPad' % ipad_serial)
+        flash(u'已删除序列号为%s的iPad' % ipad_serial, category='success')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
 
@@ -823,7 +823,7 @@ def user():
         activation = Activation(name=name, activation_code=activation_code, role_id=role_id, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id, inviter_id=current_user.id)
         db.session.add(activation)
         db.session.commit()
-        flash(u'%s用户：%s添加成功' % (activation.role.name, activation.name))
+        flash(u'%s用户：%s添加成功' % (activation.role.name, activation.name), category='success')
         return redirect(url_for('manage.user'))
     page = request.args.get('page', 1, type=int)
     show_users = True
@@ -919,11 +919,11 @@ def edit_activation(id):
         activation.vb_course_id = form.vb_course.data
         activation.y_gre_course_id = form.y_gre_course.data
         if activation.activated:
-            flash(u'该账户已经激活，不能更新。')
+            flash(u'该账户已经激活，不能更新。', category='error')
             return redirect(url_for('manage.user'))
         db.session.add(activation)
         db.session.commit()
-        flash(u'%s的激活信息已更新' % activation.name)
+        flash(u'%s的激活信息已更新' % activation.name, category='success')
         return redirect(url_for('manage.user'))
     form.name.data = activation.name
     form.activation_code.data = None
@@ -942,10 +942,10 @@ def delete_activation(id):
     form = DeleteActivationForm(activation=activation)
     if form.validate_on_submit():
         if activation.activated:
-            flash(u'该账户已经激活，无法删除。')
+            flash(u'该账户已经激活，无法删除。', category='error')
             return redirect(url_for('manage.user'))
         activation.safe_delete()
-        flash(u'已删除%s的激活邀请' % name)
+        flash(u'已删除%s的激活邀请' % name, category='success')
         return redirect(url_for('manage.user'))
     return render_template('manage/delete_activation.html', form=form, activation=activation)
 
@@ -970,7 +970,7 @@ def edit_user(id):
             user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
-        flash(u'%s的账户信息已更新' % user.name)
+        flash(u'%s的账户信息已更新' % user.name, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.name.data = user.name
     form.email.data = user.email
@@ -1030,7 +1030,7 @@ def edit_punch_step_3(user_id, lesson_id, section_id):
         else:
             punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name), category='success')
         return redirect(request.args.get('next') or url_for('manage.find_user'))
     return render_template('manage/edit_punch_step_3.html', user=user, lesson=lesson, section=section, form=form, next=request.args.get('next'))
 
@@ -1212,7 +1212,7 @@ def edit_auth(id):
             user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
-        flash(u'%s的账户信息已更新' % user.name)
+        flash(u'%s的账户信息已更新' % user.name, category='success')
         return redirect(url_for('manage.auth'))
     form.name.data = user.name
     form.email.data = user.email
@@ -1299,7 +1299,7 @@ def edit_auth_admin(id):
             user.register(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
-        flash(u'%s的账户信息已更新' % user.name)
+        flash(u'%s的账户信息已更新' % user.name, category='success')
         return redirect(url_for('manage.auth_admin'))
     form.name.data = user.name
     form.email.data = user.email
@@ -1364,13 +1364,13 @@ def rental_rent_step_1():
         booking_code = form.booking_code.data
         booking = Booking.query.filter_by(booking_code=booking_code).first()
         if not booking:
-            flash(u'预约码无效')
+            flash(u'预约码无效', category='error')
             return redirect(url_for('manage.rental_rent_step_1'))
         if not booking.valid:
-            flash(u'该预约处于“%s”状态' % booking.state.name)
+            flash(u'该预约处于“%s”状态' % booking.state.name, category='error')
             return redirect(url_for('manage.rental_rent_step_1'))
         if booking.schedule.date != date.today():
-            flash(u'预约的日期（%s）不在今天' % booking.schedule.date)
+            flash(u'预约的日期（%s）不在今天' % booking.schedule.date, category='error')
             return redirect(url_for('manage.rental_rent_step_1'))
         if booking.schedule.ended:
             booking.set_state(u'爽约')
@@ -1404,18 +1404,18 @@ def rental_rent_step_3(user_id, ipad_id):
     if form.validate_on_submit():
         serial = form.serial.data
         if serial != ipad.serial:
-            flash(u'iPad序列号信息有误')
+            flash(u'iPad序列号信息有误', category='error')
             return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=ipad_id))
         if ipad.state.name not in [u'待机', u'候补']:
-            flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name))
+            flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
             return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=ipad_id))
         if user.has_unreturned_ipads:
-            flash(u'%s有未归换的iPad' % user.name)
+            flash(u'%s有未归换的iPad' % user.name, category='error')
             return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=ipad_id))
         rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
-        flash(u'iPad借出信息登记成功')
+        flash(u'iPad借出信息登记成功', category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3.html', user=user, ipad=ipad, form=form)
 
@@ -1429,7 +1429,7 @@ def rental_rent_step_1_alt():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user is None:
-            flash(u'邮箱不存在')
+            flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_rent_step_1_alt'))
         return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user.id))
     return render_template('manage/rental_rent_step_1_alt.html', form=form)
@@ -1454,24 +1454,24 @@ def rental_rent_step_3_alt(user_id, ipad_id):
     user = User.query.get_or_404(user_id)
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
-        flash(u'序列号为%s的iPad不存在，请重新选择' % ipad.serial)
+        flash(u'序列号为%s的iPad不存在，请重新选择' % ipad.serial, category='error')
         return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user_id))
     form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
         if serial != ipad.serial:
-            flash(u'iPad序列号信息有误')
+            flash(u'iPad序列号信息有误', category='error')
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
         if ipad.state.name not in [u'待机', u'候补']:
-            flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name))
+            flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
         if user.has_unreturned_ipads:
-            flash(u'%s有未归换的iPad' % user.name)
+            flash(u'%s有未归换的iPad' % user.name, category='error')
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
         rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出')
-        flash(u'iPad借出信息登记成功')
+        flash(u'iPad借出信息登记成功', category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3_alt.html', user=user, ipad=ipad, form=form)
 
@@ -1485,14 +1485,14 @@ def rental_return_step_1():
         serial = form.serial.data
         ipad = iPad.query.filter_by(serial=serial).first()
         if ipad is None:
-            flash(u'不存在序列号为%s的iPad' % serial)
+            flash(u'不存在序列号为%s的iPad' % serial, category='error')
             return redirect(url_for('manage.rental_return_step_1'))
         if ipad.state.name != u'借出':
-            flash(u'序列号为%s的iPad处于%s状态，尚未借出' % (serial, ipad.state.name))
+            flash(u'序列号为%s的iPad处于%s状态，尚未借出' % (serial, ipad.state.name), category='error')
             return redirect(url_for('manage.rental_return_step_1'))
         rental = Rental.query.filter_by(ipad_id=ipad.id, returned=False).first()
         if rental is None:
-            flash(u'没有序列号为%s的iPad的借阅记录' % serial)
+            flash(u'没有序列号为%s的iPad的借阅记录' % serial, category='error')
             return redirect(url_for('manage.rental_return_step_1'))
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
@@ -1500,16 +1500,16 @@ def rental_return_step_1():
             for user in User.query.all():
                 if user.can(Permission.MANAGE_IPAD):
                     send_email(user.email, u'序列号为%s的iPad处于%s状态' % (serial, ipad.state.name), 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
-            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name))
+            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name), category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
         if not form.battery.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'充电')
             db.session.commit()
-            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name))
+            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name), category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
         rental.set_returned(return_agent_id=current_user.id)
         db.session.commit()
-        flash(u'已回收序列号为%s的iPad' % serial)
+        flash(u'已回收序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
     return render_template('manage/rental_return_step_1.html', form=form)
 
@@ -1556,7 +1556,7 @@ def rental_return_step_4(user_id, lesson_id, section_id):
         else:
             punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_return_step_4.html', user=user, lesson=lesson, section=section, form=form)
 
@@ -1570,7 +1570,7 @@ def rental_return_step_1_alt():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user is None:
-            flash(u'邮箱不存在')
+            flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_return_step_1_alt'))
         return redirect(url_for('manage.rental_return_step_2_alt', user_id=user.id))
     return render_template('manage/rental_return_step_1_alt.html', form=form)
@@ -1618,7 +1618,7 @@ def rental_return_step_4_alt(user_id, lesson_id, section_id):
         else:
             punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_return_step_4_alt.html', user=user, lesson=lesson, section=section, form=form)
 
@@ -1635,7 +1635,7 @@ def announcement():
         show = form.show.data
         announcement = Announcement(title=title, body=body, type_id=type_id, show=show, last_modified_by=current_user.id)
         db.session.add(announcement)
-        flash(u'已添加通知：[%s]%s' % (title, body))
+        flash(u'已添加通知：[%s]%s' % (title, body), category='success')
         return redirect(url_for('manage.announcement'))
     page = request.args.get('page', 1, type=int)
     query = Announcement.query.filter_by(deleted=False)
@@ -1664,7 +1664,7 @@ def edit_announcement(id):
         announcement.last_modified = datetime.utcnow()
         announcement.last_modified_by = current_user.id
         db.session.add(announcement)
-        flash(u'已更新通知：[%s]%s' % (title, body))
+        flash(u'已更新通知：[%s]%s' % (title, body), category='success')
         return redirect(url_for('manage.announcement'))
     form.title.data = announcement.title
     form.body.data = announcement.body
@@ -1683,7 +1683,7 @@ def delete_announcement(id):
     form = DeleteAnnouncementForm()
     if form.validate_on_submit():
         announcement.safe_delete(modified_by=current_user)
-        flash(u'已删除通知：[%s]%s' % (title, body))
+        flash(u'已删除通知：[%s]%s' % (title, body), category='success')
         return redirect(url_for('manage.announcement'))
     return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
 

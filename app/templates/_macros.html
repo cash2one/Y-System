@@ -23,3 +23,25 @@
     {% endif %}
 </div>
 {% endmacro %}
+
+{% macro message_widget() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div id="message-container">
+    {% for category, message in messages %}
+    <div class="ui big icon {{ category }} message">
+        {% if category == 'success' %}
+        <i class="check circle icon"></i>
+        {% elif category == 'error' %}
+        <i class="remove circle icon"></i>
+        {% else %}
+        <i class="{{ category }} circle icon"></i>
+        {% endif %}
+        <i class="close icon"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% endmacro %}

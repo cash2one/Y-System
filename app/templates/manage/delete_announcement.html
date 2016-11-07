@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}删除时段模板{% endblock %}
+{% block title %}删除通知{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-delete-period.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-delete-announcement.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="trash outline icon"></i> 删除时段模板</h1>
+    <h1 class="ui inverted header"><i class="trash outline icon"></i> 删除通知</h1>
 </div>
 {% endblock %}
 
@@ -20,11 +20,11 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">确定要删除时段模板{{ period.name }}？</h3>
-                <form id="delete-period" method="POST" class="ui form">
+                <h3 class="header">确定要删除通知“[{{ announcement.title }}]{{ announcement.body }}”？</h3>
+                <form id="delete-announcement" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     {{ form.submit(class='ui negative button') }}
-                    <a class="ui button cancel loading-trigger" href="{{ url_for('manage.period') }}">取消</a>
+                    <a class="ui button cancel loading-trigger" href="{{ url_for('manage.announcement') }}">取消</a>
                     <div class="ui error message"></div>
                 </form>
             </div>
@@ -35,5 +35,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-delete-period.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-delete-announcement.js') }}"></script>
 {% endblock %}

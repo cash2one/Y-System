@@ -821,6 +821,7 @@ class Period(db.Model):
     def safe_delete(self, modified_by):
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
+        self.show = False
         self.deleted = True
         db.session.add(self)
 
@@ -1562,9 +1563,9 @@ class AnnouncementType(db.Model):
 class Announcement(db.Model):
     __tablename__ = 'announcements'
     id = db.Column(db.Integer, primary_key=True)
-    type_id = db.Column(db.Integer, db.ForeignKey('announcement_types.id'), primary_key=True)
     title = db.Column(db.Unicode(64))
     body = db.Column(db.UnicodeText)
+    type_id = db.Column(db.Integer, db.ForeignKey('announcement_types.id'))
     last_modified = db.Column(db.DateTime, default=datetime.utcnow)
     last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     show = db.Column(db.Boolean, default=False)
@@ -1573,8 +1574,9 @@ class Announcement(db.Model):
     def safe_delete(self, modified_by):
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
+        self.show = False
         self.deleted = True
         db.session.add(self)
 
     def __repr__(self):
-        return '<Announcement %s>' % self.body
+        return '<Announcement %s>' % self.title

@@ -6,7 +6,7 @@ from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, User, Role, Activation, Course
+from ..models import Permission, User, Role, Activation, Course, Announcement, AnnouncementType
 
 
 @auth.before_app_request
@@ -35,11 +35,11 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            # flash('欢迎登录云英语教育服务支撑系统！')
+            # flash(u'欢迎登录云英语教育服务支撑系统！', category='info')
             if user.can(Permission.MANAGE):
                 return redirect(request.args.get('next') or url_for('manage.summary'))
             return redirect(request.args.get('next') or url_for('main.profile'))
-        flash('无效的用户名或密码')
+        flash(u'无效的用户名或密码', category='error')
     return render_template('auth/login.html', form=form)
 
 
@@ -74,13 +74,13 @@ def activate():
                 new_user.add_initial_punch(activation=activation)
                 token = new_user.generate_confirmation_token()
                 send_email(new_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=new_user, token=token)
-                flash(u'激活成功，请登录！')
-                flash(u'一封确认邮件已经发送至您的邮箱')
+                flash(u'激活成功，请登录！', category='success')
+                flash(u'一封确认邮件已经发送至您的邮箱', category='info')
                 for user in User.query.all():
                     if user.can(Permission.MANAGE_USER):
                         send_email(user.email, u'新用户：%s（%s）' % (new_user.name, new_user.email), 'auth/mail/new_user', user=new_user)
                 return redirect(url_for('auth.login'))
-        flash(u'激活信息有误，或账户已处于激活状态')
+        flash(u'激活信息有误，或账户已处于激活状态', category='error')
     return render_template('auth/activate.html', form=form)
 
 
@@ -92,9 +92,9 @@ def confirm(token):
             return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     if current_user.confirm(token):
-        flash(u'您的邮箱账户确认成功！')
+        flash(u'您的邮箱账户确认成功！', category='success')
     else:
-        flash(u'确认链接无效或者已经过期')
+        flash(u'确认链接无效或者已经过期', category='error')
         return redirect(url_for('auth.unconfirmed'))
     if current_user.can(Permission.MANAGE):
         return redirect(url_for('manage.summary'))
@@ -106,7 +106,7 @@ def confirm(token):
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
-    flash(u'一封新的确认邮件已经发送至您的邮箱')
+    flash(u'一封新的确认邮件已经发送至您的邮箱', category='info')
     return redirect(url_for('auth.unconfirmed'))
 
 
@@ -118,12 +118,12 @@ def change_password():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.password.data
             db.session.add(current_user)
-            flash(u'修改密码成功')
+            flash(u'修改密码成功', category='success')
             if current_user.can(Permission.MANAGE):
                 return redirect(url_for('manage.summary'))
             return redirect(url_for('main.profile'))
         else:
-            flash(u'密码有误')
+            flash(u'密码有误', category='error')
     return render_template("auth/change_password.html", form=form)
 
 
@@ -137,7 +137,7 @@ def reset_password_request():
         if user:
             token = user.generate_reset_token()
             send_email(user.email, u'重置您的密码', 'auth/mail/reset_password', user=user, token=token, next=request.args.get('next'))
-        flash(u'一封用于重置密码的邮件已经发送至您的邮箱')
+        flash(u'一封用于重置密码的邮件已经发送至您的邮箱', category='info')
         return redirect(url_for('auth.reset_password_request'))
     return render_template('auth/reset_password_request.html', form=form)
 
@@ -154,7 +154,7 @@ def reset_password(token):
         if user is None:
             return redirect(url_for('main.index'))
         if user.reset_password(token, form.password.data):
-            flash(u'重置密码成功')
+            flash(u'重置密码成功', category='success')
             return redirect(url_for('auth.login'))
         else:
             return redirect(url_for('main.index'))
@@ -170,10 +170,10 @@ def change_email_request():
             new_email = form.email.data
             token = current_user.generate_email_change_token(new_email)
             send_email(new_email, u'确认您的邮箱账户', 'auth/mail/change_email', user=current_user, token=token)
-            flash(u'一封确认邮件已经发送至您的邮箱')
+            flash(u'一封确认邮件已经发送至您的邮箱', category='info')
             return redirect(url_for('auth.change_email_request'))
         else:
-            flash(u'无效的用户名或密码')
+            flash(u'无效的用户名或密码', category='error')
     return render_template("auth/change_email.html", form=form)
 
 
@@ -181,9 +181,9 @@ def change_email_request():
 @login_required
 def change_email(token):
     if current_user.change_email(token):
-        flash('修改邮箱成功')
+        flash(u'修改邮箱成功', category='success')
     else:
-        flash('请求无效')
+        flash(u'请求无效', category='error')
     if current_user.can(Permission.MANAGE):
         return redirect(url_for('manage.summary'))
     return redirect(url_for('main.profile'))

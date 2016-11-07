@@ -48,6 +48,7 @@ def deploy():
     from app.models import Period
     from app.models import iPad
     from app.models import iPadContent
+    from app.models import AnnouncementType
 
     # migrate database to latest revision
     upgrade()
@@ -67,6 +68,7 @@ def deploy():
     Period.insert_periods()
     iPad.insert_ipads()
     iPadContent.insert_ipad_contents()
+    AnnouncementType.insert_announcement_types()
 
 
 if __name__ == '__main__':

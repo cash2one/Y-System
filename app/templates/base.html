@@ -118,6 +118,9 @@
                     {% if current_user.can(Permission.MANAGE_IPAD) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
                     {% endif %}
+                    {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
+                    {% endif %}
                     {% if current_user.can(Permission.MANAGE_USER) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                     {% endif %}
@@ -209,6 +212,9 @@
                 {% if current_user.can(Permission.MANAGE_IPAD) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
                 {% endif %}
+                {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
+                {% endif %}
                 {% if current_user.can(Permission.MANAGE_USER) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
                 {% endif %}
@@ -299,6 +305,9 @@
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_IPAD) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
+                            {% endif %}
+                            {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                            <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_USER) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>

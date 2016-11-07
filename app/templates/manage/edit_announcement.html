@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}编辑通知{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-announcement.css') }}">
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑通知</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">编辑通知</h3>
+                <form id="edit-announcement" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="twelve wide field">
+                            {{ form.title.label() }}
+                            {{ form.title(placeholder='通知标题') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.announcement_type.label() }}
+                            {{ form.announcement_type(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.body.label() }}
+                        {{ form.body(placeholder='通知内容') }}
+                    </div>
+                    <div class="field">
+                        <div class="ui toggle checkbox">
+                            {{ form.show() }}
+                            {{ form.show.label() }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <a class="ui button cancel loading-trigger" href="{{ url_for('manage.announcement') }}">取消</a>
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-announcement.js') }}"></script>
+{% endblock %}
