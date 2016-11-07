@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement
+from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
 from ..decorators import admin_required, permission_required
 
 
@@ -26,6 +26,14 @@ def after_request(response):
 @login_required
 @permission_required(Permission.MANAGE)
 def summary():
+    announcements = Announcement.query\
+        .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
+        .filter(AnnouncementType.name == u'管理主页通知')\
+        .filter(Announcement.show == True)\
+        .filter(Announcement.deleted == False)\
+        .all()
+    for announcement in announcements:
+        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
     show_summary_ipad_1103 = True
     show_summary_ipad_1707 = False
     show_summary_ipad_others = False
@@ -516,7 +524,7 @@ def period():
     return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
 
 
-@manage.route('/edit-period/<int:id>', methods=['GET', 'POST'])
+@manage.route('/period/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def edit_period(id):
@@ -549,7 +557,7 @@ def edit_period(id):
     return render_template('manage/edit_period.html', form=form, period=period)
 
 
-@manage.route('/delete-period/<int:id>', methods=['GET', 'POST'])
+@manage.route('/period/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def delete_period(id):
@@ -725,7 +733,7 @@ def other_ipads():
     return resp
 
 
-@manage.route('/edit-ipad/<int:id>', methods=['GET', 'POST'])
+@manage.route('/ipad/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_IPAD)
 def edit_ipad(id):
@@ -761,7 +769,7 @@ def edit_ipad(id):
     return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
 
 
-@manage.route('/delete-ipad/<int:id>', methods=['GET', 'POST'])
+@manage.route('/ipad/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_IPAD)
 def delete_ipad(id):
@@ -776,7 +784,7 @@ def delete_ipad(id):
     return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
 
 
-@manage.route('/filter-ipad', methods=['GET', 'POST'])
+@manage.route('/ipad/filter', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
 def filter_ipad():
@@ -901,7 +909,7 @@ def activations():
     return resp
 
 
-@manage.route('/edit-activation/<int:id>', methods=['GET', 'POST'])
+@manage.route('/activation/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def edit_activation(id):
@@ -933,7 +941,7 @@ def edit_activation(id):
     return render_template('manage/edit_activation.html', form=form, activation=activation)
 
 
-@manage.route('/delete-activation/<int:id>', methods=['GET', 'POST'])
+@manage.route('/activation/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def delete_activation(id):
@@ -950,7 +958,7 @@ def delete_activation(id):
     return render_template('manage/delete_activation.html', form=form, activation=activation)
 
 
-@manage.route('/edit-user/<int:id>', methods=['GET', 'POST'])
+@manage.route('/user/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def edit_user(id):
@@ -982,7 +990,7 @@ def edit_user(id):
     return render_template('manage/edit_user.html', form=form, user=user)
 
 
-@manage.route('/edit-punch/step-1/<int:user_id>', methods=['GET', 'POST'])
+@manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
 def edit_punch_step_1(user_id):
@@ -995,7 +1003,7 @@ def edit_punch_step_1(user_id):
     return render_template('manage/edit_punch_step_1.html', user=user, form=form, next=request.args.get('next'))
 
 
-@manage.route('/edit-punch/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
 def edit_punch_step_2(user_id, lesson_id):
@@ -1008,7 +1016,7 @@ def edit_punch_step_2(user_id, lesson_id):
     return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form, next=request.args.get('next'))
 
 
-@manage.route('/edit-punch/step-3/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
+@manage.route('/punch/edit/step-3/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
 def edit_punch_step_3(user_id, lesson_id, section_id):
@@ -1192,7 +1200,7 @@ def auth_users():
     return resp
 
 
-@manage.route('/edit-auth/<int:id>', methods=['GET', 'POST'])
+@manage.route('/auth/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_AUTH)
 def edit_auth(id):
@@ -1279,7 +1287,7 @@ def auth_users_admin():
     return resp
 
 
-@manage.route('/edit-auth-admin/<int:id>', methods=['GET', 'POST'])
+@manage.route('/auth-admin/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.ADMINISTER)
 def edit_auth_admin(id):
@@ -1635,7 +1643,7 @@ def announcement():
         show = form.show.data
         announcement = Announcement(title=title, body=body, type_id=type_id, show=show, last_modified_by=current_user.id)
         db.session.add(announcement)
-        flash(u'已添加通知：[%s]%s' % (title, body), category='success')
+        flash(u'已添加通知：“%s”' % title, category='success')
         return redirect(url_for('manage.announcement'))
     page = request.args.get('page', 1, type=int)
     query = Announcement.query.filter_by(deleted=False)
@@ -1646,7 +1654,39 @@ def announcement():
     return render_template('manage/announcement.html', form=form, announcements=announcements, pagination=pagination)
 
 
-@manage.route('/edit-announcement/<int:id>', methods=['GET', 'POST'])
+@manage.route('/announcement/publish/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_ANNOUNCE)
+def publish_announcement(id):
+    announcement = Announcement.query.get(id)
+    if announcement is None:
+        flash(u'该通知不存在', category='error')
+        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    if announcement.show:
+        flash(u'所选通知已经发布', category='warning')
+        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    announcement.publish(modified_by=current_user)
+    flash(u'“%s”发布成功！' % announcement.title, category='success')
+    return redirect(url_for('manage.announcement', page=request.args.get('page')))
+
+
+@manage.route('/announcement/retract/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_ANNOUNCE)
+def retract_announcement(id):
+    announcement = Announcement.query.get(id)
+    if announcement is None:
+        flash(u'该通知不存在', category='error')
+        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    if not announcement.show:
+        flash(u'所选通知尚未发布', category='warning')
+        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    announcement.retract(modified_by=current_user)
+    flash(u'“%s”撤销成功！' % announcement.title, category='success')
+    return redirect(url_for('manage.announcement', page=request.args.get('page')))
+
+
+@manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_ANNOUNCE)
 def edit_announcement(id):
@@ -1664,7 +1704,7 @@ def edit_announcement(id):
         announcement.last_modified = datetime.utcnow()
         announcement.last_modified_by = current_user.id
         db.session.add(announcement)
-        flash(u'已更新通知：[%s]%s' % (title, body), category='success')
+        flash(u'已更新通知：“%s”' % title, category='success')
         return redirect(url_for('manage.announcement'))
     form.title.data = announcement.title
     form.body.data = announcement.body
@@ -1673,7 +1713,7 @@ def edit_announcement(id):
     return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
 
 
-@manage.route('/delete-announcement/<int:id>', methods=['GET', 'POST'])
+@manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_ANNOUNCE)
 def delete_announcement(id):
@@ -1683,7 +1723,7 @@ def delete_announcement(id):
     form = DeleteAnnouncementForm()
     if form.validate_on_submit():
         announcement.safe_delete(modified_by=current_user)
-        flash(u'已删除通知：[%s]%s' % (title, body), category='success')
+        flash(u'已删除通知：“%s”' % title, category='success')
         return redirect(url_for('manage.announcement'))
     return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
 

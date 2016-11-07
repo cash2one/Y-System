@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import main
 from .. import db
-from ..models import Permission, Schedule, Period, CourseType, User, Punch, Booking
+from ..models import Permission, Schedule, Period, CourseType, User, Punch, Booking, Announcement, AnnouncementType
 from ..decorators import admin_required, permission_required
 
 
@@ -37,6 +37,14 @@ def index():
 @main.route('/profile')
 @login_required
 def profile():
+    announcements = Announcement.query\
+        .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
+        .filter(AnnouncementType.name == u'用户主页通知')\
+        .filter(Announcement.show == True)\
+        .filter(Announcement.deleted == False)\
+        .all()
+    for announcement in announcements:
+        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
     page = request.args.get('page', 1, type=int)
     punches = Punch.query\
         .filter_by(user_id=current_user.id)\

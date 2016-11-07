@@ -1578,5 +1578,24 @@ class Announcement(db.Model):
         self.deleted = True
         db.session.add(self)
 
+    def publish(self, modified_by):
+        if self.type.name == u'登录通知':
+            announcements = Announcement.query\
+                .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
+                .filter(AnnouncementType.name == u'登录通知')\
+                .all()
+            for announcement in announcements:
+                announcement.retract(modified_by=modified_by)
+        self.show = True
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        db.session.add(self)
+
+    def retract(self, modified_by):
+        self.show = False
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        db.session.add(self)
+
     def __repr__(self):
         return '<Announcement %s>' % self.title

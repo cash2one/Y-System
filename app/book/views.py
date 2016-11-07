@@ -7,7 +7,7 @@ from flask_sqlalchemy import get_debug_queries
 from . import book
 from .. import db
 from ..email import send_email
-from ..models import Permission, User, Schedule, Period, CourseType, Booking, BookingState, iPadState, iPad, iPadContent, Punch
+from ..models import Permission, User, Schedule, Period, CourseType, Booking, BookingState, iPadState, iPad, iPadContent, Punch, Announcement, AnnouncementType
 from ..decorators import admin_required, permission_required
 
 
@@ -23,6 +23,14 @@ def after_request(response):
 @login_required
 @permission_required(Permission.BOOK_VB)
 def vb():
+    announcements = Announcement.query\
+        .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
+        .filter(AnnouncementType.name == u'预约VB通知')\
+        .filter(Announcement.show == True)\
+        .filter(Announcement.deleted == False)\
+        .all()
+    for announcement in announcements:
+        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
     page = request.args.get('page', 1, type=int)
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\
@@ -178,6 +186,14 @@ def miss_vb(schedule_id):
 @login_required
 @permission_required(Permission.BOOK_Y_GRE)
 def y_gre():
+    announcements = Announcement.query\
+        .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
+        .filter(AnnouncementType.name == u'预约Y-GRE通知')\
+        .filter(Announcement.show == True)\
+        .filter(Announcement.deleted == False)\
+        .all()
+    for announcement in announcements:
+        flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
     page = request.args.get('page', 1, type=int)
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\

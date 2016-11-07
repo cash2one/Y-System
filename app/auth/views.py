@@ -36,6 +36,14 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             # flash(u'欢迎登录云英语教育服务支撑系统！', category='info')
+            announcement = Announcement.query\
+                .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
+                .filter(AnnouncementType.name == u'登录通知')\
+                .filter(Announcement.show == True)\
+                .filter(Announcement.deleted == False)\
+                .first()
+            if announcement is not None:
+                flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
             if user.can(Permission.MANAGE):
                 return redirect(request.args.get('next') or url_for('manage.summary'))
             return redirect(request.args.get('next') or url_for('main.profile'))
