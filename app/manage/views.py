@@ -7,10 +7,10 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch
+from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement
 from ..decorators import admin_required, permission_required
 
 
@@ -505,7 +505,6 @@ def period():
             return redirect(url_for('manage.period'))
         period = Period(name=name, start_time=start_time, end_time=end_time, type_id=type_id, show=show, last_modified_by=current_user.id)
         db.session.add(period)
-        db.session.commit()
         flash(u'已添加时段模板：%s' % name)
         return redirect(url_for('manage.period'))
     page = request.args.get('page', 1, type=int)
@@ -540,7 +539,6 @@ def edit_period(id):
         period.last_modified = datetime.utcnow()
         period.last_modified_by = current_user.id
         db.session.add(period)
-        db.session.commit()
         flash(u'已更新时段模板：%s' % name)
         return redirect(url_for('manage.period'))
     form.name.data = period.name
@@ -587,7 +585,6 @@ def ipad():
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
-        db.session.commit()
         iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial)
         return redirect(url_for('manage.ipad'))
@@ -751,7 +748,6 @@ def edit_ipad(id):
             ipad.remove_lesson(pc.lesson_id)
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson_id)
-        db.session.commit()
         iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
@@ -1034,7 +1030,6 @@ def edit_punch_step_3(user_id, lesson_id, section_id):
         else:
             punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
-        db.session.commit()
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
         return redirect(request.args.get('next') or url_for('manage.find_user'))
     return render_template('manage/edit_punch_step_3.html', user=user, lesson=lesson, section=section, form=form, next=request.args.get('next'))
@@ -1561,7 +1556,6 @@ def rental_return_step_4(user_id, lesson_id, section_id):
         else:
             punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
-        db.session.commit()
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_return_step_4.html', user=user, lesson=lesson, section=section, form=form)
@@ -1624,10 +1618,74 @@ def rental_return_step_4_alt(user_id, lesson_id, section_id):
         else:
             punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
         db.session.add(punch)
-        db.session.commit()
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name))
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_return_step_4_alt.html', user=user, lesson=lesson, section=section, form=form)
+
+
+@manage.route('/announcement', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_ANNOUNCE)
+def announcement():
+    form = NewAnnouncementForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        body = form.body.data
+        type_id = form.announcement_type.data
+        show = form.show.data
+        announcement = Announcement(title=title, body=body, type_id=type_id, show=show, last_modified_by=current_user.id)
+        db.session.add(announcement)
+        flash(u'已添加通知：[%s]%s' % (title, body))
+        return redirect(url_for('manage.announcement'))
+    page = request.args.get('page', 1, type=int)
+    query = Announcement.query.filter_by(deleted=False)
+    pagination = query\
+        .order_by(Announcement.last_modified.desc())\
+        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    announcements = pagination.items
+    return render_template('manage/announcement.html', form=form, announcements=announcements, pagination=pagination)
+
+
+@manage.route('/edit-announcement/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_ANNOUNCE)
+def edit_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    form = EditAnnouncementForm()
+    if form.validate_on_submit():
+        title = form.title.data
+        body = form.body.data
+        type_id = form.announcement_type.data
+        show = form.show.data
+        announcement.title = title
+        announcement.body = body
+        announcement.type_id = type_id
+        announcement.show = show
+        announcement.last_modified = datetime.utcnow()
+        announcement.last_modified_by = current_user.id
+        db.session.add(announcement)
+        flash(u'已更新通知：[%s]%s' % (title, body))
+        return redirect(url_for('manage.announcement'))
+    form.title.data = announcement.title
+    form.body.data = announcement.body
+    form.announcement_type.data = announcement.type_id
+    form.show.data = announcement.show
+    return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
+
+
+@manage.route('/delete-announcement/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_ANNOUNCE)
+def delete_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    title = announcement.title
+    body = announcement.body
+    form = DeleteAnnouncementForm()
+    if form.validate_on_submit():
+        announcement.safe_delete(modified_by=current_user)
+        flash(u'已删除通知：[%s]%s' % (title, body))
+        return redirect(url_for('manage.announcement'))
+    return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
 
 
 @manage.route('/suggest/user/')
