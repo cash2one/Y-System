@@ -6,13 +6,14 @@ from sqlalchemy import or_
 from base64 import urlsafe_b64encode
 import hashlib
 import json
+from bs4 import BeautifulSoup
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
 from flask_login import UserMixin, AnonymousUserMixin
 from app.exceptions import ValidationError
 from . import db, login_manager
-
+from .email import send_email
 
 class Permission:
     FORBIDDEN       = 0b0000000000000000000000000000000
@@ -1563,6 +1564,8 @@ class AnnouncementType(db.Model):
             (u'管理主页通知', ),
             (u'预约VB通知', ),
             (u'预约Y-GRE通知', ),
+            (u'用户邮件通知', ),
+            (u'管理邮件通知', ),
         ]
         for AT in announcement_types:
             announcement_type = AnnouncementType.query.filter_by(name=AT[0]).first()
@@ -1581,6 +1584,7 @@ class Announcement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Unicode(64))
     body = db.Column(db.UnicodeText)
+    body_html = db.Column(db.UnicodeText)
     type_id = db.Column(db.Integer, db.ForeignKey('announcement_types.id'))
     last_modified = db.Column(db.DateTime, default=datetime.utcnow)
     last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -1611,6 +1615,14 @@ class Announcement(db.Model):
                 .all()
             for announcement in announcements:
                 announcement.retract(modified_by=modified_by)
+        if self.type.name == u'用户邮件通知':
+            for user in User.query.all():
+                if user.can(Permission.BOOK):
+                    send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
+        if self.type.name == u'管理邮件通知':
+            for user in User.query.all():
+                if user.can(Permission.MANAGE):
+                    send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         self.show = True
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
@@ -1634,5 +1646,20 @@ class Announcement(db.Model):
         for log in logs:
             db.session.delete(log)
 
+    @staticmethod
+    def on_changed_body_html(target, value, oldvalue, initiator):
+        newline_tags = ['p', 'li']
+        paragraphs = []
+        soup = BeautifulSoup(value, 'html.parser')
+        for child in soup.descendants:
+            child_soup = BeautifulSoup(unicode(child), 'html.parser')
+            if reduce(lambda x, y: len(child_soup.find_all(x))==1 or len(child_soup.find_all(y))==1, newline_tags):
+                if child.get_text():
+                    paragraphs.append(child.get_text())
+        target.body = reduce(lambda x, y: x + '\n\n' + y, paragraphs)
+
     def __repr__(self):
         return '<Announcement %s>' % self.title
+
+
+db.event.listen(Announcement.body_html, 'set', Announcement.on_changed_body_html)

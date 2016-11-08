@@ -29,9 +29,8 @@
 {% if messages %}
 <div id="message-container">
     {% for category, message in messages %}
-    <div class="ui big icon {{ category }} message">
+    <div class="ui {% if category != 'announcement' %}big{% endif %} icon {{ category }} message">
         {% if category == 'announcement' %}
-        <i class="announcement icon"></i>
         {% elif category == 'success' %}
         <i class="check circle icon"></i>
         {% elif category == 'error' %}
@@ -40,7 +39,7 @@
         <i class="{{ category }} circle icon"></i>
         {% endif %}
         <i class="close icon"></i>
-        {{ message }}
+        {{ message | safe }}
     </div>
     {% endfor %}
 </div>

@@ -5,6 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/editor/wangEditor.min.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-announcement.css') }}">
 {% endblock %}
 
@@ -55,5 +56,6 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script src="{{ url_for('static', filename='assets/editor/wangEditor.min.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/customize-manage-edit-announcement.js') }}"></script>
 {% endblock %}

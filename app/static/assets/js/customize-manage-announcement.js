@@ -50,3 +50,24 @@ $(document)
         ;
     })
 ;
+
+// editor
+var editor = new wangEditor('body');
+editor.config.menus = [
+    'source',
+    '|',
+    'bold',
+    'underline',
+    'italic',
+    'strikethrough',
+    'forecolor',
+    '|',
+    'quote',
+    'unorderlist',
+    'orderlist',
+    '|',
+    'eraser',
+    'undo',
+    'redo',
+ ];
+editor.create();

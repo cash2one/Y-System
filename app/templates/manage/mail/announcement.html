@@ -1,0 +1,9 @@
+<p>亲爱的 <b>{{ user.name }}</b>：</p>
+<p>您好！</p>
+{{ announcement.body_html | safe }}
+<p>此致</p>
+<p>敬礼！</p>
+<p><b>{{ announcement.modified_by.name }}</b></p>
+<p>{{ announcement.modified_by.email }}</p>
+<p><b>云英语团队</b></p>
+<p><small>温馨提示：请不要回复本邮件。</small></p>

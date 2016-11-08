@@ -74,7 +74,7 @@
                             <div class="header">{{ announcement.title }}</div>
                             <div class="meta">发布人：{{ announcement.modified_by.name }}</div>
                             <div class="description">
-                                <p>{{ announcement.body }}</p>
+                                <p>{{ announcement.body_html | safe }}</p>
                             </div>
                             <div class="extra">
                                 <i class="notched circle loading icon"></i>

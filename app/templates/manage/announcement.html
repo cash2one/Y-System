@@ -5,6 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/editor/wangEditor.min.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-announcement.css') }}">
 {% endblock %}
 
@@ -37,7 +38,7 @@
                         {% for announcement in announcements %}
                         <tr>
                             <td>{{ announcement.title }}</td>
-                            <td>{{ announcement.body }}</td>
+                            <td>{{ announcement.body_html | safe }}</td>
                             <td>{{ announcement.type.name }}</td>
                             {% if announcement.show %}
                             <td class="positive">发布中</td>
@@ -111,5 +112,6 @@
 {% block customized_scripts %}
 {{ super() }}
 <script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/editor/wangEditor.min.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/customize-manage-announcement.js') }}"></script>
 {% endblock %}
