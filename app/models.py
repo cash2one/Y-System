@@ -1649,14 +1649,8 @@ class Announcement(db.Model):
     @staticmethod
     def on_changed_body_html(target, value, oldvalue, initiator):
         newline_tags = ['p', 'li']
-        paragraphs = []
         soup = BeautifulSoup(value, 'html.parser')
-        for child in soup.descendants:
-            child_soup = BeautifulSoup(unicode(child), 'html.parser')
-            if reduce(lambda x, y: len(child_soup.find_all(x))==1 or len(child_soup.find_all(y))==1, newline_tags):
-                if child.get_text():
-                    paragraphs.append(child.get_text())
-        target.body = reduce(lambda x, y: x + '\n\n' + y, paragraphs)
+        target.body = reduce(lambda paragraph1, paragraph2: paragraph1 + '\n\n' + paragraph2, [child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1))==1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2))==1, newline_tags))] if child.get_text()])
 
     def __repr__(self):
         return '<Announcement %s>' % self.title
