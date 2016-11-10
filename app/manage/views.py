@@ -1029,7 +1029,7 @@ def edit_punch_step_3(user_id, lesson_id, section_id):
     return render_template('manage/edit_punch_step_3.html', user=user, lesson=lesson, section=section, form=form, next=request.args.get('next'))
 
 
-@manage.route('/find-user', methods=['GET', 'POST'])
+@manage.route('/user/find', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE)
 def find_user():
