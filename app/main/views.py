@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import main
 from .. import db
-from ..models import Permission, Schedule, Period, CourseType, User, Punch, Booking, Rental, Announcement, AnnouncementType
+from ..models import Permission, Schedule, Period, CourseType, User, Punch, Booking, Announcement, AnnouncementType
 from ..decorators import admin_required, permission_required
 
 
@@ -56,20 +56,14 @@ def profile():
         .filter_by(user_id=current_user.id)\
         .order_by(Punch.timestamp.desc())\
         .limit(10)
-    pagination_booking = Booking.query\
+    pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == current_user.id)\
         .order_by(Schedule.date.desc())\
         .order_by(Schedule.period_id.asc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    bookings = pagination_booking.items
-    pagination_rental = Rental.query\
-        .filter_by(user_id=current_user.id)\
-        .order_by(Rental.date.desc())\
-        .order_by(Rental.return_time.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    rentals = pagination_rental.items
-    return render_template('profile.html', user=current_user, punches=punches, bookings=bookings, pagination_booking=pagination_booking, rentals=rentals, pagination_rental=pagination_rental, announcements=announcements)
+    bookings = pagination.items
+    return render_template('profile.html', user=current_user, punches=punches, bookings=bookings, pagination=pagination, announcements=announcements)
 
 
 @main.route('/profile/<int:user_id>')
@@ -82,17 +76,11 @@ def profile_user(user_id):
         .filter_by(user_id=user.id)\
         .order_by(Punch.timestamp.desc())\
         .limit(10)
-    pagination_booking = Booking.query\
+    pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == user.id)\
         .order_by(Schedule.date.asc())\
         .order_by(Schedule.period_id.asc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    bookings = pagination_booking.items
-    pagination_rental = Rental.query\
-        .filter_by(user_id=user.id)\
-        .order_by(Rental.date.desc())\
-        .order_by(Rental.return_time.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    rentals = pagination_rental.items
-    return render_template('profile.html', user=user, punches=punches, bookings=bookings, pagination_booking=pagination_booking, rentals=rentals, pagination_rental=pagination_rental, announcements=[])
+    bookings = pagination.items
+    return render_template('profile.html', user=user, punches=punches, bookings=bookings, pagination=pagination, announcements=[])

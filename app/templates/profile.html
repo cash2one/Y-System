@@ -206,67 +206,13 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination_booking %}
-                {{ macros.pagination_widget(pagination_booking, 'main.profile') }}
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'main.profile') }}
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
-
-{% if current_user.can(Permission.MANAGE) %}
-<div id="rentals" class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="header"><i class="exchange icon"></i> iPad借阅记录</h3>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>iPad</th>
-                            <th>借出时间</th>
-                            <th>借出经办人</th>
-                            <th>归还时间</th>
-                            <th>归还经办人</th>
-                            <th>状态</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for rental in rentals %}
-                        <tr>
-                            <td>
-                                {{ rental.ipad.alias }}
-                                [<code>{{ rental.ipad.serial }}</code>]
-                            </td>
-                            <td>
-                                <div class="popup-trigger">{{ moment(rental.rent_time).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ rental.rent_agent.name }}</td>
-                            {% if rental.returned %}
-                            <td>
-                                <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ rental.return_agent.name }}</td>
-                            <td class="positive">归还</td>
-                            {% else %}
-                            <td>无</td>
-                            <td>无</td>
-                            <td class="negative">借出</td>
-                            {% endif %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% if pagination_rental %}
-                {{ macros.pagination_widget(pagination_rental, 'main.profile') }}
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
 
 {% if announcements %}
 <div class="ui vertical stripe segment">
