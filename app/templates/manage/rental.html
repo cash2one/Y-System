@@ -73,14 +73,16 @@
                                 <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ rental.rent_agent.name }}</td>
+                            {% if rental.returned %}
                             <td>
                                 <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ rental.return_agent.name }}</td>
-                            {% if rental.returned %}
                             <td class="positive">归还</td>
                             {% else %}
+                            <td>无</td>
+                            <td>无</td>
                             <td class="negative">借出</td>
                             {% endif %}
                         </tr>
