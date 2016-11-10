@@ -24,6 +24,7 @@
 </div>
 {% endmacro %}
 
+
 {% macro message_widget() %}
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
@@ -42,6 +43,54 @@
         {{ message | safe }}
     </div>
     {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% endmacro %}
+
+
+{% macro auth_message_widget() %}
+{% with messages = get_flashed_messages(category_filter=['info']) %}
+{% if messages %}
+<div class="ui flask info message">
+    <ul class="list">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
+{% with messages = get_flashed_messages(category_filter=['warning']) %}
+{% if messages %}
+<div class="ui flask warning message">
+    <ul class="list">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
+{% with messages = get_flashed_messages(category_filter=['success']) %}
+{% if messages %}
+<div class="ui flask positive message">
+    <ul class="list">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endwith %}
+{% with messages = get_flashed_messages(category_filter=['error']) %}
+{% if messages %}
+<div class="ui flask negative message">
+    <ul class="list">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
 </div>
 {% endif %}
 {% endwith %}

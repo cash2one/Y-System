@@ -30,6 +30,11 @@ def unconfirmed():
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash(u'您已经登录', 'info')
+        if current_user.can(Permission.MANAGE):
+            return redirect(request.args.get('next') or url_for('manage.summary'))
+        return redirect(request.args.get('next') or url_for('main.profile'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -60,6 +65,11 @@ def logout():
 
 @auth.route('/activate', methods=['GET', 'POST'])
 def activate():
+    if current_user.is_authenticated:
+        flash(u'您已经登录', 'info')
+        if current_user.can(Permission.MANAGE):
+            return redirect(request.args.get('next') or url_for('manage.summary'))
+        return redirect(request.args.get('next') or url_for('main.profile'))
     form = ActivationForm()
     if form.validate_on_submit():
         activations = Activation.query.filter_by(name=form.name.data, activated=False).all()
@@ -118,7 +128,7 @@ def resend_confirmation():
     return redirect(url_for('auth.unconfirmed'))
 
 
-@auth.route('/change-password', methods=['GET', 'POST'])
+@auth.route('/password/change', methods=['GET', 'POST'])
 @login_required
 def change_password():
     form = ChangePasswordForm()
@@ -135,10 +145,13 @@ def change_password():
     return render_template("auth/change_password.html", form=form)
 
 
-@auth.route('/reset-password', methods=['GET', 'POST'])
+@auth.route('/password/reset', methods=['GET', 'POST'])
 def reset_password_request():
-    if not current_user.is_anonymous:
-        return redirect(url_for('main.profile'))
+    if current_user.is_authenticated:
+        flash(u'您已经登录', 'info')
+        if current_user.can(Permission.MANAGE):
+            return redirect(request.args.get('next') or url_for('manage.summary'))
+        return redirect(request.args.get('next') or url_for('main.profile'))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -150,9 +163,10 @@ def reset_password_request():
     return render_template('auth/reset_password_request.html', form=form)
 
 
-@auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+@auth.route('/password/reset/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    if not current_user.is_anonymous:
+    if current_user.is_authenticated:
+        flash(u'您已经登录', 'info')
         if current_user.can(Permission.MANAGE):
             return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
@@ -160,16 +174,18 @@ def reset_password(token):
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None:
-            return redirect(url_for('main.index'))
+            flash(u'用户邮箱错误', category='error')
+            return redirect(url_for('auth.reset_password_request'))
         if user.reset_password(token, form.password.data):
             flash(u'重置密码成功', category='success')
             return redirect(url_for('auth.login'))
         else:
-            return redirect(url_for('main.index'))
+            flash(u'重置密码失败', category='error')
+            return redirect(url_for('auth.reset_password_request'))
     return render_template('auth/reset_password.html', form=form)
 
 
-@auth.route('/change-email', methods=['GET', 'POST'])
+@auth.route('/email/change', methods=['GET', 'POST'])
 @login_required
 def change_email_request():
     form = ChangeEmailForm()
@@ -185,7 +201,7 @@ def change_email_request():
     return render_template("auth/change_email.html", form=form)
 
 
-@auth.route('/change-email/<token>')
+@auth.route('/email/change/<token>')
 @login_required
 def change_email(token):
     if current_user.change_email(token):
