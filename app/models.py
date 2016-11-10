@@ -409,14 +409,14 @@ class User(UserMixin, db.Model):
     )
     manage_ipads_rent = db.relationship(
         'Rental',
-        foreign_keys=[Rental.user_id],
+        foreign_keys=[Rental.rent_agent_id],
         backref=db.backref('rent_agent', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
     manage_ipads_return = db.relationship(
         'Rental',
-        foreign_keys=[Rental.user_id],
+        foreign_keys=[Rental.return_agent_id],
         backref=db.backref('return_agent', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -776,7 +776,7 @@ class User(UserMixin, db.Model):
         if suggest_email:
             user_json_suggestion = {
                 'title': self.email,
-                'description': '%s[%s]' % (self.name, self.role.name),
+                'description': '%s [%s]' % (self.name, self.role.name),
             }
         else:
             user_json_suggestion = {

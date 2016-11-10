@@ -103,7 +103,7 @@ function updateCards() {
                         $('<a>')
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
-                            .text('[' + data.ipads[i].now_rented_by.last_punch.course_type + '] ' + data.ipads[i].now_rented_by.name)
+                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('teal');
                     $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
@@ -114,7 +114,7 @@ function updateCards() {
                         $('<a>')
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
-                            .text('[' + data.ipads[i].now_rented_by.last_punch.course_type + '] ' + data.ipads[i].now_rented_by.name)
+                            .text('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('orange');
                     $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
@@ -150,4 +150,4 @@ function updateCards() {
     });
 };
 updateCards();
-// setInterval(updateCards, 15000);
+setInterval(updateCards, 15000);

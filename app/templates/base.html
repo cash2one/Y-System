@@ -77,7 +77,6 @@
                 <img class="ui logo image" src="{{ url_for('static', filename='images/logo-dark.png') }}">
                 <span>云英语</span>
             </div>
-            <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
             {% if current_user.is_authenticated %}
             {% if current_user.can(Permission.MANAGE) %}
             <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
@@ -85,6 +84,7 @@
             <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
             {% endif %}
             {% else %}
+            <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
             <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
             {% endif %}
             {% if current_user.can(Permission.BOOK) %}
@@ -182,7 +182,6 @@
                 <div class="content">云英语</div>
             </h2>
         </div>
-        <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
         {% if current_user.is_authenticated %}
         {% if current_user.can(Permission.MANAGE) %}
         <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
@@ -190,6 +189,7 @@
         <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
         {% endif %}
         {% else %}
+        <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
         <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
         {% endif %}
         {% if current_user.can(Permission.BOOK) %}
@@ -277,7 +277,6 @@
                         <img class="ui logo image" src="{{ url_for('static', filename='images/logo-white.png') }}">
                         <span>云英语</span>
                     </div>
-                    <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
                     {% if current_user.is_authenticated %}
                     {% if current_user.can(Permission.MANAGE) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i> 系统实况</a>
@@ -285,6 +284,7 @@
                     <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i> 个人档案</a>
                     {% endif %}
                     {% else %}
+                    <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i> 首页</a>
                     <a class="item" href="{{ url_for('main.index') }}#products"><i class="lightbulb icon"></i> 解决方案</a>
                     {% endif %}
                     {% if current_user.can(Permission.BOOK) %}

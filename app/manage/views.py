@@ -804,7 +804,7 @@ def ipad_contents():
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def user():
-    if current_user.can(Permission.ADMINISTER):
+    if current_user.is_administrator:
         form = NewActivationFormAdmin()
     elif current_user.can(Permission.MANAGE_AUTH):
         form = NewActivationFormAuth()
@@ -820,7 +820,7 @@ def user():
         activation = Activation(name=form.name.data, activation_code=form.activation_code.data, role_id=form.role.data, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id, inviter_id=current_user.id)
         db.session.add(activation)
         db.session.commit()
-        flash(u'%s用户：%s添加成功' % (activation.role.name, activation.name), category='success')
+        flash(u'成功添加%s用户：%s' % (activation.role.name, activation.name), category='success')
         return redirect(url_for('manage.user'))
     page = request.args.get('page', 1, type=int)
     show_users = True
@@ -840,7 +840,7 @@ def user():
         .order_by(User.last_seen.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination_users.items
-    if current_user.can(Permission.ADMINISTER):
+    if current_user.is_administrator:
         pagination_activations = Activation.query\
             .join(Role, Role.id == Activation.role_id)\
             .filter(Activation.deleted == False)\
@@ -903,7 +903,7 @@ def activations():
 @permission_required(Permission.MANAGE_USER)
 def edit_activation(id):
     activation = Activation.query.get_or_404(id)
-    if current_user.can(Permission.ADMINISTER):
+    if current_user.is_administrator:
         form = EditActivationFormAdmin()
     elif current_user.can(Permission.MANAGE_AUTH):
         form = EditActivationFormAuth()
@@ -1036,7 +1036,7 @@ def find_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.can(Permission.ADMINISTER):
+        if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(or_(
@@ -1080,7 +1080,7 @@ def find_user():
     if form.validate_on_submit():
         name_or_email = form.name_or_email.data
         if name_or_email:
-            if current_user.can(Permission.ADMINISTER):
+            if current_user.is_administrator:
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
                     .filter(or_(
@@ -1710,7 +1710,7 @@ def suggest_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.can(Permission.ADMINISTER):
+        if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(or_(
@@ -1759,7 +1759,7 @@ def suggest_email():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.can(Permission.ADMINISTER):
+        if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(or_(
@@ -1808,7 +1808,7 @@ def search_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.can(Permission.ADMINISTER):
+        if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(or_(

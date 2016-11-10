@@ -20,7 +20,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">iPad内容</h3>
+                <h3 class="header"><i class="tablet icon"></i> iPad列表</h3>
                 <div class="ui tabular menu">
                     {% if show_ipad_all %}
                     <a class="item active loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
@@ -201,7 +201,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">新增iPad</h3>
+                <h3 class="header"><i class="add circle icon"></i> 新增iPad</h3>
                 <form id="new-ipad" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">

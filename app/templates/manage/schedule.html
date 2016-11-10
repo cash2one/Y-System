@@ -20,7 +20,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">时段信息</h3>
+                <h3 class="header"><i class="wait icon"></i> 时段信息</h3>
                 <div class="ui tabular menu">
                     {% if show_today_schedule %}
                     <a class="item active loading-trigger" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
@@ -130,7 +130,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">新建预约时段</h3>
+                <h3 class="header"><i class="add circle icon"></i> 新建预约时段</h3>
                 <form method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">

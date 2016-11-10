@@ -11,7 +11,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="trash outline icon"></i> 删除激活邀请</h1>
+    <h1 class="ui inverted header"><i class="remove user icon"></i> 删除激活邀请</h1>
 </div>
 {% endblock %}
 
@@ -20,7 +20,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">确定要删除{{ activation.name }}的激活邀请？</h3>
+                <h3 class="header"><i class="warning sign icon"></i> 确定要删除{{ activation.name }}的激活邀请？</h3>
                 <form id="delete-activation" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     {{ form.submit(class='ui negative button') }}

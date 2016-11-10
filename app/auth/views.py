@@ -72,7 +72,7 @@ def activate():
         return redirect(request.args.get('next') or url_for('main.profile'))
     form = ActivationForm()
     if form.validate_on_submit():
-        activations = Activation.query.filter_by(name=form.name.data, activated=False).all()
+        activations = Activation.query.filter_by(name=form.name.data, activated=False, deleted=False).all()
         for activation in activations:
             if activation.verify_activation_code(form.activation_code.data):
                 activation.activated = True
