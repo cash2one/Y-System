@@ -207,7 +207,7 @@
                     </tbody>
                 </table>
                 {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'main.profile_user') }}
+                {{ macros.pagination_widget(pagination, 'main.profile_user', user_id=user.id) }}
                 {% endif %}
             </div>
         </div>
