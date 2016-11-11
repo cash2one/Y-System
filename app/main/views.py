@@ -68,7 +68,7 @@ def profile():
 
 @main.route('/profile/<int:user_id>')
 @login_required
-@permission_required(Permission.MANAGE_USER)
+@permission_required(Permission.MANAGE)
 def profile_user(user_id):
     user = User.query.get_or_404(user_id)
     page = request.args.get('page', 1, type=int)
