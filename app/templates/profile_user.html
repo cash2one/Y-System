@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}个人档案{% endblock %}
+{% block title %}{{ user.name }}的个人档案{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
