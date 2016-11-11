@@ -83,4 +83,4 @@ def profile_user(user_id):
         .order_by(Schedule.period_id.asc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     bookings = pagination.items
-    return render_template('profile.html', user=user, punches=punches, bookings=bookings, pagination=pagination, announcements=[])
+    return render_template('profile_user.html', user=user, punches=punches, bookings=bookings, pagination=pagination)
