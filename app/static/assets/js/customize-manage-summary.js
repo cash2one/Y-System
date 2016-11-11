@@ -88,6 +88,8 @@ function updateCards() {
                                                 .addClass('notched circle loading icon')
                                         )
                                         .append(moment(data.ipads[i].last_modified_at, 'YYYY-MM-DDTh:mm:ssZ').fromNow())
+                                        .append(' - ')
+                                        .append(data.ipads[i].last_modified_by)
                                 )
                         )
                 );
