@@ -336,7 +336,7 @@ def schedule():
         for period_id in form.period.data:
             schedule = Schedule.query.filter_by(date=day, period_id=period_id).first()
             if schedule:
-                flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='error')
+                flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='warning')
             else:
                 period = Period.query.get_or_404(period_id)
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
