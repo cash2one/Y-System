@@ -1356,7 +1356,7 @@ class Lesson(db.Model):
     def first_section(self):
         return Section.query\
             .join(Lesson, Lesson.id == Section.lesson_id)\
-            .filter(Section.id == self.id)\
+            .filter(Lesson.id == self.id)\
             .order_by(Section.id.asc())\
             .first()
 
