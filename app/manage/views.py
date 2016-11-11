@@ -538,7 +538,7 @@ def edit_period(id):
         period.name = form.name.data
         period.start_time = start_time
         period.end_time = end_time
-        period.type_id = orm.period_type.data
+        period.type_id = form.period_type.data
         period.show = form.show.data
         period.last_modified = datetime.utcnow()
         period.last_modified_by = current_user.id
