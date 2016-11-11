@@ -364,7 +364,8 @@ class Rental(db.Model):
         self.return_agent_id = return_agent_id
         db.session.add(self)
         ipad = iPad.query.get(self.ipad_id)
-        ipad.set_state(ipad_state)
+        modified_by = User.query.get(return_agent_id)
+        ipad.set_state(ipad_state, modified_by=modified_by)
 
     def __repr__(self):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
@@ -835,11 +836,15 @@ class Period(db.Model):
     deleted = db.Column(db.Boolean, default=False)
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
 
+    def ping(self, modified_by):
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        db.session.add(self)
+
     def safe_delete(self, modified_by):
         self.show = False
         self.deleted = True
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.ping(modified_by=modified_by)
         db.session.add(self)
 
     @property
@@ -944,22 +949,24 @@ class Schedule(db.Model):
         cascade='all, delete-orphan'
     )
 
-    def publish(self, modified_by):
-        self.available = True
+    def ping(self, modified_by):
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
+        db.session.add(self)
+
+    def publish(self, modified_by):
+        self.available = True
+        self.ping(modified_by=modified_by)
         db.session.add(self)
 
     def retract(self, modified_by):
         self.available = False
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.ping(modified_by=modified_by)
         db.session.add(self)
 
     def increase_quota(self, modified_by):
         self.quota += 1
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.ping(modified_by=modified_by)
         db.session.add(self)
         wb = Booking.query\
             .join(BookingState, BookingState.id == Booking.state_id)\
@@ -977,8 +984,7 @@ class Schedule(db.Model):
     def decrease_quota(self, modified_by):
         if self.quota > 0:
             self.quota += -1
-            self.last_modified = datetime.utcnow()
-            self.last_modified_by = modified_by.id
+            self.ping(modified_by=modified_by)
             db.session.add(self)
 
     @property
@@ -1218,14 +1224,19 @@ class iPad(db.Model):
     )
     rentals = db.relationship('Rental', backref='ipad', lazy='dynamic')
 
-    def safe_delete(self, modified_by):
-        self.deleted = True
+    def ping(self, modified_by):
         self.last_modified = datetime.utcnow()
         self.last_modified_by = modified_by.id
         db.session.add(self)
 
-    def set_state(self, state_name):
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    def set_state(self, state_name, modified_by):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
+        self.ping(modified_by=modified_by)
         db.session.add(self)
 
     def add_lesson(self, lesson_id):
@@ -1598,12 +1609,16 @@ class Announcement(db.Model):
         cascade='all, delete-orphan'
     )
 
+    def ping(self, modified_by):
+        self.last_modified = datetime.utcnow()
+        self.last_modified_by = modified_by.id
+        db.session.add(self)
+
     def safe_delete(self, modified_by):
         self.clean_up()
         self.show = False
         self.deleted = True
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.ping(modified_by=modified_by)
         db.session.add(self)
 
     def publish(self, modified_by):
@@ -1624,15 +1639,13 @@ class Announcement(db.Model):
                 if user.can(Permission.MANAGE):
                     send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         self.show = True
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.ping(modified_by=modified_by)
         db.session.add(self)
 
     def retract(self, modified_by):
         self.clean_up()
         self.show = False
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.ping(modified_by=modified_by)
         db.session.add(self)
 
     def notify(self, reader):
