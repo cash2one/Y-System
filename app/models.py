@@ -1182,7 +1182,7 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def update():
-        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [(iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()]))
+        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [{'name': lesson.name, 'exist': (iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None)} for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()]))
         pc_json = iPadContentJSON.query.get(1)
         if pc_json is not None:
             pc_json.json_string = json_string
