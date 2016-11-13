@@ -164,7 +164,7 @@
                     <a class="item loading-trigger" href="{{ url_for('auth.change_email_request') }}"><i class="at icon"></i> 修改邮箱</a>
                     <a class="item loading-trigger" href="{{ url_for('auth.change_password') }}"><i class="lock icon"></i> 修改密码</a>
                     <div class="divider"></div>
-                    <a class="item loading-trigger" href="{{ url_for('auth.logout') }}"><i class="sign out icon"></i> 注销</a>
+                    <a class="item loading-trigger" href="{{ url_for('auth.logout') }}"><i class="sign out icon"></i> 退出</a>
                 </div>
             </div>
             {% else %}
@@ -260,7 +260,7 @@
             </div>
         </div>
         <div class="divider"></div>
-        <a class="item loading-trigger" href="{{ url_for('auth.logout') }}"><i class="sign out icon"></i> 注销</a>
+        <a class="item loading-trigger" href="{{ url_for('auth.logout') }}"><i class="sign out icon"></i> 退出</a>
         {% else %}
         <a class="item loading-trigger" href="{{ url_for('auth.login') }}"><i class="sign in icon"></i> 登录</a>
         {% endif %}
@@ -364,7 +364,7 @@
                             <a class="item loading-trigger" href="{{ url_for('auth.change_email_request') }}"><i class="at icon"></i> 修改邮箱</a>
                             <a class="item loading-trigger" href="{{ url_for('auth.change_password') }}"><i class="lock icon"></i> 修改密码</a>
                             <div class="divider"></div>
-                            <a class="item loading-trigger" href="{{ url_for('auth.logout') }}"><i class="sign out icon"></i> 注销</a>
+                            <a class="item loading-trigger" href="{{ url_for('auth.logout') }}"><i class="sign out icon"></i> 退出</a>
                         </div>
                     </div>
                     {% else %}

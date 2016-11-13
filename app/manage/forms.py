@@ -317,7 +317,7 @@ class RentiPadForm(FlaskForm):
 
     def __init__(self, user, *args, **kwargs):
         super(RentiPadForm, self).__init__(*args, **kwargs)
-        self.ipad.choices = [(ipad.id, u'%s %s %s：%s' % (ipad.alias, ipad.state.name, ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in ipad.has_lessons]))) for ipad in user.fitted_ipads if ipad.state.name in [u'待机', u'候补']]
+        self.ipad.choices = [(ipad.id, u'%s %s %s %s：%s' % (ipad.alias, ipad.capacity.name, ipad.state.name, ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in ipad.has_lessons]))) for ipad in user.fitted_ipads if ipad.state.name in [u'待机', u'候补']]
 
 
 class RentalEmailForm(FlaskForm):
