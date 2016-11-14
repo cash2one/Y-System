@@ -3,11 +3,11 @@
 from datetime import datetime, date, time
 from sqlalchemy import or_
 import json
-from flask import render_template, redirect, url_for, flash, current_app, make_response, request, jsonify
+from flask import render_template, redirect, url_for, abort, flash, current_app, make_response, request, jsonify
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, ConfirmiPadFormWalkIn, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, DeleteUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, ConfirmiPadFormWalkIn, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
@@ -176,6 +176,8 @@ def history_booking():
 @permission_required(Permission.MANAGE_BOOKING)
 def set_booking_state_valid(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     if booking.schedule.full:
@@ -252,6 +254,8 @@ def set_booking_state_missed(user_id, schedule_id):
 @permission_required(Permission.MANAGE_BOOKING)
 def set_booking_state_canceled(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     candidate = booking.set_state(u'取消')
@@ -339,6 +343,8 @@ def schedule():
                 flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='warning')
             else:
                 period = Period.query.get_or_404(period_id)
+                if period.deleted:
+                    abort(404)
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time), category='error')
                 else:
@@ -528,6 +534,8 @@ def period():
 @permission_required(Permission.MANAGE_SCHEDULE)
 def edit_period(id):
     period = Period.query.get_or_404(id)
+    if period.deleted:
+        abort(404)
     form = EditPeriodForm()
     if form.validate_on_submit():
         start_time = time(*[int(x) for x in form.start_time.data.split(':')])
@@ -558,6 +566,8 @@ def edit_period(id):
 @permission_required(Permission.MANAGE_SCHEDULE)
 def delete_period(id):
     period = Period.query.get_or_404(id)
+    if period.deleted:
+        abort(404)
     form = DeletePeriodForm()
     if form.validate_on_submit():
         period.safe_delete(modified_by=current_user._get_current_object())
@@ -731,6 +741,8 @@ def other_ipads():
 @permission_required(Permission.MANAGE_IPAD)
 def edit_ipad(id):
     ipad = iPad.query.get_or_404(id)
+    if ipad.deleted:
+        abort(404)
     form = EditiPadForm(ipad=ipad)
     if form.validate_on_submit():
         ipad.alias = form.alias.data
@@ -767,6 +779,8 @@ def edit_ipad(id):
 @permission_required(Permission.MANAGE_IPAD)
 def delete_ipad(id):
     ipad = iPad.query.get_or_404(id)
+    if ipad.deleted:
+        abort(404)
     form = DeleteiPadForm(ipad=ipad)
     if form.validate_on_submit():
         ipad.safe_delete(modified_by=current_user._get_current_object())
@@ -832,7 +846,7 @@ def user():
         .join(Role, Role.id == User.role_id)\
         .filter(User.deleted == False)\
         .filter(or_(
-            Role.name == u'禁止预约',
+            Role.name == u'挂起',
             Role.name == u'单VB',
             Role.name == u'Y-GRE 普通',
             Role.name == u'Y-GRE VBx2',
@@ -851,7 +865,7 @@ def user():
         pagination_activations = Activation.query\
             .join(Role, Role.id == Activation.role_id)\
             .filter(or_(
-                Role.name == u'禁止预约',
+                Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
@@ -866,7 +880,7 @@ def user():
         pagination_activations = Activation.query\
             .join(Role, Role.id == Activation.role_id)\
             .filter(or_(
-                Role.name == u'禁止预约',
+                Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
@@ -904,6 +918,8 @@ def activations():
 @permission_required(Permission.MANAGE_USER)
 def edit_activation(id):
     activation = Activation.query.get_or_404(id)
+    if activation.deleted:
+        abort(404)
     if current_user.is_administrator:
         form = EditActivationFormAdmin()
     elif current_user.can(Permission.MANAGE_AUTH):
@@ -938,7 +954,9 @@ def edit_activation(id):
 @permission_required(Permission.MANAGE_USER)
 def delete_activation(id):
     activation = Activation.query.get_or_404(id)
-    form = DeleteActivationForm(activation=activation)
+    if activation.deleted:
+        abort(404)
+    form = DeleteActivationForm()
     if form.validate_on_submit():
         if activation.activated:
             flash(u'该账户已经激活，无法删除。', category='error')
@@ -954,6 +972,8 @@ def delete_activation(id):
 @permission_required(Permission.MANAGE_USER)
 def edit_user(id):
     user = User.query.get_or_404(id)
+    if user.deleted:
+        abort(404)
     form = EditUserForm(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
@@ -981,11 +1001,28 @@ def edit_user(id):
     return render_template('manage/edit_user.html', form=form, user=user)
 
 
+@manage.route('/user/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MANAGE_USER)
+def delete_user(id):
+    user = User.query.get_or_404(id)
+    if user.deleted:
+        abort(404)
+    form = DeleteUserForm()
+    if form.validate_on_submit():
+        user.safe_delete()
+        flash(u'已注销用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
+        return redirect(request.args.get('next') or url_for('manage.user'))
+    return render_template('manage/delete_user.html', form=form, user=user)
+
+
 @manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
 def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     form = EditPunchLessonForm()
     if form.validate_on_submit():
         return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=form.lesson.data, next=request.args.get('next')))
@@ -998,6 +1035,8 @@ def edit_punch_step_1(user_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def edit_punch_step_2(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = EditPunchSectionForm(lesson=lesson)
     if form.validate_on_submit():
@@ -1010,6 +1049,8 @@ def edit_punch_step_2(user_id, lesson_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def edit_punch_step_3(user_id, lesson_id, section_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
@@ -1047,7 +1088,8 @@ def find_user():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1057,7 +1099,7 @@ def find_user():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
@@ -1065,7 +1107,8 @@ def find_user():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1075,13 +1118,14 @@ def find_user():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
     form = FindUserForm()
     if form.validate_on_submit():
         name_or_email = form.name_or_email.data
@@ -1094,7 +1138,8 @@ def find_user():
                         User.name.like('%' + name_or_email + '%'),
                         User.email.like('%' + name_or_email + '%')
                     ))\
-                    .order_by(User.last_seen.desc())
+                    .order_by(User.last_seen.desc())\
+                    .limit(current_app.config['RECORD_PER_QUERY'])
             elif current_user.can(Permission.MANAGE_AUTH):
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
@@ -1104,7 +1149,7 @@ def find_user():
                         User.email.like('%' + name_or_email + '%')
                     ))\
                     .filter(or_(
-                        Role.name == u'禁止预约',
+                        Role.name == u'挂起',
                         Role.name == u'单VB',
                         Role.name == u'Y-GRE 普通',
                         Role.name == u'Y-GRE VBx2',
@@ -1112,7 +1157,8 @@ def find_user():
                         Role.name == u'协管员',
                         Role.name == u'管理员'
                     ))\
-                    .order_by(User.last_seen.desc())
+                    .order_by(User.last_seen.desc())\
+                    .limit(current_app.config['RECORD_PER_QUERY'])
             else:
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
@@ -1122,13 +1168,14 @@ def find_user():
                         User.email.like('%' + name_or_email + '%')
                     ))\
                     .filter(or_(
-                        Role.name == u'禁止预约',
+                        Role.name == u'挂起',
                         Role.name == u'单VB',
                         Role.name == u'Y-GRE 普通',
                         Role.name == u'Y-GRE VBx2',
                         Role.name == u'Y-GRE A权限'
                     ))\
-                    .order_by(User.last_seen.desc())
+                    .order_by(User.last_seen.desc())\
+                    .limit(current_app.config['RECORD_PER_QUERY'])
     form.name_or_email.data = name_or_email
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
 
@@ -1165,7 +1212,7 @@ def auth():
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == False)\
             .filter(or_(
-                Role.name == u'禁止预约',
+                Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
@@ -1202,6 +1249,8 @@ def auth_users():
 @permission_required(Permission.MANAGE_AUTH)
 def edit_auth(id):
     user = User.query.get_or_404(id)
+    if user.deleted:
+        abort(404)
     form = EditAuthForm(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
@@ -1252,7 +1301,7 @@ def auth_admin():
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == False)\
             .filter(or_(
-                Role.name == u'禁止预约',
+                Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
@@ -1291,6 +1340,8 @@ def auth_users_admin():
 @permission_required(Permission.ADMINISTER)
 def edit_auth_admin(id):
     user = User.query.get_or_404(id)
+    if user.deleted:
+        abort(404)
     form = EditAuthFormAdmin(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
@@ -1393,6 +1444,8 @@ def rental_rent_step_1():
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_rent_step_2(user_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=form.ipad.data))
@@ -1404,7 +1457,11 @@ def rental_rent_step_2(user_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_rent_step_3(user_id, ipad_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     ipad = iPad.query.get_or_404(ipad_id)
+    if ipad.deleted:
+        abort(404)
     form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
@@ -1444,6 +1501,8 @@ def rental_rent_step_1_alt():
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_rent_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=form.ipad.data))
@@ -1455,10 +1514,11 @@ def rental_rent_step_2_alt(user_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_rent_step_3_alt(user_id, ipad_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
-        flash(u'序列号为%s的iPad不存在，请重新选择' % ipad.serial, category='error')
-        return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user_id))
+        abort(404)
     form = ConfirmiPadFormWalkIn()
     if form.validate_on_submit():
         serial = form.serial.data
@@ -1522,6 +1582,8 @@ def rental_return_step_1():
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_return_step_2(user_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.rental_return_step_3', user_id=user_id, lesson_id=form.lesson.data))
@@ -1533,6 +1595,8 @@ def rental_return_step_2(user_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_return_step_3(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
@@ -1545,6 +1609,8 @@ def rental_return_step_3(user_id, lesson_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_return_step_4(user_id, lesson_id, section_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
@@ -1581,6 +1647,8 @@ def rental_return_step_1_alt():
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_return_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, lesson_id=form.lesson.data))
@@ -1592,6 +1660,8 @@ def rental_return_step_2_alt(user_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_return_step_3_alt(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
@@ -1604,6 +1674,8 @@ def rental_return_step_3_alt(user_id, lesson_id):
 @permission_required(Permission.MANAGE_RENTAL)
 def rental_return_step_4_alt(user_id, lesson_id, section_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
@@ -1682,6 +1754,8 @@ def retract_announcement(id):
 @permission_required(Permission.MANAGE_ANNOUNCE)
 def edit_announcement(id):
     announcement = Announcement.query.get_or_404(id)
+    if announcement.deleted:
+        abort(404)
     form = EditAnnouncementForm()
     if form.validate_on_submit():
         announcement.title = form.title.data
@@ -1709,6 +1783,8 @@ def edit_announcement(id):
 @permission_required(Permission.MANAGE_ANNOUNCE)
 def delete_announcement(id):
     announcement = Announcement.query.get_or_404(id)
+    if announcement.deleted:
+        abort(404)
     form = DeleteAnnouncementForm()
     if form.validate_on_submit():
         announcement.safe_delete(modified_by=current_user._get_current_object())
@@ -1731,7 +1807,8 @@ def suggest_user():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1741,7 +1818,7 @@ def suggest_user():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
@@ -1749,7 +1826,8 @@ def suggest_user():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1759,13 +1837,14 @@ def suggest_user():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
     return jsonify({'results': [user.to_json_suggestion() for user in users]})
 
 
@@ -1783,7 +1862,8 @@ def suggest_email():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1793,7 +1873,7 @@ def suggest_email():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
@@ -1801,7 +1881,8 @@ def suggest_email():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1811,13 +1892,14 @@ def suggest_email():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
     return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users]})
 
 
@@ -1835,7 +1917,8 @@ def search_user():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1845,7 +1928,7 @@ def search_user():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
@@ -1853,7 +1936,8 @@ def search_user():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
@@ -1863,11 +1947,12 @@ def search_user():
                     User.email.like('%' + name_or_email + '%')
                 ))\
                 .filter(or_(
-                    Role.name == u'禁止预约',
+                    Role.name == u'挂起',
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
                     Role.name == u'Y-GRE A权限'
                 ))\
-                .order_by(User.last_seen.desc())
+                .order_by(User.last_seen.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
     return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users]})

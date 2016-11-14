@@ -71,6 +71,8 @@ def profile():
 @permission_required(Permission.MANAGE)
 def profile_user(user_id):
     user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
     page = request.args.get('page', 1, type=int)
     punches = Punch.query\
         .filter_by(user_id=user.id)\

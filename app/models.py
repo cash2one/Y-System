@@ -44,7 +44,7 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = [
-            (u'禁止预约', Permission.FORBIDDEN, ),
+            (u'挂起', Permission.FORBIDDEN, ),
             (u'单VB', Permission.BOOK | Permission.BOOK_VB, ),
             (u'Y-GRE 普通', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE, ),
             (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
@@ -446,7 +446,7 @@ class User(UserMixin, db.Model):
     )
 
     def safe_delete(self):
-        self.role_id = Role.query.filter_by(name=u'禁止预约').first()
+        self.role_id = Role.query.filter_by(name=u'挂起').first().id
         self.deleted = True
         db.session.add(self)
 
