@@ -19,69 +19,6 @@ $(document)
             .form({
                 onSuccess: submitForm,
                 fields: {
-                    root: {
-                        identifier  : 'root',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认引导式访问状态正常'
-                            }
-                        ]
-                    },
-                    battery: {
-                        identifier  : 'battery',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认电量充足'
-                            }
-                        ]
-                    },
-                    volume: {
-                        identifier  : 'volume',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认音量已经复位'
-                            }
-                        ]
-                    },
-                    brightness: {
-                        identifier  : 'brightness',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认亮度已经复位'
-                            }
-                        ]
-                    },
-                    playback_speed: {
-                        identifier  : 'playback_speed',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认播放速度已经复位'
-                            }
-                        ]
-                    },
-                    show_menu: {
-                        identifier  : 'show_menu',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认画面停留在目录状态'
-                            }
-                        ]
-                    },
-                    clean: {
-                        identifier  : 'clean',
-                        rules: [
-                            {
-                                type   : 'checked',
-                                prompt : '请确认屏幕已清洁'
-                            }
-                        ]
-                    },
                     serial: {
                         identifier  : 'serial',
                         rules: [
@@ -91,6 +28,28 @@ $(document)
                             }
                         ]
                     },
+                    battery_life: {
+                        identifier  : 'battery_life',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请输入iPad剩余电量'
+                            },
+                            {
+                                type   : 'integer[0..100]',
+                                prompt : '电量数值超出范围（0 ~ 100）'
+                            }
+                        ]
+                    },
+                    root: {
+                        identifier  : 'root',
+                        rules: [
+                            {
+                                type   : 'checked',
+                                prompt : '请确认引导式访问状态正常'
+                            }
+                        ]
+                    }
                 }
             })
         ;

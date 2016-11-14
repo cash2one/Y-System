@@ -96,6 +96,13 @@
                     <div class="label">次</div>
                 </div>
             </div>
+            <div class="column">
+                <div class="ui statistic">
+                    <div class="label">未预约到场</div>
+                    <div class="value">{{ user.walk_in_rentals.count() }}</div>
+                    <div class="label">次</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -189,7 +196,7 @@
                                 {% endif %}
                                 {{ booking.state.name }}
                                 {% if booking.waited %}
-                                <div class="ui teal label">{{ booking.queue_position }}</div>
+                                <div class="ui teal circular label">{{ booking.queue_position }}</div>
                                 {% endif %}
                             </td>
                             <td>

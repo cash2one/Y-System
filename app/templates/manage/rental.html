@@ -52,6 +52,7 @@
                             <th>iPad</th>
                             <th>借出时间</th>
                             <th>借出经办人</th>
+                            <th>是否提前预约</th>
                             <th>归还时间</th>
                             <th>归还经办人</th>
                             <th>状态</th>
@@ -73,6 +74,11 @@
                                 <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ rental.rent_agent.name }}</td>
+                            {% if rental.walk_in %}
+                            <td class="negative">否</td>
+                            {% else %}
+                            <td class="positive">是</td>
+                            {% endif %}
                             {% if rental.returned %}
                             <td>
                                 <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>

@@ -23,7 +23,9 @@ class Config:
     YSYS_SLOW_DB_QUERY_TIME=0.5
     UTC_OFFSET = 8
     RECORD_PER_PAGE = 20
+    RECORD_PER_QUERY = 50
     TOLERATE_MINUTES = 15
+
 
 
     @staticmethod

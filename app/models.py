@@ -44,7 +44,7 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = [
-            (u'禁止预约', Permission.FORBIDDEN, ),
+            (u'挂起', Permission.FORBIDDEN, ),
             (u'单VB', Permission.BOOK | Permission.BOOK_VB, ),
             (u'Y-GRE 普通', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE, ),
             (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
@@ -352,6 +352,7 @@ class Rental(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'))
     date = db.Column(db.Date, default=date.today())
+    walk_in = db.Column(db.Boolean, default=False)
     returned = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
     rent_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -387,6 +388,7 @@ class User(UserMixin, db.Model):
     confirmed = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    deleted = db.Column(db.Boolean, default=False)
     registered = db.relationship(
         'Registration',
         foreign_keys=[Registration.user_id],
@@ -442,6 +444,11 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self):
+        self.role_id = Role.query.filter_by(name=u'挂起').first().id
+        self.deleted = True
+        db.session.add(self)
 
     @property
     def password(self):
@@ -725,6 +732,10 @@ class User(UserMixin, db.Model):
             .filter(BookingState.name == u'取消')
 
     @property
+    def walk_in_rentals(self):
+        return Rental.query.filter_by(user_id=self.id, walk_in=True)
+
+    @property
     def fitted_ipads(self):
         return iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
@@ -794,7 +805,7 @@ class User(UserMixin, db.Model):
         if admin is None:
             admin = User(
                 email=current_app.config['YSYS_ADMIN'],
-                name=u'系统管理员',
+                name=u'Admin',
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD']
             )
@@ -1074,6 +1085,7 @@ class iPadCapacity(db.Model):
             (u'32GB', ),
             (u'64GB', ),
             (u'128GB', ),
+            (u'256GB', ),
         ]
         for PC in ipad_capacities:
             ipad_capacity = iPadCapacity.query.filter_by(name=PC[0]).first()
@@ -1212,6 +1224,9 @@ class iPad(db.Model):
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
+    video_playback = db.Column(db.Time, default=time(10, 0))
+    battery_life = db.Column(db.Integer, default=100)
+    last_charged = db.Column(db.DateTime, default=datetime.utcnow)
     last_modified = db.Column(db.DateTime, default=datetime.utcnow)
     last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
@@ -1234,8 +1249,11 @@ class iPad(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def set_state(self, state_name, modified_by):
+    def set_state(self, state_name, modified_by, battery_life=None):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
+        if battery_life:
+            self.battery_life = battery_life
+            self.last_charged = datetime.utcnow()
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
@@ -1288,6 +1306,36 @@ class iPad(db.Model):
         return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
 
     @property
+    def video_playback_alias(self):
+        if self.video_playback.minute == 0:
+            return u'%s小时' % unicode(self.video_playback.hour)
+        else:
+            return u'%s.5小时' % unicode(self.video_playback.hour)
+
+    @property
+    def current_battery_life(self):
+        delta = datetime.utcnow() - self.last_charged
+        current_battery_life = self.battery_life - int(delta.total_seconds() / (((self.video_playback.hour * 60) + self.video_playback.minute) * 60 + self.video_playback.second + (self.video_playback.microsecond / 10**6)) * 100)
+        if current_battery_life < 0:
+            return 0
+        if current_battery_life > 100:
+            return 100
+        return current_battery_life
+
+    @property
+    def current_battery_life_level(self):
+        if self.current_battery_life <= 10:
+            return u'empty'
+        elif self.current_battery_life > 10 and self.current_battery_life <= 35:
+            return u'low'
+        elif self.current_battery_life > 35 and self.current_battery_life <= 65:
+            return u'medium'
+        elif self.current_battery_life > 65 and self.current_battery_life <= 90:
+            return u'high'
+        elif self.current_battery_life > 90 and self.current_battery_life <= 100:
+            return u'full'
+
+    @property
     def now_rented_by(self):
         return User.query\
             .join(Rental, Rental.user_id == User.id)\
@@ -1307,6 +1355,10 @@ class iPad(db.Model):
         }
         if self.state.name == u'借出':
             ipad_json['now_rented_by'] = self.now_rented_by.to_json()
+            ipad_json['battery_life'] = {
+                'percent': self.current_battery_life,
+                'level': self.current_battery_life_level,
+            }
         return ipad_json
 
     @staticmethod
@@ -1545,6 +1597,10 @@ class Punch(db.Model):
     def alias2(self):
         return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.section.name)
 
+    @property
+    def alias3(self):
+        return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
+
     def to_json(self):
         punch_json = {
             'user': self.user.name,
@@ -1553,6 +1609,7 @@ class Punch(db.Model):
             'section': self.section.name,
             'alias': self.alias,
             'alias2': self.alias2,
+            'alias3': self.alias3,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json

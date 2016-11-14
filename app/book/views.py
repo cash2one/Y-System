@@ -71,7 +71,7 @@ def book_vb(schedule_id):
     if same_day_bookings >= 2 and not current_user.can(Permission.BOOK_ANY):
         flash(u'您当天已经预约过%d节VB课程，不要太贪心哦~' % same_day_bookings, category='warning')
         return redirect(url_for('book.vb', page=request.args.get('page')))
-    elif same_day_bookings >= 1 and not current_user.can(Permission.BOOK_VB_2):
+    elif same_day_bookings >= 1 and not (current_user.can(Permission.BOOK_VB_2) or current_user.can(Permission.BOOK_ANY)):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     current_user.book(schedule, u'预约')
@@ -120,7 +120,7 @@ def wait_vb(schedule_id):
     if same_day_bookings >= 2 and not current_user.can(Permission.BOOK_ANY):
         flash(u'您当天已经预约过%d节VB课程，不要太贪心哦~' % same_day_bookings, category='warning')
         return redirect(url_for('book.vb', page=request.args.get('page')))
-    elif same_day_bookings >= 1 and not current_user.can(Permission.BOOK_VB_2):
+    elif same_day_bookings >= 1 and not (current_user.can(Permission.BOOK_VB_2) or current_user.can(Permission.BOOK_ANY)):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
         return redirect(url_for('book.vb', page=request.args.get('page')))
     current_user.book(schedule, u'排队')
