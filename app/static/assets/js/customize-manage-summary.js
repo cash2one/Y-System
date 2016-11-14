@@ -162,4 +162,4 @@ function updateCards() {
     });
 };
 updateCards();
-// setInterval(updateCards, 15000);
+setInterval(updateCards, 15000);
