@@ -46,57 +46,24 @@
                     <div class="column">
                         <form id="confirm-ipad" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <div class="two fields">
-                                <div class="field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.root() }}
-                                        {{ form.root.label() }}
-                                    </div>
+                            <div class="fields">
+                                <div class="ten wide field">
+                                    {{ form.serial.label() }}
+                                    {{ form.serial(placeholder='iPad序列号') }}
                                 </div>
-                                <div class="field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.battery() }}
-                                        {{ form.battery.label() }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="two fields">
-                                <div class="field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.volume() }}
-                                        {{ form.volume.label() }}
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.brightness() }}
-                                        {{ form.brightness.label() }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="two fields">
-                                <div class="field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.playback_speed() }}
-                                        {{ form.playback_speed.label() }}
-                                    </div>
-                                </div>
-                                <div class="field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.show_menu() }}
-                                        {{ form.show_menu.label() }}
+                                <div class="six wide field">
+                                    {{ form.battery_life.label() }}
+                                    <div class="ui right labeled input">
+                                        {{ form.battery_life(placeholder='0 ~ 100') }}
+                                        <div class="ui basic label">%</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="field">
                                 <div class="ui toggle checkbox">
-                                    {{ form.clean() }}
-                                    {{ form.clean.label() }}
+                                    {{ form.root() }}
+                                    {{ form.root.label() }}
                                 </div>
-                            </div>
-                            <div class="field">
-                                {{ form.serial.label() }}
-                                {{ form.serial(placeholder='iPad序列号') }}
                             </div>
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_2', user_id=user.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}

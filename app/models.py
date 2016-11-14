@@ -248,6 +248,7 @@ class BookingState(db.Model):
             (u'赴约', ),
             (u'迟到', ),
             (u'爽约', ),
+            (u'空降', ),
             (u'取消', ),
         ]
         for BS in booking_states:
@@ -334,6 +335,10 @@ class Booking(db.Model):
         return self.state.name == u'爽约'
 
     @property
+    def walk_in(self):
+        return self.state.name == u'空降'
+
+    @property
     def canceled(self):
         return self.state.name == u'取消'
 
@@ -387,6 +392,7 @@ class User(UserMixin, db.Model):
     confirmed = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    deleted = db.Column(db.Boolean, default=False)
     registered = db.relationship(
         'Registration',
         foreign_keys=[Registration.user_id],
@@ -442,6 +448,11 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def safe_delete(self):
+        self.role_id = Role.query.filter_by(name=u'禁止预约').first()
+        self.deleted = True
+        db.session.add(self)
 
     @property
     def password(self):
@@ -794,7 +805,7 @@ class User(UserMixin, db.Model):
         if admin is None:
             admin = User(
                 email=current_app.config['YSYS_ADMIN'],
-                name=u'系统管理员',
+                name=u'Admin',
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD']
             )
@@ -1074,6 +1085,7 @@ class iPadCapacity(db.Model):
             (u'32GB', ),
             (u'64GB', ),
             (u'128GB', ),
+            (u'256GB', ),
         ]
         for PC in ipad_capacities:
             ipad_capacity = iPadCapacity.query.filter_by(name=PC[0]).first()
@@ -1212,6 +1224,9 @@ class iPad(db.Model):
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
+    video_playback = db.Column(db.Time, default=time(10, 0))
+    battery_life = db.Column(db.Integer, default=100)
+    last_charged = db.Column(db.DateTime, default=datetime.utcnow)
     last_modified = db.Column(db.DateTime, default=datetime.utcnow)
     last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
@@ -1234,8 +1249,11 @@ class iPad(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def set_state(self, state_name, modified_by):
+    def set_state(self, state_name, battery_life, modified_by):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
+        if battery_life:
+            self.battery_life = battery_life
+            self.last_charged = datetime.utcnow()
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
@@ -1286,6 +1304,23 @@ class iPad(db.Model):
     def y_gre_lesson_ids_included(self):
         y_gre_lessons = self.has_y_gre_lessons
         return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
+
+    @property
+    def video_playback_alias(self):
+        if self.video_playback.minute == 0:
+            return u'%s小时' % unicode(self.video_playback.hour)
+        else:
+            return u'%s.5小时' % unicode(self.video_playback.hour)
+
+    @property
+    def current_battery_life(self):
+        delta = datetime.utcnow() - self.last_charged
+        current_battery_life = self.battery_life - int(delta.total_seconds() / (((self.video_playback.hour * 60) + self.video_playback.minute) * 60 + self.video_playback.second + self.video_playback.microsecond / 10**6))
+        if current_battery_life < 0:
+            return 0
+        if current_battery_life > 100:
+            return 100
+        return current_battery_life
 
     @property
     def now_rented_by(self):

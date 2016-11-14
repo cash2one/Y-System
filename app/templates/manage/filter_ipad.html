@@ -43,6 +43,7 @@
                             <th>编号</th>
                             <th>序列号</th>
                             <th>容量</th>
+                            <th>额定电量</th>
                             <th>VB内容</th>
                             <th>Y-GRE内容</th>
                             <th>房间</th>
@@ -60,17 +61,18 @@
                             <td>{{ ipad.alias }}</td>
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
+                            <td>{{ ipad.video_playback_alias }}</td>
                             <td>
                                 {% for lesson in ipad.has_lessons %}
                                 {% if lesson.type.name == 'VB' %}
-                                <div class="ui teal label">{{ lesson.name }}</div>
+                                <div class="ui blue circular label">{{ lesson.name }}</div>
                                 {% endif%}
                                 {% endfor %}
                             </td>
                             <td>
                                 {% for lesson in ipad.has_lessons %}
                                 {% if lesson.type.name == 'Y-GRE' %}
-                                <div class="ui orange label">{{ lesson.name }}</div>
+                                <div class="ui teal circular label">{{ lesson.name }}</div>
                                 {% endif%}
                                 {% endfor %}
                             </td>

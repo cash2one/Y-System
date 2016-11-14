@@ -37,7 +37,7 @@ def login():
         return redirect(request.args.get('next') or url_for('main.profile'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data, deleted=False).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             # flash(u'欢迎登录云英语教育服务支撑系统！', category='info')

@@ -1,13 +1,13 @@
 """initial
 
-Revision ID: b8a99a06e8c8
+Revision ID: 0f83108dcd90
 Revises: None
-Create Date: 2016-11-08 22:34:12.886393
+Create Date: 2016-11-14 17:02:23.792311
 
 """
 
 # revision identifiers, used by Alembic.
-revision = 'b8a99a06e8c8'
+revision = '0f83108dcd90'
 down_revision = None
 
 from alembic import op
@@ -90,6 +90,7 @@ def upgrade():
     sa.Column('confirmed', sa.Boolean(), nullable=True),
     sa.Column('member_since', sa.DateTime(), nullable=True),
     sa.Column('last_seen', sa.DateTime(), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -116,6 +117,9 @@ def upgrade():
     sa.Column('capacity_id', sa.Integer(), nullable=True),
     sa.Column('room_id', sa.Integer(), nullable=True),
     sa.Column('state_id', sa.Integer(), nullable=True),
+    sa.Column('video_playback', sa.Time(), nullable=True),
+    sa.Column('battery_life', sa.Integer(), nullable=True),
+    sa.Column('last_charged', sa.DateTime(), nullable=True),
     sa.Column('last_modified', sa.DateTime(), nullable=True),
     sa.Column('last_modified_by', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),

@@ -27,13 +27,13 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui label">{{ maintain_num }}</div>
+                        <div class="ui circular label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui label">{{ charge_num }}</div>
+                        <div class="ui circular label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
@@ -45,13 +45,13 @@
                     <a class="item active loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui red label">{{ maintain_num }}</div>
+                        <div class="ui red circular label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui label">{{ charge_num }}</div>
+                        <div class="ui circular label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
@@ -63,13 +63,13 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui label">{{ maintain_num }}</div>
+                        <div class="ui circular label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item active loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui green label">{{ charge_num }}</div>
+                        <div class="ui green circular label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
@@ -81,13 +81,13 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui label">{{ maintain_num }}</div>
+                        <div class="ui circular label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui label">{{ charge_num }}</div>
+                        <div class="ui circular label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item active loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
@@ -99,13 +99,13 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui label">{{ maintain_num }}</div>
+                        <div class="ui circular label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui label">{{ charge_num }}</div>
+                        <div class="ui circular label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
@@ -117,13 +117,13 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui label">{{ maintain_num }}</div>
+                        <div class="ui circular label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui label">{{ charge_num }}</div>
+                        <div class="ui circular label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
                     <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
@@ -137,6 +137,7 @@
                             <th>编号</th>
                             <th>序列号</th>
                             <th>容量</th>
+                            <th>额定电量</th>
                             <th>VB内容</th>
                             <th>Y-GRE内容</th>
                             <th>状态</th>
@@ -151,11 +152,12 @@
                             <td>{{ ipad.alias }}</td>
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
+                            <td>{{ ipad.video_playback_alias }}</td>
                             <td>
                                 {% with lessons = ipad.has_vb_lessons %}
                                 {% if lessons.count() %}
                                 {% for lesson in lessons %}
-                                <div class="ui teal label">{{ lesson.name }}</div>
+                                <div class="ui blue circular label">{{ lesson.name }}</div>
                                 {% endfor %}
                                 {% else %}
                                 无
@@ -166,7 +168,7 @@
                                 {% with lessons = ipad.has_y_gre_lessons %}
                                 {% if lessons.count() %}
                                 {% for lesson in lessons %}
-                                <div class="ui orange label">{{ lesson.name }}</div>
+                                <div class="ui teal circular label">{{ lesson.name }}</div>
                                 {% endfor %}
                                 {% else %}
                                 无
@@ -205,23 +207,29 @@
                 <form id="new-ipad" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="three wide field">
+                        <div class="four wide field">
                             {{ form.alias.label() }}
                             {{ form.alias(placeholder='编号') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="twelve wide field">
                             {{ form.serial.label() }}
                             {{ form.serial(placeholder='序列号') }}
                         </div>
-                        <div class="three wide field">
+                    </div>
+                    <div class="fields">
+                        <div class="four wide field">
                             {{ form.capacity.label() }}
                             {{ form.capacity(class='ui dropdown') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
                             {{ form.room.label() }}
                             {{ form.room(class='ui dropdown') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
+                            {{ form.video_playback.label() }}
+                            {{ form.video_playback(class='ui dropdown') }}
+                        </div>
+                        <div class="four wide field">
                             {{ form.state.label() }}
                             {{ form.state(class='ui dropdown') }}
                         </div>

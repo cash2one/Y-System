@@ -830,6 +830,7 @@ def user():
         show_activations = bool(request.cookies.get('show_activations', ''))
     pagination_users = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.deleted == False)\
         .filter(or_(
             Role.name == u'禁止预约',
             Role.name == u'单VB',
@@ -1039,6 +1040,7 @@ def find_user():
         if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1047,6 +1049,7 @@ def find_user():
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1064,6 +1067,7 @@ def find_user():
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1083,6 +1087,7 @@ def find_user():
             if current_user.is_administrator:
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
+                    .filter(User.deleted == False)\
                     .filter(or_(
                         User.name.like('%' + name_or_email + '%'),
                         User.email.like('%' + name_or_email + '%')
@@ -1091,6 +1096,7 @@ def find_user():
             elif current_user.can(Permission.MANAGE_AUTH):
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
+                    .filter(User.deleted == False)\
                     .filter(or_(
                         User.name.like('%' + name_or_email + '%'),
                         User.email.like('%' + name_or_email + '%')
@@ -1108,6 +1114,7 @@ def find_user():
             else:
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
+                    .filter(User.deleted == False)\
                     .filter(or_(
                         User.name.like('%' + name_or_email + '%'),
                         User.email.like('%' + name_or_email + '%')
@@ -1145,6 +1152,7 @@ def auth():
     if show_auth_managers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.deleted == False)\
             .filter(or_(
                 Role.name == u'协管员',
                 Role.name == u'管理员'
@@ -1153,6 +1161,7 @@ def auth():
     if show_auth_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.deleted == False)\
             .filter(or_(
                 Role.name == u'禁止预约',
                 Role.name == u'单VB',
@@ -1231,6 +1240,7 @@ def auth_admin():
     if show_auth_managers_admin:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.deleted == False)\
             .filter(or_(
                 Role.name == u'开发人员'
             ))\
@@ -1238,6 +1248,7 @@ def auth_admin():
     if show_auth_users_admin:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.deleted == False)\
             .filter(or_(
                 Role.name == u'禁止预约',
                 Role.name == u'单VB',
@@ -1418,7 +1429,7 @@ def rental_rent_step_3(user_id, ipad_id):
 def rental_rent_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_rent_step_1_alt'))
@@ -1460,7 +1471,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
         rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
         db.session.add(rental)
-        ipad.set_state(u'借出', modified_by=current_user._get_current_object())
+        ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3_alt.html', user=user, ipad=ipad, form=form)
@@ -1555,7 +1566,7 @@ def rental_return_step_4(user_id, lesson_id, section_id):
 def rental_return_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_return_step_1_alt'))
@@ -1713,6 +1724,7 @@ def suggest_user():
         if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1721,6 +1733,7 @@ def suggest_user():
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1738,6 +1751,7 @@ def suggest_user():
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1762,6 +1776,7 @@ def suggest_email():
         if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1770,6 +1785,7 @@ def suggest_email():
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1787,6 +1803,7 @@ def suggest_email():
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1811,6 +1828,7 @@ def search_user():
         if current_user.is_administrator:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1819,6 +1837,7 @@ def search_user():
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
@@ -1836,6 +1855,7 @@ def search_user():
         else:
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
+                .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')

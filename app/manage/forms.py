@@ -73,6 +73,7 @@ class NewiPadForm(FlaskForm):
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
+    video_playback = SelectField(u'满电量可播放视频时间', coerce=unicode)
     vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
     submit = SubmitField(u'提交')
@@ -82,6 +83,7 @@ class NewiPadForm(FlaskForm):
         self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(0, u'无')] + [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
+        self.video_playback.choices = [(NextHalfHourString(x, startHour=0), NextHalfHourString(x, startHour=0), ) for x in range(20, 0, -1)]
         self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
 
@@ -96,6 +98,7 @@ class EditiPadForm(FlaskForm):
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
+    video_playback = SelectField(u'满电量可播放视频时间', coerce=unicode)
     vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
     submit = SubmitField(u'提交')
@@ -105,6 +108,7 @@ class EditiPadForm(FlaskForm):
         self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(0, u'无')] + [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all()  if state.name not in [u'借出']]
+        self.video_playback.choices = [(NextHalfHourString(x, startHour=0), NextHalfHourString(x, startHour=0), ) for x in range(20, 0, -1)]
         self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
         self.ipad = ipad
@@ -326,26 +330,16 @@ class RentalEmailForm(FlaskForm):
 
 
 class ConfirmiPadForm(FlaskForm):
-    root = BooleanField(u'引导式访问状态正常')
-    battery = BooleanField(u'电量充足')
-    volume = BooleanField(u'音量已经复位')
-    brightness = BooleanField(u'亮度已经复位')
-    playback_speed = BooleanField(u'播放速度已经复位')
-    show_menu = BooleanField(u'画面停留在目录状态')
-    clean = BooleanField(u'屏幕已清洁')
     serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
+    battery_life = IntegerField(u'剩余电量', validators=[Required(message=u'请输入iPad电量'), NumberRange(min=0, max=100)])
+    root = BooleanField(u'引导式访问状态正常')
     submit = SubmitField(u'确认并提交')
 
 
 class iPadSerialForm(FlaskForm):
+    serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
     root = BooleanField(u'引导式访问状态正常')
     battery = BooleanField(u'电量充足')
-    volume = BooleanField(u'音量已经复位')
-    brightness = BooleanField(u'亮度已经复位')
-    playback_speed = BooleanField(u'播放速度已经复位')
-    show_menu = BooleanField(u'画面停留在目录状态')
-    clean = BooleanField(u'屏幕已清洁')
-    serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
     submit = SubmitField(u'下一步')
 
 
