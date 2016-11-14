@@ -1356,7 +1356,7 @@ class iPad(db.Model):
         if self.state.name == u'借出':
             ipad_json['now_rented_by'] = self.now_rented_by.to_json()
             ipad_json['battery_life'] = {
-                'percent': u'%g%%' % self.current_battery_life,
+                'percent': self.current_battery_life,
                 'level': self.current_battery_life_level,
             }
         return ipad_json
