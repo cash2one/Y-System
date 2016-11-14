@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, flash, current_app, make_r
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, ConfirmiPadFormWalkIn, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
@@ -1459,7 +1459,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
     if ipad.deleted:
         flash(u'序列号为%s的iPad不存在，请重新选择' % ipad.serial, category='error')
         return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user_id))
-    form = ConfirmiPadForm()
+    form = ConfirmiPadFormWalkIn()
     if form.validate_on_submit():
         serial = form.serial.data
         if serial != ipad.serial:
@@ -1471,7 +1471,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
-        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id, walk_in=form.walk_in.data)
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')

@@ -1,13 +1,13 @@
 """initial
 
-Revision ID: 0f83108dcd90
+Revision ID: ffe330b61c2b
 Revises: None
-Create Date: 2016-11-14 17:02:23.792311
+Create Date: 2016-11-14 23:58:47.047478
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '0f83108dcd90'
+revision = 'ffe330b61c2b'
 down_revision = None
 
 from alembic import op
@@ -207,6 +207,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('ipad_id', sa.Integer(), nullable=True),
     sa.Column('date', sa.Date(), nullable=True),
+    sa.Column('walk_in', sa.Boolean(), nullable=True),
     sa.Column('returned', sa.Boolean(), nullable=True),
     sa.Column('rent_time', sa.DateTime(), nullable=True),
     sa.Column('rent_agent_id', sa.Integer(), nullable=True),

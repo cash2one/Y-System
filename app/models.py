@@ -248,7 +248,6 @@ class BookingState(db.Model):
             (u'赴约', ),
             (u'迟到', ),
             (u'爽约', ),
-            (u'空降', ),
             (u'取消', ),
         ]
         for BS in booking_states:
@@ -335,10 +334,6 @@ class Booking(db.Model):
         return self.state.name == u'爽约'
 
     @property
-    def walk_in(self):
-        return self.state.name == u'空降'
-
-    @property
     def canceled(self):
         return self.state.name == u'取消'
 
@@ -357,6 +352,7 @@ class Rental(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'))
     date = db.Column(db.Date, default=date.today())
+    walk_in = db.Column(db.Boolean, default=False)
     returned = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
     rent_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -734,6 +730,10 @@ class User(UserMixin, db.Model):
             .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.user_id == self.id)\
             .filter(BookingState.name == u'取消')
+
+    @property
+    def walk_in_rentals(self):
+        return Rental.query.filter_by(user_id=self.id, walk_in=True)
 
     @property
     def fitted_ipads(self):
