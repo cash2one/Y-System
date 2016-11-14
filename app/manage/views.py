@@ -916,6 +916,8 @@ def edit_activation(id):
         activation.role_id = form.role.data
         activation.vb_course_id = form.vb_course.data
         activation.y_gre_course_id = form.y_gre_course.data
+        activation.inviter_id = current_user.id
+        activation.timestamp = datetime.utcnow()
         if activation.activated:
             flash(u'该账户已经激活，不能更新。', category='error')
             return redirect(url_for('manage.user'))

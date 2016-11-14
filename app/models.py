@@ -1249,7 +1249,7 @@ class iPad(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def set_state(self, state_name, battery_life, modified_by):
+    def set_state(self, state_name, modified_by, battery_life=None):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
         if battery_life:
             self.battery_life = battery_life
@@ -1315,12 +1315,25 @@ class iPad(db.Model):
     @property
     def current_battery_life(self):
         delta = datetime.utcnow() - self.last_charged
-        current_battery_life = self.battery_life - int(delta.total_seconds() / (((self.video_playback.hour * 60) + self.video_playback.minute) * 60 + self.video_playback.second + self.video_playback.microsecond / 10**6))
+        current_battery_life = self.battery_life - int(delta.total_seconds() / (((self.video_playback.hour * 60) + self.video_playback.minute) * 60 + self.video_playback.second + (self.video_playback.microsecond / 10**6)) * 100)
         if current_battery_life < 0:
             return 0
         if current_battery_life > 100:
             return 100
         return current_battery_life
+
+    @property
+    def current_battery_life_level(self):
+        if self.current_battery_life <= 10:
+            return u'empty'
+        elif self.current_battery_life > 10 and self.current_battery_life <= 35:
+            return u'low'
+        elif self.current_battery_life > 35 and self.current_battery_life <= 65:
+            return u'medium'
+        elif self.current_battery_life > 65 and self.current_battery_life <= 90:
+            return u'high'
+        elif self.current_battery_life > 90 and self.current_battery_life <= 100:
+            return u'full'
 
     @property
     def now_rented_by(self):
@@ -1342,6 +1355,10 @@ class iPad(db.Model):
         }
         if self.state.name == u'借出':
             ipad_json['now_rented_by'] = self.now_rented_by.to_json()
+            ipad_json['battery_life'] = {
+                'percent': u'%g%%' % self.current_battery_life,
+                'level': self.current_battery_life_level,
+            }
         return ipad_json
 
     @staticmethod
@@ -1580,6 +1597,10 @@ class Punch(db.Model):
     def alias2(self):
         return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.section.name)
 
+    @property
+    def alias3(self):
+        return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
+
     def to_json(self):
         punch_json = {
             'user': self.user.name,
@@ -1588,6 +1609,7 @@ class Punch(db.Model):
             'section': self.section.name,
             'alias': self.alias,
             'alias2': self.alias2,
+            'alias3': self.alias3,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json
