@@ -363,17 +363,19 @@ def schedule():
         show_history_schedule = bool(request.cookies.get('show_history_schedule', ''))
     if show_today_schedule:
         query = Schedule.query\
-            .filter(Schedule.date == date.today())
+            .filter(Schedule.date == date.today())\
+            .order_by(Schedule.period_id.asc())
     if show_future_schedule:
         query = Schedule.query\
-            .filter(Schedule.date > date.today())
+            .filter(Schedule.date > date.today())\
+            .order_by(Schedule.date.asc())\
+            .order_by(Schedule.period_id.asc())\
     if show_history_schedule:
         query = Schedule.query\
-            .filter(Schedule.date < date.today())
-    pagination = query\
-        .order_by(Schedule.date.desc())\
-        .order_by(Schedule.period_id.asc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+            .filter(Schedule.date < date.today())\
+            .order_by(Schedule.date.desc())\
+            .order_by(Schedule.period_id.asc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     return render_template('manage/schedule.html', form=form, schedules=schedules, show_today_schedule=show_today_schedule, show_future_schedule=show_future_schedule, show_history_schedule=show_history_schedule, pagination=pagination)
 
