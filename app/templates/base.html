@@ -153,7 +153,11 @@
             {% if current_user.is_authenticated %}
             <div class="ui right dropdown item">
                 <i class="user icon"></i>
+                {% if current_user.can(Permission.MANAGE) %}
                 {{ current_user.name }} [{{ current_user.role.name }}]
+                {% else %}
+                {{ current_user.name }}
+                {% endif %}
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     {% if current_user.can(Permission.MANAGE) %}
@@ -353,7 +357,11 @@
                     {% if current_user.is_authenticated %}
                     <div class="ui right dropdown item">
                         <i class="user icon"></i>
+                        {% if current_user.can(Permission.MANAGE) %}
                         {{ current_user.name }} [{{ current_user.role.name }}]
+                        {% else %}
+                        {{ current_user.name }}
+                        {% endif %}
                         <i class="dropdown icon"></i>
                         <div class="menu">
                             {% if current_user.can(Permission.MANAGE) %}
@@ -394,7 +402,7 @@
                     <div class="three wide column">
                         <h4 class="ui inverted header">关于我们</h4>
                         <div class="ui inverted link list">
-                            <a id="contacts-footer-link" class="item"><i class="fa fa-phone fa-fw"></i> 联系我们</a>
+                            <a id="contacts-footer-link" class="item"><i class="fa fa-phone fa-fw"></i> 400-876-3898</a>
                             <div id="contacts-dimmer" class="ui page dimmer">
                                 <div class="content">
                                     <div class="ui center list">

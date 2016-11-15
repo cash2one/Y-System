@@ -818,7 +818,7 @@ def ipad_contents():
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def user():
-    if current_user.is_administrator:
+    if current_user.is_administrator():
         form = NewActivationFormAdmin()
     elif current_user.can(Permission.MANAGE_AUTH):
         form = NewActivationFormAuth()
@@ -855,7 +855,7 @@ def user():
         .order_by(User.last_seen.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination_users.items
-    if current_user.is_administrator:
+    if current_user.is_administrator():
         pagination_activations = Activation.query\
             .join(Role, Role.id == Activation.role_id)\
             .filter(Activation.deleted == False)\
@@ -920,7 +920,7 @@ def edit_activation(id):
     activation = Activation.query.get_or_404(id)
     if activation.deleted:
         abort(404)
-    if current_user.is_administrator:
+    if current_user.is_administrator():
         form = EditActivationFormAdmin()
     elif current_user.can(Permission.MANAGE_AUTH):
         form = EditActivationFormAuth()
@@ -974,6 +974,8 @@ def edit_user(id):
     user = User.query.get_or_404(id)
     if user.deleted:
         abort(404)
+    if user.is_superior_than(user=current_user._get_current_object()):
+        abort(403)
     form = EditUserForm(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
@@ -1008,6 +1010,8 @@ def delete_user(id):
     user = User.query.get_or_404(id)
     if user.deleted:
         abort(404)
+    if user.is_superior_than(user=current_user._get_current_object()):
+        abort(403)
     form = DeleteUserForm()
     if form.validate_on_submit():
         user.safe_delete()
@@ -1080,7 +1084,7 @@ def find_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_administrator:
+        if current_user.is_administrator():
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -1122,7 +1126,8 @@ def find_user():
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限'
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员'
                 ))\
                 .order_by(User.last_seen.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
@@ -1130,7 +1135,7 @@ def find_user():
     if form.validate_on_submit():
         name_or_email = form.name_or_email.data
         if name_or_email:
-            if current_user.is_administrator:
+            if current_user.is_administrator():
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
                     .filter(User.deleted == False)\
@@ -1172,7 +1177,8 @@ def find_user():
                         Role.name == u'单VB',
                         Role.name == u'Y-GRE 普通',
                         Role.name == u'Y-GRE VBx2',
-                        Role.name == u'Y-GRE A权限'
+                        Role.name == u'Y-GRE A权限',
+                        Role.name == u'协管员'
                     ))\
                     .order_by(User.last_seen.desc())\
                     .limit(current_app.config['RECORD_PER_QUERY'])
@@ -1251,6 +1257,8 @@ def edit_auth(id):
     user = User.query.get_or_404(id)
     if user.deleted:
         abort(404)
+    if user.is_superior_than(user=current_user._get_current_object()):
+        abort(403)
     form = EditAuthForm(user=user)
     if form.validate_on_submit():
         user.name = form.name.data
@@ -1799,7 +1807,7 @@ def suggest_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_administrator:
+        if current_user.is_administrator():
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -1841,7 +1849,8 @@ def suggest_user():
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限'
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员'
                 ))\
                 .order_by(User.last_seen.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
@@ -1854,7 +1863,7 @@ def suggest_email():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_administrator:
+        if current_user.is_administrator():
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -1896,7 +1905,8 @@ def suggest_email():
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限'
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员'
                 ))\
                 .order_by(User.last_seen.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
@@ -1909,7 +1919,7 @@ def search_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_administrator:
+        if current_user.is_administrator():
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -1951,7 +1961,8 @@ def search_user():
                     Role.name == u'单VB',
                     Role.name == u'Y-GRE 普通',
                     Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限'
+                    Role.name == u'Y-GRE A权限',
+                    Role.name == u'协管员'
                 ))\
                 .order_by(User.last_seen.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])

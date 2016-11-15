@@ -111,39 +111,6 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="flag icon"></i> 里程碑</h3>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>时间</th>
-                            <th>课程类型</th>
-                            <th>课程进度</th>
-                            <th>视频进度</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for punch in punches %}
-                        <tr>
-                            <td>
-                                <div class="popup-trigger">{{ moment(punch.timestamp).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ punch.lesson.type.name }}</td>
-                            <td>{{ punch.lesson.name }}</td>
-                            <td>{{ punch.section.name }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
                 <h3 class="ui header"><i class="checked calendar icon"></i> 预约记录</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -216,6 +183,39 @@
                 {% if pagination %}
                 {{ macros.pagination_widget(pagination, 'main.profile') }}
                 {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="flag icon"></i> 里程碑</h3>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>课程类型</th>
+                            <th>课程进度</th>
+                            <th>视频进度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for punch in punches %}
+                        <tr>
+                            <td>
+                                <div class="popup-trigger">{{ moment(punch.timestamp).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ punch.lesson.type.name }}</td>
+                            <td>{{ punch.lesson.name }}</td>
+                            <td>{{ punch.section.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

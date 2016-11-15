@@ -27,9 +27,9 @@ class Permission:
     MANAGE_RENTAL   = 0b0000000000000000000000010000000
     MANAGE_SCHEDULE = 0b0000000000000000000000100000000
     MANAGE_IPAD     = 0b0000000000000000000001000000000
-    MANAGE_USER     = 0b0000000000000000000010000000000
-    MANAGE_AUTH     = 0b0000000000000000000100000000000
-    MANAGE_ANNOUNCE = 0b0000000000000000001000000000000
+    MANAGE_ANNOUNCE = 0b0000000000000000000010000000000
+    MANAGE_USER     = 0b0000000000000000000100000000000
+    MANAGE_AUTH     = 0b0000000000000000001000000000000
     ADMINISTER      = 0b1000000000000000000000000000000
 
 
@@ -50,8 +50,8 @@ class Role(db.Model):
             (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
             (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
             (u'协管员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER, ),
-            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_AUTH | Permission.MANAGE_ANNOUNCE ),
-            (u'开发人员', 0xffffffff, ),
+            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_USER | Permission.MANAGE_ANNOUNCE | Permission.MANAGE_AUTH ),
+            (u'开发人员', 0x7fffffff, ),
         ]
         for R in roles:
             role = Role.query.filter_by(name=R[0]).first()
@@ -389,6 +389,7 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
+    profile_json = db.Column(db.UnicodeText)
     registered = db.relationship(
         'Registration',
         foreign_keys=[Registration.user_id],
@@ -519,6 +520,25 @@ class User(UserMixin, db.Model):
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
+
+    def is_superior_than(self, user):
+        if self.is_administrator():
+            if user.is_administrator():
+                return False
+            else:
+                return True
+        elif self.can(Permission.MANAGE_AUTH):
+            if user.can(Permission.MANAGE_AUTH):
+                return False
+            else:
+                return True
+        elif self.can(Permission.MANAGE):
+            if user.can(Permission.MANAGE):
+                return False
+            else:
+                return True
+        else:
+            return False
 
     def ping(self):
         self.last_seen = datetime.utcnow()
@@ -1464,22 +1484,22 @@ class Section(db.Model):
     @staticmethod
     def insert_sections():
         sections = [
-            (u'0.11', u'总论', ),
-            (u'0.12', u'总论', ),
-            (u'0.13', u'总论', ),
-            (u'0.14', u'总论', ),
-            (u'0.21', u'总论', ),
-            (u'0.22', u'总论', ),
-            (u'0.23', u'总论', ),
-            (u'0.24', u'总论', ),
-            (u'0.31', u'总论', ),
-            (u'0.32', u'总论', ),
-            (u'0.33', u'总论', ),
-            (u'0.34', u'总论', ),
-            (u'0.41', u'总论', ),
-            (u'0.42', u'总论', ),
-            (u'0.43', u'总论', ),
-            (u'0.44', u'总论', ),
+            (u'Day 1-1', u'总论', ),
+            (u'Day 1-2', u'总论', ),
+            (u'Day 1-3', u'总论', ),
+            (u'Day 1-4', u'总论', ),
+            (u'Day 2-1', u'总论', ),
+            (u'Day 2-2', u'总论', ),
+            (u'Day 2-3', u'总论', ),
+            (u'Day 2-4', u'总论', ),
+            (u'Day 3-1', u'总论', ),
+            (u'Day 3-2', u'总论', ),
+            (u'Day 3-3', u'总论', ),
+            (u'Day 3-4', u'总论', ),
+            (u'Day 4-1', u'总论', ),
+            (u'Day 4-2', u'总论', ),
+            (u'Day 4-3', u'总论', ),
+            (u'Day 4-4', u'总论', ),
             (u'1.1', u'L1', ),
             (u'1.2', u'L1', ),
             (u'1.3', u'L1', ),

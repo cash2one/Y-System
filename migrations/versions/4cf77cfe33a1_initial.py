@@ -1,13 +1,13 @@
 """initial
 
-Revision ID: ffe330b61c2b
+Revision ID: 4cf77cfe33a1
 Revises: None
-Create Date: 2016-11-14 23:58:47.047478
+Create Date: 2016-11-15 23:27:41.160476
 
 """
 
 # revision identifiers, used by Alembic.
-revision = 'ffe330b61c2b'
+revision = '4cf77cfe33a1'
 down_revision = None
 
 from alembic import op
@@ -91,6 +91,7 @@ def upgrade():
     sa.Column('member_since', sa.DateTime(), nullable=True),
     sa.Column('last_seen', sa.DateTime(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.Column('profile_json', sa.UnicodeText(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
