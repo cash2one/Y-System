@@ -369,7 +369,7 @@ def schedule():
         query = Schedule.query\
             .filter(Schedule.date > date.today())\
             .order_by(Schedule.date.asc())\
-            .order_by(Schedule.period_id.asc())\
+            .order_by(Schedule.period_id.asc())
     if show_history_schedule:
         query = Schedule.query\
             .filter(Schedule.date < date.today())\
