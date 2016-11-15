@@ -20,9 +20,9 @@ class Config:
     YSYS_ADMIN = unicode(os.environ.get('YSYS_ADMIN'))
     YSYS_ADMIN_PASSWORD = os.environ.get('YSYS_ADMIN_PASSWORD')
     ANALYTICS_TOKEN = os.environ.get('ANALYTICS_TOKEN')
-    YSYS_SLOW_DB_QUERY_TIME=0.5
+    YSYS_SLOW_DB_QUERY_TIME = 0.5
     UTC_OFFSET = 8
-    RECORD_PER_PAGE = 20
+    RECORD_PER_PAGE = 10
     RECORD_PER_QUERY = 50
     TOLERATE_MINUTES = 15
 
