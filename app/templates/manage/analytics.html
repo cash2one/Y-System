@@ -80,8 +80,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/countUp.min.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/js/echarts.min.js') }}"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/countup.js/1.7.1/countUp.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/echarts/3.3.1/echarts.min.js"></script>
 <script src="{{ url_for('static', filename='assets/js/macarons.js') }}"></script>
 <script>
     var analyticsAPIurl = 'https://dev.y-english.org/analytics/?callback=?';

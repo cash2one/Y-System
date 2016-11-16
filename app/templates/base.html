@@ -14,10 +14,10 @@
     <meta name="keywords" content="Y-English, Y-System, English, Education" />
 
     <!-- Semantic UI CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/semantic/semantic.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.css">
 
     <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/font-awesome.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- Customized CSS -->
     {% block customized_styles %}
@@ -444,11 +444,11 @@
 
     {% block scripts %}
     <!-- jQuery -->
-    <script src="{{ url_for('static', filename='assets/js/jquery-3.1.1.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/js/jquery-migrate-3.0.0.min.js') }}"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.0.0/jquery-migrate.min.js"></script>
 
     <!-- Semantic UI JS -->
-    <script src="{{ url_for('static', filename='assets/semantic/semantic.min.js') }}"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.js"></script>
 
     <!-- Moment.js -->
     {{ moment.include_moment() }}
