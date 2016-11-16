@@ -175,7 +175,54 @@
                                 {% endif %}
                                 {% endwith %}
                             </td>
-                            <td>{{ ipad.state.name }}</td>
+                            <td>
+                                {% if ipad.state.name == '借出' %}
+                                <div class="ui orange mini button" style="cursor: not-allowed;">
+                                    <i class="upload icon"></i>
+                                    {{ ipad.state.name }}
+                                </div>
+                                {% else %}
+                                    {% if ipad.state.name == '待机' %}
+                                <div class="ui simple dropdown mini button">
+                                    <i class="wait icon"></i>
+                                    {% endif %}
+                                    {% if ipad.state.name == '候补' %}
+                                <div class="ui grey simple dropdown mini button">
+                                    <i class="cube icon"></i>
+                                    {% endif %}
+                                    {% if ipad.state.name == '维护' %}
+                                <div class="ui red simple dropdown mini button">
+                                    <i class="wrench icon"></i>
+                                    {% endif %}
+                                    {% if ipad.state.name == '充电' %}
+                                <div class="ui green simple dropdown mini button">
+                                    <i class="plug icon"></i>
+                                    {% endif %}
+                                    {% if ipad.state.name == '退役' %}
+                                <div class="ui olive simple dropdown mini button">
+                                    <i class="recycle icon"></i>
+                                    {% endif %}
+                                    {{ ipad.state.name }}
+                                    <div class="menu">
+                                        {% if ipad.state.name != '待机' %}
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wait icon"></i> 待机</a>
+                                        {% endif %}
+                                        {% if ipad.state.name != '候补' %}
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="cube icon"></i> 候补</a>
+                                        {% endif %}
+                                        {% if ipad.state.name != '维护' %}
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_maintain', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wrench icon"></i> 维护</a>
+                                        {% endif %}
+                                        {% if ipad.state.name != '充电' %}
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_charge', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="plug icon"></i> 充电</a>
+                                        {% endif %}
+                                        {% if ipad.state.name != '退役' %}
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_obsolete', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="recycle icon"></i> 退役</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
                             <td>
                                 <div class="popup-trigger">{{ moment(ipad.last_modified).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(ipad.last_modified).format('YYYY-M-D H:mm:ss') }}</div>

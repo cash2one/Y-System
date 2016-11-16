@@ -726,6 +726,71 @@ def other_ipads():
     return resp
 
 
+@manage.route('/ipad/set-state/standby/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def set_ipad_state_standby(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'待机', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：待机' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/candidate/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def set_ipad_state_candidate(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'候补', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：候补' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/maintain/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def set_ipad_state_maintain(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'维护', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/charge/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def set_ipad_state_charge(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'充电', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：充电' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/obsolete/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_IPAD)
+def set_ipad_state_obsolete(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'退役', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：退役' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
 @manage.route('/ipad/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_IPAD)

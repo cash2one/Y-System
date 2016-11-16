@@ -372,8 +372,10 @@ class Rental(db.Model):
         self.walk_in = not self.walk_in
         db.session.add(self)
 
+    @property
     def is_overtime(self):
-        return reduce(lambda result1, result2: result1 or result2, [schedule.is_booked_by(user=self.user) for schedule in Schedule.query.filter_by(date=date.today()).all if schedule.started])
+        return (not self.walk_in) and\
+            (not reduce(lambda result1, result2: result1 or result2, [False] + [schedule.is_booked_by(user=self.user) for schedule in Schedule.query.filter_by(date=date.today()).all() if schedule.started]))
 
     def __repr__(self):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
@@ -1064,7 +1066,8 @@ class Schedule(db.Model):
 
     def is_booked_by(self, user):
         return (self.booked_users.filter_by(user_id=user.id).first() is not None) and\
-            (Booking.query.filter_by(user_id=user.id, schedule_id=self.id).first().canceled == False)
+            (Booking.query.filter_by(user_id=user.id, schedule_id=self.id).first().canceled == False) and\
+            (Booking.query.filter_by(user_id=user.id, schedule_id=self.id).first().invalid == False)
 
     @property
     def occupied_quota(self):
@@ -1276,9 +1279,9 @@ class iPad(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def set_state(self, state_name, modified_by, battery_life=None):
+    def set_state(self, state_name, modified_by, battery_life=-1):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
-        if battery_life:
+        if battery_life > -1:
             self.battery_life = battery_life
             self.last_charged = datetime.utcnow()
         self.ping(modified_by=modified_by)
@@ -1366,9 +1369,14 @@ class iPad(db.Model):
     def now_rented_by(self):
         return User.query\
             .join(Rental, Rental.user_id == User.id)\
-            .join(iPad, iPad.id == Rental.ipad_id)\
             .filter(Rental.returned == False)\
-            .filter(iPad.id == self.id)\
+            .filter(Rental.ipad_id == self.id)\
+            .first()
+
+    @property
+    def current_rental(self):
+        return Rental.query\
+            .filter_by(ipad_id=self.id, returned=False)\
             .first()
 
     def to_json(self):
@@ -1386,6 +1394,7 @@ class iPad(db.Model):
                 'percent': self.current_battery_life,
                 'level': self.current_battery_life_level,
             }
+            ipad_json['overtime'] = self.current_rental.is_overtime
         return ipad_json
 
     @staticmethod
