@@ -1529,9 +1529,9 @@ def flip_rental_walk_in(id):
     rental = Rental.query.get_or_404(id)
     rental.flip_walk_in()
     if rental.walk_in:
-        flash(u'预约状态改为：未提前预约', category='success')
+        flash(u'%s的iPad借阅状态改为：未提前预约' % rental.user.name, category='success')
     else:
-        flash(u'预约状态改为：提前预约', category='success')
+        flash(u'%s的iPad借阅状态改为：提前预约' % rental.user.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.rental'))
 
 
