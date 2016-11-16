@@ -38,10 +38,26 @@
                 <div class="ui tabular menu">
                     {% if show_today_rental %}
                     <a class="item active loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
+                    {% endif %}
+                    {% if show_today_rental_1103 %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
+                    {% endif %}
+                    {% if show_today_rental_1707 %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
                     {% endif %}
                     {% if show_history_rental %}
                     <a class="item loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
                     <a class="item active loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
                     {% endif %}
                 </div>
@@ -53,6 +69,7 @@
                             <th>借出时间</th>
                             <th>借出经办人</th>
                             <th>是否提前预约</th>
+                            <th>是否超时</th>
                             <th>归还时间</th>
                             <th>归还经办人</th>
                             <th>状态</th>
@@ -76,14 +93,20 @@
                             <td>{{ rental.rent_agent.name }}</td>
                             {% if rental.walk_in %}
                             <td class="negative">
-                                否
+                                未预约
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                             </td>
+                            <td>N/A</td>
                             {% else %}
                             <td class="positive">
-                                是
+                                有预约
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                             </td>
+                            {% if rental.is_overtime %}
+                            <td class="negative">已超时</td>
+                            {% else %}
+                            <td class="positive">未超时</td>
+                            {% endif %}
                             {% endif %}
                             {% if rental.returned %}
                             <td>

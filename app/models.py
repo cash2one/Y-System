@@ -372,6 +372,9 @@ class Rental(db.Model):
         self.walk_in = not self.walk_in
         db.session.add(self)
 
+    def is_overtime(self):
+        return reduce(lambda result1, result2: result1 or result2, [schedule.is_booked_by(user=self.user) for schedule in Schedule.query.filter_by(date=date.today()).all if schedule.started])
+
     def __repr__(self):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 

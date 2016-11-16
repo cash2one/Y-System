@@ -1373,12 +1373,30 @@ def edit_auth_admin(id):
 def rental():
     page = request.args.get('page', 1, type=int)
     show_today_rental = True
+    show_today_rental_1103 = False
+    show_today_rental_1707 = False
     show_history_rental = False
     if current_user.is_authenticated:
         show_today_rental = bool(request.cookies.get('show_today_rental', '1'))
+        show_today_rental_1103 = bool(request.cookies.get('show_today_rental_1103', '0'))
+        show_today_rental_1707 = bool(request.cookies.get('show_today_rental_1707', '0'))
         show_history_rental = bool(request.cookies.get('show_history_rental', ''))
     if show_today_rental:
         query = Rental.query\
+            .filter(Rental.date == date.today())\
+            .order_by(Rental.rent_time.desc())
+    if show_today_rental_1103:
+        query = Rental.query\
+            .join(iPad, iPad.id == Rental.ipad_id)\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1103')\
+            .filter(Rental.date == date.today())\
+            .order_by(Rental.rent_time.desc())
+    if show_today_rental_1707:
+        query = Rental.query\
+            .join(iPad, iPad.id == Rental.ipad_id)\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1707')\
             .filter(Rental.date == date.today())\
             .order_by(Rental.rent_time.desc())
     if show_history_rental:
@@ -1388,7 +1406,7 @@ def rental():
             .order_by(Rental.return_time.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     rentals = pagination.items
-    return render_template('manage/rental.html', rentals=rentals, show_today_rental=show_today_rental, show_history_rental=show_history_rental, pagination=pagination)
+    return render_template('manage/rental.html', rentals=rentals, show_today_rental=show_today_rental, show_today_rental_1103=show_today_rental_1103, show_today_rental_1707=show_today_rental_1707, show_history_rental=show_history_rental, pagination=pagination)
 
 
 @manage.route('/rental/today')
@@ -1397,6 +1415,32 @@ def rental():
 def rental_today():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rental', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/rental/today/1103')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_today_1103():
+    resp = make_response(redirect(url_for('manage.rental')))
+    resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rental', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/rental/today/1707')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def rental_today_1707():
+    resp = make_response(redirect(url_for('manage.rental')))
+    resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1707', '1', max_age=30*24*60*60)
     resp.set_cookie('show_history_rental', '', max_age=30*24*60*60)
     return resp
 
@@ -1407,6 +1451,8 @@ def rental_today():
 def rental_history():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rental_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_history_rental', '1', max_age=30*24*60*60)
     return resp
 
