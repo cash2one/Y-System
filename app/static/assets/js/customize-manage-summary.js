@@ -149,9 +149,9 @@ function updateCards() {
                 $('#ipad-content-' + i + ' .value').html('<i class="configure icon"></i>');
             } else if (data.ipads[i].state == '充电') {
                 $('#ipad-' + i).addClass('green');
-                $('#ipad-state-' + i).html('<i class="lightning icon"></i>' + data.ipads[i].state);
+                $('#ipad-state-' + i).html('<i class="plug icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('green');
-                $('#ipad-content-' + i + ' .value').html('<i class="lightning icon"></i>');
+                $('#ipad-content-' + i + ' .value').html('<i class="plug icon"></i>');
             } else if (data.ipads[i].state == '退役') {
                 $('#ipad-' + i).addClass('olive');
                 $('#ipad-state-' + i).html('<i class="recycle icon"></i>' + data.ipads[i].state);

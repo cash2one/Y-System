@@ -368,6 +368,10 @@ class Rental(db.Model):
         modified_by = User.query.get(return_agent_id)
         ipad.set_state(ipad_state, modified_by=modified_by)
 
+    def flip_walk_in(self):
+        self.walk_in = not self.walk_in
+        db.session.add(self)
+
     def __repr__(self):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 

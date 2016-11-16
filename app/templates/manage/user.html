@@ -78,7 +78,7 @@
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can(Permission.MANAGE_USER) %}
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user')) }}"><i class="refresh icon"></i></a>
+                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -91,8 +91,8 @@
                             </td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="remove user icon"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -163,8 +163,8 @@
                                 </div>
                                 {% else %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_activation', id=activation.id) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_activation', id=activation.id) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_activation', id=activation.id, next=url_for('manage.user', page=pagination_activations.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_activation', id=activation.id, next=url_for('manage.user', page=pagination_activations.page)) }}"><i class="remove user icon"></i></a>
                                 </div>
                                 {% endif %}
                             </td>

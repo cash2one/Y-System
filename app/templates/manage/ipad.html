@@ -183,8 +183,8 @@
                             <td>{{ ipad.modified_by.name }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_ipad', id=ipad.id) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_ipad', id=ipad.id) }}"><i class="trash outline icon"></i></a>
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_ipad', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_ipad', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
                                 </div>
                             </td>
                         </tr>

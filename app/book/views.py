@@ -54,26 +54,26 @@ def book_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if not schedule.unstarted:
         flash(u'所选时段已不接受预约', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if schedule.full:
         flash(u'该时段名额已经约满', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if current_user.booking_y_gre_same_day(schedule):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     same_day_bookings = current_user.booking_vb_same_day(schedule)
     if same_day_bookings >= 2 and not current_user.can(Permission.BOOK_ANY):
         flash(u'您当天已经预约过%d节VB课程，不要太贪心哦~' % same_day_bookings, category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     elif same_day_bookings >= 1 and not (current_user.can(Permission.BOOK_VB_2) or current_user.can(Permission.BOOK_ANY)):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'预约')
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
@@ -93,7 +93,7 @@ def book_vb(schedule_id):
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
                 send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
-    return redirect(url_for('book.vb', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.vb'))
 
 
 @book.route('/vb/wait/<schedule_id>')
@@ -103,29 +103,29 @@ def wait_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if not schedule.unstarted:
         flash(u'所选时段已不接受预约', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if not schedule.full:
         flash(u'该时段仍有名额，请直接预约', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if current_user.booking_y_gre_same_day(schedule):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     same_day_bookings = current_user.booking_vb_same_day(schedule)
     if same_day_bookings >= 2 and not current_user.can(Permission.BOOK_ANY):
         flash(u'您当天已经预约过%d节VB课程，不要太贪心哦~' % same_day_bookings, category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     elif same_day_bookings >= 1 and not (current_user.can(Permission.BOOK_VB_2) or current_user.can(Permission.BOOK_ANY)):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'排队')
     flash(u'已将您加入候选名单', category='success')
-    return redirect(url_for('book.vb', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.vb'))
 
 
 @book.route('/vb/unbook/<schedule_id>')
@@ -135,13 +135,13 @@ def unbook_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if not schedule.unstarted:
         flash(u'所选时段已不能自行取消', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     candidate = current_user.unbook(schedule)
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
@@ -162,7 +162,7 @@ def unbook_vb(schedule_id):
                 if manager.can(Permission.MANAGE_IPAD):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'取消成功！', category='success')
-    return redirect(url_for('book.vb', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.vb'))
 
 
 @book.route('/vb/miss/<schedule_id>')
@@ -172,16 +172,16 @@ def miss_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if not schedule.started:
         flash(u'所选时段已不能自行取消', category='error')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段', category='warning')
-        return redirect(url_for('book.vb', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.miss(schedule)
     flash(u'取消成功！', category='success')
-    return redirect(url_for('book.vb', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.vb'))
 
 
 @book.route('/y-gre')
@@ -219,23 +219,23 @@ def book_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if not schedule.unstarted:
         flash(u'所选时段已不接受预约', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if schedule.full:
         flash(u'该时段名额已经约满', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约', category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if current_user.booking_vb_same_day(schedule):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     same_day_bookings = current_user.booking_y_gre_same_day(schedule)
     if same_day_bookings >= 1 and not current_user.can(Permission.BOOK_ANY):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~' % same_day_bookings, category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'预约')
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
@@ -255,7 +255,7 @@ def book_y_gre(schedule_id):
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
                 send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
-    return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
 @book.route('/y-gre/wait/<schedule_id>')
@@ -265,26 +265,26 @@ def wait_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if not schedule.unstarted:
         flash(u'所选时段已不接受预约', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if not schedule.full:
         flash(u'该时段仍有名额，请直接预约', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if current_user.booked(schedule):
         flash(u'您已经预约过该时段，请不要重复预约', category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if current_user.booking_vb_same_day(schedule):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     same_day_bookings = current_user.booking_y_gre_same_day(schedule)
     if same_day_bookings >= 1 and not current_user.can(Permission.BOOK_ANY):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~' % same_day_bookings, category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'排队')
     flash(u'已将您加入候选名单', category='success')
-    return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
 @book.route('/y-gre/unbook/<schedule_id>')
@@ -294,13 +294,13 @@ def unbook_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if not schedule.unstarted:
         flash(u'所选时段已不能自行取消', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段', category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     candidate = current_user.unbook(schedule)
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
@@ -321,7 +321,7 @@ def unbook_y_gre(schedule_id):
                 if manager.can(Permission.MANAGE_IPAD):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'取消成功！', category='success')
-    return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
 @book.route('/y_gre/miss/<schedule_id>')
@@ -331,13 +331,13 @@ def miss_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if not schedule.started:
         flash(u'所选时段已不能自行取消', category='error')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段', category='warning')
-        return redirect(url_for('book.y_gre', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.miss(schedule)
     flash(u'取消成功！', category='success')
-    return redirect(url_for('book.y_gre', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('book.y_gre'))

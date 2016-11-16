@@ -82,7 +82,7 @@
                                 <div class="ui popup popup-content">{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
-                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_auth', id=user.id) }}"><i class="edit icon"></i> 编辑</a>
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_auth', id=user.id, next=url_for('manage.auth', page=pagination.page)) }}"><i class="edit icon"></i> 编辑</a>
                             </td>
                         </tr>
                         {% endfor %}

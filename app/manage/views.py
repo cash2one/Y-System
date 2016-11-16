@@ -182,7 +182,7 @@ def set_booking_state_valid(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     if booking.schedule.full:
         flash(u'该时段名额已经约满', category='error')
-        return redirect(url_for('manage.booking', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'预约')
     db.session.commit()
     send_email(user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=user, schedule=schedule, booking=booking)
@@ -201,7 +201,7 @@ def set_booking_state_valid(user_id, schedule_id):
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
                 send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/booking/set-state-wait/<int:user_id>/<int:schedule_id>')
@@ -210,7 +210,7 @@ def set_booking_state_valid(user_id, schedule_id):
 def set_booking_state_wait(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'排队')
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/booking/set-state-invalid/<int:user_id>/<int:schedule_id>')
@@ -219,7 +219,7 @@ def set_booking_state_wait(user_id, schedule_id):
 def set_booking_state_invalid(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'失效')
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/booking/set-state-kept/<int:user_id>/<int:schedule_id>')
@@ -228,7 +228,7 @@ def set_booking_state_invalid(user_id, schedule_id):
 def set_booking_state_kept(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'赴约')
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/booking/set-state-late/<int:user_id>/<int:schedule_id>')
@@ -237,7 +237,7 @@ def set_booking_state_kept(user_id, schedule_id):
 def set_booking_state_late(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'迟到')
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/booking/set-state-missed/<int:user_id>/<int:schedule_id>')
@@ -246,7 +246,7 @@ def set_booking_state_late(user_id, schedule_id):
 def set_booking_state_missed(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'爽约')
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/booking/set-state-canceled/<int:user_id>/<int:schedule_id>')
@@ -277,7 +277,7 @@ def set_booking_state_canceled(user_id, schedule_id):
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 def time_now(utcOffset=0):
@@ -327,7 +327,7 @@ def set_booking_state_missed_all():
     for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
         booking.set_state(u'失效')
     flash(u'标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)), category='info')
-    return redirect(url_for('manage.booking', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/schedule', methods=['GET', 'POST'])
@@ -417,38 +417,32 @@ def history_schedule():
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def publish_schedule(id):
-    schedule = Schedule.query.get(id)
-    if schedule is None:
-        flash(u'该预约时段不存在', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+    schedule = Schedule.query.get_or_404(id)
     if schedule.out_of_date:
         flash(u'所选时段已经过期', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     if schedule.available:
         flash(u'所选时段已经发布', category='warning')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.publish(modified_by=current_user._get_current_object())
     flash(u'发布成功！', category='success')
-    return redirect(url_for('manage.schedule', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
 @manage.route('/schedule/retract/<int:id>')
 @login_required
 @permission_required(Permission.MANAGE_SCHEDULE)
 def retract_schedule(id):
-    schedule = Schedule.query.get(id)
-    if schedule is None:
-        flash(u'该预约时段不存在', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+    schedule = Schedule.query.get_or_404(id)
     if schedule.out_of_date:
         flash(u'所选时段已经过期', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     if not schedule.available:
         flash(u'所选时段尚未发布', category='warning')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.retract(modified_by=current_user._get_current_object())
     flash(u'撤销成功！', category='success')
-    return redirect(url_for('manage.schedule', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
 @manage.route('/schedule/increase-quota/<int:id>')
@@ -456,12 +450,9 @@ def retract_schedule(id):
 @permission_required(Permission.MANAGE_SCHEDULE)
 def increase_schedule_quota(id):
     schedule = Schedule.query.get_or_404(id)
-    if schedule is None:
-        flash(u'该预约时段不存在', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.out_of_date:
         flash(u'所选时段已经过期', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     candidate = schedule.increase_quota(modified_by=current_user._get_current_object())
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
@@ -482,7 +473,7 @@ def increase_schedule_quota(id):
                 if manager.can(Permission.MANAGE_IPAD):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'所选时段名额+1', category='success')
-    return redirect(url_for('manage.schedule', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
 @manage.route('/schedule/decrease-quota/<int:id>')
@@ -490,21 +481,18 @@ def increase_schedule_quota(id):
 @permission_required(Permission.MANAGE_SCHEDULE)
 def decrease_schedule_quota(id):
     schedule = Schedule.query.get_or_404(id)
-    if schedule is None:
-        flash(u'该预约时段不存在', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
     if schedule.out_of_date:
         flash(u'所选时段已经过期', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     if schedule.quota == 0:
         flash(u'所选时段名额已经为0', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     if schedule.quota <= schedule.occupied_quota:
         flash(u'所选时段名额不可少于预约人数', category='error')
-        return redirect(url_for('manage.schedule', page=request.args.get('page')))
+        return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.decrease_quota(modified_by=current_user._get_current_object())
     flash(u'所选时段名额-1', category='success')
-    return redirect(url_for('manage.schedule', page=request.args.get('page')))
+    return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
 @manage.route('/period', methods=['GET', 'POST'])
@@ -544,7 +532,7 @@ def edit_period(id):
         end_time = time(*[int(x) for x in form.end_time.data.split(':')])
         if start_time >= end_time:
             flash(u'无法更新时段模板：%s，时间设置有误' % form.name.data, category='error')
-            return redirect(url_for('manage.edit_period', id=period.id))
+            return redirect(url_for('manage.edit_period', id=period.id, next=request.args.get('next')))
         period.name = form.name.data
         period.start_time = start_time
         period.end_time = end_time
@@ -554,7 +542,7 @@ def edit_period(id):
         period.last_modified_by = current_user.id
         db.session.add(period)
         flash(u'已更新时段模板：%s' % form.name.data, category='success')
-        return redirect(url_for('manage.period'))
+        return redirect(request.args.get('next') or url_for('manage.period'))
     form.name.data = period.name
     form.start_time.data = period.start_time.strftime(u'%H:%M')
     form.end_time.data = period.end_time.strftime(u'%H:%M')
@@ -574,7 +562,7 @@ def delete_period(id):
     if form.validate_on_submit():
         period.safe_delete(modified_by=current_user._get_current_object())
         flash(u'已删除时段模板：%s' % period.name, category='success')
-        return redirect(url_for('manage.period'))
+        return redirect(request.args.get('next') or url_for('manage.period'))
     return render_template('manage/delete_period.html', form=form, period=period)
 
 
@@ -938,11 +926,11 @@ def edit_activation(id):
         activation.timestamp = datetime.utcnow()
         if activation.activated:
             flash(u'该账户已经激活，不能更新。', category='error')
-            return redirect(url_for('manage.user'))
+            return redirect(request.args.get('next') or url_for('manage.user'))
         db.session.add(activation)
         db.session.commit()
         flash(u'%s的激活信息已更新' % activation.name, category='success')
-        return redirect(url_for('manage.user'))
+        return redirect(request.args.get('next') or url_for('manage.user'))
     form.name.data = activation.name
     form.activation_code.data = None
     form.role.data = activation.role_id
@@ -962,10 +950,10 @@ def delete_activation(id):
     if form.validate_on_submit():
         if activation.activated:
             flash(u'该账户已经激活，无法删除。', category='error')
-            return redirect(url_for('manage.user'))
+            return redirect(request.args.get('next') or url_for('manage.user'))
         activation.safe_delete()
         flash(u'已删除%s的激活邀请' % activation.name, category='success')
-        return redirect(url_for('manage.user'))
+        return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/delete_activation.html', form=form, activation=activation)
 
 
@@ -1277,7 +1265,7 @@ def edit_auth(id):
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name, category='success')
-        return redirect(url_for('manage.auth'))
+        return redirect(request.args.get('next') or url_for('manage.auth'))
     form.name.data = user.name
     form.email.data = user.email
     form.role.data = user.role_id
@@ -1368,7 +1356,7 @@ def edit_auth_admin(id):
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name, category='success')
-        return redirect(url_for('manage.auth_admin'))
+        return redirect(request.args.get('next') or url_for('manage.auth_admin'))
     form.name.data = user.name
     form.email.data = user.email
     form.role.data = user.role_id
@@ -1421,6 +1409,19 @@ def rental_history():
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
     resp.set_cookie('show_history_rental', '1', max_age=30*24*60*60)
     return resp
+
+
+@manage.route('/rental/flip-walk-in/<int:id>')
+@login_required
+@permission_required(Permission.MANAGE_RENTAL)
+def flip_rental_walk_in(id):
+    rental = Rental.query.get_or_404(id)
+    rental.flip_walk_in()
+    if rental.walk_in:
+        flash(u'预约状态改为：未提前预约', category='success')
+    else:
+        flash(u'预约状态改为：提前预约', category='success')
+    return redirect(request.args.get('next') or url_for('manage.rental'))
 
 
 @manage.route('/rental/rent/step-1', methods=['GET', 'POST'])
@@ -1731,32 +1732,26 @@ def announcement():
 @login_required
 @permission_required(Permission.MANAGE_ANNOUNCE)
 def publish_announcement(id):
-    announcement = Announcement.query.get(id)
-    if announcement is None:
-        flash(u'该通知不存在', category='error')
-        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    announcement = Announcement.query.get_or_404(id)
     if announcement.show:
         flash(u'所选通知已经发布', category='warning')
-        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
     announcement.publish(modified_by=current_user._get_current_object())
     flash(u'“%s”发布成功！' % announcement.title, category='success')
-    return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
 
 
 @manage.route('/announcement/retract/<int:id>')
 @login_required
 @permission_required(Permission.MANAGE_ANNOUNCE)
 def retract_announcement(id):
-    announcement = Announcement.query.get(id)
-    if announcement is None:
-        flash(u'该通知不存在', category='error')
-        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    announcement = Announcement.query.get_or_404(id)
     if not announcement.show:
         flash(u'所选通知尚未发布', category='warning')
-        return redirect(url_for('manage.announcement', page=request.args.get('page')))
+        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
     announcement.retract(modified_by=current_user._get_current_object())
     flash(u'“%s”撤销成功！' % announcement.title, category='success')
-    return redirect(url_for('manage.announcement', page=request.args.get('page')))
+    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
 
 
 @manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
@@ -1780,7 +1775,7 @@ def edit_announcement(id):
         else:
             announcement.clean_up()
         flash(u'已更新通知：“%s”' % form.title.data, category='success')
-        return redirect(url_for('manage.announcement'))
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
     form.title.data = announcement.title
     form.body.data = announcement.body_html
     form.announcement_type.data = announcement.type_id
@@ -1799,7 +1794,7 @@ def delete_announcement(id):
     if form.validate_on_submit():
         announcement.safe_delete(modified_by=current_user._get_current_object())
         flash(u'已删除通知：“%s”' % announcement.title, category='success')
-        return redirect(url_for('manage.announcement'))
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
     return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
 
 
