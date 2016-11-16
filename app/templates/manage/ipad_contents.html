@@ -21,8 +21,8 @@
         <div class="row">
             <div class="column">
                 <table class="ui very basic sortable selectable celled table">
-                    <thead class="ui sticky">
-                        <tr class="center aligned">
+                    <thead>
+                        <tr>
                             <th><i class="tablet icon"></i></th>
                             <th>VB总论</th>
                             <th>L1</th>
@@ -48,9 +48,9 @@
                             <th>AW总论</th>
                         </tr>
                     </thead>
-                    <tbody id="context">
+                    <tbody>
                         {% for ipad in ipad_contents %}
-                        <tr class="center aligned">
+                        <tr>
                             <td>{{ ipad['alias'] }}</td>
                             {% for lesson in ipad['lessons'] %}
                             {% if lesson['exist'] %}
