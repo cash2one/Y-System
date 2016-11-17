@@ -30,6 +30,7 @@
 }
 .ui.vertical.stripe .ui.statistic .label {
     font-size: 1.2em;
+    text-transform: none;
 }
 .ui.vertical.stripe p,
 .ui.vertical.stripe .ui.table {
