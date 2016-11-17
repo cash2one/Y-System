@@ -33,6 +33,9 @@
 .ui.vertical.stripe .ui.table {
     /*font-size: 1.2em;*/
 }
+.ui.vertical.stripe .ui.table .ui.mini.icon.button {
+    margin-left: 10px;
+}
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
 }
