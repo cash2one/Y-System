@@ -5,7 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-rent-step-3.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-rent-step-4.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
@@ -24,9 +24,15 @@
                     <div class="column">
                         <div class="ui fluid vertical steps">
                             <div class="completed step">
-                                <i class="qrcode icon"></i>
+                                <i class="at icon"></i>
                                 <div class="content">
-                                    <div class="title">预约码有效</div>
+                                    <div class="title">邮箱有效</div>
+                                </div>
+                            </div>
+                            <div class="completed step">
+                                <i class="student icon"></i>
+                                <div class="content">
+                                    <div class="title">已选课程：{{ lesson.type.name }} - {{ lesson.name }}</div>
                                 </div>
                             </div>
                             <div class="completed step">
@@ -65,7 +71,13 @@
                                     {{ form.root.label() }}
                                 </div>
                             </div>
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_2', user_id=user.id) }}">上一步</a>
+                            <div class="field">
+                                <div class="ui toggle checkbox">
+                                    {{ form.walk_in() }}
+                                    {{ form.walk_in.label() }}
+                                </div>
+                            </div>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_3_lesson_alt', user_id=user.id, lesson_id=lesson.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
                             <div class="ui error message"></div>
@@ -80,5 +92,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-rent-step-3.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-rent-step-4-lesson.js') }}"></script>
 {% endblock %}

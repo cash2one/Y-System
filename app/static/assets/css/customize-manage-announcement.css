@@ -37,9 +37,6 @@
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
 }
-.ui.vertical.stripe .ui.table .ui.buttons {
-    margin-left: 10px;
-}
 
 .stats.stripe.segment,
 .quote.stripe.segment {

@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}更新进度{% endblock %}
+{% block title %}借出iPad{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-return-step-4.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-rent-step-2.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="refresh icon"></i> 更新进度</h1>
+    <h1 class="ui inverted header"><i class="upload icon"></i> 借出iPad</h1>
 </div>
 {% endblock %}
 
@@ -24,27 +24,27 @@
                     <div class="column">
                         <div class="ui fluid vertical steps">
                             <div class="completed step">
-                                <i class="at icon"></i>
+                                <i class="qrcode icon"></i>
                                 <div class="content">
-                                    <div class="title">邮箱有效</div>
-                                </div>
-                            </div>
-                            <div class="completed step">
-                                <i class="student icon"></i>
-                                <div class="content">
-                                    <div class="title">课程进度信息：{{ lesson.type.name }} - {{ lesson.name }}</div>
-                                </div>
-                            </div>
-                            <div class="completed step">
-                                <i class="record icon"></i>
-                                <div class="content">
-                                    <div class="title">视频进度信息：{{ lesson.name }} - {{ section.name }}</div>
+                                    <div class="title">预约码有效</div>
                                 </div>
                             </div>
                             <div class="active step">
-                                <i class="save icon"></i>
+                                <i class="student icon"></i>
                                 <div class="content">
-                                    <div class="title">确认并保存</div>
+                                    <div class="title">选择课程</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="tablet icon"></i>
+                                <div class="content">
+                                    <div class="title">选取iPad</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="barcode icon"></i>
+                                <div class="content">
+                                    <div class="title">扫码确认</div>
                                 </div>
                             </div>
                         </div>
@@ -52,14 +52,17 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
-                            <div class="item">更新进度：{{ lesson.type.name }} - {{ lesson.name }} - {{ section.name }}</div>
+                            <div class="item">进度：{{user.last_punch.section.lesson.type.name}} - {{user.last_punch.section.lesson.name}} - {{ user.last_punch.section.name }}</div>
                         </div>
-                        <form id="confirm-punch" method="POST" class="ui form">
+                        <form id="select-lesson" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_return_step_3_alt', user_id=user.id, lesson_id=lesson.id) }}">上一步</a>
+                            <div class="field">
+                                {{ form.lesson.label() }}
+                                {{ form.lesson(class='ui search dropdown') }}
+                            </div>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
+                            <a class="loading-trigger" href="{{ url_for('manage.rental_rent_step_2', user_id=user.id) }}">按进度选iPad？</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>
@@ -72,5 +75,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-return-step-4.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-rent-step-2-lesson.js') }}"></script>
 {% endblock %}

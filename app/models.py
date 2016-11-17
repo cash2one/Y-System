@@ -887,6 +887,11 @@ class Period(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
+    def flip_show(self, modified_by):
+        self.show = not self.show
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
     @property
     def start_time_utc(self):
         hour = self.start_time.hour - current_app.config['UTC_OFFSET']
