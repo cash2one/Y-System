@@ -105,10 +105,10 @@ def summary_room(room_id):
 @permission_required(Permission.MANAGE)
 def summary_statistics():
     statistics = {
-        'booking': {
-            'vb': '',
-            'y_gre': '',
-        },
+        # 'booking': {
+        #     'vb': '',
+        #     'y_gre': '',
+        # },
         'room_1103': {
             'ipad': {
                 'total': iPad.query\
@@ -157,6 +157,16 @@ def summary_statistics():
                     .filter(Room.name == u'1103')\
                     .filter(iPadState.name == u'退役')\
                     .filter(iPad.deleted == False)\
+                    .count(),
+                'walk_in': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .join(Rental, Rental.ipad_id == iPad.id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPadState.name == u'借出')\
+                    .filter(iPad.deleted == False)\
+                    .filter(Rental.returned == False)\
+                    .filter(Rental.walk_in == True)\
                     .count(),
             },
         },
@@ -208,6 +218,16 @@ def summary_statistics():
                     .filter(Room.name == u'1707')\
                     .filter(iPadState.name == u'退役')\
                     .filter(iPad.deleted == False)\
+                    .count(),
+                'walk_in': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .join(Rental, Rental.ipad_id == iPad.id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPadState.name == u'借出')\
+                    .filter(iPad.deleted == False)\
+                    .filter(Rental.returned == False)\
+                    .filter(Rental.walk_in == True)\
                     .count(),
             },
         },

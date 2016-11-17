@@ -30,15 +30,19 @@ var countUpOptions = {
 };
 var iPadRent1103CountUp = new CountUp('stat-ipad-rent-1103', 0, 0, 0, 2.5, countUpOptions);
 var iPadTotal1103CountUp = new CountUp('stat-ipad-total-1103', 0, 0, 0, 2.5, countUpOptions);
+var iPadWalkIn1103CountUp = new CountUp('stat-walk-in-1103', 0, 0, 0, 2.5, countUpOptions);
 var iPadRent1707CountUp = new CountUp('stat-ipad-rent-1707', 0, 0, 0, 2.5, countUpOptions);
 var iPadTotal1707CountUp = new CountUp('stat-ipad-total-1707', 0, 0, 0, 2.5, countUpOptions);
+var iPadWalkIn1707CountUp = new CountUp('stat-walk-in-1707', 0, 0, 0, 2.5, countUpOptions);
 function updateStats() {
     var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/statistics';
     $.getJSON(url, function(data) {
         iPadRent1103CountUp.update(data.room_1103.ipad.rent);
         iPadTotal1103CountUp.update(data.room_1103.ipad.total);
+        iPadWalkIn1103CountUp.update(data.room_1103.ipad.walk_in);
         iPadRent1707CountUp.update(data.room_1707.ipad.rent);
         iPadTotal1707CountUp.update(data.room_1707.ipad.total);
+        iPadWalkIn1707CountUp.update(data.room_1707.ipad.walk_in);
     });
 };
 updateStats();
