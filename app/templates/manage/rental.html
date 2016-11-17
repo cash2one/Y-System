@@ -96,19 +96,14 @@
                                 未预约
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                             </td>
-                            <td>N/A</td>
                             {% else %}
                             <td class="positive">
                                 有预约
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                             </td>
-                            {% if rental.is_overtime %}
-                            <td class="negative">已超时</td>
-                            {% else %}
-                            <td class="positive">未超时</td>
-                            {% endif %}
                             {% endif %}
                             {% if rental.returned %}
+                            <td>N/A</td>
                             <td>
                                 <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
@@ -116,6 +111,15 @@
                             <td>{{ rental.return_agent.name }}</td>
                             <td class="positive">归还</td>
                             {% else %}
+                            {% if rental.walk_in %}
+                            <td>N/A</td>
+                            {% else %}
+                            {% if rental.is_overtime %}
+                            <td class="negative">已超时</td>
+                            {% else %}
+                            <td class="positive">未超时</td>
+                            {% endif %}
+                            {% endif %}
                             <td>无</td>
                             <td>无</td>
                             <td class="negative">借出</td>

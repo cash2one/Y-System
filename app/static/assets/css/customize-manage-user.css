@@ -37,7 +37,7 @@
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
 }
-.ui.vertical.stripe .ui.table .ui.buttons {
+.ui.vertical.stripe .ui.table .ui.mini.icon.button {
     margin-left: 10px;
 }
 .ui.vertical.stripe .ui.form .ui.flask.message {

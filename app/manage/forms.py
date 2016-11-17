@@ -348,6 +348,24 @@ class ConfirmiPadFormWalkIn(FlaskForm):
     submit = SubmitField(u'确认并提交')
 
 
+class SelectLessonForm(FlaskForm):
+    lesson = SelectField(u'课程', coerce=int)
+    submit = SubmitField(u'下一步')
+
+    def __init__(self, *args, **kwargs):
+        super(SelectLessonForm, self).__init__(*args, **kwargs)
+        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+
+
+class RentiPadByLessonForm(FlaskForm):
+    ipad = SelectField(u'可用iPad', coerce=int)
+    submit = SubmitField(u'下一步')
+
+    def __init__(self, lesson, *args, **kwargs):
+        super(RentiPadByLessonForm, self).__init__(*args, **kwargs)
+        self.ipad.choices = [(item.ipad_id, u'%s %s %s %s：%s' % (item.ipad.alias, item.ipad.capacity.name, item.ipad.state.name, item.ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in item.ipad.has_lessons]))) for item in lesson.occupied_ipads if (item.ipad.state.name in [u'待机', u'候补']) and (item.ipad.deleted == False)]
+
+
 class iPadSerialForm(FlaskForm):
     serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
     root = BooleanField(u'引导式访问状态正常')

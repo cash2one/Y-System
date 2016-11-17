@@ -374,8 +374,14 @@ class Rental(db.Model):
 
     @property
     def is_overtime(self):
-        return (not self.walk_in) and\
-            (not reduce(lambda result1, result2: result1 or result2, [False] + [schedule.is_booked_by(user=self.user) for schedule in Schedule.query.filter_by(date=date.today()).all() if schedule.started]))
+        if self.walk_in:
+            return False
+        else:
+            for schedule in Schedule.query.filter_by(date=date.today()).all():
+                if not schedule.ended:
+                    if schedule.is_booked_by(user=self.user):
+                        return False
+            return True
 
     def __repr__(self):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
@@ -884,6 +890,11 @@ class Period(db.Model):
     def safe_delete(self, modified_by):
         self.show = False
         self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    def flip_show(self, modified_by):
+        self.show = not self.show
         self.ping(modified_by=modified_by)
         db.session.add(self)
 

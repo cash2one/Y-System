@@ -61,10 +61,11 @@
                                     <img class="ui small image" src="{{ qrcode(current_user.booking(schedule).booking_code) }}">
                                 </div>
                             </td>
+                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.unbook_y_gre', schedule_id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i> 取消</a></td>
                             {% else %}
                             <td class="warning">{{ current_user.booking_state(schedule).name }}</td>
+                            <td><div class="ui disabled mini button"><i class="ban icon"></i> 无</div></td>
                             {% endif %}
-                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.unbook_y_gre', schedule_id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i> 取消</a></td>
                             {% else %}
                             {% if schedule.full %}
                             <td>未预约</td>

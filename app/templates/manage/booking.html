@@ -83,6 +83,11 @@
                                 <div class="ui label">{{ booking.schedule.time_state }}</div>
                                 {% endif %}
                                 {{ moment(booking.schedule.period.start_time_utc).format('H:mm') }} - {{ moment(booking.schedule.period.end_time_utc).format('H:mm') }}
+                                {% if booking.schedule.full %}
+                                <div class="ui red label">{{ booking.schedule.occupied_quota }} / {{ booking.schedule.quota }}</div>
+                                {% else %}
+                                <div class="ui label">{{ booking.schedule.occupied_quota }} / {{ booking.schedule.quota }}</div>
+                                {% endif %}
                             </td>
                             <td>
                                 {% if booking.valid %}
@@ -107,11 +112,6 @@
                                 <i class="delete calendar icon"></i>
                                 {% endif %}
                                 {{ booking.state.name }}
-                                {% if booking.schedule.full %}
-                                <div class="ui red label">{{ booking.schedule.occupied_quota }} / {{ booking.schedule.quota }}</div>
-                                {% else %}
-                                <div class="ui label">{{ booking.schedule.occupied_quota }} / {{ booking.schedule.quota }}</div>
-                                {% endif %}
                                 {% if booking.valid %}
                                 <a id="booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}"><i class="large qrcode icon"></i></a>
                                 <div id="booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}" class="ui flowing popup top left transition hidden">
@@ -124,40 +124,25 @@
                                 <div class="ui popup popup-content">{{ moment(booking.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
+                                {% if booking.schedule.unstarted %}
+                                {% if booking.kept %}
+                                <div class="ui mini button disabled"><i class="ban icon"></i> 无</div>
+                                {% endif %}
+                                {% if booking.valid or booking.waited %}
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.set_booking_state_canceled', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="remove from calendar icon"></i> 取消</a>
+                                {% endif %}
+                                {% if booking.canceled %}
+                                {% if booking.schedule.full %}
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.set_booking_state_wait', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="wait icon"></i> 候选</a>
+                                {% else %}
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.set_booking_state_valid', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="add to calendar icon"></i> 预约</a>
+                                {% endif %}
+                                {% endif %}
+                                {% else %}
                                 <div class="ui simple dropdown mini button">
                                     <i class="wrench icon"></i>
                                     操作
                                     <div class="menu">
-                                    {% if booking.schedule.unstarted %}
-                                        {% if booking.valid %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_canceled', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="remove from calendar icon"></i> 取消</a>
-                                        {% endif %}
-                                        {% if booking.waited %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_canceled', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="remove from calendar icon"></i> 取消</a>
-                                        {% endif %}
-                                        {% if booking.canceled %}
-                                        {% if booking.schedule.full %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_wait', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="wait icon"></i> 候选</a>
-                                        {% else %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_valid', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="add to calendar icon"></i> 预约</a>
-                                        {% endif %}
-                                        {% endif %}
-                                    {% endif %}
-                                    {% if booking.schedule.started %}
-                                        {% if not booking.kept %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_kept', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="smile icon"></i> 赴约</a>
-                                        {% endif %}
-                                        {% if not booking.late %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_late', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="meh icon"></i> 迟到</a>
-                                        {% endif %}
-                                        {% if not booking.missed %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_missed', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="frown icon"></i> 爽约</a>
-                                        {% endif %}
-                                        {% if not booking.invalid %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_invalid', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="delete calendar icon"></i> 失效</a>
-                                        {% endif %}
-                                    {% endif %}
-                                    {% if booking.schedule.ended %}
                                         {% if not booking.kept %}
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_booking_state_kept', user_id=booking.user_id, schedule_id=booking.schedule_id, next=url_for('manage.booking', page=pagination.page)) }}"><i class="smile icon"></i> 赴约</a>
                                         {% endif %}
