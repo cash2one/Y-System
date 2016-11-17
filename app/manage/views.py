@@ -101,6 +101,120 @@ def summary_room(room_id):
     return jsonify({'ipads': [ipad.to_json() for ipad in ipads]})
 
 
+@manage.route('/summary/statistics')
+@permission_required(Permission.MANAGE)
+def summary_statistics():
+    statistics = {
+        'booking': {
+            'vb': '',
+            'y_gre': '',
+        },
+        'room_1103': {
+            'ipad': {
+                'total': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'standby': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPadState.name == u'待机')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'candidate': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPadState.name == u'候补')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'rent': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPadState.name == u'借出')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'maintain': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPadState.name == u'维护')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'charge': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPadState.name == u'充电')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'obsolete': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1103')\
+                    .filter(iPadState.name == u'退役')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+            },
+        },
+        'room_1707': {
+            'ipad': {
+                'total': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'standby': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPadState.name == u'待机')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'candidate': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPadState.name == u'候补')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'rent': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPadState.name == u'借出')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'maintain': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPadState.name == u'维护')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'charge': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPadState.name == u'充电')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+                'obsolete': iPad.query\
+                    .join(Room, Room.id == iPad.room_id)\
+                    .join(iPadState, iPadState.id == iPad.state_id)\
+                    .filter(Room.name == u'1707')\
+                    .filter(iPadState.name == u'退役')\
+                    .filter(iPad.deleted == False)\
+                    .count(),
+            },
+        },
+    }
+    return jsonify(statistics)
+
+
 @manage.route('/booking')
 @login_required
 @permission_required(Permission.MANAGE_BOOKING)

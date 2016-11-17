@@ -16,6 +16,35 @@
 {% endblock %}
 
 {% block page_content %}
+<div class="ui vertical stripe stats segment">
+    <div class="ui equal width stackable internally celled grid">
+        <div class="center aligned row">
+            <div class="column">
+                <div class="ui statistic">
+                    <div class="label">1103</div>
+                    <div class="label">iPad使用情况</div>
+                    <div class="value">
+                        <span id="stat-ipad-rent-1103">0</span>
+                        /
+                        <span id="stat-ipad-total-1103">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="ui statistic">
+                    <div class="label">1707</div>
+                    <div class="label">iPad使用情况</div>
+                    <div class="value">
+                        <span id="stat-ipad-rent-1707">0</span>
+                        /
+                        <span id="stat-ipad-total-1707">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
@@ -93,6 +122,7 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script src="//cdnjs.cloudflare.com/ajax/libs/countup.js/1.7.1/countUp.min.js"></script>
 <script>
     var roomID = '{{ room_id }}';
 </script>
