@@ -158,16 +158,16 @@ def summary_statistics():
                     .filter(iPadState.name == u'退役')\
                     .filter(iPad.deleted == False)\
                     .count(),
-                'walk_in': iPad.query\
+            },
+            'rental': {
+                'walk_in': Rental.query\
+                    .join(iPad, iPad.id == Rental.ipad_id)\
                     .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .join(Rental, Rental.ipad_id == iPad.id)\
                     .filter(Room.name == u'1103')\
-                    .filter(iPadState.name == u'借出')\
-                    .filter(iPad.deleted == False)\
                     .filter(Rental.returned == False)\
                     .filter(Rental.walk_in == True)\
                     .count(),
+                'overtime': sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == u'1103').filter(Rental.returned == False).all()]),
             },
         },
         'room_1707': {
@@ -219,16 +219,16 @@ def summary_statistics():
                     .filter(iPadState.name == u'退役')\
                     .filter(iPad.deleted == False)\
                     .count(),
-                'walk_in': iPad.query\
+            },
+            'rental': {
+                'walk_in': Rental.query\
+                    .join(iPad, iPad.id == Rental.ipad_id)\
                     .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .join(Rental, Rental.ipad_id == iPad.id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPadState.name == u'借出')\
-                    .filter(iPad.deleted == False)\
+                    .filter(Room.name == u'1103')\
                     .filter(Rental.returned == False)\
                     .filter(Rental.walk_in == True)\
                     .count(),
+                'overtime': sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == u'1103').filter(Rental.returned == False).all()]),
             },
         },
     }
