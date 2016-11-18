@@ -224,11 +224,11 @@ def summary_statistics():
                 'walk_in': Rental.query\
                     .join(iPad, iPad.id == Rental.ipad_id)\
                     .join(Room, Room.id == iPad.room_id)\
-                    .filter(Room.name == u'1103')\
+                    .filter(Room.name == u'1707')\
                     .filter(Rental.returned == False)\
                     .filter(Rental.walk_in == True)\
                     .count(),
-                'overtime': sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == u'1103').filter(Rental.returned == False).all()]),
+                'overtime': sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == u'1707').filter(Rental.returned == False).all()]),
             },
         },
     }
