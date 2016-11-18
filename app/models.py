@@ -337,6 +337,34 @@ class Booking(db.Model):
     def canceled(self):
         return self.state.name == u'取消'
 
+    @staticmethod
+    def show_ups(lessons):
+        return sum([rental.user.last_punch.lesson.name in lessons for rental in Rental.query.filter(Rental.returned == False).filter(Rental.walk_in == False).all()])
+
+    @staticmethod
+    def of_current_vb_schedule(lessons):
+        for schedule in Schedule.query\
+            .join(Period, Period.id == Schedule.period_id)\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(Schedule.date == date.today())\
+            .filter(CourseType.name == u'VB')\
+            .all():
+            if schedule.started:
+                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.type.name in [u'预约', u'排队', u'赴约', u'迟到']])
+        return 0
+
+    @staticmethod
+    def of_current_y_gre_schedule(lessons):
+        for schedule in Schedule.query\
+            .join(Period, Period.id == Schedule.period_id)\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(Schedule.date == date.today())\
+            .filter(CourseType.name == u'Y-GRE')\
+            .all():
+            if schedule.started:
+                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.type.name in [u'预约', u'排队', u'赴约', u'迟到']])
+        return 0
+
     def to_json(self):
         booking_json = {
             'user': self.user.to_json(),

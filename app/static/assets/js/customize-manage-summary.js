@@ -36,6 +36,18 @@ var iPadRent1707CountUp = new CountUp('stat-ipad-rent-1707', 0, 0, 0, 2.5, count
 var iPadTotal1707CountUp = new CountUp('stat-ipad-total-1707', 0, 0, 0, 2.5, countUpOptions);
 var iPadWalkIn1707CountUp = new CountUp('stat-walk-in-1707', 0, 0, 0, 2.5, countUpOptions);
 var iPadOvertime1707CountUp = new CountUp('stat-overtime-1707', 0, 0, 0, 2.5, countUpOptions);
+var VBIntroCountUp = new CountUp('stat-vb-intro', 0, 0, 0, 2.5, countUpOptions);
+var VBIntroTotalCountUp = new CountUp('stat-vb-intro-total', 0, 0, 0, 2.5, countUpOptions);
+var GREIntroCountUp = new CountUp('stat-gre-intro', 0, 0, 0, 2.5, countUpOptions);
+var GREIntroTotalCountUp = new CountUp('stat-gre-intro-total', 0, 0, 0, 2.5, countUpOptions);
+var AWIntroCountUp = new CountUp('stat-aw-intro', 0, 0, 0, 2.5, countUpOptions);
+var AWIntroTotalCountUp = new CountUp('stat-aw-intro-total', 0, 0, 0, 2.5, countUpOptions);
+var VBL1_3CountUp = new CountUp('stat-vb-l1-3', 0, 0, 0, 2.5, countUpOptions);
+var VBL1_3TotalCountUp = new CountUp('stat-vb-l1-3-total', 0, 0, 0, 2.5, countUpOptions);
+var VBL4_10CountUp = new CountUp('stat-vb-l4-10', 0, 0, 0, 2.5, countUpOptions);
+var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-10-total', 0, 0, 0, 2.5, countUpOptions);
+var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
+var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
 function updateStats() {
     var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/statistics';
     $.getJSON(url, function(data) {
@@ -47,6 +59,18 @@ function updateStats() {
         iPadTotal1707CountUp.update(data.room_1707.ipad.total);
         iPadWalkIn1707CountUp.update(data.room_1707.rental.walk_in);
         iPadOvertime1707CountUp.update(data.room_1707.rental.overtime);
+        VBIntroCountUp.update(data.booking.vb.intro.show_up);
+        VBIntroTotalCountUp.update(data.booking.vb.intro.total);
+        GREIntroCountUp.update(data.booking.y_gre.intro.show_up);
+        GREIntroTotalCountUp.update(data.booking.y_gre.intro.total);
+        AWIntroCountUp.update(data.booking.y_gre.aw_intro.show_up);
+        AWIntroTotalCountUp.update(data.booking.y_gre.aw_intro.total);
+        VBL1_3CountUp.update(data.booking.vb.l1_3.show_up);
+        VBL1_3TotalCountUp.update(data.booking.vb.l1_3.total);
+        VBL4_10CountUp.update(data.booking.vb.l4_10.show_up);
+        VBL4_10TotalCountUp.update(data.booking.vb.l4_10.total);
+        YGRECountUp.update(data.booking.y_gre.y_gre.show_up);
+        YGRETotalCountUp.update(data.booking.y_gre.y_gre.total);
     });
 };
 updateStats();

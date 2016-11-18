@@ -105,10 +105,44 @@ def summary_room(room_id):
 @permission_required(Permission.MANAGE)
 def summary_statistics():
     statistics = {
-        # 'booking': {
-        #     'vb': '',
-        #     'y_gre': '',
-        # },
+        'booking': {
+            'vb': {
+                'intro': {
+                    'total': Booking.of_current_vb_schedule([u'总论']),
+                    'show_up': Booking.show_ups([u'总论']),
+                },
+                'l1_3': {
+                    'total': Booking.of_current_vb_schedule([u'L1', u'L2', u'L3']),
+                    'show_up': Booking.show_ups([u'L1', u'L2', u'L3']),
+                },
+                'l4_10': {
+                    'total': Booking.of_current_vb_schedule([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9', u'L10']),
+                    'show_up': Booking.show_ups([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9', u'L10']),
+                },
+                'l11_14': {
+                    'total': Booking.of_current_vb_schedule([u'L11', u'L12', u'L13', u'L14']),
+                    'show_up': Booking.show_ups([u'L11', u'L12', u'L13', u'L14']),
+                },
+            },
+            'y_gre': {
+                'intro': {
+                    'total': Booking.of_current_y_gre_schedule([u'Y-GRE总论']),
+                    'show_up': Booking.show_ups([u'Y-GRE总论']),
+                },
+                'y_gre': {
+                    'total': Booking.of_current_y_gre_schedule([u'1st', u'2nd', u'3rd', u'4th', u'5th', u'6th', u'7th', u'8th', u'9th']),
+                    'show_up': Booking.show_ups([u'1st', u'2nd', u'3rd', u'4th', u'5th', u'6th', u'7th', u'8th', u'9th']),
+                },
+                'test': {
+                    'total': Booking.of_current_y_gre_schedule([u'Test']),
+                    'show_up': Booking.show_ups([u'Test']),
+                },
+                'aw_intro': {
+                    'total': Booking.of_current_y_gre_schedule([u'AW总论']),
+                    'show_up': Booking.show_ups([u'AW总论']),
+                },
+            },
+        },
         'room_1103': {
             'ipad': {
                 'total': iPad.query\
