@@ -26,8 +26,6 @@ class Config:
     RECORD_PER_QUERY = 50
     TOLERATE_MINUTES = 15
 
-
-
     @staticmethod
     def init_app(app):
         pass
@@ -46,7 +44,6 @@ class BetaConfig(Config):
     @classmethod
     def init_app(cls, app):
         Config.init_app(app)
-
         # email errors to the administrators
         import logging
         from logging.handlers import SMTPHandler
@@ -74,7 +71,6 @@ class ProductionConfig(Config):
     @classmethod
     def init_app(cls, app):
         Config.init_app(app)
-
         # email errors to the administrators
         import logging
         from logging.handlers import SMTPHandler
