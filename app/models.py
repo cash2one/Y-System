@@ -1443,7 +1443,7 @@ class iPad(db.Model):
 
     @staticmethod
     def quantity_in_room(room_name, state_name=None):
-        if room_name:
+        if state_name:
             return iPad.query\
                 .join(Room, Room.id == iPad.room_id)\
                 .join(iPadState, iPadState.id == iPad.state_id)\
