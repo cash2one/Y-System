@@ -350,7 +350,7 @@ class Booking(db.Model):
             .filter(CourseType.name == u'VB')\
             .all():
             if schedule.started:
-                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.type.name in [u'预约', u'排队', u'赴约', u'迟到']])
+                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.state.name in [u'预约', u'排队', u'赴约', u'迟到']])
         return 0
 
     @staticmethod
@@ -362,7 +362,7 @@ class Booking(db.Model):
             .filter(CourseType.name == u'Y-GRE')\
             .all():
             if schedule.started:
-                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.type.name in [u'预约', u'排队', u'赴约', u'迟到']])
+                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.state.name in [u'预约', u'排队', u'赴约', u'迟到']])
         return 0
 
     def to_json(self):
