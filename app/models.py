@@ -379,11 +379,12 @@ class Rental(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'))
-    date = db.Column(db.Date, default=date.today())
+    # date = db.Column(db.Date, default=date.today())
+    schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'))
     walk_in = db.Column(db.Boolean, default=False)
-    returned = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
     rent_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    returned = db.Column(db.Boolean, default=False)
     return_time = db.Column(db.DateTime)
     return_agent_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -396,20 +397,15 @@ class Rental(db.Model):
         modified_by = User.query.get(return_agent_id)
         ipad.set_state(ipad_state, modified_by=modified_by)
 
-    def flip_walk_in(self):
-        self.walk_in = not self.walk_in
-        db.session.add(self)
+    # def flip_walk_in(self):
+    #     self.walk_in = not self.walk_in
+    #     db.session.add(self)
 
     @property
     def is_overtime(self):
-        if self.walk_in:
-            return False
-        else:
-            for schedule in Schedule.query.filter_by(date=date.today()).all():
-                if not schedule.ended:
-                    if schedule.is_booked_by(user=self.user):
-                        return False
+        if (not self.returned) and self.schedule.ended:
             return True
+        return False
 
     @staticmethod
     def unreturned_walk_ins_in_room(room_name):
@@ -1041,6 +1037,7 @@ class Schedule(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    schedules = db.relationship('Rental', backref='schedule', lazy='dynamic')
 
     def ping(self, modified_by):
         self.last_modified = datetime.utcnow()
@@ -1139,6 +1136,18 @@ class Schedule(db.Model):
     @property
     def full(self):
         return self.occupied_quota >= self.quota
+
+    @staticmethod
+    def current_schedule(type_name):
+        for schedule in Schedule.query\
+            .join(Period, Period.id == Schedule.period_id)\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(CourseType.name == type_name)\
+            .filter(Schedule.date == date.today())\
+            .all()
+            if schedule.started:
+                return schedule
+        return None
 
     def to_json(self):
         schedule_json = {
