@@ -145,124 +145,32 @@ def summary_statistics():
         },
         'room_1103': {
             'ipad': {
-                'total': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'standby': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(iPadState.name == u'待机')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'candidate': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(iPadState.name == u'候补')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'rent': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(iPadState.name == u'借出')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'maintain': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(iPadState.name == u'维护')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'charge': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(iPadState.name == u'充电')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'obsolete': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(iPadState.name == u'退役')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
+                'total': iPad.quantity_in_room(room_name=u'1103'),
+                'standby': iPad.quantity_in_room(room_name=u'1103', state_name=u'待机'),
+                'candidate': iPad.quantity_in_room(room_name=u'1103', state_name=u'候补'),
+                'rent': iPad.quantity_in_room(room_name=u'1103', state_name=u'借出'),
+                'maintain': iPad.quantity_in_room(room_name=u'1103', state_name=u'维护'),
+                'charge': iPad.quantity_in_room(room_name=u'1103', state_name=u'充电'),
+                'obsolete': iPad.quantity_in_room(room_name=u'1103', state_name=u'退役'),
             },
             'rental': {
-                'walk_in': Rental.query\
-                    .join(iPad, iPad.id == Rental.ipad_id)\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .filter(Room.name == u'1103')\
-                    .filter(Rental.returned == False)\
-                    .filter(Rental.walk_in == True)\
-                    .count(),
-                'overtime': sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == u'1103').filter(Rental.returned == False).all()]),
+                'walk_in': Rental.unreturned_walk_ins_in_room(u'1103'),
+                'overtime': Rental.current_overtimes_in_room(u'1103'),
             },
         },
         'room_1707': {
             'ipad': {
-                'total': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'standby': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPadState.name == u'待机')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'candidate': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPadState.name == u'候补')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'rent': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPadState.name == u'借出')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'maintain': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPadState.name == u'维护')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'charge': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPadState.name == u'充电')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
-                'obsolete': iPad.query\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .join(iPadState, iPadState.id == iPad.state_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(iPadState.name == u'退役')\
-                    .filter(iPad.deleted == False)\
-                    .count(),
+                'total': iPad.quantity_in_room(room_name=u'1707'),
+                'standby': iPad.quantity_in_room(room_name=u'1707', state_name=u'待机'),
+                'candidate': iPad.quantity_in_room(room_name=u'1707', state_name=u'候补'),
+                'rent': iPad.quantity_in_room(room_name=u'1707', state_name=u'借出'),
+                'maintain': iPad.quantity_in_room(room_name=u'1707', state_name=u'维护'),
+                'charge': iPad.quantity_in_room(room_name=u'1707', state_name=u'充电'),
+                'obsolete': iPad.quantity_in_room(room_name=u'1707', state_name=u'退役'),
             },
             'rental': {
-                'walk_in': Rental.query\
-                    .join(iPad, iPad.id == Rental.ipad_id)\
-                    .join(Room, Room.id == iPad.room_id)\
-                    .filter(Room.name == u'1707')\
-                    .filter(Rental.returned == False)\
-                    .filter(Rental.walk_in == True)\
-                    .count(),
-                'overtime': sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == u'1707').filter(Rental.returned == False).all()]),
+                'walk_in': Rental.unreturned_walk_ins_in_room(u'1707'),
+                'overtime': Rental.current_overtimes_in_room(u'1707'),
             },
         },
     }

@@ -411,6 +411,20 @@ class Rental(db.Model):
                         return False
             return True
 
+    @staticmethod
+    def unreturned_walk_ins_in_room(room_name):
+        return Rental.query\
+            .join(iPad, iPad.id == Rental.ipad_id)\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == room_name)\
+            .filter(Rental.returned == False)\
+            .filter(Rental.walk_in == True)\
+            .count()
+
+    @staticmethod
+    def current_overtimes_in_room(room_name):
+        return sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == room_name).filter(Rental.returned == False).all()])
+
     def __repr__(self):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
@@ -1417,6 +1431,22 @@ class iPad(db.Model):
         return Rental.query\
             .filter_by(ipad_id=self.id, returned=False)\
             .first()
+
+    @staticmethod
+    def quantity_in_room(room_name, state_name=None):
+        if room_name:
+            return iPad.query\
+                .join(Room, Room.id == iPad.room_id)\
+                .join(iPadState, iPadState.id == iPad.state_id)\
+                .filter(Room.name == room_name)\
+                .filter(iPadState.name == state_name)\
+                .filter(iPad.deleted == False)\
+                .count()
+        return iPad.query\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == room_name)\
+            .filter(iPad.deleted == False)\
+            .count()
 
     def to_json(self):
         ipad_json = {
