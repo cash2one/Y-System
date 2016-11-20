@@ -385,7 +385,6 @@ class Rental(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     ipad_id = db.Column(db.Integer, db.ForeignKey('ipads.id'))
-    # date = db.Column(db.Date, default=date.today())
     schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'))
     walk_in = db.Column(db.Boolean, default=False)
     rent_time = db.Column(db.DateTime, default=datetime.utcnow)
@@ -402,10 +401,6 @@ class Rental(db.Model):
         ipad = iPad.query.get(self.ipad_id)
         modified_by = User.query.get(return_agent_id)
         ipad.set_state(ipad_state, modified_by=modified_by)
-
-    # def flip_walk_in(self):
-    #     self.walk_in = not self.walk_in
-    #     db.session.add(self)
 
     @property
     def is_overtime(self):

@@ -1539,26 +1539,30 @@ def rental():
         show_history_rental = bool(request.cookies.get('show_history_rental', ''))
     if show_today_rental:
         query = Rental.query\
-            .filter(Rental.date == date.today())\
+            .join(Schedule, Schedule.id == Rental.schedule_id)\
+            .filter(Schedule.date == date.today())\
             .order_by(Rental.rent_time.desc())
     if show_today_rental_1103:
         query = Rental.query\
+            .join(Schedule, Schedule.id == Rental.schedule_id)\
             .join(iPad, iPad.id == Rental.ipad_id)\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1103')\
-            .filter(Rental.date == date.today())\
+            .filter(Schedule.date == date.today())\
             .order_by(Rental.rent_time.desc())
     if show_today_rental_1707:
         query = Rental.query\
+            .join(Schedule, Schedule.id == Rental.schedule_id)\
             .join(iPad, iPad.id == Rental.ipad_id)\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')\
-            .filter(Rental.date == date.today())\
+            .filter(Schedule.date == date.today())\
             .order_by(Rental.rent_time.desc())
     if show_history_rental:
         query = Rental.query\
-            .filter(Rental.date < date.today())\
-            .order_by(Rental.date.desc())\
+            .join(Schedule, Schedule.id == Rental.schedule_id)\
+            .filter(Schedule.date < date.today())\
+            .order_by(Schedule.date.desc())\
             .order_by(Rental.return_time.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     rentals = pagination.items

@@ -73,6 +73,7 @@
                             <th>归还时间</th>
                             <th>归还经办人</th>
                             <th>状态</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,15 +93,14 @@
                             </td>
                             <td>{{ rental.rent_agent.name }}</td>
                             {% if rental.walk_in %}
-                            <td class="negative">
-                                未预约
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
-                            </td>
+                            <td class="negative">未预约</td>
                             {% else %}
-                            <td class="positive">
-                                有预约
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
-                            </td>
+                            <td class="positive">有预约</td>
+                            {% endif %}
+                            {% if rental.is_overtime %}
+                            <td class="negative">已超时</td>
+                            {% else %}
+                            <td class="positive">未超时</td>
                             {% endif %}
                             {% if rental.returned %}
                             <td>N/A</td>
@@ -110,19 +110,12 @@
                             </td>
                             <td>{{ rental.return_agent.name }}</td>
                             <td class="positive">归还</td>
+                            <td><div class="ui mini button disabled"><i class="ban icon"></i> 无</a></td>
                             {% else %}
-                            {% if rental.walk_in %}
-                            <td>N/A</td>
-                            {% else %}
-                            {% if rental.is_overtime %}
-                            <td class="negative">已超时</td>
-                            {% else %}
-                            <td class="positive">未超时</td>
-                            {% endif %}
-                            {% endif %}
                             <td>无</td>
                             <td>无</td>
                             <td class="negative">借出</td>
+                            <td><a class="ui mini button loading-trigger"><i class="green exchange icon"></i> 调换</a></td>
                             {% endif %}
                         </tr>
                         {% endfor %}
