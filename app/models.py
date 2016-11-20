@@ -1521,6 +1521,39 @@ class Lesson(db.Model):
     )
 
     @property
+    def abbr(self):
+        abbreviations = {
+            u'VB总论': u'总',
+            u'L1': u'1',
+            u'L2': u'2',
+            u'L3': u'3',
+            u'L4': u'4',
+            u'L5': u'5',
+            u'L6': u'6',
+            u'L7': u'7',
+            u'L8': u'8',
+            u'L9': u'9',
+            u'L10': u'10',
+            u'L11': u'11',
+            u'L12': u'12',
+            u'L13': u'13',
+            u'L14': u'14',
+            u'Y-GRE总论': u'总',
+            u'1st': u'1',
+            u'2nd': u'2',
+            u'3rd': u'3',
+            u'4th': u'4',
+            u'5th': u'5',
+            u'6th': u'6',
+            u'7th': u'7',
+            u'8th': u'8',
+            u'9th': u'9',
+            u'Test': u'T',
+            u'AW总论': u'A',
+        }
+        return abbreviations[self.name]
+
+    @property
     def first_section(self):
         return Section.query\
             .join(Lesson, Lesson.id == Section.lesson_id)\
@@ -1531,7 +1564,7 @@ class Lesson(db.Model):
     @staticmethod
     def insert_lessons():
         lessons = [
-            (u'总论', u'VB', ),
+            (u'VB总论', u'VB', ),
             (u'L1', u'VB', ),
             (u'L2', u'VB', ),
             (u'L3', u'VB', ),
@@ -1541,7 +1574,7 @@ class Lesson(db.Model):
             (u'L7', u'VB', ),
             (u'L8', u'VB', ),
             (u'L9', u'VB', ),
-            (u'GRE总论', u'Y-GRE', ),
+            (u'Y-GRE总论', u'Y-GRE', ),
             (u'1st', u'Y-GRE', ),
             (u'2nd', u'Y-GRE', ),
             (u'3rd', u'Y-GRE', ),
@@ -1580,22 +1613,22 @@ class Section(db.Model):
     @staticmethod
     def insert_sections():
         sections = [
-            (u'Day 1-1', u'总论', ),
-            (u'Day 1-2', u'总论', ),
-            (u'Day 1-3', u'总论', ),
-            (u'Day 1-4', u'总论', ),
-            (u'Day 2-1', u'总论', ),
-            (u'Day 2-2', u'总论', ),
-            (u'Day 2-3', u'总论', ),
-            (u'Day 2-4', u'总论', ),
-            (u'Day 3-1', u'总论', ),
-            (u'Day 3-2', u'总论', ),
-            (u'Day 3-3', u'总论', ),
-            (u'Day 3-4', u'总论', ),
-            (u'Day 4-1', u'总论', ),
-            (u'Day 4-2', u'总论', ),
-            (u'Day 4-3', u'总论', ),
-            (u'Day 4-4', u'总论', ),
+            (u'Day 1-1', u'VB总论', ),
+            (u'Day 1-2', u'VB总论', ),
+            (u'Day 1-3', u'VB总论', ),
+            (u'Day 1-4', u'VB总论', ),
+            (u'Day 2-1', u'VB总论', ),
+            (u'Day 2-2', u'VB总论', ),
+            (u'Day 2-3', u'VB总论', ),
+            (u'Day 2-4', u'VB总论', ),
+            (u'Day 3-1', u'VB总论', ),
+            (u'Day 3-2', u'VB总论', ),
+            (u'Day 3-3', u'VB总论', ),
+            (u'Day 3-4', u'VB总论', ),
+            (u'Day 4-1', u'VB总论', ),
+            (u'Day 4-2', u'VB总论', ),
+            (u'Day 4-3', u'VB总论', ),
+            (u'Day 4-4', u'VB总论', ),
             (u'1.1', u'L1', ),
             (u'1.2', u'L1', ),
             (u'1.3', u'L1', ),
@@ -1670,7 +1703,7 @@ class Section(db.Model):
             (u'9.7', u'L9', ),
             (u'9.8', u'L9', ),
             (u'9.9', u'L9', ),
-            (u'GRE总论', u'GRE总论', ),
+            (u'Y-GRE总论', u'Y-GRE总论', ),
             (u'1st', u'1st', ),
             (u'2nd', u'2nd', ),
             (u'3rd', u'3rd', ),

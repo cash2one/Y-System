@@ -157,7 +157,7 @@
                                 {% with lessons = ipad.has_vb_lessons %}
                                 {% if lessons.count() %}
                                 {% for lesson in lessons %}
-                                <div class="ui blue circular label">{{ lesson.name }}</div>
+                                <div class="ui blue circular label">{{ lesson.abbr }}</div>
                                 {% endfor %}
                                 {% else %}
                                 无
@@ -168,7 +168,7 @@
                                 {% with lessons = ipad.has_y_gre_lessons %}
                                 {% if lessons.count() %}
                                 {% for lesson in lessons %}
-                                <div class="ui teal circular label">{{ lesson.name }}</div>
+                                <div class="ui teal circular label">{{ lesson.abbr }}</div>
                                 {% endfor %}
                                 {% else %}
                                 无

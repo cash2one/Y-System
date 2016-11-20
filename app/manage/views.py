@@ -108,8 +108,8 @@ def summary_statistics():
         'booking': {
             'vb': {
                 'intro': {
-                    'total': Booking.of_current_vb_schedule([u'总论']),
-                    'show_up': Booking.show_ups([u'总论']),
+                    'total': Booking.of_current_vb_schedule([u'VB总论']),
+                    'show_up': Booking.show_ups([u'VB总论']),
                 },
                 'l1_3': {
                     'total': Booking.of_current_vb_schedule([u'L1', u'L2', u'L3']),

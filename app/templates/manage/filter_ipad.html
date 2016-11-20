@@ -63,18 +63,26 @@
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
                             <td>
-                                {% for lesson in ipad.has_lessons %}
-                                {% if lesson.type.name == 'VB' %}
-                                <div class="ui blue circular label">{{ lesson.name }}</div>
-                                {% endif%}
+                                {% with lessons = ipad.has_vb_lessons %}
+                                {% if lessons.count() %}
+                                {% for lesson in lessons %}
+                                <div class="ui blue circular label">{{ lesson.abbr }}</div>
                                 {% endfor %}
+                                {% else %}
+                                无
+                                {% endif %}
+                                {% endwith %}
                             </td>
                             <td>
-                                {% for lesson in ipad.has_lessons %}
-                                {% if lesson.type.name == 'Y-GRE' %}
-                                <div class="ui teal circular label">{{ lesson.name }}</div>
-                                {% endif%}
+                                {% with lessons = ipad.has_y_gre_lessons %}
+                                {% if lessons.count() %}
+                                {% for lesson in lessons %}
+                                <div class="ui teal circular label">{{ lesson.abbr }}</div>
                                 {% endfor %}
+                                {% else %}
+                                无
+                                {% endif %}
+                                {% endwith %}
                             </td>
                             <td>{{ ipad.room.name }}</td>
                             <td>{{ ipad.state.name }}</td>
