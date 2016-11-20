@@ -120,7 +120,7 @@
                     {% if current_user.can(Permission.MANAGE_IPAD) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
                     {% endif %}
-                    {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                    {% if current_user.can(Permission.MANAGE_ANNOUNCEMENT) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_USER) %}
@@ -225,7 +225,7 @@
                 {% if current_user.can(Permission.MANAGE_IPAD) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
                 {% endif %}
-                {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                {% if current_user.can(Permission.MANAGE_ANNOUNCEMENT) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_USER) %}
@@ -324,7 +324,7 @@
                             {% if current_user.can(Permission.MANAGE_IPAD) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
                             {% endif %}
-                            {% if current_user.can(Permission.MANAGE_ANNOUNCE) %}
+                            {% if current_user.can(Permission.MANAGE_ANNOUNCEMENT) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_USER) %}

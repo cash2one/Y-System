@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, DeleteUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, ConfirmiPadFormWalkIn, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, DeleteUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
@@ -1613,17 +1613,17 @@ def rental_history():
     return resp
 
 
-@manage.route('/rental/flip-walk-in/<int:id>')
-@login_required
-@permission_required(Permission.MANAGE_RENTAL)
-def flip_rental_walk_in(id):
-    rental = Rental.query.get_or_404(id)
-    rental.flip_walk_in()
-    if rental.walk_in:
-        flash(u'%s的iPad借阅状态改为：未提前预约' % rental.user.name, category='success')
-    else:
-        flash(u'%s的iPad借阅状态改为：提前预约' % rental.user.name, category='success')
-    return redirect(request.args.get('next') or url_for('manage.rental'))
+# @manage.route('/rental/flip-walk-in/<int:id>')
+# @login_required
+# @permission_required(Permission.MANAGE_RENTAL)
+# def flip_rental_walk_in(id):
+#     rental = Rental.query.get_or_404(id)
+#     rental.flip_walk_in()
+#     if rental.walk_in:
+#         flash(u'%s的iPad借阅状态改为：未提前预约' % rental.user.name, category='success')
+#     else:
+#         flash(u'%s的iPad借阅状态改为：提前预约' % rental.user.name, category='success')
+#     return redirect(request.args.get('next') or url_for('manage.rental'))
 
 
 @manage.route('/rental/rent/step-1', methods=['GET', 'POST'])
@@ -1790,7 +1790,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
         abort(404)
-    form = ConfirmiPadFormWalkIn()
+    form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
         if serial != ipad.serial:
@@ -1802,7 +1802,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
-        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id, walk_in=form.walk_in.data)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id, walk_in=True)
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
@@ -1848,7 +1848,7 @@ def rental_rent_step_4_lesson_alt(user_id, lesson_id, ipad_id):
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
         abort(404)
-    form = ConfirmiPadFormWalkIn()
+    form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
         if serial != ipad.serial:
@@ -1860,7 +1860,7 @@ def rental_rent_step_4_lesson_alt(user_id, lesson_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
             return redirect(url_for('manage.rental_rent_step_3_lesson_alt', user_id=user_id, lesson_id=lesson_id))
-        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id, walk_in=form.walk_in.data)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id, walk_in=True)
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
@@ -2024,7 +2024,7 @@ def rental_return_step_4_alt(user_id, lesson_id, section_id):
 
 @manage.route('/announcement', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCE)
+@permission_required(Permission.MANAGE_ANNOUNCEMENT)
 def announcement():
     form = NewAnnouncementForm()
     if form.validate_on_submit():
@@ -2048,7 +2048,7 @@ def announcement():
 
 @manage.route('/announcement/publish/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCE)
+@permission_required(Permission.MANAGE_ANNOUNCEMENT)
 def publish_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.show:
@@ -2061,7 +2061,7 @@ def publish_announcement(id):
 
 @manage.route('/announcement/retract/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCE)
+@permission_required(Permission.MANAGE_ANNOUNCEMENT)
 def retract_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if not announcement.show:
@@ -2074,7 +2074,7 @@ def retract_announcement(id):
 
 @manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCE)
+@permission_required(Permission.MANAGE_ANNOUNCEMENT)
 def edit_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.deleted:
@@ -2103,7 +2103,7 @@ def edit_announcement(id):
 
 @manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCE)
+@permission_required(Permission.MANAGE_ANNOUNCEMENT)
 def delete_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.deleted:

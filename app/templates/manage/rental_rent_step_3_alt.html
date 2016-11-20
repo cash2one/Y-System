@@ -65,12 +65,6 @@
                                     {{ form.root.label() }}
                                 </div>
                             </div>
-                            <div class="field">
-                                <div class="ui toggle checkbox">
-                                    {{ form.walk_in() }}
-                                    {{ form.walk_in.label() }}
-                                </div>
-                            </div>
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_2_alt', user_id=user.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
