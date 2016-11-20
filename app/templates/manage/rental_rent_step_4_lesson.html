@@ -26,7 +26,7 @@
                             <div class="completed step">
                                 <i class="qrcode icon"></i>
                                 <div class="content">
-                                    <div class="title">预约码有效</div>
+                                    <div class="title">已预约：{{ schedule.period.alias }}</div>
                                 </div>
                             </div>
                             <div class="completed step">
@@ -71,7 +71,7 @@
                                     {{ form.root.label() }}
                                 </div>
                             </div>
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_3_lesson', user_id=user.id, lesson_id=lesson.id) }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_3_lesson', user_id=user.id, lesson_id=lesson.id, schedule_id=schedule.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
                             <div class="ui error message"></div>
