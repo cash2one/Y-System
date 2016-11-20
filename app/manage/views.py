@@ -853,6 +853,9 @@ def set_ipad_state_maintain(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
+    for user in User.query.all():
+        if user.can(Permission.MANAGE_IPAD):
+            send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -1617,19 +1620,6 @@ def rental_history():
     return resp
 
 
-# @manage.route('/rental/flip-walk-in/<int:id>')
-# @login_required
-# @permission_required(Permission.MANAGE_RENTAL)
-# def flip_rental_walk_in(id):
-#     rental = Rental.query.get_or_404(id)
-#     rental.flip_walk_in()
-#     if rental.walk_in:
-#         flash(u'%s的iPad借阅状态改为：未提前预约' % rental.user.name, category='success')
-#     else:
-#         flash(u'%s的iPad借阅状态改为：提前预约' % rental.user.name, category='success')
-#     return redirect(request.args.get('next') or url_for('manage.rental'))
-
-
 @manage.route('/rental/rent/step-1', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
@@ -1894,19 +1884,16 @@ def rental_return_step_1():
             return redirect(url_for('manage.rental_return_step_1'))
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
-            db.session.commit()
             for user in User.query.all():
                 if user.can(Permission.MANAGE_IPAD):
-                    send_email(user.email, u'序列号为%s的iPad处于%s状态' % (serial, ipad.state.name), 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
-            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name), category='warning')
+                    send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+            flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
         if not form.battery.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'充电')
-            db.session.commit()
-            flash(u'已回收序列号为%s的iPad，并设为%s状态' % (serial, ipad.state.name), category='warning')
+            flash(u'已回收序列号为%s的iPad，并设为充电状态' % serial, category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
         rental.set_returned(return_agent_id=current_user.id)
-        db.session.commit()
         flash(u'已回收序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
     return render_template('manage/rental_return_step_1.html', form=form)

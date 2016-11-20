@@ -94,10 +94,14 @@
                             {% else %}
                             <td class="positive">有预约</td>
                             {% endif %}
+                            {% if rental.returned %}
+                            <td>N/A</td>
+                            {% else %}
                             {% if rental.is_overtime %}
                             <td class="negative">已超时</td>
                             {% else %}
                             <td class="positive">未超时</td>
+                            {% endif %}
                             {% endif %}
                             <td>
                                 <div class="popup-trigger">{{ moment(rental.rent_time).fromNow() }}</div>
@@ -105,7 +109,6 @@
                             </td>
                             <td>{{ rental.rent_agent.name }}</td>
                             {% if rental.returned %}
-                            <td>N/A</td>
                             <td>
                                 <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
@@ -117,7 +120,7 @@
                             <td>无</td>
                             <td>无</td>
                             <td class="negative">借出</td>
-                            <td><a class="ui mini button loading-trigger"><i class="green exchange icon"></i> 调换</a></td>
+                            <td><a class="ui green mini button loading-trigger" href="#"><i class="exchange icon"></i> 调换</a></td>
                             {% endif %}
                         </tr>
                         {% endfor %}
