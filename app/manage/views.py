@@ -852,10 +852,11 @@ def set_ipad_state_maintain(id):
         flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
-    flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
+    db.session.commit()
     for user in User.query.all():
         if user.can(Permission.MANAGE_IPAD):
             send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+    flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -1895,6 +1896,7 @@ def rental_return_step_1():
             return redirect(url_for('manage.rental_return_step_1'))
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
+            db.session.commit()
             for user in User.query.all():
                 if user.can(Permission.MANAGE_IPAD):
                     send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
@@ -2046,6 +2048,7 @@ def rental_exchange_step_1(rental_id):
             return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
+            db.session.commit()
             for user in User.query.all():
                 if user.can(Permission.MANAGE_IPAD):
                     send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
