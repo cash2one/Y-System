@@ -120,7 +120,7 @@
                             <td>无</td>
                             <td>无</td>
                             <td class="negative">借出</td>
-                            <td><a class="ui green mini button loading-trigger" href="#"><i class="exchange icon"></i> 调换</a></td>
+                            <td><a class="ui orange mini button loading-trigger" href="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="exchange icon"></i> 调换</a></td>
                             {% endif %}
                         </tr>
                         {% endfor %}

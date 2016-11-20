@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}更新进度{% endblock %}
+{% block title %}调换iPad{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-return-step-4.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-rental-exchange-step-4.css') }}">
 {% endblock %}
 
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="refresh icon"></i> 更新进度</h1>
+    <h1 class="ui inverted header"><i class="exchange icon"></i> 调换iPad</h1>
 </div>
 {% endblock %}
 
@@ -24,9 +24,9 @@
                     <div class="column">
                         <div class="ui fluid vertical steps">
                             <div class="completed step">
-                                <i class="at icon"></i>
+                                <i class="barcode icon"></i>
                                 <div class="content">
-                                    <div class="title">邮箱有效</div>
+                                    <div class="title">已归还iPad：{{ rental.ipad.alias }}</div>
                                 </div>
                             </div>
                             <div class="completed step">
@@ -47,19 +47,32 @@
                                     <div class="title">确认并保存进度信息</div>
                                 </div>
                             </div>
+                            <div class="disabled step">
+                                <i class="tablet icon"></i>
+                                <div class="content">
+                                    <div class="title">选取iPad</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
+                                <i class="barcode icon"></i>
+                                <div class="content">
+                                    <div class="title">扫码确认</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="column">
                         <div class="ui big list">
-                            <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
+                            <div class="item">{{ rental.user.name }}（{{ rental.user.email }}）</div>
+                            <div class="item">原先进度：{{ rental.user.last_punch.lesson.type.name }} - {{ rental.user.last_punch.lesson.name }} - {{ rental.user.last_punch.section.name }}</div>
                             <div class="item">更新进度：{{ lesson.type.name }} - {{ lesson.name }} - {{ section.name }}</div>
                         </div>
                         <form id="confirm-punch" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_return_step_3_alt', user_id=user.id, lesson_id=lesson.id) }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_exchange_step_3', rental_id=rental.id, lesson_id=lesson.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
+                            <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
+                            <a class="loading-trigger" href="{{ url_for('manage.rental_exchange_step_5', rental_id=rental.id, next=request.args.get('next')) }}">跳过进度更新</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>
@@ -72,5 +85,5 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-return-step-4.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/customize-manage-rental-exchange-step-4.js') }}"></script>
 {% endblock %}
