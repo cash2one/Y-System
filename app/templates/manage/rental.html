@@ -66,10 +66,11 @@
                         <tr>
                             <th>姓名</th>
                             <th>iPad</th>
+                            <th>借阅时段</th>
+                            <th>预约</th>
+                            <th>超时</th>
                             <th>借出时间</th>
                             <th>借出经办人</th>
-                            <th>是否提前预约</th>
-                            <th>是否超时</th>
                             <th>归还时间</th>
                             <th>归还经办人</th>
                             <th>状态</th>
@@ -87,11 +88,7 @@
                                 {{ rental.ipad.alias }}
                                 [<code>{{ rental.ipad.serial }}</code>]
                             </td>
-                            <td>
-                                <div class="popup-trigger">{{ moment(rental.rent_time).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ rental.rent_agent.name }}</td>
+                            <td>{{ rental.schedule.period.alias }}</td>
                             {% if rental.walk_in %}
                             <td class="negative">未预约</td>
                             {% else %}
@@ -102,6 +99,11 @@
                             {% else %}
                             <td class="positive">未超时</td>
                             {% endif %}
+                            <td>
+                                <div class="popup-trigger">{{ moment(rental.rent_time).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ rental.rent_agent.name }}</td>
                             {% if rental.returned %}
                             <td>N/A</td>
                             <td>
