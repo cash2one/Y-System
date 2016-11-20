@@ -441,7 +441,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
-    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    last_seen_at = db.Column(db.DateTime(), default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
     profile_json = db.Column(db.UnicodeText)
     registered = db.relationship(
@@ -595,7 +595,7 @@ class User(UserMixin, db.Model):
             return False
 
     def ping(self):
-        self.last_seen = datetime.utcnow()
+        self.last_seen_at = datetime.utcnow()
         db.session.add(self)
 
     def generate_auth_token(self, expiration):
@@ -853,7 +853,7 @@ class User(UserMixin, db.Model):
             'email': self.email,
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
-            'last_seen': self.last_seen.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'url': url_for('main.profile_user', user_id=self.id),
         }
         return user_json
@@ -916,14 +916,14 @@ class Period(db.Model):
     end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     show = db.Column(db.Boolean, default=False)
-    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
-    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
     schedules = db.relationship('Schedule', backref='period', lazy='dynamic')
 
     def ping(self, modified_by):
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
         db.session.add(self)
 
     def safe_delete(self, modified_by):
@@ -985,8 +985,8 @@ class Period(db.Model):
             'alias3': self.alias3,
             'type': self.type.show,
             'show': self.show,
-            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'last_modified_by': self.modified_by.name,
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
         }
         return period_json
 
@@ -1012,7 +1012,7 @@ class Period(db.Model):
                     start_time=P[1],
                     end_time=P[2],
                     type_id=CourseType.query.filter_by(name=P[3]).first().id,
-                    last_modified_by=User.query.get(1).id
+                    modified_by_id=User.query.get(1).id
                 )
                 db.session.add(period)
                 print u'导入时段信息', P[0], P[1], P[2], P[3]
@@ -1029,8 +1029,8 @@ class Schedule(db.Model):
     period_id = db.Column(db.Integer, db.ForeignKey('periods.id'))
     quota = db.Column(db.Integer, default=0)
     available = db.Column(db.Boolean, default=False)
-    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
-    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     booked_users = db.relationship(
         'Booking',
         foreign_keys=[Booking.schedule_id],
@@ -1041,8 +1041,8 @@ class Schedule(db.Model):
     schedules = db.relationship('Rental', backref='schedule', lazy='dynamic')
 
     def ping(self, modified_by):
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
         db.session.add(self)
 
     def publish(self, modified_by):
@@ -1156,8 +1156,8 @@ class Schedule(db.Model):
             'period': self.period.to_json(),
             'quota': self.quota,
             'available': self.available,
-            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'last_modified_by': self.modified_by.name,
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
         }
         return schedule_json
 
@@ -1319,9 +1319,9 @@ class iPad(db.Model):
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
     video_playback = db.Column(db.Time, default=time(10, 0))
     battery_life = db.Column(db.Integer, default=100)
-    last_charged = db.Column(db.DateTime, default=datetime.utcnow)
-    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
-    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    charged_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
     lessons_included = db.relationship(
         'iPadContent',
@@ -1333,8 +1333,8 @@ class iPad(db.Model):
     rentals = db.relationship('Rental', backref='ipad', lazy='dynamic')
 
     def ping(self, modified_by):
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
         db.session.add(self)
 
     def safe_delete(self, modified_by):
@@ -1346,7 +1346,7 @@ class iPad(db.Model):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
         if battery_life > -1:
             self.battery_life = battery_life
-            self.last_charged = datetime.utcnow()
+            self.charged_at = datetime.utcnow()
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
@@ -1407,7 +1407,7 @@ class iPad(db.Model):
 
     @property
     def current_battery_life(self):
-        delta = datetime.utcnow() - self.last_charged
+        delta = datetime.utcnow() - self.charged_at
         current_battery_life = self.battery_life - int(delta.total_seconds() / (((self.video_playback.hour * 60) + self.video_playback.minute) * 60 + self.video_playback.second + (self.video_playback.microsecond / 10**6)) * 100)
         if current_battery_life < 0:
             return 0
@@ -1464,8 +1464,8 @@ class iPad(db.Model):
             'alias': self.alias,
             'capacity': self.capacity.name,
             'state': self.state.name,
-            'last_modified_at': self.last_modified.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'last_modified_by': self.modified_by.name,
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
         }
         if self.state.name == u'借出':
             ipad_json['now_rented_by'] = self.now_rented_by.to_json()
@@ -1493,7 +1493,7 @@ class iPad(db.Model):
                     capacity_id=iPadCapacity.query.filter_by(name=P[2]).first().id,
                     room_id=Room.query.filter_by(name=unicode(str(P[3]))).first().id,
                     state_id=iPadState.query.filter_by(name=P[4]).first().id,
-                    last_modified_by=User.query.get(1).id
+                    modified_by_id=User.query.get(1).id
                 )
                 print u'导入iPad信息', P[1], P[0], P[2], P[3], P[4]
                 db.session.add(ipad)
@@ -1769,8 +1769,8 @@ class Announcement(db.Model):
     body = db.Column(db.UnicodeText)
     body_html = db.Column(db.UnicodeText)
     type_id = db.Column(db.Integer, db.ForeignKey('announcement_types.id'))
-    last_modified = db.Column(db.DateTime, default=datetime.utcnow)
-    last_modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     show = db.Column(db.Boolean, default=False)
     deleted = db.Column(db.Boolean, default=False)
     users_notified = db.relationship(
@@ -1782,8 +1782,8 @@ class Announcement(db.Model):
     )
 
     def ping(self, modified_by):
-        self.last_modified = datetime.utcnow()
-        self.last_modified_by = modified_by.id
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
         db.session.add(self)
 
     def safe_delete(self, modified_by):
