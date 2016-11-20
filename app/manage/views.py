@@ -1786,6 +1786,10 @@ def rental_rent_step_3_alt(user_id, ipad_id):
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
         abort(404)
+    schedule = Schedule.current_schedule(user.last_punch.lesson.type.name)
+    if schedule is None:
+        flash(u'目前没有开放的%s时段，无法借出iPad' % user.last_punch.lesson.type.name, category='error')
+        return redirect(url_for('manage.rental'))
     form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
@@ -1798,7 +1802,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
             return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
-        rental = Rental(user_id=user.id, ipad_id=ipad.id, rent_agent_id=current_user.id, walk_in=True)
+        rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, rent_agent_id=current_user.id, walk_in=True)
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
