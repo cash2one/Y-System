@@ -1030,7 +1030,7 @@ class Schedule(db.Model):
     quota = db.Column(db.Integer, default=0)
     available = db.Column(db.Boolean, default=False)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
-    modified_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     booked_users = db.relationship(
         'Booking',
         foreign_keys=[Booking.schedule_id],
