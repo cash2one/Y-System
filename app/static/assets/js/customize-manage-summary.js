@@ -140,7 +140,7 @@ function updateCards() {
                                 .addClass('extra content')
                                 .append(
                                     $('<span>')
-                                        .append(moment(data.ipads[i].last_modified_at, 'YYYY-MM-DDTh:mm:ssZ').fromNow() + ' [' + data.ipads[i].last_modified_by + ']')
+                                        .append(moment(data.ipads[i].modified_at, 'YYYY-MM-DDTh:mm:ssZ').fromNow() + ' [' + data.ipads[i].modified_by + ']')
                                 )
                                 .append(
                                     $('<span>')

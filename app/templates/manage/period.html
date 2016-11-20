@@ -47,8 +47,8 @@
                             <td>不可选</td>
                             {% endif %}
                             <td>
-                                <div class="popup-trigger">{{ moment(period.last_modified).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(period.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                                <div class="popup-trigger">{{ moment(period.modified_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(period.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ period.modified_by.name }}</td>
                             <td>

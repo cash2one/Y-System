@@ -79,8 +79,8 @@
                             <td>{{ ipad.room.name }}</td>
                             <td>{{ ipad.state.name }}</td>
                             <td>
-                                <div class="popup-trigger">{{ moment(ipad.last_modified).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(ipad.last_modified).format('YYYY-M-D H:mm:ss') }}</div>
+                                <div class="popup-trigger">{{ moment(ipad.modified_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(ipad.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ ipad.modified_by.name }}</td>
                             {% if current_user.can(Permission.MANAGE_IPAD) %}

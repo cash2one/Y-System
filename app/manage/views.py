@@ -424,7 +424,7 @@ def schedule():
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time), category='error')
                 else:
-                    schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data, last_modified_by=current_user.id)
+                    schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data, modified_by_id=current_user.id)
                     db.session.add(schedule)
                     db.session.commit()
                     flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='success')
@@ -582,7 +582,7 @@ def period():
         if start_time >= end_time:
             flash(u'无法添加时段模板：%s，时间设置有误' % form.name.data, category='error')
             return redirect(url_for('manage.period'))
-        period = Period(name=form.name.data, start_time=start_time, end_time=end_time, type_id=form.period_type.data, show=form.show.data, last_modified_by=current_user.id)
+        period = Period(name=form.name.data, start_time=start_time, end_time=end_time, type_id=form.period_type.data, show=form.show.data, modified_by_id=current_user.id)
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
         return redirect(url_for('manage.period'))
@@ -629,8 +629,8 @@ def edit_period(id):
         period.end_time = end_time
         period.type_id = form.period_type.data
         period.show = form.show.data
-        period.last_modified = datetime.utcnow()
-        period.last_modified_by = current_user.id
+        period.modified_at = datetime.utcnow()
+        period.modified_by_id = current_user.id
         db.session.add(period)
         flash(u'已更新时段模板：%s' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.period'))
@@ -672,7 +672,7 @@ def ipad():
         if ipad:
             flash(u'序列号为%s的iPad已存在' % serial, category='error')
             return redirect(url_for('manage.ipad'))
-        ipad = iPad(serial=serial, alias=form.alias.data, capacity_id=form.capacity.data, room_id=room_id, state_id=state_id, last_modified_by=current_user.id)
+        ipad = iPad(serial=serial, alias=form.alias.data, capacity_id=form.capacity.data, room_id=room_id, state_id=state_id, modified_by_id=current_user.id)
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
@@ -899,8 +899,8 @@ def edit_ipad(id):
         else:
             ipad.room_id = form.room.data
         ipad.state_id = form.state.data
-        ipad.last_modified = datetime.utcnow()
-        ipad.last_modified_by = current_user.id
+        ipad.modified_at = datetime.utcnow()
+        ipad.modified_by_id = current_user.id
         db.session.add(ipad)
         db.session.commit()
         for pc in ipad.lessons_included:
@@ -998,7 +998,7 @@ def user():
             Role.name == u'Y-GRE VBx2',
             Role.name == u'Y-GRE A权限'
         ))\
-        .order_by(User.last_seen.desc())\
+        .order_by(User.last_seen_at.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination_users.items
     if current_user.is_administrator():
@@ -1238,7 +1238,7 @@ def find_user():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
@@ -1257,7 +1257,7 @@ def find_user():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
@@ -1275,7 +1275,7 @@ def find_user():
                     Role.name == u'Y-GRE A权限',
                     Role.name == u'协管员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
     form = FindUserForm()
     if form.validate_on_submit():
@@ -1289,7 +1289,7 @@ def find_user():
                         User.name.like('%' + name_or_email + '%'),
                         User.email.like('%' + name_or_email + '%')
                     ))\
-                    .order_by(User.last_seen.desc())\
+                    .order_by(User.last_seen_at.desc())\
                     .limit(current_app.config['RECORD_PER_QUERY'])
             elif current_user.can(Permission.MANAGE_AUTH):
                 users = User.query\
@@ -1308,7 +1308,7 @@ def find_user():
                         Role.name == u'协管员',
                         Role.name == u'管理员'
                     ))\
-                    .order_by(User.last_seen.desc())\
+                    .order_by(User.last_seen_at.desc())\
                     .limit(current_app.config['RECORD_PER_QUERY'])
             else:
                 users = User.query\
@@ -1326,7 +1326,7 @@ def find_user():
                         Role.name == u'Y-GRE A权限',
                         Role.name == u'协管员'
                     ))\
-                    .order_by(User.last_seen.desc())\
+                    .order_by(User.last_seen_at.desc())\
                     .limit(current_app.config['RECORD_PER_QUERY'])
     form.name_or_email.data = name_or_email
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
@@ -1358,7 +1358,7 @@ def auth():
                 Role.name == u'协管员',
                 Role.name == u'管理员'
             ))\
-            .order_by(User.last_seen.desc())
+            .order_by(User.last_seen_at.desc())
     if show_auth_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
@@ -1370,7 +1370,7 @@ def auth():
                 Role.name == u'Y-GRE VBx2',
                 Role.name == u'Y-GRE A权限'
             ))\
-            .order_by(User.last_seen.desc())
+            .order_by(User.last_seen_at.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
     return render_template('manage/auth.html', users=users, show_auth_managers=show_auth_managers, show_auth_users=show_auth_users, pagination=pagination)
@@ -1463,7 +1463,7 @@ def auth_admin():
                 Role.name == u'协管员',
                 Role.name == u'管理员'
             ))\
-            .order_by(User.last_seen.desc())
+            .order_by(User.last_seen_at.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
     return render_template('manage/auth_admin.html', users=users, show_auth_managers_admin=show_auth_managers_admin, show_auth_users_admin=show_auth_users_admin, pagination=pagination)
@@ -1695,7 +1695,7 @@ def rental_rent_step_3(user_id, ipad_id, schedule_id):
             return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=ipad_id, schedule_id=schedule_id))
         rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, rent_agent_id=current_user.id)
         db.session.add(rental)
-        ipad.set_state(u'借出', modified_by=current_user._get_current_object())
+        ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3.html', user=user, ipad=ipad, schedule=schedule, form=form)
@@ -2034,7 +2034,7 @@ def rental_return_step_4_alt(user_id, lesson_id, section_id):
 def announcement():
     form = NewAnnouncementForm()
     if form.validate_on_submit():
-        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=form.announcement_type.data, last_modified_by=current_user.id)
+        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=form.announcement_type.data, modified_by_id=current_user.id)
         db.session.add(announcement)
         db.session.commit()
         if form.show.data:
@@ -2046,7 +2046,7 @@ def announcement():
     page = request.args.get('page', 1, type=int)
     query = Announcement.query.filter_by(deleted=False)
     pagination = query\
-        .order_by(Announcement.last_modified.desc())\
+        .order_by(Announcement.modified_at.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     announcements = pagination.items
     return render_template('manage/announcement.html', form=form, announcements=announcements, pagination=pagination)
@@ -2090,8 +2090,8 @@ def edit_announcement(id):
         announcement.title = form.title.data
         announcement.body_html = form.body.data
         announcement.type_id = form.announcement_type.data
-        announcement.last_modified = datetime.utcnow()
-        announcement.last_modified_by = current_user.id
+        announcement.modified_at = datetime.utcnow()
+        announcement.modified_by_id = current_user.id
         db.session.add(announcement)
         db.session.commit()
         if form.show.data:
@@ -2136,7 +2136,7 @@ def suggest_user():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
@@ -2155,7 +2155,7 @@ def suggest_user():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
@@ -2173,7 +2173,7 @@ def suggest_user():
                     Role.name == u'Y-GRE A权限',
                     Role.name == u'协管员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
     return jsonify({'results': [user.to_json_suggestion() for user in users]})
 
@@ -2192,7 +2192,7 @@ def suggest_email():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
@@ -2211,7 +2211,7 @@ def suggest_email():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
@@ -2229,7 +2229,7 @@ def suggest_email():
                     Role.name == u'Y-GRE A权限',
                     Role.name == u'协管员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
     return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users]})
 
@@ -2248,7 +2248,7 @@ def search_user():
                     User.name.like('%' + name_or_email + '%'),
                     User.email.like('%' + name_or_email + '%')
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         elif current_user.can(Permission.MANAGE_AUTH):
             users = User.query\
@@ -2267,7 +2267,7 @@ def search_user():
                     Role.name == u'协管员',
                     Role.name == u'管理员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
         else:
             users = User.query\
@@ -2285,6 +2285,6 @@ def search_user():
                     Role.name == u'Y-GRE A权限',
                     Role.name == u'协管员'
                 ))\
-                .order_by(User.last_seen.desc())\
+                .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
     return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users]})
