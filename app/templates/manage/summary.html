@@ -29,24 +29,6 @@
                 </div>
             </div>
             <div class="column">
-                <div class="ui teal statistic">
-                    <div class="label">GRE总论</div>
-                    <div class="label">到场/预约人数</div>
-                    <div class="value">
-                        <span id="stat-gre-intro">0</span>/<span id="stat-gre-intro-total">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui teal statistic">
-                    <div class="label">AW总论</div>
-                    <div class="label">到场/预约人数</div>
-                    <div class="value">
-                        <span id="stat-aw-intro">0</span>/<span id="stat-aw-intro-total">0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="column">
                 <div class="ui blue statistic">
                     <div class="label">VB L1-3</div>
                     <div class="label">到场/预约人数</div>
@@ -66,10 +48,28 @@
             </div>
             <div class="column">
                 <div class="ui teal statistic">
+                    <div class="label">Y-GRE总论</div>
+                    <div class="label">到场/预约人数</div>
+                    <div class="value">
+                        <span id="stat-gre-intro">0</span>/<span id="stat-gre-intro-total">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="ui teal statistic">
                     <div class="label">Y-GRE 1st-9th</div>
                     <div class="label">到场/预约人数</div>
                     <div class="value">
                         <span id="stat-y-gre">0</span>/<span id="stat-y-gre-total">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="ui teal statistic">
+                    <div class="label">AW总论</div>
+                    <div class="label">到场/预约人数</div>
+                    <div class="value">
+                        <span id="stat-aw-intro">0</span>/<span id="stat-aw-intro-total">0</span>
                     </div>
                 </div>
             </div>
@@ -192,7 +192,7 @@
                             </div>
                             <div class="extra">
                                 <i class="notched circle loading icon"></i>
-                                {{ moment(announcement.last_modified).fromNow() }}
+                                {{ moment(announcement.modified_at).fromNow() }}
                             </div>
                         </div>
                     </div>

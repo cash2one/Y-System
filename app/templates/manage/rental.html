@@ -66,13 +66,15 @@
                         <tr>
                             <th>姓名</th>
                             <th>iPad</th>
+                            <th>借阅时段</th>
+                            <th>预约</th>
+                            <th>超时</th>
                             <th>借出时间</th>
                             <th>借出经办人</th>
-                            <th>是否提前预约</th>
-                            <th>是否超时</th>
                             <th>归还时间</th>
                             <th>归还经办人</th>
                             <th>状态</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,32 +88,13 @@
                                 {{ rental.ipad.alias }}
                                 [<code>{{ rental.ipad.serial }}</code>]
                             </td>
-                            <td>
-                                <div class="popup-trigger">{{ moment(rental.rent_time).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ rental.rent_agent.name }}</td>
+                            <td>{{ rental.schedule.period.alias }}</td>
                             {% if rental.walk_in %}
-                            <td class="negative">
-                                未预约
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
-                            </td>
+                            <td class="negative">未预约</td>
                             {% else %}
-                            <td class="positive">
-                                有预约
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_rental_walk_in', id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="refresh icon"></i></a>
-                            </td>
+                            <td class="positive">有预约</td>
                             {% endif %}
                             {% if rental.returned %}
-                            <td>N/A</td>
-                            <td>
-                                <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ rental.return_agent.name }}</td>
-                            <td class="positive">归还</td>
-                            {% else %}
-                            {% if rental.walk_in %}
                             <td>N/A</td>
                             {% else %}
                             {% if rental.is_overtime %}
@@ -120,9 +103,24 @@
                             <td class="positive">未超时</td>
                             {% endif %}
                             {% endif %}
+                            <td>
+                                <div class="popup-trigger">{{ moment(rental.rent_time).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ rental.rent_agent.name }}</td>
+                            {% if rental.returned %}
+                            <td>
+                                <div class="popup-trigger">{{ moment(rental.return_time).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ rental.return_agent.name }}</td>
+                            <td class="positive">归还</td>
+                            <td><div class="ui mini button disabled"><i class="ban icon"></i> 无</a></td>
+                            {% else %}
                             <td>无</td>
                             <td>无</td>
                             <td class="negative">借出</td>
+                            <td><a class="ui orange mini button loading-trigger" href="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="exchange icon"></i> 调换</a></td>
                             {% endif %}
                         </tr>
                         {% endfor %}

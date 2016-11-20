@@ -340,14 +340,6 @@ class ConfirmiPadForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
 
 
-class ConfirmiPadFormWalkIn(FlaskForm):
-    serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
-    battery_life = IntegerField(u'剩余电量', validators=[Required(message=u'请输入iPad电量'), NumberRange(min=0, max=100)])
-    root = BooleanField(u'引导式访问状态正常')
-    walk_in = BooleanField(u'未预约到场')
-    submit = SubmitField(u'确认并提交')
-
-
 class SelectLessonForm(FlaskForm):
     lesson = SelectField(u'课程', coerce=int)
     submit = SubmitField(u'下一步')
