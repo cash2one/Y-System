@@ -75,6 +75,7 @@ class Registration(db.Model):
     __tablename__ = 'registrations'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class CourseType(db.Model):
@@ -108,6 +109,10 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    show = db.Column(db.Boolean, default=False)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
     registered_users = db.relationship(
         'Registration',
         foreign_keys=[Registration.course_id],
@@ -115,6 +120,22 @@ class Course(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.show = False
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    def flip_show(self, modified_by):
+        self.show = not self.show
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
 
     @staticmethod
     def insert_courses():
@@ -127,7 +148,8 @@ class Course(db.Model):
             if course is None:
                 course = Course(
                     name=C[0],
-                    type_id=CourseType.query.filter_by(name=C[1]).first().id
+                    type_id=CourseType.query.filter_by(name=C[1]).first().id,
+                    modified_by_id=modified_by_id=User.query.get(1).id
                 )
                 db.session.add(course)
                 print u'导入课程信息', C[0], C[1]
@@ -479,8 +501,9 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
+    modified_courses = db.relationship('Course', backref='modified_by', lazy='dynamic')
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
+    modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
     modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
     read_announcements = db.relationship(
