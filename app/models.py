@@ -447,6 +447,14 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
+class AssignmentScore(db.Model):
+    __tablename__ = 'assignment_scores'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), primary_key=True)
+    score = db.Column(db.Float)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class TestScore(db.Model):
     __tablename__ = 'test_scores'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
