@@ -447,6 +447,14 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
+class TestScore(db.Model):
+    __tablename__ = 'test_scores'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), primary_key=True)
+    score = db.Column(db.Float)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class UserAnnouncement(db.Model):
     __tablename__ = 'user_announcements'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -461,8 +469,8 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
-    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
-    last_seen_at = db.Column(db.DateTime(), default=datetime.utcnow)
+    member_since = db.Column(db.DateTime, default=datetime.utcnow)
+    last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
     profile_json = db.Column(db.UnicodeText)
     registered = db.relationship(
