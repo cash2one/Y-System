@@ -206,8 +206,8 @@
                                 <div class="popup-trigger">{{ moment(punch.timestamp).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ punch.lesson.type.name }}</td>
-                            <td>{{ punch.lesson.name }}</td>
+                            <td>{{ punch.section.lesson.type.name }}</td>
+                            <td>{{ punch.section.lesson.name }}</td>
                             <td>{{ punch.section.name }}</td>
                         </tr>
                         {% endfor %}

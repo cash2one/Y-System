@@ -366,7 +366,7 @@ class Booking(db.Model):
 
     @staticmethod
     def show_ups(lessons):
-        return sum([rental.user.last_punch.lesson.name in lessons for rental in Rental.query.filter(Rental.returned == False).filter(Rental.walk_in == False).all()])
+        return sum([rental.user.last_punch.section.lesson.name in lessons for rental in Rental.query.filter(Rental.returned == False).filter(Rental.walk_in == False).all()])
 
     @staticmethod
     def of_current_vb_schedule(lessons):
@@ -377,7 +377,7 @@ class Booking(db.Model):
             .filter(CourseType.name == u'VB')\
             .all():
             if schedule.started:
-                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.state.name in [u'预约', u'排队', u'赴约', u'迟到']])
+                return sum([booking.user.last_punch.section.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.state.name in [u'预约', u'排队', u'赴约', u'迟到']])
         return 0
 
     @staticmethod
@@ -389,7 +389,7 @@ class Booking(db.Model):
             .filter(CourseType.name == u'Y-GRE')\
             .all():
             if schedule.started:
-                return sum([booking.user.last_punch.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.state.name in [u'预约', u'排队', u'赴约', u'迟到']])
+                return sum([booking.user.last_punch.section.lesson.name in lessons for booking in Booking.query.filter_by(schedule_id=schedule.id).all() if booking.state.name in [u'预约', u'排队', u'赴约', u'迟到']])
         return 0
 
     def to_json(self):
@@ -651,7 +651,7 @@ class User(UserMixin, db.Model):
         db.session.add(ua)
 
     def add_initial_punch(self, activation):
-        initial_punch = Punch(user_id=self.id, lesson_id=activation.initial_lesson_id, section_id=activation.initial_section_id)
+        initial_punch = Punch(user_id=self.id, section_id=activation.initial_section_id)
         db.session.add(initial_punch)
 
     @property
@@ -836,7 +836,8 @@ class User(UserMixin, db.Model):
         return iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
             .join(iPadContent, iPadContent.ipad_id == iPad.id)\
-            .join(Punch, Punch.lesson_id == iPadContent.lesson_id)\
+            .join(Section, Section.lesson_id == iPadContent.lesson_id)\
+            .join(Punch, Punch.section_id == Section.id)\
             .filter(Punch.user_id == self.id)\
             .filter(Punch.timestamp == self.last_punch.timestamp)\
             .filter(or_(
@@ -907,7 +908,7 @@ class User(UserMixin, db.Model):
             )
             db.session.add(admin)
             db.session.commit()
-            initial_punch = Punch(user_id=admin.id, lesson_id=1, section_id=1)
+            initial_punch = Punch(user_id=admin.id, section_id=1)
             db.session.add(initial_punch)
             print u'初始化系统管理员信息'
 
