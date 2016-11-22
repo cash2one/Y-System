@@ -369,7 +369,7 @@ class PunchLessonForm(FlaskForm):
 
     def __init__(self, user, *args, **kwargs):
         super(PunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.lesson_id]
+        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
 
 
 class PunchSectionForm(FlaskForm):
