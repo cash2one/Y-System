@@ -1173,6 +1173,16 @@ class Schedule(db.Model):
                 return schedule
         return None
 
+    def booked_ipads_quantity(self, lesson):
+        return Booking.query\
+            .join(BookingState, BookingState.id == Booking.state_id)\
+            .join(Punch, Punch.user_id == Booking.user_id)\
+            .join(Section, Section.id == Punch.section_id)\
+            .filter(Booking.schedule_id == self.id)\
+            .filter(BookingState.name == u'预约')\
+            .filter(Section.lesson_id == lesson.id)\
+            .count()
+
     def to_json(self):
         schedule_json = {
             'date': self.date,
@@ -1579,6 +1589,14 @@ class Lesson(db.Model):
             .filter(Lesson.id == self.id)\
             .order_by(Section.id.asc())\
             .first()
+
+    @property
+    def available_ipads(self):
+        return iPad.query\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .filter(iPadState.name != u'退役')\
+            .filter(iPadContent.lesson_id == self.id)
 
     @staticmethod
     def insert_lessons():

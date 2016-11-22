@@ -262,21 +262,12 @@ def set_booking_state_valid(user_id, schedule_id):
     booking.set_state(u'预约')
     db.session.commit()
     send_email(user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=user, schedule=schedule, booking=booking)
-    booked_ipads = Booking.query\
-        .join(Punch, Punch.user_id == Booking.user_id)\
-        .join(BookingState, BookingState.id == Booking.state_id)\
-        .filter(Booking.schedule_id == schedule_id)\
-        .filter(BookingState.name == u'预约')\
-        .filter(Punch.section_id == user.last_punch.section_id)
-    available_ipads = iPad.query\
-        .join(iPadContent, iPadContent.ipad_id == iPad.id)\
-        .join(iPadState, iPadState.id == iPad.state_id)\
-        .filter(iPadContent.lesson_id == user.last_punch.section.lesson_id)\
-        .filter(iPadState.name != u'退役')
-    if booked_ipads.count() >= available_ipads.count():
+    booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=user.last_punch.section.lesson)
+    available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
+    if booked_ipads_quantity >= available_ipads_quantity:
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.section.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -338,21 +329,12 @@ def set_booking_state_canceled(user_id, schedule_id):
     db.session.commit()
     if candidate:
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
-        booked_ipads = Booking.query\
-            .join(Punch, Punch.user_id == Booking.user_id)\
-            .join(BookingState, BookingState.id == Booking.state_id)\
-            .filter(Booking.schedule_id == schedule_id)\
-            .filter(BookingState.name == u'预约')\
-            .filter(Punch.section_id == candidate.last_punch.section_id)
-        available_ipads = iPad.query\
-            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
-            .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadContent.lesson_id == candidate.last_punch.section.lesson_id)\
-            .filter(iPadState.name != u'退役')
-        if booked_ipads.count() >= available_ipads.count():
+        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
+        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
+        if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -533,21 +515,12 @@ def increase_schedule_quota(id):
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
-        booked_ipads = Booking.query\
-            .join(Punch, Punch.user_id == Booking.user_id)\
-            .join(BookingState, BookingState.id == Booking.state_id)\
-            .filter(Booking.schedule_id == schedule_id)\
-            .filter(BookingState.name == u'预约')\
-            .filter(Punch.section_id == candidate.last_punch.section_id)
-        available_ipads = iPad.query\
-            .join(iPadContent, iPadContent.ipad_id == iPad.id)\
-            .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadContent.lesson_id == candidate.last_punch.section.lesson_id)\
-            .filter(iPadState.name != u'退役')
-        if booked_ipads.count() >= available_ipads.count():
+        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
+        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
+        if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     flash(u'所选时段名额+1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
