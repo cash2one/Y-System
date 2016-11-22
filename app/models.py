@@ -488,15 +488,15 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), index=True)
+    email = db.Column(db.Unicode(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
-    email = db.Column(db.Unicode(64), unique=True, index=True)
     confirmed = db.Column(db.Boolean, default=False)
     # activated = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
-    registered = db.relationship(
+    registered_courses = db.relationship(
         'Registration',
         foreign_keys=[Registration.user_id],
         backref=db.backref('user', lazy='joined'),
@@ -718,12 +718,12 @@ class User(UserMixin, db.Model):
             db.session.add(r)
 
     def unregister(self, course):
-        r = self.registered.filter_by(course_id=course.id).first()
+        r = self.registered_courses.filter_by(course_id=course.id).first()
         if r:
             db.session.delete(r)
 
     def is_registering(self, course):
-        return self.registered.filter_by(course_id=course.id).first() is not None
+        return self.registered_courses.filter_by(course_id=course.id).first() is not None
 
     # def add_user_activation(self, activation):
     #     ua = UserActivation(user_id=self.id, activation_id=activation.id)
@@ -763,7 +763,7 @@ class User(UserMixin, db.Model):
 
     def unbook(self, schedule):
         # mark booking state as canceled
-        b =self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        b = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
         if b:
             b.state_id = BookingState.query.filter_by(name=u'取消').first().id
             db.session.add(b)
@@ -782,7 +782,7 @@ class User(UserMixin, db.Model):
             return User.query.get(wb.user_id)
 
     def miss(self, schedule):
-        b =self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        b = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
         if b:
             b.state_id = BookingState.query.filter_by(name=u'爽约').first().id
             db.session.add(b)
