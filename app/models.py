@@ -67,7 +67,7 @@ class Role(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Role %s>' % self.name
+        return '<Role %r>' % self.name
 
 
 class Registration(db.Model):
@@ -100,7 +100,7 @@ class CourseType(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Course Type %s>' % self.name
+        return '<Course Type %r>' % self.name
 
 
 class Course(db.Model):
@@ -155,7 +155,7 @@ class Course(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Course %s>' % self.name
+        return '<Course %r>' % self.name
 
 
 class UserActivation(db.Model):
@@ -257,7 +257,7 @@ class Activation(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Activation %s>' % self.name
+        return '<Activation %r>' % self.name
 
 
 class BookingState(db.Model):
@@ -286,7 +286,7 @@ class BookingState(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Booking State %s>' % self.name
+        return '<Booking State %r>' % self.name
 
 
 class Booking(db.Model):
@@ -447,20 +447,75 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
+class AssignmentScoreGrade(db.Model):
+    __tablename__ = 'assignment_score_grades'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    assignment_scores = db.relationship('AssignmentScore', backref='grade', lazy='dynamic')
+
+    @staticmethod
+    def insert_assignment_score_grades():
+        assignment_score_grades = [
+            (u'完成', ),
+            (u'A+', ),
+            (u'A', ),
+            (u'A-', ),
+            (u'B+', ),
+            (u'B', ),
+            (u'B-', ),
+            (u'C+', ),
+            (u'C', ),
+            (u'C-', ),
+            (u'D+', ),
+            (u'D', ),
+            (u'D-', ),
+            (u'F', ),
+        ]
+        for ASG in assignment_score_grades:
+            assignment_score_grade = AssignmentScoreGrade.query.filter_by(name=ASG[0]).first()
+            if assignment_score_grade is None:
+                assignment_score_grade = AssignmentScoreGrade(name=ASG[0])
+                db.session.add(assignment_score_grade)
+                print u'导入作业成绩类型信息', ASG[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Assignment Score Grade %r>' % self.name
+
+
 class AssignmentScore(db.Model):
     __tablename__ = 'assignment_scores'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), primary_key=True)
-    score = db.Column(db.Float)
+    grade_id = db.Column(db.Integer, db.ForeignKey('assignment_scores_grades.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return '<Assignment Score %r, %r>' % (self.user.name, self.assignment.name)
 
-class TestScore(db.Model):
-    __tablename__ = 'test_scores'
+
+class VBTestScore(db.Model):
+    __tablename__ = 'vb_test_scores'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), primary_key=True)
     score = db.Column(db.Float)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
+
+
+class YGRETestScore(db.Model):
+    __tablename__ = 'y_gre_test_scores'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), primary_key=True)
+    v_score = db.Column(db.Integer)
+    q_score = db.Column(db.Integer)
+    aw_score = db.Column(db.Float)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
 class UserAnnouncement(db.Model):
@@ -1238,7 +1293,7 @@ class iPadCapacity(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<iPad Capacity %s>' % self.name
+        return '<iPad Capacity %r>' % self.name
 
 
 class iPadState(db.Model):
@@ -1266,7 +1321,7 @@ class iPadState(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<iPad State %s>' % self.name
+        return '<iPad State %r>' % self.name
 
 
 class Room(db.Model):
@@ -1290,7 +1345,7 @@ class Room(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Room %s>' % self.name
+        return '<Room %r>' % self.name
 
 
 class iPadContent(db.Model):
@@ -1355,7 +1410,7 @@ class iPadContentJSON(db.Model):
         db.session.add(pc_json)
 
     def __repr__(self):
-        return '<iPadContentJSON %s>' % self.json_string
+        return '<iPadContentJSON %r>' % self.json_string
 
 
 class iPad(db.Model):
@@ -1546,7 +1601,7 @@ class iPad(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<iPad %s, %s>' % (self.alias, self.serial)
+        return '<iPad %r, %r>' % (self.alias, self.serial)
 
 
 class Lesson(db.Model):
@@ -1660,7 +1715,7 @@ class Lesson(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Lesson %s>' % self.name
+        return '<Lesson %r>' % self.name
 
 
 class Section(db.Model):
@@ -1808,7 +1863,7 @@ class Section(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Section %s>' % self.name
+        return '<Section %r>' % self.name
 
 
 class Assignment(db.Model):
@@ -1846,7 +1901,7 @@ class Assignment(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Assignment %s>' % self.name
+        return '<Assignment %r>' % self.name
 
 
 class Test(db.Model):
@@ -1885,7 +1940,7 @@ class Test(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Test %s>' % self.name
+        return '<Test %r>' % self.name
 
 
 class Punch(db.Model):
@@ -1949,7 +2004,7 @@ class AnnouncementType(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<AnnouncementType %s>' % self.name
+        return '<AnnouncementType %r>' % self.name
 
 
 class Announcement(db.Model):
@@ -2028,7 +2083,7 @@ class Announcement(db.Model):
         target.body = reduce(lambda paragraph1, paragraph2: paragraph1 + '\n\n' + paragraph2, [child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1))==1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2))==1, newline_tags))] if child.get_text()])
 
     def __repr__(self):
-        return '<Announcement %s>' % self.title
+        return '<Announcement %r>' % self.title
 
 
 db.event.listen(Announcement.body_html, 'set', Announcement.on_changed_body_html)
