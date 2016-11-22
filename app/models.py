@@ -480,7 +480,6 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
-    profile_json = db.Column(db.UnicodeText)
     registered = db.relationship(
         'Registration',
         foreign_keys=[Registration.user_id],
