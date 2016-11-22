@@ -274,7 +274,10 @@
                         </div>
                         <div class="four wide field">
                             {{ form.video_playback.label() }}
-                            {{ form.video_playback(class='ui dropdown') }}
+                            <div class="ui right labeled input">
+                                {{ form.video_playback(placeholder='10') }}
+                                <div class="ui basic label">小时</div>
+                            </div>
                         </div>
                         <div class="four wide field">
                             {{ form.state.label() }}

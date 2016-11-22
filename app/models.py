@@ -27,12 +27,11 @@ class Permission:
     MANAGE_RENTAL       = 0b0000000000000000000000010000000
     MANAGE_SCHEDULE     = 0b0000000000000000000000100000000
     MANAGE_IPAD         = 0b0000000000000000000001000000000
-    MANAGE_ASSIGNMENT   = 0b0000000000000000000010000000000
-    MANAGE_TEST         = 0b0000000000000000000100000000000
-    MANAGE_ANNOUNCEMENT = 0b0000000000000000001000000000000
-    MANAGE_MESSAGE      = 0b0000000000000000010000000000000
-    MANAGE_FEEDBACK     = 0b0000000000000000100000000000000
-    MANAGE_BANNER       = 0b0000000000000001000000000000000
+    MANAGE_TEACHING     = 0b0000000000000000000010000000000
+    MANAGE_ANNOUNCEMENT = 0b0000000000000000000100000000000
+    MANAGE_MESSAGE      = 0b0000000000000000001000000000000
+    MANAGE_FEEDBACK     = 0b0000000000000000010000000000000
+    MANAGE_BANNER       = 0b0000000000000000100000000000000
     MANAGE_USER         = 0b0010000000000000000000000000000
     MANAGE_AUTH         = 0b0100000000000000000000000000000
     ADMINISTER          = 0b1000000000000000000000000000000
@@ -55,8 +54,8 @@ class Role(db.Model):
             (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
             (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
             (u'志愿者', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL, ),
-            (u'协管员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_ASSIGNMENT | Permission.MANAGE_TEST | Permission.MANAGE_ANNOUNCEMENT | Permission.MANAGE_MESSAGE | Permission.MANAGE_FEEDBACK | Permission.MANAGE_BANNER | Permission.MANAGE_USER, ),
-            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_ASSIGNMENT | Permission.MANAGE_TEST | Permission.MANAGE_ANNOUNCEMENT | Permission.MANAGE_MESSAGE | Permission.MANAGE_FEEDBACK | Permission.MANAGE_BANNER | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
+            (u'协管员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_TEACHING | Permission.MANAGE_ANNOUNCEMENT | Permission.MANAGE_MESSAGE | Permission.MANAGE_FEEDBACK | Permission.MANAGE_BANNER | Permission.MANAGE_USER, ),
+            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_TEACHING | Permission.MANAGE_ANNOUNCEMENT | Permission.MANAGE_MESSAGE | Permission.MANAGE_FEEDBACK | Permission.MANAGE_BANNER | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
             (u'开发人员', 0x7fffffff, ),
         ]
         for R in roles:
@@ -1341,7 +1340,7 @@ class iPad(db.Model):
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
     state_id = db.Column(db.Integer, db.ForeignKey('ipad_states.id'))
-    video_playback = db.Column(db.Time, default=time(10, 0))
+    video_playback = db.Column(db.Interval, default=timedelta(hours=10))
     battery_life = db.Column(db.Integer, default=100)
     charged_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -1424,15 +1423,12 @@ class iPad(db.Model):
 
     @property
     def video_playback_alias(self):
-        if self.video_playback.minute == 0:
-            return u'%s小时' % unicode(self.video_playback.hour)
-        else:
-            return u'%s.5小时' % unicode(self.video_playback.hour)
+        return u'%g小时' % (self.video_playback.total_seconds() / 3600)
 
     @property
     def current_battery_life(self):
         delta = datetime.utcnow() - self.charged_at
-        current_battery_life = self.battery_life - int(delta.total_seconds() / (((self.video_playback.hour * 60) + self.video_playback.minute) * 60 + self.video_playback.second + (self.video_playback.microsecond / 10**6)) * 100)
+        current_battery_life = self.battery_life - int(delta.total_seconds() / self.video_playback.total_seconds() * 100)
         if current_battery_life < 0:
             return 0
         if current_battery_life > 100:
@@ -1597,6 +1593,11 @@ class Lesson(db.Model):
             (u'L7', u'VB', ),
             (u'L8', u'VB', ),
             (u'L9', u'VB', ),
+            (u'L10', u'VB', ),
+            (u'L11', u'VB', ),
+            (u'L12', u'VB', ),
+            (u'L13', u'VB', ),
+            (u'L14', u'VB', ),
             (u'Y-GRE总论', u'Y-GRE', ),
             (u'1st', u'Y-GRE', ),
             (u'2nd', u'Y-GRE', ),
@@ -1629,6 +1630,7 @@ class Section(db.Model):
     __tablename__ = 'sections'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    hour = db.Column(db.Float, default=1.0)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     punches = db.relationship('Punch', backref='section', lazy='dynamic')
     activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
@@ -1757,27 +1759,26 @@ class Section(db.Model):
 class Punch(db.Model):
     __tablename__ = 'punches'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.name, self.section.name)
+        return u'%s - %s' % (self.section.lesson.name, self.section.name)
 
     @property
     def alias2(self):
-        return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.section.name)
+        return u'%s - %s - %s' % (self.section.lesson.type.name, self.section.lesson.name, self.section.name)
 
     @property
     def alias3(self):
-        return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
+        return u'%s - %s' % (self.section.lesson.type.name, self.lesson.name)
 
     def to_json(self):
         punch_json = {
             'user': self.user.name,
-            'course_type': self.lesson.type.name,
-            'lesson': self.lesson.name,
+            'course_type': self.section.lesson.type.name,
+            'lesson': self.section.lesson.name,
             'section': self.section.name,
             'alias': self.alias,
             'alias2': self.alias2,
@@ -1787,7 +1788,7 @@ class Punch(db.Model):
         return punch_json
 
     def __repr__(self):
-        return '<Punch %r, %r>' % (self.user.name, self.section.name)
+        return '<Punch %r, %r>' % (self.user.name, self.alias)
 
 
 class AnnouncementType(db.Model):

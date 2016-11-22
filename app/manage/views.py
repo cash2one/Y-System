@@ -672,7 +672,7 @@ def ipad():
         if ipad:
             flash(u'序列号为%s的iPad已存在' % serial, category='error')
             return redirect(url_for('manage.ipad'))
-        ipad = iPad(serial=serial, alias=form.alias.data, capacity_id=form.capacity.data, room_id=room_id, state_id=state_id, modified_by_id=current_user.id)
+        ipad = iPad(serial=serial, alias=form.alias.data, capacity_id=form.capacity.data, room_id=room_id, state_id=state_id, video_playback=timedelta(hours=form.video_playback.data), modified_by_id=current_user.id)
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
@@ -903,6 +903,7 @@ def edit_ipad(id):
         else:
             ipad.room_id = form.room.data
         ipad.state_id = form.state.data
+        ipad.video_playback = timedelta(hours=form.video_playback.data)
         ipad.modified_at = datetime.utcnow()
         ipad.modified_by_id = current_user.id
         db.session.add(ipad)
@@ -919,6 +920,7 @@ def edit_ipad(id):
     form.capacity.data = ipad.capacity_id
     form.room.data = ipad.room_id
     form.state.data = ipad.state_id
+    form.video_playback.data = ipad.video_playback.total_seconds() / 3600
     form.vb_lessons.data = ipad.vb_lesson_ids_included
     form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included
     return render_template('manage/edit_ipad.html', form=form, ipad=ipad)

@@ -73,7 +73,7 @@ class NewiPadForm(FlaskForm):
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
-    video_playback = SelectField(u'满电量可播放视频时间', coerce=unicode)
+    video_playback = FloatField(u'满电量可播放视频时间', validators=[Required(message=u'请输入iPad电池寿命'), NumberRange(min=0)])
     vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
     submit = SubmitField(u'提交')
@@ -83,7 +83,6 @@ class NewiPadForm(FlaskForm):
         self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(0, u'无')] + [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
-        self.video_playback.choices = [(NextHalfHourString(x, startHour=0), NextHalfHourString(x, startHour=0), ) for x in range(20, 0, -1)]
         self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
 
@@ -98,7 +97,7 @@ class EditiPadForm(FlaskForm):
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
-    video_playback = SelectField(u'满电量可播放视频时间', coerce=unicode)
+    video_playback = FloatField(u'满电量可播放视频时间', validators=[Required(message=u'请输入iPad电池寿命'), NumberRange(min=0)])
     vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
     submit = SubmitField(u'提交')
@@ -108,7 +107,6 @@ class EditiPadForm(FlaskForm):
         self.capacity.choices = [(capacity.id, capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(0, u'无')] + [(room.id, room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(state.id, state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all()  if state.name not in [u'借出']]
-        self.video_playback.choices = [(NextHalfHourString(x, startHour=0), NextHalfHourString(x, startHour=0), ) for x in range(20, 0, -1)]
         self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
         self.ipad = ipad
