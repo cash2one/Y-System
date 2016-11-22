@@ -32,7 +32,7 @@
                             <div class="completed step">
                                 <i class="student icon"></i>
                                 <div class="content">
-                                    <div class="title">课程进度信息：{{ lesson.type.name }} - {{ lesson.name }}</div>
+                                    <div class="title">课程进度信息：{{ lesson.alias }}</div>
                                 </div>
                             </div>
                             <div class="active step">
@@ -52,7 +52,7 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
+                            <div class="item">原先进度：{{ user.last_punch.alias2 }}</div>
                         </div>
                         <form id="punch-section" method="POST" class="ui form">
                             {{ form.hidden_tag() }}

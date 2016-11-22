@@ -1973,7 +1973,7 @@ def rental_return_step_3_alt(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4_alt', user_id=user_id, lesson_id=lesson_id, section_id=form.section.data))
+        return redirect(url_for('manage.rental_return_step_4_alt', user_id=user_id, section_id=form.section.data))
     return render_template('manage/rental_return_step_3_alt.html', user=user, lesson=lesson, form=form)
 
 
@@ -2067,7 +2067,7 @@ def rental_exchange_step_3(rental_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, lesson_id=lesson_id, section_id=form.section.data, next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, section_id=form.section.data, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_3.html', rental=rental, lesson=lesson, form=form)
 
 

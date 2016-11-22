@@ -32,13 +32,13 @@
                             <div class="completed step">
                                 <i class="student icon"></i>
                                 <div class="content">
-                                    <div class="title">课程进度信息：{{ lesson.type.name }} - {{ lesson.name }}</div>
+                                    <div class="title">课程进度信息：{{ section.alias3 }}</div>
                                 </div>
                             </div>
                             <div class="completed step">
                                 <i class="record icon"></i>
                                 <div class="content">
-                                    <div class="title">视频进度信息：{{ lesson.name }} - {{ section.name }}</div>
+                                    <div class="title">视频进度信息：{{ section.alias }}</div>
                                 </div>
                             </div>
                             <div class="active step">
@@ -64,12 +64,12 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ rental.user.name }}（{{ rental.user.email }}）</div>
-                            <div class="item">原先进度：{{ rental.user.last_punch.lesson.type.name }} - {{ rental.user.last_punch.lesson.name }} - {{ rental.user.last_punch.section.name }}</div>
-                            <div class="item">更新进度：{{ lesson.type.name }} - {{ lesson.name }} - {{ section.name }}</div>
+                            <div class="item">原先进度：{{ rental.user.last_punch.alias2 }}</div>
+                            <div class="item">更新进度：{{ section.alias2 }}</div>
                         </div>
                         <form id="confirm-punch" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_exchange_step_3', rental_id=rental.id, lesson_id=lesson.id, next=request.args.get('next')) }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_exchange_step_3', rental_id=rental.id, lesson_id=section.lesson.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
                             <a class="loading-trigger" href="{{ url_for('manage.rental_exchange_step_5', rental_id=rental.id, next=request.args.get('next')) }}">跳过进度更新</a>

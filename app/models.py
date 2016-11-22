@@ -1539,7 +1539,6 @@ class Lesson(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
-    punches = db.relationship('Punch', backref='lesson', lazy='dynamic')
     activations = db.relationship('Activation', backref='initial_lesson', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
@@ -1548,6 +1547,10 @@ class Lesson(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.type.name, self.name)
 
     @property
     def abbr(self):
@@ -1652,6 +1655,18 @@ class Section(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     punches = db.relationship('Punch', backref='section', lazy='dynamic')
     activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.lesson.name, self.name)
+
+    @property
+    def alias2(self):
+        return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.name)
+
+    @property
+    def alias3(self):
+        return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
 
     @staticmethod
     def insert_sections():
@@ -1790,7 +1805,7 @@ class Punch(db.Model):
 
     @property
     def alias3(self):
-        return u'%s - %s' % (self.section.lesson.type.name, self.lesson.name)
+        return u'%s - %s' % (self.section.lesson.type.name, self.section.lesson.name)
 
     def to_json(self):
         punch_json = {

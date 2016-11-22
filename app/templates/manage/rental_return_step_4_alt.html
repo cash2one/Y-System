@@ -32,13 +32,13 @@
                             <div class="completed step">
                                 <i class="student icon"></i>
                                 <div class="content">
-                                    <div class="title">课程进度信息：{{ lesson.type.name }} - {{ lesson.name }}</div>
+                                    <div class="title">课程进度信息：{{ section.alias3 }}</div>
                                 </div>
                             </div>
                             <div class="completed step">
                                 <i class="record icon"></i>
                                 <div class="content">
-                                    <div class="title">视频进度信息：{{ lesson.name }} - {{ section.name }}</div>
+                                    <div class="title">视频进度信息：{{ section.alias }}</div>
                                 </div>
                             </div>
                             <div class="active step">
@@ -52,12 +52,12 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">原先进度：{{ user.last_punch.lesson.type.name }} - {{ user.last_punch.lesson.name }} - {{ user.last_punch.section.name }}</div>
-                            <div class="item">更新进度：{{ lesson.type.name }} - {{ lesson.name }} - {{ section.name }}</div>
+                            <div class="item">原先进度：{{ user.last_punch.alias2 }}</div>
+                            <div class="item">更新进度：{{ section.alias2 }}</div>
                         </div>
                         <form id="confirm-punch" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_return_step_3_alt', user_id=user.id, lesson_id=lesson.id) }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_return_step_3_alt', user_id=user.id, lesson_id=section.lesson.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
                             <div class="ui error message"></div>

@@ -52,7 +52,7 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ rental.user.name }}（{{ rental.user.email }}）</div>
-                            <div class="item">进度：{{ rental.user.last_punch.lesson.type.name }} - {{ rental.user.last_punch.lesson.name }} - {{ rental.user.last_punch.section.name }}</div>
+                            <div class="item">进度：{{ rental.user.last_punch.alias2 }}</div>
                         </div>
                         <form id="select-lesson" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
