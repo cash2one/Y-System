@@ -267,16 +267,16 @@ def set_booking_state_valid(user_id, schedule_id):
         .join(BookingState, BookingState.id == Booking.state_id)\
         .filter(Booking.schedule_id == schedule_id)\
         .filter(BookingState.name == u'预约')\
-        .filter(Punch.lesson_id == user.last_punch.lesson_id)
+        .filter(Punch.section_id == user.last_punch.section_id)
     available_ipads = iPad.query\
         .join(iPadContent, iPadContent.ipad_id == iPad.id)\
         .join(iPadState, iPadState.id == iPad.state_id)\
-        .filter(iPadContent.lesson_id == user.last_punch.lesson_id)\
+        .filter(iPadContent.lesson_id == user.last_punch.section.lesson_id)\
         .filter(iPadState.name != u'退役')
     if booked_ipads.count() >= available_ipads.count():
         for manager in User.query.all():
             if manager.can(Permission.MANAGE_IPAD):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.section.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -343,16 +343,16 @@ def set_booking_state_canceled(user_id, schedule_id):
             .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.schedule_id == schedule_id)\
             .filter(BookingState.name == u'预约')\
-            .filter(Punch.lesson_id == candidate.last_punch.lesson_id)
+            .filter(Punch.section_id == candidate.last_punch.section_id)
         available_ipads = iPad.query\
             .join(iPadContent, iPadContent.ipad_id == iPad.id)\
             .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadContent.lesson_id == candidate.last_punch.lesson_id)\
+            .filter(iPadContent.lesson_id == candidate.last_punch.section.lesson_id)\
             .filter(iPadState.name != u'退役')
         if booked_ipads.count() >= available_ipads.count():
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -538,16 +538,16 @@ def increase_schedule_quota(id):
             .join(BookingState, BookingState.id == Booking.state_id)\
             .filter(Booking.schedule_id == schedule_id)\
             .filter(BookingState.name == u'预约')\
-            .filter(Punch.lesson_id == candidate.last_punch.lesson_id)
+            .filter(Punch.section_id == candidate.last_punch.section_id)
         available_ipads = iPad.query\
             .join(iPadContent, iPadContent.ipad_id == iPad.id)\
             .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadContent.lesson_id == candidate.last_punch.lesson_id)\
+            .filter(iPadContent.lesson_id == candidate.last_punch.section.lesson_id)\
             .filter(iPadState.name != u'退役')
         if booked_ipads.count() >= available_ipads.count():
             for manager in User.query.all():
                 if manager.can(Permission.MANAGE_IPAD):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
+                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads=booked_ipads, available_ipads=available_ipads)
     flash(u'所选时段名额+1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
@@ -1182,8 +1182,8 @@ def edit_punch_step_1(user_id):
     form = EditPunchLessonForm()
     if form.validate_on_submit():
         return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=form.lesson.data, next=request.args.get('next')))
-    form.lesson.data = user.last_punch.lesson_id
-    return render_template('manage/edit_punch_step_1.html', user=user, form=form, next=request.args.get('next'))
+    form.lesson.data = user.last_punch.section.lesson_id
+    return render_template('manage/edit_punch_step_1.html', user=user, form=form)
 
 
 @manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
@@ -1196,23 +1196,22 @@ def edit_punch_step_2(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = EditPunchSectionForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, lesson_id=lesson_id, section_id=form.section.data, next=request.args.get('next')))
-    return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form, next=request.args.get('next'))
+        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, section_id=form.section.data, next=request.args.get('next')))
+    return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form)
 
 
-@manage.route('/punch/edit/step-3/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
+@manage.route('/punch/edit/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
-def edit_punch_step_3(user_id, lesson_id, section_id):
+def edit_punch_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
         abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         punch = Punch.query\
-            .filter_by(user_id=user_id, lesson_id=lesson_id, section_id=section_id)\
+            .filter_by(user_id=user_id, section_id=section_id)\
             .first()
         if punch is not None:
             # punches = Punch.query\
@@ -1222,11 +1221,11 @@ def edit_punch_step_3(user_id, lesson_id, section_id):
             #     db.session.delete(pun)
             punch.timestamp = datetime.utcnow()
         else:
-            punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
+            punch = Punch(user_id=user_id, section_id=section_id)
         db.session.add(punch)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(request.args.get('next') or url_for('manage.find_user'))
-    return render_template('manage/edit_punch_step_3.html', user=user, lesson=lesson, section=section, form=form, next=request.args.get('next'))
+    return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
 
 
 @manage.route('/user/find', methods=['GET', 'POST'])
@@ -1792,9 +1791,9 @@ def rental_rent_step_3_alt(user_id, ipad_id):
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
         abort(404)
-    schedule = Schedule.current_schedule(user.last_punch.lesson.type.name)
+    schedule = Schedule.current_schedule(user.last_punch.section.lesson.type.name)
     if schedule is None:
-        flash(u'目前没有开放的%s时段，无法借出iPad' % user.last_punch.lesson.type.name, category='error')
+        flash(u'目前没有开放的%s时段，无法借出iPad' % user.last_punch.section.lesson.type.name, category='error')
         return redirect(url_for('manage.rental'))
     form = ConfirmiPadForm()
     if form.validate_on_submit():
@@ -1937,32 +1936,31 @@ def rental_return_step_3(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4', user_id=user_id, lesson_id=lesson_id, section_id=form.section.data))
+        return redirect(url_for('manage.rental_return_step_4', user_id=user_id, section_id=form.section.data))
     return render_template('manage/rental_return_step_3.html', user=user, lesson=lesson, form=form)
 
 
-@manage.route('/rental/return/step-4/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
+@manage.route('/rental/return/step-4/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
-def rental_return_step_4(user_id, lesson_id, section_id):
+def rental_return_step_4(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
         abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         punch = Punch.query\
-            .filter_by(user_id=user_id, lesson_id=lesson_id, section_id=section_id)\
+            .filter_by(user_id=user_id, section_id=section_id)\
             .first()
         if punch is not None:
             punch.timestamp = datetime.utcnow()
         else:
-            punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
+            punch = Punch(user_id=user_id, section_id=section_id)
         db.session.add(punch)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental'))
-    return render_template('manage/rental_return_step_4.html', user=user, lesson=lesson, section=section, form=form)
+    return render_template('manage/rental_return_step_4.html', user=user, section=section, form=form)
 
 
 @manage.route('/rental/return/step-1-alt', methods=['GET', 'POST'])
@@ -2006,28 +2004,27 @@ def rental_return_step_3_alt(user_id, lesson_id):
     return render_template('manage/rental_return_step_3_alt.html', user=user, lesson=lesson, form=form)
 
 
-@manage.route('/rental/return/step-4-alt/<int:user_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
+@manage.route('/rental/return/step-4-alt/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
-def rental_return_step_4_alt(user_id, lesson_id, section_id):
+def rental_return_step_4_alt(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
         abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         punch = Punch.query\
-            .filter_by(user_id=user_id, lesson_id=lesson_id, section_id=section_id)\
+            .filter_by(user_id=user_id, section_id=section_id)\
             .first()
         if punch is not None:
             punch.timestamp = datetime.utcnow()
         else:
-            punch = Punch(user_id=user_id, lesson_id=lesson_id, section_id=section_id)
+            punch = Punch(user_id=user_id, section_id=section_id)
         db.session.add(punch)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental'))
-    return render_template('manage/rental_return_step_4_alt.html', user=user, lesson=lesson, section=section, form=form)
+    return render_template('manage/rental_return_step_4_alt.html', user=user, section=section, form=form)
 
 
 @manage.route('/rental/exchange/step-1/<int:rental_id>', methods=['GET', 'POST'])
@@ -2101,10 +2098,10 @@ def rental_exchange_step_3(rental_id, lesson_id):
     return render_template('manage/rental_exchange_step_3.html', rental=rental, lesson=lesson, form=form)
 
 
-@manage.route('/rental/exchange/step-4/<int:rental_id>/<int:lesson_id>/<int:section_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-4/<int:rental_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MANAGE_RENTAL)
-def rental_exchange_step_4(rental_id, lesson_id, section_id):
+def rental_exchange_step_4(rental_id, section_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -2112,21 +2109,20 @@ def rental_exchange_step_4(rental_id, lesson_id, section_id):
     user = User.query.get_or_404(rental.user_id)
     if user.deleted:
         abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         punch = Punch.query\
-            .filter_by(user_id=user.id, lesson_id=lesson_id, section_id=section_id)\
+            .filter_by(user_id=user.id, section_id=section_id)\
             .first()
         if punch is not None:
             punch.timestamp = datetime.utcnow()
         else:
-            punch = Punch(user_id=user.id, lesson_id=lesson_id, section_id=section_id)
+            punch = Punch(user_id=user.id, section_id=section_id)
         db.session.add(punch)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, lesson.type.name, lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_4.html', rental=rental, lesson=lesson, section=section, form=form)
+    return render_template('manage/rental_exchange_step_4.html', rental=rental, section=section, form=form)
 
 
 @manage.route('/rental/exchange/step-5/<int:rental_id>', methods=['GET', 'POST'])
