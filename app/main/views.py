@@ -50,7 +50,7 @@ def profile():
     for announcement in announcements:
         if not current_user.notified_by(announcement=announcement):
             flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
-            announcement.notify(reader=current_user._get_current_object())
+            announcement.notify(user=current_user._get_current_object())
     page = request.args.get('page', 1, type=int)
     punches = Punch.query\
         .filter_by(user_id=current_user.id)\

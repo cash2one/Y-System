@@ -547,7 +547,7 @@ class User(UserMixin, db.Model):
     read_announcements = db.relationship(
         'UserAnnouncement',
         foreign_keys=[UserAnnouncement.user_id],
-        backref=db.backref('reader', lazy='joined'),
+        backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
@@ -2012,6 +2012,20 @@ class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+    vb_finished_by = db.relationship(
+        'VBTestScore',
+        foreign_keys=[VBTestScore.test_id],
+        backref=db.backref('test', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    y_gre_finished_by = db.relationship(
+        'YGRETestScore',
+        foreign_keys=[YGRETestScore.test_id],
+        backref=db.backref('test', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     @staticmethod
     def insert_tests():
@@ -2133,8 +2147,8 @@ class Announcement(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def notify(self, reader):
-        log = UserAnnouncement(user_id=reader.id, announcement_id=self.id)
+    def notify(self, user):
+        log = UserAnnouncement(user_id=user.id, announcement_id=self.id)
         db.session.add(log)
 
     def clean_up(self):

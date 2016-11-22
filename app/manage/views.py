@@ -35,7 +35,7 @@ def summary():
     for announcement in announcements:
         if not current_user.notified_by(announcement=announcement):
             flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
-            announcement.notify(reader=current_user._get_current_object())
+            announcement.notify(user=current_user._get_current_object())
     show_summary_ipad_1103 = True
     show_summary_ipad_1707 = False
     show_summary_ipad_others = False
