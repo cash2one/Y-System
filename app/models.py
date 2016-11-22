@@ -77,187 +77,106 @@ class Registration(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-class CourseType(db.Model):
-    __tablename__ = 'course_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    lessons = db.relationship('Lesson', backref='type', lazy='dynamic')
-    courses = db.relationship('Course', backref='type', lazy='dynamic')
-    periods = db.relationship('Period', backref='type', lazy='dynamic')
-
-    @staticmethod
-    def insert_course_types():
-        course_types = [
-            (u'VB', ),
-            (u'Y-GRE', ),
-        ]
-        for CT in course_types:
-            course_type = CourseType.query.filter_by(name=CT[0]).first()
-            if course_type is None:
-                course_type = CourseType(name=CT[0])
-                db.session.add(course_type)
-                print u'导入课程类型信息', CT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Course Type %r>' % self.name
+# class UserActivation(db.Model):
+#     __tablename__ = 'user_activations'
+#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+#     activation_id = db.Column(db.Integer, db.ForeignKey('activations.id'), primary_key=True)
 
 
-class Course(db.Model):
-    __tablename__ = 'courses'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
-    show = db.Column(db.Boolean, default=False)
-    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
-    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    deleted = db.Column(db.Boolean, default=False)
-    registered_users = db.relationship(
-        'Registration',
-        foreign_keys=[Registration.course_id],
-        backref=db.backref('course', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
+# class Activation(db.Model):
+#     __tablename__ = 'activations'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), index=True)
+#     activation_code_hash = db.Column(db.String(128))
+#     activated = db.Column(db.Boolean, default=False)
+#     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+#     vb_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+#     y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+#     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+#     inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+#     initial_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), default=1)
+#     initial_section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), default=1)
+#     deleted = db.Column(db.Boolean, default=False)
+#     activated_users = db.relationship(
+#         'UserActivation',
+#         foreign_keys=[UserActivation.activation_id],
+#         backref=db.backref('activation', lazy='joined'),
+#         lazy='dynamic',
+#         cascade='all, delete-orphan'
+#     )
 
-    def ping(self, modified_by):
-        self.modified_at = datetime.utcnow()
-        self.modified_by_id = modified_by.id
-        db.session.add(self)
+#     @property
+#     def activation_code(self):
+#         raise AttributeError('activation_code is not a readable attribute')
 
-    def safe_delete(self, modified_by):
-        self.show = False
-        self.deleted = True
-        self.ping(modified_by=modified_by)
-        db.session.add(self)
+#     @activation_code.setter
+#     def activation_code(self, activation_code):
+#         self.activation_code_hash = generate_password_hash(activation_code)
 
-    def flip_show(self, modified_by):
-        self.show = not self.show
-        self.ping(modified_by=modified_by)
-        db.session.add(self)
+#     def verify_activation_code(self, activation_code):
+#         return check_password_hash(self.activation_code_hash, activation_code)
 
-    @staticmethod
-    def insert_courses():
-        import xlrd
-        data = xlrd.open_workbook('initial-courses.xlsx')
-        table = data.sheet_by_index(0)
-        courses = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for C in courses:
-            course = Course.query.filter_by(name=C[0]).first()
-            if course is None:
-                course = Course(
-                    name=C[0],
-                    type_id=CourseType.query.filter_by(name=C[1]).first().id,
-                    modified_by_id=modified_by_id=User.query.get(1).id
-                )
-                db.session.add(course)
-                print u'导入课程信息', C[0], C[1]
-        db.session.commit()
+#     @property
+#     def vb_course(self):
+#         if self.vb_course_id:
+#             return Course.query.get(self.vb_course_id)
 
-    def __repr__(self):
-        return '<Course %r>' % self.name
+#     @property
+#     def y_gre_course(self):
+#         if self.y_gre_course_id:
+#             return Course.query.get(self.y_gre_course_id)
 
+#     @property
+#     def activated_user(self):
+#         return self.activated_users.first()
 
-class UserActivation(db.Model):
-    __tablename__ = 'user_activations'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    activation_id = db.Column(db.Integer, db.ForeignKey('activations.id'), primary_key=True)
+#     def safe_delete(self):
+#         self.deleted = True
+#         db.session.add(self)
 
+#     @staticmethod
+#     def insert_activations():
+#         import xlrd
+#         data = xlrd.open_workbook('initial-activations.xlsx')
+#         table = data.sheet_by_index(0)
+#         activations = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+#         for A in activations:
+#             if isinstance(A[1], float):
+#                 A[1] = int(A[1])
+#             if isinstance(A[6], float):
+#                 A[6] = unicode(A[6])
+#             activation = Activation.query.filter_by(name=A[0]).first()
+#             if activation is None:
+#                 if Course.query.filter_by(name=A[3]).first():
+#                     vb_course_id = Course.query.filter_by(name=A[3]).first().id
+#                 else:
+#                     vb_course_id = None
+#                 if Course.query.filter_by(name=A[4]).first():
+#                     y_gre_course_id = Course.query.filter_by(name=A[4]).first().id
+#                 else:
+#                     y_gre_course_id = None
+#                 activation = Activation(
+#                     name=A[0],
+#                     activation_code=str(A[1]),
+#                     role_id=Role.query.filter_by(name=A[2]).first().id,
+#                     vb_course_id=vb_course_id,
+#                     y_gre_course_id=y_gre_course_id,
+#                     inviter_id=User.query.get(1).id
+#                 )
+#                 if Section.query.filter_by(name=A[6]).first():
+#                     initial_section = Section.query.filter_by(name=A[6]).first()
+#                     activation.initial_lesson_id = initial_section.lesson.id
+#                     activation.initial_section_id = initial_section.id
+#                 elif Lesson.query.filter_by(name=A[5]).first():
+#                     initial_lesson = Lesson.query.filter_by(name=A[5]).first()
+#                     activation.initial_lesson_id = initial_lesson.id
+#                     activation.initial_section_id = initial_lesson.first_section.id
+#                 db.session.add(activation)
+#                 print u'导入激活信息', A[0], A[2], A[3], A[4], A[5], A[6]
+#         db.session.commit()
 
-class Activation(db.Model):
-    __tablename__ = 'activations'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), index=True)
-    activation_code_hash = db.Column(db.String(128))
-    activated = db.Column(db.Boolean, default=False)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    vb_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
-    y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    initial_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), default=1)
-    initial_section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), default=1)
-    deleted = db.Column(db.Boolean, default=False)
-    activated_users = db.relationship(
-        'UserActivation',
-        foreign_keys=[UserActivation.activation_id],
-        backref=db.backref('activation', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-
-    @property
-    def activation_code(self):
-        raise AttributeError('activation_code is not a readable attribute')
-
-    @activation_code.setter
-    def activation_code(self, activation_code):
-        self.activation_code_hash = generate_password_hash(activation_code)
-
-    def verify_activation_code(self, activation_code):
-        return check_password_hash(self.activation_code_hash, activation_code)
-
-    @property
-    def vb_course(self):
-        if self.vb_course_id:
-            return Course.query.get(self.vb_course_id)
-
-    @property
-    def y_gre_course(self):
-        if self.y_gre_course_id:
-            return Course.query.get(self.y_gre_course_id)
-
-    @property
-    def activated_user(self):
-        return self.activated_users.first()
-
-    def safe_delete(self):
-        self.deleted = True
-        db.session.add(self)
-
-    @staticmethod
-    def insert_activations():
-        import xlrd
-        data = xlrd.open_workbook('initial-activations.xlsx')
-        table = data.sheet_by_index(0)
-        activations = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for A in activations:
-            if isinstance(A[1], float):
-                A[1] = int(A[1])
-            if isinstance(A[6], float):
-                A[6] = unicode(A[6])
-            activation = Activation.query.filter_by(name=A[0]).first()
-            if activation is None:
-                if Course.query.filter_by(name=A[3]).first():
-                    vb_course_id = Course.query.filter_by(name=A[3]).first().id
-                else:
-                    vb_course_id = None
-                if Course.query.filter_by(name=A[4]).first():
-                    y_gre_course_id = Course.query.filter_by(name=A[4]).first().id
-                else:
-                    y_gre_course_id = None
-                activation = Activation(
-                    name=A[0],
-                    activation_code=str(A[1]),
-                    role_id=Role.query.filter_by(name=A[2]).first().id,
-                    vb_course_id=vb_course_id,
-                    y_gre_course_id=y_gre_course_id,
-                    inviter_id=User.query.get(1).id
-                )
-                if Section.query.filter_by(name=A[6]).first():
-                    initial_section = Section.query.filter_by(name=A[6]).first()
-                    activation.initial_lesson_id = initial_section.lesson.id
-                    activation.initial_section_id = initial_section.id
-                elif Lesson.query.filter_by(name=A[5]).first():
-                    initial_lesson = Lesson.query.filter_by(name=A[5]).first()
-                    activation.initial_lesson_id = initial_lesson.id
-                    activation.initial_section_id = initial_lesson.first_section.id
-                db.session.add(activation)
-                print u'导入激活信息', A[0], A[2], A[3], A[4], A[5], A[6]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Activation %r>' % self.name
+#     def __repr__(self):
+#         return '<Activation %r>' % self.name
 
 
 class BookingState(db.Model):
@@ -447,6 +366,41 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
+class Punch(db.Model):
+    __tablename__ = 'punches'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.section.lesson.name, self.section.name)
+
+    @property
+    def alias2(self):
+        return u'%s - %s - %s' % (self.section.lesson.type.name, self.section.lesson.name, self.section.name)
+
+    @property
+    def alias3(self):
+        return u'%s - %s' % (self.section.lesson.type.name, self.section.lesson.name)
+
+    def to_json(self):
+        punch_json = {
+            'user': self.user.name,
+            'course_type': self.section.lesson.type.name,
+            'lesson': self.section.lesson.name,
+            'section': self.section.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'alias3': self.alias3,
+            'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        }
+        return punch_json
+
+    def __repr__(self):
+        return '<Punch %r, %r>' % (self.user.name, self.alias)
+
+
 class AssignmentScoreGrade(db.Model):
     __tablename__ = 'assignment_score_grades'
     id = db.Column(db.Integer, primary_key=True)
@@ -485,8 +439,9 @@ class AssignmentScoreGrade(db.Model):
 
 class AssignmentScore(db.Model):
     __tablename__ = 'assignment_scores'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
     grade_id = db.Column(db.Integer, db.ForeignKey('assignment_scores_grades.id'))
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -497,8 +452,9 @@ class AssignmentScore(db.Model):
 
 class VBTestScore(db.Model):
     __tablename__ = 'vb_test_scores'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
     score = db.Column(db.Float)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -509,8 +465,9 @@ class VBTestScore(db.Model):
 
 class YGRETestScore(db.Model):
     __tablename__ = 'y_gre_test_scores'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score = db.Column(db.Float)
@@ -559,25 +516,34 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    manage_ipads_rent = db.relationship(
-        'Rental',
-        foreign_keys=[Rental.rent_agent_id],
-        backref=db.backref('rent_agent', lazy='joined'),
+    punches = db.relationship(
+        'Punch',
+        foreign_keys=[Punch.user_id],
+        backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    manage_ipads_return = db.relationship(
-        'Rental',
-        foreign_keys=[Rental.return_agent_id],
-        backref=db.backref('return_agent', lazy='joined'),
+    finished_assignments = db.relationship(
+        'AssignmentScore',
+        foreign_keys=[AssignmentScore.user_id],
+        backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    modified_courses = db.relationship('Course', backref='modified_by', lazy='dynamic')
-    modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
-    modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
-    modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
-    modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
+    finished_vb_tests = db.relationship(
+        'VBTestScore',
+        foreign_keys=[VBTestScore.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    finished_y_gre_tests = db.relationship(
+        'YGRETestScore',
+        foreign_keys=[YGRETestScore.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     read_announcements = db.relationship(
         'UserAnnouncement',
         foreign_keys=[UserAnnouncement.user_id],
@@ -585,15 +551,54 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    punches = db.relationship('Punch', backref='user', lazy='dynamic')
-    invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
-    activation = db.relationship(
-        'UserActivation',
-        foreign_keys=[UserActivation.user_id],
-        backref=db.backref('user', lazy='joined'),
+    modified_courses = db.relationship('Course', backref='modified_by', lazy='dynamic')
+    modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
+    modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
+    modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
+    managed_ipads_rent = db.relationship(
+        'Rental',
+        foreign_keys=[Rental.rent_agent_id],
+        backref=db.backref('rent_agent', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    managed_ipads_return = db.relationship(
+        'Rental',
+        foreign_keys=[Rental.return_agent_id],
+        backref=db.backref('return_agent', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    modified_assignment_scores = db.relationship(
+        'AssignmentScore',
+        foreign_keys=[AssignmentScore.user_id],
+        backref=db.backref('modified_by', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    modified_vb_test_scores = db.relationship(
+        'VBTestScore',
+        foreign_keys=[VBTestScore.user_id],
+        backref=db.backref('modified_by', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    modified_y_gre_test_scores = db.relationship(
+        'YGRETestScore',
+        foreign_keys=[YGRETestScore.user_id],
+        backref=db.backref('modified_by', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
+    # invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
+    # activation = db.relationship(
+    #     'UserActivation',
+    #     foreign_keys=[UserActivation.user_id],
+    #     backref=db.backref('user', lazy='joined'),
+    #     lazy='dynamic',
+    #     cascade='all, delete-orphan'
+    # )
 
     def safe_delete(self):
         self.role_id = Role.query.filter_by(name=u'挂起').first().id
@@ -719,13 +724,13 @@ class User(UserMixin, db.Model):
     def is_registering(self, course):
         return self.registered.filter_by(course_id=course.id).first() is not None
 
-    def add_user_activation(self, activation):
-        ua = UserActivation(user_id=self.id, activation_id=activation.id)
-        db.session.add(ua)
+    # def add_user_activation(self, activation):
+    #     ua = UserActivation(user_id=self.id, activation_id=activation.id)
+    #     db.session.add(ua)
 
-    def add_initial_punch(self, activation):
-        initial_punch = Punch(user_id=self.id, section_id=activation.initial_section_id)
-        db.session.add(initial_punch)
+    # def add_initial_punch(self, activation):
+    #     initial_punch = Punch(user_id=self.id, section_id=activation.initial_section_id)
+    #     db.session.add(initial_punch)
 
     @property
     def vb_course(self):
@@ -1003,6 +1008,87 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+class CourseType(db.Model):
+    __tablename__ = 'course_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    lessons = db.relationship('Lesson', backref='type', lazy='dynamic')
+    courses = db.relationship('Course', backref='type', lazy='dynamic')
+    periods = db.relationship('Period', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_course_types():
+        course_types = [
+            (u'VB', ),
+            (u'Y-GRE', ),
+        ]
+        for CT in course_types:
+            course_type = CourseType.query.filter_by(name=CT[0]).first()
+            if course_type is None:
+                course_type = CourseType(name=CT[0])
+                db.session.add(course_type)
+                print u'导入课程类型信息', CT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Course Type %r>' % self.name
+
+
+class Course(db.Model):
+    __tablename__ = 'courses'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    show = db.Column(db.Boolean, default=False)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
+    registered_users = db.relationship(
+        'Registration',
+        foreign_keys=[Registration.course_id],
+        backref=db.backref('course', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.show = False
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    def flip_show(self, modified_by):
+        self.show = not self.show
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    @staticmethod
+    def insert_courses():
+        import xlrd
+        data = xlrd.open_workbook('initial-courses.xlsx')
+        table = data.sheet_by_index(0)
+        courses = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+        for C in courses:
+            course = Course.query.filter_by(name=C[0]).first()
+            if course is None:
+                course = Course(
+                    name=C[0],
+                    type_id=CourseType.query.filter_by(name=C[1]).first().id,
+                    modified_by_id=modified_by_id=User.query.get(1).id
+                )
+                db.session.add(course)
+                print u'导入课程信息', C[0], C[1]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Course %r>' % self.name
 
 
 class Period(db.Model):
@@ -1613,7 +1699,7 @@ class Lesson(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
-    activations = db.relationship('Activation', backref='initial_lesson', lazy='dynamic')
+    # activations = db.relationship('Activation', backref='initial_lesson', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
@@ -1727,8 +1813,15 @@ class Section(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     hour = db.Column(db.Interval, default=timedelta(hours=0))
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
-    punches = db.relationship('Punch', backref='section', lazy='dynamic')
-    activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
+    punches = db.relationship(
+        'Punch',
+        foreign_keys=[Punch.section_id],
+        backref=db.backref('section', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    # punches = db.relationship('Punch', backref='section', lazy='dynamic')
+    # activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
 
     @property
     def alias(self):
@@ -1874,6 +1967,13 @@ class Assignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+    finished_by = db.relationship(
+        'AssignmentScore',
+        foreign_keys=[AssignmentScore.assignment_id],
+        backref=db.backref('assignment', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     @staticmethod
     def insert_assignments():
@@ -1944,41 +2044,6 @@ class Test(db.Model):
 
     def __repr__(self):
         return '<Test %r>' % self.name
-
-
-class Punch(db.Model):
-    __tablename__ = 'punches'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-    @property
-    def alias(self):
-        return u'%s - %s' % (self.section.lesson.name, self.section.name)
-
-    @property
-    def alias2(self):
-        return u'%s - %s - %s' % (self.section.lesson.type.name, self.section.lesson.name, self.section.name)
-
-    @property
-    def alias3(self):
-        return u'%s - %s' % (self.section.lesson.type.name, self.section.lesson.name)
-
-    def to_json(self):
-        punch_json = {
-            'user': self.user.name,
-            'course_type': self.section.lesson.type.name,
-            'lesson': self.section.lesson.name,
-            'section': self.section.name,
-            'alias': self.alias,
-            'alias2': self.alias2,
-            'alias3': self.alias3,
-            'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
-        }
-        return punch_json
-
-    def __repr__(self):
-        return '<Punch %r, %r>' % (self.user.name, self.alias)
 
 
 class AnnouncementType(db.Model):
