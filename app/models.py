@@ -488,7 +488,8 @@ class AssignmentScore(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), primary_key=True)
     grade_id = db.Column(db.Integer, db.ForeignKey('assignment_scores_grades.id'))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Assignment Score %r, %r>' % (self.user.name, self.assignment.name)
@@ -499,7 +500,8 @@ class VBTestScore(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'), primary_key=True)
     score = db.Column(db.Float)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
@@ -512,7 +514,8 @@ class YGRETestScore(db.Model):
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score = db.Column(db.Float)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
