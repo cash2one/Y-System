@@ -1652,7 +1652,7 @@ class Section(db.Model):
     __tablename__ = 'sections'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    hour = db.Column(db.Float, default=1.0)
+    hour = db.Column(db.Interval, default=timedelta(hours=0))
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     punches = db.relationship('Punch', backref='section', lazy='dynamic')
     activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
@@ -1672,115 +1672,121 @@ class Section(db.Model):
     @staticmethod
     def insert_sections():
         sections = [
-            (u'Day 1-1', u'VB总论', ),
-            (u'Day 1-2', u'VB总论', ),
-            (u'Day 1-3', u'VB总论', ),
-            (u'Day 1-4', u'VB总论', ),
-            (u'Day 2-1', u'VB总论', ),
-            (u'Day 2-2', u'VB总论', ),
-            (u'Day 2-3', u'VB总论', ),
-            (u'Day 2-4', u'VB总论', ),
-            (u'Day 3-1', u'VB总论', ),
-            (u'Day 3-2', u'VB总论', ),
-            (u'Day 3-3', u'VB总论', ),
-            (u'Day 3-4', u'VB总论', ),
-            (u'Day 4-1', u'VB总论', ),
-            (u'Day 4-2', u'VB总论', ),
-            (u'Day 4-3', u'VB总论', ),
-            (u'Day 4-4', u'VB总论', ),
-            (u'1.1', u'L1', ),
-            (u'1.2', u'L1', ),
-            (u'1.3', u'L1', ),
-            (u'1.4', u'L1', ),
-            (u'1.5', u'L1', ),
-            (u'1.6', u'L1', ),
-            (u'1.7', u'L1', ),
-            (u'1.8', u'L1', ),
-            (u'2.1', u'L2', ),
-            (u'2.2', u'L2', ),
-            (u'2.3', u'L2', ),
-            (u'2.4', u'L2', ),
-            (u'2.5', u'L2', ),
-            (u'2.6', u'L2', ),
-            (u'2.7', u'L2', ),
-            (u'2.8', u'L2', ),
-            (u'3.1', u'L3', ),
-            (u'3.2', u'L3', ),
-            (u'3.3', u'L3', ),
-            (u'3.4', u'L3', ),
-            (u'3.5', u'L3', ),
-            (u'3.6', u'L3', ),
-            (u'3.7', u'L3', ),
-            (u'3.8', u'L3', ),
-            (u'4.1', u'L4', ),
-            (u'4.2', u'L4', ),
-            (u'4.3', u'L4', ),
-            (u'4.4', u'L4', ),
-            (u'4.5', u'L4', ),
-            (u'4.6', u'L4', ),
-            (u'4.7', u'L4', ),
-            (u'4.8', u'L4', ),
-            (u'5.1', u'L5', ),
-            (u'5.2', u'L5', ),
-            (u'5.3', u'L5', ),
-            (u'5.4', u'L5', ),
-            (u'5.5', u'L5', ),
-            (u'5.6', u'L5', ),
-            (u'5.7', u'L5', ),
-            (u'5.8', u'L5', ),
-            (u'6.1', u'L6', ),
-            (u'6.2', u'L6', ),
-            (u'6.3', u'L6', ),
-            (u'6.4', u'L6', ),
-            (u'6.5', u'L6', ),
-            (u'6.6', u'L6', ),
-            (u'6.7', u'L6', ),
-            (u'6.8', u'L6', ),
-            (u'7.1', u'L7', ),
-            (u'7.2', u'L7', ),
-            (u'7.3', u'L7', ),
-            (u'7.4', u'L7', ),
-            (u'7.5', u'L7', ),
-            (u'7.6', u'L7', ),
-            (u'7.7', u'L7', ),
-            (u'7.8', u'L7', ),
-            (u'8.1', u'L8', ),
-            (u'8.2', u'L8', ),
-            (u'8.3', u'L8', ),
-            (u'8.4', u'L8', ),
-            (u'8.5', u'L8', ),
-            (u'8.6', u'L8', ),
-            (u'8.7', u'L8', ),
-            (u'8.8', u'L8', ),
-            (u'8.9', u'L8', ),
-            (u'9.1', u'L9', ),
-            (u'9.2', u'L9', ),
-            (u'9.3', u'L9', ),
-            (u'9.4', u'L9', ),
-            (u'9.5', u'L9', ),
-            (u'9.6', u'L9', ),
-            (u'9.7', u'L9', ),
-            (u'9.8', u'L9', ),
-            (u'9.9', u'L9', ),
-            (u'Y-GRE总论', u'Y-GRE总论', ),
-            (u'1st', u'1st', ),
-            (u'2nd', u'2nd', ),
-            (u'3rd', u'3rd', ),
-            (u'4th', u'4th', ),
-            (u'5th', u'5th', ),
-            (u'6th', u'6th', ),
-            (u'7th', u'7th', ),
-            (u'8th', u'8th', ),
-            (u'9th', u'9th', ),
-            (u'Test', u'Test', ),
-            (u'AW总论', u'AW总论', ),
+            (u'Day 1-1', u'VB总论', 1, ),
+            (u'Day 1-2', u'VB总论', 1, ),
+            (u'Day 1-3', u'VB总论', 1, ),
+            (u'Day 1-4', u'VB总论', 1, ),
+            (u'Day 2-1', u'VB总论', 1, ),
+            (u'Day 2-2', u'VB总论', 1, ),
+            (u'Day 2-3', u'VB总论', 1, ),
+            (u'Day 2-4', u'VB总论', 1, ),
+            (u'Day 3-1', u'VB总论', 1, ),
+            (u'Day 3-2', u'VB总论', 1, ),
+            (u'Day 3-3', u'VB总论', 1, ),
+            (u'Day 3-4', u'VB总论', 1, ),
+            (u'Day 4-1', u'VB总论', 1, ),
+            (u'Day 4-2', u'VB总论', 1, ),
+            (u'Day 4-3', u'VB总论', 1, ),
+            (u'Day 4-4', u'VB总论', 1, ),
+            (u'1.1', u'L1', 1, ),
+            (u'1.2', u'L1', 1, ),
+            (u'1.3', u'L1', 1, ),
+            (u'1.4', u'L1', 1, ),
+            (u'1.5', u'L1', 1, ),
+            (u'1.6', u'L1', 1, ),
+            (u'1.7', u'L1', 1, ),
+            (u'1.8', u'L1', 1, ),
+            (u'2.1', u'L2', 1, ),
+            (u'2.2', u'L2', 1, ),
+            (u'2.3', u'L2', 1, ),
+            (u'2.4', u'L2', 1, ),
+            (u'2.5', u'L2', 1, ),
+            (u'2.6', u'L2', 1, ),
+            (u'2.7', u'L2', 1, ),
+            (u'2.8', u'L2', 1, ),
+            (u'3.1', u'L3', 1, ),
+            (u'3.2', u'L3', 1, ),
+            (u'3.3', u'L3', 1, ),
+            (u'3.4', u'L3', 1, ),
+            (u'3.5', u'L3', 1, ),
+            (u'3.6', u'L3', 1, ),
+            (u'3.7', u'L3', 1, ),
+            (u'3.8', u'L3', 1, ),
+            (u'4.1', u'L4', 1, ),
+            (u'4.2', u'L4', 1, ),
+            (u'4.3', u'L4', 1, ),
+            (u'4.4', u'L4', 1, ),
+            (u'4.5', u'L4', 1, ),
+            (u'4.6', u'L4', 1, ),
+            (u'4.7', u'L4', 1, ),
+            (u'4.8', u'L4', 1, ),
+            (u'5.1', u'L5', 1, ),
+            (u'5.2', u'L5', 1, ),
+            (u'5.3', u'L5', 1, ),
+            (u'5.4', u'L5', 1, ),
+            (u'5.5', u'L5', 1, ),
+            (u'5.6', u'L5', 1, ),
+            (u'5.7', u'L5', 1, ),
+            (u'5.8', u'L5', 1, ),
+            (u'6.1', u'L6', 1, ),
+            (u'6.2', u'L6', 1, ),
+            (u'6.3', u'L6', 1, ),
+            (u'6.4', u'L6', 1, ),
+            (u'6.5', u'L6', 1, ),
+            (u'6.6', u'L6', 1, ),
+            (u'6.7', u'L6', 1, ),
+            (u'6.8', u'L6', 1, ),
+            (u'7.1', u'L7', 1, ),
+            (u'7.2', u'L7', 1, ),
+            (u'7.3', u'L7', 1, ),
+            (u'7.4', u'L7', 1, ),
+            (u'7.5', u'L7', 1, ),
+            (u'7.6', u'L7', 1, ),
+            (u'7.7', u'L7', 1, ),
+            (u'7.8', u'L7', 1, ),
+            (u'8.1', u'L8', 1, ),
+            (u'8.2', u'L8', 1, ),
+            (u'8.3', u'L8', 1, ),
+            (u'8.4', u'L8', 1, ),
+            (u'8.5', u'L8', 1, ),
+            (u'8.6', u'L8', 1, ),
+            (u'8.7', u'L8', 1, ),
+            (u'8.8', u'L8', 1, ),
+            (u'8.9', u'L8', 1, ),
+            (u'9.1', u'L9', 1, ),
+            (u'9.2', u'L9', 1, ),
+            (u'9.3', u'L9', 1, ),
+            (u'9.4', u'L9', 1, ),
+            (u'9.5', u'L9', 1, ),
+            (u'9.6', u'L9', 1, ),
+            (u'9.7', u'L9', 1, ),
+            (u'9.8', u'L9', 1, ),
+            (u'9.9', u'L9', 1, ),
+            (u'L10', u'L10', 1, ),
+            (u'L11', u'L11', 1, ),
+            (u'L12', u'L12', 1, ),
+            (u'L13', u'L13', 1, ),
+            (u'L14', u'L14', 1, ),
+            (u'Y-GRE总论', u'Y-GRE总论', 10, ),
+            (u'1st', u'1st', 30, ),
+            (u'2nd', u'2nd', 30, ),
+            (u'3rd', u'3rd', 50, ),
+            (u'4th', u'4th', 30, ),
+            (u'5th', u'5th', 40, ),
+            (u'6th', u'6th', 30, ),
+            (u'7th', u'7th', 30, ),
+            (u'8th', u'8th', 30, ),
+            (u'9th', u'9th', 30, ),
+            (u'Test', u'Test', 0, ),
+            (u'AW总论', u'AW总论', 2.5, ),
         ]
         for S in sections:
             section = Section.query.filter_by(name=S[0]).first()
             if section is None:
                 section = Section(
                     name=S[0],
-                    lesson_id=Lesson.query.filter_by(name=S[1]).first().id
+                    lesson_id=Lesson.query.filter_by(name=S[1]).first().id,
+                    hour=timedelta(hours=s[2])
                 )
                 db.session.add(section)
                 print u'导入节信息', S[0], S[1]
@@ -1788,6 +1794,83 @@ class Section(db.Model):
 
     def __repr__(self):
         return '<Section %s>' % self.name
+
+
+class Assignment(db.Model):
+    __tablename__ = 'assignments'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+
+    @staticmethod
+    def insert_assignments():
+        assignments = [
+            (u'L1', u'L1', ),
+            (u'L2', u'L2', ),
+            (u'R1-2', u'L2', ),
+            (u'L3', u'L3', ),
+            (u'L4', u'L4', ),
+            (u'R3-4', u'L4', ),
+            (u'L5', u'L5', ),
+            (u'L6', u'L6', ),
+            (u'R5-6', u'L6', ),
+            (u'L7', u'L7', ),
+            (u'L8', u'L8', ),
+            (u'R7-8', u'L8', ),
+            (u'R9-10', u'L10', ),
+        ]
+        for A in assignments:
+            assignment = Assignment.query.filter_by(name=A[0]).first()
+            if assignment is None:
+                assignment = Assignment(
+                    name=A[0],
+                    lesson_id=Lesson.query.filter_by(name=A[1]).first().id
+                )
+                db.session.add(assignment)
+                print u'导入作业信息', A[0], A[1]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Assignment %s>' % self.name
+
+
+class Test(db.Model):
+    __tablename__ = 'tests'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+
+    @staticmethod
+    def insert_tests():
+        tests = [
+            (u'L1-5', u'L5', ),
+            (u'L6-9', u'L9', ),
+            (u'初始成绩', u'Y-GRE总论', ),
+            (u'Unit 1', u'1st', ),
+            (u'Unit 2', u'2nd', ),
+            (u'Unit 3', u'3rd', ),
+            (u'Unit 4', u'4th', ),
+            (u'Unit 5', u'5th', ),
+            (u'Unit 6', u'6th', ),
+            (u'模考1', u'Y-GRE总论', ),
+            (u'模考2', u'Y-GRE总论', ),
+            (u'PPII-1', u'Y-GRE总论', ),
+            (u'PPII-2', u'Y-GRE总论', ),
+            (u'GRE', u'Y-GRE总论', ),
+        ]
+        for T in tests:
+            test = Test.query.filter_by(name=T[0]).first()
+            if test is None:
+                test = Test(
+                    name=T[0],
+                    lesson_id=Lesson.query.filter_by(name=T[1]).first().id
+                )
+                db.session.add(test)
+                print u'导入考试信息', T[0], T[1]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Test %s>' % self.name
 
 
 class Punch(db.Model):
