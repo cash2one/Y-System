@@ -474,21 +474,24 @@ class Gender(db.Model):
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), index=True)
     email = db.Column(db.Unicode(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    password_hash = db.Column(db.String(128))
+    activated = db.Column(db.Boolean, default=False)
+    confirmed = db.Column(db.Boolean, default=False)
+    name = db.Column(db.Unicode(64), index=True)
     gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
     id_number = db.Column(db.Unicode(64), unique=True, index=True)
     birthdate = db.Column(db.Date)
     mobile = db.Column(db.Unicode(64))
     qq = db.Column(db.Unicode(64))
     address = db.Column(db.Unicode(128))
-    password_hash = db.Column(db.String(128))
-    activated = db.Column(db.Boolean, default=False)
-    confirmed = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
+    emergency_contacts = db.relationship('EmergencyContact', backref='user', lazy='dynamic')
+    education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
+    employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
     registered_courses = db.relationship(
         'CourseRegistration',
         foreign_keys=[CourseRegistration.user_id],
@@ -585,14 +588,6 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
-    # invitations = db.relationship('Activation', backref='inviter', lazy='dynamic')
-    # activation = db.relationship(
-    #     'UserActivation',
-    #     foreign_keys=[UserActivation.user_id],
-    #     backref=db.backref('user', lazy='joined'),
-    #     lazy='dynamic',
-    #     cascade='all, delete-orphan'
-    # )
 
     def safe_delete(self):
         self.role_id = Role.query.filter_by(name=u'挂起').first().id
@@ -717,14 +712,6 @@ class User(UserMixin, db.Model):
 
     def is_registering_course(self, course):
         return self.registered_courses.filter_by(course_id=course.id).first() is not None
-
-    # def add_user_activation(self, activation):
-    #     ua = UserActivation(user_id=self.id, activation_id=activation.id)
-    #     db.session.add(ua)
-
-    # def add_initial_punch(self, activation):
-    #     initial_punch = Punch(user_id=self.id, section_id=activation.initial_section_id)
-    #     db.session.add(initial_punch)
 
     @property
     def vb_course(self):
@@ -1002,6 +989,97 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+class Relationship(db.Model):
+    __tablename__ = 'relationships'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    emergency_contacts = db.relationship('EmergencyContact', backref='relationship', lazy='dynamic')
+
+    @staticmethod
+    def insert_relationships():
+        relationships = [
+            (u'父母', ),
+            (u'配偶', ),
+            (u'子女', ),
+            (u'同学', ),
+            (u'同事', ),
+            (u'朋友', ),
+        ]
+        for R in relationships:
+            relationship = Relationship.query.filter_by(name=R[0]).first()
+            if relationship is None:
+                relationship = Relationship(name=R[0])
+                db.session.add(relationship)
+                print u'导入关系类型信息', R[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Relationship %r>' % self.name
+
+
+class EmergencyContact(db.Model):
+    __tablename__ = 'emergency_contacts'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    name = db.Column(db.Unicode(64))
+    relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
+    contact = db.Column(db.Unicode(64))
+
+    def __repr__(self):
+        return '<Emergency Contact %r, %r, %r, %r>' % (self.user.name, self.name, self.relationship.name, self.contact)
+
+
+class EducationType(db.Model):
+    __tablename__ = 'education_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    education_records = db.relationship('EducationRecord', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_education_types():
+        education_types = [
+            (u'高中', ),
+            (u'本科', ),
+            (u'硕士', ),
+            (u'博士', ),
+        ]
+        for ET in education_types:
+            education_type = EducationType.query.filter_by(name=ET[0]).first()
+            if education_type is None:
+                education_type = EducationType(name=ET[0])
+                db.session.add(education_type)
+                print u'导入学历类型信息', ET[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Education Type %r>' % self.name
+
+
+class EducationRecord(db.Model):
+    __tablename__ = 'education_records'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('education_types.id'))
+    school = db.Column(db.Unicode(64), index=True)
+    major = db.Column(db.Unicode(64), index=True)
+    year = db.Column(db.Unicode(64), index=True)
+
+    def __repr__(self):
+        return '<Education Record %r, %r, %r, %r>' % (self.user.name, self.type.name, self.school, self.year)
+
+
+class EmploymentRecord(db.Model):
+    __tablename__ = 'employment_records'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    employer = db.Column(db.Unicode(64), index=True)
+    position = db.Column(db.Unicode(64), index=True)
+    year = db.Column(db.Unicode(64), index=True)
+
+    def __repr__(self):
+        return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
 
 
 class CourseType(db.Model):
