@@ -43,7 +43,6 @@ class Role(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
-    activations = db.relationship('Activation', backref='role', lazy='dynamic')
 
     @staticmethod
     def insert_roles():
@@ -70,113 +69,11 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
-class Registration(db.Model):
-    __tablename__ = 'registrations'
+class CourseRegistration(db.Model):
+    __tablename__ = 'course_registrations'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-# class UserActivation(db.Model):
-#     __tablename__ = 'user_activations'
-#     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-#     activation_id = db.Column(db.Integer, db.ForeignKey('activations.id'), primary_key=True)
-
-
-# class Activation(db.Model):
-#     __tablename__ = 'activations'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), index=True)
-#     activation_code_hash = db.Column(db.String(128))
-#     activated = db.Column(db.Boolean, default=False)
-#     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-#     vb_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
-#     y_gre_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
-#     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-#     inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#     initial_lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), default=1)
-#     initial_section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), default=1)
-#     deleted = db.Column(db.Boolean, default=False)
-#     activated_users = db.relationship(
-#         'UserActivation',
-#         foreign_keys=[UserActivation.activation_id],
-#         backref=db.backref('activation', lazy='joined'),
-#         lazy='dynamic',
-#         cascade='all, delete-orphan'
-#     )
-
-#     @property
-#     def activation_code(self):
-#         raise AttributeError('activation_code is not a readable attribute')
-
-#     @activation_code.setter
-#     def activation_code(self, activation_code):
-#         self.activation_code_hash = generate_password_hash(activation_code)
-
-#     def verify_activation_code(self, activation_code):
-#         return check_password_hash(self.activation_code_hash, activation_code)
-
-#     @property
-#     def vb_course(self):
-#         if self.vb_course_id:
-#             return Course.query.get(self.vb_course_id)
-
-#     @property
-#     def y_gre_course(self):
-#         if self.y_gre_course_id:
-#             return Course.query.get(self.y_gre_course_id)
-
-#     @property
-#     def activated_user(self):
-#         return self.activated_users.first()
-
-#     def safe_delete(self):
-#         self.deleted = True
-#         db.session.add(self)
-
-#     @staticmethod
-#     def insert_activations():
-#         import xlrd
-#         data = xlrd.open_workbook('initial-activations.xlsx')
-#         table = data.sheet_by_index(0)
-#         activations = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-#         for A in activations:
-#             if isinstance(A[1], float):
-#                 A[1] = int(A[1])
-#             if isinstance(A[6], float):
-#                 A[6] = unicode(A[6])
-#             activation = Activation.query.filter_by(name=A[0]).first()
-#             if activation is None:
-#                 if Course.query.filter_by(name=A[3]).first():
-#                     vb_course_id = Course.query.filter_by(name=A[3]).first().id
-#                 else:
-#                     vb_course_id = None
-#                 if Course.query.filter_by(name=A[4]).first():
-#                     y_gre_course_id = Course.query.filter_by(name=A[4]).first().id
-#                 else:
-#                     y_gre_course_id = None
-#                 activation = Activation(
-#                     name=A[0],
-#                     activation_code=str(A[1]),
-#                     role_id=Role.query.filter_by(name=A[2]).first().id,
-#                     vb_course_id=vb_course_id,
-#                     y_gre_course_id=y_gre_course_id,
-#                     inviter_id=User.query.get(1).id
-#                 )
-#                 if Section.query.filter_by(name=A[6]).first():
-#                     initial_section = Section.query.filter_by(name=A[6]).first()
-#                     activation.initial_lesson_id = initial_section.lesson.id
-#                     activation.initial_section_id = initial_section.id
-#                 elif Lesson.query.filter_by(name=A[5]).first():
-#                     initial_lesson = Lesson.query.filter_by(name=A[5]).first()
-#                     activation.initial_lesson_id = initial_lesson.id
-#                     activation.initial_section_id = initial_lesson.first_section.id
-#                 db.session.add(activation)
-#                 print u'导入激活信息', A[0], A[2], A[3], A[4], A[5], A[6]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<Activation %r>' % self.name
 
 
 class BookingState(db.Model):
@@ -463,14 +360,80 @@ class VBTestScore(db.Model):
         return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
+class GREVScore(db.Model):
+    __tablename__ = 'gre_v_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Integer)
+    y_gre_test_scores = db.relationship('YGRETestScore', backref='v_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_gre_v_scores():
+        gre_v_scores = [(unicode(x), x, ) for x in range(130, 171)]
+        for GVS in gre_v_scores:
+            gre_v_score = GREVScore.query.filter_by(name=GVS[0]).first()
+            if gre_v_score is None:
+                gre_v_score = GREVScore(name=GVS[0], value=GVS[1])
+                db.session.add(gre_v_score)
+                print u'导入GRE Verbal成绩类型信息', GVS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<GRE Verbal Reasoning Score %r>' % self.name
+
+
+class GREQScore(db.Model):
+    __tablename__ = 'gre_q_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Integer)
+    y_gre_test_scores = db.relationship('YGRETestScore', backref='q_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_gre_q_scores():
+        gre_q_scores = [(unicode(x), x, ) for x in range(130, 171)]
+        for GQS in gre_q_scores:
+            gre_q_score = GREQScore.query.filter_by(name=GQS[0]).first()
+            if gre_q_score is None:
+                gre_q_score = GREQScore(name=GQS[0], value=GQS[1])
+                db.session.add(gre_q_score)
+                print u'导入GRE Quantitative成绩类型信息', GQS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<GRE Quantitative Reasoning Score %r>' % self.name
+
+
+class GREAWScore(db.Model):
+    __tablename__ = 'gre_aw_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Float)
+    y_gre_test_scores = db.relationship('YGRETestScore', backref='aw_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_gre_aw_scores():
+        gre_aw_scores = [(unicode(x/2.0), x/2.0, ) for x in range(0, 13)]
+        for GAWS in gre_aw_scores:
+            gre_aw_score = GREAWScore.query.filter_by(name=GAWS[0]).first()
+            if gre_aw_score is None:
+                gre_aw_score = GREAWScore(name=GAWS[0], value=GAWS[1])
+                db.session.add(gre_aw_score)
+                print u'导入GRE AW成绩类型信息', GAWS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<GRE Analytical Writing Score %r>' % self.name
+
+
 class YGRETestScore(db.Model):
     __tablename__ = 'y_gre_test_scores'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
-    v_score = db.Column(db.Integer)
-    q_score = db.Column(db.Integer)
-    aw_score = db.Column(db.Float)
+    v_score_id = db.Column(db.Integer, db.ForeignKey('gre_v_scores.id'))
+    q_score_id = db.Column(db.Integer, db.ForeignKey('gre_q_scores.id'))
+    aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -484,21 +447,51 @@ class UserAnnouncement(db.Model):
     announcement_id = db.Column(db.Integer, db.ForeignKey('announcements.id'), primary_key=True)
 
 
+class Gender(db.Model):
+    __tablename__ = 'genders'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    users = db.relationship('User', backref='gender', lazy='dynamic')
+
+    @staticmethod
+    def insert_genders():
+        genders = [
+            (u'男', ),
+            (u'女', ),
+        ]
+        for G in genders:
+            gender = Gender.query.filter_by(name=G[0]).first()
+            if gender is None:
+                gender = Gender(name=G[0])
+                db.session.add(gender)
+                print u'导入性别类型信息', G[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Gender %r>' % self.name
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), index=True)
     email = db.Column(db.Unicode(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
+    id_number = db.Column(db.Unicode(64), unique=True, index=True)
+    birthdate = db.Column(db.Date)
+    mobile = db.Column(db.Unicode(64))
+    qq = db.Column(db.Unicode(64))
+    address = db.Column(db.Unicode(128))
     password_hash = db.Column(db.String(128))
+    activated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, default=False)
-    # activated = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
     registered_courses = db.relationship(
-        'Registration',
-        foreign_keys=[Registration.user_id],
+        'CourseRegistration',
+        foreign_keys=[CourseRegistration.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -712,17 +705,17 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(data['id'])
 
-    def register(self, course):
-        if not self.is_registering(course):
-            r = Registration(user=self, course=course)
+    def register_course(self, course):
+        if not self.is_registering_course(course):
+            r = CourseRegistration(user=self, course=course)
             db.session.add(r)
 
-    def unregister(self, course):
+    def unregister_course(self, course):
         r = self.registered_courses.filter_by(course_id=course.id).first()
         if r:
             db.session.delete(r)
 
-    def is_registering(self, course):
+    def is_registering_course(self, course):
         return self.registered_courses.filter_by(course_id=course.id).first() is not None
 
     # def add_user_activation(self, activation):
@@ -736,18 +729,18 @@ class User(UserMixin, db.Model):
     @property
     def vb_course(self):
         return Course.query\
-            .join(Registration, Registration.course_id == Course.id)\
+            .join(CourseRegistration, CourseRegistration.course_id == Course.id)\
             .join(CourseType, CourseType.id == Course.type_id)\
-            .filter(Registration.user_id == self.id)\
+            .filter(CourseRegistration.user_id == self.id)\
             .filter(CourseType.name == u'VB')\
             .first()
 
     @property
     def y_gre_course(self):
         return Course.query\
-            .join(Registration, Registration.course_id == Course.id)\
+            .join(CourseRegistration, CourseRegistration.course_id == Course.id)\
             .join(CourseType, CourseType.id == Course.type_id)\
-            .filter(Registration.user_id == self.id)\
+            .filter(CourseRegistration.user_id == self.id)\
             .filter(CourseType.name == u'Y-GRE')\
             .first()
 
@@ -1047,8 +1040,8 @@ class Course(db.Model):
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
     registered_users = db.relationship(
-        'Registration',
-        foreign_keys=[Registration.course_id],
+        'CourseRegistration',
+        foreign_keys=[CourseRegistration.course_id],
         backref=db.backref('course', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'

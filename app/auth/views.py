@@ -82,11 +82,11 @@ def activate():
                 if activation.vb_course_id:
                     vb_course = Course.query.get(activation.vb_course_id)
                     if vb_course:
-                        new_user.register(course=vb_course)
+                        new_user.register_course(course=vb_course)
                 if activation.y_gre_course_id:
                     y_gre_course = Course.query.get(activation.y_gre_course_id)
                     if y_gre_course:
-                        new_user.register(course=y_gre_course)
+                        new_user.register_course(course=y_gre_course)
                 db.session.commit()
                 new_user.add_user_activation(activation=activation)
                 new_user.add_initial_punch(activation=activation)
