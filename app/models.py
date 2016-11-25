@@ -471,6 +471,46 @@ class Gender(db.Model):
         return '<Gender %r>' % self.name
 
 
+class Relationship(db.Model):
+    __tablename__ = 'relationships'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    emergency_contacts = db.relationship('EmergencyContact', backref='relationship', lazy='dynamic')
+
+    @staticmethod
+    def insert_relationships():
+        relationships = [
+            (u'父母', ),
+            (u'配偶', ),
+            (u'子女', ),
+            (u'同学', ),
+            (u'同事', ),
+            (u'朋友', ),
+        ]
+        for R in relationships:
+            relationship = Relationship.query.filter_by(name=R[0]).first()
+            if relationship is None:
+                relationship = Relationship(name=R[0])
+                db.session.add(relationship)
+                print u'导入关系类型信息', R[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Relationship %r>' % self.name
+
+
+class EmergencyContact(db.Model):
+    __tablename__ = 'emergency_contacts'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64))
+    relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
+    mobile = db.Column(db.Unicode(64))
+    users = db.relationship('User', backref='emergency_contact', lazy='dynamic')
+
+    def __repr__(self):
+        return '<Emergency Contact %r, %r, %r, %r>' % (self.user.name, self.name, self.relationship.name, self.mobile)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -484,12 +524,12 @@ class User(UserMixin, db.Model):
     id_number = db.Column(db.Unicode(64), unique=True, index=True)
     birthdate = db.Column(db.Date)
     mobile = db.Column(db.Unicode(64))
-    qq = db.Column(db.Unicode(64))
     address = db.Column(db.Unicode(128))
+    qq = db.Column(db.Unicode(64))
+    emergency_contact_id = db.Column(db.Integer, db.ForeignKey('emergency_contacts.id'))
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
-    emergency_contacts = db.relationship('EmergencyContact', backref='user', lazy='dynamic')
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
     registered_courses = db.relationship(
@@ -989,46 +1029,6 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-class Relationship(db.Model):
-    __tablename__ = 'relationships'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    emergency_contacts = db.relationship('EmergencyContact', backref='relationship', lazy='dynamic')
-
-    @staticmethod
-    def insert_relationships():
-        relationships = [
-            (u'父母', ),
-            (u'配偶', ),
-            (u'子女', ),
-            (u'同学', ),
-            (u'同事', ),
-            (u'朋友', ),
-        ]
-        for R in relationships:
-            relationship = Relationship.query.filter_by(name=R[0]).first()
-            if relationship is None:
-                relationship = Relationship(name=R[0])
-                db.session.add(relationship)
-                print u'导入关系类型信息', R[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Relationship %r>' % self.name
-
-
-class EmergencyContact(db.Model):
-    __tablename__ = 'emergency_contacts'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    name = db.Column(db.Unicode(64))
-    relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
-    contact = db.Column(db.Unicode(64))
-
-    def __repr__(self):
-        return '<Emergency Contact %r, %r, %r, %r>' % (self.user.name, self.name, self.relationship.name, self.contact)
 
 
 class EducationType(db.Model):
