@@ -565,7 +565,7 @@ class Profile(db.Model):
     )
 
     def __repr__(self):
-        return '<Profile %r, %r>' % (self.name, self.id_number)
+        return '<Profile %r, %r, %r>' % (self.name, self.gender.name, self.id_number)
 
 
 class EducationType(db.Model):
