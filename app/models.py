@@ -260,7 +260,7 @@ class Rental(db.Model):
         return sum([rental.is_overtime for rental in Rental.query.join(iPad, iPad.id == Rental.ipad_id).join(Room, Room.id == iPad.room_id).filter(Room.name == room_name).filter(Rental.returned == False).all()])
 
     def __repr__(self):
-        return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
+        return '<Rental %r, %r, %r>' % (self.user.profile.name, self.ipad.alias, self.ipad.serial)
 
 
 class Punch(db.Model):
@@ -283,7 +283,7 @@ class Punch(db.Model):
 
     def to_json(self):
         punch_json = {
-            'user': self.user.name,
+            'user': self.user.profile.name,
             'course_type': self.section.lesson.type.name,
             'lesson': self.section.lesson.name,
             'section': self.section.name,
@@ -295,7 +295,7 @@ class Punch(db.Model):
         return punch_json
 
     def __repr__(self):
-        return '<Punch %r, %r>' % (self.user.name, self.alias)
+        return '<Punch %r, %r>' % (self.user.profile.name, self.alias)
 
 
 class AssignmentScoreGrade(db.Model):
@@ -344,7 +344,7 @@ class AssignmentScore(db.Model):
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<Assignment Score %r, %r>' % (self.user.name, self.assignment.name)
+        return '<Assignment Score %r, %r>' % (self.user.profile.name, self.assignment.name)
 
 
 class VBTestScore(db.Model):
@@ -357,7 +357,7 @@ class VBTestScore(db.Model):
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
+        return '<VB Test Score %r, %r>' % (self.user.profile.name, self.test.name)
 
 
 class GREVScore(db.Model):
@@ -438,7 +438,7 @@ class YGRETestScore(db.Model):
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
+        return '<Y-GRE Test Score %r, %r>' % (self.user.profile.name, self.test.name)
 
 
 class UserAnnouncement(db.Model):
@@ -451,7 +451,7 @@ class Gender(db.Model):
     __tablename__ = 'genders'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    users = db.relationship('User', backref='gender', lazy='dynamic')
+    profiles = db.relationship('Profile', backref='gender', lazy='dynamic')
 
     @staticmethod
     def insert_genders():
@@ -475,7 +475,7 @@ class Relationship(db.Model):
     __tablename__ = 'relationships'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    emergency_contacts = db.relationship('EmergencyContact', backref='relationship', lazy='dynamic')
+    profiles = db.relationship('Profile', backref='relationship', lazy='dynamic')
 
     @staticmethod
     def insert_relationships():
@@ -499,16 +499,124 @@ class Relationship(db.Model):
         return '<Relationship %r>' % self.name
 
 
-class EmergencyContact(db.Model):
-    __tablename__ = 'emergency_contacts'
+class Purpose(db.Model):
+    __tablename__ = 'purposes'
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'), primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('purpose_types.id'), primary_key=True)
+
+
+class PurposeType(db.Model):
+    __tablename__ = 'purpose_types'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64))
-    relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
-    mobile = db.Column(db.Unicode(64))
-    users = db.relationship('User', backref='emergency_contact', lazy='dynamic')
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    purposes = db.relationship(
+        'Purpose',
+        foreign_keys=[Purpose.type_id],
+        backref=db.backref('type', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    @staticmethod
+    def insert_purpose_types():
+        purpose_types = [
+            (u'词源爱好者', ),
+            (u'GRE', ),
+            (u'TOEFL', ),
+            (u'GMAT', ),
+            (u'IELTS', ),
+            (u'考研', ),
+            (u'四六级', ),
+            (u'其它', ),
+        ]
+        for PT in purpose_types:
+            purpose_type = PurposeType.query.filter_by(name=PT[0]).first()
+            if purpose_type is None:
+                purpose_type = PurposeType(name=PT[0])
+                db.session.add(purpose_type)
+                print u'导入研修目的类型信息', PT[0]
+        db.session.commit()
 
     def __repr__(self):
-        return '<Emergency Contact %r, %r, %r, %r>' % (self.user.name, self.name, self.relationship.name, self.mobile)
+        return '<Purpose Type %r>' % self.name
+
+
+class Profile(db.Model):
+    __tablename__ = 'profiles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), index=True)
+    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
+    id_number = db.Column(db.Unicode(64), unique=True, index=True)
+    birthdate = db.Column(db.Date)
+    mobile = db.Column(db.Unicode(64))
+    address = db.Column(db.Unicode(128))
+    qq = db.Column(db.Unicode(64))
+    emergency_name = db.Column(db.Unicode(64))
+    emergency_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
+    emergency_mobile = db.Column(db.Unicode(64))
+    education_records = db.relationship('EducationRecord', backref='profile', lazy='dynamic')
+    employment_records = db.relationship('EmploymentRecord', backref='profile', lazy='dynamic')
+    purposes = db.relationship(
+        'Purpose',
+        foreign_keys=[Purpose.profile_id],
+        backref=db.backref('profile', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    def __repr__(self):
+        return '<Profile %r, %r>' % (self.name, self.id_number)
+
+
+class EducationType(db.Model):
+    __tablename__ = 'education_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    education_records = db.relationship('EducationRecord', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_education_types():
+        education_types = [
+            (u'高中', ),
+            (u'本科', ),
+            (u'硕士', ),
+            (u'博士', ),
+        ]
+        for ET in education_types:
+            education_type = EducationType.query.filter_by(name=ET[0]).first()
+            if education_type is None:
+                education_type = EducationType(name=ET[0])
+                db.session.add(education_type)
+                print u'导入学历类型信息', ET[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Education Type %r>' % self.name
+
+
+class EducationRecord(db.Model):
+    __tablename__ = 'education_records'
+    id = db.Column(db.Integer, primary_key=True)
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('education_types.id'))
+    school = db.Column(db.Unicode(64), index=True)
+    major = db.Column(db.Unicode(64), index=True)
+    year = db.Column(db.Unicode(64), index=True)
+
+    def __repr__(self):
+        return '<Education Record %r, %r, %r, %r>' % (self.profile.name, self.type.name, self.school, self.year)
+
+
+class EmploymentRecord(db.Model):
+    __tablename__ = 'employment_records'
+    id = db.Column(db.Integer, primary_key=True)
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'))
+    employer = db.Column(db.Unicode(64), index=True)
+    position = db.Column(db.Unicode(64), index=True)
+    year = db.Column(db.Unicode(64), index=True)
+
+    def __repr__(self):
+        return '<Education Record %r, %r, %r>' % (self.profile.name, self.employer, self.position)
 
 
 class User(UserMixin, db.Model):
@@ -519,19 +627,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     activated = db.Column(db.Boolean, default=False)
     confirmed = db.Column(db.Boolean, default=False)
-    name = db.Column(db.Unicode(64), index=True)
-    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
-    id_number = db.Column(db.Unicode(64), unique=True, index=True)
-    birthdate = db.Column(db.Date)
-    mobile = db.Column(db.Unicode(64))
-    address = db.Column(db.Unicode(128))
-    qq = db.Column(db.Unicode(64))
-    emergency_contact_id = db.Column(db.Integer, db.ForeignKey('emergency_contacts.id'))
+    profile_id = db.Column(db.Integer, db.ForeignKey('profiles.id'))
     member_since = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
-    education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
-    employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
     registered_courses = db.relationship(
         'CourseRegistration',
         foreign_keys=[CourseRegistration.user_id],
@@ -971,7 +1070,7 @@ class User(UserMixin, db.Model):
 
     def to_json(self):
         user_json = {
-            'name': self.name,
+            'name': self.profile.name,
             'email': self.email,
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
@@ -984,11 +1083,11 @@ class User(UserMixin, db.Model):
         if suggest_email:
             user_json_suggestion = {
                 'title': self.email,
-                'description': '%s [%s]' % (self.name, self.role.name),
+                'description': '%s [%s]' % (self.profile.name, self.role.name),
             }
         else:
             user_json_suggestion = {
-                'title': self.name,
+                'title': self.profile.name,
                 'description': self.email,
             }
         if include_url:
@@ -1001,7 +1100,7 @@ class User(UserMixin, db.Model):
         if admin is None:
             admin = User(
                 email=current_app.config['YSYS_ADMIN'],
-                name=u'Admin',
+                # name=u'Admin',
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD']
             )
@@ -1012,7 +1111,7 @@ class User(UserMixin, db.Model):
             print u'初始化系统管理员信息'
 
     def __repr__(self):
-        return '<User %s, %r>' % (self.name, self.email)
+        return '<User %s, %r>' % (self.profile.name, self.email)
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -1029,57 +1128,6 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-class EducationType(db.Model):
-    __tablename__ = 'education_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    education_records = db.relationship('EducationRecord', backref='type', lazy='dynamic')
-
-    @staticmethod
-    def insert_education_types():
-        education_types = [
-            (u'高中', ),
-            (u'本科', ),
-            (u'硕士', ),
-            (u'博士', ),
-        ]
-        for ET in education_types:
-            education_type = EducationType.query.filter_by(name=ET[0]).first()
-            if education_type is None:
-                education_type = EducationType(name=ET[0])
-                db.session.add(education_type)
-                print u'导入学历类型信息', ET[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Education Type %r>' % self.name
-
-
-class EducationRecord(db.Model):
-    __tablename__ = 'education_records'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    type_id = db.Column(db.Integer, db.ForeignKey('education_types.id'))
-    school = db.Column(db.Unicode(64), index=True)
-    major = db.Column(db.Unicode(64), index=True)
-    year = db.Column(db.Unicode(64), index=True)
-
-    def __repr__(self):
-        return '<Education Record %r, %r, %r, %r>' % (self.user.name, self.type.name, self.school, self.year)
-
-
-class EmploymentRecord(db.Model):
-    __tablename__ = 'employment_records'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    employer = db.Column(db.Unicode(64), index=True)
-    position = db.Column(db.Unicode(64), index=True)
-    year = db.Column(db.Unicode(64), index=True)
-
-    def __repr__(self):
-        return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
 
 
 class CourseType(db.Model):
