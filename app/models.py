@@ -611,11 +611,11 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.Unicode(64), unique=True, index=True)
+    confirmed = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     activated = db.Column(db.Boolean, default=False)
-    confirmed = db.Column(db.Boolean, default=False)
-    member_since = db.Column(db.DateTime, default=datetime.utcnow)
+    activated_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
     registered_courses = db.relationship(
@@ -731,7 +731,7 @@ class User(UserMixin, db.Model):
     # user profile properties
     name = db.Column(db.Unicode(64), index=True)
     gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
-    id_number = db.Column(db.Unicode(64), unique=True, index=True)
+    id_number = db.Column(db.Unicode(64), index=True)
     birthdate = db.Column(db.Date)
     mobile = db.Column(db.Unicode(64))
     address = db.Column(db.Unicode(128))
@@ -1123,11 +1123,16 @@ class User(UserMixin, db.Model):
             .order_by(Punch.timestamp.desc())\
             .first()
 
+    @property
+    def suspended(self):
+        return self.role.name == u'挂起'
+
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
     def activate(self):
         self.activated = True
+        self.activated_at = datetime.utcnow()
         db.session.add(self)
         initial_punch = Punch(user_id=self.id, section_id=1)
         db.session.add(initial_punch)

@@ -946,6 +946,7 @@ def user():
     page = request.args.get('page', 1, type=int)
     show_activated = True
     show_unactivated = False
+    show_suspended = False
     if current_user.is_authenticated:
         show_activated = bool(request.cookies.get('show_activated', '1'))
         show_unactivated = bool(request.cookies.get('show_unactivated', ''))
@@ -956,7 +957,6 @@ def user():
             .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(or_(
-                # Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
@@ -969,7 +969,7 @@ def user():
             .filter(User.activated == False)\
             .filter(User.deleted == False)\
             .filter(or_(
-                # Role.name == u'挂起',
+                Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
