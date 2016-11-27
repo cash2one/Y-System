@@ -957,6 +957,7 @@ def user():
             .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(or_(
+                Role.name == u'开发人员',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
@@ -985,7 +986,7 @@ def user():
             .order_by(User.last_seen_at.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/user.html', users=users, form=form, show_activated=show_activated, show_unactivated=show_unactivated, show_suspended=show_suspended, pagination=pagination)
+    return render_template('manage/user.html', users=users, show_activated=show_activated, show_unactivated=show_unactivated, show_suspended=show_suspended, pagination=pagination)
 
 
 @manage.route('/user/activated')
@@ -1112,19 +1113,7 @@ def edit_punch_step_3(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
-        punch = Punch.query\
-            .filter_by(user_id=user_id, section_id=section_id)\
-            .first()
-        if punch is not None:
-            # punches = Punch.query\
-            #     .filter(Punch.timestamp > punch.timestamp)\
-            #     .all()
-            # for pun in punches:
-            #     db.session.delete(pun)
-            punch.timestamp = datetime.utcnow()
-        else:
-            punch = Punch(user_id=user_id, section_id=section_id)
-        db.session.add(punch)
+        user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(request.args.get('next') or url_for('manage.find_user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
@@ -1852,14 +1841,7 @@ def rental_return_step_4(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
-        punch = Punch.query\
-            .filter_by(user_id=user_id, section_id=section_id)\
-            .first()
-        if punch is not None:
-            punch.timestamp = datetime.utcnow()
-        else:
-            punch = Punch(user_id=user_id, section_id=section_id)
-        db.session.add(punch)
+        user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_return_step_4.html', user=user, section=section, form=form)
@@ -1916,14 +1898,7 @@ def rental_return_step_4_alt(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
-        punch = Punch.query\
-            .filter_by(user_id=user_id, section_id=section_id)\
-            .first()
-        if punch is not None:
-            punch.timestamp = datetime.utcnow()
-        else:
-            punch = Punch(user_id=user_id, section_id=section_id)
-        db.session.add(punch)
+        user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental'))
     return render_template('manage/rental_return_step_4_alt.html', user=user, section=section, form=form)
@@ -2014,14 +1989,7 @@ def rental_exchange_step_4(rental_id, section_id):
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
     if form.validate_on_submit():
-        punch = Punch.query\
-            .filter_by(user_id=user.id, section_id=section_id)\
-            .first()
-        if punch is not None:
-            punch.timestamp = datetime.utcnow()
-        else:
-            punch = Punch(user_id=user.id, section_id=section_id)
-        db.session.add(punch)
+        user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
         return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_4.html', rental=rental, section=section, form=form)

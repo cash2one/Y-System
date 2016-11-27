@@ -6,13 +6,16 @@ from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, User, Role, Activation, Course, Announcement, AnnouncementType
+from ..models import Permission, User, Role, Course, Announcement, AnnouncementType
 
 
 @auth.before_app_request
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
+        if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
+            logout_user()
+            return redirect(url_for('auth.activate'))
         if not current_user.confirmed and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
             return redirect(url_for('auth.unconfirmed'))
 

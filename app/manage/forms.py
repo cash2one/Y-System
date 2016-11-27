@@ -2,7 +2,7 @@
 
 from datetime import date, time, timedelta
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, BooleanField, DateField, IntegerField, SelectField, SelectMultipleField, SubmitField
+from wtforms import StringField, TextAreaField, BooleanField, DateField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
 from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType

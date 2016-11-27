@@ -34,6 +34,9 @@ manager.add_command('db', MigrateCommand)
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
+    from app.models import Role
+    from app.models import Gender
+    from app.models import User
     from app.models import BookingState
     from app.models import iPadCapacity
     from app.models import iPadState
@@ -42,18 +45,29 @@ def deploy():
     from app.models import Course
     from app.models import Lesson
     from app.models import Section
-    from app.models import Role
-    from app.models import User
-    from app.models import Activation
+    from app.models import Assignment
+    from app.models import Test
     from app.models import Period
     from app.models import iPad
     from app.models import iPadContent
+    from app.models import AssignmentScoreGrade
+    from app.models import GREVScore
+    from app.models import GREQScore
+    from app.models import GREAWScore
+    from app.models import Relationship
+    from app.models import PurposeType
+    from app.models import ReferrerType
+    from app.models import PreviousAchievementType
+    from app.models import EducationType
     from app.models import AnnouncementType
 
     # migrate database to latest revision
     upgrade()
 
     # insert initial data
+    Role.insert_roles()
+    Gender.insert_genders()
+    User.insert_admin()
     BookingState.insert_booking_states()
     iPadCapacity.insert_ipad_capacities()
     iPadState.insert_ipad_states()
@@ -62,12 +76,21 @@ def deploy():
     Course.insert_courses()
     Lesson.insert_lessons()
     Section.insert_sections()
-    Role.insert_roles()
-    User.insert_admin()
-    Activation.insert_activations()
+    Assignment.insert_assignments()
+    Test.insert_tests()
     Period.insert_periods()
     iPad.insert_ipads()
     iPadContent.insert_ipad_contents()
+    AssignmentScoreGrade.insert_assignment_score_grades()
+    GREVScore.insert_gre_v_scores()
+    GREQScore.insert_gre_q_scores()
+    GREAWScore.insert_gre_aw_scores()
+    Relationship.insert_relationships()
+    PurposeType.insert_purpose_types()
+    ReferrerType.insert_referrer_types()
+    PreviousAchievementType.insert_previous_achievement_types()
+    EducationType.insert_education_types()
+
     AnnouncementType.insert_announcement_types()
 
 

@@ -52,10 +52,7 @@ def profile():
             flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
             announcement.notify(user=current_user._get_current_object())
     page = request.args.get('page', 1, type=int)
-    punches = Punch.query\
-        .filter_by(user_id=current_user.id)\
-        .order_by(Punch.timestamp.desc())\
-        .limit(10)
+    punches = current_user.punches.order_by(Punch.timestamp.desc()).limit(10)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == current_user.id)\
@@ -74,10 +71,7 @@ def profile_user(user_id):
     if user.deleted:
         abort(404)
     page = request.args.get('page', 1, type=int)
-    punches = Punch.query\
-        .filter_by(user_id=user.id)\
-        .order_by(Punch.timestamp.desc())\
-        .limit(10)
+    punches = user.punches.order_by(Punch.timestamp.desc()).limit(10)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == user.id)\

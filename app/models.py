@@ -339,7 +339,7 @@ class AssignmentScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
-    grade_id = db.Column(db.Integer, db.ForeignKey('assignment_scores_grades.id'))
+    grade_id = db.Column(db.Integer, db.ForeignKey('assignment_score_grades.id'))
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -742,7 +742,7 @@ class User(UserMixin, db.Model):
     previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
-    peer = db.Column(db.Boolean, default=False)
+    worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
     purposes = db.relationship(
         'Purpose',
@@ -906,15 +906,34 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(data['id'])
 
+    def create_user(self, user):
+        if not self.created_user(user):
+            user_creation = UserCreation(creator_id=self.id, user_id=user.id)
+        else:
+            user_creation = self.created_users.filter_by(user_id=user.id).first()
+            user_creation.timestamp = datetime.utcnow()
+        db.session.add(user_creation)
+
+    def uncreate_user(self, user):
+        user_creation = self.created_users.filter_by(user_id=user.id).first()
+        if user_creation:
+            db.session.delete(user_creation)
+
+    def created_user(self, user):
+        return self.created_users.filter_by(user_id=user.id).first() is not None
+
     def register_course(self, course):
         if not self.is_registering_course(course):
-            r = CourseRegistration(user=self, course=course)
-            db.session.add(r)
+            course_registration = CourseRegistration(user_id=self.id, course_id=course.id)
+        else:
+            course_registration = self.registered_courses.filter_by(course_id=course.id).first()
+            course_registration.timestamp = datetime.utcnow()
+        db.session.add(course_registration)
 
     def unregister_course(self, course):
-        r = self.registered_courses.filter_by(course_id=course.id).first()
-        if r:
-            db.session.delete(r)
+        course_registration = self.registered_courses.filter_by(course_id=course.id).first()
+        if course_registration:
+            db.session.delete(course_registration)
 
     def is_registering_course(self, course):
         return self.registered_courses.filter_by(course_id=course.id).first() is not None
@@ -1116,12 +1135,25 @@ class User(UserMixin, db.Model):
     def has_unreturned_ipads(self):
         return Rental.query.filter_by(user_id=self.id, returned=False).count() > 0
 
+    def punch(self, section):
+        if not self.punched(section):
+            pun = Punch(user_id=self.id, section_id=section.id)
+        else:
+            pun = self.punches.filter_by(section_id=section.id).first()
+            pun.timestamp = datetime.utcnow()
+        db.session.add(pun)
+
+    def unpunch(self, section):
+        pun = self.punches.filter_by(section_id=section.id).first()
+        if pun:
+            db.session.delete(pun)
+
+    def punched(self, section):
+        return self.punches.filter_by(section_id=section.id).first() is not None
+
     @property
     def last_punch(self):
-        return Punch.query\
-            .filter_by(user_id=self.id)\
-            .order_by(Punch.timestamp.desc())\
-            .first()
+        return self.punches.order_by(Punch.timestamp.desc()).first()
 
     @property
     def suspended(self):
@@ -1134,8 +1166,7 @@ class User(UserMixin, db.Model):
         self.activated = True
         self.activated_at = datetime.utcnow()
         db.session.add(self)
-        initial_punch = Punch(user_id=self.id, section_id=1)
-        db.session.add(initial_punch)
+        self.punch(section=Section.query.get(1))
 
     def to_json(self):
         user_json = {
@@ -1171,17 +1202,16 @@ class User(UserMixin, db.Model):
                 email=current_app.config['YSYS_ADMIN'],
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD'],
-                # activated=True,
                 name=u'Admin'
             )
             db.session.add(admin)
             db.session.commit()
-            # initial_punch = Punch(user_id=admin.id, section_id=1)
-            # db.session.add(initial_punch)
+            admin.create_user(user=admin)
+            db.session.commit()
             print u'初始化系统管理员信息'
 
     def __repr__(self):
-        return '<User %s, %r>' % (self.name, self.email)
+        return '<User %r, %r>' % (self.name, self.email)
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -1377,7 +1407,7 @@ class Course(db.Model):
                 course = Course(
                     name=C[0],
                     type_id=CourseType.query.filter_by(name=C[1]).first().id,
-                    modified_by_id=modified_by_id=User.query.get(1).id
+                    modified_by_id=User.query.get(1).id
                 )
                 db.session.add(course)
                 print u'导入课程信息', C[0], C[1]
@@ -2116,8 +2146,6 @@ class Section(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    # punches = db.relationship('Punch', backref='section', lazy='dynamic')
-    # activations = db.relationship('Activation', backref='initial_section', lazy='dynamic')
 
     @property
     def alias(self):
@@ -2248,7 +2276,7 @@ class Section(db.Model):
                 section = Section(
                     name=S[0],
                     lesson_id=Lesson.query.filter_by(name=S[1]).first().id,
-                    hour=timedelta(hours=s[2])
+                    hour=timedelta(hours=S[2])
                 )
                 db.session.add(section)
                 print u'导入节信息', S[0], S[1]
