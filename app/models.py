@@ -593,6 +593,13 @@ class Invitation(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class GroupRegistration(db.Model):
+    __tablename__ = 'group_registrations'
+    organizer_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -725,6 +732,20 @@ class User(UserMixin, db.Model):
         'Referrer',
         foreign_keys=[Referrer.user_id],
         backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    organized_groups = db.relationship(
+        'GroupRegistration',
+        foreign_keys=[GroupRegistration.organizer_id],
+        backref=db.backref('organizer', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    joined_groups = db.relationship(
+        'GroupRegistration',
+        foreign_keys=[GroupRegistration.member_id],
+        backref=db.backref('member', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
