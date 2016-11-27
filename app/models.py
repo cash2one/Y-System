@@ -574,12 +574,12 @@ class ReferrerType(db.Model):
             (u'传单', ),
             (u'其它', ),
         ]
-        for PT in referrer_types:
-            referrer_type = ReferrerType.query.filter_by(name=PT[0]).first()
+        for RT in referrer_types:
+            referrer_type = ReferrerType.query.filter_by(name=RT[0]).first()
             if referrer_type is None:
-                referrer_type = ReferrerType(name=PT[0])
+                referrer_type = ReferrerType(name=RT[0])
                 db.session.add(referrer_type)
-                print u'导入来源类型信息', PT[0]
+                print u'导入来源类型信息', RT[0]
         db.session.commit()
 
     def __repr__(self):
@@ -711,11 +711,19 @@ class User(UserMixin, db.Model):
     emergency_name = db.Column(db.Unicode(64))
     emergency_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
     emergency_mobile = db.Column(db.Unicode(64))
+    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
     purposes = db.relationship(
         'Purpose',
         foreign_keys=[Purpose.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    referrers = db.relationship(
+        'Referrer',
+        foreign_keys=[Referrer.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -1063,15 +1071,6 @@ class User(UserMixin, db.Model):
             .order_by(Punch.timestamp.desc())\
             .first()
 
-    # @property
-    # def invited_by(self):
-    #     return Activation.query\
-    #         .join(UserActivation, UserActivation.activation_id == Activation.id)\
-    #         .join(User, User.id == UserActivation.user_id)\
-    #         .filter(User.id == self.id)\
-    #         .first()\
-    #         .inviter
-
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
@@ -1107,9 +1106,10 @@ class User(UserMixin, db.Model):
         if admin is None:
             admin = User(
                 email=current_app.config['YSYS_ADMIN'],
-                # name=u'Admin',
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
-                password=current_app.config['YSYS_ADMIN_PASSWORD']
+                password=current_app.config['YSYS_ADMIN_PASSWORD'],
+                activated=True,
+                name=u'Admin'
             )
             db.session.add(admin)
             db.session.commit()
@@ -1135,6 +1135,49 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+class PreviousAchievementType(db.Model):
+    __tablename__ = 'previous_achievement_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    previous_achievements = db.relationship('PreviousAchievement', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_previous_achievement_types():
+        previous_achievement_types = [
+            (u'高考总分', ),
+            (u'高考数学', ),
+            (u'高考英语', ),
+            (u'大学英语四级', ),
+            (u'大学英语六级', ),
+            (u'专业英语四级', ),
+            (u'专业英语八级', ),
+            (u'TOEFL', ),
+            (u'其它', ),
+        ]
+        for PAT in previous_achievement_types:
+            previous_achievement_type = PreviousAchievementType.query.filter_by(name=PAT[0]).first()
+            if previous_achievement_type is None:
+                previous_achievement_type = PreviousAchievementType(name=PAT[0])
+                db.session.add(previous_achievement_type)
+                print u'导入既往成绩类型信息', PAT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Previous Achievement Type %r>' % self.name
+
+
+class PreviousAchievement(db.Model):
+    __tablename__ = 'previous_achievements'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('previous_achievement_types.id'))
+    score = db.Column(db.Integer)
+    remark = db.Column(db.UnicodeText)
+
+    def __repr__(self):
+        return '<Previous Achievement %r, %r, %r, %r>' % (self.user.name, self.type.name, self.score)
 
 
 class EducationType(db.Model):
@@ -1170,6 +1213,7 @@ class EducationRecord(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey('education_types.id'))
     school = db.Column(db.Unicode(64))
     major = db.Column(db.Unicode(64))
+    gpa = db.Column(db.Float)
     year = db.Column(db.Unicode(16))
 
     def __repr__(self):
