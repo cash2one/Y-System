@@ -773,8 +773,9 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     # registration properties
-    valid_period = db.Column(db.Interval, default=timedelta(days=180))
+    valid_months = db.Column(db.Integer, default=6)
     suspended = db.Column(db.Boolean, default=False)
+    suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
     vb_y_gre_together_offer = db.Column(db.Boolean, default=False)
     undergraduate_refund = db.Column(db.Boolean, default=False)
     alumni_refund = db.Column(db.Boolean, default=False)
@@ -1282,6 +1283,17 @@ class EmploymentRecord(db.Model):
 
     def __repr__(self):
         return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
+
+
+class SuspensionRecord(db.Model):
+    __tablename__ = 'suspension_records'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+
+    def __repr__(self):
+        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_date, self.end_date)
 
 
 class CourseType(db.Model):
