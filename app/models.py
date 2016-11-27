@@ -600,6 +600,13 @@ class GroupRegistration(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class UserCreation(db.Model):
+    __tablename__ = 'user_creations'
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -707,7 +714,21 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
-    # user profile
+    created_users = db.relationship(
+        'UserCreation',
+        foreign_keys=[UserCreation.creator_id],
+        backref=db.backref('creator', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    created_by = db.relationship(
+        'UserCreation',
+        foreign_keys=[UserCreation.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    # user profile properties
     name = db.Column(db.Unicode(64), index=True)
     gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
     id_number = db.Column(db.Unicode(64), unique=True, index=True)
@@ -721,6 +742,8 @@ class User(UserMixin, db.Model):
     previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
+    peer = db.Column(db.Boolean, default=False)
+    deformity = db.Column(db.Boolean, default=False)
     purposes = db.relationship(
         'Purpose',
         foreign_keys=[Purpose.user_id],
@@ -735,20 +758,6 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    organized_group_registrations = db.relationship(
-        'GroupRegistration',
-        foreign_keys=[GroupRegistration.organizer_id],
-        backref=db.backref('organizer', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    joined_group_registrations = db.relationship(
-        'GroupRegistration',
-        foreign_keys=[GroupRegistration.member_id],
-        backref=db.backref('member', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
     invited = db.relationship(
         'Invitation',
         foreign_keys=[Invitation.inviter_id],
@@ -760,6 +769,27 @@ class User(UserMixin, db.Model):
         'Invitation',
         foreign_keys=[Invitation.invited_id],
         backref=db.backref('invited', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    # registration properties
+    valid_thru = db.Column(db.Date)
+    vb_y_gre_together_offer = db.Column(db.Boolean, default=False)
+    undergraduate_refund = db.Column(db.Boolean, default=False)
+    alumni_refund = db.Column(db.Boolean, default=False)
+    special_offer = db.Column(db.Boolean, default=False)
+    other_offer = db.Column(db.Boolean, default=False)
+    organized_group_registrations = db.relationship(
+        'GroupRegistration',
+        foreign_keys=[GroupRegistration.organizer_id],
+        backref=db.backref('organizer', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    joined_group_registrations = db.relationship(
+        'GroupRegistration',
+        foreign_keys=[GroupRegistration.member_id],
+        backref=db.backref('member', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
