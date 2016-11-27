@@ -773,7 +773,8 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     # registration properties
-    valid_thru = db.Column(db.Date)
+    valid_period = db.Column(db.Interval, default=timedelta(days=180))
+    suspended = db.Column(db.Boolean, default=False)
     vb_y_gre_together_offer = db.Column(db.Boolean, default=False)
     undergraduate_refund = db.Column(db.Boolean, default=False)
     alumni_refund = db.Column(db.Boolean, default=False)
