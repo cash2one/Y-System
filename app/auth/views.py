@@ -72,24 +72,10 @@ def activate():
         return redirect(request.args.get('next') or url_for('main.profile'))
     form = ActivationForm()
     if form.validate_on_submit():
-        activations = Activation.query.filter_by(name=form.name.data, activated=False, deleted=False).all()
-        for activation in activations:
-            if activation.verify_activation_code(form.activation_code.data):
-                activation.activated = True
-                db.session.add(activation)
-                new_user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
-                db.session.add(new_user)
-                if activation.vb_course_id:
-                    vb_course = Course.query.get(activation.vb_course_id)
-                    if vb_course:
-                        new_user.register_course(course=vb_course)
-                if activation.y_gre_course_id:
-                    y_gre_course = Course.query.get(activation.y_gre_course_id)
-                    if y_gre_course:
-                        new_user.register_course(course=y_gre_course)
-                db.session.commit()
-                new_user.add_user_activation(activation=activation)
-                new_user.add_initial_punch(activation=activation)
+        new_users = User.query.filter_by(name=form.name.data, activated=False, deleted=False).all()
+        for new_user in new_users:
+            if new_user.verify_password(form.activation_code.data):
+                new_user.activate()
                 token = new_user.generate_confirmation_token()
                 send_email(new_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=new_user, token=token)
                 flash(u'激活成功，请登录！', category='success')

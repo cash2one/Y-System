@@ -774,7 +774,6 @@ class User(UserMixin, db.Model):
     )
     # registration properties
     valid_months = db.Column(db.Integer, default=6)
-    suspended = db.Column(db.Boolean, default=False)
     suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
     vb_y_gre_together_offer = db.Column(db.Boolean, default=False)
     undergraduate_refund = db.Column(db.Boolean, default=False)
@@ -1127,6 +1126,12 @@ class User(UserMixin, db.Model):
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
+    def activate(self):
+        self.activated = True
+        db.session.add(self)
+        initial_punch = Punch(user_id=self.id, section_id=1)
+        db.session.add(initial_punch)
+
     def to_json(self):
         user_json = {
             'name': self.name,
@@ -1161,13 +1166,13 @@ class User(UserMixin, db.Model):
                 email=current_app.config['YSYS_ADMIN'],
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD'],
-                activated=True,
+                # activated=True,
                 name=u'Admin'
             )
             db.session.add(admin)
             db.session.commit()
-            initial_punch = Punch(user_id=admin.id, section_id=1)
-            db.session.add(initial_punch)
+            # initial_punch = Punch(user_id=admin.id, section_id=1)
+            # db.session.add(initial_punch)
             print u'初始化系统管理员信息'
 
     def __repr__(self):

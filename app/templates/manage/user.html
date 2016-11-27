@@ -24,14 +24,8 @@
                 <div class="ui tabular menu">
                     {% if show_users %}
                     <a class="item active loading-trigger" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.activations') }}">激活信息</a>
-                    {% endif %}
-                    {% if show_activations %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.activations') }}">激活信息</a>
                     {% endif %}
                 </div>
-                {% if show_users %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -78,7 +72,7 @@
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can(Permission.MANAGE_USER) %}
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="refresh icon"></i></a>
+                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -91,90 +85,16 @@
                             </td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination_users %}
-                {{ macros.pagination_widget(pagination_users, 'manage.user') }}
-                {% endif %}
-                {% endif %}
-                {% if show_activations %}
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>姓名</th>
-                            <th>初始权限</th>
-                            <th>初始VB班</th>
-                            <th>初始Y-GRE班</th>
-                            <th>初始进度</th>
-                            <th>邀请人</th>
-                            <th>邀请时间</th>
-                            <th>激活状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for activation in activations %}
-                        <tr>
-                            <td>
-                                {% if activation.activated %}
-                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=activation.activated_user.user_id) }}" target="_blank">{{ activation.name }}</a>
-                                <div class="ui flowing popup popup-content">{{ activation.name }}（{{ activation.activated_user.user.email }}）</div>
-                                {% else %}
-                                {{ activation.name }}
-                                {% endif %}
-                            </td>
-                            <td>{{ activation.role.name }}</td>
-                            <td>
-                                {% if activation.vb_course %}
-                                {{ activation.vb_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if activation.y_gre_course %}
-                                {{ activation.y_gre_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>{{ activation.initial_lesson.name }} - {{ activation.initial_section.name }}</td>
-                            <td>{{ activation.inviter.name }}</td>
-                            <td>
-                                <div class="popup-trigger">{{ moment(activation.timestamp).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(activation.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            {% if activation.activated %}
-                            <td class="positive">已激活</td>
-                            {% else %}
-                            <td class="negative">未激活</td>
-                            {% endif %}
-                            <td>
-                                {% if activation.activated %}
-                                <div class="ui mini icon disabled buttons">
-                                    <div class="ui mini disabled button"><i class="edit icon"></i></div>
-                                    <div class="ui mini negative disabled button"><i class="remove user icon"></i></div>
-                                </div>
-                                {% else %}
-                                <div class="ui mini icon buttons">
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_activation', id=activation.id, next=url_for('manage.user', page=pagination_activations.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_activation', id=activation.id, next=url_for('manage.user', page=pagination_activations.page)) }}"><i class="remove user icon"></i></a>
-                                </div>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% if pagination_activations %}
-                {{ macros.pagination_widget(pagination_activations, 'manage.user') }}
-                {% endif %}
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.user') }}
                 {% endif %}
             </div>
         </div>

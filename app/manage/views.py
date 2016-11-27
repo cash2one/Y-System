@@ -7,10 +7,10 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, NewActivationForm, NewActivationFormAuth, NewActivationFormAdmin, EditActivationForm, EditActivationFormAuth, EditActivationFormAdmin, DeleteActivationForm, EditUserForm, DeleteUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditUserForm, DeleteUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Activation, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
+from ..models import Permission, Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
 from ..decorators import admin_required, permission_required
 
 
@@ -943,153 +943,82 @@ def ipad_contents():
 @login_required
 @permission_required(Permission.MANAGE_USER)
 def user():
-    if current_user.is_administrator():
-        form = NewActivationFormAdmin()
-    elif current_user.can(Permission.MANAGE_AUTH):
-        form = NewActivationFormAuth()
-    else:
-        form = NewActivationForm()
-    if form.validate_on_submit():
-        vb_course_id = form.vb_course.data
-        if vb_course_id == 0:
-            vb_course_id = None
-        y_gre_course_id = form.y_gre_course.data
-        if y_gre_course_id == 0:
-            y_gre_course_id = None
-        activation = Activation(name=form.name.data, activation_code=form.activation_code.data, role_id=form.role.data, vb_course_id=vb_course_id, y_gre_course_id=y_gre_course_id, inviter_id=current_user.id)
-        db.session.add(activation)
-        db.session.commit()
-        flash(u'成功添加%s用户：%s' % (activation.role.name, activation.name), category='success')
-        return redirect(url_for('manage.user'))
     page = request.args.get('page', 1, type=int)
-    show_users = True
-    show_activations = False
+    show_activated = True
+    show_unactivated = False
     if current_user.is_authenticated:
-        show_users = bool(request.cookies.get('show_users', '1'))
-        show_activations = bool(request.cookies.get('show_activations', ''))
-    pagination_users = User.query\
-        .join(Role, Role.id == User.role_id)\
-        .filter(User.deleted == False)\
-        .filter(or_(
-            Role.name == u'挂起',
-            Role.name == u'单VB',
-            Role.name == u'Y-GRE 普通',
-            Role.name == u'Y-GRE VBx2',
-            Role.name == u'Y-GRE A权限'
-        ))\
-        .order_by(User.last_seen_at.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    users = pagination_users.items
-    if current_user.is_administrator():
-        pagination_activations = Activation.query\
-            .join(Role, Role.id == Activation.role_id)\
-            .filter(Activation.deleted == False)\
-            .order_by(Activation.timestamp.desc())\
-            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    elif current_user.can(Permission.MANAGE_AUTH):
-        pagination_activations = Activation.query\
-            .join(Role, Role.id == Activation.role_id)\
+        show_activated = bool(request.cookies.get('show_activated', '1'))
+        show_unactivated = bool(request.cookies.get('show_unactivated', ''))
+        show_suspended = bool(request.cookies.get('show_suspended', ''))
+    if show_activated:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
             .filter(or_(
-                Role.name == u'挂起',
-                Role.name == u'单VB',
-                Role.name == u'Y-GRE 普通',
-                Role.name == u'Y-GRE VBx2',
-                Role.name == u'Y-GRE A权限',
-                Role.name == u'协管员',
-                Role.name == u'管理员'
-            ))\
-            .filter(Activation.deleted == False)\
-            .order_by(Activation.timestamp.desc())\
-            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    else:
-        pagination_activations = Activation.query\
-            .join(Role, Role.id == Activation.role_id)\
-            .filter(or_(
-                Role.name == u'挂起',
+                # Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
                 Role.name == u'Y-GRE A权限'
             ))\
-            .filter(Activation.deleted == False)\
-            .order_by(Activation.timestamp.desc())\
-            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    activations = pagination_activations.items
-    return render_template('manage/user.html', users=users, activations=activations, form=form, show_users=show_users, show_activations=show_activations, pagination_users=pagination_users, pagination_activations=pagination_activations)
+            .order_by(User.last_seen_at.desc())
+    if show_unactivated:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.activated == False)\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                # Role.name == u'挂起',
+                Role.name == u'单VB',
+                Role.name == u'Y-GRE 普通',
+                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE A权限'
+            ))\
+            .order_by(User.last_seen_at.desc())
+    if show_suspended:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .filter(Role.name == u'挂起')\
+            .order_by(User.last_seen_at.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    users = pagination.items
+    return render_template('manage/user.html', users=users, form=form, show_activated=show_activated, show_unactivated=show_unactivated, show_suspended=show_suspended, pagination=pagination)
 
 
-@manage.route('/user/users')
+@manage.route('/user/activated')
 @login_required
 @permission_required(Permission.MANAGE_USER)
-def users():
+def activated_users():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_users', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_activations', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activated', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
     return resp
 
 
-@manage.route('/user/activations')
+@manage.route('/user/unactivated')
 @login_required
 @permission_required(Permission.MANAGE_USER)
-def activations():
+def unactivated_users():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_users', '', max_age=30*24*60*60)
-    resp.set_cookie('show_activations', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
     return resp
 
 
-@manage.route('/activation/edit/<int:id>', methods=['GET', 'POST'])
+@manage.route('/user/suspended')
 @login_required
 @permission_required(Permission.MANAGE_USER)
-def edit_activation(id):
-    activation = Activation.query.get_or_404(id)
-    if activation.deleted:
-        abort(404)
-    if current_user.is_administrator():
-        form = EditActivationFormAdmin()
-    elif current_user.can(Permission.MANAGE_AUTH):
-        form = EditActivationFormAuth()
-    else:
-        form = EditActivationForm()
-    if form.validate_on_submit():
-        activation.name = form.name.data
-        activation.activation_code = form.activation_code.data
-        activation.role_id = form.role.data
-        activation.vb_course_id = form.vb_course.data
-        activation.y_gre_course_id = form.y_gre_course.data
-        activation.inviter_id = current_user.id
-        activation.timestamp = datetime.utcnow()
-        if activation.activated:
-            flash(u'该账户已经激活，不能更新。', category='error')
-            return redirect(request.args.get('next') or url_for('manage.user'))
-        db.session.add(activation)
-        db.session.commit()
-        flash(u'%s的激活信息已更新' % activation.name, category='success')
-        return redirect(request.args.get('next') or url_for('manage.user'))
-    form.name.data = activation.name
-    form.activation_code.data = None
-    form.role.data = activation.role_id
-    form.vb_course.data = activation.vb_course_id
-    form.y_gre_course.data = activation.y_gre_course_id
-    return render_template('manage/edit_activation.html', form=form, activation=activation)
-
-
-@manage.route('/activation/delete/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(Permission.MANAGE_USER)
-def delete_activation(id):
-    activation = Activation.query.get_or_404(id)
-    if activation.deleted:
-        abort(404)
-    form = DeleteActivationForm()
-    if form.validate_on_submit():
-        if activation.activated:
-            flash(u'该账户已经激活，无法删除。', category='error')
-            return redirect(request.args.get('next') or url_for('manage.user'))
-        activation.safe_delete()
-        flash(u'已删除%s的激活邀请' % activation.name, category='success')
-        return redirect(request.args.get('next') or url_for('manage.user'))
-    return render_template('manage/delete_activation.html', form=form, activation=activation)
+def suspended_users():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/user/edit/<int:id>', methods=['GET', 'POST'])

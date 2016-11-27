@@ -32,19 +32,6 @@ $(document)
                             }
                         ]
                     },
-                    email: {
-                        identifier  : 'email',
-                        rules: [
-                            {
-                                type   : 'empty',
-                                prompt : '请输入您的电子邮箱地址'
-                            },
-                            {
-                                type   : 'email',
-                                prompt : '请输入一个有效的电子邮箱地址'
-                            }
-                        ]
-                    },
                     password: {
                         identifier  : 'password',
                         rules: [

@@ -27,23 +27,6 @@
                         {{ form.activation_code(placeholder='激活码') }}
                     </div>
                 </div>
-                {% with email_errors = form.email.errors %}
-                {% if email_errors %}
-                <div class="field error">
-                    <div class="ui large left icon input">
-                        <i class="at icon"></i>
-                        {{ form.email(placeholder='邮箱（用于登录系统和接收确认邮件）') }}
-                    </div>
-                </div>
-                {% else %}
-                <div class="field">
-                    <div class="ui large left icon input">
-                        <i class="at icon"></i>
-                        {{ form.email(placeholder='邮箱（用于登录系统和接收确认邮件）') }}
-                    </div>
-                </div>
-                {% endif %}
-                {% endwith %}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="lock icon"></i>
