@@ -16,7 +16,7 @@ class LoginForm(FlaskForm):
 
 class ActivationForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
+    activation_code = PasswordField(u'激活码', validators=[Required()])
     password = PasswordField(u'新密码', validators=[Required(), EqualTo('password2')])
     password2 = PasswordField(u'确认密码', validators=[Required()])
     eula = BooleanField(u'同意使用条款', validators=[Required()])
