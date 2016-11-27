@@ -104,18 +104,27 @@
             {% endif %}
             {% if current_user.can(Permission.MANAGE) %}
             <div class="ui dropdown item">
-                <i class="settings icon"></i>
-                系统管理
+                <i class="student icon"></i>
+                教学管理
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     {% if current_user.can(Permission.MANAGE_BOOKING) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                     {% endif %}
-                    {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
-                    {% endif %}
                     {% if current_user.can(Permission.MANAGE_RENTAL) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
+                    {% endif %}
+                    <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                    <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                </div>
+            </div>
+            <div class="ui dropdown item">
+                <i class="settings icon"></i>
+                系统管理
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_IPAD) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
@@ -124,15 +133,15 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE_USER) %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                     {% endif %}
-                    {% if current_user.can(Permission.MANAGE_AUTH) %}
+                    <!-- {% if current_user.can(Permission.MANAGE_AUTH) %}
                     <a class="item loading-trigger" href="{{ url_for('manage.auth') }}"><i class="users icon"></i> 权限管理</a>
                     {% endif %}
                     {% if current_user.can(Permission.ADMINISTER) %}
                     <div class="divider"></div>
                     <a class="item loading-trigger" href="{{ url_for('manage.auth_admin') }}"><i class="bomb icon"></i> 开发者权限</a>
-                    {% endif %}
+                    {% endif %} -->
                 </div>
             </div>
             <div class="ui dropdown item">
@@ -211,16 +220,23 @@
         {% endif %}
         {% if current_user.can(Permission.MANAGE) %}
         <div class="item">
-            <div class="header">系统管理</div>
+            <div class="header">教学管理</div>
             <div class="menu">
                 {% if current_user.can(Permission.MANAGE_BOOKING) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                 {% endif %}
-                {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
-                <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
-                {% endif %}
                 {% if current_user.can(Permission.MANAGE_RENTAL) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
+                {% endif %}
+                <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+            </div>
+        </div>
+        <div class="item">
+            <div class="header">系统管理</div>
+            <div class="menu">
+                {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
+                <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_IPAD) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
@@ -229,14 +245,14 @@
                 <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.MANAGE_USER) %}
-                <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
+                <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                 {% endif %}
-                {% if current_user.can(Permission.MANAGE_AUTH) %}
+                <!-- {% if current_user.can(Permission.MANAGE_AUTH) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.auth') }}"><i class="users icon"></i> 权限管理</a>
                 {% endif %}
                 {% if current_user.can(Permission.ADMINISTER) %}
                 <a class="item loading-trigger" href="{{ url_for('manage.auth_admin') }}"><i class="bomb icon"></i> 开发者权限</a>
-                {% endif %}
+                {% endif %} -->
             </div>
         </div>
         <div class="item">
@@ -308,18 +324,27 @@
                     {% endif %}
                     {% if current_user.can(Permission.MANAGE) %}
                     <div class="ui dropdown item">
-                        <i class="settings icon"></i>
-                        系统管理
+                        <i class="student icon"></i>
+                        教学管理
                         <i class="dropdown icon"></i>
                         <div class="menu">
                             {% if current_user.can(Permission.MANAGE_BOOKING) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                             {% endif %}
-                            {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
-                            <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
-                            {% endif %}
                             {% if current_user.can(Permission.MANAGE_RENTAL) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
+                            {% endif %}
+                            <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                            <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                        </div>
+                    </div>
+                    <div class="ui dropdown item">
+                        <i class="settings icon"></i>
+                        系统管理
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            {% if current_user.can(Permission.MANAGE_SCHEDULE) %}
+                            <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_IPAD) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
@@ -328,15 +353,15 @@
                             <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.MANAGE_USER) %}
-                            <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i> 用户管理</a>
+                            <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                             {% endif %}
-                            {% if current_user.can(Permission.MANAGE_AUTH) %}
+                            <!-- {% if current_user.can(Permission.MANAGE_AUTH) %}
                             <a class="item loading-trigger" href="{{ url_for('manage.auth') }}"><i class="users icon"></i> 权限管理</a>
                             {% endif %}
                             {% if current_user.can(Permission.ADMINISTER) %}
                             <div class="divider"></div>
                             <a class="item loading-trigger" href="{{ url_for('manage.auth_admin') }}"><i class="bomb icon"></i> 开发者权限</a>
-                            {% endif %}
+                            {% endif %} -->
                         </div>
                     </div>
                     <div class="ui dropdown item">

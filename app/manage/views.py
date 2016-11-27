@@ -957,7 +957,6 @@ def user():
             .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(or_(
-                Role.name == u'开发人员',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
