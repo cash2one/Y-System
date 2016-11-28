@@ -615,6 +615,7 @@ class Invitation(db.Model):
     inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     invited_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     type_id = db.Column(db.Integer, db.ForeignKey('invitation_types.id'))
+    paid = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
