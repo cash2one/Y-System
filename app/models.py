@@ -586,10 +586,35 @@ class ReferrerType(db.Model):
         return '<Purpose Type %r>' % self.name
 
 
+class InvitationType(db.Model):
+    __tablename__ = 'invitation_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    invitations = db.relationship('Invitation', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_invitation_types():
+        invitation_types = [
+            (u'积分', ),
+            (u'提成', ),
+        ]
+        for IT in invitation_types:
+            invitation_type = InvitationType.query.filter_by(name=IT[0]).first()
+            if invitation_type is None:
+                invitation_type = InvitationType(name=IT[0])
+                db.session.add(invitation_type)
+                print u'导入邀请类型信息', IT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Invitation Type %r>' % self.name
+
+
 class Invitation(db.Model):
     __tablename__ = 'invitations'
     inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     invited_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('invitation_types.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -775,11 +800,11 @@ class User(UserMixin, db.Model):
     # registration properties
     valid_months = db.Column(db.Integer, default=6)
     suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
-    vb_y_gre_together_offer = db.Column(db.Boolean, default=False)
-    undergraduate_refund = db.Column(db.Boolean, default=False)
-    alumni_refund = db.Column(db.Boolean, default=False)
-    special_offer = db.Column(db.Boolean, default=False)
-    other_offer = db.Column(db.Boolean, default=False)
+    # vb_y_gre_together_offer = db.Column(db.Boolean, default=False)
+    # undergraduate_refund = db.Column(db.Boolean, default=False)
+    # alumni_refund = db.Column(db.Boolean, default=False)
+    # special_offer = db.Column(db.Boolean, default=False)
+    # other_offer = db.Column(db.Boolean, default=False)
     organized_group_registrations = db.relationship(
         'GroupRegistration',
         foreign_keys=[GroupRegistration.organizer_id],
