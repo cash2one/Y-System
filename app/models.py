@@ -1362,6 +1362,33 @@ class SuspensionRecord(db.Model):
         return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_date, self.end_date)
 
 
+class Product(db.Model):
+    __tablename__ = 'products'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    price = db.Column(db.Float, default=0.0)
+
+    @staticmethod
+    def insert_products():
+        products = [
+            (u'VB', 6800.0, ),
+            (u'Y-GRE', 6800.0, ),
+        ]
+        for P in products:
+            product = Product.query.filter_by(name=P[0]).first()
+            if product is None:
+                product = Product(
+                    name=P[0],
+                    price=P[1]
+                )
+                db.session.add(product)
+                print u'导入课程类型信息', P[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Product %r>' % self.name
+
+
 class CourseType(db.Model):
     __tablename__ = 'course_types'
     id = db.Column(db.Integer, primary_key=True)
