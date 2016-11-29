@@ -41,6 +41,7 @@ def deploy():
     from app.models import iPadCapacity
     from app.models import iPadState
     from app.models import Room
+    from app.models import Product
     from app.models import CourseType
     from app.models import Course
     from app.models import Lesson
@@ -57,6 +58,7 @@ def deploy():
     from app.models import Relationship
     from app.models import PurposeType
     from app.models import ReferrerType
+    from app.models import InvitationType
     from app.models import PreviousAchievementType
     from app.models import EducationType
     from app.models import AnnouncementType
@@ -72,6 +74,7 @@ def deploy():
     iPadCapacity.insert_ipad_capacities()
     iPadState.insert_ipad_states()
     Room.insert_rooms()
+    Product.insert_products()
     CourseType.insert_course_types()
     Course.insert_courses()
     Lesson.insert_lessons()
@@ -88,6 +91,7 @@ def deploy():
     Relationship.insert_relationships()
     PurposeType.insert_purpose_types()
     ReferrerType.insert_referrer_types()
+    InvitationType.insert_invitation_types()
     PreviousAchievementType.insert_previous_achievement_types()
     EducationType.insert_education_types()
 

@@ -69,6 +69,192 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
+class Gender(db.Model):
+    __tablename__ = 'genders'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    users = db.relationship('User', backref='gender', lazy='dynamic')
+
+    @staticmethod
+    def insert_genders():
+        genders = [
+            (u'男', ),
+            (u'女', ),
+        ]
+        for G in genders:
+            gender = Gender.query.filter_by(name=G[0]).first()
+            if gender is None:
+                gender = Gender(name=G[0])
+                db.session.add(gender)
+                print u'导入性别类型信息', G[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Gender %r>' % self.name
+
+
+class Relationship(db.Model):
+    __tablename__ = 'relationships'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    users = db.relationship('User', backref='relationship', lazy='dynamic')
+
+    @staticmethod
+    def insert_relationships():
+        relationships = [
+            (u'父母', ),
+            (u'配偶', ),
+            (u'子女', ),
+            (u'同学', ),
+            (u'同事', ),
+            (u'朋友', ),
+        ]
+        for R in relationships:
+            relationship = Relationship.query.filter_by(name=R[0]).first()
+            if relationship is None:
+                relationship = Relationship(name=R[0])
+                db.session.add(relationship)
+                print u'导入关系类型信息', R[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Relationship %r>' % self.name
+
+
+class Purpose(db.Model):
+    __tablename__ = 'purposes'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('purpose_types.id'), primary_key=True)
+    remark = db.Column(db.UnicodeText)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class PurposeType(db.Model):
+    __tablename__ = 'purpose_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    purposes = db.relationship(
+        'Purpose',
+        foreign_keys=[Purpose.type_id],
+        backref=db.backref('type', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    @staticmethod
+    def insert_purpose_types():
+        purpose_types = [
+            (u'词源爱好者', ),
+            (u'GRE', ),
+            (u'TOEFL', ),
+            (u'GMAT', ),
+            (u'IELTS', ),
+            (u'考研', ),
+            (u'四六级', ),
+            (u'其它', ),
+        ]
+        for PT in purpose_types:
+            purpose_type = PurposeType.query.filter_by(name=PT[0]).first()
+            if purpose_type is None:
+                purpose_type = PurposeType(name=PT[0])
+                db.session.add(purpose_type)
+                print u'导入研修目的类型信息', PT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Purpose Type %r>' % self.name
+
+
+class Referrer(db.Model):
+    __tablename__ = 'referrers'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('referrer_types.id'), primary_key=True)
+    remark = db.Column(db.UnicodeText)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class ReferrerType(db.Model):
+    __tablename__ = 'referrer_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    referrers = db.relationship(
+        'Referrer',
+        foreign_keys=[Referrer.type_id],
+        backref=db.backref('type', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    @staticmethod
+    def insert_referrer_types():
+        referrer_types = [
+            (u'讲座', ),
+            (u'博客', ),
+            (u'微博', ),
+            (u'微信', ),
+            (u'人人', ),
+            (u'传单', ),
+            (u'其它', ),
+        ]
+        for RT in referrer_types:
+            referrer_type = ReferrerType.query.filter_by(name=RT[0]).first()
+            if referrer_type is None:
+                referrer_type = ReferrerType(name=RT[0])
+                db.session.add(referrer_type)
+                print u'导入来源类型信息', RT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Purpose Type %r>' % self.name
+
+
+class InvitationType(db.Model):
+    __tablename__ = 'invitation_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    invitations = db.relationship('Invitation', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_invitation_types():
+        invitation_types = [
+            (u'积分', ),
+            (u'提成', ),
+        ]
+        for IT in invitation_types:
+            invitation_type = InvitationType.query.filter_by(name=IT[0]).first()
+            if invitation_type is None:
+                invitation_type = InvitationType(name=IT[0])
+                db.session.add(invitation_type)
+                print u'导入邀请类型信息', IT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Invitation Type %r>' % self.name
+
+
+class Invitation(db.Model):
+    __tablename__ = 'invitations'
+    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    invited_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('invitation_types.id'))
+    paid_off = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class GroupRegistration(db.Model):
+    __tablename__ = 'group_registrations'
+    organizer_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class UserCreation(db.Model):
+    __tablename__ = 'user_creations'
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class CourseRegistration(db.Model):
     __tablename__ = 'course_registrations'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -447,192 +633,6 @@ class UserAnnouncement(db.Model):
     announcement_id = db.Column(db.Integer, db.ForeignKey('announcements.id'), primary_key=True)
 
 
-class Gender(db.Model):
-    __tablename__ = 'genders'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    users = db.relationship('User', backref='gender', lazy='dynamic')
-
-    @staticmethod
-    def insert_genders():
-        genders = [
-            (u'男', ),
-            (u'女', ),
-        ]
-        for G in genders:
-            gender = Gender.query.filter_by(name=G[0]).first()
-            if gender is None:
-                gender = Gender(name=G[0])
-                db.session.add(gender)
-                print u'导入性别类型信息', G[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Gender %r>' % self.name
-
-
-class Relationship(db.Model):
-    __tablename__ = 'relationships'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    users = db.relationship('User', backref='relationship', lazy='dynamic')
-
-    @staticmethod
-    def insert_relationships():
-        relationships = [
-            (u'父母', ),
-            (u'配偶', ),
-            (u'子女', ),
-            (u'同学', ),
-            (u'同事', ),
-            (u'朋友', ),
-        ]
-        for R in relationships:
-            relationship = Relationship.query.filter_by(name=R[0]).first()
-            if relationship is None:
-                relationship = Relationship(name=R[0])
-                db.session.add(relationship)
-                print u'导入关系类型信息', R[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Relationship %r>' % self.name
-
-
-class Purpose(db.Model):
-    __tablename__ = 'purposes'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    type_id = db.Column(db.Integer, db.ForeignKey('purpose_types.id'), primary_key=True)
-    remark = db.Column(db.UnicodeText)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class PurposeType(db.Model):
-    __tablename__ = 'purpose_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    purposes = db.relationship(
-        'Purpose',
-        foreign_keys=[Purpose.type_id],
-        backref=db.backref('type', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-
-    @staticmethod
-    def insert_purpose_types():
-        purpose_types = [
-            (u'词源爱好者', ),
-            (u'GRE', ),
-            (u'TOEFL', ),
-            (u'GMAT', ),
-            (u'IELTS', ),
-            (u'考研', ),
-            (u'四六级', ),
-            (u'其它', ),
-        ]
-        for PT in purpose_types:
-            purpose_type = PurposeType.query.filter_by(name=PT[0]).first()
-            if purpose_type is None:
-                purpose_type = PurposeType(name=PT[0])
-                db.session.add(purpose_type)
-                print u'导入研修目的类型信息', PT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Purpose Type %r>' % self.name
-
-
-class Referrer(db.Model):
-    __tablename__ = 'referrers'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    type_id = db.Column(db.Integer, db.ForeignKey('referrer_types.id'), primary_key=True)
-    remark = db.Column(db.UnicodeText)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class ReferrerType(db.Model):
-    __tablename__ = 'referrer_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    referrers = db.relationship(
-        'Referrer',
-        foreign_keys=[Referrer.type_id],
-        backref=db.backref('type', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-
-    @staticmethod
-    def insert_referrer_types():
-        referrer_types = [
-            (u'讲座', ),
-            (u'博客', ),
-            (u'微博', ),
-            (u'微信', ),
-            (u'人人', ),
-            (u'传单', ),
-            (u'其它', ),
-        ]
-        for RT in referrer_types:
-            referrer_type = ReferrerType.query.filter_by(name=RT[0]).first()
-            if referrer_type is None:
-                referrer_type = ReferrerType(name=RT[0])
-                db.session.add(referrer_type)
-                print u'导入来源类型信息', RT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Purpose Type %r>' % self.name
-
-
-class InvitationType(db.Model):
-    __tablename__ = 'invitation_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    invitations = db.relationship('Invitation', backref='type', lazy='dynamic')
-
-    @staticmethod
-    def insert_invitation_types():
-        invitation_types = [
-            (u'积分', ),
-            (u'提成', ),
-        ]
-        for IT in invitation_types:
-            invitation_type = InvitationType.query.filter_by(name=IT[0]).first()
-            if invitation_type is None:
-                invitation_type = InvitationType(name=IT[0])
-                db.session.add(invitation_type)
-                print u'导入邀请类型信息', IT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Invitation Type %r>' % self.name
-
-
-class Invitation(db.Model):
-    __tablename__ = 'invitations'
-    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    invited_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    type_id = db.Column(db.Integer, db.ForeignKey('invitation_types.id'))
-    paid = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class GroupRegistration(db.Model):
-    __tablename__ = 'group_registrations'
-    organizer_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    member_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class UserCreation(db.Model):
-    __tablename__ = 'user_creations'
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -799,13 +799,7 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     # registration properties
-    valid_months = db.Column(db.Integer, default=6)
     suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
-    # vb_y_gre_together_offer = db.Column(db.Boolean, default=False)
-    # undergraduate_refund = db.Column(db.Boolean, default=False)
-    # alumni_refund = db.Column(db.Boolean, default=False)
-    # special_offer = db.Column(db.Boolean, default=False)
-    # other_offer = db.Column(db.Boolean, default=False)
     organized_group_registrations = db.relationship(
         'GroupRegistration',
         foreign_keys=[GroupRegistration.organizer_id],
@@ -1367,12 +1361,22 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     price = db.Column(db.Float, default=0.0)
+    available = db.Column(db.Boolean, default=False)
 
     @staticmethod
     def insert_products():
         products = [
-            (u'VB', 6800.0, ),
-            (u'Y-GRE', 6800.0, ),
+            (u'VB基本技术费', 6800.0, ),
+            (u'Y-GRE基本技术费', 6800.0, ),
+            (u'AW费用', 800.0, ),
+            (u'Q费用', 800.0, ),
+            (u'多轮费用', 800.0, ),
+            (u'未毕业减免', -800.0, ),
+            (u'本校减免', -500.0, ),
+            (u'联报优惠', -1000.0, ),
+            (u'团报优惠', -200.0, ),
+            (u'按月延长有效期', 1000.0, ),
+            (u'一次性延长2年有效期', 3000.0, ),
         ]
         for P in products:
             product = Product.query.filter_by(name=P[0]).first()
