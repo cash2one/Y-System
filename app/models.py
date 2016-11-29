@@ -809,14 +809,14 @@ class User(UserMixin, db.Model):
     )
     # registration properties
     suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
-    organized_group_registrations = db.relationship(
+    organized_groups = db.relationship(
         'GroupRegistration',
         foreign_keys=[GroupRegistration.organizer_id],
         backref=db.backref('organizer', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    joined_group_registrations = db.relationship(
+    registered_groups = db.relationship(
         'GroupRegistration',
         foreign_keys=[GroupRegistration.member_id],
         backref=db.backref('member', lazy='joined'),
@@ -957,6 +957,22 @@ class User(UserMixin, db.Model):
 
     def created_user(self, user):
         return self.created_users.filter_by(user_id=user.id).first() is not None
+
+    def register_group(self, organizer):
+        if not self.is_registering_group(organizer):
+            group_registration = GroupRegistration(organizer_id=organizer.id, member_id=self.id)
+        else:
+            group_registration = self.registered_groups.filter_by(organizer_id=organizer.id).first()
+            group_registration.timestamp = datetime.utcnow()
+        db.session.add(group_registration)
+
+    def unregister_group(self, organizer):
+        group_registration = self.registered_groups.filter_by(organizer_id=organizer.id).first()
+        if group_registration:
+            db.session.delete(group_registration)
+
+    def is_registering_group(self, organizer):
+        return self.registered_groups.filter_by(organizer_id=organizer.id).first() is not None
 
     def register_course(self, course):
         if not self.is_registering_course(course):
