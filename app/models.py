@@ -255,6 +255,14 @@ class UserCreation(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Purchase(db.Model):
+    __tablename__ = 'purchases'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
+    quantity = db.Column(db.Integer, default=1)
+
+
 class CourseRegistration(db.Model):
     __tablename__ = 'course_registrations'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -814,6 +822,13 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    purchases = db.relationship(
+        'Purchase',
+        foreign_keys=[Purchase.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     def safe_delete(self):
         self.role_id = Role.query.filter_by(name=u'挂起').first().id
@@ -1362,6 +1377,13 @@ class Product(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     price = db.Column(db.Float, default=0.0)
     available = db.Column(db.Boolean, default=False)
+    purchases = db.relationship(
+        'Purchase',
+        foreign_keys=[Purchase.product_id],
+        backref=db.backref('product', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     @staticmethod
     def insert_products():
