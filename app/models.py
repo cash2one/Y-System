@@ -235,7 +235,7 @@ class InvitationType(db.Model):
 class Invitation(db.Model):
     __tablename__ = 'invitations'
     inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    invited_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     type_id = db.Column(db.Integer, db.ForeignKey('invitation_types.id'))
     paid_off = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
@@ -793,17 +793,17 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    invited = db.relationship(
+    invited_users = db.relationship(
         'Invitation',
         foreign_keys=[Invitation.inviter_id],
         backref=db.backref('inviter', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    inviters = db.relationship(
+    invited_by = db.relationship(
         'Invitation',
-        foreign_keys=[Invitation.invited_id],
-        backref=db.backref('invited', lazy='joined'),
+        foreign_keys=[Invitation.user_id],
+        backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
@@ -957,6 +957,57 @@ class User(UserMixin, db.Model):
 
     def created_user(self, user):
         return self.created_users.filter_by(user_id=user.id).first() is not None
+
+    def add_purpose(self, purpose_type, remark=u''):
+        if not self.has_purpose(purpose_type):
+            purpose = Purpose(user_id=self.id, type_id=purpose_type.id, remark=remark)
+        else:
+            purpose = self.purposes.filter_by(type_id=purpose_type.id).first()
+            purpose.remark = remark
+            purpose.timestamp = datetime.utcnow()
+        db.session.add(purpose)
+
+    def remove_purpose(self, purpose_type):
+        purpose = self.purposes.filter_by(type_id=purpose_type.id).first()
+        if purpose:
+            db.session.delete(purpose)
+
+    def has_purpose(self, purpose_type):
+        return self.purposes.filter_by(type_id=purpose_type.id).first() is not None
+
+    def add_referrer(self, referrer_type, remark=u''):
+        if not self.has_referrer(referrer_type):
+            referrer = Referrer(user_id=self.id, type_id=referrer_type.id, remark=remark)
+        else:
+            referrer = self.referrers.filter_by(type_id=referrer_type.id).first()
+            referrer.remark = remark
+            referrer.timestamp = datetime.utcnow()
+        db.session.add(referrer)
+
+    def remove_referrer(self, referrer_type):
+        referrer = self.referrers.filter_by(type_id=referrer_type.id).first()
+        if referrer:
+            db.session.delete(referrer)
+
+    def has_referrer(self, referrer_type):
+        return self.referrers.filter_by(type_id=referrer_type.id).first() is not None
+
+    def invite_user(self, user, invitation_type):
+        if not self.invited_user(user):
+            invitation = Invitation(inviter_id=self.id, user_id=user.id, type_id=invitation_type.id)
+        else:
+            invitation = self.invited_users.filter_by(user_id=user.id).first()
+            invitation.type_id = invitation_type.id
+            invitation.timestamp = datetime.utcnow()
+        db.session.add(invitation)
+
+    def uninvite_user(self, user):
+        invitation = self.invited_users.filter_by(user_id=user.id).first()
+        if invitation:
+            db.session.delete(invitation)
+
+    def invited_user(self, user):
+        return self.invited_users.filter_by(user_id=user.id).first() is not None
 
     def register_group(self, organizer):
         if not self.is_registering_group(organizer):
