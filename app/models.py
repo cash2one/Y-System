@@ -322,18 +322,18 @@ class Booking(db.Model):
         self.ping()
         db.session.add(self)
         if state_name == u'取消' and self.schedule.unstarted:
-            wb = Booking.query\
+            waited_booking = Booking.query\
                 .join(BookingState, BookingState.id == Booking.state_id)\
                 .join(Schedule, Schedule.id == Booking.schedule_id)\
                 .filter(Schedule.id == self.schedule_id)\
                 .filter(BookingState.name == u'排队')\
                 .order_by(Booking.timestamp.desc())\
                 .first()
-            if wb:
-                wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
-                wb.ping()
-                db.session.add(wb)
-                return User.query.get(wb.user_id)
+            if waited_booking:
+                waited_booking.state_id = BookingState.query.filter_by(name=u'预约').first().id
+                waited_booking.ping()
+                db.session.add(waited_booking)
+                return User.query.get(waited_booking.user_id)
 
     @property
     def valid(self):
@@ -848,13 +848,13 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def generate_confirmation_token(self, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': self.id})
+        serial = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return serial.dumps({'confirm': self.id})
 
     def confirm(self, token):
-        s = Serializer(current_app.config['SECRET_KEY'])
+        serial = Serializer(current_app.config['SECRET_KEY'])
         try:
-            data = s.loads(token)
+            data = serial.loads(token)
         except:
             return False
         if data.get('confirm') != self.id:
@@ -864,13 +864,13 @@ class User(UserMixin, db.Model):
         return True
 
     def generate_reset_token(self, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'reset': self.id})
+        serial = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return serial.dumps({'reset': self.id})
 
     def reset_password(self, token, new_password):
-        s = Serializer(current_app.config['SECRET_KEY'])
+        serial = Serializer(current_app.config['SECRET_KEY'])
         try:
-            data = s.loads(token)
+            data = serial.loads(token)
         except:
             return False
         if data.get('reset') != self.id:
@@ -880,13 +880,13 @@ class User(UserMixin, db.Model):
         return True
 
     def generate_email_change_token(self, new_email, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'change_email': self.id, 'new_email': new_email})
+        serial = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return serial.dumps({'change_email': self.id, 'new_email': new_email})
 
     def change_email(self, token):
-        s = Serializer(current_app.config['SECRET_KEY'])
+        serial = Serializer(current_app.config['SECRET_KEY'])
         try:
-            data = s.loads(token)
+            data = serial.loads(token)
         except:
             return False
         if data.get('change_email') != self.id:
@@ -930,14 +930,14 @@ class User(UserMixin, db.Model):
         db.session.add(self)
 
     def generate_auth_token(self, expiration):
-        s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
-        return s.dumps({'id': self.id}).decode('ascii')
+        serial = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+        return serial.dumps({'id': self.id}).decode('ascii')
 
     @staticmethod
     def verify_auth_token(token):
-        s = Serializer(current_app.config['SECRET_KEY'])
+        serial = Serializer(current_app.config['SECRET_KEY'])
         try:
-            data = s.loads(token)
+            data = serial.loads(token)
         except:
             return None
         return User.query.get(data['id'])
@@ -1071,29 +1071,29 @@ class User(UserMixin, db.Model):
 
     def unbook(self, schedule):
         # mark booking state as canceled
-        b = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
-        if b:
-            b.state_id = BookingState.query.filter_by(name=u'取消').first().id
-            db.session.add(b)
+        booking = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        if booking:
+            booking.state_id = BookingState.query.filter_by(name=u'取消').first().id
+            db.session.add(booking)
         # transfer to candidate if exist
-        wb = Booking.query\
+        waited_booking = Booking.query\
             .join(BookingState, BookingState.id == Booking.state_id)\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.id == schedule.id)\
             .filter(BookingState.name == u'排队')\
             .order_by(Booking.timestamp.desc())\
             .first()
-        if wb:
-            wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
-            wb.ping()
-            db.session.add(wb)
-            return User.query.get(wb.user_id)
+        if waited_booking:
+            waited_booking.state_id = BookingState.query.filter_by(name=u'预约').first().id
+            waited_booking.ping()
+            db.session.add(waited_booking)
+            return User.query.get(waited_booking.user_id)
 
     def miss(self, schedule):
-        b = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
-        if b:
-            b.state_id = BookingState.query.filter_by(name=u'爽约').first().id
-            db.session.add(b)
+        booking = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        if booking:
+            booking.state_id = BookingState.query.filter_by(name=u'爽约').first().id
+            db.session.add(booking)
 
     def booked(self, schedule):
         return (self.booked_schedules.filter_by(schedule_id=schedule.id).first() is not None) and\
@@ -1240,16 +1240,16 @@ class User(UserMixin, db.Model):
 
     def punch(self, section):
         if not self.punched(section):
-            pun = Punch(user_id=self.id, section_id=section.id)
+            punch = Punch(user_id=self.id, section_id=section.id)
         else:
-            pun = self.punches.filter_by(section_id=section.id).first()
-            pun.timestamp = datetime.utcnow()
-        db.session.add(pun)
+            punch = self.punches.filter_by(section_id=section.id).first()
+            punch.timestamp = datetime.utcnow()
+        db.session.add(punch)
 
     def unpunch(self, section):
-        pun = self.punches.filter_by(section_id=section.id).first()
-        if pun:
-            db.session.delete(pun)
+        punch = self.punches.filter_by(section_id=section.id).first()
+        if punch:
+            db.session.delete(punch)
 
     def punched(self, section):
         return self.punches.filter_by(section_id=section.id).first() is not None
@@ -1410,6 +1410,7 @@ class EducationRecord(db.Model):
     school = db.Column(db.Unicode(64))
     major = db.Column(db.Unicode(64))
     gpa = db.Column(db.Float)
+    full_gpa = db.Column(db.Float)
     year = db.Column(db.Unicode(16))
 
     def __repr__(self):
@@ -1715,18 +1716,18 @@ class Schedule(db.Model):
         self.quota += 1
         self.ping(modified_by=modified_by)
         db.session.add(self)
-        wb = Booking.query\
+        waited_booking = Booking.query\
             .join(BookingState, BookingState.id == Booking.state_id)\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.id == self.id)\
             .filter(BookingState.name == u'排队')\
             .order_by(Booking.timestamp.desc())\
             .first()
-        if wb:
-            wb.state_id = BookingState.query.filter_by(name=u'预约').first().id
-            wb.ping()
-            db.session.add(wb)
-            return User.query.get(wb.user_id)
+        if waited_booking:
+            waited_booking.state_id = BookingState.query.filter_by(name=u'预约').first().id
+            waited_booking.ping()
+            db.session.add(waited_booking)
+            return User.query.get(waited_booking.user_id)
 
     def decrease_quota(self, modified_by):
         if self.quota > 0:
@@ -1954,22 +1955,22 @@ class iPadContentJSON(db.Model):
     @staticmethod
     def update():
         json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [{'name': lesson.name, 'exist': (iPadContent.query.filter_by(ipad_id=ipad.id, lesson_id=lesson.id).first() is not None)} for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()]))
-        pc_json = iPadContentJSON.query.get(1)
-        if pc_json is not None:
-            pc_json.json_string = json_string
-            pc_json.out_of_date = False
+        ipad_content_json = iPadContentJSON.query.get(1)
+        if ipad_content_json is not None:
+            ipad_content_json.json_string = json_string
+            ipad_content_json.out_of_date = False
         else:
-            pc_json = iPadContentJSON(json_string=json_string, out_of_date=False)
-        db.session.add(pc_json)
+            ipad_content_json = iPadContentJSON(json_string=json_string, out_of_date=False)
+        db.session.add(ipad_content_json)
 
     @staticmethod
     def mark_out_of_date():
-        pc_json = iPadContentJSON.query.get(1)
-        if pc_json is not None:
-            pc_json.out_of_date = True
+        ipad_content_json = iPadContentJSON.query.get(1)
+        if ipad_content_json is not None:
+            ipad_content_json.out_of_date = True
         else:
-            pc_json = iPadContentJSON(out_of_date=True)
-        db.session.add(pc_json)
+            ipad_content_json = iPadContentJSON(out_of_date=True)
+        db.session.add(ipad_content_json)
 
     def __repr__(self):
         return '<iPadContentJSON %r>' % self.json_string
@@ -1989,7 +1990,7 @@ class iPad(db.Model):
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
-    lessons_included = db.relationship(
+    contents = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.ipad_id],
         backref=db.backref('ipad', lazy='joined'),
@@ -2016,18 +2017,18 @@ class iPad(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def add_lesson(self, lesson_id):
-        if not self.has_lesson(lesson_id):
-            pc = iPadContent(ipad_id=self.id, lesson_id=lesson_id)
-            db.session.add(pc)
+    def add_lesson(self, lesson):
+        if not self.has_lesson(lesson):
+            ipad_content = iPadContent(ipad_id=self.id, lesson_id=lesson.id)
+            db.session.add(ipad_content)
 
-    def remove_lesson(self, lesson_id):
-        if self.has_lesson(lesson_id):
-            pc = iPadContent.query.filter_by(ipad_id=self.id, lesson_id=lesson_id).first()
-            db.session.delete(pc)
+    def remove_lesson(self, lesson):
+        ipad_content = self.contents.filter_by(lesson_id=lesson.id).first()
+        if ipad_content:
+            db.session.delete(ipad_content)
 
-    def has_lesson(self, lesson_id):
-        return iPadContent.query.filter_by(ipad_id=self.id, lesson_id=lesson_id).first() is not None
+    def has_lesson(self, lesson):
+        return self.contents.filter_by(lesson_id=lesson.id).first() is not None
 
     @property
     def has_lessons(self):
@@ -2172,7 +2173,6 @@ class Lesson(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
-    # activations = db.relationship('Activation', backref='initial_lesson', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
@@ -2220,9 +2220,7 @@ class Lesson(db.Model):
 
     @property
     def first_section(self):
-        return Section.query\
-            .join(Lesson, Lesson.id == Section.lesson_id)\
-            .filter(Lesson.id == self.id)\
+        return self.sections\
             .order_by(Section.id.asc())\
             .first()
 

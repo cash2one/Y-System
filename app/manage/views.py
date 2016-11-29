@@ -649,7 +649,8 @@ def ipad():
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            ipad.add_lesson(lesson_id)
+            lesson = Lesson.query.get(lesson_id)
+            ipad.add_lesson(lesson)
         iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad'))
@@ -881,10 +882,11 @@ def edit_ipad(id):
         ipad.modified_by_id = current_user.id
         db.session.add(ipad)
         db.session.commit()
-        for pc in ipad.lessons_included:
-            ipad.remove_lesson(pc.lesson_id)
+        for ipad_content in ipad.contents:
+            ipad.remove_lesson(ipad_content.lesson)
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            ipad.add_lesson(lesson_id)
+            lesson = Lesson.query.get(lesson_id)
+            ipad.add_lesson(lesson)
         iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新', category='success')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
