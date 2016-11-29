@@ -261,6 +261,7 @@ class Purchase(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
     quantity = db.Column(db.Integer, default=1)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class CourseRegistration(db.Model):
