@@ -93,6 +93,13 @@ class Gender(db.Model):
         return '<Gender %r>' % self.name
 
 
+class UserCreation(db.Model):
+    __tablename__ = 'user_creations'
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class Relationship(db.Model):
     __tablename__ = 'relationships'
     id = db.Column(db.Integer, primary_key=True)
@@ -241,24 +248,17 @@ class Invitation(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Reception(db.Model):
+    __tablename__ = 'receptions'
+    receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class GroupRegistration(db.Model):
     __tablename__ = 'group_registrations'
     organizer_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     member_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class UserCreation(db.Model):
-    __tablename__ = 'user_creations'
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class UserReception(db.Model):
-    __tablename__ = 'user_receptions'
-    receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -660,6 +660,7 @@ class User(UserMixin, db.Model):
     activated_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
+    suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
     registered_courses = db.relationship(
         'CourseRegistration',
         foreign_keys=[CourseRegistration.user_id],
@@ -815,21 +816,19 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     received_users = db.relationship(
-        'UserReception',
-        foreign_keys=[UserReception.receptionist_id],
+        'Reception',
+        foreign_keys=[Reception.receptionist_id],
         backref=db.backref('receptionist', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
     received_by = db.relationship(
-        'UserReception',
-        foreign_keys=[UserReception.user_id],
+        'Reception',
+        foreign_keys=[Reception.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    # registration properties
-    suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
     organized_groups = db.relationship(
         'GroupRegistration',
         foreign_keys=[GroupRegistration.organizer_id],
@@ -1032,16 +1031,16 @@ class User(UserMixin, db.Model):
 
     def receive_user(self, user):
         if not self.received_user(user):
-            user_reception = UserReception(receptionist_id=self.id, user_id=user.id)
+            reception = Reception(receptionist_id=self.id, user_id=user.id)
         else:
-            user_reception = self.received_users.filter_by(user_id=user.id).first()
-            user_reception.timestamp = datetime.utcnow()
-        db.session.add(user_reception)
+            reception = self.received_users.filter_by(user_id=user.id).first()
+            reception.timestamp = datetime.utcnow()
+        db.session.add(reception)
 
     def unreceive_user(self, user):
-        user_reception = self.received_users.filter_by(user_id=user.id).first()
-        if user_reception:
-            db.session.delete(user_reception)
+        reception = self.received_users.filter_by(user_id=user.id).first()
+        if reception:
+            db.session.delete(reception)
 
     def received_user(self, user):
         return self.received_users.filter_by(user_id=user.id).first() is not None
