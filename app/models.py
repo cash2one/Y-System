@@ -255,6 +255,13 @@ class UserCreation(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class UserReception(db.Model):
+    __tablename__ = 'user_receptions'
+    receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class Purchase(db.Model):
     __tablename__ = 'purchases'
     id = db.Column(db.Integer, primary_key=True)
@@ -807,6 +814,20 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    received_users = db.relationship(
+        'UserReception',
+        foreign_keys=[UserReception.receptionist_id],
+        backref=db.backref('receptionist', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    received_by = db.relationship(
+        'UserReception',
+        foreign_keys=[UserReception.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     # registration properties
     suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
     organized_groups = db.relationship(
@@ -1008,6 +1029,22 @@ class User(UserMixin, db.Model):
 
     def invited_user(self, user):
         return self.invited_users.filter_by(user_id=user.id).first() is not None
+
+    def receive_user(self, user):
+        if not self.received_user(user):
+            user_reception = UserReception(receptionist_id=self.id, user_id=user.id)
+        else:
+            user_reception = self.received_users.filter_by(user_id=user.id).first()
+            user_reception.timestamp = datetime.utcnow()
+        db.session.add(user_reception)
+
+    def unreceive_user(self, user):
+        user_reception = self.received_users.filter_by(user_id=user.id).first()
+        if user_reception:
+            db.session.delete(user_reception)
+
+    def received_user(self, user):
+        return self.received_users.filter_by(user_id=user.id).first() is not None
 
     def register_group(self, organizer):
         if not self.is_registering_group(organizer):
