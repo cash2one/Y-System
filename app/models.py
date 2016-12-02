@@ -1422,10 +1422,26 @@ class User(UserMixin, db.Model):
 
 
 class AnonymousUser(AnonymousUserMixin):
-    def can(self, permissions):
+    def can(self, permission_name):
         return False
 
+    @property
+    def is_volunteer(self):
+        return False
+
+    @property
+    def is_moderator(self):
+        return False
+
+    @property
     def is_administrator(self):
+        return False
+
+    @property
+    def is_developer(self):
+        return False
+
+    def is_superior_than(self, user):
         return False
 
 
