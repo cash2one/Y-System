@@ -25,6 +25,7 @@ class Config:
     RECORD_PER_PAGE = 20
     RECORD_PER_QUERY = 50
     TOLERATE_MINUTES = 15
+    MAX_GROUP_SIZE = 5
 
     @staticmethod
     def init_app(app):
