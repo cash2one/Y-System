@@ -47,7 +47,8 @@ class Permission:
             (u'管理iPad借阅', ),
             (u'管理预约时段', ),
             (u'管理iPad设备', ),
-            (u'管理教学', ),
+            (u'管理作业', ),
+            (u'管理考试', ),
             (u'管理通知', ),
             (u'管理站内信', ),
             (u'管理反馈', ),
@@ -103,9 +104,9 @@ class Role(db.Model):
             (u'Y-GRE VBx2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程x2'], ),
             (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
             (u'志愿者', [u'管理', u'管理课程预约', u'管理iPad借阅'], ),
-            (u'协管员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理教学', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户'], ),
-            (u'管理员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理教学', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户', u'管理权限'], ),
-            (u'开发人员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理教学', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户', u'管理权限', u'开发权限'], ),
+            (u'协管员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户'], ),
+            (u'管理员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户', u'管理权限'], ),
+            (u'开发人员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户', u'管理权限', u'开发权限'], ),
         ]
         for R in roles:
             role = Role.query.filter_by(name=R[0]).first()
@@ -269,6 +270,30 @@ class Purchase(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
     quantity = db.Column(db.Integer, default=1)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class SuspensionRecord(db.Model):
+    __tablename__ = 'suspension_records'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    def __repr__(self):
+        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_date, self.end_date)
 
 
 class CourseRegistration(db.Model):
@@ -754,7 +779,13 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
+    suspension_records = db.relationship(
+        'SuspensionRecord',
+        foreign_keys=[SuspensionRecord.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     registered_courses = db.relationship(
         'CourseRegistration',
         foreign_keys=[CourseRegistration.user_id],
@@ -812,7 +843,14 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     # management properties
-    modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
+    modified_products = db.relationship('Product', backref='modified_by', lazy='dynamic')
+    modified_suspension_records = db.relationship(
+        'SuspensionRecord',
+        foreign_keys=[SuspensionRecord.modified_by_id],
+        backref=db.backref('modified_by', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     modified_courses = db.relationship('Course', backref='modified_by', lazy='dynamic')
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
     modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
@@ -833,25 +871,26 @@ class User(UserMixin, db.Model):
     )
     modified_assignment_scores = db.relationship(
         'AssignmentScore',
-        foreign_keys=[AssignmentScore.user_id],
+        foreign_keys=[AssignmentScore.modified_by_id],
         backref=db.backref('modified_by', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
     modified_vb_test_scores = db.relationship(
         'VBTestScore',
-        foreign_keys=[VBTestScore.user_id],
+        foreign_keys=[VBTestScore.modified_by_id],
         backref=db.backref('modified_by', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
     modified_y_gre_test_scores = db.relationship(
         'YGRETestScore',
-        foreign_keys=[YGRETestScore.user_id],
+        foreign_keys=[YGRETestScore.modified_by_id],
         backref=db.backref('modified_by', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
     # user relationship properties
     invited_users = db.relationship(
         'Invitation',
@@ -983,6 +1022,10 @@ class User(UserMixin, db.Model):
         return self.role is not None and self.role.has_permission(permission=Permission.query.filter_by(name=permission_name).first())
 
     @property
+    def is_suspended(self):
+        return self.role.name == u'挂起'
+
+    @property
     def is_volunteer(self):
         return self.role.name == u'志愿者'
 
@@ -1029,22 +1072,6 @@ class User(UserMixin, db.Model):
         except:
             return None
         return User.query.get(data['id'])
-
-    def create_user(self, user):
-        if not self.created_user(user):
-            user_creation = UserCreation(creator_id=self.id, user_id=user.id)
-        else:
-            user_creation = self.created_users.filter_by(user_id=user.id).first()
-            user_creation.timestamp = datetime.utcnow()
-        db.session.add(user_creation)
-
-    def uncreate_user(self, user):
-        user_creation = self.created_users.filter_by(user_id=user.id).first()
-        if user_creation:
-            db.session.delete(user_creation)
-
-    def created_user(self, user):
-        return self.created_users.filter_by(user_id=user.id).first() is not None
 
     def add_purpose(self, purpose_type, remark=u''):
         if not self.has_purpose(purpose_type):
@@ -1112,6 +1139,22 @@ class User(UserMixin, db.Model):
 
     def received_user(self, user):
         return self.received_users.filter_by(user_id=user.id).first() is not None
+
+    def create_user(self, user):
+        if not self.created_user(user):
+            user_creation = UserCreation(creator_id=self.id, user_id=user.id)
+        else:
+            user_creation = self.created_users.filter_by(user_id=user.id).first()
+            user_creation.timestamp = datetime.utcnow()
+        db.session.add(user_creation)
+
+    def uncreate_user(self, user):
+        user_creation = self.created_users.filter_by(user_id=user.id).first()
+        if user_creation:
+            db.session.delete(user_creation)
+
+    def created_user(self, user):
+        return self.created_users.filter_by(user_id=user.id).first() is not None
 
     def register_group(self, organizer):
         if not self.is_registering_group(organizer):
@@ -1362,10 +1405,6 @@ class User(UserMixin, db.Model):
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
-    @property
-    def suspended(self):
-        return self.role.name == u'挂起'
-
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
@@ -1423,6 +1462,10 @@ class User(UserMixin, db.Model):
 
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permission_name):
+        return False
+
+    @property
+    def is_suspended(self):
         return False
 
     @property
@@ -1549,23 +1592,15 @@ class EmploymentRecord(db.Model):
         return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
 
 
-class SuspensionRecord(db.Model):
-    __tablename__ = 'suspension_records'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
-
-    def __repr__(self):
-        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_date, self.end_date)
-
-
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     price = db.Column(db.Float, default=0.0)
     available = db.Column(db.Boolean, default=False)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
     purchases = db.relationship(
         'Purchase',
         foreign_keys=[Purchase.product_id],
@@ -1573,6 +1608,16 @@ class Product(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
 
     @staticmethod
     def insert_products():
@@ -1594,7 +1639,8 @@ class Product(db.Model):
             if product is None:
                 product = Product(
                     name=P[0],
-                    price=P[1]
+                    price=P[1],
+                    modified_by_id=User.query.get(1).id
                 )
                 db.session.add(product)
                 print u'导入课程类型信息', P[0]
@@ -2292,6 +2338,7 @@ class Lesson(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
@@ -2355,40 +2402,41 @@ class Lesson(db.Model):
     @staticmethod
     def insert_lessons():
         lessons = [
-            (u'VB总论', u'VB', ),
-            (u'L1', u'VB', ),
-            (u'L2', u'VB', ),
-            (u'L3', u'VB', ),
-            (u'L4', u'VB', ),
-            (u'L5', u'VB', ),
-            (u'L6', u'VB', ),
-            (u'L7', u'VB', ),
-            (u'L8', u'VB', ),
-            (u'L9', u'VB', ),
-            (u'L10', u'VB', ),
-            (u'L11', u'VB', ),
-            (u'L12', u'VB', ),
-            (u'L13', u'VB', ),
-            (u'L14', u'VB', ),
-            (u'Y-GRE总论', u'Y-GRE', ),
-            (u'1st', u'Y-GRE', ),
-            (u'2nd', u'Y-GRE', ),
-            (u'3rd', u'Y-GRE', ),
-            (u'4th', u'Y-GRE', ),
-            (u'5th', u'Y-GRE', ),
-            (u'6th', u'Y-GRE', ),
-            (u'7th', u'Y-GRE', ),
-            (u'8th', u'Y-GRE', ),
-            (u'9th', u'Y-GRE', ),
-            (u'Test', u'Y-GRE', ),
-            (u'AW总论', u'Y-GRE', ),
+            (u'VB总论', u'VB', False, ),
+            (u'L1', u'VB', False, ),
+            (u'L2', u'VB', False, ),
+            (u'L3', u'VB', False, ),
+            (u'L4', u'VB', False, ),
+            (u'L5', u'VB', False, ),
+            (u'L6', u'VB', False, ),
+            (u'L7', u'VB', False, ),
+            (u'L8', u'VB', False, ),
+            (u'L9', u'VB', False, ),
+            (u'L10', u'VB', False, ),
+            (u'L11', u'VB', True, ),
+            (u'L12', u'VB', True, ),
+            (u'L13', u'VB', True, ),
+            (u'L14', u'VB', True, ),
+            (u'Y-GRE总论', u'Y-GRE', False, ),
+            (u'1st', u'Y-GRE', False, ),
+            (u'2nd', u'Y-GRE', False, ),
+            (u'3rd', u'Y-GRE', False, ),
+            (u'4th', u'Y-GRE', False, ),
+            (u'5th', u'Y-GRE', False, ),
+            (u'6th', u'Y-GRE', False, ),
+            (u'7th', u'Y-GRE', False, ),
+            (u'8th', u'Y-GRE', False, ),
+            (u'9th', u'Y-GRE', False, ),
+            (u'Test', u'Y-GRE', False, ),
+            (u'AW总论', u'Y-GRE', False, ),
         ]
         for L in lessons:
             lesson = Lesson.query.filter_by(name=L[0]).first()
             if lesson is None:
                 lesson = Lesson(
                     name=L[0],
-                    type_id=CourseType.query.filter_by(name=L[1]).first().id
+                    type_id=CourseType.query.filter_by(name=L[1]).first().id,
+                    advanced=L[2]
                 )
                 db.session.add(lesson)
                 print u'导入课程信息', L[0], L[1]
