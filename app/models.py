@@ -147,13 +147,6 @@ class Gender(db.Model):
         return '<Gender %r>' % self.name
 
 
-class UserCreation(db.Model):
-    __tablename__ = 'user_creations'
-    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
 class Relationship(db.Model):
     __tablename__ = 'relationships'
     id = db.Column(db.Integer, primary_key=True)
@@ -267,53 +260,6 @@ class ReferrerType(db.Model):
 
     def __repr__(self):
         return '<Purpose Type %r>' % self.name
-
-
-class InvitationType(db.Model):
-    __tablename__ = 'invitation_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    invitations = db.relationship('Invitation', backref='type', lazy='dynamic')
-
-    @staticmethod
-    def insert_invitation_types():
-        invitation_types = [
-            (u'积分', ),
-            (u'提成', ),
-        ]
-        for IT in invitation_types:
-            invitation_type = InvitationType.query.filter_by(name=IT[0]).first()
-            if invitation_type is None:
-                invitation_type = InvitationType(name=IT[0])
-                db.session.add(invitation_type)
-                print u'导入邀请类型信息', IT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Invitation Type %r>' % self.name
-
-
-class Invitation(db.Model):
-    __tablename__ = 'invitations'
-    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    type_id = db.Column(db.Integer, db.ForeignKey('invitation_types.id'))
-    paid_off = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class Reception(db.Model):
-    __tablename__ = 'receptions'
-    receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-class GroupRegistration(db.Model):
-    __tablename__ = 'group_registrations'
-    organizer_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    member_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Purchase(db.Model):
@@ -701,6 +647,60 @@ class UserAnnouncement(db.Model):
     __tablename__ = 'user_announcements'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     announcement_id = db.Column(db.Integer, db.ForeignKey('announcements.id'), primary_key=True)
+
+
+class InvitationType(db.Model):
+    __tablename__ = 'invitation_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    invitations = db.relationship('Invitation', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_invitation_types():
+        invitation_types = [
+            (u'积分', ),
+            (u'提成', ),
+        ]
+        for IT in invitation_types:
+            invitation_type = InvitationType.query.filter_by(name=IT[0]).first()
+            if invitation_type is None:
+                invitation_type = InvitationType(name=IT[0])
+                db.session.add(invitation_type)
+                print u'导入邀请类型信息', IT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Invitation Type %r>' % self.name
+
+
+class Invitation(db.Model):
+    __tablename__ = 'invitations'
+    inviter_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('invitation_types.id'))
+    paid_off = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Reception(db.Model):
+    __tablename__ = 'receptions'
+    receptionist_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class UserCreation(db.Model):
+    __tablename__ = 'user_creations'
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class GroupRegistration(db.Model):
+    __tablename__ = 'group_registrations'
+    organizer_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    member_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class User(UserMixin, db.Model):
