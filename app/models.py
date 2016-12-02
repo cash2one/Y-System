@@ -15,53 +15,107 @@ from app.exceptions import ValidationError
 from . import db, login_manager
 from .email import send_email
 
+
+class RolePermission(db.Model):
+    __tablename__ = 'role_permissions'
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), primary_key=True)
+    permission_id = db.Column(db.Integer, db.ForeignKey('permissions.id'), primary_key=True)
+
+
 class Permission:
-    FORBIDDEN           = 0b0000000000000000000000000000000
-    BOOK                = 0b0000000000000000000000000000001
-    BOOK_VB             = 0b0000000000000000000000000000010
-    BOOK_Y_GRE          = 0b0000000000000000000000000000100
-    BOOK_VB_2           = 0b0000000000000000000000000001000
-    BOOK_ANY            = 0b0000000000000000000000000010000
-    MANAGE              = 0b0000000000000000000000000100000
-    MANAGE_BOOKING      = 0b0000000000000000000000001000000
-    MANAGE_RENTAL       = 0b0000000000000000000000010000000
-    MANAGE_SCHEDULE     = 0b0000000000000000000000100000000
-    MANAGE_IPAD         = 0b0000000000000000000001000000000
-    MANAGE_TEACHING     = 0b0000000000000000000010000000000
-    MANAGE_ANNOUNCEMENT = 0b0000000000000000000100000000000
-    MANAGE_MESSAGE      = 0b0000000000000000001000000000000
-    MANAGE_FEEDBACK     = 0b0000000000000000010000000000000
-    MANAGE_BANNER       = 0b0000000000000000100000000000000
-    MANAGE_USER         = 0b0010000000000000000000000000000
-    MANAGE_AUTH         = 0b0100000000000000000000000000000
-    ADMINISTER          = 0b1000000000000000000000000000000
+    __tablename__ = 'permissions'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    roles = db.relationship(
+        'RolePermission',
+        foreign_keys=[RolePermission.permission_id],
+        backref=db.backref('permission', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    @staticmethod
+    def insert_permissions():
+        permissions = [
+            (u'预约', ),
+            (u'预约VB课程', ),
+            (u'预约Y-GRE课程', ),
+            (u'预约VB课程x2', ),
+            (u'预约任意课程', ),
+            (u'管理', ),
+            (u'管理课程预约', ),
+            (u'管理iPad借阅', ),
+            (u'管理预约时段', ),
+            (u'管理iPad设备', ),
+            (u'管理教学', ),
+            (u'管理通知', ),
+            (u'管理站内信', ),
+            (u'管理反馈', ),
+            (u'管理进站', ),
+            (u'管理学生用户', ),
+            (u'管理管理员用户', ),
+            (u'开发权限', ),
+        ]
+        for P in permissions:
+            permission = Permission.query.filter_by(name=P[0]).first()
+            if permission is None:
+                permission = Permission(name=P[0])
+                db.session.add(permission)
+                print u'导入用户权限信息', P[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Permission %r>' % self.name
 
 
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    permissions = db.Column(db.Integer)
+    permissions = db.relationship(
+        'RolePermission',
+        foreign_keys=[RolePermission.role_id],
+        backref=db.backref('role', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     users = db.relationship('User', backref='role', lazy='dynamic')
+
+    def add_permission(self, permission):
+        if not self.has_permission(permission):
+            role_permission = RolePermission(role_id=self.id, permission_id=permission.id)
+            db.session.add(role_permission)
+
+    def remove_permission(self, permission):
+        role_permission = self.permissions.filter_by(permission_id=permission.id).first()
+        if role_permission:
+            db.session.delete(role_permission)
+
+    def has_permission(self, permission):
+        return self.permissions.filter_by(permission_id=permission.id).first() is not None
 
     @staticmethod
     def insert_roles():
         roles = [
-            (u'挂起', Permission.FORBIDDEN, ),
-            (u'单VB', Permission.BOOK | Permission.BOOK_VB, ),
-            (u'Y-GRE 普通', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE, ),
-            (u'Y-GRE VBx2', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_VB_2, ),
-            (u'Y-GRE A权限', Permission.BOOK | Permission.BOOK_VB | Permission.BOOK_Y_GRE | Permission.BOOK_ANY, ),
-            (u'志愿者', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL, ),
-            (u'协管员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_TEACHING | Permission.MANAGE_ANNOUNCEMENT | Permission.MANAGE_MESSAGE | Permission.MANAGE_FEEDBACK | Permission.MANAGE_BANNER | Permission.MANAGE_USER, ),
-            (u'管理员', Permission.MANAGE | Permission.MANAGE_BOOKING | Permission.MANAGE_RENTAL | Permission.MANAGE_SCHEDULE | Permission.MANAGE_IPAD | Permission.MANAGE_TEACHING | Permission.MANAGE_ANNOUNCEMENT | Permission.MANAGE_MESSAGE | Permission.MANAGE_FEEDBACK | Permission.MANAGE_BANNER | Permission.MANAGE_USER | Permission.MANAGE_AUTH, ),
-            (u'开发人员', 0x7fffffff, ),
+            (u'挂起', [], ),
+            (u'单VB', [u'预约', u'预约VB课程'], ),
+            (u'Y-GRE 普通', [u'预约', u'预约VB课程', u'预约Y-GRE课程'], ),
+            (u'Y-GRE VBx2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程x2'], ),
+            (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
+            (u'志愿者', [u'管理', u'管理课程预约', u'管理iPad借阅'], ),
+            (u'协管员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理教学', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户'], ),
+            (u'管理员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理教学', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户', u'管理管理员用户'], ),
+            (u'开发人员', [u'管理', u'管理课程预约', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理教学', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理学生用户', u'管理管理员用户', u'开发权限'], ),
         ]
         for R in roles:
             role = Role.query.filter_by(name=R[0]).first()
             if role is None:
-                role = Role(name=R[0], permissions=R[1])
+                role = Role(name=R[0])
                 db.session.add(role)
+                db.session.commit()
+                for P in R[1]:
+                    permission = Permission.query.filter_by(name=P).first()
+                    role.add_permission(permission=permission)
                 print u'导入用户角色信息', R[0]
         db.session.commit()
 
