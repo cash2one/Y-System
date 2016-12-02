@@ -705,6 +705,7 @@ class UserAnnouncement(db.Model):
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
+    # basic properties
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.Unicode(64), unique=True, index=True)
     confirmed = db.Column(db.Boolean, default=False)
@@ -714,6 +715,45 @@ class User(UserMixin, db.Model):
     activated_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
+    # profile properties
+    name = db.Column(db.Unicode(64), index=True)
+    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
+    id_number = db.Column(db.Unicode(64), index=True)
+    birthdate = db.Column(db.Date)
+    mobile = db.Column(db.Unicode(64))
+    wechat = db.Column(db.Unicode(64))
+    qq = db.Column(db.Unicode(64))
+    address = db.Column(db.Unicode(128))
+    emergency_contact_name = db.Column(db.Unicode(64))
+    emergency_contact_mobile = db.Column(db.Unicode(64))
+    emergency_contact_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
+    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
+    education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
+    employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
+    worked_in_same_field = db.Column(db.Boolean, default=False)
+    deformity = db.Column(db.Boolean, default=False)
+    # study properties
+    purposes = db.relationship(
+        'Purpose',
+        foreign_keys=[Purpose.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    referrers = db.relationship(
+        'Referrer',
+        foreign_keys=[Referrer.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    purchases = db.relationship(
+        'Purchase',
+        foreign_keys=[Purchase.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     suspension_records = db.relationship('SuspensionRecord', backref='user', lazy='dynamic')
     registered_courses = db.relationship(
         'CourseRegistration',
@@ -771,6 +811,8 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    # management properties
+    modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
     modified_courses = db.relationship('Course', backref='modified_by', lazy='dynamic')
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
     modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
@@ -810,51 +852,7 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
-    created_users = db.relationship(
-        'UserCreation',
-        foreign_keys=[UserCreation.creator_id],
-        backref=db.backref('creator', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    created_by = db.relationship(
-        'UserCreation',
-        foreign_keys=[UserCreation.user_id],
-        backref=db.backref('user', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    # user profile properties
-    name = db.Column(db.Unicode(64), index=True)
-    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
-    id_number = db.Column(db.Unicode(64), index=True)
-    birthdate = db.Column(db.Date)
-    mobile = db.Column(db.Unicode(64))
-    address = db.Column(db.Unicode(128))
-    qq = db.Column(db.Unicode(64))
-    emergency_name = db.Column(db.Unicode(64))
-    emergency_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
-    emergency_mobile = db.Column(db.Unicode(64))
-    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
-    education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
-    employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
-    worked_in_same_field = db.Column(db.Boolean, default=False)
-    deformity = db.Column(db.Boolean, default=False)
-    purposes = db.relationship(
-        'Purpose',
-        foreign_keys=[Purpose.user_id],
-        backref=db.backref('user', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    referrers = db.relationship(
-        'Referrer',
-        foreign_keys=[Referrer.user_id],
-        backref=db.backref('user', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
+    # user relationship properties
     invited_users = db.relationship(
         'Invitation',
         foreign_keys=[Invitation.inviter_id],
@@ -883,6 +881,20 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    created_users = db.relationship(
+        'UserCreation',
+        foreign_keys=[UserCreation.creator_id],
+        backref=db.backref('creator', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    created_by = db.relationship(
+        'UserCreation',
+        foreign_keys=[UserCreation.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     organized_groups = db.relationship(
         'GroupRegistration',
         foreign_keys=[GroupRegistration.organizer_id],
@@ -894,13 +906,6 @@ class User(UserMixin, db.Model):
         'GroupRegistration',
         foreign_keys=[GroupRegistration.member_id],
         backref=db.backref('member', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    purchases = db.relationship(
-        'Purchase',
-        foreign_keys=[Purchase.user_id],
-        backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
@@ -974,30 +979,39 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
 
-    def can(self, permissions):
-        return self.role is not None and (self.role.permissions & permissions) == permissions
+    def can(self, permission_name):
+        return self.role is not None and self.role.has_permission(permission=Permission.query.filter_by(name=permission_name).first())
 
+    @property
+    def is_volunteer(self):
+        return self.role.name == u'志愿者'
+
+    @property
+    def is_moderator(self):
+        return self.role.name == u'协管员'
+
+    @property
     def is_administrator(self):
-        return self.can(Permission.ADMINISTER)
+        return self.role.name == u'管理员'
+
+    @property
+    def is_developer(self):
+        return self.role.name == u'开发人员'
 
     def is_superior_than(self, user):
-        if self.is_administrator():
-            if user.is_administrator():
+        if self.is_developer:
+            if user.is_developer:
                 return False
-            else:
-                return True
-        elif self.can(Permission.MANAGE_AUTH):
-            if user.can(Permission.MANAGE_AUTH):
+        if self.is_administrator:
+            if user.is_developer or user.is_administrator:
                 return False
-            else:
-                return True
-        elif self.can(Permission.MANAGE):
-            if user.can(Permission.MANAGE):
+        if self.is_moderator:
+            if user.is_developer or user.is_administrator or user.is_moderator:
                 return False
-            else:
-                return True
-        else:
-            return False
+        if self.is_volunteer:
+            if user.is_developer or user.is_administrator or user.is_moderator or user.is_volunteer:
+                return False
+        return True
 
     def ping(self):
         self.last_seen_at = datetime.utcnow()
