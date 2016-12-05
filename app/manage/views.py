@@ -1127,105 +1127,28 @@ def find_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        # if current_user.is_developer():
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(u'管理权限'):
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员',
-                    Role.name == u'管理员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        else:
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
+        users = User.query\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                User.name.like('%' + name_or_email + '%'),
+                User.email.like('%' + name_or_email + '%')
+            ))\
+            .order_by(User.last_seen_at.desc())\
+            .limit(current_app.config['RECORD_PER_QUERY'])
     form = FindUserForm()
     if form.validate_on_submit():
         name_or_email = form.name_or_email.data
         if name_or_email:
-            # if current_user.is_developer():
-                users = User.query\
-                    .join(Role, Role.id == User.role_id)\
-                    .filter(User.deleted == False)\
-                    .filter(or_(
-                        User.name.like('%' + name_or_email + '%'),
-                        User.email.like('%' + name_or_email + '%')
-                    ))\
-                    .order_by(User.last_seen_at.desc())\
-                    .limit(current_app.config['RECORD_PER_QUERY'])
-            elif current_user.can(u'管理权限'):
-                users = User.query\
-                    .join(Role, Role.id == User.role_id)\
-                    .filter(User.deleted == False)\
-                    .filter(or_(
-                        User.name.like('%' + name_or_email + '%'),
-                        User.email.like('%' + name_or_email + '%')
-                    ))\
-                    .filter(or_(
-                        Role.name == u'挂起',
-                        Role.name == u'单VB',
-                        Role.name == u'Y-GRE 普通',
-                        Role.name == u'Y-GRE VBx2',
-                        Role.name == u'Y-GRE A权限',
-                        Role.name == u'协管员',
-                        Role.name == u'管理员'
-                    ))\
-                    .order_by(User.last_seen_at.desc())\
-                    .limit(current_app.config['RECORD_PER_QUERY'])
-            else:
-                users = User.query\
-                    .join(Role, Role.id == User.role_id)\
-                    .filter(User.deleted == False)\
-                    .filter(or_(
-                        User.name.like('%' + name_or_email + '%'),
-                        User.email.like('%' + name_or_email + '%')
-                    ))\
-                    .filter(or_(
-                        Role.name == u'挂起',
-                        Role.name == u'单VB',
-                        Role.name == u'Y-GRE 普通',
-                        Role.name == u'Y-GRE VBx2',
-                        Role.name == u'Y-GRE A权限',
-                        Role.name == u'协管员'
-                    ))\
-                    .order_by(User.last_seen_at.desc())\
-                    .limit(current_app.config['RECORD_PER_QUERY'])
+            users = User.query\
+                .filter(User.deleted == False)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .order_by(User.last_seen_at.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
     form.name_or_email.data = name_or_email
+    users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
 
 
@@ -1235,189 +1158,6 @@ def find_user():
 def analytics():
     analytics_token = current_app.config['ANALYTICS_TOKEN']
     return render_template('manage/analytics.html', analytics_token=analytics_token)
-
-
-# @manage.route('/auth')
-# @login_required
-# @permission_required(u'管理权限')
-# def auth():
-#     page = request.args.get('page', 1, type=int)
-#     show_auth_managers = True
-#     show_auth_users = False
-#     if current_user.is_authenticated:
-#         show_auth_managers = bool(request.cookies.get('show_auth_managers', '1'))
-#         show_auth_users = bool(request.cookies.get('show_auth_users', ''))
-#     if show_auth_managers:
-#         query = User.query\
-#             .join(Role, Role.id == User.role_id)\
-#             .filter(User.deleted == False)\
-#             .filter(or_(
-#                 Role.name == u'协管员',
-#                 Role.name == u'管理员'
-#             ))\
-#             .order_by(User.last_seen_at.desc())
-#     if show_auth_users:
-#         query = User.query\
-#             .join(Role, Role.id == User.role_id)\
-#             .filter(User.deleted == False)\
-#             .filter(or_(
-#                 Role.name == u'挂起',
-#                 Role.name == u'单VB',
-#                 Role.name == u'Y-GRE 普通',
-#                 Role.name == u'Y-GRE VBx2',
-#                 Role.name == u'Y-GRE A权限'
-#             ))\
-#             .order_by(User.last_seen_at.desc())
-#     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-#     users = pagination.items
-#     return render_template('manage/auth.html', users=users, show_auth_managers=show_auth_managers, show_auth_users=show_auth_users, pagination=pagination)
-
-
-# @manage.route('/auth/managers')
-# @login_required
-# @permission_required(u'管理权限')
-# def auth_managers():
-#     resp = make_response(redirect(url_for('manage.auth')))
-#     resp.set_cookie('show_auth_managers', '1', max_age=30*24*60*60)
-#     resp.set_cookie('show_auth_users', '', max_age=30*24*60*60)
-#     return resp
-
-
-# @manage.route('/auth/users')
-# @login_required
-# @permission_required(u'管理权限')
-# def auth_users():
-#     resp = make_response(redirect(url_for('manage.auth')))
-#     resp.set_cookie('show_auth_managers', '', max_age=30*24*60*60)
-#     resp.set_cookie('show_auth_users', '1', max_age=30*24*60*60)
-#     return resp
-
-
-# @manage.route('/auth/edit/<int:id>', methods=['GET', 'POST'])
-# @login_required
-# @permission_required(u'管理权限')
-# def edit_auth(id):
-#     user = User.query.get_or_404(id)
-#     if user.deleted:
-#         abort(404)
-#     if user.is_superior_than(user=current_user._get_current_object()):
-#         abort(403)
-#     form = EditAuthForm(user=user)
-#     if form.validate_on_submit():
-#         user.name = form.name.data
-#         # user.email = form.email.data
-#         user.role_id = form.role.data
-#         if user.vb_course:
-#             user.unregister(user.vb_course)
-#         if form.vb_course.data:
-#             user.register(Course.query.get(form.vb_course.data))
-#         if user.y_gre_course:
-#             user.unregister(user.y_gre_course)
-#         if form.y_gre_course.data:
-#             user.register(Course.query.get(form.y_gre_course.data))
-#         db.session.add(user)
-#         db.session.commit()
-#         flash(u'%s的账户信息已更新' % user.name, category='success')
-#         return redirect(request.args.get('next') or url_for('manage.auth'))
-#     form.name.data = user.name
-#     form.email.data = user.email
-#     form.role.data = user.role_id
-#     if user.vb_course:
-#         form.vb_course.data = user.vb_course.id
-#     if user.y_gre_course:
-#         form.y_gre_course.data = user.y_gre_course.id
-#     return render_template('manage/edit_auth.html', form=form, user=user)
-
-
-# @manage.route('/auth-admin')
-# @login_required
-# @permission_required(u'开发权限')
-# def auth_admin():
-#     page = request.args.get('page', 1, type=int)
-#     show_auth_managers_admin = True
-#     show_auth_users_admin = False
-#     if current_user.is_authenticated:
-#         show_auth_managers_admin = bool(request.cookies.get('show_auth_managers_admin', '1'))
-#         show_auth_users_admin = bool(request.cookies.get('show_auth_users_admin', ''))
-#     if show_auth_managers_admin:
-#         query = User.query\
-#             .join(Role, Role.id == User.role_id)\
-#             .filter(User.deleted == False)\
-#             .filter(or_(
-#                 Role.name == u'开发人员'
-#             ))\
-#             .order_by(Role.id.desc())
-#     if show_auth_users_admin:
-#         query = User.query\
-#             .join(Role, Role.id == User.role_id)\
-#             .filter(User.deleted == False)\
-#             .filter(or_(
-#                 Role.name == u'挂起',
-#                 Role.name == u'单VB',
-#                 Role.name == u'Y-GRE 普通',
-#                 Role.name == u'Y-GRE VBx2',
-#                 Role.name == u'Y-GRE A权限',
-#                 Role.name == u'协管员',
-#                 Role.name == u'管理员'
-#             ))\
-#             .order_by(User.last_seen_at.desc())
-#     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-#     users = pagination.items
-#     return render_template('manage/auth_admin.html', users=users, show_auth_managers_admin=show_auth_managers_admin, show_auth_users_admin=show_auth_users_admin, pagination=pagination)
-
-
-# @manage.route('/auth/managers-admin')
-# @login_required
-# @permission_required(u'开发权限')
-# def auth_managers_admin():
-#     resp = make_response(redirect(url_for('manage.auth_admin')))
-#     resp.set_cookie('show_auth_managers_admin', '1', max_age=30*24*60*60)
-#     resp.set_cookie('show_auth_users_admin', '', max_age=30*24*60*60)
-#     return resp
-
-
-# @manage.route('/auth/users-admin')
-# @login_required
-# @permission_required(u'开发权限')
-# def auth_users_admin():
-#     resp = make_response(redirect(url_for('manage.auth_admin')))
-#     resp.set_cookie('show_auth_managers_admin', '', max_age=30*24*60*60)
-#     resp.set_cookie('show_auth_users_admin', '1', max_age=30*24*60*60)
-#     return resp
-
-
-# @manage.route('/auth-admin/edit/<int:id>', methods=['GET', 'POST'])
-# @login_required
-# @permission_required(u'开发权限')
-# def edit_auth_admin(id):
-#     user = User.query.get_or_404(id)
-#     if user.deleted:
-#         abort(404)
-#     form = EditAuthFormAdmin(user=user)
-#     if form.validate_on_submit():
-#         user.name = form.name.data
-#         # user.email = form.email.data
-#         user.role_id = form.role.data
-#         if user.vb_course:
-#             user.unregister(user.vb_course)
-#         if form.vb_course.data:
-#             user.register(Course.query.get(form.vb_course.data))
-#         if user.y_gre_course:
-#             user.unregister(user.y_gre_course)
-#         if form.y_gre_course.data:
-#             user.register(Course.query.get(form.y_gre_course.data))
-#         db.session.add(user)
-#         db.session.commit()
-#         flash(u'%s的账户信息已更新' % user.name, category='success')
-#         return redirect(request.args.get('next') or url_for('manage.auth_admin'))
-#     form.name.data = user.name
-#     form.email.data = user.email
-#     form.role.data = user.role_id
-#     if user.vb_course:
-#         form.vb_course.data = user.vb_course.id
-#     if user.y_gre_course:
-#         form.y_gre_course.data = user.y_gre_course.id
-#     return render_template('manage/edit_auth_admin.html', form=form, user=user)
 
 
 @manage.route('/rental')
@@ -2227,7 +1967,7 @@ def suggest_user():
             ))\
             .order_by(User.last_seen_at.desc())\
             .limit(current_app.config['RECORD_PER_QUERY'])
-    return jsonify({'results': [user.to_json_suggestion() for user in users if not user.is_superior_than(current_user._get_current_object())]})
+    return jsonify({'results': [user.to_json_suggestion() for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
 @manage.route('/suggest/email/')
@@ -2244,7 +1984,7 @@ def suggest_email():
             ))\
             .order_by(User.last_seen_at.desc())\
             .limit(current_app.config['RECORD_PER_QUERY'])
-    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if not user.is_superior_than(current_user._get_current_object())]})
+    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
 @manage.route('/search/user/')
@@ -2261,4 +2001,4 @@ def search_user():
             ))\
             .order_by(User.last_seen_at.desc())\
             .limit(current_app.config['RECORD_PER_QUERY'])
-    return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users if not user.is_superior_than(current_user._get_current_object())]})
+    return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
