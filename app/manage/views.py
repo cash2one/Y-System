@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditUserForm, DeleteUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
+from ..models import Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
 from ..decorators import permission_required
 
 
@@ -24,7 +24,7 @@ def after_request(response):
 
 @manage.route('/summary')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def summary():
     announcements = Announcement.query\
         .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
@@ -54,7 +54,7 @@ def summary():
 
 @manage.route('/summary/ipad/1103')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def summary_room_1103_ipads():
     resp = make_response(redirect(url_for('manage.summary')))
     resp.set_cookie('show_summary_ipad_1103', '1', max_age=30*24*60*60)
@@ -65,7 +65,7 @@ def summary_room_1103_ipads():
 
 @manage.route('/summary/ipad/1707')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def summary_room_1707_ipads():
     resp = make_response(redirect(url_for('manage.summary')))
     resp.set_cookie('show_summary_ipad_1103', '', max_age=30*24*60*60)
@@ -76,7 +76,7 @@ def summary_room_1707_ipads():
 
 @manage.route('/summary/ipad/others')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def summary_other_ipads():
     resp = make_response(redirect(url_for('manage.summary')))
     resp.set_cookie('show_summary_ipad_1103', '', max_age=30*24*60*60)
@@ -86,7 +86,7 @@ def summary_other_ipads():
 
 
 @manage.route('/summary/ipad/room/<int:room_id>')
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def summary_room(room_id):
     ipads = []
     if room_id == 0:
@@ -102,7 +102,7 @@ def summary_room(room_id):
 
 
 @manage.route('/summary/statistics')
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def summary_statistics():
     statistics = {
         'booking': {
@@ -179,7 +179,7 @@ def summary_statistics():
 
 @manage.route('/booking')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def booking():
     page = request.args.get('page', 1, type=int)
     show_today_booking = True
@@ -216,7 +216,7 @@ def booking():
 
 @manage.route('/booking/today')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def today_booking():
     resp = make_response(redirect(url_for('manage.booking')))
     resp.set_cookie('show_today_booking', '1', max_age=30*24*60*60)
@@ -227,7 +227,7 @@ def today_booking():
 
 @manage.route('/booking/future')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def future_booking():
     resp = make_response(redirect(url_for('manage.booking')))
     resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
@@ -238,7 +238,7 @@ def future_booking():
 
 @manage.route('/booking/history')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def history_booking():
     resp = make_response(redirect(url_for('manage.booking')))
     resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
@@ -249,7 +249,7 @@ def history_booking():
 
 @manage.route('/booking/set-state-valid/<int:user_id>/<int:schedule_id>')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_valid(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -266,14 +266,14 @@ def set_booking_state_valid(user_id, schedule_id):
     available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
         for manager in User.query.all():
-            if manager.can(Permission.MANAGE_IPAD):
+            if manager.can(u'管理iPad设备'):
                 send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
 @manage.route('/booking/set-state-wait/<int:user_id>/<int:schedule_id>')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_wait(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'排队')
@@ -282,7 +282,7 @@ def set_booking_state_wait(user_id, schedule_id):
 
 @manage.route('/booking/set-state-invalid/<int:user_id>/<int:schedule_id>')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_invalid(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'失效')
@@ -291,7 +291,7 @@ def set_booking_state_invalid(user_id, schedule_id):
 
 @manage.route('/booking/set-state-kept/<int:user_id>/<int:schedule_id>')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_kept(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'赴约')
@@ -300,7 +300,7 @@ def set_booking_state_kept(user_id, schedule_id):
 
 @manage.route('/booking/set-state-late/<int:user_id>/<int:schedule_id>')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_late(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'迟到')
@@ -309,7 +309,7 @@ def set_booking_state_late(user_id, schedule_id):
 
 @manage.route('/booking/set-state-missed/<int:user_id>/<int:schedule_id>')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_missed(user_id, schedule_id):
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
     booking.set_state(u'爽约')
@@ -318,7 +318,7 @@ def set_booking_state_missed(user_id, schedule_id):
 
 @manage.route('/booking/set-state-canceled/<int:user_id>/<int:schedule_id>')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_canceled(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -333,7 +333,7 @@ def set_booking_state_canceled(user_id, schedule_id):
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.query.all():
-                if manager.can(Permission.MANAGE_IPAD):
+                if manager.can(u'管理iPad设备'):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
@@ -350,7 +350,7 @@ def time_now(utcOffset=0):
 
 @manage.route('/booking/set-state-missed-all')
 @login_required
-@permission_required(Permission.MANAGE_BOOKING)
+@permission_required(u'管理课程预约')
 def set_booking_state_missed_all():
     history_unmarked_missed_bookings = Booking.query\
         .join(BookingState, BookingState.id == Booking.state_id)\
@@ -390,7 +390,7 @@ def set_booking_state_missed_all():
 
 @manage.route('/schedule', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def schedule():
     form = NewScheduleForm()
     if form.validate_on_submit():
@@ -440,7 +440,7 @@ def schedule():
 
 @manage.route('/schedule/today')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def today_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '1', max_age=30*24*60*60)
@@ -451,7 +451,7 @@ def today_schedule():
 
 @manage.route('/schedule/future')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def future_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
@@ -462,7 +462,7 @@ def future_schedule():
 
 @manage.route('/schedule/history')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def history_schedule():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
@@ -473,7 +473,7 @@ def history_schedule():
 
 @manage.route('/schedule/publish/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def publish_schedule(id):
     schedule = Schedule.query.get_or_404(id)
     if schedule.out_of_date:
@@ -489,7 +489,7 @@ def publish_schedule(id):
 
 @manage.route('/schedule/retract/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def retract_schedule(id):
     schedule = Schedule.query.get_or_404(id)
     if schedule.out_of_date:
@@ -505,7 +505,7 @@ def retract_schedule(id):
 
 @manage.route('/schedule/increase-quota/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def increase_schedule_quota(id):
     schedule = Schedule.query.get_or_404(id)
     if schedule.out_of_date:
@@ -519,7 +519,7 @@ def increase_schedule_quota(id):
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.query.all():
-                if manager.can(Permission.MANAGE_IPAD):
+                if manager.can(u'管理iPad设备'):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     flash(u'所选时段名额+1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
@@ -527,7 +527,7 @@ def increase_schedule_quota(id):
 
 @manage.route('/schedule/decrease-quota/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def decrease_schedule_quota(id):
     schedule = Schedule.query.get_or_404(id)
     if schedule.out_of_date:
@@ -546,7 +546,7 @@ def decrease_schedule_quota(id):
 
 @manage.route('/period', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def period():
     form = NewPeriodForm()
     if form.validate_on_submit():
@@ -570,7 +570,7 @@ def period():
 
 @manage.route('/period/flip-show/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def flip_period_show(id):
     period = Period.query.get_or_404(id)
     if period.deleted:
@@ -585,7 +585,7 @@ def flip_period_show(id):
 
 @manage.route('/period/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def edit_period(id):
     period = Period.query.get_or_404(id)
     if period.deleted:
@@ -617,7 +617,7 @@ def edit_period(id):
 
 @manage.route('/period/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_SCHEDULE)
+@permission_required(u'管理预约时段')
 def delete_period(id):
     period = Period.query.get_or_404(id)
     if period.deleted:
@@ -632,7 +632,7 @@ def delete_period(id):
 
 @manage.route('/ipad', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def ipad():
     form = NewiPadForm()
     if form.validate_on_submit():
@@ -709,7 +709,7 @@ def ipad():
 
 @manage.route('/ipad/all')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def all_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '1', max_age=30*24*60*60)
@@ -723,7 +723,7 @@ def all_ipads():
 
 @manage.route('/ipad/maintain')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def maintain_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -737,7 +737,7 @@ def maintain_ipads():
 
 @manage.route('/ipad/charge')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def charge_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -751,7 +751,7 @@ def charge_ipads():
 
 @manage.route('/ipad/1103')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def room_1103_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -765,7 +765,7 @@ def room_1103_ipads():
 
 @manage.route('/ipad/1707')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def room_1707_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -779,7 +779,7 @@ def room_1707_ipads():
 
 @manage.route('/ipad/others')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def other_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -793,7 +793,7 @@ def other_ipads():
 
 @manage.route('/ipad/set-state/standby/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def set_ipad_state_standby(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
@@ -806,7 +806,7 @@ def set_ipad_state_standby(id):
 
 @manage.route('/ipad/set-state/candidate/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def set_ipad_state_candidate(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
@@ -819,7 +819,7 @@ def set_ipad_state_candidate(id):
 
 @manage.route('/ipad/set-state/maintain/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def set_ipad_state_maintain(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
@@ -828,7 +828,7 @@ def set_ipad_state_maintain(id):
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
     for user in User.query.all():
-        if user.can(Permission.MANAGE_IPAD):
+        if user.can(u'管理iPad设备'):
             send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
@@ -836,7 +836,7 @@ def set_ipad_state_maintain(id):
 
 @manage.route('/ipad/set-state/charge/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def set_ipad_state_charge(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
@@ -849,7 +849,7 @@ def set_ipad_state_charge(id):
 
 @manage.route('/ipad/set-state/obsolete/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def set_ipad_state_obsolete(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
@@ -862,7 +862,7 @@ def set_ipad_state_obsolete(id):
 
 @manage.route('/ipad/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def edit_ipad(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.deleted:
@@ -903,7 +903,7 @@ def edit_ipad(id):
 
 @manage.route('/ipad/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_IPAD)
+@permission_required(u'管理iPad设备')
 def delete_ipad(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.deleted:
@@ -919,7 +919,7 @@ def delete_ipad(id):
 
 @manage.route('/ipad/filter', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def filter_ipad():
     ipads = []
     form = FilteriPadForm()
@@ -933,7 +933,7 @@ def filter_ipad():
 
 @manage.route('/ipad/contents')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def ipad_contents():
     ipad_contents = iPadContentJSON.query.get_or_404(1)
     if ipad_contents.out_of_date:
@@ -943,7 +943,7 @@ def ipad_contents():
 
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_USER)
+@permission_required(u'管理用户')
 def user():
     page = request.args.get('page', 1, type=int)
     show_activated = True
@@ -992,7 +992,7 @@ def user():
 
 @manage.route('/user/activated')
 @login_required
-@permission_required(Permission.MANAGE_USER)
+@permission_required(u'管理用户')
 def activated_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated', '1', max_age=30*24*60*60)
@@ -1003,7 +1003,7 @@ def activated_users():
 
 @manage.route('/user/unactivated')
 @login_required
-@permission_required(Permission.MANAGE_USER)
+@permission_required(u'管理用户')
 def unactivated_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated', '', max_age=30*24*60*60)
@@ -1014,7 +1014,7 @@ def unactivated_users():
 
 @manage.route('/user/suspended')
 @login_required
-@permission_required(Permission.MANAGE_USER)
+@permission_required(u'管理用户')
 def suspended_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated', '', max_age=30*24*60*60)
@@ -1025,7 +1025,7 @@ def suspended_users():
 
 @manage.route('/user/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_USER)
+@permission_required(u'管理用户')
 def edit_user(id):
     user = User.query.get_or_404(id)
     if user.deleted:
@@ -1061,7 +1061,7 @@ def edit_user(id):
 
 @manage.route('/user/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_USER)
+@permission_required(u'管理用户')
 def delete_user(id):
     user = User.query.get_or_404(id)
     if user.deleted:
@@ -1078,7 +1078,7 @@ def delete_user(id):
 
 @manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1092,7 +1092,7 @@ def edit_punch_step_1(user_id):
 
 @manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def edit_punch_step_2(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1106,7 +1106,7 @@ def edit_punch_step_2(user_id, lesson_id):
 
 @manage.route('/punch/edit/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def edit_punch_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1122,7 +1122,7 @@ def edit_punch_step_3(user_id, section_id):
 
 @manage.route('/user/find', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def find_user():
     users = []
     name_or_email = request.args.get('keyword')
@@ -1137,7 +1137,7 @@ def find_user():
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(Permission.MANAGE_AUTH):
+        elif current_user.can(u'管理权限'):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -1188,7 +1188,7 @@ def find_user():
                     ))\
                     .order_by(User.last_seen_at.desc())\
                     .limit(current_app.config['RECORD_PER_QUERY'])
-            elif current_user.can(Permission.MANAGE_AUTH):
+            elif current_user.can(u'管理权限'):
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
                     .filter(User.deleted == False)\
@@ -1231,7 +1231,7 @@ def find_user():
 
 @manage.route('/analytics')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def analytics():
     analytics_token = current_app.config['ANALYTICS_TOKEN']
     return render_template('manage/analytics.html', analytics_token=analytics_token)
@@ -1239,7 +1239,7 @@ def analytics():
 
 @manage.route('/auth')
 @login_required
-@permission_required(Permission.MANAGE_AUTH)
+@permission_required(u'管理权限')
 def auth():
     page = request.args.get('page', 1, type=int)
     show_auth_managers = True
@@ -1275,7 +1275,7 @@ def auth():
 
 @manage.route('/auth/managers')
 @login_required
-@permission_required(Permission.MANAGE_AUTH)
+@permission_required(u'管理权限')
 def auth_managers():
     resp = make_response(redirect(url_for('manage.auth')))
     resp.set_cookie('show_auth_managers', '1', max_age=30*24*60*60)
@@ -1285,7 +1285,7 @@ def auth_managers():
 
 @manage.route('/auth/users')
 @login_required
-@permission_required(Permission.MANAGE_AUTH)
+@permission_required(u'管理权限')
 def auth_users():
     resp = make_response(redirect(url_for('manage.auth')))
     resp.set_cookie('show_auth_managers', '', max_age=30*24*60*60)
@@ -1295,7 +1295,7 @@ def auth_users():
 
 @manage.route('/auth/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_AUTH)
+@permission_required(u'管理权限')
 def edit_auth(id):
     user = User.query.get_or_404(id)
     if user.deleted:
@@ -1331,7 +1331,7 @@ def edit_auth(id):
 
 @manage.route('/auth-admin')
 @login_required
-@permission_required(Permission.ADMINISTER)
+@permission_required(u'开发权限')
 def auth_admin():
     page = request.args.get('page', 1, type=int)
     show_auth_managers_admin = True
@@ -1368,7 +1368,7 @@ def auth_admin():
 
 @manage.route('/auth/managers-admin')
 @login_required
-@permission_required(Permission.ADMINISTER)
+@permission_required(u'开发权限')
 def auth_managers_admin():
     resp = make_response(redirect(url_for('manage.auth_admin')))
     resp.set_cookie('show_auth_managers_admin', '1', max_age=30*24*60*60)
@@ -1378,7 +1378,7 @@ def auth_managers_admin():
 
 @manage.route('/auth/users-admin')
 @login_required
-@permission_required(Permission.ADMINISTER)
+@permission_required(u'开发权限')
 def auth_users_admin():
     resp = make_response(redirect(url_for('manage.auth_admin')))
     resp.set_cookie('show_auth_managers_admin', '', max_age=30*24*60*60)
@@ -1388,7 +1388,7 @@ def auth_users_admin():
 
 @manage.route('/auth-admin/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.ADMINISTER)
+@permission_required(u'开发权限')
 def edit_auth_admin(id):
     user = User.query.get_or_404(id)
     if user.deleted:
@@ -1422,7 +1422,7 @@ def edit_auth_admin(id):
 
 @manage.route('/rental')
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental():
     page = request.args.get('page', 1, type=int)
     show_today_rental = True
@@ -1468,7 +1468,7 @@ def rental():
 
 @manage.route('/rental/today')
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_today():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '1', max_age=30*24*60*60)
@@ -1480,7 +1480,7 @@ def rental_today():
 
 @manage.route('/rental/today/1103')
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_today_1103():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
@@ -1492,7 +1492,7 @@ def rental_today_1103():
 
 @manage.route('/rental/today/1707')
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_today_1707():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
@@ -1504,7 +1504,7 @@ def rental_today_1707():
 
 @manage.route('/rental/history')
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_history():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
@@ -1516,7 +1516,7 @@ def rental_history():
 
 @manage.route('/rental/rent/step-1', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_1():
     form = BookingCodeForm()
     if form.validate_on_submit():
@@ -1542,7 +1542,7 @@ def rental_rent_step_1():
 
 @manage.route('/rental/rent/step-2/<int:user_id>/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_2(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1556,7 +1556,7 @@ def rental_rent_step_2(user_id, schedule_id):
 
 @manage.route('/rental/rent/step-3/<int:user_id>/<int:ipad_id>/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_3(user_id, ipad_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1587,7 +1587,7 @@ def rental_rent_step_3(user_id, ipad_id, schedule_id):
 
 @manage.route('/rental/rent/step-2-lesson/<int:user_id>/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_2_lesson(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1601,7 +1601,7 @@ def rental_rent_step_2_lesson(user_id, schedule_id):
 
 @manage.route('rental/rent/step-3-lesson/<int:user_id>/<int:lesson_id>/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_3_lesson(user_id, lesson_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1616,7 +1616,7 @@ def rental_rent_step_3_lesson(user_id, lesson_id, schedule_id):
 
 @manage.route('rental/rent/step-4-lesson/<int:user_id>/<int:lesson_id>/<int:ipad_id>/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_4_lesson(user_id, lesson_id, ipad_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1648,7 +1648,7 @@ def rental_rent_step_4_lesson(user_id, lesson_id, ipad_id, schedule_id):
 
 @manage.route('/rental/rent/step-1-alt', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
@@ -1662,7 +1662,7 @@ def rental_rent_step_1_alt():
 
 @manage.route('/rental/rent/step-2-alt/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1675,7 +1675,7 @@ def rental_rent_step_2_alt(user_id):
 
 @manage.route('/rental/rent/step-3-alt/<int:user_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_3_alt(user_id, ipad_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1709,7 +1709,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
 
 @manage.route('/rental/rent/step-2-lesson-alt/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_2_lesson_alt(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1722,7 +1722,7 @@ def rental_rent_step_2_lesson_alt(user_id):
 
 @manage.route('rental/rent/step-3-lesson-alt/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_3_lesson_alt(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1736,7 +1736,7 @@ def rental_rent_step_3_lesson_alt(user_id, lesson_id):
 
 @manage.route('rental/rent/step-4-lesson-alt/<int:user_id>/<int:lesson_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_rent_step_4_lesson_alt(user_id, lesson_id, ipad_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1771,7 +1771,7 @@ def rental_rent_step_4_lesson_alt(user_id, lesson_id, ipad_id):
 
 @manage.route('/rental/return/step-1', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_1():
     form = iPadSerialForm()
     if form.validate_on_submit():
@@ -1791,7 +1791,7 @@ def rental_return_step_1():
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
             for user in User.query.all():
-                if user.can(Permission.MANAGE_IPAD):
+                if user.can(u'管理iPad设备'):
                     send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
@@ -1807,7 +1807,7 @@ def rental_return_step_1():
 
 @manage.route('/rental/return/step-2/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_2(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1820,7 +1820,7 @@ def rental_return_step_2(user_id):
 
 @manage.route('/rental/return/step-3/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_3(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1834,7 +1834,7 @@ def rental_return_step_3(user_id, lesson_id):
 
 @manage.route('/rental/return/step-4/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_4(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1850,7 +1850,7 @@ def rental_return_step_4(user_id, section_id):
 
 @manage.route('/rental/return/step-1-alt', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
@@ -1864,7 +1864,7 @@ def rental_return_step_1_alt():
 
 @manage.route('/rental/return/step-2-alt/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1877,7 +1877,7 @@ def rental_return_step_2_alt(user_id):
 
 @manage.route('/rental/return/step-3-alt/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_3_alt(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1891,7 +1891,7 @@ def rental_return_step_3_alt(user_id, lesson_id):
 
 @manage.route('/rental/return/step-4-alt/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_return_step_4_alt(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1907,7 +1907,7 @@ def rental_return_step_4_alt(user_id, section_id):
 
 @manage.route('/rental/exchange/step-1/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_1(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if rental.returned:
@@ -1927,7 +1927,7 @@ def rental_exchange_step_1(rental_id):
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
             for user in User.query.all():
-                if user.can(Permission.MANAGE_IPAD):
+                if user.can(u'管理iPad设备'):
                     send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
@@ -1943,7 +1943,7 @@ def rental_exchange_step_1(rental_id):
 
 @manage.route('/rental/exchange/step-2/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_2(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -1960,7 +1960,7 @@ def rental_exchange_step_2(rental_id):
 
 @manage.route('/rental/exchange/step-3/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_3(rental_id, lesson_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -1978,7 +1978,7 @@ def rental_exchange_step_3(rental_id, lesson_id):
 
 @manage.route('/rental/exchange/step-4/<int:rental_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_4(rental_id, section_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -1998,7 +1998,7 @@ def rental_exchange_step_4(rental_id, section_id):
 
 @manage.route('/rental/exchange/step-5/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_5(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -2015,7 +2015,7 @@ def rental_exchange_step_5(rental_id):
 
 @manage.route('/rental/exchange/step-6/<int:rental_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_6(rental_id, ipad_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -2050,7 +2050,7 @@ def rental_exchange_step_6(rental_id, ipad_id):
 
 @manage.route('/rental/exchange/step-5-lesson/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_5_lesson(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -2067,7 +2067,7 @@ def rental_exchange_step_5_lesson(rental_id):
 
 @manage.route('rental/exchange/step-6-lesson/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_6_lesson(rental_id, lesson_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -2085,7 +2085,7 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id):
 
 @manage.route('rental/exchange/step-7-lesson/<int:rental_id>/<int:lesson_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_RENTAL)
+@permission_required(u'管理iPad借阅')
 def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
@@ -2121,7 +2121,7 @@ def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
 
 @manage.route('/announcement', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCEMENT)
+@permission_required(u'管理通知')
 def announcement():
     form = NewAnnouncementForm()
     if form.validate_on_submit():
@@ -2145,7 +2145,7 @@ def announcement():
 
 @manage.route('/announcement/publish/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCEMENT)
+@permission_required(u'管理通知')
 def publish_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.show:
@@ -2158,7 +2158,7 @@ def publish_announcement(id):
 
 @manage.route('/announcement/retract/<int:id>')
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCEMENT)
+@permission_required(u'管理通知')
 def retract_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if not announcement.show:
@@ -2171,7 +2171,7 @@ def retract_announcement(id):
 
 @manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCEMENT)
+@permission_required(u'管理通知')
 def edit_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.deleted:
@@ -2200,7 +2200,7 @@ def edit_announcement(id):
 
 @manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MANAGE_ANNOUNCEMENT)
+@permission_required(u'管理通知')
 def delete_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.deleted:
@@ -2214,7 +2214,7 @@ def delete_announcement(id):
 
 
 @manage.route('/suggest/user/')
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def suggest_user():
     users = []
     name_or_email = request.args.get('keyword')
@@ -2229,7 +2229,7 @@ def suggest_user():
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(Permission.MANAGE_AUTH):
+        elif current_user.can(u'管理权限'):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -2270,7 +2270,7 @@ def suggest_user():
 
 
 @manage.route('/suggest/email/')
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def suggest_email():
     users = []
     name_or_email = request.args.get('keyword')
@@ -2285,7 +2285,7 @@ def suggest_email():
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(Permission.MANAGE_AUTH):
+        elif current_user.can(u'管理权限'):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -2326,7 +2326,7 @@ def suggest_email():
 
 
 @manage.route('/search/user/')
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def search_user():
     users = []
     name_or_email = request.args.get('keyword')
@@ -2341,7 +2341,7 @@ def search_user():
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(Permission.MANAGE_AUTH):
+        elif current_user.can(u'管理权限'):
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
