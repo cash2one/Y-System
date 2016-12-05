@@ -1127,7 +1127,7 @@ def find_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_developer():
+        # if current_user.is_developer():
             users = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.deleted == False)\
@@ -1178,7 +1178,7 @@ def find_user():
     if form.validate_on_submit():
         name_or_email = form.name_or_email.data
         if name_or_email:
-            if current_user.is_developer():
+            # if current_user.is_developer():
                 users = User.query\
                     .join(Role, Role.id == User.role_id)\
                     .filter(User.deleted == False)\
@@ -2219,54 +2219,15 @@ def suggest_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_developer():
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(u'管理权限'):
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员',
-                    Role.name == u'管理员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        else:
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-    return jsonify({'results': [user.to_json_suggestion() for user in users]})
+        users = User.query\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                User.name.like('%' + name_or_email + '%'),
+                User.email.like('%' + name_or_email + '%')
+            ))\
+            .order_by(User.last_seen_at.desc())\
+            .limit(current_app.config['RECORD_PER_QUERY'])
+    return jsonify({'results': [user.to_json_suggestion() for user in users if not user.is_superior_than(current_user._get_current_object())]})
 
 
 @manage.route('/suggest/email/')
@@ -2275,54 +2236,15 @@ def suggest_email():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_developer():
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(u'管理权限'):
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员',
-                    Role.name == u'管理员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        else:
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users]})
+        users = User.query\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                User.name.like('%' + name_or_email + '%'),
+                User.email.like('%' + name_or_email + '%')
+            ))\
+            .order_by(User.last_seen_at.desc())\
+            .limit(current_app.config['RECORD_PER_QUERY'])
+    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if not user.is_superior_than(current_user._get_current_object())]})
 
 
 @manage.route('/search/user/')
@@ -2331,51 +2253,12 @@ def search_user():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:
-        if current_user.is_developer():
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        elif current_user.can(u'管理权限'):
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员',
-                    Role.name == u'管理员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-        else:
-            users = User.query\
-                .join(Role, Role.id == User.role_id)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .filter(or_(
-                    Role.name == u'挂起',
-                    Role.name == u'单VB',
-                    Role.name == u'Y-GRE 普通',
-                    Role.name == u'Y-GRE VBx2',
-                    Role.name == u'Y-GRE A权限',
-                    Role.name == u'协管员'
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
-    return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users]})
+        users = User.query\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                User.name.like('%' + name_or_email + '%'),
+                User.email.like('%' + name_or_email + '%')
+            ))\
+            .order_by(User.last_seen_at.desc())\
+            .limit(current_app.config['RECORD_PER_QUERY'])
+    return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users if not user.is_superior_than(current_user._get_current_object())]})
