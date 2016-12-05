@@ -18,7 +18,6 @@ $('.ui.search')
         apiSettings: {
             url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user/?keyword={query}'
         },
-        // selectFirstResult: true,
         showNoResults: false
     })
 ;

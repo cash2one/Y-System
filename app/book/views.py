@@ -7,8 +7,8 @@ from flask_sqlalchemy import get_debug_queries
 from . import book
 from .. import db
 from ..email import send_email
-from ..models import Permission, User, Schedule, Period, CourseType, Booking, BookingState, iPadState, iPad, iPadContent, Punch, Announcement, AnnouncementType
-from ..decorators import admin_required, permission_required
+from ..models import User, Schedule, Period, CourseType, Booking, Announcement, AnnouncementType
+from ..decorators import permission_required
 
 
 @book.after_app_request
@@ -21,7 +21,7 @@ def after_request(response):
 
 @book.route('/vb')
 @login_required
-@permission_required(Permission.BOOK_VB)
+@permission_required(u'预约VB课程')
 def vb():
     announcements = Announcement.query\
         .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
@@ -49,7 +49,7 @@ def vb():
 
 @book.route('/vb/book/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_VB)
+@permission_required(u'预约VB课程')
 def book_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
@@ -68,10 +68,10 @@ def book_vb(schedule_id):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~', category='warning')
         return redirect(request.args.get('next') or url_for('book.vb'))
     same_day_bookings = current_user.booking_vb_same_day(schedule)
-    if same_day_bookings >= 2 and not current_user.can(Permission.BOOK_ANY):
+    if same_day_bookings >= 2 and not current_user.can(u'预约任意课程'):
         flash(u'您当天已经预约过%d节VB课程，不要太贪心哦~' % same_day_bookings, category='warning')
         return redirect(request.args.get('next') or url_for('book.vb'))
-    elif same_day_bookings >= 1 and not (current_user.can(Permission.BOOK_VB_2) or current_user.can(Permission.BOOK_ANY)):
+    elif same_day_bookings >= 1 and not (current_user.can(u'预约VB课程x2') or current_user.can(u'预约任意课程')):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'预约')
@@ -82,14 +82,14 @@ def book_vb(schedule_id):
     available_ipads_quantity = current_user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
         for manager in User.query.all():
-            if manager.can(Permission.MANAGE_IPAD):
+            if manager.can(u'管理iPad设备'):
                 send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
 @book.route('/vb/wait/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_VB)
+@permission_required(u'预约VB课程')
 def wait_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
@@ -108,10 +108,10 @@ def wait_vb(schedule_id):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~', category='warning')
         return redirect(request.args.get('next') or url_for('book.vb'))
     same_day_bookings = current_user.booking_vb_same_day(schedule)
-    if same_day_bookings >= 2 and not current_user.can(Permission.BOOK_ANY):
+    if same_day_bookings >= 2 and not current_user.can(u'预约任意课程'):
         flash(u'您当天已经预约过%d节VB课程，不要太贪心哦~' % same_day_bookings, category='warning')
         return redirect(request.args.get('next') or url_for('book.vb'))
-    elif same_day_bookings >= 1 and not (current_user.can(Permission.BOOK_VB_2) or current_user.can(Permission.BOOK_ANY)):
+    elif same_day_bookings >= 1 and not (current_user.can(u'预约VB课程x2') or current_user.can(u'预约任意课程')):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'排队')
@@ -121,7 +121,7 @@ def wait_vb(schedule_id):
 
 @book.route('/vb/unbook/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_VB)
+@permission_required(u'预约VB课程')
 def unbook_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
@@ -141,7 +141,7 @@ def unbook_vb(schedule_id):
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.query.all():
-                if manager.can(Permission.MANAGE_IPAD):
+                if manager.can(u'管理iPad设备'):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     flash(u'取消成功！', category='success')
     return redirect(request.args.get('next') or url_for('book.vb'))
@@ -149,7 +149,7 @@ def unbook_vb(schedule_id):
 
 @book.route('/vb/miss/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_VB)
+@permission_required(u'预约VB课程')
 def miss_vb(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
@@ -168,7 +168,7 @@ def miss_vb(schedule_id):
 
 @book.route('/y-gre')
 @login_required
-@permission_required(Permission.BOOK_Y_GRE)
+@permission_required(u'预约Y-GRE课程')
 def y_gre():
     announcements = Announcement.query\
         .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
@@ -196,7 +196,7 @@ def y_gre():
 
 @book.route('/y-gre/book/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_Y_GRE)
+@permission_required(u'预约Y-GRE课程')
 def book_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
@@ -215,7 +215,7 @@ def book_y_gre(schedule_id):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     same_day_bookings = current_user.booking_y_gre_same_day(schedule)
-    if same_day_bookings >= 1 and not current_user.can(Permission.BOOK_ANY):
+    if same_day_bookings >= 1 and not current_user.can(u'预约任意课程'):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~' % same_day_bookings, category='warning')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'预约')
@@ -226,14 +226,14 @@ def book_y_gre(schedule_id):
     available_ipads_quantity = current_user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
         for manager in User.query.all():
-            if manager.can(Permission.MANAGE_IPAD):
+            if manager.can(u'管理iPad设备'):
                 send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
 @book.route('/y-gre/wait/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_Y_GRE)
+@permission_required(u'预约Y-GRE课程')
 def wait_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
@@ -252,7 +252,7 @@ def wait_y_gre(schedule_id):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     same_day_bookings = current_user.booking_y_gre_same_day(schedule)
-    if same_day_bookings >= 1 and not current_user.can(Permission.BOOK_ANY):
+    if same_day_bookings >= 1 and not current_user.can(u'预约任意课程'):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~' % same_day_bookings, category='warning')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'排队')
@@ -262,7 +262,7 @@ def wait_y_gre(schedule_id):
 
 @book.route('/y-gre/unbook/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_Y_GRE)
+@permission_required(u'预约Y-GRE课程')
 def unbook_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:
@@ -282,7 +282,7 @@ def unbook_y_gre(schedule_id):
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.query.all():
-                if manager.can(Permission.MANAGE_IPAD):
+                if manager.can(u'管理iPad设备'):
                     send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     flash(u'取消成功！', category='success')
     return redirect(request.args.get('next') or url_for('book.y_gre'))
@@ -290,7 +290,7 @@ def unbook_y_gre(schedule_id):
 
 @book.route('/y_gre/miss/<int:schedule_id>')
 @login_required
-@permission_required(Permission.BOOK_Y_GRE)
+@permission_required(u'预约Y-GRE课程')
 def miss_y_gre(schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     if not schedule.available:

@@ -6,8 +6,8 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import main
 from .. import db
-from ..models import Permission, Schedule, Period, CourseType, User, Punch, Booking, Announcement, AnnouncementType
-from ..decorators import admin_required, permission_required
+from ..models import User, Schedule, Punch, Booking, Announcement, AnnouncementType
+from ..decorators import permission_required
 
 
 @main.after_app_request
@@ -32,7 +32,7 @@ def server_shutdown():
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if current_user.is_authenticated:
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
         return redirect(request.args.get('next') or url_for('main.profile'))
     return render_template('index.html')
@@ -65,7 +65,7 @@ def profile():
 
 @main.route('/profile/<int:user_id>')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def profile_user(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:

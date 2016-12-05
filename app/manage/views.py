@@ -11,7 +11,7 @@ from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodF
 from .. import db
 from ..email import send_email
 from ..models import Permission, Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
-from ..decorators import admin_required, permission_required
+from ..decorators import permission_required
 
 
 @manage.after_app_request
