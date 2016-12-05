@@ -5,7 +5,42 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-unconfirmed.css') }}">
+<style type="text/css">
+.masthead.segment {
+    min-height: 550px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1em;
+    margin-bottom: 0em;
+    font-size: 8em;
+    font-weight: normal;
+}
+.masthead h2 {
+    font-size: 1.7em;
+    font-weight: normal;
+}
+.masthead a.ui.button {
+    margin: auto;
+}
+.masthead #message-container {
+    margin-top: 50px;
+}
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 300px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        font-size: 4em;
+    }
+    .masthead h2 {
+        margin-top: 0.5em;
+        font-size: 1.2em;
+    }
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
@@ -20,5 +55,14 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-unconfirmed.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+</script>
 {% endblock %}
