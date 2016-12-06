@@ -137,7 +137,7 @@
                     {% endif %}
                     {% if current_user.is_developer%}
                     <div class="divider"></div>
-                    <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 权限管理</a>
+                    <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
                     {% endif %}
                 </div>
             </div>
@@ -245,7 +245,7 @@
                 <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                 {% endif %}
                 {% if current_user.is_developer%}
-                <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 权限管理</a>
+                <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
                 {% endif %}
             </div>
         </div>
@@ -351,7 +351,7 @@
                             {% endif %}
                             {% if current_user.is_developer%}
                             <div class="divider"></div>
-                            <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 权限管理</a>
+                            <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
                             {% endif %}
                         </div>
                     </div>
