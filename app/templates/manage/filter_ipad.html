@@ -123,7 +123,7 @@
                             <th>状态</th>
                             <th>上次操作</th>
                             <th>操作人</th>
-                            {% if current_user.can(Permission.MANAGE_IPAD) %}
+                            {% if current_user.can('管理iPad设备') %}
                             <th>操作</th>
                             {% endif %}
                         </tr>
@@ -164,7 +164,7 @@
                                 <div class="ui popup popup-content">{{ moment(ipad.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ ipad.modified_by.name }}</td>
-                            {% if current_user.can(Permission.MANAGE_IPAD) %}
+                            {% if current_user.can('管理iPad设备') %}
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_ipad', id=ipad.id, next=url_for('manage.filter_ipad')) }}"><i class="edit icon"></i></a>

@@ -7,10 +7,10 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditUserForm, DeleteUserForm, FindUserForm, EditPunchLessonForm, EditPunchSectionForm, EditAuthForm, EditAuthFormAdmin, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
+from ..models import Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
 from ..decorators import permission_required
 
 
@@ -1087,6 +1087,134 @@ def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
     return render_template('manage/rental_exchange_step_7_lesson.html', rental=rental, lesson=lesson, ipad=ipad, form=form)
 
 
+@manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理学习进度')
+def edit_punch_step_1(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
+    form = EditPunchLessonForm()
+    if form.validate_on_submit():
+        return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=form.lesson.data, next=request.args.get('next')))
+    form.lesson.data = user.last_punch.section.lesson_id
+    return render_template('manage/edit_punch_step_1.html', user=user, form=form)
+
+
+@manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理学习进度')
+def edit_punch_step_2(user_id, lesson_id):
+    user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
+    lesson = Lesson.query.get_or_404(lesson_id)
+    form = EditPunchSectionForm(lesson=lesson)
+    if form.validate_on_submit():
+        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, section_id=form.section.data, next=request.args.get('next')))
+    return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form)
+
+
+@manage.route('/punch/edit/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理学习进度')
+def edit_punch_step_3(user_id, section_id):
+    user = User.query.get_or_404(user_id)
+    if user.deleted:
+        abort(404)
+    section = Section.query.get_or_404(section_id)
+    form = ConfirmPunchForm()
+    if form.validate_on_submit():
+        user.punch(section=section)
+        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
+        return redirect(request.args.get('next') or url_for('manage.find_user'))
+    return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
+
+
+@manage.route('/period', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理预约时段')
+def period():
+    form = NewPeriodForm()
+    if form.validate_on_submit():
+        start_time = time(*[int(x) for x in form.start_time.data.split(':')])
+        end_time = time(*[int(x) for x in form.end_time.data.split(':')])
+        if start_time >= end_time:
+            flash(u'无法添加时段模板：%s，时间设置有误' % form.name.data, category='error')
+            return redirect(url_for('manage.period'))
+        period = Period(name=form.name.data, start_time=start_time, end_time=end_time, type_id=form.period_type.data, show=form.show.data, modified_by_id=current_user.id)
+        db.session.add(period)
+        flash(u'已添加时段模板：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.period'))
+    page = request.args.get('page', 1, type=int)
+    query = Period.query.filter_by(deleted=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    periods = pagination.items
+    return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
+
+
+@manage.route('/period/flip-show/<int:id>')
+@login_required
+@permission_required(u'管理预约时段')
+def flip_period_show(id):
+    period = Period.query.get_or_404(id)
+    if period.deleted:
+        abort(404)
+    period.flip_show(modified_by=current_user._get_current_object())
+    if period.show:
+        flash(u'%s的可选状态改为：可选' % period.alias, category='success')
+    else:
+        flash(u'%s的可选状态改为：不可选' % period.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.period'))
+
+
+@manage.route('/period/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理预约时段')
+def edit_period(id):
+    period = Period.query.get_or_404(id)
+    if period.deleted:
+        abort(404)
+    form = EditPeriodForm()
+    if form.validate_on_submit():
+        start_time = time(*[int(x) for x in form.start_time.data.split(':')])
+        end_time = time(*[int(x) for x in form.end_time.data.split(':')])
+        if start_time >= end_time:
+            flash(u'无法更新时段模板：%s，时间设置有误' % form.name.data, category='error')
+            return redirect(url_for('manage.edit_period', id=period.id, next=request.args.get('next')))
+        period.name = form.name.data
+        period.start_time = start_time
+        period.end_time = end_time
+        period.type_id = form.period_type.data
+        period.show = form.show.data
+        period.modified_at = datetime.utcnow()
+        period.modified_by_id = current_user.id
+        db.session.add(period)
+        flash(u'已更新时段模板：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.period'))
+    form.name.data = period.name
+    form.start_time.data = period.start_time.strftime(u'%H:%M')
+    form.end_time.data = period.end_time.strftime(u'%H:%M')
+    form.period_type.data = period.type_id
+    form.show.data = period.show
+    return render_template('manage/edit_period.html', form=form, period=period)
+
+
+@manage.route('/period/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理预约时段')
+def delete_period(id):
+    period = Period.query.get_or_404(id)
+    if period.deleted:
+        abort(404)
+    form = DeletePeriodForm()
+    if form.validate_on_submit():
+        period.safe_delete(modified_by=current_user._get_current_object())
+        flash(u'已删除时段模板：%s' % period.name, category='success')
+        return redirect(request.args.get('next') or url_for('manage.period'))
+    return render_template('manage/delete_period.html', form=form, period=period)
+
+
 @manage.route('/schedule', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理预约时段')
@@ -1241,92 +1369,6 @@ def decrease_schedule_quota(id):
     schedule.decrease_quota(modified_by=current_user._get_current_object())
     flash(u'所选时段名额-1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
-
-
-@manage.route('/period', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理预约时段')
-def period():
-    form = NewPeriodForm()
-    if form.validate_on_submit():
-        start_time = time(*[int(x) for x in form.start_time.data.split(':')])
-        end_time = time(*[int(x) for x in form.end_time.data.split(':')])
-        if start_time >= end_time:
-            flash(u'无法添加时段模板：%s，时间设置有误' % form.name.data, category='error')
-            return redirect(url_for('manage.period'))
-        period = Period(name=form.name.data, start_time=start_time, end_time=end_time, type_id=form.period_type.data, show=form.show.data, modified_by_id=current_user.id)
-        db.session.add(period)
-        flash(u'已添加时段模板：%s' % form.name.data, category='success')
-        return redirect(url_for('manage.period'))
-    page = request.args.get('page', 1, type=int)
-    query = Period.query.filter_by(deleted=False)
-    pagination = query\
-        .order_by(Period.id.asc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    periods = pagination.items
-    return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
-
-
-@manage.route('/period/flip-show/<int:id>')
-@login_required
-@permission_required(u'管理预约时段')
-def flip_period_show(id):
-    period = Period.query.get_or_404(id)
-    if period.deleted:
-        abort(404)
-    period.flip_show(modified_by=current_user._get_current_object())
-    if period.show:
-        flash(u'%s的可选状态改为：可选' % period.alias, category='success')
-    else:
-        flash(u'%s的可选状态改为：不可选' % period.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.period'))
-
-
-@manage.route('/period/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理预约时段')
-def edit_period(id):
-    period = Period.query.get_or_404(id)
-    if period.deleted:
-        abort(404)
-    form = EditPeriodForm()
-    if form.validate_on_submit():
-        start_time = time(*[int(x) for x in form.start_time.data.split(':')])
-        end_time = time(*[int(x) for x in form.end_time.data.split(':')])
-        if start_time >= end_time:
-            flash(u'无法更新时段模板：%s，时间设置有误' % form.name.data, category='error')
-            return redirect(url_for('manage.edit_period', id=period.id, next=request.args.get('next')))
-        period.name = form.name.data
-        period.start_time = start_time
-        period.end_time = end_time
-        period.type_id = form.period_type.data
-        period.show = form.show.data
-        period.modified_at = datetime.utcnow()
-        period.modified_by_id = current_user.id
-        db.session.add(period)
-        flash(u'已更新时段模板：%s' % form.name.data, category='success')
-        return redirect(request.args.get('next') or url_for('manage.period'))
-    form.name.data = period.name
-    form.start_time.data = period.start_time.strftime(u'%H:%M')
-    form.end_time.data = period.end_time.strftime(u'%H:%M')
-    form.period_type.data = period.type_id
-    form.show.data = period.show
-    return render_template('manage/edit_period.html', form=form, period=period)
-
-
-@manage.route('/period/delete/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理预约时段')
-def delete_period(id):
-    period = Period.query.get_or_404(id)
-    if period.deleted:
-        abort(404)
-    form = DeletePeriodForm()
-    if form.validate_on_submit():
-        period.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除时段模板：%s' % period.name, category='success')
-        return redirect(request.args.get('next') or url_for('manage.period'))
-    return render_template('manage/delete_period.html', form=form, period=period)
 
 
 @manage.route('/ipad', methods=['GET', 'POST'])
@@ -1640,6 +1682,100 @@ def ipad_contents():
     return render_template('manage/ipad_contents.html', ipad_contents=json.loads(ipad_contents.json_string))
 
 
+@manage.route('/announcement', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理通知')
+def announcement():
+    form = NewAnnouncementForm()
+    if form.validate_on_submit():
+        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=form.announcement_type.data, modified_by_id=current_user.id)
+        db.session.add(announcement)
+        db.session.commit()
+        if form.show.data:
+            announcement.publish(modified_by=current_user._get_current_object())
+        else:
+            announcement.clean_up()
+        flash(u'已添加通知：“%s”' % form.title.data, category='success')
+        return redirect(url_for('manage.announcement'))
+    page = request.args.get('page', 1, type=int)
+    query = Announcement.query.filter_by(deleted=False)
+    pagination = query\
+        .order_by(Announcement.modified_at.desc())\
+        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    announcements = pagination.items
+    return render_template('manage/announcement.html', form=form, announcements=announcements, pagination=pagination)
+
+
+@manage.route('/announcement/publish/<int:id>')
+@login_required
+@permission_required(u'管理通知')
+def publish_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if announcement.show:
+        flash(u'所选通知已经发布', category='warning')
+        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+    announcement.publish(modified_by=current_user._get_current_object())
+    flash(u'“%s”发布成功！' % announcement.title, category='success')
+    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+
+
+@manage.route('/announcement/retract/<int:id>')
+@login_required
+@permission_required(u'管理通知')
+def retract_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if not announcement.show:
+        flash(u'所选通知尚未发布', category='warning')
+        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+    announcement.retract(modified_by=current_user._get_current_object())
+    flash(u'“%s”撤销成功！' % announcement.title, category='success')
+    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+
+
+@manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理通知')
+def edit_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if announcement.deleted:
+        abort(404)
+    form = EditAnnouncementForm()
+    if form.validate_on_submit():
+        announcement.title = form.title.data
+        announcement.body_html = form.body.data
+        announcement.type_id = form.announcement_type.data
+        announcement.modified_at = datetime.utcnow()
+        announcement.modified_by_id = current_user.id
+        db.session.add(announcement)
+        db.session.commit()
+        if form.show.data:
+            announcement.publish(modified_by=current_user._get_current_object())
+        else:
+            announcement.clean_up()
+        flash(u'已更新通知：“%s”' % form.title.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
+    form.title.data = announcement.title
+    form.body.data = announcement.body_html
+    form.announcement_type.data = announcement.type_id
+    form.show.data = announcement.show
+    return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
+
+
+@manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理通知')
+def delete_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if announcement.deleted:
+        abort(404)
+    form = DeleteAnnouncementForm()
+    if form.validate_on_submit():
+        announcement.safe_delete(modified_by=current_user._get_current_object())
+        flash(u'已删除通知：“%s”' % announcement.title, category='success')
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
+    return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
+
+
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
@@ -1775,50 +1911,6 @@ def delete_user(id):
     return render_template('manage/delete_user.html', form=form, user=user)
 
 
-@manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理学习进度')
-def edit_punch_step_1(user_id):
-    user = User.query.get_or_404(user_id)
-    if user.deleted:
-        abort(404)
-    form = EditPunchLessonForm()
-    if form.validate_on_submit():
-        return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=form.lesson.data, next=request.args.get('next')))
-    form.lesson.data = user.last_punch.section.lesson_id
-    return render_template('manage/edit_punch_step_1.html', user=user, form=form)
-
-
-@manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理学习进度')
-def edit_punch_step_2(user_id, lesson_id):
-    user = User.query.get_or_404(user_id)
-    if user.deleted:
-        abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
-    form = EditPunchSectionForm(lesson=lesson)
-    if form.validate_on_submit():
-        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, section_id=form.section.data, next=request.args.get('next')))
-    return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form)
-
-
-@manage.route('/punch/edit/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理学习进度')
-def edit_punch_step_3(user_id, section_id):
-    user = User.query.get_or_404(user_id)
-    if user.deleted:
-        abort(404)
-    section = Section.query.get_or_404(section_id)
-    form = ConfirmPunchForm()
-    if form.validate_on_submit():
-        user.punch(section=section)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
-        return redirect(request.args.get('next') or url_for('manage.find_user'))
-    return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
-
-
 @manage.route('/user/find', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理')
@@ -1851,106 +1943,63 @@ def find_user():
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
 
 
+@manage.route('/course')
+@login_required
+@permission_required(u'管理班级')
+def course():
+    form = NewCourseForm()
+    if form.validate_on_submit():
+        course = Course(name=form.date.name, type_id=form.course_type.data, show=form.show.data, modified_by_id=current_user.id)
+        db.session.add(course)
+        flash(u'新建班级：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.course'))
+    page = request.args.get('page', 1, type=int)
+    show_vb_courses = True
+    show_y_gre_courses = False
+    if current_user.is_authenticated:
+        show_vb_courses = bool(request.cookies.get('show_vb_courses', '1'))
+        show_y_gre_courses = bool(request.cookies.get('show_y_gre_courses', ''))
+    if show_vb_courses:
+        query = Course.query\
+            .join(CourseType, CourseType.id == Course.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .filter(Course.deleted == False)\
+    if show_y_gre_courses:
+        query = Course.query\
+            .join(CourseType, CourseType.id == Course.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(Course.deleted == False)\
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    courses = pagination.items
+    return render_template('manage/course.html', form=form, courses=courses, show_vb_courses=show_vb_courses, show_y_gre_courses=show_y_gre_courses, pagination=pagination)
+
+
+@manage.route('/course/vb')
+@login_required
+@permission_required(u'管理班级')
+def vb_courses():
+    resp = make_response(redirect(url_for('manage.course')))
+    resp.set_cookie('show_vb_courses', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_courses', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/course/y-gre')
+@login_required
+@permission_required(u'管理班级')
+def y_gre_courses():
+    resp = make_response(redirect(url_for('manage.course')))
+    resp.set_cookie('show_vb_courses', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_courses', '1', max_age=30*24*60*60)
+    return resp
+
+
 @manage.route('/analytics')
 @login_required
 @permission_required(u'管理')
 def analytics():
     analytics_token = current_app.config['ANALYTICS_TOKEN']
     return render_template('manage/analytics.html', analytics_token=analytics_token)
-
-
-@manage.route('/announcement', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理通知')
-def announcement():
-    form = NewAnnouncementForm()
-    if form.validate_on_submit():
-        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=form.announcement_type.data, modified_by_id=current_user.id)
-        db.session.add(announcement)
-        db.session.commit()
-        if form.show.data:
-            announcement.publish(modified_by=current_user._get_current_object())
-        else:
-            announcement.clean_up()
-        flash(u'已添加通知：“%s”' % form.title.data, category='success')
-        return redirect(url_for('manage.announcement'))
-    page = request.args.get('page', 1, type=int)
-    query = Announcement.query.filter_by(deleted=False)
-    pagination = query\
-        .order_by(Announcement.modified_at.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    announcements = pagination.items
-    return render_template('manage/announcement.html', form=form, announcements=announcements, pagination=pagination)
-
-
-@manage.route('/announcement/publish/<int:id>')
-@login_required
-@permission_required(u'管理通知')
-def publish_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if announcement.show:
-        flash(u'所选通知已经发布', category='warning')
-        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
-    announcement.publish(modified_by=current_user._get_current_object())
-    flash(u'“%s”发布成功！' % announcement.title, category='success')
-    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
-
-
-@manage.route('/announcement/retract/<int:id>')
-@login_required
-@permission_required(u'管理通知')
-def retract_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if not announcement.show:
-        flash(u'所选通知尚未发布', category='warning')
-        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
-    announcement.retract(modified_by=current_user._get_current_object())
-    flash(u'“%s”撤销成功！' % announcement.title, category='success')
-    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
-
-
-@manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理通知')
-def edit_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if announcement.deleted:
-        abort(404)
-    form = EditAnnouncementForm()
-    if form.validate_on_submit():
-        announcement.title = form.title.data
-        announcement.body_html = form.body.data
-        announcement.type_id = form.announcement_type.data
-        announcement.modified_at = datetime.utcnow()
-        announcement.modified_by_id = current_user.id
-        db.session.add(announcement)
-        db.session.commit()
-        if form.show.data:
-            announcement.publish(modified_by=current_user._get_current_object())
-        else:
-            announcement.clean_up()
-        flash(u'已更新通知：“%s”' % form.title.data, category='success')
-        return redirect(request.args.get('next') or url_for('manage.announcement'))
-    form.title.data = announcement.title
-    form.body.data = announcement.body_html
-    form.announcement_type.data = announcement.type_id
-    form.show.data = announcement.show
-    return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
-
-
-@manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理通知')
-def delete_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if announcement.deleted:
-        abort(404)
-    form = DeleteAnnouncementForm()
-    if form.validate_on_submit():
-        announcement.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除通知：“%s”' % announcement.title, category='success')
-        return redirect(request.args.get('next') or url_for('manage.announcement'))
-    return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
 
 
 @manage.route('/suggest/user/')

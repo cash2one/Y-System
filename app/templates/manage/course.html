@@ -147,6 +147,37 @@
         </div>
     </div>
 </div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header"><i class="add circle icon"></i> 新建班级</h3>
+                <form id="new-course" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='班级名称') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.course_type.label() }}
+                            {{ form.course_type(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="ui toggle checkbox">
+                            {{ form.show() }}
+                            {{ form.show.label() }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block customized_scripts %}
@@ -164,6 +195,27 @@ $('.message .close')
 
 $('table')
     .tablesort()
+;
+
+$(document)
+    .ready(function() {
+        $('#new-course')
+            .form({
+                onSuccess: submitForm,
+                fields: {
+                    name: {
+                        identifier  : 'name',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请输入班级名称'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
 ;
 </script>
 {% endblock %}
