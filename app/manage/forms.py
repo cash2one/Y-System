@@ -289,3 +289,17 @@ class NewCourseForm(FlaskForm):
         super(NewCourseForm, self).__init__(*args, **kwargs)
         self.course_type.choices = [(course_type.id, course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
+
+class EditCourseForm(FlaskForm):
+    name = StringField(u'班级名称', validators=[Required(message=u'请输入班级名称'), Length(1, 64)])
+    course_type = SelectField(u'班级类型', coerce=int)
+    show = BooleanField(u'显示为可选')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditCourseForm, self).__init__(*args, **kwargs)
+        self.course_type.choices = [(course_type.id, course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class DeleteCourseForm(FlaskForm):
+    submit = SubmitField(u'删除')

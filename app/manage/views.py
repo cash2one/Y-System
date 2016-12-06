@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
 from ..models import Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
@@ -1992,6 +1992,59 @@ def y_gre_courses():
     resp.set_cookie('show_vb_courses', '', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_courses', '1', max_age=30*24*60*60)
     return resp
+
+
+@manage.route('/course/flip-show/<int:id>')
+@login_required
+@permission_required(u'管理班级')
+def flip_course_show(id):
+    course = Course.query.get_or_404(id)
+    if course.deleted:
+        abort(404)
+    course.flip_show(modified_by=current_user._get_current_object())
+    if course.show:
+        flash(u'班级：%s的可选状态改为：可选' % course.name, category='success')
+    else:
+        flash(u'班级：%s的可选状态改为：不可选' % course.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.course'))
+
+
+@manage.route('/course/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理班级')
+def edit_course(id):
+    course = Course.query.get_or_404(id)
+    if course.deleted:
+        abort(404)
+    form = EditCourseForm()
+    if form.validate_on_submit():
+        course.name = form.name.data
+        course.type_id = form.course_type.data
+        course.show = form.show.data
+        course.modified_at = datetime.utcnow()
+        course.modified_by_id = current_user.id
+        db.session.add(course)
+        flash(u'已更新班级：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.course'))
+    form.name.data = course.name
+    form.course_type.data = course.type_id
+    form.show.data = course.show
+    return render_template('manage/edit_course.html', form=form, course=course)
+
+
+@manage.route('/course/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理班级')
+def delete_course(id):
+    course = Course.query.get_or_404(id)
+    if course.deleted:
+        abort(404)
+    form = DeleteCourseForm()
+    if form.validate_on_submit():
+        course.safe_delete(modified_by=current_user._get_current_object())
+        flash(u'已删除班级：%s' % course.name, category='success')
+        return redirect(request.args.get('next') or url_for('manage.course'))
+    return render_template('manage/delete_course.html', form=form, course=course)
 
 
 @manage.route('/analytics')
