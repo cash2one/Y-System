@@ -1449,7 +1449,7 @@ class User(UserMixin, db.Model):
                 email=current_app.config['YSYS_ADMIN'],
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD'],
-                name=u'Admin'
+                name=u'SysOp'
             )
             db.session.add(admin)
             db.session.commit()
