@@ -1078,7 +1078,7 @@ def delete_user(id):
 
 @manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理iPad借阅')
+@permission_required(u'管理学习进度')
 def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1092,7 +1092,7 @@ def edit_punch_step_1(user_id):
 
 @manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理iPad借阅')
+@permission_required(u'管理学习进度')
 def edit_punch_step_2(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
@@ -1106,7 +1106,7 @@ def edit_punch_step_2(user_id, lesson_id):
 
 @manage.route('/punch/edit/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理iPad借阅')
+@permission_required(u'管理学习进度')
 def edit_punch_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
