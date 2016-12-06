@@ -134,6 +134,7 @@
                     {% endif %}
                     {% if current_user.can('管理用户') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
+                    <a class="item loading-trigger" href="#"><i class="student icon"></i> 班级管理</a>
                     {% endif %}
                     {% if current_user.is_developer%}
                     <div class="divider"></div>
@@ -243,6 +244,7 @@
                 {% endif %}
                 {% if current_user.can('管理用户') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
+                <a class="item loading-trigger" href="#"><i class="student icon"></i> 班级管理</a>
                 {% endif %}
                 {% if current_user.is_developer%}
                 <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
@@ -348,6 +350,7 @@
                             {% endif %}
                             {% if current_user.can('管理用户') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
+                            <a class="item loading-trigger" href="#"><i class="student icon"></i> 班级管理</a>
                             {% endif %}
                             {% if current_user.is_developer%}
                             <div class="divider"></div>
