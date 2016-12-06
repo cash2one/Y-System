@@ -1963,12 +1963,12 @@ def course():
         query = Course.query\
             .join(CourseType, CourseType.id == Course.type_id)\
             .filter(CourseType.name == u'VB')\
-            .filter(Course.deleted == False)\
+            .filter(Course.deleted == False)
     if show_y_gre_courses:
         query = Course.query\
             .join(CourseType, CourseType.id == Course.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
-            .filter(Course.deleted == False)\
+            .filter(Course.deleted == False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     courses = pagination.items
     return render_template('manage/course.html', form=form, courses=courses, show_vb_courses=show_vb_courses, show_y_gre_courses=show_y_gre_courses, pagination=pagination)

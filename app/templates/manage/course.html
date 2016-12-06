@@ -111,8 +111,8 @@
                     <thead>
                         <tr>
                             <th>班级</th>
-                            <th>班级类型</th>
-                            <th>班级人数</th>
+                            <th>类型</th>
+                            <th>人数</th>
                             <th>可选状态</th>
                             <th>上次操作</th>
                             <th>操作人</th>
@@ -122,9 +122,9 @@
                     <tbody>
                         {% for course in courses %}
                         <tr>
-                            <th>{{ course.name }}</th>
-                            <th>{{ course.type.name }}</th>
-                            <th>{{ course.registered_users.count() }}</th>
+                            <td>{{ course.name }}</td>
+                            <td>{{ course.type.name }}</td>
+                            <td>{{ course.registered_users.count() }}</td>
                             {% if course.show %}
                             <td class="positive">可选</td>
                             {% else %}
@@ -135,7 +135,7 @@
                                 <div class="ui popup popup-content">{{ moment(course.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ course.modified_by.name }}</td>
-                            <th>操作</th>
+                            <td>操作</td>
                         </tr>
                         {% endfor %}
                     </tbody>
