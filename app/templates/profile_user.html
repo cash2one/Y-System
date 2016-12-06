@@ -314,7 +314,7 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {

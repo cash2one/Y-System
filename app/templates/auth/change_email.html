@@ -42,7 +42,7 @@
 <div class="ui middle aligned center aligned grid">
     <div class="column">
         <h2 class="ui inverted header">修改邮箱</h2>
-        <form method="POST" class="ui inverted form">
+        <form id="change-email" method="POST" class="ui inverted form">
             <div class="ui inverted segment">
                 {{ form.hidden_tag() }}
                 {% with email_errors = form.email.errors %}
@@ -95,7 +95,7 @@
 <script type="text/javascript">
 $(document)
     .ready(function() {
-        $('.ui.form')
+        $('#change-email')
             .form({
                 onSuccess: submitForm,
                 fields: {

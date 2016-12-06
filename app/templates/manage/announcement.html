@@ -148,7 +148,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="header"><i class="add circle icon"></i> 新建通知</h3>
-                <form method="POST" class="ui form">
+                <form id="new-announcement" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="twelve wide field">
@@ -181,8 +181,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/editor/wangEditor.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/editor/wangEditor.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -207,7 +207,7 @@ $('table')
 
 $(document)
     .ready(function() {
-        $('.ui.form')
+        $('#new-announcement')
             .form({
                 onSuccess: submitForm,
                 fields: {

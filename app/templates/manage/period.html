@@ -149,7 +149,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="header"><i class="add circle icon"></i> 新建时段模板</h3>
-                <form method="POST" class="ui form">
+                <form id="new-period" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="four wide field">
@@ -212,7 +212,7 @@ $('table')
 
 $(document)
     .ready(function() {
-        $('.ui.form')
+        $('#new-period')
             .form({
                 onSuccess: submitForm,
                 fields: {
