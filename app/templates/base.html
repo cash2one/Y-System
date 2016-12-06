@@ -135,13 +135,10 @@
                     {% if current_user.can('管理用户') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                     {% endif %}
-                    <!-- {% if current_user.can('管理权限') %}
-                    <a class="item loading-trigger" href="#"><i class="users icon"></i> 权限管理</a>
-                    {% endif %}
                     {% if current_user.is_developer%}
                     <div class="divider"></div>
-                    <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发者权限</a>
-                    {% endif %} -->
+                    <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 权限管理</a>
+                    {% endif %}
                 </div>
             </div>
             <div class="ui dropdown item">
@@ -247,12 +244,9 @@
                 {% if current_user.can('管理用户') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                 {% endif %}
-                <!-- {% if current_user.can('管理权限') %}
-                <a class="item loading-trigger" href="#"><i class="users icon"></i> 权限管理</a>
-                {% endif %}
                 {% if current_user.is_developer%}
-                <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发者权限</a>
-                {% endif %} -->
+                <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 权限管理</a>
+                {% endif %}
             </div>
         </div>
         <div class="item">
@@ -355,13 +349,10 @@
                             {% if current_user.can('管理用户') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                             {% endif %}
-                            <!-- {% if current_user.can('管理权限') %}
-                            <a class="item loading-trigger" href="#"><i class="users icon"></i> 权限管理</a>
-                            {% endif %}
                             {% if current_user.is_developer%}
                             <div class="divider"></div>
-                            <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发者权限</a>
-                            {% endif %} -->
+                            <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 权限管理</a>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="ui dropdown item">
