@@ -3,14 +3,13 @@
 from functools import wraps
 from flask import abort
 from flask_login import current_user
-from .models import Permission
 
 
-def permission_required(permission):
+def permission_required(permission_name):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.can(permission):
+            if not current_user.can(permission_name):
                 abort(403)
             return f(*args, **kwargs)
         return decorated_function
@@ -18,4 +17,8 @@ def permission_required(permission):
 
 
 def admin_required(f):
-    return permission_required(Permission.ADMINISTER)(f)
+    return permission_required(u'管理权限')(f)
+
+
+def developer_required(f):
+    return permission_required(u'开发权限')(f)

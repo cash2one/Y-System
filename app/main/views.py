@@ -6,8 +6,8 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import main
 from .. import db
-from ..models import Permission, Schedule, Period, CourseType, User, Punch, Booking, Announcement, AnnouncementType
-from ..decorators import admin_required, permission_required
+from ..models import User, Schedule, Punch, Booking, Announcement, AnnouncementType
+from ..decorators import permission_required
 
 
 @main.after_app_request
@@ -32,7 +32,7 @@ def server_shutdown():
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if current_user.is_authenticated:
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
         return redirect(request.args.get('next') or url_for('main.profile'))
     return render_template('index.html')
@@ -50,12 +50,9 @@ def profile():
     for announcement in announcements:
         if not current_user.notified_by(announcement=announcement):
             flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
-            announcement.notify(reader=current_user._get_current_object())
+            announcement.notify(user=current_user._get_current_object())
     page = request.args.get('page', 1, type=int)
-    punches = Punch.query\
-        .filter_by(user_id=current_user.id)\
-        .order_by(Punch.timestamp.desc())\
-        .limit(10)
+    punches = current_user.punches.order_by(Punch.timestamp.desc()).limit(10)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == current_user.id)\
@@ -68,16 +65,13 @@ def profile():
 
 @main.route('/profile/<int:user_id>')
 @login_required
-@permission_required(Permission.MANAGE)
+@permission_required(u'管理')
 def profile_user(user_id):
     user = User.query.get_or_404(user_id)
     if user.deleted:
         abort(404)
     page = request.args.get('page', 1, type=int)
-    punches = Punch.query\
-        .filter_by(user_id=user.id)\
-        .order_by(Punch.timestamp.desc())\
-        .limit(10)
+    punches = user.punches.order_by(Punch.timestamp.desc()).limit(10)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == user.id)\

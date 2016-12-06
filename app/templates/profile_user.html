@@ -5,7 +5,81 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-profile.css') }}">
+<style type="text/css">
+.masthead.segment {
+    /*min-height: 300px;*/
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+.masthead .ui.list {
+    margin-bottom: 90px;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.list {
+    font-size: 1.2em;
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        /*min-height: 160px;*/
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead .ui.list {
+        margin-bottom: 50px;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
@@ -206,8 +280,8 @@
                                 <div class="popup-trigger">{{ moment(punch.timestamp).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ punch.lesson.type.name }}</td>
-                            <td>{{ punch.lesson.name }}</td>
+                            <td>{{ punch.section.lesson.type.name }}</td>
+                            <td>{{ punch.section.lesson.name }}</td>
                             <td>{{ punch.section.name }}</td>
                         </tr>
                         {% endfor %}
@@ -218,7 +292,7 @@
     </div>
 </div>
 
-{% if current_user.can(Permission.MANAGE) %}
+{% if current_user.can('管理') %}
 <div class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
@@ -240,16 +314,37 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/js/customize-profile.js') }}"></script>
-<script>
-    {% for booking in bookings %}
-    $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
-        .popup({
-            popup : $('#booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}'),
-            on    : 'click'
-        })
-    ;
-    {% endfor %}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('table')
+    .tablesort()
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user/?keyword={query}'
+        },
+        showNoResults: false
+    })
+;
+
+{% for booking in bookings %}
+$('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
+    .popup({
+        popup : $('#booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}'),
+        on    : 'click'
+    })
+;
+{% endfor %}
 </script>
 {% endblock %}

@@ -4,6 +4,6 @@
 
 课程：{{ lesson.type.name }} - {{ lesson.name }}
 
-预约数量：{{ booked_ipads.count() }}
+预约数量：{{ booked_ipads_quantity }}
 
-已有数量：{{ available_ipads.count() }}
+已有数量：{{ available_ipads_quantity }}

@@ -5,14 +5,44 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-activate.css') }}">
+<style type="text/css">
+.masthead.segment .ui.grid {
+    height: 100%;
+    margin-top: 100px;
+    margin-bottom: 50px;
+}
+.masthead.segment .column {
+    max-width: 450px;
+}
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link {
+    color: rgba(255,255,255,.5);
+}
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:active,
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:hover {
+    color: #fff;
+}
+.masthead.segment .ui.inverted.form .ui.inverted.segment .ui.flask.message {
+    display: block;
+}
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment .ui.grid {
+        margin-top: 50px;
+        margin-bottom: 0;
+    }
+    .masthead.segment .ui.inverted.form .ui.inverted.segment div.fields {
+        -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
 <div class="ui middle aligned center aligned grid">
     <div class="column">
         <h2 class="ui inverted header">激活账户</h2>
-        <form method="POST" class="ui inverted form">
+        <form id="activate" method="POST" class="ui inverted form">
             <div class="ui inverted segment">
                 {{ form.hidden_tag() }}
                 <div class="field">
@@ -27,27 +57,10 @@
                         {{ form.activation_code(placeholder='激活码') }}
                     </div>
                 </div>
-                {% with email_errors = form.email.errors %}
-                {% if email_errors %}
-                <div class="field error">
-                    <div class="ui large left icon input">
-                        <i class="at icon"></i>
-                        {{ form.email(placeholder='邮箱（用于登录系统和接收确认邮件）') }}
-                    </div>
-                </div>
-                {% else %}
-                <div class="field">
-                    <div class="ui large left icon input">
-                        <i class="at icon"></i>
-                        {{ form.email(placeholder='邮箱（用于登录系统和接收确认邮件）') }}
-                    </div>
-                </div>
-                {% endif %}
-                {% endwith %}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="lock icon"></i>
-                        {{ form.password(placeholder='密码') }}
+                        {{ form.password(placeholder='新密码') }}
                     </div>
                 </div>
                 <div class="field">
@@ -72,17 +85,6 @@
                     {{ form.submit(class='ui fluid huge inverted submit button') }}
                 </div>
                 <div class="ui error message"></div>
-                {% with errors = form.email.errors %}
-                {% if errors %}
-                <div class="ui flask negative message">
-                    <ul class="list">
-                        {% for error in errors %}
-                        <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-                {% endwith %}
                 {{ macros.auth_message_widget() }}
             </div>
         </form>
@@ -92,5 +94,78 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-activate.js') }}"></script>
+<script type="text/javascript">
+$('.ui.checkbox')
+    .checkbox()
+;
+
+$(document)
+    .ready(function() {
+        $('#activate')
+            .form({
+                onSuccess: submitForm,
+                fields: {
+                    name: {
+                        identifier  : 'name',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请输入您的姓名'
+                            }
+                        ]
+                    },
+                    activation_code: {
+                        identifier  : 'activation_code',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请输入您的激活码'
+                            },
+                            {
+                                type   : 'length[6]',
+                                prompt : '激活码长度至少为6位'
+                            }
+                        ]
+                    },
+                    password: {
+                        identifier  : 'password',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请设置您的密码'
+                            },
+                            {
+                                type   : 'length[6]',
+                                prompt : '密码长度至少为6位'
+                            }
+                        ]
+                    },
+                    password2: {
+                        identifier  : 'password2',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请再次输入您的密码'
+                            },
+                            {
+                                type   : 'match[password]',
+                                prompt : '两次设置的密码不一致'
+                            }
+                        ]
+                    },
+                    eula: {
+                        identifier  : 'eula',
+                        rules: [
+                            {
+                                type   : 'checked',
+                                prompt : '请同意云英语服务条款'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
 {% endblock %}

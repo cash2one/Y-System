@@ -5,7 +5,83 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-ipad.css') }}">
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+.ui.vertical.stripe .ui.form .ui.button.cancel {
+    margin-left: 5px;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
@@ -43,7 +119,10 @@
                         </div>
                         <div class="four wide field">
                             {{ form.video_playback.label() }}
-                            {{ form.video_playback(class='ui dropdown') }}
+                            <div class="ui right labeled input">
+                                {{ form.video_playback(placeholder='10') }}
+                                <div class="ui basic label">小时</div>
+                            </div>
                         </div>
                         <div class="four wide field">
                             {{ form.state.label() }}
@@ -83,5 +162,65 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-ipad.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('select.dropdown')
+    .dropdown()
+;
+
+$(document)
+    .ready(function() {
+        $('#edit-ipad')
+            .form({
+                onSuccess: submitForm,
+                fields: {
+                    alias: {
+                        identifier  : 'alias',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请填写iPad编号'
+                            }
+                        ]
+                    },
+                    serial: {
+                        identifier  : 'serial',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请填写iPad序列号'
+                            },
+                            {
+                                type   : 'exactLength[12]',
+                                prompt : 'iPad序列号必须为12位'
+                            }
+                        ]
+                    },
+                    video_playback: {
+                        identifier  : 'video_playback',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请输入满电量可播放视频时间（小时）'
+                            },
+                            {
+                                type   : 'number',
+                                prompt : '满电量可播放视频时间必须为数字'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
 {% endblock %}

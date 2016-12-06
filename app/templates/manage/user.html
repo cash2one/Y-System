@@ -5,7 +5,83 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-user.css') }}">
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.table .ui.mini.icon.button {
+    margin-left: 10px;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
@@ -22,16 +98,22 @@
             <div class="column">
                 <h3 class="header"><i class="user icon"></i> 用户列表</h3>
                 <div class="ui tabular menu">
-                    {% if show_users %}
-                    <a class="item active loading-trigger" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.activations') }}">激活信息</a>
+                    {% if show_activated %}
+                    <a class="item active loading-trigger" href="{{ url_for('manage.activated_users') }}">用户</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
                     {% endif %}
-                    {% if show_activations %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.users') }}">用户</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.activations') }}">激活信息</a>
+                    {% if show_unactivated %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">用户</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
+                    {% endif %}
+                    {% if show_suspended %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">用户</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
                     {% endif %}
                 </div>
-                {% if show_users %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -78,141 +160,30 @@
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can(Permission.MANAGE_USER) %}
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="refresh icon"></i></a>
+                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="popup-trigger">{{ moment(user.member_since).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(user.member_since).format('YYYY-M-D H:mm:ss') }}</div>
+                                <div class="popup-trigger">{{ moment(user.activated_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
-                                <div class="popup-trigger">{{ moment(user.last_seen).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(user.last_seen).format('YYYY-M-D H:mm:ss') }}</div>
+                                <div class="popup-trigger">{{ moment(user.last_seen_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination_users.page)) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination_users %}
-                {{ macros.pagination_widget(pagination_users, 'manage.user') }}
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.user') }}
                 {% endif %}
-                {% endif %}
-                {% if show_activations %}
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>姓名</th>
-                            <th>初始权限</th>
-                            <th>初始VB班</th>
-                            <th>初始Y-GRE班</th>
-                            <th>初始进度</th>
-                            <th>邀请人</th>
-                            <th>邀请时间</th>
-                            <th>激活状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for activation in activations %}
-                        <tr>
-                            <td>
-                                {% if activation.activated %}
-                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=activation.activated_user.user_id) }}" target="_blank">{{ activation.name }}</a>
-                                <div class="ui flowing popup popup-content">{{ activation.name }}（{{ activation.activated_user.user.email }}）</div>
-                                {% else %}
-                                {{ activation.name }}
-                                {% endif %}
-                            </td>
-                            <td>{{ activation.role.name }}</td>
-                            <td>
-                                {% if activation.vb_course %}
-                                {{ activation.vb_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if activation.y_gre_course %}
-                                {{ activation.y_gre_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>{{ activation.initial_lesson.name }} - {{ activation.initial_section.name }}</td>
-                            <td>{{ activation.inviter.name }}</td>
-                            <td>
-                                <div class="popup-trigger">{{ moment(activation.timestamp).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(activation.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            {% if activation.activated %}
-                            <td class="positive">已激活</td>
-                            {% else %}
-                            <td class="negative">未激活</td>
-                            {% endif %}
-                            <td>
-                                {% if activation.activated %}
-                                <div class="ui mini icon disabled buttons">
-                                    <div class="ui mini disabled button"><i class="edit icon"></i></div>
-                                    <div class="ui mini negative disabled button"><i class="remove user icon"></i></div>
-                                </div>
-                                {% else %}
-                                <div class="ui mini icon buttons">
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_activation', id=activation.id, next=url_for('manage.user', page=pagination_activations.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_activation', id=activation.id, next=url_for('manage.user', page=pagination_activations.page)) }}"><i class="remove user icon"></i></a>
-                                </div>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% if pagination_activations %}
-                {{ macros.pagination_widget(pagination_activations, 'manage.user') }}
-                {% endif %}
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="header"><i class="add user icon"></i> 添加用户激活信息</h3>
-                <form id="new-activation" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="three wide field">
-                            {{ form.name.label() }}
-                            {{ form.name(placeholder='姓名') }}
-                        </div>
-                        <div class="four wide field">
-                            {{ form.activation_code.label() }}
-                            {{ form.activation_code(placeholder='激活码') }}
-                        </div>
-                        <div class="three wide field">
-                            {{ form.role.label() }}
-                            {{ form.role(class='ui dropdown') }}
-                        </div>
-                        <div class="three wide field">
-                            {{ form.vb_course.label() }}
-                            {{ form.vb_course(class='ui dropdown') }}
-                        </div>
-                        <div class="three wide field">
-                            {{ form.y_gre_course.label() }}
-                            {{ form.y_gre_course(class='ui dropdown') }}
-                        </div>
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
-                </form>
             </div>
         </div>
     </div>
@@ -221,6 +192,23 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
-<script src="{{ url_for('static', filename='assets/js/customize-manage-user.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('select.dropdown')
+    .dropdown()
+;
+
+$('table')
+    .tablesort()
+;
+</script>
 {% endblock %}

@@ -5,7 +5,80 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-edit-punch-step-3.css') }}">
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
@@ -26,13 +99,13 @@
                             <div class="completed step">
                                 <i class="student icon"></i>
                                 <div class="content">
-                                    <div class="title">课程进度信息：{{ lesson.type.name }} - {{ lesson.name }}</div>
+                                    <div class="title">课程进度信息：{{ section.alias3 }}</div>
                                 </div>
                             </div>
                             <div class="completed step">
                                 <i class="record icon"></i>
                                 <div class="content">
-                                    <div class="title">视频进度信息：{{ lesson.name }} - {{ section.name }}</div>
+                                    <div class="title">视频进度信息：{{ section.alias }}</div>
                                 </div>
                             </div>
                             <div class="active step">
@@ -47,11 +120,11 @@
                         <div class="ui big list">
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
                             <div class="item">原先进度：{{ user.last_punch.alias2 }}</div>
-                            <div class="item">更新进度：{{ lesson.type.name }} - {{ lesson.name }} - {{ section.name }}</div>
+                            <div class="item">更新进度：{{ section.alias2 }}</div>
                         </div>
                         <form id="confirm-punch" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.edit_punch_step_2', user_id=user.id, lesson_id=lesson.id, next=request.args.get('next')) }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.edit_punch_step_2', user_id=user.id, lesson_id=section.lesson.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <div class="ui error message"></div>
                         </form>
@@ -65,5 +138,28 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-manage-edit-punch-step-3.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('select.dropdown')
+    .dropdown()
+;
+
+$(document)
+    .ready(function() {
+        $('#confirm-punch')
+            .form({
+                onSuccess: submitForm
+            })
+        ;
+    })
+;
+</script>
 {% endblock %}

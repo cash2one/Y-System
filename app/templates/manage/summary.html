@@ -5,7 +5,153 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-manage-summary.css') }}">
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.statistic .label {
+    font-size: 1.2em;
+    text-transform: none;
+}
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+
+
+.ui.cards .card .ipad-basic-info.content .header .right.floated a {
+    color: #FFF;
+}
+.ui.cards .red.card .ipad-basic-info.content {
+    background-color: #DB2828;
+}
+.ui.cards .orange.card .ipad-basic-info.content {
+    background-color: #F2711C;
+}
+.ui.cards .yellow.card .ipad-basic-info.content {
+    background-color: #FBBD08;
+}
+.ui.cards .olive.card .ipad-basic-info.content {
+    background-color: #B5CC18;
+}
+.ui.cards .green.card .ipad-basic-info.content {
+    background-color: #21BA45;
+}
+.ui.cards .teal.card .ipad-basic-info.content {
+    background-color: #00B5AD;
+}
+.ui.cards .blue.card .ipad-basic-info.content {
+    background-color: #2185D0;
+}
+.ui.cards .violet.card .ipad-basic-info.content {
+    background-color: #6435C9;
+}
+.ui.cards .purple.card .ipad-basic-info.content {
+    background-color: #A333C8;
+}
+.ui.cards .pink.card .ipad-basic-info.content {
+    background-color: #E03997;
+}
+.ui.cards .brown.card .ipad-basic-info.content {
+    background-color: #A5673F;
+}
+.ui.cards .grey.card .ipad-basic-info.content {
+    background-color: #767676;
+}
+.ui.cards .black.card .ipad-basic-info.content {
+    background-color: #1B1C1D;
+}
+.ui.cards .red.card .ipad-basic-info.content .header,
+.ui.cards .orange.card .ipad-basic-info.content .header,
+.ui.cards .yellow.card .ipad-basic-info.content .header,
+.ui.cards .olive.card .ipad-basic-info.content .header,
+.ui.cards .green.card .ipad-basic-info.content .header,
+.ui.cards .teal.card .ipad-basic-info.content .header,
+.ui.cards .blue.card .ipad-basic-info.content .header,
+.ui.cards .violet.card .ipad-basic-info.content .header,
+.ui.cards .purple.card .ipad-basic-info.content .header,
+.ui.cards .pink.card .ipad-basic-info.content .header,
+.ui.cards .brown.card .ipad-basic-info.content .header,
+.ui.cards .grey.card .ipad-basic-info.content .header,
+.ui.cards .black.card .ipad-basic-info.content .header {
+    color: #FFF;
+}
+.ui.cards .red.card .ipad-basic-info.content .meta,
+.ui.cards .orange.card .ipad-basic-info.content .meta,
+.ui.cards .yellow.card .ipad-basic-info.content .meta,
+.ui.cards .olive.card .ipad-basic-info.content .meta,
+.ui.cards .green.card .ipad-basic-info.content .meta,
+.ui.cards .teal.card .ipad-basic-info.content .meta,
+.ui.cards .blue.card .ipad-basic-info.content .meta,
+.ui.cards .violet.card .ipad-basic-info.content .meta,
+.ui.cards .purple.card .ipad-basic-info.content .meta,
+.ui.cards .pink.card .ipad-basic-info.content .meta,
+.ui.cards .brown.card .ipad-basic-info.content .meta,
+.ui.cards .grey.card .ipad-basic-info.content .meta,
+.ui.cards .black.card .ipad-basic-info.content .meta {
+    color: rgba(255,255,255,.6);
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
@@ -207,9 +353,228 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="//cdnjs.cloudflare.com/ajax/libs/countup.js/1.7.1/countUp.min.js"></script>
-<script>
-    var roomID = '{{ room_id }}';
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/1.7.1/countUp.min.js"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user/?keyword={query}'
+        },
+        showNoResults: false
+    })
+;
+
+var roomID = '{{ room_id }}';
+
+// update statistics
+var countUpOptions = {
+    useEasing: true,
+    useGrouping: true,
+    separator: ',',
+    decimal: '.',
+    prefix: '',
+    suffix: ''
+};
+var iPadRent1103CountUp = new CountUp('stat-ipad-rent-1103', 0, 0, 0, 2.5, countUpOptions);
+var iPadTotal1103CountUp = new CountUp('stat-ipad-total-1103', 0, 0, 0, 2.5, countUpOptions);
+var iPadWalkIn1103CountUp = new CountUp('stat-walk-in-1103', 0, 0, 0, 2.5, countUpOptions);
+var iPadOvertime1103CountUp = new CountUp('stat-overtime-1103', 0, 0, 0, 2.5, countUpOptions);
+var iPadRent1707CountUp = new CountUp('stat-ipad-rent-1707', 0, 0, 0, 2.5, countUpOptions);
+var iPadTotal1707CountUp = new CountUp('stat-ipad-total-1707', 0, 0, 0, 2.5, countUpOptions);
+var iPadWalkIn1707CountUp = new CountUp('stat-walk-in-1707', 0, 0, 0, 2.5, countUpOptions);
+var iPadOvertime1707CountUp = new CountUp('stat-overtime-1707', 0, 0, 0, 2.5, countUpOptions);
+var VBIntroCountUp = new CountUp('stat-vb-intro', 0, 0, 0, 2.5, countUpOptions);
+var VBIntroTotalCountUp = new CountUp('stat-vb-intro-total', 0, 0, 0, 2.5, countUpOptions);
+var GREIntroCountUp = new CountUp('stat-gre-intro', 0, 0, 0, 2.5, countUpOptions);
+var GREIntroTotalCountUp = new CountUp('stat-gre-intro-total', 0, 0, 0, 2.5, countUpOptions);
+var AWIntroCountUp = new CountUp('stat-aw-intro', 0, 0, 0, 2.5, countUpOptions);
+var AWIntroTotalCountUp = new CountUp('stat-aw-intro-total', 0, 0, 0, 2.5, countUpOptions);
+var VBL1_3CountUp = new CountUp('stat-vb-l1-3', 0, 0, 0, 2.5, countUpOptions);
+var VBL1_3TotalCountUp = new CountUp('stat-vb-l1-3-total', 0, 0, 0, 2.5, countUpOptions);
+var VBL4_10CountUp = new CountUp('stat-vb-l4-10', 0, 0, 0, 2.5, countUpOptions);
+var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-10-total', 0, 0, 0, 2.5, countUpOptions);
+var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
+var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
+function updateStats() {
+    var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/statistics';
+    $.getJSON(url, function(data) {
+        iPadRent1103CountUp.update(data.room_1103.ipad.rent);
+        iPadTotal1103CountUp.update(data.room_1103.ipad.total);
+        iPadWalkIn1103CountUp.update(data.room_1103.rental.walk_in);
+        iPadOvertime1103CountUp.update(data.room_1103.rental.overtime);
+        iPadRent1707CountUp.update(data.room_1707.ipad.rent);
+        iPadTotal1707CountUp.update(data.room_1707.ipad.total);
+        iPadWalkIn1707CountUp.update(data.room_1707.rental.walk_in);
+        iPadOvertime1707CountUp.update(data.room_1707.rental.overtime);
+        VBIntroCountUp.update(data.booking.vb.intro.show_up);
+        VBIntroTotalCountUp.update(data.booking.vb.intro.total);
+        GREIntroCountUp.update(data.booking.y_gre.intro.show_up);
+        GREIntroTotalCountUp.update(data.booking.y_gre.intro.total);
+        AWIntroCountUp.update(data.booking.y_gre.aw_intro.show_up);
+        AWIntroTotalCountUp.update(data.booking.y_gre.aw_intro.total);
+        VBL1_3CountUp.update(data.booking.vb.l1_3.show_up);
+        VBL1_3TotalCountUp.update(data.booking.vb.l1_3.total);
+        VBL4_10CountUp.update(data.booking.vb.l4_10.show_up);
+        VBL4_10TotalCountUp.update(data.booking.vb.l4_10.total);
+        YGRECountUp.update(data.booking.y_gre.y_gre.show_up);
+        YGRETotalCountUp.update(data.booking.y_gre.y_gre.total);
+    });
+};
+updateStats();
+setInterval(updateStats, 15000);
+
+// update iPad info
+function updateCards() {
+    var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/' + roomID;
+    $.getJSON(url, function(data) {
+        $('.card').remove();
+        for (var i in data.ipads) {
+            $('#ipads')
+                .append(
+                    $('<div>')
+                        .attr('id', 'ipad-' + i)
+                        .addClass('card')
+                        .append(
+                            $('<div>')
+                                .addClass('ipad-basic-info content')
+                                .append(
+                                    $('<div>')
+                                        .addClass('header')
+                                        .append(
+                                            $('<span>')
+                                                .text(data.ipads[i].alias)
+                                        )
+                                        .append(
+                                            $('<span>')
+                                                .attr('id', 'ipad-state-' + i)
+                                                .addClass('right floated')
+                                        )
+                                )
+                                .append(
+                                    $('<div>')
+                                        .addClass('meta')
+                                        .append(
+                                            $('<code>')
+                                                .text(data.ipads[i].serial)
+                                        )
+                                        .append(
+                                            $('<span>')
+                                                .addClass('right floated')
+                                                .text(data.ipads[i].capacity)
+                                        )
+                                )
+                        )
+                        .append(
+                            $('<div>')
+                                .attr('id', 'ipad-content-' + i)
+                                .addClass('center aligned content')
+                                .append(
+                                    $('<div>')
+                                        .addClass('ui statistic')
+                                        .append(
+                                            $('<div>')
+                                                .addClass('value')
+                                        )
+                                        .append(
+                                            $('<div>')
+                                                .addClass('label')
+                                                .text(data.ipads[i].state)
+                                        )
+                                )
+                        )
+                        .append(
+                            $('<div>')
+                                .addClass('extra content')
+                                .append(
+                                    $('<span>')
+                                        .append(moment(data.ipads[i].modified_at, 'YYYY-MM-DDTh:mm:ssZ').fromNow() + ' [' + data.ipads[i].modified_by + ']')
+                                )
+                                .append(
+                                    $('<span>')
+                                        .attr('id', 'ipad-battery-' + i)
+                                        .addClass('right floated')
+                                )
+                        )
+                );
+            if (data.ipads[i].state == '待机') {
+                // $('#ipad-' + i).addClass('grey');
+                $('#ipad-state-' + i).html('<i class="wait icon"></i>' + data.ipads[i].state);
+                $('#ipad-content-' + i + ' .statistic').addClass('grey');
+                $('#ipad-content-' + i + ' .value').html('<i class="wait icon"></i>');
+            } else if (data.ipads[i].state == '借出') {
+                $('#ipad-battery-' + i).html(data.ipads[i].battery_life.percent + '% <i class="' + data.ipads[i].battery_life.level + ' battery icon"></i>');
+                if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
+                    $('#ipad-' + i).addClass('blue');
+                    $('#ipad-state-' + i).append(
+                        $('<a>')
+                            .attr('href', data.ipads[i].now_rented_by.url)
+                            .attr('target', '_blank')
+                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                    );
+                    $('#ipad-content-' + i + ' .statistic').addClass('blue');
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias);
+                } else if (data.ipads[i].now_rented_by.last_punch.course_type == 'Y-GRE') {
+                    $('#ipad-' + i).addClass('teal');
+                    $('#ipad-state-' + i).append(
+                        $('<a>')
+                            .attr('href', data.ipads[i].now_rented_by.url)
+                            .attr('target', '_blank')
+                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                    );
+                    $('#ipad-content-' + i + ' .statistic').addClass('teal');
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.lesson);
+                } else {
+                    $('#ipad-' + i).addClass('yellow');
+                    $('#ipad-state-' + i).html('<i class="upload icon"></i>' + data.ipads[i].state);
+                    $('#ipad-content-' + i + ' .statistic').addClass('yellow');
+                    $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
+                };
+                if (data.ipads[i].battery_life.percent < 20) {
+                    $('#ipad-' + i).removeClass('blue teal').addClass('orange');
+                    $('#ipad-content-' + i + ' .statistic').removeClass('blue teal').addClass('orange');
+                    $('#ipad-content-' + i + ' .value').html('<i class="empty battery icon"></i>');
+                    if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
+                        $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias2);
+                    } else if (data.ipads[i].now_rented_by.last_punch.course_type == 'Y-GRE') {
+                        $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias3);
+                    };
+                };
+            } else if (data.ipads[i].state == '候补') {
+                $('#ipad-' + i).addClass('grey');
+                $('#ipad-state-' + i).html('<i class="cube icon"></i>' + data.ipads[i].state);
+                $('#ipad-content-' + i + ' .statistic').addClass('grey');
+                $('#ipad-content-' + i + ' .value').html('<i class="cube icon"></i>');
+            } else if (data.ipads[i].state == '维护') {
+                $('#ipad-' + i).addClass('red');
+                $('#ipad-state-' + i).html('<i class="configure icon"></i>' + data.ipads[i].state);
+                $('#ipad-content-' + i + ' .statistic').addClass('red');
+                $('#ipad-content-' + i + ' .value').html('<i class="configure icon"></i>');
+            } else if (data.ipads[i].state == '充电') {
+                $('#ipad-' + i).addClass('green');
+                $('#ipad-state-' + i).html('<i class="plug icon"></i>' + data.ipads[i].state);
+                $('#ipad-content-' + i + ' .statistic').addClass('green');
+                $('#ipad-content-' + i + ' .value').html('<i class="plug icon"></i>');
+            } else if (data.ipads[i].state == '退役') {
+                $('#ipad-' + i).addClass('olive');
+                $('#ipad-state-' + i).html('<i class="recycle icon"></i>' + data.ipads[i].state);
+                $('#ipad-content-' + i + ' .statistic').addClass('olive');
+                $('#ipad-content-' + i + ' .value').html('<i class="recycle icon"></i>');
+            };
+        };
+    });
+};
+updateCards();
+setInterval(updateCards, 15000);
 </script>
-<script src="{{ url_for('static', filename='assets/js/customize-manage-summary.js') }}"></script>
 {% endblock %}

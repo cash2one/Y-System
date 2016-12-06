@@ -5,7 +5,37 @@
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-login.css') }}">
+<style type="text/css">
+.masthead.segment .ui.grid {
+    height: 100%;
+    margin-top: 100px;
+    margin-bottom: 50px;
+}
+.masthead.segment .column {
+    max-width: 450px;
+}
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link {
+    color: rgba(255,255,255,.5);
+}
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:active,
+.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:hover {
+    color: #fff;
+}
+.masthead.segment .ui.inverted.form .ui.inverted.segment .ui.flask.message {
+    display: block;
+}
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment .ui.grid {
+        margin-top: 50px;
+        margin-bottom: 0;
+    }
+    .masthead.segment .ui.inverted.form .ui.inverted.segment div.fields {
+        -webkit-flex-wrap: nowrap;
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+}
+</style>
 {% endblock %}
 
 {% block following_menu_auth %}
@@ -25,7 +55,7 @@
 <div class="ui middle aligned center aligned grid">
     <div class="column">
         <h2 class="ui inverted header">登录账户</h2>
-        <form method="POST" class="ui inverted form">
+        <form id="login" method="POST" class="ui inverted form">
             <div class="ui inverted segment">
                 {{ form.hidden_tag() }}
                 {% with email_errors = form.email.errors %}
@@ -89,5 +119,51 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script src="{{ url_for('static', filename='assets/js/customize-login.js') }}"></script>
+<script type="text/javascript">
+$('.ui.checkbox')
+    .checkbox()
+;
+
+$(document)
+    .ready(function() {
+        $('#login')
+            .form({
+                onSuccess: submitForm,
+                fields: {
+                    email: {
+                        identifier  : 'email',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请输入您的电子邮箱地址'
+                            },
+                            {
+                                type   : 'email',
+                                prompt : '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    password: {
+                        identifier  : 'password',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请输入您的密码'
+                            },
+                            {
+                                type   : 'length[6]',
+                                prompt : '密码长度至少为6位'
+                            }
+                        ]
+                    },
+                    remember_me: {
+                        identifier  : 'remember_me',
+                        optional    : true
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
 {% endblock %}

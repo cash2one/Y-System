@@ -6,13 +6,16 @@ from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
 from ..email import send_email
-from ..models import Permission, User, Role, Activation, Course, Announcement, AnnouncementType
+from ..models import User, Role, Announcement, AnnouncementType
 
 
 @auth.before_app_request
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
+        if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
+            logout_user()
+            return redirect(url_for('auth.activate'))
         if not current_user.confirmed and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
             return redirect(url_for('auth.unconfirmed'))
 
@@ -22,7 +25,7 @@ def unconfirmed():
     if current_user.is_anonymous:
         return redirect(url_for('main.index'))
     if current_user.confirmed:
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     return render_template('auth/unconfirmed.html')
@@ -32,7 +35,7 @@ def unconfirmed():
 def login():
     if current_user.is_authenticated:
         flash(u'您已经登录', 'info')
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
         return redirect(request.args.get('next') or url_for('main.profile'))
     form = LoginForm()
@@ -49,7 +52,7 @@ def login():
                 .first()
             if announcement is not None:
                 flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
-            if user.can(Permission.MANAGE):
+            if user.can(u'管理'):
                 return redirect(request.args.get('next') or url_for('manage.summary'))
             return redirect(request.args.get('next') or url_for('main.profile'))
         flash(u'无效的用户名或密码', category='error')
@@ -67,35 +70,21 @@ def logout():
 def activate():
     if current_user.is_authenticated:
         flash(u'您已经登录', 'info')
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
         return redirect(request.args.get('next') or url_for('main.profile'))
     form = ActivationForm()
     if form.validate_on_submit():
-        activations = Activation.query.filter_by(name=form.name.data, activated=False, deleted=False).all()
-        for activation in activations:
-            if activation.verify_activation_code(form.activation_code.data):
-                activation.activated = True
-                db.session.add(activation)
-                new_user = User(email=form.email.data, name=form.name.data, role_id=activation.role_id, password=form.password.data)
-                db.session.add(new_user)
-                if activation.vb_course_id:
-                    vb_course = Course.query.get(activation.vb_course_id)
-                    if vb_course:
-                        new_user.register(course=vb_course)
-                if activation.y_gre_course_id:
-                    y_gre_course = Course.query.get(activation.y_gre_course_id)
-                    if y_gre_course:
-                        new_user.register(course=y_gre_course)
-                db.session.commit()
-                new_user.add_user_activation(activation=activation)
-                new_user.add_initial_punch(activation=activation)
+        new_users = User.query.filter_by(name=form.name.data, activated=False, deleted=False).all()
+        for new_user in new_users:
+            if new_user.verify_password(form.activation_code.data):
+                new_user.activate()
                 token = new_user.generate_confirmation_token()
                 send_email(new_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=new_user, token=token)
                 flash(u'激活成功，请登录！', category='success')
                 flash(u'一封确认邮件已经发送至您的邮箱', category='info')
                 for user in User.query.all():
-                    if user.can(Permission.MANAGE_USER):
+                    if user.can(u'管理用户'):
                         send_email(user.email, u'新用户：%s（%s）' % (new_user.name, new_user.email), 'auth/mail/new_user', user=new_user)
                 return redirect(url_for('auth.login'))
         flash(u'激活信息有误，或账户已处于激活状态', category='error')
@@ -106,7 +95,7 @@ def activate():
 @login_required
 def confirm(token):
     if current_user.confirmed:
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     if current_user.confirm(token):
@@ -114,7 +103,7 @@ def confirm(token):
     else:
         flash(u'确认链接无效或者已经过期', category='error')
         return redirect(url_for('auth.unconfirmed'))
-    if current_user.can(Permission.MANAGE):
+    if current_user.can(u'管理'):
         return redirect(url_for('manage.summary'))
     return redirect(url_for('main.profile'))
 
@@ -137,7 +126,7 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             flash(u'修改密码成功', category='success')
-            if current_user.can(Permission.MANAGE):
+            if current_user.can(u'管理'):
                 return redirect(url_for('manage.summary'))
             return redirect(url_for('main.profile'))
         else:
@@ -149,7 +138,7 @@ def change_password():
 def reset_password_request():
     if current_user.is_authenticated:
         flash(u'您已经登录', 'info')
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
         return redirect(request.args.get('next') or url_for('main.profile'))
     form = ResetPasswordRequestForm()
@@ -167,7 +156,7 @@ def reset_password_request():
 def reset_password(token):
     if current_user.is_authenticated:
         flash(u'您已经登录', 'info')
-        if current_user.can(Permission.MANAGE):
+        if current_user.can(u'管理'):
             return redirect(url_for('manage.summary'))
         return redirect(url_for('main.profile'))
     form = ResetPasswordForm()
@@ -208,6 +197,6 @@ def change_email(token):
         flash(u'修改邮箱成功', category='success')
     else:
         flash(u'请求无效', category='error')
-    if current_user.can(Permission.MANAGE):
+    if current_user.can(u'管理'):
         return redirect(url_for('manage.summary'))
     return redirect(url_for('main.profile'))
