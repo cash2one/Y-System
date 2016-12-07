@@ -250,24 +250,59 @@ class DeleteAnnouncementForm(FlaskForm):
     submit = SubmitField(u'删除')
 
 
-class EditUserForm(FlaskForm):
+class NewUserForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    role = SelectField(u'用户组', coerce=int)
+    submit = SubmitField(u'新建学生用户')
+
+    def __init__(self, creator, *args, **kwargs):
+        super(NewUserForm, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError(u'%s已经被注册' % field.data)
+
+
+class NewAdminForm(FlaskForm):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
+    role = SelectField(u'用户组', coerce=int)
+    submit = SubmitField(u'新建管理用户')
+
+    def __init__(self, creator, *args, **kwargs):
+        super(NewAdminForm, self).__init__(*args, **kwargs)
+        if creator.is_developer:
+            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
+        else:
+            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError(u'%s已经被注册' % field.data)
+
+
+class EditUserForm(FlaskForm):
+    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
     role = SelectField(u'用户组', coerce=int)
     vb_course = SelectField(u'VB班', coerce=int)
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
     submit = SubmitField(u'提交')
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, creator, *args, **kwargs):
         super(EditUserForm, self).__init__(*args, **kwargs)
-        self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
-        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
-        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
-        self.user = user
-
-    def validate_email(self, field):
-        if field.data != self.user.email and User.query.filter_by(email=field.data).first():
-            raise ValidationError(u'%s已经被注册' % field.data)
+        if creator.is_developer:
+            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all()]
+        elif creator.is_administrator:
+            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+        else:
+            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
 class DeleteUserForm(FlaskForm):

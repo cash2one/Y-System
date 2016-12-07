@@ -46,9 +46,6 @@
 .ui.vertical.stripe .ui.table .ui.mini.icon.button {
     margin-left: 10px;
 }
-.ui.vertical.stripe .ui.form .ui.flask.message {
-    display: block;
-}
 
 .stats.stripe.segment,
 .quote.stripe.segment {
@@ -193,25 +190,25 @@
                             <td>{{ user.role.name }}</td>
                             <td>
                                 {% if user.vb_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>
+                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>
                                 {% else %}
                                 无
                                 {% endif %}
                             </td>
                             <td>
                                 {% if user.y_gre_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>
+                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>
                                 {% else %}
                                 无
                                 {% endif %}
                             </td>
+                            {% if user.activated %}
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can('管理学习进度') %}
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
-                            {% if user.activated %}
                             <td>
                                 <div class="popup-trigger">{{ moment(user.activated_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
@@ -222,6 +219,7 @@
                             </td>
                             {% else %}
                             <td>N/A</td>
+                            <td class="negative">未激活</td>
                             <td>N/A</td>
                             {% endif %}
                             <td>
@@ -237,7 +235,15 @@
                 {% if pagination %}
                 {{ macros.pagination_widget(pagination, 'manage.user') }}
                 {% endif %}
-                <a class="ui primary button loading-trigger" href="#"><i class="add user icon"></i> 新建用户</a>
+                {% if current_user.can('管理权限') %}
+                <div class="ui buttons">
+                    <a class="ui primary button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="add user icon"></i> 新建普通用户</a>
+                    <div class="or" data-text="或"></div>
+                    <a class="ui positive button loading-trigger" href="{{ url_for('manage.create_admin', next=url_for('manage.user', page=pagination.page)) }}"><i class="add user icon"></i> 新建管理用户</a>
+                </div>
+                {% else %}
+                <a class="ui primary button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="add user icon"></i> 新建普通用户</a>
+                {% endif %}
             </div>
         </div>
     </div>

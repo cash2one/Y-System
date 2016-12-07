@@ -158,7 +158,7 @@
                             </td>
                             {% if current_user.can('管理用户') %}
                             <td>
-                                {% if not user.is_superior_than(user=current_user._get_current_object()) %}
+                                {% if not user.is_superior_than(user=current_user) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
@@ -176,7 +176,7 @@
                     </tbody>
                 </table>
                 {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.course_users') }}
+                {{ macros.pagination_widget(pagination, 'manage.course_users', id=course.id, next=request.args.get('next')) }}
                 {% endif %}
                 {% if request.args.get('next') %}
                 <a class="ui button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i> 返回</a>

@@ -143,18 +143,19 @@
                             <td>{{ user.role.name }}</td>
                             <td>
                                 {% if user.vb_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=vb_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.vb_course.name }}</a>
+                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.vb_course.name }}</a>
                                 {% else %}
                                 无
                                 {% endif %}
                             </td>
                             <td>
                                 {% if user.y_gre_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=y_gre_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.y_gre_course.name }}</a>
+                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.y_gre_course.name }}</a>
                                 {% else %}
                                 无
                                 {% endif %}
                             </td>
+                            {% if user.activated %}
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can('管理学习进度') %}
@@ -169,6 +170,11 @@
                                 <div class="popup-trigger">{{ moment(user.last_seen_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
+                            {% else %}
+                            <td>N/A</td>
+                            <td class="negative">未激活</td>
+                            <td>N/A</td>
+                            {% endif %}
                             {% if current_user.can('管理用户') %}
                             <td>
                                 <div class="ui mini icon buttons">

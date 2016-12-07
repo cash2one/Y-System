@@ -8,9 +8,9 @@
     {% for p in pagination.iter_pages() %}
     {% if p %}
     {% if p == pagination.page %}
-    <a class="active item loading-trigger" href="{{ url_for(endpoint, page = p, **kwargs) }}{{ fragment }}">{{ p }}</a>
+    <a class="active item loading-trigger" href="{{ url_for(endpoint, page=p, **kwargs) }}{{ fragment }}">{{ p }}</a>
     {% else %}
-    <a class="item loading-trigger" href="{{ url_for(endpoint, page = p, **kwargs) }}{{ fragment }}">{{ p }}</a>
+    <a class="item loading-trigger" href="{{ url_for(endpoint, page=p, **kwargs) }}{{ fragment }}">{{ p }}</a>
     {% endif %}
     {% else %}
     <a class="disabled item" href="#"><i class="ellipsis horizontal icon"></i></a>

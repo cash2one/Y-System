@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
 from ..models import Role, User, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
@@ -1831,28 +1831,24 @@ def user():
     if show_volunteers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'志愿者')\
             .order_by(User.last_seen_at.desc())
     if show_moderators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'协管员')\
             .order_by(User.last_seen_at.desc())
     if show_administrators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'管理员')\
             .order_by(User.last_seen_at.desc())
     if show_developers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'开发人员')\
             .order_by(User.last_seen_at.desc())
@@ -1966,6 +1962,32 @@ def developers():
     return resp
 
 
+@manage.route('/user/create', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理用户')
+def create_user():
+    form = NewUserForm(creator=current_user._get_current_object())
+    if form.validate_on_submit():
+        pass
+        # flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
+    return render_template('manage/create_user.html', form=form)
+
+
+@manage.route('/user/create-admin', methods=['GET', 'POST'])
+@login_required
+@administrator_required
+def create_admin():
+    form = NewAdminForm(creator=current_user._get_current_object())
+    if form.validate_on_submit():
+        admin = User(email=form.email.data, role_id=form.role.data, password=form.activation_code.data, name=form.name.data)
+        db.session.add(admin)
+        db.session.commit()
+        current_user.create_user(user=admin)
+        flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
+        return redirect(request.args.get('next') or url_for('manage.user'))
+    return render_template('manage/create_admin.html', form=form)
+
+
 @manage.route('/user/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
@@ -1975,11 +1997,11 @@ def edit_user(id):
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
-    form = EditUserForm(user=user)
+    form = EditUserForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
         user.name = form.name.data
-        # user.email = form.email.data
         user.role_id = form.role.data
+        db.session.add(user)
         if user.vb_course:
             user.unregister_course(user.vb_course)
         if form.vb_course.data:
@@ -1988,12 +2010,9 @@ def edit_user(id):
             user.unregister_course(user.y_gre_course)
         if form.y_gre_course.data:
             user.register_course(Course.query.get(form.y_gre_course.data))
-        db.session.add(user)
-        db.session.commit()
-        flash(u'%s的账户信息已更新' % user.name, category='success')
+        flash(u'%s的账户信息已更新' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.name.data = user.name
-    form.email.data = user.email
     form.role.data = user.role_id
     if user.vb_course:
         form.vb_course.data = user.vb_course.id
