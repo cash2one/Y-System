@@ -1873,13 +1873,13 @@ def edit_user(id):
         # user.email = form.email.data
         user.role_id = form.role.data
         if user.vb_course:
-            user.unregister(user.vb_course)
+            user.unregister_course(user.vb_course)
         if form.vb_course.data:
-            user.register(Course.query.get(form.vb_course.data))
+            user.register_course(Course.query.get(form.vb_course.data))
         if user.y_gre_course:
-            user.unregister(user.y_gre_course)
+            user.unregister_course(user.y_gre_course)
         if form.y_gre_course.data:
-            user.register(Course.query.get(form.y_gre_course.data))
+            user.register_course(Course.query.get(form.y_gre_course.data))
         db.session.add(user)
         db.session.commit()
         flash(u'%s的账户信息已更新' % user.name, category='success')
@@ -1943,13 +1943,13 @@ def find_user():
     return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
 
 
-@manage.route('/course')
+@manage.route('/course', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理班级')
 def course():
     form = NewCourseForm()
     if form.validate_on_submit():
-        course = Course(name=form.date.name, type_id=form.course_type.data, show=form.show.data, modified_by_id=current_user.id)
+        course = Course(name=form.name.data, type_id=form.course_type.data, show=form.show.data, modified_by_id=current_user.id)
         db.session.add(course)
         flash(u'新建班级：%s' % form.name.data, category='success')
         return redirect(url_for('manage.course'))

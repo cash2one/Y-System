@@ -43,9 +43,6 @@
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
 }
-.ui.vertical.stripe .ui.table .ui.mini.icon.button {
-    margin-left: 10px;
-}
 .ui.vertical.stripe .ui.form .ui.flask.message {
     display: block;
 }
@@ -124,7 +121,7 @@
                         <tr>
                             <td>{{ course.name }}</td>
                             <td>{{ course.type.name }}</td>
-                            <td>{{ course.registered_users.count() }}</td>
+                            <td>{{ course.registrations.count() }}</td>
                             {% if course.show %}
                             <td class="positive">可选</td>
                             {% else %}
@@ -138,12 +135,13 @@
                             <td>
                                 <div class="ui mini icon buttons">
                                     {% if course.show %}
-                                    <a class="ui mini grey icon button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="unhide icon"></i></a>
+                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="unhide icon"></i></a>
                                     {% else %}
-                                    <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
+                                    <a class="ui button loading-trigger" href="#"><i class="search icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
                                 </div>
                             </td>
                         </tr>
