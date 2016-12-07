@@ -1593,7 +1593,7 @@ class EmploymentRecord(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     employer = db.Column(db.Unicode(64))
     position = db.Column(db.Unicode(64))
-    year = db.Column(db.Unicode(16))
+    # year = db.Column(db.Unicode(16))
 
     def __repr__(self):
         return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)

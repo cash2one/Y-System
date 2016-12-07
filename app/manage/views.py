@@ -1966,7 +1966,7 @@ def developers():
 @login_required
 @permission_required(u'管理用户')
 def create_user():
-    form = NewUserForm(creator=current_user._get_current_object())
+    form = NewUserForm()
     if form.validate_on_submit():
         pass
         # flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')

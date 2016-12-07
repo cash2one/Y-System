@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, DateField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Role, User, Gender, Relationship, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 def NextDayString(days, short=False):
@@ -34,7 +34,7 @@ class NewScheduleForm(FlaskForm):
 
 
 class NewPeriodForm(FlaskForm):
-    name = StringField(u'时段名称', validators=[Required(message=u'请输入时段名称')])
+    name = StringField(u'时段名称', validators=[Required()])
     start_time = SelectField(u'开始时间', coerce=unicode)
     end_time = SelectField(u'结束时间', coerce=unicode)
     period_type = SelectField(u'时段类型', coerce=int)
@@ -49,7 +49,7 @@ class NewPeriodForm(FlaskForm):
 
 
 class EditPeriodForm(FlaskForm):
-    name = StringField(u'时段名称', validators=[Required(message=u'请输入时段名称')])
+    name = StringField(u'时段名称', validators=[Required()])
     start_time = SelectField(u'开始时间', coerce=unicode)
     end_time = SelectField(u'结束时间', coerce=unicode)
     period_type = SelectField(u'时段类型', coerce=int)
@@ -69,11 +69,11 @@ class DeletePeriodForm(FlaskForm):
 
 class NewiPadForm(FlaskForm):
     alias = StringField(u'编号')
-    serial = StringField(u'序列号', validators=[Required(message=u'请输入iPad序列号')])
+    serial = StringField(u'序列号', validators=[Required()])
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
-    video_playback = FloatField(u'满电量可播放视频时间', validators=[Required(message=u'请输入iPad电池寿命'), NumberRange(min=0)])
+    video_playback = FloatField(u'满电量可播放视频时间', validators=[Required(), NumberRange(min=0)])
     vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
     submit = SubmitField(u'提交')
@@ -93,11 +93,11 @@ class NewiPadForm(FlaskForm):
 
 class EditiPadForm(FlaskForm):
     alias = StringField(u'编号')
-    serial = StringField(u'序列号', validators=[Required(message=u'请输入iPad序列号')])
+    serial = StringField(u'序列号', validators=[Required()])
     capacity = SelectField(u'容量', coerce=int)
     room = SelectField(u'房间', coerce=int)
     state = SelectField(u'状态', coerce=int)
-    video_playback = FloatField(u'满电量可播放视频时间', validators=[Required(message=u'请输入iPad电池寿命'), NumberRange(min=0)])
+    video_playback = FloatField(u'满电量可播放视频时间', validators=[Required(), NumberRange(min=0)])
     vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
     submit = SubmitField(u'提交')
@@ -150,7 +150,7 @@ class EditPunchSectionForm(FlaskForm):
 
 
 class BookingCodeForm(FlaskForm):
-    booking_code = StringField(u'预约码', validators=[Required(message=u'请输入预约码')])
+    booking_code = StringField(u'预约码', validators=[Required()])
     submit = SubmitField(u'下一步')
 
 
@@ -169,8 +169,8 @@ class RentalEmailForm(FlaskForm):
 
 
 class ConfirmiPadForm(FlaskForm):
-    serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
-    battery_life = IntegerField(u'剩余电量', validators=[Required(message=u'请输入iPad电量'), NumberRange(min=0, max=100)])
+    serial = StringField(u'iPad序列号', validators=[Required()])
+    battery_life = IntegerField(u'剩余电量', validators=[Required(), NumberRange(min=0, max=100)])
     root = BooleanField(u'引导式访问状态正常')
     submit = SubmitField(u'确认并提交')
 
@@ -194,7 +194,7 @@ class RentiPadByLessonForm(FlaskForm):
 
 
 class iPadSerialForm(FlaskForm):
-    serial = StringField(u'iPad序列号', validators=[Required(message=u'请输入iPad序列号')])
+    serial = StringField(u'iPad序列号', validators=[Required()])
     root = BooleanField(u'引导式访问状态正常')
     battery = BooleanField(u'电量充足')
     submit = SubmitField(u'下一步')
@@ -223,8 +223,8 @@ class ConfirmPunchForm(FlaskForm):
 
 
 class NewAnnouncementForm(FlaskForm):
-    title = StringField(u'通知标题', validators=[Required(message=u'请输入通知标题')])
-    body = TextAreaField(u'通知内容', validators=[Required(message=u'请输入通知内容')])
+    title = StringField(u'通知标题', validators=[Required()])
+    body = TextAreaField(u'通知内容', validators=[Required()])
     announcement_type = SelectField(u'通知类型', coerce=int)
     show = BooleanField(u'立即发布')
     submit = SubmitField(u'提交')
@@ -235,8 +235,8 @@ class NewAnnouncementForm(FlaskForm):
 
 
 class EditAnnouncementForm(FlaskForm):
-    title = StringField(u'通知标题', validators=[Required(message=u'请输入通知标题')])
-    body = TextAreaField(u'通知内容', validators=[Required(message=u'请输入通知内容')])
+    title = StringField(u'通知标题', validators=[Required()])
+    body = TextAreaField(u'通知内容', validators=[Required()])
     announcement_type = SelectField(u'通知类型', coerce=int)
     show = BooleanField(u'发布')
     submit = SubmitField(u'提交')
@@ -251,13 +251,41 @@ class DeleteAnnouncementForm(FlaskForm):
 
 
 class NewUserForm(FlaskForm):
-    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
+    gender = SelectField(u'性别', coerce=int)
+    id_number = StringField(u'', validators=[Required(), Length(18, 18)])
+    high_school = StringField(u'毕业高中', validators=[Required(), Length(1, 64)])
+    bachelor_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
+    bachelor_major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
+    bachelor_year = SelectField(u'入学年份', coerce=int)
+    master_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
+    master_major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
+    master_year = SelectField(u'入学年份', coerce=int)
+    doctor_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
+    doctor_major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
+    doctor_year = SelectField(u'入学年份', coerce=int)
+    employer = StringField(u'工作单位', validators=[Required(), Length(1, 64)])
+    position = StringField(u'职务', validators=[Required(), Length(1, 64)])
+    mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
+    address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
+    qq = StringField(u'QQ', validators=[Required(), Length(1, 64)])
+    wechat = StringField(u'微信', validators=[Required(), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    emergency_contact_name = StringField(u'紧急联系人', validators=[Required(), Length(1, 64)])
+    emergency_contact_relationship = SelectField(u'关系', coerce=int)
+    emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
     role = SelectField(u'用户组', coerce=int)
+    vb_course = SelectField(u'VB班', coerce=int)
+    y_gre_course = SelectField(u'Y-GRE班', coerce=int)
     submit = SubmitField(u'新建学生用户')
 
-    def __init__(self, creator, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
+        self.gender.choices = [(gender.id, gender.name) for gender in Gender.query.order_by(Gender.id.desc()).all()]
+        self.bachelor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
+        self.master_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
+        self.doctor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
+        self.emergency_contact_relationship.choices = [(relationship.id, relationship.name) for relationship in Relationship.query.order_by(Relationship.id.desc()).all()]
         self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
@@ -268,7 +296,7 @@ class NewUserForm(FlaskForm):
 
 
 class NewAdminForm(FlaskForm):
-    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
     role = SelectField(u'用户组', coerce=int)
@@ -287,7 +315,7 @@ class NewAdminForm(FlaskForm):
 
 
 class EditUserForm(FlaskForm):
-    name = StringField(u'姓名', validators=[Required(message=u'请输入姓名'), Length(1, 64)])
+    name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     role = SelectField(u'用户组', coerce=int)
     vb_course = SelectField(u'VB班', coerce=int)
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
@@ -310,12 +338,12 @@ class DeleteUserForm(FlaskForm):
 
 
 class FindUserForm(FlaskForm):
-    name_or_email = StringField(u'用户姓名/邮箱', validators=[Required(message=u'请输入用户姓名或者邮箱'), Length(1, 64)])
+    name_or_email = StringField(u'用户姓名/邮箱', validators=[Required(), Length(1, 64)])
     submit = SubmitField(u'检索')
 
 
 class NewCourseForm(FlaskForm):
-    name = StringField(u'班级名称', validators=[Required(message=u'请输入班级名称'), Length(1, 64)])
+    name = StringField(u'班级名称', validators=[Required(), Length(1, 64)])
     course_type = SelectField(u'班级类型', coerce=int)
     show = BooleanField(u'显示为可选')
     submit = SubmitField(u'提交')
@@ -326,7 +354,7 @@ class NewCourseForm(FlaskForm):
 
 
 class EditCourseForm(FlaskForm):
-    name = StringField(u'班级名称', validators=[Required(message=u'请输入班级名称'), Length(1, 64)])
+    name = StringField(u'班级名称', validators=[Required(), Length(1, 64)])
     course_type = SelectField(u'班级类型', coerce=int)
     show = BooleanField(u'显示为可选')
     submit = SubmitField(u'提交')
