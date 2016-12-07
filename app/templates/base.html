@@ -117,8 +117,12 @@
                     {% if current_user.can('管理iPad借阅') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
                     {% endif %}
+                    {% if current_user.can('管理作业') %}
                     <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                    {% endif %}
+                    {% if current_user.can('管理考试') %}
                     <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                    {% endif %}
                 </div>
             </div>
             <div class="ui dropdown item">
@@ -229,8 +233,12 @@
                 {% if current_user.can('管理iPad借阅') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
                 {% endif %}
+                {% if current_user.can('管理作业') %}
                 <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                {% endif %}
+                {% if current_user.can('管理考试') %}
                 <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                {% endif %}
             </div>
         </div>
         <div class="item">
@@ -333,8 +341,12 @@
                             {% if current_user.can('管理iPad借阅') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
                             {% endif %}
+                            {% if current_user.can('管理作业') %}
                             <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                            {% endif %}
+                            {% if current_user.can('管理考试') %}
                             <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="ui dropdown item">

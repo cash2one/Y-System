@@ -894,42 +894,42 @@ class User(UserMixin, db.Model):
     )
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
     # user relationship properties
-    invited_users = db.relationship(
+    sent_invitations = db.relationship(
         'Invitation',
         foreign_keys=[Invitation.inviter_id],
         backref=db.backref('inviter', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    invited_by = db.relationship(
+    accepted_invitations = db.relationship(
         'Invitation',
         foreign_keys=[Invitation.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    received_users = db.relationship(
+    made_receptions = db.relationship(
         'Reception',
         foreign_keys=[Reception.receptionist_id],
         backref=db.backref('receptionist', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    received_by = db.relationship(
+    received_receptions = db.relationship(
         'Reception',
         foreign_keys=[Reception.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    created_users = db.relationship(
+    made_user_creations = db.relationship(
         'UserCreation',
         foreign_keys=[UserCreation.creator_id],
         backref=db.backref('creator', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    created_by = db.relationship(
+    received_user_creations = db.relationship(
         'UserCreation',
         foreign_keys=[UserCreation.user_id],
         backref=db.backref('user', lazy='joined'),
@@ -1113,50 +1113,50 @@ class User(UserMixin, db.Model):
         if not self.invited_user(user):
             invitation = Invitation(inviter_id=self.id, user_id=user.id, type_id=invitation_type.id)
         else:
-            invitation = self.invited_users.filter_by(user_id=user.id).first()
+            invitation = self.sent_invitations.filter_by(user_id=user.id).first()
             invitation.type_id = invitation_type.id
             invitation.timestamp = datetime.utcnow()
         db.session.add(invitation)
 
     def uninvite_user(self, user):
-        invitation = self.invited_users.filter_by(user_id=user.id).first()
+        invitation = self.sent_invitations.filter_by(user_id=user.id).first()
         if invitation:
             db.session.delete(invitation)
 
     def invited_user(self, user):
-        return self.invited_users.filter_by(user_id=user.id).first() is not None
+        return self.sent_invitations.filter_by(user_id=user.id).first() is not None
 
     def receive_user(self, user):
         if not self.received_user(user):
             reception = Reception(receptionist_id=self.id, user_id=user.id)
         else:
-            reception = self.received_users.filter_by(user_id=user.id).first()
+            reception = self.made_receptions.filter_by(user_id=user.id).first()
             reception.timestamp = datetime.utcnow()
         db.session.add(reception)
 
     def unreceive_user(self, user):
-        reception = self.received_users.filter_by(user_id=user.id).first()
+        reception = self.made_receptions.filter_by(user_id=user.id).first()
         if reception:
             db.session.delete(reception)
 
     def received_user(self, user):
-        return self.received_users.filter_by(user_id=user.id).first() is not None
+        return self.made_receptions.filter_by(user_id=user.id).first() is not None
 
     def create_user(self, user):
         if not self.created_user(user):
             user_creation = UserCreation(creator_id=self.id, user_id=user.id)
         else:
-            user_creation = self.created_users.filter_by(user_id=user.id).first()
+            user_creation = self.made_user_creations.filter_by(user_id=user.id).first()
             user_creation.timestamp = datetime.utcnow()
         db.session.add(user_creation)
 
     def uncreate_user(self, user):
-        user_creation = self.created_users.filter_by(user_id=user.id).first()
+        user_creation = self.made_user_creations.filter_by(user_id=user.id).first()
         if user_creation:
             db.session.delete(user_creation)
 
     def created_user(self, user):
-        return self.created_users.filter_by(user_id=user.id).first() is not None
+        return self.made_user_creations.filter_by(user_id=user.id).first() is not None
 
     def register_group(self, organizer):
         if not self.is_registering_group(organizer):
