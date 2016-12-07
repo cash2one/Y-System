@@ -216,7 +216,9 @@
                             <th>状态</th>
                             <th>上次操作</th>
                             <th>操作人</th>
+                            {% if current_user.can('管理iPad设备') %}
                             <th>操作</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -280,7 +282,7 @@
                                         {% if ipad.state.name != '待机' %}
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wait icon"></i> 待机</a>
                                         {% endif %}
-                                        {% if ipad.state.name != '候补' %}
+                                        {% if ipad.state.name != '候补' and current_user.can('管理iPad设备') %}
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="cube icon"></i> 候补</a>
                                         {% endif %}
                                         {% if ipad.state.name != '维护' %}
@@ -289,7 +291,7 @@
                                         {% if ipad.state.name != '充电' %}
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_charge', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="plug icon"></i> 充电</a>
                                         {% endif %}
-                                        {% if ipad.state.name != '退役' %}
+                                        {% if ipad.state.name != '退役' and current_user.can('管理iPad设备') %}
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_obsolete', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="recycle icon"></i> 退役</a>
                                         {% endif %}
                                     </div>
@@ -301,12 +303,14 @@
                                 <div class="ui popup popup-content">{{ moment(ipad.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ ipad.modified_by.name }}</td>
+                            {% if current_user.can('管理iPad设备') %}
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_ipad', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_ipad', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
                                 </div>
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -319,6 +323,7 @@
     </div>
 </div>
 
+{% if current_user.can('管理iPad设备') %}
 <div class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
@@ -385,6 +390,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block customized_scripts %}

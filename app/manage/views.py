@@ -247,7 +247,7 @@ def history_booking():
     return resp
 
 
-@manage.route('/booking/set-state-valid/<int:user_id>/<int:schedule_id>')
+@manage.route('/booking/set-state/valid/<int:user_id>/<int:schedule_id>')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_valid(user_id, schedule_id):
@@ -271,7 +271,7 @@ def set_booking_state_valid(user_id, schedule_id):
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
-@manage.route('/booking/set-state-wait/<int:user_id>/<int:schedule_id>')
+@manage.route('/booking/set-state/wait/<int:user_id>/<int:schedule_id>')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_wait(user_id, schedule_id):
@@ -280,7 +280,7 @@ def set_booking_state_wait(user_id, schedule_id):
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
-@manage.route('/booking/set-state-invalid/<int:user_id>/<int:schedule_id>')
+@manage.route('/booking/set-state/invalid/<int:user_id>/<int:schedule_id>')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_invalid(user_id, schedule_id):
@@ -289,7 +289,7 @@ def set_booking_state_invalid(user_id, schedule_id):
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
-@manage.route('/booking/set-state-kept/<int:user_id>/<int:schedule_id>')
+@manage.route('/booking/set-state/kept/<int:user_id>/<int:schedule_id>')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_kept(user_id, schedule_id):
@@ -298,7 +298,7 @@ def set_booking_state_kept(user_id, schedule_id):
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
-@manage.route('/booking/set-state-late/<int:user_id>/<int:schedule_id>')
+@manage.route('/booking/set-state/late/<int:user_id>/<int:schedule_id>')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_late(user_id, schedule_id):
@@ -307,7 +307,7 @@ def set_booking_state_late(user_id, schedule_id):
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
-@manage.route('/booking/set-state-missed/<int:user_id>/<int:schedule_id>')
+@manage.route('/booking/set-state/missed/<int:user_id>/<int:schedule_id>')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_missed(user_id, schedule_id):
@@ -316,7 +316,7 @@ def set_booking_state_missed(user_id, schedule_id):
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
-@manage.route('/booking/set-state-canceled/<int:user_id>/<int:schedule_id>')
+@manage.route('/booking/set-state/canceled/<int:user_id>/<int:schedule_id>')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_canceled(user_id, schedule_id):
@@ -348,7 +348,7 @@ def time_now(utcOffset=0):
     return time(hour, minute, second, microsecond)
 
 
-@manage.route('/booking/set-state-missed-all')
+@manage.route('/booking/set-state/missed/all')
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_missed_all():
@@ -1373,10 +1373,10 @@ def decrease_schedule_quota(id):
 
 @manage.route('/ipad', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def ipad():
     form = NewiPadForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit() and current_user.can(u'管理iPad设备'):
         serial = form.serial.data.upper()
         room_id = form.room.data
         if room_id == 0:
@@ -1450,7 +1450,7 @@ def ipad():
 
 @manage.route('/ipad/all')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def all_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '1', max_age=30*24*60*60)
@@ -1464,7 +1464,7 @@ def all_ipads():
 
 @manage.route('/ipad/maintain')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def maintain_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -1478,7 +1478,7 @@ def maintain_ipads():
 
 @manage.route('/ipad/charge')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def charge_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -1492,7 +1492,7 @@ def charge_ipads():
 
 @manage.route('/ipad/1103')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def room_1103_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -1506,7 +1506,7 @@ def room_1103_ipads():
 
 @manage.route('/ipad/1707')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def room_1707_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -1520,7 +1520,7 @@ def room_1707_ipads():
 
 @manage.route('/ipad/others')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def other_ipads():
     resp = make_response(redirect(url_for('manage.ipad')))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
@@ -1534,7 +1534,7 @@ def other_ipads():
 
 @manage.route('/ipad/set-state/standby/<int:id>')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def set_ipad_state_standby(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
@@ -1560,7 +1560,7 @@ def set_ipad_state_candidate(id):
 
 @manage.route('/ipad/set-state/maintain/<int:id>')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def set_ipad_state_maintain(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
@@ -1577,7 +1577,7 @@ def set_ipad_state_maintain(id):
 
 @manage.route('/ipad/set-state/charge/<int:id>')
 @login_required
-@permission_required(u'管理iPad设备')
+@permission_required(u'管理')
 def set_ipad_state_charge(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.state.name == u'借出':
