@@ -193,22 +193,14 @@
                             <td>{{ user.role.name }}</td>
                             <td>
                                 {% if user.vb_course %}
-                                {% if current_user.can('管理班级') %}
                                 <a class="loading-trigger" href="{{ url_for('manage.course_users', id=vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>
-                                {% else %}
-                                {{ user.vb_course.name }}
-                                {% endif %}
                                 {% else %}
                                 无
                                 {% endif %}
                             </td>
                             <td>
                                 {% if user.y_gre_course %}
-                                {% if current_user.can('管理班级') %}
                                 <a class="loading-trigger" href="{{ url_for('manage.course_users', id=y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>
-                                {% else %}
-                                {{ user.y_gre_course.name }}
-                                {% endif %}
                                 {% else %}
                                 无
                                 {% endif %}

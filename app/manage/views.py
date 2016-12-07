@@ -2104,7 +2104,7 @@ def y_gre_courses():
 
 @manage.route('/course/<int:id>')
 @login_required
-@permission_required(u'管理班级')
+@permission_required(u'管理')
 def course_users(id):
     course = Course.query.get_or_404(id)
     if course.deleted:
