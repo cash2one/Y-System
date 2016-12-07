@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}时段模板管理{% endblock %}
+{% block title %}班级管理{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -43,6 +43,9 @@
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
 }
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
 
 .stats.stripe.segment,
 .quote.stripe.segment {
@@ -81,23 +84,32 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="tasks icon"></i> 时段模板管理</h1>
+    <h1 class="ui inverted header"><i class="student icon"></i> 班级管理</h1>
 </div>
 {% endblock %}
 
 {% block page_content %}
-<div id="periods" class="ui vertical stripe segment">
+<div id="users" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="tasks icon"></i> 时段模板</h3>
+                <h3 class="header"><i class="student icon"></i> 班级列表</h3>
+                <div class="ui tabular menu">
+                    {% if show_vb_courses %}
+                    <a class="item active loading-trigger" href="{{ url_for('manage.vb_courses') }}">VB班</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.y_gre_courses') }}">Y-GRE班</a>
+                    {% endif %}
+                    {% if show_y_gre_courses %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.vb_courses') }}">VB班</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.y_gre_courses') }}">Y-GRE班</a>
+                    {% endif %}
+                </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
-                            <th>时段名称</th>
-                            <th>开始时间</th>
-                            <th>结束时间</th>
-                            <th>时段类型</th>
+                            <th>班级</th>
+                            <th>类型</th>
+                            <th>人数</th>
                             <th>可选状态</th>
                             <th>上次操作</th>
                             <th>操作人</th>
@@ -105,31 +117,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for period in periods %}
+                        {% for course in courses %}
                         <tr>
-                            <td>{{ period.name }}</td>
-                            <td>{{ moment(period.start_time_utc).format('H:mm') }}</td>
-                            <td>{{ moment(period.end_time_utc).format('H:mm') }}</td>
-                            <td>{{ period.type.name }}</td>
-                            {% if period.show %}
+                            <td>{{ course.name }}</td>
+                            <td>{{ course.type.name }}</td>
+                            <td>{{ course.registrations.count() }}</td>
+                            {% if course.show %}
                             <td class="positive">可选</td>
                             {% else %}
                             <td>不可选</td>
                             {% endif %}
                             <td>
-                                <div class="popup-trigger">{{ moment(period.modified_at).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(period.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
+                                <div class="popup-trigger">{{ moment(course.modified_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(course.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ period.modified_by.name }}</td>
+                            <td>{{ course.modified_by.name }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    {% if period.show %}
-                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.flip_period_show', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="unhide icon"></i></a>
+                                    {% if course.show %}
+                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="unhide icon"></i></a>
                                     {% else %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.flip_period_show', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="hide icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_period', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_period', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.course_users', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="search icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -137,7 +149,7 @@
                     </tbody>
                 </table>
                 {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.period') }}
+                {{ macros.pagination_widget(pagination, 'manage.course') }}
                 {% endif %}
             </div>
         </div>
@@ -148,25 +160,17 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="add circle icon"></i> 新建时段模板</h3>
-                <form id="new-period" method="POST" class="ui form">
+                <h3 class="header"><i class="add circle icon"></i> 新建班级</h3>
+                <form id="new-course" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="eight wide field">
                             {{ form.name.label() }}
-                            {{ form.name(placeholder='时段名称') }}
+                            {{ form.name(placeholder='班级名称') }}
                         </div>
-                        <div class="four wide field">
-                            {{ form.start_time.label() }}
-                            {{ form.start_time(class='ui search dropdown') }}
-                        </div>
-                        <div class="four wide field">
-                            {{ form.end_time.label() }}
-                            {{ form.end_time(class='ui search dropdown') }}
-                        </div>
-                        <div class="four wide field">
-                            {{ form.period_type.label() }}
-                            {{ form.period_type(class='ui search dropdown') }}
+                        <div class="eight wide field">
+                            {{ form.course_type.label() }}
+                            {{ form.course_type(class='ui search dropdown') }}
                         </div>
                     </div>
                     <div class="field">
@@ -176,7 +180,6 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <a class="ui button loading-trigger" href="{{ url_for('manage.schedule') }}">管理时段信息</a>
                     <div class="ui error message"></div>
                 </form>
             </div>
@@ -198,21 +201,13 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
-;
-
-$('.ui.checkbox')
-    .checkbox()
-;
-
 $('table')
     .tablesort()
 ;
 
 $(document)
     .ready(function() {
-        $('#new-period')
+        $('#new-course')
             .form({
                 onSuccess: submitForm,
                 fields: {
@@ -221,7 +216,7 @@ $(document)
                         rules: [
                             {
                                 type   : 'empty',
-                                prompt : '请输入时段名称'
+                                prompt : '请输入班级名称'
                             }
                         ]
                     }

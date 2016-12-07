@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: cd724ab05f23
+Revision ID: f2fc40063fc1
 Revises: 
-Create Date: 2016-12-06 16:52:46.173345
+Create Date: 2016-12-07 11:09:17.622645
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'cd724ab05f23'
+revision = 'f2fc40063fc1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -222,7 +222,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_courses_name'), 'courses', ['name'], unique=True)
+    op.create_index(op.f('ix_courses_name'), 'courses', ['name'], unique=False)
     op.create_table('education_records',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -284,7 +284,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_ipads_alias'), 'ipads', ['alias'], unique=False)
-    op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=True)
+    op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=False)
     op.create_table('periods',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -297,8 +297,7 @@ def upgrade():
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('previous_achievements',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -321,7 +320,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_products_name'), 'products', ['name'], unique=True)
+    op.create_index(op.f('ix_products_name'), 'products', ['name'], unique=False)
     op.create_table('purposes',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('type_id', sa.Integer(), nullable=False),

@@ -123,12 +123,12 @@
                             <td>
                                 <div class="ui mini icon buttons">
                                     {% if announcement.show %}
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="撤回"><i class="undo icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="撤回"><i class="undo icon"></i></a>
                                     {% else %}
-                                    <a class="ui mini primary button loading-trigger" href="{{ url_for('manage.publish_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="发布"><i class="send icon"></i></a>
+                                    <a class="ui primary button loading-trigger" href="{{ url_for('manage.publish_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="发布"><i class="send icon"></i></a>
                                     {% endif %}
-                                    <a class="ui mini button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.delete_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
                                 </div>
                             </td>
                         </tr>

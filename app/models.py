@@ -55,6 +55,7 @@ class Permission(db.Model):
             (u'管理反馈', ),
             (u'管理进站', ),
             (u'管理用户', ),
+            (u'管理班级', ),
             (u'管理权限', ),
             (u'开发权限', ),
         ]
@@ -105,9 +106,9 @@ class Role(db.Model):
             (u'Y-GRE VBx2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程x2'], ),
             (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
             (u'志愿者', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅'], ),
-            (u'协管员', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户'], ),
-            (u'管理员', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理权限'], ),
-            (u'开发人员', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理权限', u'开发权限'], ),
+            (u'协管员', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级'], ),
+            (u'管理员', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级', u'管理权限'], ),
+            (u'开发人员', [permission.name for permission in Permission.query.all()], ),
         ]
         for R in roles:
             role = Role.query.filter_by(name=R[0]).first()
@@ -787,21 +788,21 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    registered_courses = db.relationship(
+    course_registrations = db.relationship(
         'CourseRegistration',
         foreign_keys=[CourseRegistration.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    booked_schedules = db.relationship(
+    bookings = db.relationship(
         'Booking',
         foreign_keys=[Booking.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    rented_ipads = db.relationship(
+    rentals = db.relationship(
         'Rental',
         foreign_keys=[Rental.user_id],
         backref=db.backref('user', lazy='joined'),
@@ -815,21 +816,21 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    finished_assignments = db.relationship(
+    assignment_scores = db.relationship(
         'AssignmentScore',
         foreign_keys=[AssignmentScore.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    finished_vb_tests = db.relationship(
+    vb_test_scores = db.relationship(
         'VBTestScore',
         foreign_keys=[VBTestScore.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    finished_y_gre_tests = db.relationship(
+    y_gre_test_scores = db.relationship(
         'YGRETestScore',
         foreign_keys=[YGRETestScore.user_id],
         backref=db.backref('user', lazy='joined'),
@@ -856,14 +857,14 @@ class User(UserMixin, db.Model):
     modified_periods = db.relationship('Period', backref='modified_by', lazy='dynamic')
     modified_schedules = db.relationship('Schedule', backref='modified_by', lazy='dynamic')
     modified_ipads = db.relationship('iPad', backref='modified_by', lazy='dynamic')
-    managed_ipads_rent = db.relationship(
+    managed_rentals_rent = db.relationship(
         'Rental',
         foreign_keys=[Rental.rent_agent_id],
         backref=db.backref('rent_agent', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    managed_ipads_return = db.relationship(
+    managed_rentals_return = db.relationship(
         'Rental',
         foreign_keys=[Rental.return_agent_id],
         backref=db.backref('return_agent', lazy='joined'),
@@ -1177,17 +1178,17 @@ class User(UserMixin, db.Model):
         if not self.is_registering_course(course):
             course_registration = CourseRegistration(user_id=self.id, course_id=course.id)
         else:
-            course_registration = self.registered_courses.filter_by(course_id=course.id).first()
+            course_registration = self.course_registrations.filter_by(course_id=course.id).first()
             course_registration.timestamp = datetime.utcnow()
         db.session.add(course_registration)
 
     def unregister_course(self, course):
-        course_registration = self.registered_courses.filter_by(course_id=course.id).first()
+        course_registration = self.course_registrations.filter_by(course_id=course.id).first()
         if course_registration:
             db.session.delete(course_registration)
 
     def is_registering_course(self, course):
-        return self.registered_courses.filter_by(course_id=course.id).first() is not None
+        return self.course_registrations.filter_by(course_id=course.id).first() is not None
 
     @property
     def vb_course(self):
@@ -1219,7 +1220,7 @@ class User(UserMixin, db.Model):
 
     def unbook(self, schedule):
         # mark booking state as canceled
-        booking = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        booking = self.bookings.filter_by(schedule_id=schedule.id).first()
         if booking:
             booking.state_id = BookingState.query.filter_by(name=u'取消').first().id
             db.session.add(booking)
@@ -1238,13 +1239,13 @@ class User(UserMixin, db.Model):
             return User.query.get(waited_booking.user_id)
 
     def miss(self, schedule):
-        booking = self.booked_schedules.filter_by(schedule_id=schedule.id).first()
+        booking = self.bookings.filter_by(schedule_id=schedule.id).first()
         if booking:
             booking.state_id = BookingState.query.filter_by(name=u'爽约').first().id
             db.session.add(booking)
 
     def booked(self, schedule):
-        return (self.booked_schedules.filter_by(schedule_id=schedule.id).first() is not None) and\
+        return (self.bookings.filter_by(schedule_id=schedule.id).first() is not None) and\
             (Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first().canceled is False)
 
     def booking(self, schedule):
@@ -1596,7 +1597,7 @@ class EmploymentRecord(db.Model):
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
+    name = db.Column(db.Unicode(64), index=True)
     price = db.Column(db.Float, default=0.0)
     available = db.Column(db.Boolean, default=False)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -1680,13 +1681,13 @@ class CourseType(db.Model):
 class Course(db.Model):
     __tablename__ = 'courses'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
+    name = db.Column(db.Unicode(64), index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     show = db.Column(db.Boolean, default=False)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
-    registered_users = db.relationship(
+    registrations = db.relationship(
         'CourseRegistration',
         foreign_keys=[CourseRegistration.course_id],
         backref=db.backref('course', lazy='joined'),
@@ -1735,7 +1736,7 @@ class Course(db.Model):
 class Period(db.Model):
     __tablename__ = 'periods'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True)
+    name = db.Column(db.Unicode(64))
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
@@ -2146,7 +2147,7 @@ class iPadContentJSON(db.Model):
 class iPad(db.Model):
     __tablename__ = 'ipads'
     id = db.Column(db.Integer, primary_key=True)
-    serial = db.Column(db.Unicode(12), unique=True, index=True)
+    serial = db.Column(db.Unicode(12), index=True)
     alias = db.Column(db.Unicode(64), index=True)
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))

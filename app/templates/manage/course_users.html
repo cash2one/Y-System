@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}检索用户{% endblock %}
+{% block title %}{{ course.name }}{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -87,29 +87,16 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="find icon"></i> 检索用户</h1>
+    <h1 class="ui inverted header"><i class="student icon"></i> {{ course.name }}</h1>
 </div>
 {% endblock %}
 
 {% block page_content %}
-<div class="ui vertical stripe segment">
+<div id="users" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="find-user" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="field">
-                        {{ form.name_or_email.label() }}
-                        <div class="ui fluid search">
-                            {{ form.name_or_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                            <div class="results"></div>
-                        </div>
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
-                </form>
-                {% if users %}
-                <h3 class="header"><i class="find icon"></i> 检索结果</h3>
+                <h3 class="header"><i class="user icon"></i> 用户列表</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -158,7 +145,7 @@
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can('管理学习进度') %}
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="refresh icon"></i></a>
+                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -171,18 +158,28 @@
                             </td>
                             {% if current_user.can('管理用户') %}
                             <td>
+                                {% if not user.is_superior_than(user=current_user._get_current_object()) %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
                                 </div>
+                                {% else %}
+                                <div class="ui mini icon buttons">
+                                    <div class="ui button disabled"><i class="edit icon"></i></div>
+                                    <div class="ui negative button disabled"><i class="remove user icon"></i></div>
+                                </div>
+                                {% endif %}
                             </td>
                             {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% else %}
-                <h3 class="header"><i class="ban icon"></i> 暂无检索结果</h3>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.course_users') }}
+                {% endif %}
+                {% if request.args.get('next') %}
+                <a class="ui button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i> 返回</a>
                 {% endif %}
             </div>
         </div>
@@ -203,42 +200,8 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
-;
-
 $('table')
     .tablesort()
-;
-
-$(document)
-    .ready(function() {
-        $('#find-user')
-            .form({
-                onSuccess: submitForm,
-                fields: {
-                    name_or_email: {
-                        identifier  : 'name_or_email',
-                        rules: [
-                            {
-                                type   : 'empty',
-                                prompt : '请输入您的电子邮箱地址'
-                            }
-                        ]
-                    }
-                }
-            })
-        ;
-    })
-;
-
-$('.ui.search')
-    .search({
-        apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/user/?keyword={query}'
-        },
-        showNoResults: false
-    })
 ;
 </script>
 {% endblock %}
