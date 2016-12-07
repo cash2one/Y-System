@@ -4,5 +4,5 @@
 <p>VB班：{{ user.vb_course.name }}</p>
 <p>Y-GRE班：{{ user.y_gre_course.name }}</p>
 <p>初始进度：{{ user.last_punch.section.lesson.name }} - {{ user.last_punch.section.name }}</p>
-<p>创建人：{{ user.created_by.first().creator.name }}（{{ user.created_by.first().creator.email }}）</p>
+<p>创建人：{{ user.received_user_creations.first().creator.name }}（{{ user.received_user_creations.first().creator.email }}）</p>
 <p><small>温馨提示：请不要回复本邮件。</small></p>
