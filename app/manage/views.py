@@ -10,8 +10,8 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Booking, BookingState, Schedule, Period, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, Rental, Lesson, Section, Punch, Announcement, AnnouncementType
-from ..decorators import permission_required
+from ..models import Role, User, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..decorators import permission_required, administrator_required, developer_required
 
 
 @manage.after_app_request
@@ -1784,10 +1784,18 @@ def user():
     show_activated = True
     show_unactivated = False
     show_suspended = False
+    show_volunteers = False
+    show_moderators = False
+    show_administrators = False
+    show_developers = False
     if current_user.is_authenticated:
         show_activated = bool(request.cookies.get('show_activated', '1'))
         show_unactivated = bool(request.cookies.get('show_unactivated', ''))
         show_suspended = bool(request.cookies.get('show_suspended', ''))
+        show_volunteers = bool(request.cookies.get('show_volunteers', ''))
+        show_moderators = bool(request.cookies.get('show_moderators', ''))
+        show_administrators = bool(request.cookies.get('show_administrators', ''))
+        show_developers = bool(request.cookies.get('show_developers', ''))
     if show_activated:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
@@ -1820,9 +1828,37 @@ def user():
             .filter(User.deleted == False)\
             .filter(Role.name == u'挂起')\
             .order_by(User.last_seen_at.desc())
+    if show_volunteers:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .filter(Role.name == u'志愿者')\
+            .order_by(User.last_seen_at.desc())
+    if show_moderators:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .filter(Role.name == u'协管员')\
+            .order_by(User.last_seen_at.desc())
+    if show_administrators:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .filter(Role.name == u'管理员')\
+            .order_by(User.last_seen_at.desc())
+    if show_developers:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .filter(Role.name == u'开发人员')\
+            .order_by(User.last_seen_at.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/user.html', users=users, show_activated=show_activated, show_unactivated=show_unactivated, show_suspended=show_suspended, pagination=pagination)
+    return render_template('manage/user.html', users=users, show_activated=show_activated, show_unactivated=show_unactivated, show_suspended=show_suspended, show_volunteers=show_volunteers, show_moderators=show_moderators, show_administrators=show_administrators, show_developers=show_developers, pagination=pagination)
 
 
 @manage.route('/user/activated')
@@ -1833,6 +1869,10 @@ def activated_users():
     resp.set_cookie('show_activated', '1', max_age=30*24*60*60)
     resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
     resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1844,6 +1884,10 @@ def unactivated_users():
     resp.set_cookie('show_activated', '', max_age=30*24*60*60)
     resp.set_cookie('show_unactivated', '1', max_age=30*24*60*60)
     resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1855,6 +1899,70 @@ def suspended_users():
     resp.set_cookie('show_activated', '', max_age=30*24*60*60)
     resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
     resp.set_cookie('show_suspended', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/user/volunteers')
+@login_required
+@permission_required(u'管理用户')
+def volunteers():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/user/moderators')
+@login_required
+@permission_required(u'管理用户')
+def moderators():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/user/administrators')
+@login_required
+@administrator_required
+def administrators():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/user/developers')
+@login_required
+@developer_required
+def developers():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -1992,6 +2100,23 @@ def y_gre_courses():
     resp.set_cookie('show_vb_courses', '', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_courses', '1', max_age=30*24*60*60)
     return resp
+
+
+@manage.route('/course/<int:id>')
+@login_required
+@permission_required(u'管理班级')
+def course_users(id):
+    course = Course.query.get_or_404(id)
+    if course.deleted:
+        abort(404)
+    page = request.args.get('page', 1, type=int)
+    query = User.query\
+        .join(CourseRegistration, CourseRegistration.user_id == User.id)\
+        .join(Course, Course.id == CourseRegistration.course_id)\
+        .filter(User.deleted == False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    users = pagination.items
+    return render_template('manage/course_users.html', course=course, users=users, pagination=pagination)
 
 
 @manage.route('/course/flip-show/<int:id>')

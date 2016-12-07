@@ -16,7 +16,7 @@ def permission_required(permission_name):
     return decorator
 
 
-def admin_required(f):
+def administrator_required(f):
     return permission_required(u'管理权限')(f)
 
 

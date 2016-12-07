@@ -139,7 +139,7 @@
                                     {% else %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    <a class="ui button loading-trigger" href="#"><i class="search icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.course_users', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="search icon"></i></a>
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
                                 </div>
