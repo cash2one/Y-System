@@ -70,6 +70,9 @@
 #visit-hourly.echart-container {
     height: 600px;
 }
+#visit-map.echart-container {
+    height: 600px;
+}
 
 @media only screen and (max-width: 767px) {
     .masthead.segment {
@@ -136,6 +139,9 @@
             </div>
         </div>
     </div>
+    <div id="page-loading-progress" class="ui bottom attached blue progress">
+        <div class="bar"></div>
+    </div>
 </div>
 
 <div class="ui vertical stripe segment">
@@ -157,6 +163,16 @@
         </div>
     </div>
 </div>
+
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <div id="visit-map" class="echart-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block customized_scripts %}
@@ -164,6 +180,7 @@
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/1.7.1/countUp.min.js"></script>
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/echarts/3.3.1/echarts.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/macarons.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/map/world.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -174,6 +191,17 @@ $('.message .close')
     })
 ;
 
+// progress bar
+$('#page-loading-progress').progress({
+    total: 11,
+    onSuccess: function() {
+        $('#page-loading-progress').fadeOut('slow', function() {
+            $('#page-loading-progress').remove();
+        });
+    }
+});
+
+// analytics API
 var analyticsAPIurl = 'https://dev.y-english.org/analytics/?callback=?';
 var analyticsToken = '{{ analytics_token }}';
 
@@ -202,6 +230,7 @@ $.getJSON(analyticsAPIurl, {
     'token_auth': analyticsToken
 }, function(data) {
     yesterdayVisitorsCountUp.update(data.value);
+    $('#page-loading-progress').progress('increment');
 });
 $.getJSON(analyticsAPIurl, {
     'module': 'API',
@@ -213,6 +242,7 @@ $.getJSON(analyticsAPIurl, {
     'token_auth': analyticsToken
 }, function(data) {
     yesterdayVisitsCountUp.update(data.value);
+    $('#page-loading-progress').progress('increment');
 });
 $.getJSON(analyticsAPIurl, {
     'module': 'API',
@@ -224,8 +254,9 @@ $.getJSON(analyticsAPIurl, {
     'token_auth': analyticsToken
 }, function(data) {
     yesterdayActionsCountUp.update(data.value);
+    $('#page-loading-progress').progress('increment');
 });
-function updateVisit() {
+function updateVisit(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getUniqueVisitors',
@@ -236,6 +267,9 @@ function updateVisit() {
         'token_auth': analyticsToken
     }, function(data) {
         todayVisitorsCountUp.update(data.value);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
@@ -247,6 +281,9 @@ function updateVisit() {
         'token_auth': analyticsToken
     }, function(data) {
         todayVisitsCountUp.update(data.value);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
@@ -258,10 +295,13 @@ function updateVisit() {
         'token_auth': analyticsToken
     }, function(data) {
         todayActionsCountUp.update(data.value);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
 };
-updateVisit();
-setInterval(updateVisit, 15000);
+updateVisit(true);
+setInterval(updateVisit(false), 15000);
 
 // chart
 var visitSummaryChart = echarts.init(document.getElementById('visit-summary'), 'macarons');
@@ -337,7 +377,7 @@ visitSummaryChart.setOption({
     }
 });
 visitSummaryChart.showLoading();
-function updateVisitSummaryChart() {
+function updateVisitSummaryChart(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getUniqueVisitors',
@@ -362,6 +402,9 @@ function updateVisitSummaryChart() {
                 data: visitors
             }]
         });
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
@@ -382,6 +425,9 @@ function updateVisitSummaryChart() {
                 data: visits
             }]
         });
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
@@ -402,11 +448,14 @@ function updateVisitSummaryChart() {
                 data: actions
             }]
         });
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
 };
-updateVisitSummaryChart();
+updateVisitSummaryChart(true);
 visitSummaryChart.hideLoading();
-setInterval(updateVisitSummaryChart, 15000);
+setInterval(updateVisitSummaryChart(false), 15000);
 
 var visitHourlyChart = echarts.init(document.getElementById('visit-hourly'), 'macarons');
 visitHourlyChart.setOption({
@@ -501,7 +550,7 @@ function normalizeSymbolSize(val, data) {
         };
     };
 };
-function updateVisitHourlyChart() {
+function updateVisitHourlyChart(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitTime.getVisitInformationPerServerTime',
@@ -549,10 +598,178 @@ function updateVisitHourlyChart() {
                 }
             }]
         });
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
 };
-updateVisitHourlyChart();
+updateVisitHourlyChart(true);
 visitHourlyChart.hideLoading();
-setInterval(updateVisitHourlyChart, 15000);
+setInterval(updateVisitHourlyChart(false), 15000);
+
+var visitMapChart = echarts.init(document.getElementById('visit-map'), 'macarons');
+visitMapChart.setOption({
+    title: {
+        text: '今日访客来源',
+        left: 'center'
+    },
+    legend: {
+        data: ['访客数', '访问次数', '浏览次数'],
+        selectedMode: 'single',
+        right: 'center',
+        top: 30
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: function (params) {
+            var value = params.value
+            if (!value) {
+                value = 0
+            };
+            return params.name + ': ' + value;
+        }
+    },
+    toolbox: {
+        showTitle: false,
+        feature: {
+            restore: {},
+            saveAsImage: {
+                excludeComponents: ['toolbox']
+            }
+        }
+    },
+    visualMap: {
+        min: 0,
+        max: 500,
+        text:['High','Low'],
+        calculable: true,
+        inRange: {
+            color: ['lightskyblue','yellow', 'orangered']
+        }
+    },
+    series: [{
+        name: '访客数',
+        type: 'map',
+        mapType: 'world',
+        showLegendSymbol: false,
+        itemStyle: {
+            emphasis: {
+                label: {
+                    show:true
+                }
+            }
+        },
+        data:[]
+    },
+    {
+        name: '访问次数',
+        type: 'map',
+        mapType: 'world',
+        showLegendSymbol: false,
+        itemStyle: {
+            emphasis: {
+                label: {
+                    show:true
+                }
+            }
+        },
+        data:[]
+    },
+    {
+        name: '浏览次数',
+        type: 'map',
+        mapType: 'world',
+        showLegendSymbol: false,
+        itemStyle: {
+            emphasis: {
+                label: {
+                    show:true
+                }
+            }
+        },
+        data:[]
+    }]
+});
+function updateVisitMapChart(updateProgressBar) {
+    $.getJSON(analyticsAPIurl, {
+        'module': 'API',
+        'method': 'UserCountry.getCountry',
+        'idSite': '1',
+        'period': 'day',
+        'date': 'today',
+        'format': 'JSON',
+        'token_auth': analyticsToken
+    }, function(data) {
+        var visitors = [];
+        var visits = [];
+        var actions = [];
+        var visitorsChina = 0;
+        var visitsChina = 0;
+        var actionsChina = 0;
+        for (var i in data) {
+            if (data[i]['label'] == 'China') {
+                var visitorsChina = visitorsChina + data[i]['nb_uniq_visitors'];
+                var visitsChina = visitsChina + data[i]['nb_visits'];
+                var actionsChina = actionsChina + data[i]['nb_actions'];
+            } else if (data[i]['label'] == 'Hong Kong SAR China') {
+                var visitorsChina = visitorsChina + data[i]['nb_uniq_visitors'];
+                var visitsChina = visitsChina + data[i]['nb_visits'];
+                var actionsChina = actionsChina + data[i]['nb_actions'];
+            } else if (data[i]['label'] == 'Taiwan') {
+                var visitorsChina = visitorsChina + data[i]['nb_uniq_visitors'];
+                var visitsChina = visitsChina + data[i]['nb_visits'];
+                var actionsChina = actionsChina + data[i]['nb_actions'];
+            } else if (data[i]['label'] == 'Unknown') {
+                var visitorsChina = visitorsChina + data[i]['nb_uniq_visitors'];
+                var visitsChina = visitsChina + data[i]['nb_visits'];
+                var actionsChina = actionsChina + data[i]['nb_actions'];
+            } else {
+                visitors.push({
+                    'name': data[i]['label'].replace('United States', 'United States of America'),
+                    'value': data[i]['nb_uniq_visitors']
+                });
+                visits.push({
+                    'name': data[i]['label'].replace('United States', 'United States of America'),
+                    'value': data[i]['nb_visits']
+                });
+                actions.push({
+                    'name': data[i]['label'].replace('United States', 'United States of America'),
+                    'value': data[i]['nb_actions']
+                });
+            };
+        };
+        visitors.push({
+            'name': 'China',
+            'value': visitorsChina
+        });
+        visits.push({
+            'name': 'China',
+            'value': visitsChina
+        });
+        actions.push({
+            'name': 'China',
+            'value': actionsChina
+        });
+        visitMapChart.setOption({
+            series: [{
+                name: '访客数',
+                data: visitors
+            },
+            {
+                name: '访问次数',
+                data: visits
+            },
+            {
+                name: '浏览次数',
+                data: actions
+            }]
+        });
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
+    });
+};
+updateVisitMapChart(true);
+setInterval(updateVisitMapChart(false), 15000);
 </script>
 {% endblock %}
