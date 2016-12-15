@@ -1968,7 +1968,25 @@ def developers():
 def create_user():
     form = NewUserForm()
     if form.validate_on_submit():
-        pass
+        user = User(
+            email=form.email.data,
+            role_id=form.role.data,
+            password=form.id_number.data[-6:],
+            deleted=True,
+            name=form.name.data,
+            gender_id=form.gender.data,
+            id_number=form.id_number.data,
+            birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14])),
+            mobile=form.mobile.data,
+            wechat=form.wechat.data,
+            qq=form.qq.data,
+            address=form.address.data,
+            emergency_contact_name=form.emergency_contact_name.data,
+            emergency_contact_relationship=form.emergency_contact_relationship.data,
+            emergency_contact_mobile=form.emergency_contact_mobile.data,
+            worked_in_same_field=form.worked_in_same_field.data,
+            deformity=form.deformity.data
+        )
         # flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
     return render_template('manage/create_user.html', form=form)
 
