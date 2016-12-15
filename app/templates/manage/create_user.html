@@ -100,24 +100,72 @@
                     {{ form.hidden_tag() }}
                     <h4 class="ui dividing header">基本信息</h4>
                     <div class="fields">
-                        <div class="twelve wide field">
+                        <div class="five wide field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="three wide field">
                             {{ form.gender.label() }}
                             {{ form.gender(class='ui dropdown') }}
                         </div>
+                        <div class="eight wide field">
+                            {{ form.id_number.label() }}
+                            {{ form.id_number(placeholder='身份证号') }}
+                        </div>
                     </div>
-                    <div class="field">
-                        {{ form.id_number.label() }}
-                        {{ form.id_number(placeholder='身份证号') }}
-                    </div>
+                    <h4 class="ui dividing header">联系方式</h4>
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="eight wide field">
                             {{ form.email.label() }}
                             {{ form.email(placeholder='邮箱') }}
                         </div>
+                        <div class="eight wide field">
+                            {{ form.mobile.label() }}
+                            {{ form.mobile(placeholder='移动电话') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.address.label() }}
+                        {{ form.address(placeholder='联系地址') }}
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.qq.label() }}
+                            {{ form.qq(placeholder='QQ') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.wechat.label() }}
+                            {{ form.wechat(placeholder='微信') }}
+                        </div>
+                    </div>
+                    <h4 class="ui dividing header">紧急联系人</h4>
+                    <div class="fields">
+                        <div class="five wide field">
+                            {{ form.emergency_contact_name.label() }}
+                            {{ form.emergency_contact_name(placeholder='姓名') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.emergency_contact_relationship.label() }}
+                            {{ form.emergency_contact_relationship(class='ui dropdown') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.emergency_contact_mobile.label() }}
+                            {{ form.emergency_contact_mobile(placeholder='如：手机') }}
+                        </div>
+                    </div>
+                    <h4 class="ui dividing header">报名信息</h4>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.purposes.label() }}
+                            {{ form.purposes(class='ui search dropdown') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.referrers.label() }}
+                            {{ form.referrers(class='ui search dropdown') }}
+                        </div>
+                    </div>
+                    <h4 class="ui dividing header">研修信息</h4>
+                    <div class="fields">
                         <div class="three wide field">
                             {{ form.role.label() }}
                             {{ form.role(class='ui dropdown') }}
