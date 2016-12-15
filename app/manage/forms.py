@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, DateField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Gender, Relationship, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Role, User, Gender, Relationship, PurposeType, ReferrerType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 def NextDayString(days, short=False):
@@ -255,7 +255,6 @@ class NewUserForm(FlaskForm):
     gender = SelectField(u'性别', coerce=int)
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    role = SelectField(u'用户组', coerce=int)
     # high_school = StringField(u'毕业高中', validators=[Required(), Length(1, 64)])
     # bachelor_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
     # bachelor_major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
@@ -275,10 +274,15 @@ class NewUserForm(FlaskForm):
     emergency_contact_name = StringField(u'紧急联系人', validators=[Required(), Length(1, 64)])
     emergency_contact_relationship = SelectField(u'关系', coerce=int)
     emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
-    worked_in_same_field = BooleanField(u'')
-    deformity = BooleanField(u'')
+    purposes = SelectMultipleField(u'研修目的', coerce=int)
+    other_purpose = StringField(u'其它研修目的', validators=[Length(1, 64)])
+    referrers = SelectMultipleField(u'了解渠道', coerce=int)
+    other_referrer = StringField(u'其它了解渠道', validators=[Length(1, 64)])
+    role = SelectField(u'用户组', coerce=int)
     vb_course = SelectField(u'VB班', coerce=int)
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
+    worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
+    deformity = BooleanField(u'有严重心理或身体疾病')
     submit = SubmitField(u'新建学生用户')
 
     def __init__(self, *args, **kwargs):
@@ -287,7 +291,9 @@ class NewUserForm(FlaskForm):
         # self.bachelor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
         # self.master_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
         # self.doctor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
-        self.emergency_contact_relationship.choices = [(relationship.id, relationship.name) for relationship in Relationship.query.order_by(Relationship.id.desc()).all()]
+        self.emergency_contact_relationship.choices = [(relationship.id, relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
+        self.purposes = [(purpose_type.id, purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
+        self.referrers = [(referrer_type.id, referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
         self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']

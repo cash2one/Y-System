@@ -1415,9 +1415,11 @@ class User(UserMixin, db.Model):
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
-    def activate(self):
+    def activate(self, new_password=''):
         self.activated = True
         self.activated_at = datetime.utcnow()
+        if new_password:
+            self.password = new_password
         db.session.add(self)
         self.punch(section=Section.query.get(1))
 

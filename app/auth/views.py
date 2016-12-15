@@ -78,7 +78,7 @@ def activate():
         new_users = User.query.filter_by(name=form.name.data, activated=False, deleted=False).all()
         for new_user in new_users:
             if new_user.verify_password(form.activation_code.data):
-                new_user.activate()
+                new_user.activate(new_password=form.password.data)
                 token = new_user.generate_confirmation_token()
                 send_email(new_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=new_user, token=token)
                 flash(u'激活成功，请登录！', category='success')

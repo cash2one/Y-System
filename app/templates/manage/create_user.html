@@ -98,11 +98,22 @@
             <div class="column">
                 <form id="create-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
+                    <h4 class="ui dividing header">基本信息</h4>
                     <div class="fields">
-                        <div class="three wide field">
+                        <div class="twelve wide field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
+                        <div class="four wide field">
+                            {{ form.gender.label() }}
+                            {{ form.gender(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.id_number.label() }}
+                        {{ form.id_number(placeholder='身份证号') }}
+                    </div>
+                    <div class="fields">
                         <div class="four wide field">
                             {{ form.email.label() }}
                             {{ form.email(placeholder='邮箱') }}
