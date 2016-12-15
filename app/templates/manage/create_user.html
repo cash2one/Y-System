@@ -160,11 +160,21 @@
                             {{ form.purposes(class='ui search dropdown') }}
                         </div>
                         <div class="eight wide field">
+                            {{ form.other_purpose.label() }}
+                            {{ form.other_purpose(placeholder='其它研修目的') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
                             {{ form.referrers.label() }}
                             {{ form.referrers(class='ui search dropdown') }}
                         </div>
+                        <div class="eight wide field">
+                            {{ form.other_referrer.label() }}
+                            {{ form.other_referrer(placeholder='其它了解渠道') }}
+                        </div>
                     </div>
-                    <h4 class="ui dividing header">研修信息</h4>
+                    <!-- <h4 class="ui dividing header">研修信息</h4> -->
                     <div class="fields">
                         <div class="three wide field">
                             {{ form.role.label() }}
