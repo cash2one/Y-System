@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, Purpose, PurposeType, Referrer, ReferrerType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -1986,11 +1986,23 @@ def create_user():
             qq=form.qq.data,
             address=form.address.data,
             emergency_contact_name=form.emergency_contact_name.data,
-            emergency_contact_relationship=form.emergency_contact_relationship.data,
+            emergency_contact_relationship_id=form.emergency_contact_relationship.data,
             emergency_contact_mobile=form.emergency_contact_mobile.data,
             worked_in_same_field=form.worked_in_same_field.data,
             deformity=form.deformity.data
         )
+        db.session.add(user)
+        db.session.commit()
+        for purpose_type_id in form.purposes.data:
+            purpose_type = PurposeType.query.get(purpose_type_id)
+            user.add_purpose(purpose_type=purpose_type)
+        if form.other_purpose.data:
+            user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
+        for referrer_type_id in form.referrers.data:
+            referrer_type = ReferrerType.query.get(referrer_type_id)
+            user.add_referrer(referrer_type=referrer_type)
+        if form.other_referrer.data:
+            user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
         # flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
     return render_template('manage/create_user.html', form=form)
 
