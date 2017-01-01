@@ -266,11 +266,11 @@ class NewUserForm(FlaskForm):
     other_purpose = StringField(u'其它研修目的', validators=[Length(1, 64)])
     referrers = SelectMultipleField(u'了解渠道', coerce=int)
     other_referrer = StringField(u'其它了解渠道', validators=[Length(1, 64)])
-    role = SelectField(u'用户组', coerce=int)
+    role = SelectField(u'研修类别', coerce=int)
     vb_course = SelectField(u'VB班', coerce=int)
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
-    deformity = BooleanField(u'有严重心理或身体疾病')
+    deformity = BooleanField(u'（曾）有严重心理或身体疾病')
     submit = SubmitField(u'新建学生用户')
     # high_school = StringField(u'毕业高中', validators=[Required(), Length(1, 64)])
     # bachelor_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
@@ -288,6 +288,9 @@ class NewUserForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
         self.gender.choices = [(gender.id, gender.name) for gender in Gender.query.order_by(Gender.id.asc()).all()]
+        # self.birth_year.choices = [(year, u'%g年' % year) for year in range(int(date.today().year), 1899, -1)]
+        # self.birth_month.choices = [(month, u'%g月' % month) for month in range(1, 13)]
+        # self.birth_day.choices = [(day, u'%g日' % day) for day in range(1, 31)]
         # self.bachelor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
         # self.master_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
         # self.doctor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
