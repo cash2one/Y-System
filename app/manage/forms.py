@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, DateField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Gender, Relationship, PurposeType, ReferrerType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Role, User, Relationship, PurposeType, ReferrerType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 def NextDayString(days, short=False):
@@ -252,7 +252,7 @@ class DeleteAnnouncementForm(FlaskForm):
 
 class NewUserForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    gender = SelectField(u'性别', coerce=int)
+    # gender = SelectField(u'性别', coerce=int)
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
@@ -287,10 +287,6 @@ class NewUserForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
-        self.gender.choices = [(gender.id, gender.name) for gender in Gender.query.order_by(Gender.id.asc()).all()]
-        # self.birth_year.choices = [(year, u'%g年' % year) for year in range(int(date.today().year), 1899, -1)]
-        # self.birth_month.choices = [(month, u'%g月' % month) for month in range(1, 13)]
-        # self.birth_day.choices = [(day, u'%g日' % day) for day in range(1, 31)]
         # self.bachelor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
         # self.master_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
         # self.doctor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))

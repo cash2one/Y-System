@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -1968,14 +1968,18 @@ def developers():
 def create_user():
     form = NewUserForm()
     if form.validate_on_submit():
+        if int(form.id_number.data[16]) % 2 == 1:
+            gender = uery. Gender,filter_by(name=u'男').first()
+        else:
+            gender = Gender.query.filter_by(name=u'女').first()
         user = User(
             email=form.email.data,
             role_id=form.role.data,
             password=form.id_number.data[-6:],
             deleted=True,
             name=form.name.data,
-            gender_id=form.gender.data,
-            id_number=form.id_number.data,
+            gender_id=gender.id,
+            id_number=form.id_number.data.upper(),
             birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14])),
             mobile=form.mobile.data,
             wechat=form.wechat.data,
