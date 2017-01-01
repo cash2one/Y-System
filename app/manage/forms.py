@@ -251,28 +251,47 @@ class DeleteAnnouncementForm(FlaskForm):
 
 
 class NewUserForm(FlaskForm):
+    # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    # education
     high_school = StringField(u'毕业高中', validators=[Length(1, 64)])
+    # bachelor
     bachelor_school = StringField(u'本科学校', validators=[Length(1, 64)])
     bachelor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
     bachelor_year = SelectField(u'入学年份', coerce=int)
+    bachelor_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
+    bachelor_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    # master
     master_school = StringField(u'研究生学校（硕士）', validators=[Length(1, 64)])
     master_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
     master_year = SelectField(u'入学年份', coerce=int)
+    master_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
+    master_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    # doctor
     doctor_school = StringField(u'研究生学校（博士）', validators=[Length(1, 64)])
     doctor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
     doctor_year = SelectField(u'入学年份', coerce=int)
-    employer = StringField(u'工作单位', validators=[Length(1, 64)])
-    position = StringField(u'职务', validators=[Length(1, 64)])
+    doctor_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
+    doctor_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    # job
+    employer_1 = StringField(u'工作单位', validators=[Length(1, 64)])
+    position_1 = StringField(u'职务', validators=[Length(1, 64)])
+    job_year_1 = SelectField(u'入职年份', coerce=int)
+    employer_2 = StringField(u'工作单位', validators=[Length(1, 64)])
+    position_2 = StringField(u'职务', validators=[Length(1, 64)])
+    job_year_2 = SelectField(u'入职年份', coerce=int)
+    # contact
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
     address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
     qq = StringField(u'QQ', validators=[Length(1, 64)])
     wechat = StringField(u'微信', validators=[Length(1, 64)])
+    # emergency contact
     emergency_contact_name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     emergency_contact_relationship = SelectField(u'关系', coerce=int)
     emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
+    # registration
     purposes = SelectMultipleField(u'研修目的', coerce=int)
     other_purpose = StringField(u'其它研修目的', validators=[Length(1, 64)])
     referrers = SelectMultipleField(u'了解渠道', coerce=int)
@@ -282,13 +301,16 @@ class NewUserForm(FlaskForm):
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     deformity = BooleanField(u'有严重心理或身体疾病')
+    # submit
     submit = SubmitField(u'新建学生用户')
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
-        self.bachelor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1969, -1)]
-        self.master_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1969, -1)]
-        self.doctor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1969, -1)]
+        self.bachelor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.master_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.doctor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.job_year_1.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.job_year_2.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.emergency_contact_relationship.choices = [(relationship.id, relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.purposes.choices = [(purpose_type.id, purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(referrer_type.id, referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
