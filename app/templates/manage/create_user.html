@@ -198,6 +198,57 @@
                             {{ form.doctor_year(class='ui compact dropdown') }}
                         </div>
                     </div>
+                    <h4 class="ui blue dividing header">既往成绩</h4>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.cet_4.label() }}
+                            {{ form.cet_4(placeholder='大学英语四级') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.cet_6.label() }}
+                            {{ form.cet_6(placeholder='大学英语六级') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.tem_4.label() }}
+                            {{ form.tem_4(placeholder='专业英语四级') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.tem_8.label() }}
+                            {{ form.tem_8(placeholder='专业英语八级') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.toefl_total.label() }}
+                            {{ form.toefl_total(placeholder='TOFEL总分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.toefl_reading.label() }}
+                            {{ form.toefl_reading(placeholder='TOFEL阅读') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.toefl_listening.label() }}
+                            {{ form.toefl_listening(placeholder='TOFEL听力') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.toefl_speaking.label() }}
+                            {{ form.toefl_speaking(placeholder='TOFEL口语') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.toefl_writing.label() }}
+                            {{ form.toefl_writing(placeholder='TOFEL写作') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.competition.label() }}
+                        {{ form.competition(placeholder='竞赛成绩') }}
+                    </div>
+                    <div class="field">
+                        {{ form.other_score.label() }}
+                        {{ form.other_score(placeholder='其它成绩') }}
+                    </div>
                     <h4 class="ui blue dividing header">工作经历</h4>
                     <div class="fields">
                         <div class="eight wide field">

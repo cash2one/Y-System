@@ -278,6 +278,18 @@ class NewUserForm(FlaskForm):
     doctor_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
     doctor_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
     doctor_year = SelectField(u'入学年份', coerce=int)
+    # scores
+    cet_4 = IntegerField(u'CET-4', validators=[NumberRange(min=0)])
+    cet_6 = IntegerField(u'CET-6', validators=[NumberRange(min=0)])
+    tem_4 = IntegerField(u'TEM-4', validators=[NumberRange(min=0)])
+    tem_8 = IntegerField(u'TEM-8', validators=[NumberRange(min=0)])
+    toefl_total = IntegerField(u'TOEFL', validators=[NumberRange(min=0, max=120)])
+    toefl_reading = IntegerField(u'Reading', validators=[NumberRange(min=0, max=30)])
+    toefl_listening = IntegerField(u'Listening', validators=[NumberRange(min=0, max=30)])
+    toefl_speaking = IntegerField(u'Speaking', validators=[NumberRange(min=0, max=30)])
+    toefl_writing = IntegerField(u'Writing', validators=[NumberRange(min=0, max=30)])
+    competition = StringField(u'竞赛成绩', validators=[Length(1, 128)])
+    other_score = StringField(u'其它成绩', validators=[Length(1, 128)])
     # job 1
     employer_1 = StringField(u'工作单位', validators=[Length(1, 64)])
     position_1 = StringField(u'职务', validators=[Length(1, 64)])

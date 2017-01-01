@@ -1522,6 +1522,7 @@ class PreviousAchievementType(db.Model):
             (u'专业英语四级', ),
             (u'专业英语八级', ),
             (u'TOEFL', ),
+            (u'竞赛', ),
             (u'其它', ),
         ]
         for PAT in previous_achievement_types:
