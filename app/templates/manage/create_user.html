@@ -109,6 +109,54 @@
                             {{ form.id_number(placeholder='身份证号（18位）') }}
                         </div>
                     </div>
+                    <h4 class="ui blue dividing header">教育经历</h4>
+                    <div class="field">
+                        {{ form.high_school.label() }}
+                        {{ form.high_school(placeholder='毕业高中') }}
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.bachelor_school.label() }}
+                            {{ form.bachelor_school(placeholder='本科学校') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.bachelor_major.label() }}
+                            {{ form.bachelor_major(placeholder='院系（专业）') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.bachelor_year.label() }}
+                            {{ form.bachelor_year(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.master_school.label() }}
+                            {{ form.master_school(placeholder='研究生学校（硕士）') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.master_major.label() }}
+                            {{ form.master_major(placeholder='院系（专业）') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.master_year.label() }}
+                            {{ form.master_year(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.doctor_school.label() }}
+                            {{ form.doctor_school(placeholder='研究生学校（博士）') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.doctor_major.label() }}
+                            {{ form.doctor_major(placeholder='院系（专业）') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.doctor_year.label() }}
+                            {{ form.doctor_year(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    <h4 class="ui blue dividing header">工作经历</h4>
                     <h4 class="ui blue dividing header">联系方式</h4>
                     <div class="fields">
                         <div class="eight wide field">

@@ -252,8 +252,19 @@ class DeleteAnnouncementForm(FlaskForm):
 
 class NewUserForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    # gender = SelectField(u'性别', coerce=int)
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    high_school = StringField(u'毕业高中', validators=[Length(1, 64)])
+    bachelor_school = StringField(u'本科学校', validators=[Length(1, 64)])
+    bachelor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
+    bachelor_year = SelectField(u'入学年份', coerce=int)
+    master_school = StringField(u'研究生学校（硕士）', validators=[Length(1, 64)])
+    master_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
+    master_year = SelectField(u'入学年份', coerce=int)
+    doctor_school = StringField(u'研究生学校（博士）', validators=[Length(1, 64)])
+    doctor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
+    doctor_year = SelectField(u'入学年份', coerce=int)
+    employer = StringField(u'工作单位', validators=[Length(1, 64)])
+    position = StringField(u'职务', validators=[Length(1, 64)])
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
     address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
@@ -272,24 +283,12 @@ class NewUserForm(FlaskForm):
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     deformity = BooleanField(u'有严重心理或身体疾病')
     submit = SubmitField(u'新建学生用户')
-    # high_school = StringField(u'毕业高中', validators=[Required(), Length(1, 64)])
-    # bachelor_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
-    # bachelor_major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
-    # bachelor_year = SelectField(u'入学年份', coerce=int)
-    # master_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
-    # master_major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
-    # master_year = SelectField(u'入学年份', coerce=int)
-    # doctor_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
-    # doctor_major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
-    # doctor_year = SelectField(u'入学年份', coerce=int)
-    # employer = StringField(u'工作单位', validators=[Required(), Length(1, 64)])
-    # position = StringField(u'职务', validators=[Required(), Length(1, 64)])
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
-        # self.bachelor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
-        # self.master_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
-        # self.doctor_year.choices = list(enumerate([unicode(x) for x in range(int(date.today().year)+3, 1969, -1)], start=1))
+        self.bachelor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1969, -1)]
+        self.master_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1969, -1)]
+        self.doctor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1969, -1)]
         self.emergency_contact_relationship.choices = [(relationship.id, relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.purposes.choices = [(purpose_type.id, purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(referrer_type.id, referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
