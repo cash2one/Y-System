@@ -259,25 +259,26 @@ class NewUserForm(FlaskForm):
     # bachelor
     bachelor_school = StringField(u'本科学校', validators=[Length(1, 64)])
     bachelor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
-    bachelor_year = SelectField(u'入学年份', coerce=int)
     bachelor_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
     bachelor_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    bachelor_year = SelectField(u'入学年份', coerce=int)
     # master
     master_school = StringField(u'研究生学校（硕士）', validators=[Length(1, 64)])
     master_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
-    master_year = SelectField(u'入学年份', coerce=int)
     master_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
     master_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    master_year = SelectField(u'入学年份', coerce=int)
     # doctor
     doctor_school = StringField(u'研究生学校（博士）', validators=[Length(1, 64)])
     doctor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
-    doctor_year = SelectField(u'入学年份', coerce=int)
     doctor_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
     doctor_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
-    # job
+    doctor_year = SelectField(u'入学年份', coerce=int)
+    # job 1
     employer_1 = StringField(u'工作单位', validators=[Length(1, 64)])
     position_1 = StringField(u'职务', validators=[Length(1, 64)])
     job_year_1 = SelectField(u'入职年份', coerce=int)
+    # job 2
     employer_2 = StringField(u'工作单位', validators=[Length(1, 64)])
     position_2 = StringField(u'职务', validators=[Length(1, 64)])
     job_year_2 = SelectField(u'入职年份', coerce=int)

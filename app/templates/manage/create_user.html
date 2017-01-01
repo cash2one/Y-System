@@ -115,45 +115,78 @@
                         {{ form.high_school(placeholder='毕业高中') }}
                     </div>
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="six wide field">
                             {{ form.bachelor_school.label() }}
                             {{ form.bachelor_school(placeholder='本科学校') }}
                         </div>
-                        <div class="five wide field">
+                        <div class="four wide field">
                             {{ form.bachelor_major.label() }}
                             {{ form.bachelor_major(placeholder='院系（专业）') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
+                            {{ form.bachelor_gpa.label() }}
+                            <div class="two fields">
+                                <div class="field">
+                                    {{ form.bachelor_gpa(placeholder='GPA') }}
+                                </div>
+                                <div class="field">
+                                    {{ form.bachelor_full_gpa(placeholder='GPA满分') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="two wide field">
                             {{ form.bachelor_year.label() }}
-                            {{ form.bachelor_year(class='ui dropdown') }}
+                            {{ form.bachelor_year(class='ui compact dropdown') }}
                         </div>
                     </div>
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="six wide field">
                             {{ form.master_school.label() }}
                             {{ form.master_school(placeholder='研究生学校（硕士）') }}
                         </div>
-                        <div class="five wide field">
+                        <div class="four wide field">
                             {{ form.master_major.label() }}
                             {{ form.master_major(placeholder='院系（专业）') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
+                            {{ form.bachelor_gpa.label() }}
+                            <div class="two fields">
+                                <div class="field">
+                                    {{ form.bachelor_gpa(placeholder='GPA') }}
+                                </div>
+                                <div class="field">
+                                    {{ form.bachelor_full_gpa(placeholder='GPA满分') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="two wide field">
                             {{ form.master_year.label() }}
-                            {{ form.master_year(class='ui dropdown') }}
+                            {{ form.master_year(class='ui compact dropdown') }}
                         </div>
                     </div>
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="six wide field">
                             {{ form.doctor_school.label() }}
                             {{ form.doctor_school(placeholder='研究生学校（博士）') }}
                         </div>
-                        <div class="five wide field">
+                        <div class="four wide field">
                             {{ form.doctor_major.label() }}
                             {{ form.doctor_major(placeholder='院系（专业）') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
+                            {{ form.bachelor_gpa.label() }}
+                            <div class="two fields">
+                                <div class="field">
+                                    {{ form.bachelor_gpa(placeholder='GPA') }}
+                                </div>
+                                <div class="field">
+                                    {{ form.bachelor_full_gpa(placeholder='GPA满分') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="two wide field">
                             {{ form.doctor_year.label() }}
-                            {{ form.doctor_year(class='ui dropdown') }}
+                            {{ form.doctor_year(class='ui compact dropdown') }}
                         </div>
                     </div>
                     <h4 class="ui blue dividing header">工作经历</h4>
@@ -162,13 +195,13 @@
                             {{ form.employer_1.label() }}
                             {{ form.employer_1(placeholder='工作单位') }}
                         </div>
-                        <div class="five wide field">
+                        <div class="six wide field">
                             {{ form.position_1.label() }}
                             {{ form.position_1(placeholder='职务') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="two wide field">
                             {{ form.job_year_1.label() }}
-                            {{ form.job_year_1(class='ui dropdown') }}
+                            {{ form.job_year_1(class='ui compact dropdown') }}
                         </div>
                     </div>
                     <div class="fields">
@@ -176,13 +209,13 @@
                             {{ form.employer_2.label() }}
                             {{ form.employer_2(placeholder='工作单位') }}
                         </div>
-                        <div class="five wide field">
+                        <div class="six wide field">
                             {{ form.position_2.label() }}
                             {{ form.position_2(placeholder='职务') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="two wide field">
                             {{ form.job_year_2.label() }}
-                            {{ form.job_year_2(class='ui dropdown') }}
+                            {{ form.job_year_2(class='ui compact dropdown') }}
                         </div>
                     </div>
                     <h4 class="ui blue dividing header">联系方式</h4>
@@ -212,13 +245,13 @@
                     </div>
                     <h4 class="ui orange dividing header">紧急联系人</h4>
                     <div class="fields">
-                        <div class="five wide required field">
+                        <div class="six wide required field">
                             {{ form.emergency_contact_name.label() }}
                             {{ form.emergency_contact_name(placeholder='紧急联系人') }}
                         </div>
-                        <div class="three wide required field">
+                        <div class="two wide required field">
                             {{ form.emergency_contact_relationship.label() }}
-                            {{ form.emergency_contact_relationship(class='ui dropdown') }}
+                            {{ form.emergency_contact_relationship(class='ui compact dropdown') }}
                         </div>
                         <div class="eight wide required field">
                             {{ form.emergency_contact_mobile.label() }}
