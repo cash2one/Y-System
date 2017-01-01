@@ -270,7 +270,7 @@ class NewUserForm(FlaskForm):
     vb_course = SelectField(u'VB班', coerce=int)
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
-    deformity = BooleanField(u'（曾）有严重心理或身体疾病')
+    deformity = BooleanField(u'有严重心理或身体疾病')
     submit = SubmitField(u'新建学生用户')
     # high_school = StringField(u'毕业高中', validators=[Required(), Length(1, 64)])
     # bachelor_school = StringField(u'学校', validators=[Required(), Length(1, 64)])
