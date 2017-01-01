@@ -120,11 +120,11 @@
                         <form id="confirm-ipad" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
-                                <div class="ten wide field">
+                                <div class="ten wide required field">
                                     {{ form.serial.label() }}
                                     {{ form.serial(placeholder='iPad序列号') }}
                                 </div>
-                                <div class="six wide field">
+                                <div class="six wide required field">
                                     {{ form.battery_life.label() }}
                                     <div class="ui right labeled input">
                                         {{ form.battery_life(placeholder='0 ~ 100') }}

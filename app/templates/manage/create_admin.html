@@ -99,19 +99,19 @@
                 <form id="create-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.email.label() }}
                             {{ form.email(placeholder='邮箱') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.activation_code.label() }}
                             {{ form.activation_code(placeholder='激活码') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.role.label() }}
                             {{ form.role(class='ui dropdown') }}
                         </div>

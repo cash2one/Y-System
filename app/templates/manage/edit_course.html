@@ -99,11 +99,11 @@
                 <form id="edit-course" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='班级名称') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.course_type.label() }}
                             {{ form.course_type(class='ui search dropdown') }}
                         </div>

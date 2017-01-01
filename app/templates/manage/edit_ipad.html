@@ -99,17 +99,17 @@
                 <form id="edit-ipad" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.alias.label() }}
                             {{ form.alias(placeholder='编号') }}
                         </div>
-                        <div class="twelve wide field">
+                        <div class="twelve wide required field">
                             {{ form.serial.label() }}
                             {{ form.serial(placeholder='序列号') }}
                         </div>
                     </div>
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.capacity.label() }}
                             {{ form.capacity(class='ui dropdown') }}
                         </div>
@@ -117,14 +117,14 @@
                             {{ form.room.label() }}
                             {{ form.room(class='ui dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.video_playback.label() }}
                             <div class="ui right labeled input">
                                 {{ form.video_playback(placeholder='10') }}
                                 <div class="ui basic label">小时</div>
                             </div>
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.state.label() }}
                             {{ form.state(class='ui dropdown') }}
                         </div>

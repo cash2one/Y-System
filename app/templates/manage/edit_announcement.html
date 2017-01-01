@@ -100,16 +100,16 @@
                 <form id="edit-announcement" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="twelve wide field">
+                        <div class="twelve wide required field">
                             {{ form.title.label() }}
                             {{ form.title(placeholder='通知标题') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.announcement_type.label() }}
                             {{ form.announcement_type(class='ui search dropdown') }}
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="required field">
                         {{ form.body.label() }}
                         {{ form.body(placeholder='通知内容') }}
                     </div>

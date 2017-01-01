@@ -125,7 +125,7 @@
                     <div class="column">
                         <form id="find-user" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <div class="field">
+                            <div class="required field">
                                 {{ form.email.label() }}
                                 <div class="ui fluid search">
                                     {{ form.email(placeholder='输入姓名/邮箱查询用户', class='prompt') }}

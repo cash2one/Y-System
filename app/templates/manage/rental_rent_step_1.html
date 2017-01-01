@@ -119,7 +119,7 @@
                     <div class="column">
                         <form id="booking-code" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <div class="field">
+                            <div class="required field">
                                 {{ form.booking_code.label() }}
                                 {{ form.booking_code(placeholder='预约码') }}
                             </div>

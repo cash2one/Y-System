@@ -99,19 +99,19 @@
                 <form id="edit-period" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='时段名称') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.start_time.label() }}
                             {{ form.start_time(class='ui search dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.end_time.label() }}
                             {{ form.end_time(class='ui search dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.period_type.label() }}
                             {{ form.period_type(class='ui search dropdown') }}
                         </div>

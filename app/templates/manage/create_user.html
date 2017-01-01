@@ -100,11 +100,11 @@
                     {{ form.hidden_tag() }}
                     <h4 class="ui blue dividing header">基本信息</h4>
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.id_number.label() }}
                             {{ form.id_number(placeholder='身份证号（18位）') }}
                         </div>
@@ -187,16 +187,16 @@
                     </div>
                     <h4 class="ui blue dividing header">联系方式</h4>
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.email.label() }}
                             {{ form.email(placeholder='用于登录系统、接收通知') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.mobile.label() }}
                             {{ form.mobile(placeholder='移动电话') }}
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="required field">
                         {{ form.address.label() }}
                         {{ form.address(placeholder='联系地址') }}
                     </div>
@@ -212,15 +212,15 @@
                     </div>
                     <h4 class="ui orange dividing header">紧急联系人</h4>
                     <div class="fields">
-                        <div class="five wide field">
+                        <div class="five wide required field">
                             {{ form.emergency_contact_name.label() }}
                             {{ form.emergency_contact_name(placeholder='紧急联系人') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="three wide required field">
                             {{ form.emergency_contact_relationship.label() }}
                             {{ form.emergency_contact_relationship(class='ui dropdown') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.emergency_contact_mobile.label() }}
                             {{ form.emergency_contact_mobile(placeholder='移动电话') }}
                         </div>
@@ -248,30 +248,32 @@
                     </div>
                     <h4 class="ui teal dividing header">研修信息</h4>
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.role.label() }}
                             {{ form.role(class='ui dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.vb_course.label() }}
                             {{ form.vb_course(class='ui dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.y_gre_course.label() }}
                             {{ form.y_gre_course(class='ui dropdown') }}
                         </div>
                     </div>
                     <h4 class="ui grey dividing header">其它信息</h4>
-                    <div class="field">
-                        <div class="ui checkbox">
-                            {{ form.worked_in_same_field() }}
-                            {{ form.worked_in_same_field.label() }}
+                    <div class="fields">
+                        <div class="eight wide field">
+                            <div class="ui toggle checkbox">
+                                {{ form.worked_in_same_field() }}
+                                {{ form.worked_in_same_field.label() }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="field">
-                        <div class="ui checkbox">
-                            {{ form.deformity() }}
-                            {{ form.deformity.label() }}
+                        <div class="eight wide field">
+                            <div class="ui toggle checkbox">
+                                {{ form.deformity() }}
+                                {{ form.deformity.label() }}
+                            </div>
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}

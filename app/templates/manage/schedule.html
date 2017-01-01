@@ -207,15 +207,15 @@
                 <form id="new-schedule" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="five wide field">
+                        <div class="five wide required field">
                             {{ form.date.label() }}
                             {{ form.date(class='ui dropdown') }}
                         </div>
-                        <div class="nine wide field">
+                        <div class="nine wide required field">
                             {{ form.period.label() }}
                             {{ form.period(class='ui search dropdown') }}
                         </div>
-                        <div class="two wide field">
+                        <div class="two wide required field">
                             {{ form.quota.label() }}
                             {{ form.quota(placeholder='0') }}
                         </div>
