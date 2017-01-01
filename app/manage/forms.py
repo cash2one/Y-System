@@ -256,6 +256,10 @@ class NewUserForm(FlaskForm):
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     # education
     high_school = StringField(u'毕业高中', validators=[Length(1, 64)])
+    cee_total = IntegerField(u'高考总分', validators=[NumberRange(min=0)])
+    cee_math = IntegerField(u'高考数学', validators=[NumberRange(min=0)])
+    cee_english = IntegerField(u'高考英语', validators=[NumberRange(min=0)])
+    high_school_year = SelectField(u'入学年份', coerce=int)
     # bachelor
     bachelor_school = StringField(u'本科学校', validators=[Length(1, 64)])
     bachelor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
@@ -307,6 +311,7 @@ class NewUserForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
+        self.high_school_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.bachelor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.master_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.doctor_year.choices = [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
