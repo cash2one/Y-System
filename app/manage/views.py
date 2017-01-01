@@ -1976,7 +1976,6 @@ def create_user():
             email=form.email.data,
             role_id=form.role.data,
             password=form.id_number.data[-6:],
-            deleted=True,
             name=form.name.data,
             gender_id=gender.id,
             id_number=form.id_number.data.upper(),
