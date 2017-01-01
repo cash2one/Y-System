@@ -144,6 +144,8 @@ $(document)
         $('#edit-user')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     name: {
                         identifier: 'name',

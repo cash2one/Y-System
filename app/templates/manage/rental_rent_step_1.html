@@ -153,6 +153,8 @@ $(document)
         $('#booking-code')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     booking_code: {
                         identifier: 'booking_code',

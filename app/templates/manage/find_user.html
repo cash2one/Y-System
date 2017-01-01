@@ -222,6 +222,8 @@ $(document)
         $('#find-user')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     name_or_email: {
                         identifier: 'name_or_email',

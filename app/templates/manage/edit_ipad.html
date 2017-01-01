@@ -181,6 +181,8 @@ $(document)
         $('#edit-ipad')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     alias: {
                         identifier: 'alias',

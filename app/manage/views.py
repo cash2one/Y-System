@@ -2003,6 +2003,10 @@ def create_user():
             user.add_referrer(referrer_type=referrer_type)
         if form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
+        if form.vb_course.data:
+            user.register_course(form.vb_course.data)
+        if form.y_gre_course.data:
+            user.register_course(form.y_gre_course.data)
         # flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
     return render_template('manage/create_user.html', form=form)
 

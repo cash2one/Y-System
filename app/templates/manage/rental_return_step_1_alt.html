@@ -173,6 +173,8 @@ $(document)
         $('#find-user')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     email: {
                         identifier: 'email',

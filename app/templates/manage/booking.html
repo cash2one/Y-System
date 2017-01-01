@@ -265,8 +265,8 @@ $('table')
 {% for booking in bookings %}
 $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
     .popup({
-        popup : $('#booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}'),
-        on    : 'click'
+        popup: $('#booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}'),
+        on: 'click'
     })
 ;
 {% endfor %}

@@ -210,6 +210,8 @@ $(document)
         $('#new-announcement')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     title: {
                         identifier: 'title',

@@ -188,6 +188,8 @@ $(document)
         $('#find-ipad')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     serial: {
                         identifier: 'serial',

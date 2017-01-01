@@ -266,6 +266,8 @@ $(document)
         $('#new-schedule')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     period: {
                         identifier: 'period',
