@@ -117,7 +117,7 @@
                     <div class="fields">
                         <div class="eight wide field">
                             {{ form.email.label() }}
-                            {{ form.email(placeholder='邮箱') }}
+                            {{ form.email(placeholder='用于登录系统、接收通知') }}
                         </div>
                         <div class="eight wide field">
                             {{ form.mobile.label() }}
@@ -225,6 +225,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/IDValidator.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -243,8 +245,12 @@ $('.ui.checkbox')
     .checkbox()
 ;
 
+var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
+        $.fn.form.settings.rules.id_number = function(value) {
+            return (Validator.isValid(value, 18));
+        };
         $('#create-user')
             .form({
                 onSuccess: submitForm,
@@ -258,12 +264,25 @@ $(document)
                             }
                         ]
                     },
+                    id_number: {
+                        identifier  : 'id_number',
+                        rules: [
+                            {
+                                type   : 'empty',
+                                prompt : '请填写身份证号'
+                            },
+                            {
+                                type   : 'id_number',
+                                prompt : '请输入一个有效的身份证号'
+                            }
+                        ]
+                    },
                     email: {
                         identifier  : 'email',
                         rules: [
                             {
                                 type   : 'empty',
-                                prompt : '请输入您的电子邮箱地址'
+                                prompt : '请填写电子邮箱地址'
                             },
                             {
                                 type   : 'email',
@@ -276,7 +295,7 @@ $(document)
                         rules: [
                             {
                                 type   : 'empty',
-                                prompt : '请选择用户组'
+                                prompt : '请选研修类别'
                             }
                         ]
                     }

@@ -254,7 +254,7 @@ class NewUserForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     gender = SelectField(u'性别', coerce=int)
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
-    email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
     address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
     qq = StringField(u'QQ', validators=[Length(1, 64)])
