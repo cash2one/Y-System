@@ -174,33 +174,33 @@ $(document)
                 onSuccess: submitForm,
                 fields: {
                     serial: {
-                        identifier  : 'serial',
+                        identifier: 'serial',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请输入iPad序列号'
+                                type: 'empty',
+                                prompt: '请输入iPad序列号'
                             }
                         ]
                     },
                     battery_life: {
-                        identifier  : 'battery_life',
+                        identifier: 'battery_life',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请输入iPad剩余电量'
+                                type: 'empty',
+                                prompt: '请输入iPad剩余电量'
                             },
                             {
-                                type   : 'integer[0..100]',
-                                prompt : '电量数值超出范围（0 ~ 100）'
+                                type: 'integer[0..100]',
+                                prompt: '电量数值超出范围（0 ~ 100）'
                             }
                         ]
                     },
                     root: {
-                        identifier  : 'root',
+                        identifier: 'root',
                         rules: [
                             {
-                                type   : 'checked',
-                                prompt : '请确认引导式访问状态正常'
+                                type: 'checked',
+                                prompt: '请确认引导式访问状态正常'
                             }
                         ]
                     }

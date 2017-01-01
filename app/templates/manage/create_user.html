@@ -146,7 +146,7 @@
                         </div>
                         <div class="eight wide field">
                             {{ form.emergency_contact_mobile.label() }}
-                            {{ form.emergency_contact_mobile(placeholder='如：手机') }}
+                            {{ form.emergency_contact_mobile(placeholder='移动电话') }}
                         </div>
                     </div>
                     <h4 class="ui blue dividing header">报名信息</h4>
@@ -244,7 +244,7 @@ $('.ui.checkbox')
 var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
-        $.fn.form.settings.rules.id_number = function(value) {
+        $.fn.form.settings.rules.idNumber = function(value) {
             return (Validator.isValid(value, 18));
         };
         $('#create-user')
@@ -268,7 +268,7 @@ $(document)
                                 prompt: '请填写身份证号'
                             },
                             {
-                                type: 'id_number',
+                                type: 'idNumber',
                                 prompt: '请输入一个有效的身份证号'
                             }
                         ]
@@ -286,12 +286,55 @@ $(document)
                             }
                         ]
                     },
-                    role: {
-                        identifier: 'role',
+                    mobile: {
+                        identifier: 'mobile',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选研修类别'
+                                prompt: '请填写移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '移动电话号码位数有误'
+                            }
+                        ]
+                    },
+                    address: {
+                        identifier: 'address',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写联系地址'
+                            }
+                        ]
+                    },
+                    emergency_contact_name: {
+                        identifier: 'emergency_contact_name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人姓名'
+                            }
+                        ]
+                    },
+                    emergency_contact_mobile: {
+                        identifier: 'emergency_contact_mobile',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '紧急联系人移动电话号码位数有误'
                             }
                         ]
                     }
