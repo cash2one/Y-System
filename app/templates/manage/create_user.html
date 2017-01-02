@@ -365,7 +365,7 @@
                                 <div class="results"></div>
                             </div>
                         </div>
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.receptionist_email.label() }}
                             <div class="ui fluid search">
                                 {{ form.receptionist_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
@@ -578,8 +578,21 @@ $(document)
                         identifier: 'products',
                         rules: [
                             {
-                                type: 'minCount[0]',
+                                type: 'empty',
                                 prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
+                    receptionist_email: {
+                        identifier: 'receptionist_email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写接待人电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
                             }
                         ]
                     },
@@ -588,7 +601,7 @@ $(document)
                         rules: [
                             {
                                 type: 'checked',
-                                prompt: '请确认服务条款'
+                                prompt: '请确认用户同意服务条款'
                             }
                         ]
                     }

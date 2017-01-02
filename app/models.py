@@ -1443,7 +1443,7 @@ class User(UserMixin, db.Model):
         else:
             user_json_suggestion = {
                 'title': self.name,
-                'description': self.email,
+                'description': '%s [%s]' % (self.email, self.role.name),
             }
         if include_url:
             user_json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
@@ -1638,7 +1638,7 @@ class Product(db.Model):
             (u'AW费用', 800.0, ),
             (u'Q费用', 800.0, ),
             (u'Y-GRE多轮费用', 2000.0, ),
-            (u'未毕业减免', -800.0, ),
+            (u'在校生减免', -800.0, ),
             (u'本校减免', -500.0, ),
             (u'联报优惠', -1000.0, ),
             (u'团报优惠', -200.0, ),
