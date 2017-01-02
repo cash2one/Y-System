@@ -220,7 +220,7 @@
                             {{ form.quota(placeholder='0') }}
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="inline field">
                         <div class="ui toggle checkbox">
                             {{ form.publish_now() }}
                             {{ form.publish_now.label() }}
@@ -269,6 +269,15 @@ $(document)
                 inline: true,
                 on: 'blur',
                 fields: {
+                    date: {
+                        identifier: 'date',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择日期'
+                            }
+                        ]
+                    },
                     period: {
                         identifier: 'period',
                         rules: [

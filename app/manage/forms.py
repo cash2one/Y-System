@@ -8,11 +8,22 @@ from wtforms import ValidationError
 from ..models import Role, User, Relationship, PurposeType, ReferrerType, Product, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
+EN_2_CN = {
+    u'Mon': u'周一',
+    u'Tue': u'周二',
+    u'Wed': u'周三',
+    u'Thu': u'周四',
+    u'Fri': u'周五',
+    u'Sat': u'周六',
+    u'Sun': u'周日',
+}
+
+
 def NextDayString(days, short=False):
     day = date.today() + timedelta(days=1) * days
     if short:
         return day.strftime(u'%Y-%m-%d')
-    return day.strftime(u'%Y-%m-%d %a')
+    return day.strftime(u'%Y-%m-%d') + u' ' + EN_2_CN[day.strftime(u'%a')]
 
 
 def NextHalfHourString(halfHours, startHour=6):
@@ -21,46 +32,46 @@ def NextHalfHourString(halfHours, startHour=6):
 
 
 class NewScheduleForm(FlaskForm):
-    date = SelectField(u'日期', coerce=unicode)
-    period = SelectMultipleField(u'时段', coerce=int)
+    date = SelectField(u'日期', coerce=unicode, validators=[Required()])
+    period = SelectMultipleField(u'时段', coerce=unicode, validators=[Required()])
     quota = IntegerField(u'名额', validators=[Required(), NumberRange(min=1)])
     publish_now = BooleanField(u'立即发布')
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(NewScheduleForm, self).__init__(*args, **kwargs)
-        self.date.choices = [(NextDayString(x, short=True), NextDayString(x), ) for x in range(30)]
-        self.period.choices = [(period.id, period.alias3) for period in Period.query.order_by(Period.id.asc()).all() if (period.show and not period.deleted)]
+        self.date.choices = [(u'', u'选择日期')] + [(NextDayString(x, short=True), NextDayString(x), ) for x in range(30)]
+        self.period.choices = [(u'', u'选择时段')] + [(unicode(period.id), period.alias3) for period in Period.query.order_by(Period.id.asc()).all() if (period.show and not period.deleted)]
 
 
 class NewPeriodForm(FlaskForm):
     name = StringField(u'时段名称', validators=[Required()])
-    start_time = SelectField(u'开始时间', coerce=unicode)
-    end_time = SelectField(u'结束时间', coerce=unicode)
-    period_type = SelectField(u'时段类型', coerce=int)
+    start_time = SelectField(u'开始时间', coerce=unicode, validators=[Required()])
+    end_time = SelectField(u'结束时间', coerce=unicode, validators=[Required()])
+    period_type = SelectField(u'时段类型', coerce=unicode, validators=[Required()])
     show = BooleanField(u'显示为可选')
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(NewPeriodForm, self).__init__(*args, **kwargs)
-        self.start_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
-        self.end_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
-        self.period_type.choices = [(period_type.id, period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+        self.start_time.choices = [(u'', u'选择开始时间')] + [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.end_time.choices = [(u'', u'选择结束时间')] + [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.period_type.choices = [(u'', u'选择时段类型')] + [(unicode(period_type.id), period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
 class EditPeriodForm(FlaskForm):
     name = StringField(u'时段名称', validators=[Required()])
-    start_time = SelectField(u'开始时间', coerce=unicode)
-    end_time = SelectField(u'结束时间', coerce=unicode)
-    period_type = SelectField(u'时段类型', coerce=int)
+    start_time = SelectField(u'开始时间', coerce=unicode, validators=[Required()])
+    end_time = SelectField(u'结束时间', coerce=unicode, validators=[Required()])
+    period_type = SelectField(u'时段类型', coerce=unicode, validators=[Required()])
     show = BooleanField(u'显示为可选')
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(EditPeriodForm, self).__init__(*args, **kwargs)
-        self.start_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
-        self.end_time.choices = [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
-        self.period_type.choices = [(period_type.id, period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+        self.start_time.choices = [(u'', u'选择开始时间')] + [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.end_time.choices = [(u'', u'选择结束时间')] + [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
+        self.period_type.choices = [(u'', u'选择时段类型')] + [(unicode(period_type.id), period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
 class DeletePeriodForm(FlaskForm):
@@ -121,14 +132,14 @@ class DeleteiPadForm(FlaskForm):
 
 
 class FilteriPadForm(FlaskForm):
-    vb_lessons = SelectMultipleField(u'VB内容', coerce=int)
-    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=int)
+    vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
+    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
     submit = SubmitField(u'筛选')
 
     def __init__(self, *args, **kwargs):
         super(FilteriPadForm, self).__init__(*args, **kwargs)
-        self.vb_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
-        self.y_gre_lessons.choices = [(lesson.id, lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
 
 
 class EditPunchLessonForm(FlaskForm):
@@ -327,19 +338,19 @@ class NewUserForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
-        self.high_school_year.choices = [(u'', u'入学年份')] + [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.bachelor_year.choices = [(u'', u'入学年份')] + [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.master_year.choices = [(u'', u'入学年份')] + [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.doctor_year.choices = [(u'', u'入学年份')] + [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.job_year_1.choices = [(u'', u'入职年份')] + [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.job_year_2.choices = [(u'', u'入职年份')] + [(year, u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(relationship.id, relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
-        self.purposes.choices = [(u'', u'选择研修目的')] + [(purpose_type.id, purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
-        self.referrers.choices = [(u'', u'选择了解渠道')] + [(referrer_type.id, referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
-        self.role.choices = [(u'', u'选择研修类别')] + [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
-        self.vb_course.choices = [(u'', u'选择VB班')] + [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
-        self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
-        self.products.choices = [(u'', u'选择研修产品')] + [(product.id, u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        self.high_school_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.bachelor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.master_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.doctor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.job_year_1.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
+        self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
+        self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
+        self.role.choices = [(u'', u'选择研修类别')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.vb_course.choices = [(u'', u'选择VB班')] + [(0, u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(0, u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
@@ -356,9 +367,9 @@ class NewAdminForm(FlaskForm):
     def __init__(self, creator, *args, **kwargs):
         super(NewAdminForm, self).__init__(*args, **kwargs)
         if creator.is_developer:
-            self.role.choices = [(u'', u'选择用户组')] + [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
         else:
-            self.role.choices = [(u'', u'选择用户组')] + [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():

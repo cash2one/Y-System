@@ -1195,7 +1195,7 @@ def edit_period(id):
     form.name.data = period.name
     form.start_time.data = period.start_time.strftime(u'%H:%M')
     form.end_time.data = period.end_time.strftime(u'%H:%M')
-    form.period_type.data = period.type_id
+    form.period_type.data = unicode(period.type_id)
     form.show.data = period.show
     return render_template('manage/edit_period.html', form=form, period=period)
 
@@ -1974,7 +1974,7 @@ def create_user():
             gender = Gender.query.filter_by(name=u'女').first()
         user = User(
             email=form.email.data,
-            role_id=int(form.role.data),
+            role_id=form.role.data,
             password=form.id_number.data[-6:],
             name=form.name.data,
             gender_id=gender.id,
@@ -1985,7 +1985,7 @@ def create_user():
             qq=form.qq.data,
             address=form.address.data,
             emergency_contact_name=form.emergency_contact_name.data,
-            emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
+            emergency_contact_relationship_id=form.emergency_contact_relationship.data,
             emergency_contact_mobile=form.emergency_contact_mobile.data,
             worked_in_same_field=form.worked_in_same_field.data,
             deformity=form.deformity.data
@@ -1993,19 +1993,19 @@ def create_user():
         db.session.add(user)
         db.session.commit()
         for purpose_type_id in form.purposes.data:
-            purpose_type = PurposeType.query.get(int(purpose_type_id))
+            purpose_type = PurposeType.query.get(purpose_type_id)
             user.add_purpose(purpose_type=purpose_type)
         if form.other_purpose.data:
             user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
         for referrer_type_id in form.referrers.data:
-            referrer_type = ReferrerType.query.get(int(referrer_type_id))
+            referrer_type = ReferrerType.query.get(referrer_type_id)
             user.add_referrer(referrer_type=referrer_type)
         if form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
         if int(form.vb_course.data):
-            user.register_course(int(form.vb_course.data))
+            user.register_course(form.vb_course.data)
         if int(form.y_gre_course.data):
-            user.register_course(int(form.y_gre_course.data))
+            user.register_course(form.y_gre_course.data)
         # flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
     return render_template('manage/create_user.html', form=form)
 
@@ -2016,7 +2016,7 @@ def create_user():
 def create_admin():
     form = NewAdminForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
-        admin = User(email=form.email.data, role_id=int(form.role.data), password=form.activation_code.data, name=form.name.data)
+        admin = User(email=form.email.data, role_id=form.role.data, password=form.activation_code.data, name=form.name.data)
         db.session.add(admin)
         db.session.commit()
         current_user.create_user(user=admin)

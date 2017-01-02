@@ -116,7 +116,7 @@
                             {{ form.period_type(class='ui search dropdown') }}
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="inline field">
                         <div class="ui toggle checkbox">
                             {{ form.show() }}
                             {{ form.show.label() }}
@@ -162,6 +162,33 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请填写时段名称'
+                            }
+                        ]
+                    },
+                    start_time: {
+                        identifier: 'start_time',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择开始时间'
+                            }
+                        ]
+                    },
+                    end_time: {
+                        identifier: 'end_time',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择结束时间'
+                            }
+                        ]
+                    },
+                    period_type: {
+                        identifier: 'period_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择时段类型'
                             }
                         ]
                     }
