@@ -1687,7 +1687,7 @@ def ipad_contents():
 def announcement():
     form = NewAnnouncementForm()
     if form.validate_on_submit():
-        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=form.announcement_type.data, modified_by_id=current_user.id)
+        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=int(form.announcement_type.data), modified_by_id=current_user.id)
         db.session.add(announcement)
         db.session.commit()
         if form.show.data:
@@ -1712,10 +1712,10 @@ def publish_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.show:
         flash(u'所选通知已经发布', category='warning')
-        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.publish(modified_by=current_user._get_current_object())
     flash(u'“%s”发布成功！' % announcement.title, category='success')
-    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
 @manage.route('/announcement/retract/<int:id>')
@@ -1725,10 +1725,10 @@ def retract_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if not announcement.show:
         flash(u'所选通知尚未发布', category='warning')
-        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.retract(modified_by=current_user._get_current_object())
     flash(u'“%s”撤销成功！' % announcement.title, category='success')
-    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
 @manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
@@ -1742,7 +1742,7 @@ def edit_announcement(id):
     if form.validate_on_submit():
         announcement.title = form.title.data
         announcement.body_html = form.body.data
-        announcement.type_id = form.announcement_type.data
+        announcement.type_id = int(form.announcement_type.data)
         announcement.modified_at = datetime.utcnow()
         announcement.modified_by_id = current_user.id
         db.session.add(announcement)
@@ -1755,7 +1755,7 @@ def edit_announcement(id):
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     form.title.data = announcement.title
     form.body.data = announcement.body_html
-    form.announcement_type.data = announcement.type_id
+    form.announcement_type.data = unicode(announcement.type_id)
     form.show.data = announcement.show
     return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
 

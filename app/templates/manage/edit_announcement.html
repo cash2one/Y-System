@@ -106,7 +106,7 @@
                         </div>
                         <div class="four wide required field">
                             {{ form.announcement_type.label() }}
-                            {{ form.announcement_type(class='ui search dropdown') }}
+                            {{ form.announcement_type(class='ui dropdown') }}
                         </div>
                     </div>
                     <div class="required field">
@@ -160,6 +160,15 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请输入通知标题'
+                            }
+                        ]
+                    },
+                    announcement_type: {
+                        identifier: 'announcement_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择通知类型'
                             }
                         ]
                     },

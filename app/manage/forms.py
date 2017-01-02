@@ -236,25 +236,25 @@ class ConfirmPunchForm(FlaskForm):
 class NewAnnouncementForm(FlaskForm):
     title = StringField(u'通知标题', validators=[Required()])
     body = TextAreaField(u'通知内容', validators=[Required()])
-    announcement_type = SelectField(u'通知类型', coerce=int)
+    announcement_type = SelectField(u'通知类型', coerce=unicode, validators=[Required()])
     show = BooleanField(u'立即发布')
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(NewAnnouncementForm, self).__init__(*args, **kwargs)
-        self.announcement_type.choices = [(announcement_type.id, announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
+        self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
 
 
 class EditAnnouncementForm(FlaskForm):
     title = StringField(u'通知标题', validators=[Required()])
     body = TextAreaField(u'通知内容', validators=[Required()])
-    announcement_type = SelectField(u'通知类型', coerce=int)
+    announcement_type = SelectField(u'通知类型', coerce=unicode, validators=[Required()])
     show = BooleanField(u'发布')
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(EditAnnouncementForm, self).__init__(*args, **kwargs)
-        self.announcement_type.choices = [(announcement_type.id, announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
+        self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
 
 
 class DeleteAnnouncementForm(FlaskForm):
