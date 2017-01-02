@@ -1993,19 +1993,19 @@ def create_user():
         db.session.add(user)
         db.session.commit()
         for purpose_type_id in form.purposes.data:
-            purpose_type = PurposeType.query.get(purpose_type_id)
+            purpose_type = PurposeType.query.get(int(purpose_type_id))
             user.add_purpose(purpose_type=purpose_type)
         if form.other_purpose.data:
             user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
         for referrer_type_id in form.referrers.data:
-            referrer_type = ReferrerType.query.get(referrer_type_id)
+            referrer_type = ReferrerType.query.get(int(referrer_type_id))
             user.add_referrer(referrer_type=referrer_type)
         if form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
-        if form.vb_course.data:
-            user.register_course(form.vb_course.data)
-        if form.y_gre_course.data:
-            user.register_course(form.y_gre_course.data)
+        if int(form.vb_course.data):
+            user.register_course(int(form.vb_course.data))
+        if int(form.y_gre_course.data):
+            user.register_course(int(form.y_gre_course.data))
         # flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
     return render_template('manage/create_user.html', form=form)
 
