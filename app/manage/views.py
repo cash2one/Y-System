@@ -1974,7 +1974,7 @@ def create_user():
             gender = Gender.query.filter_by(name=u'女').first()
         user = User(
             email=form.email.data,
-            role_id=form.role.data,
+            role_id=int(form.role.data),
             password=form.id_number.data[-6:],
             name=form.name.data,
             gender_id=gender.id,
@@ -1985,7 +1985,7 @@ def create_user():
             qq=form.qq.data,
             address=form.address.data,
             emergency_contact_name=form.emergency_contact_name.data,
-            emergency_contact_relationship_id=form.emergency_contact_relationship.data,
+            emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
             emergency_contact_mobile=form.emergency_contact_mobile.data,
             worked_in_same_field=form.worked_in_same_field.data,
             deformity=form.deformity.data

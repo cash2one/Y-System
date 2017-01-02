@@ -358,15 +358,15 @@
                         {{ form.products.label() }}
                         {{ form.products(class='ui search dropdown') }}
                     </div>
-                    <h4 class="ui grey dividing header">其它信息</h4>
-                    <div class="fields">
-                        <div class="eight wide field">
+                    <!-- <h4 class="ui grey dividing header">其它信息</h4> -->
+                    <div class="ui segment">
+                        <div class="inline field">
                             <div class="ui toggle checkbox">
                                 {{ form.worked_in_same_field() }}
                                 {{ form.worked_in_same_field.label() }}
                             </div>
                         </div>
-                        <div class="eight wide field">
+                        <div class="inline field">
                             <div class="ui toggle checkbox">
                                 {{ form.deformity() }}
                                 {{ form.deformity.label() }}
@@ -374,7 +374,7 @@
                         </div>
                     </div>
                     <div class="ui segment">
-                        <div class="required field">
+                        <div class="inline required field">
                             <div class="ui toggle checkbox">
                                 {{ form.disclaimer() }}
                                 {{ form.disclaimer.label() }}
@@ -506,6 +506,15 @@ $(document)
                             }
                         ]
                     },
+                    emergency_contact_relationship: {
+                        identifier: 'emergency_contact_relationship',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择紧急联系人关系'
+                            }
+                        ]
+                    },
                     emergency_contact_mobile: {
                         identifier: 'emergency_contact_mobile',
                         rules: [
@@ -520,6 +529,51 @@ $(document)
                             {
                                 type: 'exactLength[11]',
                                 prompt: '紧急联系人移动电话号码位数有误'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier: 'role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修类别'
+                            }
+                        ]
+                    },
+                    vb_course: {
+                        identifier: 'vb_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择VB班'
+                            }
+                        ]
+                    },
+                    y_gre_course: {
+                        identifier: 'y_gre_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Y-GRE班'
+                            }
+                        ]
+                    },
+                    products: {
+                        identifier: 'products',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
+                    disclaimer: {
+                        identifier: 'disclaimer',
+                        rules: [
+                            {
+                                type: 'checked',
+                                prompt: '请确认服务条款'
                             }
                         ]
                     }
