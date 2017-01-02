@@ -103,7 +103,7 @@
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="four wide required field">
+                        <div class="six wide required field">
                             {{ form.email.label() }}
                             {{ form.email(placeholder='邮箱') }}
                         </div>
@@ -111,9 +111,9 @@
                             {{ form.activation_code.label() }}
                             {{ form.activation_code(placeholder='激活码') }}
                         </div>
-                        <div class="four wide required field">
+                        <div class="two wide required field">
                             {{ form.role.label() }}
-                            {{ form.role(class='ui dropdown') }}
+                            {{ form.role(class='ui compact dropdown') }}
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
@@ -193,6 +193,15 @@ $(document)
                             {
                                 type: 'length[6]',
                                 prompt: '激活码至少为6位'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier: 'role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择用户组'
                             }
                         ]
                     }

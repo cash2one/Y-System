@@ -348,15 +348,15 @@ class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
-    role = SelectField(u'用户组', coerce=int)
+    role = SelectField(u'用户组', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'新建管理用户')
 
     def __init__(self, creator, *args, **kwargs):
         super(NewAdminForm, self).__init__(*args, **kwargs)
         if creator.is_developer:
-            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
+            self.role.choices = [(u'', u'选择用户组')] + [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
         else:
-            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
+            self.role.choices = [(u'', u'选择用户组')] + [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
