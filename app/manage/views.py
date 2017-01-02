@@ -2113,7 +2113,7 @@ def find_user():
 def course():
     form = NewCourseForm()
     if form.validate_on_submit():
-        course = Course(name=form.name.data, type_id=form.course_type.data, show=form.show.data, modified_by_id=current_user.id)
+        course = Course(name=form.name.data, type_id=int(form.course_type.data), show=form.show.data, modified_by_id=current_user.id)
         db.session.add(course)
         flash(u'新建班级：%s' % form.name.data, category='success')
         return redirect(url_for('manage.course'))
@@ -2200,7 +2200,7 @@ def edit_course(id):
     form = EditCourseForm()
     if form.validate_on_submit():
         course.name = form.name.data
-        course.type_id = form.course_type.data
+        course.type_id = int(form.course_type.data)
         course.show = form.show.data
         course.modified_at = datetime.utcnow()
         course.modified_by_id = current_user.id
@@ -2208,7 +2208,7 @@ def edit_course(id):
         flash(u'已更新班级：%s' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.course'))
     form.name.data = course.name
-    form.course_type.data = course.type_id
+    form.course_type.data = unicode(course.type_id)
     form.show.data = course.show
     return render_template('manage/edit_course.html', form=form, course=course)
 
