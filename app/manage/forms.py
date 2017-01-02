@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, DateField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Relationship, PurposeType, ReferrerType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Role, User, Relationship, PurposeType, ReferrerType, Product, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 def NextDayString(days, short=False):
@@ -316,9 +316,11 @@ class NewUserForm(FlaskForm):
     role = SelectField(u'研修类别', coerce=int)
     vb_course = SelectField(u'VB班', coerce=int)
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
+    products = SelectMultipleField(u'研修产品', coerce=int)
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     deformity = BooleanField(u'有严重心理或身体疾病')
     # submit
+    disclaimer = BooleanField(u'确认无偿授权“云英语”使用申请者姓名、肖像、GRE成绩单以及其它必要信息用于宣传')
     submit = SubmitField(u'新建学生用户')
 
     def __init__(self, *args, **kwargs):
@@ -335,6 +337,7 @@ class NewUserForm(FlaskForm):
         self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
         self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+        self.products.choices = [(product.id, u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
