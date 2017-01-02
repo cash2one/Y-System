@@ -1613,7 +1613,7 @@ def edit_ipad(id):
         ipad.alias = form.alias.data
         ipad.serial = form.serial.data.upper()
         ipad.capacity_id = form.capacity.data
-        if form.room.data == 0:
+        if int(form.room.data) == 0:
             ipad.room_id = None
         else:
             ipad.room_id = form.room.data
@@ -1969,7 +1969,7 @@ def create_user():
     form = NewUserForm()
     if form.validate_on_submit():
         if int(form.id_number.data[16]) % 2 == 1:
-            gender = uery. Gender,filter_by(name=u'男').first()
+            gender = Gender.query.filter_by(name=u'男').first()
         else:
             gender = Gender.query.filter_by(name=u'女').first()
         user = User(
