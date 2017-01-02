@@ -1379,7 +1379,7 @@ def ipad():
     if form.validate_on_submit() and current_user.can(u'管理iPad设备'):
         serial = form.serial.data.upper()
         room_id = form.room.data
-        if room_id == 0:
+        if int(room_id) == 0:
             room_id = None
         state_id = form.state.data
         ipad = iPad.query.filter_by(serial=serial).first()
