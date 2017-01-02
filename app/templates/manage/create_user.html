@@ -339,7 +339,6 @@
                             {{ form.other_referrer(placeholder='其它了解渠道') }}
                         </div>
                     </div>
-                    <!-- <h4 class="ui teal dividing header">研修信息</h4> -->
                     <div class="fields">
                         <div class="eight wide required field">
                             {{ form.role.label() }}
@@ -358,7 +357,23 @@
                         {{ form.products.label() }}
                         {{ form.products(class='ui search dropdown') }}
                     </div>
-                    <!-- <h4 class="ui grey dividing header">其它信息</h4> -->
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.inviter_email.label() }}
+                            <div class="ui fluid search">
+                                {{ form.inviter_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
+                                <div class="results"></div>
+                            </div>
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.receptionist_email.label() }}
+                            <div class="ui fluid search">
+                                {{ form.receptionist_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
+                                <div class="results"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="ui grey dividing header">其它信息</h4>
                     <div class="ui segment">
                         <div class="inline field">
                             <div class="ui toggle checkbox">
@@ -563,7 +578,7 @@ $(document)
                         identifier: 'products',
                         rules: [
                             {
-                                type: 'empty',
+                                type: 'minCount[0]',
                                 prompt: '请选择研修产品'
                             }
                         ]
@@ -580,6 +595,15 @@ $(document)
                 }
             })
         ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/?keyword={query}'
+        },
+        showNoResults: false
     })
 ;
 </script>

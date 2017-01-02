@@ -399,8 +399,8 @@ def rental():
     show_history_rental = False
     if current_user.is_authenticated:
         show_today_rental = bool(request.cookies.get('show_today_rental', '1'))
-        show_today_rental_1103 = bool(request.cookies.get('show_today_rental_1103', '0'))
-        show_today_rental_1707 = bool(request.cookies.get('show_today_rental_1707', '0'))
+        show_today_rental_1103 = bool(request.cookies.get('show_today_rental_1103', ''))
+        show_today_rental_1707 = bool(request.cookies.get('show_today_rental_1707', ''))
         show_history_rental = bool(request.cookies.get('show_history_rental', ''))
     if show_today_rental:
         query = Rental.query\
@@ -2016,7 +2016,7 @@ def create_user():
 def create_admin():
     form = NewAdminForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
-        admin = User(email=form.email.data, role_id=form.role.data, password=form.activation_code.data, name=form.name.data)
+        admin = User(email=form.email.data, role_id=int(form.role.data), password=form.activation_code.data, name=form.name.data)
         db.session.add(admin)
         db.session.commit()
         current_user.create_user(user=admin)
