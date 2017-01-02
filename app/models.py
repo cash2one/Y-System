@@ -280,6 +280,7 @@ class SuspensionRecord(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
@@ -569,6 +570,7 @@ class AssignmentScore(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
     grade_id = db.Column(db.Integer, db.ForeignKey('assignment_score_grades.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -582,6 +584,7 @@ class VBTestScore(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
     score = db.Column(db.Float)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -663,6 +666,7 @@ class YGRETestScore(db.Model):
     v_score_id = db.Column(db.Integer, db.ForeignKey('gre_v_scores.id'))
     q_score_id = db.Column(db.Integer, db.ForeignKey('gre_q_scores.id'))
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
@@ -739,8 +743,9 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     activated = db.Column(db.Boolean, default=False)
-    activated_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
+    activated_at = db.Column(db.DateTime)
+    last_seen_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
     # profile properties
     name = db.Column(db.Unicode(64), index=True)
@@ -894,42 +899,42 @@ class User(UserMixin, db.Model):
     )
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
     # user relationship properties
-    invited_users = db.relationship(
+    sent_invitations = db.relationship(
         'Invitation',
         foreign_keys=[Invitation.inviter_id],
         backref=db.backref('inviter', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    invited_by = db.relationship(
+    accepted_invitations = db.relationship(
         'Invitation',
         foreign_keys=[Invitation.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    received_users = db.relationship(
+    made_receptions = db.relationship(
         'Reception',
         foreign_keys=[Reception.receptionist_id],
         backref=db.backref('receptionist', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    received_by = db.relationship(
+    received_receptions = db.relationship(
         'Reception',
         foreign_keys=[Reception.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    created_users = db.relationship(
+    made_user_creations = db.relationship(
         'UserCreation',
         foreign_keys=[UserCreation.creator_id],
         backref=db.backref('creator', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    created_by = db.relationship(
+    received_user_creations = db.relationship(
         'UserCreation',
         foreign_keys=[UserCreation.user_id],
         backref=db.backref('user', lazy='joined'),
@@ -1113,50 +1118,50 @@ class User(UserMixin, db.Model):
         if not self.invited_user(user):
             invitation = Invitation(inviter_id=self.id, user_id=user.id, type_id=invitation_type.id)
         else:
-            invitation = self.invited_users.filter_by(user_id=user.id).first()
+            invitation = self.sent_invitations.filter_by(user_id=user.id).first()
             invitation.type_id = invitation_type.id
             invitation.timestamp = datetime.utcnow()
         db.session.add(invitation)
 
     def uninvite_user(self, user):
-        invitation = self.invited_users.filter_by(user_id=user.id).first()
+        invitation = self.sent_invitations.filter_by(user_id=user.id).first()
         if invitation:
             db.session.delete(invitation)
 
     def invited_user(self, user):
-        return self.invited_users.filter_by(user_id=user.id).first() is not None
+        return self.sent_invitations.filter_by(user_id=user.id).first() is not None
 
     def receive_user(self, user):
         if not self.received_user(user):
             reception = Reception(receptionist_id=self.id, user_id=user.id)
         else:
-            reception = self.received_users.filter_by(user_id=user.id).first()
+            reception = self.made_receptions.filter_by(user_id=user.id).first()
             reception.timestamp = datetime.utcnow()
         db.session.add(reception)
 
     def unreceive_user(self, user):
-        reception = self.received_users.filter_by(user_id=user.id).first()
+        reception = self.made_receptions.filter_by(user_id=user.id).first()
         if reception:
             db.session.delete(reception)
 
     def received_user(self, user):
-        return self.received_users.filter_by(user_id=user.id).first() is not None
+        return self.made_receptions.filter_by(user_id=user.id).first() is not None
 
     def create_user(self, user):
         if not self.created_user(user):
             user_creation = UserCreation(creator_id=self.id, user_id=user.id)
         else:
-            user_creation = self.created_users.filter_by(user_id=user.id).first()
+            user_creation = self.made_user_creations.filter_by(user_id=user.id).first()
             user_creation.timestamp = datetime.utcnow()
         db.session.add(user_creation)
 
     def uncreate_user(self, user):
-        user_creation = self.created_users.filter_by(user_id=user.id).first()
+        user_creation = self.made_user_creations.filter_by(user_id=user.id).first()
         if user_creation:
             db.session.delete(user_creation)
 
     def created_user(self, user):
-        return self.created_users.filter_by(user_id=user.id).first() is not None
+        return self.made_user_creations.filter_by(user_id=user.id).first() is not None
 
     def register_group(self, organizer):
         if not self.is_registering_group(organizer):
@@ -1410,9 +1415,11 @@ class User(UserMixin, db.Model):
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
-    def activate(self):
+    def activate(self, new_password=''):
         self.activated = True
         self.activated_at = datetime.utcnow()
+        if new_password:
+            self.password = new_password
         db.session.add(self)
         self.punch(section=Section.query.get(1))
 
@@ -1436,7 +1443,7 @@ class User(UserMixin, db.Model):
         else:
             user_json_suggestion = {
                 'title': self.name,
-                'description': self.email,
+                'description': '%s [%s]' % (self.email, self.role.name),
             }
         if include_url:
             user_json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
@@ -1515,6 +1522,7 @@ class PreviousAchievementType(db.Model):
             (u'专业英语四级', ),
             (u'专业英语八级', ),
             (u'TOEFL', ),
+            (u'竞赛', ),
             (u'其它', ),
         ]
         for PAT in previous_achievement_types:
@@ -1600,6 +1608,7 @@ class Product(db.Model):
     name = db.Column(db.Unicode(64), index=True)
     price = db.Column(db.Float, default=0.0)
     available = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
@@ -1628,8 +1637,8 @@ class Product(db.Model):
             (u'Y-GRE基本技术费', 6800.0, ),
             (u'AW费用', 800.0, ),
             (u'Q费用', 800.0, ),
-            (u'多轮费用', 800.0, ),
-            (u'未毕业减免', -800.0, ),
+            (u'Y-GRE多轮费用', 2000.0, ),
+            (u'在校生减免', -800.0, ),
             (u'本校减免', -500.0, ),
             (u'联报优惠', -1000.0, ),
             (u'团报优惠', -200.0, ),
@@ -1684,6 +1693,7 @@ class Course(db.Model):
     name = db.Column(db.Unicode(64), index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     show = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
@@ -1741,6 +1751,7 @@ class Period(db.Model):
     end_time = db.Column(db.Time)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     show = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
@@ -1854,6 +1865,7 @@ class Schedule(db.Model):
     period_id = db.Column(db.Integer, db.ForeignKey('periods.id'))
     quota = db.Column(db.Integer, default=0)
     available = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     booked_users = db.relationship(
@@ -2155,6 +2167,7 @@ class iPad(db.Model):
     video_playback = db.Column(db.Interval, default=timedelta(hours=10))
     battery_life = db.Column(db.Integer, default=100)
     charged_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     deleted = db.Column(db.Boolean, default=False)
@@ -2229,9 +2242,19 @@ class iPad(db.Model):
         return [vb_lesson.id for vb_lesson in vb_lessons]
 
     @property
+    def vb_lesson_ids_included_unicode(self):
+        vb_lessons = self.has_vb_lessons
+        return [unicode(vb_lesson.id) for vb_lesson in vb_lessons]
+
+    @property
     def y_gre_lesson_ids_included(self):
         y_gre_lessons = self.has_y_gre_lessons
         return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
+
+    @property
+    def y_gre_lesson_ids_included_unicode(self):
+        y_gre_lessons = self.has_y_gre_lessons
+        return [unicode(y_gre_lesson.id) for y_gre_lesson in y_gre_lessons]
 
     @property
     def video_playback_alias(self):
@@ -2735,6 +2758,7 @@ class Announcement(db.Model):
     body = db.Column(db.UnicodeText)
     body_html = db.Column(db.UnicodeText)
     type_id = db.Column(db.Integer, db.ForeignKey('announcement_types.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     show = db.Column(db.Boolean, default=False)

@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}编辑通知{% endblock %}
+{% block title %}新建管理用户{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/editor/wangEditor.min.css') }}">
 <style type="text/css">
 .masthead.segment {
     min-height: 300px;
@@ -88,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑通知</h1>
+    <h1 class="ui inverted header"><i class="add user icon"></i> 新建管理用户</h1>
 </div>
 {% endblock %}
 
@@ -97,31 +96,40 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="edit-announcement" method="POST" class="ui form">
+                <form id="create-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="twelve wide required field">
-                            {{ form.title.label() }}
-                            {{ form.title(placeholder='通知标题') }}
+                        <div class="four wide required field">
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='姓名') }}
+                        </div>
+                        <div class="six wide required field">
+                            {{ form.email.label() }}
+                            {{ form.email(placeholder='邮箱') }}
                         </div>
                         <div class="four wide required field">
-                            {{ form.announcement_type.label() }}
-                            {{ form.announcement_type(class='ui dropdown') }}
+                            {{ form.activation_code.label() }}
+                            {{ form.activation_code(placeholder='激活码') }}
                         </div>
-                    </div>
-                    <div class="required field">
-                        {{ form.body.label() }}
-                        {{ form.body(placeholder='通知内容') }}
-                    </div>
-                    <div class="field">
-                        <div class="ui toggle checkbox">
-                            {{ form.show() }}
-                            {{ form.show.label() }}
+                        <div class="two wide required field">
+                            {{ form.role.label() }}
+                            {{ form.role(class='ui compact dropdown') }}
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.announcement') }}">取消</a>
+                    <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                     <div class="ui error message"></div>
+                    {% with email_errors = form.email.errors %}
+                    {% if email_errors %}
+                    <div class="ui flask negative message">
+                        <ul class="list">
+                            {% for error in email_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </form>
             </div>
         </div>
@@ -131,7 +139,6 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script type="text/javascript" src="{{ url_for('static', filename='assets/editor/wangEditor.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -148,36 +155,53 @@ $('select.dropdown')
 
 $(document)
     .ready(function() {
-        $('#edit-announcement')
+        $('#create-user')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    title: {
-                        identifier: 'title',
+                    name: {
+                        identifier: 'name',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请输入通知标题'
+                                prompt: '请填写用户姓名'
                             }
                         ]
                     },
-                    announcement_type: {
-                        identifier: 'announcement_type',
+                    email: {
+                        identifier: 'email',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择通知类型'
+                                prompt: '请填写电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
                             }
                         ]
                     },
-                    body: {
-                        identifier: 'body',
+                    activation_code: {
+                        identifier: 'activation_code',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请输入通知内容'
+                                prompt: '请填写激活码'
+                            },
+                            {
+                                type: 'length[6]',
+                                prompt: '激活码至少为6位'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier: 'role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择用户组'
                             }
                         ]
                     }
@@ -186,26 +210,5 @@ $(document)
         ;
     })
 ;
-
-// editor
-var editor = new wangEditor('body');
-editor.config.menus = [
-    'source',
-    '|',
-    'bold',
-    'underline',
-    'italic',
-    'strikethrough',
-    'forecolor',
-    '|',
-    'quote',
-    'unorderlist',
-    'orderlist',
-    '|',
-    'eraser',
-    'undo',
-    'redo',
- ];
-editor.create();
 </script>
 {% endblock %}

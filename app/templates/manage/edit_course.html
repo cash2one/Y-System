@@ -99,13 +99,13 @@
                 <form id="edit-course" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='班级名称') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="eight wide required field">
                             {{ form.course_type.label() }}
-                            {{ form.course_type(class='ui search dropdown') }}
+                            {{ form.course_type(class='ui dropdown') }}
                         </div>
                     </div>
                     <div class="field">
@@ -145,13 +145,24 @@ $(document)
         $('#edit-course')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     name: {
-                        identifier  : 'name',
+                        identifier: 'name',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请填写班级名称'
+                                type: 'empty',
+                                prompt: '请输入班级名称'
+                            }
+                        ]
+                    },
+                    course_type: {
+                        identifier: 'course_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择班级类型'
                             }
                         ]
                     }

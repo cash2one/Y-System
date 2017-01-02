@@ -99,24 +99,24 @@
                 <form id="edit-period" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='时段名称') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.start_time.label() }}
-                            {{ form.start_time(class='ui search dropdown') }}
+                            {{ form.start_time(class='ui dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.end_time.label() }}
-                            {{ form.end_time(class='ui search dropdown') }}
+                            {{ form.end_time(class='ui dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.period_type.label() }}
-                            {{ form.period_type(class='ui search dropdown') }}
+                            {{ form.period_type(class='ui dropdown') }}
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="inline field">
                         <div class="ui toggle checkbox">
                             {{ form.show() }}
                             {{ form.show.label() }}
@@ -153,13 +153,42 @@ $(document)
         $('#edit-period')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     name: {
-                        identifier  : 'name',
+                        identifier: 'name',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请填写时段名称'
+                                type: 'empty',
+                                prompt: '请填写时段名称'
+                            }
+                        ]
+                    },
+                    start_time: {
+                        identifier: 'start_time',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择开始时间'
+                            }
+                        ]
+                    },
+                    end_time: {
+                        identifier: 'end_time',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择结束时间'
+                            }
+                        ]
+                    },
+                    period_type: {
+                        identifier: 'period_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择时段类型'
                             }
                         ]
                     }

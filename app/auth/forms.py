@@ -16,17 +16,17 @@ class LoginForm(FlaskForm):
 
 class ActivationForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    activation_code = PasswordField(u'激活码', validators=[Required()])
-    password = PasswordField(u'新密码', validators=[Required(), EqualTo('password2')])
-    password2 = PasswordField(u'确认密码', validators=[Required()])
+    activation_code = PasswordField(u'激活码', validators=[Required(), Length(6, 64)])
+    password = PasswordField(u'新密码', validators=[Required(), Length(6, 64), EqualTo('password2')])
+    password2 = PasswordField(u'确认密码', validators=[Required(), Length(6, 64)])
     eula = BooleanField(u'同意使用条款', validators=[Required()])
     submit = SubmitField(u'激活')
 
 
 class ChangePasswordForm(FlaskForm):
     old_password = PasswordField(u'旧密码', validators=[Required()])
-    password = PasswordField(u'新密码', validators=[Required(), EqualTo('password2')])
-    password2 = PasswordField(u'确认密码', validators=[Required()])
+    password = PasswordField(u'新密码', validators=[Required(), Length(6, 64), EqualTo('password2')])
+    password2 = PasswordField(u'确认密码', validators=[Required(), Length(6, 64)])
     submit = SubmitField(u'修改密码')
 
 
@@ -37,8 +37,8 @@ class ResetPasswordRequestForm(FlaskForm):
 
 class ResetPasswordForm(FlaskForm):
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    password = PasswordField(u'新密码', validators=[Required(), EqualTo('password2')])
-    password2 = PasswordField(u'确认密码', validators=[Required()])
+    password = PasswordField(u'新密码', validators=[Required(), Length(6, 64), EqualTo('password2')])
+    password2 = PasswordField(u'确认密码', validators=[Required(), Length(6, 64)])
     submit = SubmitField(u'重置密码')
 
     def validate_email(self, field):
@@ -48,7 +48,7 @@ class ResetPasswordForm(FlaskForm):
 
 class ChangeEmailForm(FlaskForm):
     email = StringField(u'新邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    password = PasswordField(u'密码', validators=[Required()])
+    password = PasswordField(u'密码', validators=[Required(), Length(6, 64)])
     submit = SubmitField(u'修改邮箱')
 
     def validate_email(self, field):

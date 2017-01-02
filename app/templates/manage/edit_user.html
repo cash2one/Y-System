@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}编辑用户账户信息{% endblock %}
+{% block title %}编辑用户信息{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -42,9 +42,6 @@
 }
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
-}
-.ui.vertical.stripe .ui.form .ui.flask.message {
-    display: block;
 }
 .ui.vertical.stripe .ui.form .ui.button.cancel {
     margin-left: 5px;
@@ -87,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑用户账户信息</h1>
+    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑用户信息</h1>
 </div>
 {% endblock %}
 
@@ -99,23 +96,19 @@
                 <form id="edit-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="three wide field">
+                        <div class="four wide field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="four wide field disabled">
-                            {{ form.email.label() }}
-                            {{ form.email(placeholder='邮箱') }}
-                        </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
                             {{ form.role.label() }}
                             {{ form.role(class='ui dropdown') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
                             {{ form.vb_course.label() }}
                             {{ form.vb_course(class='ui dropdown') }}
                         </div>
-                        <div class="three wide field">
+                        <div class="four wide field">
                             {{ form.y_gre_course.label() }}
                             {{ form.y_gre_course(class='ui dropdown') }}
                         </div>
@@ -123,17 +116,6 @@
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                     <div class="ui error message"></div>
-                    {% with email_errors = form.email.errors %}
-                    {% if email_errors %}
-                    <div class="ui flask negative message">
-                        <ul class="list">
-                            {% for error in email_errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
                 </form>
             </div>
         </div>
@@ -162,35 +144,37 @@ $(document)
         $('#edit-user')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
                     name: {
-                        identifier  : 'name',
+                        identifier: 'name',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请填写用户姓名'
+                                type: 'empty',
+                                prompt: '请填写用户姓名'
                             }
                         ]
                     },
                     email: {
-                        identifier  : 'email',
+                        identifier: 'email',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请输入您的电子邮箱地址'
+                                type: 'empty',
+                                prompt: '请输入您的电子邮箱地址'
                             },
                             {
-                                type   : 'email',
-                                prompt : '请输入一个有效的电子邮箱地址'
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
                             }
                         ]
                     },
                     role: {
-                        identifier  : 'role',
+                        identifier: 'role',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请选择用户组'
+                                type: 'empty',
+                                prompt: '请选择用户组'
                             }
                         ]
                     }

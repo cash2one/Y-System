@@ -207,20 +207,20 @@
                 <form id="new-schedule" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="five wide field">
+                        <div class="five wide required field">
                             {{ form.date.label() }}
                             {{ form.date(class='ui dropdown') }}
                         </div>
-                        <div class="nine wide field">
+                        <div class="nine wide required field">
                             {{ form.period.label() }}
-                            {{ form.period(class='ui search dropdown') }}
+                            {{ form.period(class='ui dropdown') }}
                         </div>
-                        <div class="two wide field">
+                        <div class="two wide required field">
                             {{ form.quota.label() }}
                             {{ form.quota(placeholder='0') }}
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="inline field">
                         <div class="ui toggle checkbox">
                             {{ form.publish_now() }}
                             {{ form.publish_now.label() }}
@@ -266,26 +266,37 @@ $(document)
         $('#new-schedule')
             .form({
                 onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
                 fields: {
-                    period: {
-                        identifier  : 'period',
+                    date: {
+                        identifier: 'date',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请选择预约时段'
+                                type: 'empty',
+                                prompt: '请选择日期'
+                            }
+                        ]
+                    },
+                    period: {
+                        identifier: 'period',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择预约时段'
                             }
                         ]
                     },
                     quota: {
-                        identifier  : 'quota',
+                        identifier: 'quota',
                         rules: [
                             {
-                                type   : 'empty',
-                                prompt : '请输入预约名额'
+                                type: 'empty',
+                                prompt: '请输入预约名额'
                             },
                             {
-                                type   : 'integer[1..]',
-                                prompt : '请输入一个大于0的整数'
+                                type: 'integer[1..]',
+                                prompt: '请输入一个大于0的整数'
                             }
                         ]
                     }

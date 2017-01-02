@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: f2fc40063fc1
+Revision ID: f8c5a0df6f8d
 Revises: 
-Create Date: 2016-12-07 11:09:17.622645
+Create Date: 2016-12-07 17:04:38.233057
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f2fc40063fc1'
+revision = 'f8c5a0df6f8d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -166,6 +166,7 @@ def upgrade():
     sa.Column('activated', sa.Boolean(), nullable=True),
     sa.Column('activated_at', sa.DateTime(), nullable=True),
     sa.Column('last_seen_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('gender_id', sa.Integer(), nullable=True),
@@ -194,6 +195,7 @@ def upgrade():
     sa.Column('body', sa.UnicodeText(), nullable=True),
     sa.Column('body_html', sa.UnicodeText(), nullable=True),
     sa.Column('type_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('show', sa.Boolean(), nullable=True),
@@ -215,6 +217,7 @@ def upgrade():
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('type_id', sa.Integer(), nullable=True),
     sa.Column('show', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
@@ -274,6 +277,7 @@ def upgrade():
     sa.Column('video_playback', sa.Interval(), nullable=True),
     sa.Column('battery_life', sa.Integer(), nullable=True),
     sa.Column('charged_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
@@ -292,6 +296,7 @@ def upgrade():
     sa.Column('end_time', sa.Time(), nullable=True),
     sa.Column('type_id', sa.Integer(), nullable=True),
     sa.Column('show', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
@@ -314,6 +319,7 @@ def upgrade():
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('price', sa.Float(), nullable=True),
     sa.Column('available', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
@@ -361,6 +367,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('start_date', sa.Date(), nullable=True),
     sa.Column('end_date', sa.Date(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
@@ -389,6 +396,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('assignment_id', sa.Integer(), nullable=True),
     sa.Column('grade_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['assignment_id'], ['assignments.id'], ),
@@ -438,6 +446,7 @@ def upgrade():
     sa.Column('period_id', sa.Integer(), nullable=True),
     sa.Column('quota', sa.Integer(), nullable=True),
     sa.Column('available', sa.Boolean(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
@@ -457,6 +466,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('test_id', sa.Integer(), nullable=True),
     sa.Column('score', sa.Float(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
@@ -471,6 +481,7 @@ def upgrade():
     sa.Column('v_score_id', sa.Integer(), nullable=True),
     sa.Column('q_score_id', sa.Integer(), nullable=True),
     sa.Column('aw_score_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['aw_score_id'], ['gre_aw_scores.id'], ),

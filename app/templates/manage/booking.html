@@ -238,7 +238,7 @@
                 {% if pagination %}
                 {{ macros.pagination_widget(pagination, 'manage.booking') }}
                 {% endif %}
-                <a class="ui button loading-trigger" href="{{ url_for('manage.set_booking_state_missed_all', next=url_for('manage.booking', page=pagination.page)) }}"><i class="repeat icon"></i> 批量标记爽约/失效</a>
+                <a class="ui labeled icon button loading-trigger" href="{{ url_for('manage.set_booking_state_missed_all', next=url_for('manage.booking', page=pagination.page)) }}"><i class="repeat icon"></i> 批量标记爽约/失效</a>
             </div>
         </div>
     </div>
@@ -265,8 +265,8 @@ $('table')
 {% for booking in bookings %}
 $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
     .popup({
-        popup : $('#booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}'),
-        on    : 'click'
+        popup: $('#booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}'),
+        on: 'click'
     })
 ;
 {% endfor %}

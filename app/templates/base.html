@@ -14,7 +14,7 @@
     <meta name="keywords" content="Y-English, Y-System, English, Education" />
 
     <!-- Semantic UI CSS -->
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.css">
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -108,17 +108,21 @@
                 教学管理
                 <i class="dropdown icon"></i>
                 <div class="menu">
+                    {% if current_user.can('管理iPad借阅') %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
+                    {% endif %}
                     {% if current_user.can('管理课程预约') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                     {% endif %}
                     {% if current_user.can('管理预约时段') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
                     {% endif %}
-                    {% if current_user.can('管理iPad借阅') %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
-                    {% endif %}
+                    {% if current_user.can('管理作业') %}
                     <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                    {% endif %}
+                    {% if current_user.can('管理考试') %}
                     <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                    {% endif %}
                 </div>
             </div>
             <div class="ui dropdown item">
@@ -126,15 +130,15 @@
                 系统管理
                 <i class="dropdown icon"></i>
                 <div class="menu">
-                    <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
-                    {% if current_user.can('管理通知') %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
-                    {% endif %}
                     {% if current_user.can('管理用户') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                     {% endif %}
                     {% if current_user.can('管理班级') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i> 班级管理</a>
+                    {% endif %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
+                    {% if current_user.can('管理通知') %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                     {% endif %}
                     {% if current_user.is_developer%}
                     <div class="divider"></div>
@@ -220,31 +224,35 @@
         <div class="item">
             <div class="header">教学管理</div>
             <div class="menu">
+                {% if current_user.can('管理iPad借阅') %}
+                <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
+                {% endif %}
                 {% if current_user.can('管理课程预约') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                 {% endif %}
                 {% if current_user.can('管理预约时段') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
                 {% endif %}
-                {% if current_user.can('管理iPad借阅') %}
-                <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
-                {% endif %}
+                {% if current_user.can('管理作业') %}
                 <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                {% endif %}
+                {% if current_user.can('管理考试') %}
                 <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                {% endif %}
             </div>
         </div>
         <div class="item">
             <div class="header">系统管理</div>
             <div class="menu">
-                <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
-                {% if current_user.can('管理通知') %}
-                <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
-                {% endif %}
                 {% if current_user.can('管理用户') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                 {% endif %}
                 {% if current_user.can('管理班级') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i> 班级管理</a>
+                {% endif %}
+                <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
+                {% if current_user.can('管理通知') %}
+                <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                 {% endif %}
                 {% if current_user.is_developer%}
                 <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
@@ -324,17 +332,21 @@
                         教学管理
                         <i class="dropdown icon"></i>
                         <div class="menu">
+                            {% if current_user.can('管理iPad借阅') %}
+                            <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
+                            {% endif %}
                             {% if current_user.can('管理课程预约') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                             {% endif %}
                             {% if current_user.can('管理预约时段') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
                             {% endif %}
-                            {% if current_user.can('管理iPad借阅') %}
-                            <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="exchange icon"></i> iPad借阅管理</a>
-                            {% endif %}
+                            {% if current_user.can('管理作业') %}
                             <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
+                            {% endif %}
+                            {% if current_user.can('管理考试') %}
                             <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="ui dropdown item">
@@ -342,15 +354,15 @@
                         系统管理
                         <i class="dropdown icon"></i>
                         <div class="menu">
-                            <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
-                            {% if current_user.can('管理通知') %}
-                            <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
-                            {% endif %}
                             {% if current_user.can('管理用户') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="users icon"></i> 用户管理</a>
                             {% endif %}
                             {% if current_user.can('管理班级') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i> 班级管理</a>
+                            {% endif %}
+                            <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
+                            {% if current_user.can('管理通知') %}
+                            <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                             {% endif %}
                             {% if current_user.is_developer%}
                             <div class="divider"></div>
@@ -466,7 +478,7 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.0.0/jquery-migrate.min.js"></script>
 
     <!-- Semantic UI JS -->
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.js"></script>
 
     <!-- Moment.js -->
     {{ moment.include_moment() }}

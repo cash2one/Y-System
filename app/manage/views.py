@@ -7,10 +7,10 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, Purpose, PurposeType, Referrer, ReferrerType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -399,8 +399,8 @@ def rental():
     show_history_rental = False
     if current_user.is_authenticated:
         show_today_rental = bool(request.cookies.get('show_today_rental', '1'))
-        show_today_rental_1103 = bool(request.cookies.get('show_today_rental_1103', '0'))
-        show_today_rental_1707 = bool(request.cookies.get('show_today_rental_1707', '0'))
+        show_today_rental_1103 = bool(request.cookies.get('show_today_rental_1103', ''))
+        show_today_rental_1707 = bool(request.cookies.get('show_today_rental_1707', ''))
         show_history_rental = bool(request.cookies.get('show_history_rental', ''))
     if show_today_rental:
         query = Rental.query\
@@ -1142,7 +1142,7 @@ def period():
         if start_time >= end_time:
             flash(u'无法添加时段模板：%s，时间设置有误' % form.name.data, category='error')
             return redirect(url_for('manage.period'))
-        period = Period(name=form.name.data, start_time=start_time, end_time=end_time, type_id=form.period_type.data, show=form.show.data, modified_by_id=current_user.id)
+        period = Period(name=form.name.data, start_time=start_time, end_time=end_time, type_id=int(form.period_type.data), show=form.show.data, modified_by_id=current_user.id)
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
         return redirect(url_for('manage.period'))
@@ -1185,7 +1185,7 @@ def edit_period(id):
         period.name = form.name.data
         period.start_time = start_time
         period.end_time = end_time
-        period.type_id = form.period_type.data
+        period.type_id = int(form.period_type.data)
         period.show = form.show.data
         period.modified_at = datetime.utcnow()
         period.modified_by_id = current_user.id
@@ -1195,7 +1195,7 @@ def edit_period(id):
     form.name.data = period.name
     form.start_time.data = period.start_time.strftime(u'%H:%M')
     form.end_time.data = period.end_time.strftime(u'%H:%M')
-    form.period_type.data = period.type_id
+    form.period_type.data = unicode(period.type_id)
     form.show.data = period.show
     return render_template('manage/edit_period.html', form=form, period=period)
 
@@ -1223,17 +1223,17 @@ def schedule():
     if form.validate_on_submit():
         day = date(*[int(x) for x in form.date.data.split('-')])
         for period_id in form.period.data:
-            schedule = Schedule.query.filter_by(date=day, period_id=period_id).first()
+            schedule = Schedule.query.filter_by(date=day, period_id=int(period_id)).first()
             if schedule:
                 flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='warning')
             else:
-                period = Period.query.get_or_404(period_id)
+                period = Period.query.get_or_404(int(period_id))
                 if period.deleted:
                     abort(404)
                 if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time), category='error')
                 else:
-                    schedule = Schedule(date=day, period_id=period_id, quota=form.quota.data, available=form.publish_now.data, modified_by_id=current_user.id)
+                    schedule = Schedule(date=day, period_id=int(period_id), quota=form.quota.data, available=form.publish_now.data, modified_by_id=current_user.id)
                     db.session.add(schedule)
                     db.session.commit()
                     flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='success')
@@ -1378,19 +1378,18 @@ def ipad():
     form = NewiPadForm()
     if form.validate_on_submit() and current_user.can(u'管理iPad设备'):
         serial = form.serial.data.upper()
-        room_id = form.room.data
+        room_id = int(form.room.data)
         if room_id == 0:
             room_id = None
-        state_id = form.state.data
         ipad = iPad.query.filter_by(serial=serial).first()
         if ipad:
             flash(u'序列号为%s的iPad已存在' % serial, category='error')
             return redirect(url_for('manage.ipad'))
-        ipad = iPad(serial=serial, alias=form.alias.data, capacity_id=form.capacity.data, room_id=room_id, state_id=state_id, video_playback=timedelta(hours=form.video_playback.data), modified_by_id=current_user.id)
+        ipad = iPad(serial=serial, alias=form.alias.data, capacity_id=int(form.capacity.data), room_id=room_id, state_id=int(form.state.data), video_playback=timedelta(hours=form.video_playback.data), modified_by_id=current_user.id)
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            lesson = Lesson.query.get(lesson_id)
+            lesson = Lesson.query.get(int(lesson_id))
             ipad.add_lesson(lesson)
         iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
@@ -1613,11 +1612,11 @@ def edit_ipad(id):
         ipad.alias = form.alias.data
         ipad.serial = form.serial.data.upper()
         ipad.capacity_id = form.capacity.data
-        if form.room.data == 0:
+        if int(form.room.data) == 0:
             ipad.room_id = None
         else:
-            ipad.room_id = form.room.data
-        ipad.state_id = form.state.data
+            ipad.room_id = int(form.room.data)
+        ipad.state_id = int(form.state.data)
         ipad.video_playback = timedelta(hours=form.video_playback.data)
         ipad.modified_at = datetime.utcnow()
         ipad.modified_by_id = current_user.id
@@ -1626,19 +1625,19 @@ def edit_ipad(id):
         for ipad_content in ipad.contents:
             ipad.remove_lesson(ipad_content.lesson)
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            lesson = Lesson.query.get(lesson_id)
+            lesson = Lesson.query.get(int(lesson_id))
             ipad.add_lesson(lesson)
         iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新', category='success')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
     form.serial.data = ipad.serial
-    form.capacity.data = ipad.capacity_id
-    form.room.data = ipad.room_id
-    form.state.data = ipad.state_id
+    form.capacity.data = unicode(ipad.capacity_id)
+    form.room.data = unicode(ipad.room_id)
+    form.state.data = unicode(ipad.state_id)
     form.video_playback.data = ipad.video_playback.total_seconds() / 3600
-    form.vb_lessons.data = ipad.vb_lesson_ids_included
-    form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included
+    form.vb_lessons.data = ipad.vb_lesson_ids_included_unicode
+    form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included_unicode
     return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
 
 
@@ -1667,7 +1666,7 @@ def filter_ipad():
     if form.validate_on_submit():
         lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
         if len(lesson_ids):
-            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=lesson_id).all()]) for lesson_id in lesson_ids])
+            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
             ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
     return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
 
@@ -1688,7 +1687,7 @@ def ipad_contents():
 def announcement():
     form = NewAnnouncementForm()
     if form.validate_on_submit():
-        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=form.announcement_type.data, modified_by_id=current_user.id)
+        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=int(form.announcement_type.data), modified_by_id=current_user.id)
         db.session.add(announcement)
         db.session.commit()
         if form.show.data:
@@ -1713,10 +1712,10 @@ def publish_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.show:
         flash(u'所选通知已经发布', category='warning')
-        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.publish(modified_by=current_user._get_current_object())
     flash(u'“%s”发布成功！' % announcement.title, category='success')
-    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
 @manage.route('/announcement/retract/<int:id>')
@@ -1726,10 +1725,10 @@ def retract_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if not announcement.show:
         flash(u'所选通知尚未发布', category='warning')
-        return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.retract(modified_by=current_user._get_current_object())
     flash(u'“%s”撤销成功！' % announcement.title, category='success')
-    return redirect(url_for(request.args.get('next') or 'manage.announcement'))
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
 @manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
@@ -1743,7 +1742,7 @@ def edit_announcement(id):
     if form.validate_on_submit():
         announcement.title = form.title.data
         announcement.body_html = form.body.data
-        announcement.type_id = form.announcement_type.data
+        announcement.type_id = int(form.announcement_type.data)
         announcement.modified_at = datetime.utcnow()
         announcement.modified_by_id = current_user.id
         db.session.add(announcement)
@@ -1756,7 +1755,7 @@ def edit_announcement(id):
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     form.title.data = announcement.title
     form.body.data = announcement.body_html
-    form.announcement_type.data = announcement.type_id
+    form.announcement_type.data = unicode(announcement.type_id)
     form.show.data = announcement.show
     return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
 
@@ -1831,28 +1830,24 @@ def user():
     if show_volunteers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'志愿者')\
             .order_by(User.last_seen_at.desc())
     if show_moderators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'协管员')\
             .order_by(User.last_seen_at.desc())
     if show_administrators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'管理员')\
             .order_by(User.last_seen_at.desc())
     if show_developers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'开发人员')\
             .order_by(User.last_seen_at.desc())
@@ -1966,6 +1961,70 @@ def developers():
     return resp
 
 
+@manage.route('/user/create', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理用户')
+def create_user():
+    form = NewUserForm()
+    if form.validate_on_submit():
+        if int(form.id_number.data[16]) % 2 == 1:
+            gender = Gender.query.filter_by(name=u'男').first()
+        else:
+            gender = Gender.query.filter_by(name=u'女').first()
+        user = User(
+            email=form.email.data,
+            role_id=int(form.role.data),
+            password=form.id_number.data[-6:],
+            name=form.name.data,
+            gender_id=gender.id,
+            id_number=form.id_number.data.upper(),
+            birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14])),
+            mobile=form.mobile.data,
+            wechat=form.wechat.data,
+            qq=form.qq.data,
+            address=form.address.data,
+            emergency_contact_name=form.emergency_contact_name.data,
+            emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
+            emergency_contact_mobile=form.emergency_contact_mobile.data,
+            worked_in_same_field=form.worked_in_same_field.data,
+            deformity=form.deformity.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        for purpose_type_id in form.purposes.data:
+            purpose_type = PurposeType.query.get(int(purpose_type_id))
+            user.add_purpose(purpose_type=purpose_type)
+        if form.other_purpose.data:
+            user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
+        for referrer_type_id in form.referrers.data:
+            referrer_type = ReferrerType.query.get(int(referrer_type_id))
+            user.add_referrer(referrer_type=referrer_type)
+        if form.other_referrer.data:
+            user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
+        if int(form.vb_course.data):
+            user.register_course(int(form.vb_course.data))
+        if int(form.y_gre_course.data):
+            user.register_course(int(form.y_gre_course.data))
+        current_user.create_user(user=user)
+        flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
+    return render_template('manage/create_user.html', form=form)
+
+
+@manage.route('/user/create-admin', methods=['GET', 'POST'])
+@login_required
+@administrator_required
+def create_admin():
+    form = NewAdminForm(creator=current_user._get_current_object())
+    if form.validate_on_submit():
+        admin = User(email=form.email.data, role_id=int(form.role.data), password=form.activation_code.data, name=form.name.data)
+        db.session.add(admin)
+        db.session.commit()
+        current_user.create_user(user=admin)
+        flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
+        return redirect(request.args.get('next') or url_for('manage.user'))
+    return render_template('manage/create_admin.html', form=form)
+
+
 @manage.route('/user/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
@@ -1975,11 +2034,11 @@ def edit_user(id):
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
-    form = EditUserForm(user=user)
+    form = EditUserForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
         user.name = form.name.data
-        # user.email = form.email.data
         user.role_id = form.role.data
+        db.session.add(user)
         if user.vb_course:
             user.unregister_course(user.vb_course)
         if form.vb_course.data:
@@ -1988,12 +2047,9 @@ def edit_user(id):
             user.unregister_course(user.y_gre_course)
         if form.y_gre_course.data:
             user.register_course(Course.query.get(form.y_gre_course.data))
-        db.session.add(user)
-        db.session.commit()
-        flash(u'%s的账户信息已更新' % user.name, category='success')
+        flash(u'%s的账户信息已更新' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.name.data = user.name
-    form.email.data = user.email
     form.role.data = user.role_id
     if user.vb_course:
         form.vb_course.data = user.vb_course.id
@@ -2057,7 +2113,7 @@ def find_user():
 def course():
     form = NewCourseForm()
     if form.validate_on_submit():
-        course = Course(name=form.name.data, type_id=form.course_type.data, show=form.show.data, modified_by_id=current_user.id)
+        course = Course(name=form.name.data, type_id=int(form.course_type.data), show=form.show.data, modified_by_id=current_user.id)
         db.session.add(course)
         flash(u'新建班级：%s' % form.name.data, category='success')
         return redirect(url_for('manage.course'))
@@ -2144,7 +2200,7 @@ def edit_course(id):
     form = EditCourseForm()
     if form.validate_on_submit():
         course.name = form.name.data
-        course.type_id = form.course_type.data
+        course.type_id = int(form.course_type.data)
         course.show = form.show.data
         course.modified_at = datetime.utcnow()
         course.modified_by_id = current_user.id
@@ -2152,7 +2208,7 @@ def edit_course(id):
         flash(u'已更新班级：%s' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.course'))
     form.name.data = course.name
-    form.course_type.data = course.type_id
+    form.course_type.data = unicode(course.type_id)
     form.show.data = course.show
     return render_template('manage/edit_course.html', form=form, course=course)
 
