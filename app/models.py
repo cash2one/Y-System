@@ -2242,9 +2242,19 @@ class iPad(db.Model):
         return [vb_lesson.id for vb_lesson in vb_lessons]
 
     @property
+    def vb_lesson_ids_included_unicode(self):
+        vb_lessons = self.has_vb_lessons
+        return [unicode(vb_lesson.id) for vb_lesson in vb_lessons]
+
+    @property
     def y_gre_lesson_ids_included(self):
         y_gre_lessons = self.has_y_gre_lessons
         return [y_gre_lesson.id for y_gre_lesson in y_gre_lessons]
+
+    @property
+    def y_gre_lesson_ids_included_unicode(self):
+        y_gre_lessons = self.has_y_gre_lessons
+        return [unicode(y_gre_lesson.id) for y_gre_lesson in y_gre_lessons]
 
     @property
     def video_playback_alias(self):

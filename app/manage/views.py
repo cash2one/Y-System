@@ -1633,12 +1633,12 @@ def edit_ipad(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
     form.serial.data = ipad.serial
-    form.capacity.data = ipad.capacity_id
-    form.room.data = ipad.room_id
-    form.state.data = ipad.state_id
+    form.capacity.data = unicode(ipad.capacity_id)
+    form.room.data = unicode(ipad.room_id)
+    form.state.data = unicode(ipad.state_id)
     form.video_playback.data = ipad.video_playback.total_seconds() / 3600
-    form.vb_lessons.data = ipad.vb_lesson_ids_included
-    form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included
+    form.vb_lessons.data = ipad.vb_lesson_ids_included_unicode
+    form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included_unicode
     return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
 
 

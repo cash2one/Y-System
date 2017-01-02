@@ -103,40 +103,38 @@
                             {{ form.alias.label() }}
                             {{ form.alias(placeholder='编号') }}
                         </div>
-                        <div class="twelve wide required field">
+                        <div class="four wide required field">
                             {{ form.serial.label() }}
                             {{ form.serial(placeholder='序列号') }}
                         </div>
-                    </div>
-                    <div class="fields">
-                        <div class="four wide required field">
+                        <div class="two wide required field">
                             {{ form.capacity.label() }}
-                            {{ form.capacity(class='ui dropdown') }}
+                            {{ form.capacity(class='ui compact dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="two wide required field">
                             {{ form.room.label() }}
-                            {{ form.room(class='ui dropdown') }}
+                            {{ form.room(class='ui compact dropdown') }}
                         </div>
-                        <div class="four wide required field">
+                        <div class="two wide required field">
                             {{ form.video_playback.label() }}
                             <div class="ui right labeled input">
                                 {{ form.video_playback(placeholder='10') }}
                                 <div class="ui basic label">小时</div>
                             </div>
                         </div>
-                        <div class="four wide required field">
+                        <div class="two wide required field">
                             {{ form.state.label() }}
-                            {{ form.state(class='ui dropdown') }}
+                            {{ form.state(class='ui compact dropdown') }}
                         </div>
                     </div>
                     <div class="fields">
                         <div class="eight wide field">
                             {{ form.vb_lessons.label() }}
-                            {{ form.vb_lessons(class='ui search dropdown') }}
+                            {{ form.vb_lessons(class='ui dropdown') }}
                         </div>
                         <div class="eight wide field">
                             {{ form.y_gre_lessons.label() }}
-                            {{ form.y_gre_lessons(class='ui search dropdown') }}
+                            {{ form.y_gre_lessons(class='ui dropdown') }}
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
@@ -206,6 +204,24 @@ $(document)
                             }
                         ]
                     },
+                    capacity: {
+                        identifier: 'capacity',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择容量'
+                            }
+                        ]
+                    },
+                    room: {
+                        identifier: 'room',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择房间'
+                            }
+                        ]
+                    },
                     video_playback: {
                         identifier: 'video_playback',
                         rules: [
@@ -216,6 +232,15 @@ $(document)
                             {
                                 type: 'number',
                                 prompt: '满电量可播放视频时间必须为数字'
+                            }
+                        ]
+                    },
+                    state: {
+                        identifier: 'state',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择状态'
                             }
                         ]
                     }
