@@ -1292,7 +1292,7 @@ class User(UserMixin, db.Model):
         )
         db.session.add(previous_achievement)
 
-    def add_purpose(self, purpose_type, remark=u''):
+    def add_purpose(self, purpose_type, remark=None):
         if not self.has_purpose(purpose_type):
             purpose = Purpose(user_id=self.id, type_id=purpose_type.id, remark=remark)
         else:
@@ -1309,7 +1309,7 @@ class User(UserMixin, db.Model):
     def has_purpose(self, purpose_type):
         return self.purposes.filter_by(type_id=purpose_type.id).first() is not None
 
-    def add_referrer(self, referrer_type, remark=u''):
+    def add_referrer(self, referrer_type, remark=None):
         if not self.has_referrer(referrer_type):
             referrer = Referrer(user_id=self.id, type_id=referrer_type.id, remark=remark)
         else:
@@ -1325,6 +1325,10 @@ class User(UserMixin, db.Model):
 
     def has_referrer(self, referrer_type):
         return self.referrers.filter_by(type_id=referrer_type.id).first() is not None
+
+    def purchase_product(self, product, quantity=1):
+        purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
+        db.session.add(purchase)
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):

@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -2097,19 +2097,26 @@ def create_user():
             )
         # registration
         for purpose_type_id in form.purposes.data:
-            purpose_type = PurposeType.query.get(int(purpose_type_id))
-            user.add_purpose(purpose_type=purpose_type)
+            user.add_purpose(purpose_type=PurposeType.query.get(int(purpose_type_id)))
         if form.other_purpose.data:
             user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
         for referrer_type_id in form.referrers.data:
-            referrer_type = ReferrerType.query.get(int(referrer_type_id))
-            user.add_referrer(referrer_type=referrer_type)
+            user.add_referrer(referrer_type=ReferrerType.query.get(int(referrer_type_id)))
         if form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
+        if form.inviter_email.data:
+            inviter = User.query.filter_by(email=form.inviter_email.data).first()
+            if inviter is not None:
+                inviter.invite_user(user=user)
         if int(form.vb_course.data):
-            user.register_course(int(form.vb_course.data))
+            user.register_course(course=Course.query.get(int(form.vb_course.data)))
         if int(form.y_gre_course.data):
-            user.register_course(int(form.y_gre_course.data))
+            user.register_course(course=Course.query.get(int(form.y_gre_course.data)))
+        for product_id in form.products.data:
+            user.purchase_product(product=Product.query.get(int(product_id)))
+        receptionist = User.query.filter_by(email=form.receptionist_email.data).first()
+        if receptionist is not None:
+            receptionist.receive_user(user=user)
         current_user.create_user(user=user)
         flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
     return render_template('manage/create_user.html', form=form)
