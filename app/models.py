@@ -774,6 +774,10 @@ class TOEFLTestScore(db.Model):
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    @property
+    def total_score(self):
+        return self.reading_score.value + self.listening_score.value + self.speaking_score.value + self.writing_score.value
+
     def __repr__(self):
         return '<TOEFL Test Score %r, %r>' % (self.user.name, self.test.name)
 
