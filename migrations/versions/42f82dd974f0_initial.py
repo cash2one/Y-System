@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: f8c5a0df6f8d
+Revision ID: 42f82dd974f0
 Revises: 
-Create Date: 2016-12-07 17:04:38.233057
+Create Date: 2017-01-03 00:51:26.325334
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f8c5a0df6f8d'
+revision = '42f82dd974f0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -141,6 +141,34 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_rooms_name'), 'rooms', ['name'], unique=True)
+    op.create_table('toefl_listening_scores',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('value', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_toefl_listening_scores_name'), 'toefl_listening_scores', ['name'], unique=True)
+    op.create_table('toefl_reading_scores',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('value', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_toefl_reading_scores_name'), 'toefl_reading_scores', ['name'], unique=True)
+    op.create_table('toefl_speaking_scores',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('value', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_toefl_speaking_scores_name'), 'toefl_speaking_scores', ['name'], unique=True)
+    op.create_table('toefl_writing_scores',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('value', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_toefl_writing_scores_name'), 'toefl_writing_scores', ['name'], unique=True)
     op.create_table('lessons',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -383,6 +411,25 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_tests_name'), 'tests', ['name'], unique=True)
+    op.create_table('toefl_test_score',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('reading_score_id', sa.Integer(), nullable=True),
+    sa.Column('listening_score_id', sa.Integer(), nullable=True),
+    sa.Column('speaking_score_id', sa.Integer(), nullable=True),
+    sa.Column('writing_score_id', sa.Integer(), nullable=True),
+    sa.Column('remark', sa.UnicodeText(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('modified_at', sa.DateTime(), nullable=True),
+    sa.Column('modified_by_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['listening_score_id'], ['toefl_listening_scores.id'], ),
+    sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['reading_score_id'], ['toefl_reading_scores.id'], ),
+    sa.ForeignKeyConstraint(['speaking_score_id'], ['toefl_speaking_scores.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['writing_score_id'], ['toefl_writing_scores.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('user_creations',
     sa.Column('creator_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -543,6 +590,7 @@ def downgrade():
     op.drop_table('course_registrations')
     op.drop_table('assignment_scores')
     op.drop_table('user_creations')
+    op.drop_table('toefl_test_score')
     op.drop_index(op.f('ix_tests_name'), table_name='tests')
     op.drop_table('tests')
     op.drop_table('suspension_records')
@@ -574,6 +622,14 @@ def downgrade():
     op.drop_table('role_permissions')
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')
+    op.drop_index(op.f('ix_toefl_writing_scores_name'), table_name='toefl_writing_scores')
+    op.drop_table('toefl_writing_scores')
+    op.drop_index(op.f('ix_toefl_speaking_scores_name'), table_name='toefl_speaking_scores')
+    op.drop_table('toefl_speaking_scores')
+    op.drop_index(op.f('ix_toefl_reading_scores_name'), table_name='toefl_reading_scores')
+    op.drop_table('toefl_reading_scores')
+    op.drop_index(op.f('ix_toefl_listening_scores_name'), table_name='toefl_listening_scores')
+    op.drop_table('toefl_listening_scores')
     op.drop_index(op.f('ix_rooms_name'), table_name='rooms')
     op.drop_table('rooms')
     op.drop_index(op.f('ix_roles_name'), table_name='roles')
