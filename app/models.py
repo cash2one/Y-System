@@ -831,6 +831,11 @@ class TOEFLTestScore(db.Model):
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
     def __repr__(self):
         return '<TOEFL Test Score %r, %r>' % (self.user.name, self.test.name)
 
@@ -1618,6 +1623,19 @@ class User(UserMixin, db.Model):
     @property
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
+
+    def add_toefl_test_score(self, toefl_test_score_type, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
+        toefl_test_score = TOEFLTestScore(
+            user_id=self.id,
+            type_id=toefl_test_score_type.id,
+            total_score_id=total_score.id,
+            reading_score_id=reading_score.id,
+            listening_score_id=listening_score.id,
+            speaking_score_id=speaking_score.id,
+            writing_score_id=writing_score.id,
+            modified_by_id=modified_by.id
+        )
+        db.session.add(toefl_test_score)
 
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None

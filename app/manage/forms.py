@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, DateField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Relationship, PurposeType, ReferrerType, Product, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Role, User, Relationship, PurposeType, ReferrerType, TOEFLTotalScore, TOEFLReadingScore, TOEFLListeningScore, TOEFLSpeakingScore, TOEFLWritingScore, Product, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 EN_2_CN = {
@@ -294,11 +294,11 @@ class NewUserForm(FlaskForm):
     cet_6 = IntegerField(u'CET-6', validators=[NumberRange(min=0)])
     tem_4 = IntegerField(u'TEM-4', validators=[NumberRange(min=0)])
     tem_8 = IntegerField(u'TEM-8', validators=[NumberRange(min=0)])
-    toefl_total = IntegerField(u'TOEFL', validators=[NumberRange(min=0, max=120)])
-    toefl_reading = IntegerField(u'Reading', validators=[NumberRange(min=0, max=30)])
-    toefl_listening = IntegerField(u'Listening', validators=[NumberRange(min=0, max=30)])
-    toefl_speaking = IntegerField(u'Speaking', validators=[NumberRange(min=0, max=30)])
-    toefl_writing = IntegerField(u'Writing', validators=[NumberRange(min=0, max=30)])
+    toefl_total = SelectField(u'TOEFL', coerce=unicode)
+    toefl_reading = SelectField(u'Reading', coerce=unicode)
+    toefl_listening = SelectField(u'Listening', coerce=unicode)
+    toefl_speaking = SelectField(u'Speaking', coerce=unicode)
+    toefl_writing = SelectField(u'Writing', coerce=unicode)
     competition = StringField(u'竞赛成绩', validators=[Length(1, 128)])
     other_score = StringField(u'其它成绩', validators=[Length(1, 128)])
     # job 1
@@ -345,6 +345,11 @@ class NewUserForm(FlaskForm):
         self.doctor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.job_year_1.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.toefl_total.choices = [(u'', u'选择TOEFL总分')] + [(unicode(toefl_total_score.id), toefl_total_score.name) for toefl_total_score in TOEFLTotalScore.query.order_by(TOEFLTotalScore.value.desc()).all()]
+        self.toefl_reading.choices = [(u'', u'选择TOEFL阅读分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLReadingScore.query.order_by(TOEFLReadingScore.value.desc()).all()]
+        self.toefl_listening.choices = [(u'', u'选择TOEFL听力分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLListeningScore.query.order_by(TOEFLListeningScore.value.desc()).all()]
+        self.toefl_speaking.choices = [(u'', u'选择TOEFL口语分数')] + [(unicode(toefl_speaking_score.id), toefl_speaking_score.name) for toefl_speaking_score in TOEFLSpeakingScore.query.order_by(TOEFLSpeakingScore.value.desc()).all()]
+        self.toefl_writing.choices = [(u'', u'选择TOEFL写作分数')] + [(unicode(toefl_writing_score.id), toefl_writing_score.name) for toefl_writing_score in TOEFLWritingScore.query.order_by(TOEFLWritingScore.value.desc()).all()]
         self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
