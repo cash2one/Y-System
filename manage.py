@@ -46,6 +46,12 @@ def deploy():
     from app.models import GREVScore
     from app.models import GREQScore
     from app.models import GREAWScore
+    from app.models import TOEFLTotalScore
+    from app.models import TOEFLReadingScore
+    from app.models import TOEFLListeningScore
+    from app.models import TOEFLSpeakingScore
+    from app.models import TOEFLWritingScore
+    from app.models import TOEFLTestScoreType
     from app.models import InvitationType
     from app.models import User
     from app.models import PreviousAchievementType
@@ -80,6 +86,12 @@ def deploy():
     GREVScore.insert_gre_v_scores()
     GREQScore.insert_gre_q_scores()
     GREAWScore.insert_gre_aw_scores()
+    TOEFLTotalScore.insert_toefl_total_scores()
+    TOEFLReadingScore.insert_toefl_reading_scores()
+    TOEFLListeningScore.insert_toefl_listening_scores()
+    TOEFLSpeakingScore.insert_toefl_speaking_scores()
+    TOEFLWritingScore.insert_toefl_writing_scores()
+    TOEFLTestScoreType.insert_toefl_test_score_types()
     InvitationType.insert_invitation_types()
     User.insert_admin()
     PreviousAchievementType.insert_previous_achievement_types()

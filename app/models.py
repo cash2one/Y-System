@@ -674,6 +674,28 @@ class YGRETestScore(db.Model):
         return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
+class TOEFLTotalScore(db.Model):
+    __tablename__ = 'toefl_total_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Integer)
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='total_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_toefl_total_scores():
+        toefl_total_scores = [(unicode(x), x, ) for x in range(0, 121)]
+        for TTS in toefl_total_scores:
+            toefl_total_score = TOEFLTotalScore.query.filter_by(name=TTS[0]).first()
+            if toefl_total_score is None:
+                toefl_total_score = TOEFLTotalScore(name=TTS[0], value=TTS[1])
+                db.session.add(toefl_total_score)
+                print u'导入TOEFL总分成绩类型信息', TTS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<TOEFL Total Score %r>' % self.name
+
+
 class TOEFLReadingScore(db.Model):
     __tablename__ = 'toefl_reading_scores'
     id = db.Column(db.Integer, primary_key=True)
@@ -762,22 +784,52 @@ class TOEFLWritingScore(db.Model):
         return '<TOEFL Writing Score %r>' % self.name
 
 
+class TOEFLTestScoreType(db.Model):
+    __tablename__ = 'toefl_test_score_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_toefl_test_score_types():
+        toefl_test_score_types = [
+            (u'初始', ),
+            (u'目标', ),
+            (u'第1次', ),
+            (u'第2次', ),
+            (u'第3次', ),
+            (u'第4次', ),
+            (u'第5次', ),
+            (u'第6次', ),
+            (u'第7次', ),
+            (u'第8次', ),
+            (u'第9次', ),
+        ]
+        for TTST in toefl_test_score_types:
+            toefl_test_score_type = TOEFLTestScoreType.query.filter_by(name=TTST[0]).first()
+            if toefl_test_score_type is None:
+                toefl_test_score_type = TOEFLTestScoreType(name=TTST[0])
+                db.session.add(toefl_test_score_type)
+                print u'导入TOEFL考试成绩类型信息', TTST[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<TOEFL Test Score Type %r>' % self.name
+
+
 class TOEFLTestScore(db.Model):
     __tablename__ = 'toefl_test_score'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('toefl_test_score_types.id'))
+    total_score_id = db.Column(db.Integer, db.ForeignKey('toefl_total_scores.id'))
     reading_score_id = db.Column(db.Integer, db.ForeignKey('toefl_reading_scores.id'))
     listening_score_id = db.Column(db.Integer, db.ForeignKey('toefl_listening_scores.id'))
     speaking_score_id = db.Column(db.Integer, db.ForeignKey('toefl_speaking_scores.id'))
     writing_score_id = db.Column(db.Integer, db.ForeignKey('toefl_writing_scores.id'))
-    remark = db.Column(db.UnicodeText)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-    @property
-    def total_score(self):
-        return self.reading_score.value + self.listening_score.value + self.speaking_score.value + self.writing_score.value
 
     def __repr__(self):
         return '<TOEFL Test Score %r, %r>' % (self.user.name, self.test.name)
@@ -873,6 +925,8 @@ class User(UserMixin, db.Model):
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
     worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
+    # application properties
+    application_major = db.Column(db.Unicode(64))
     # study properties
     purposes = db.relationship(
         'Purpose',

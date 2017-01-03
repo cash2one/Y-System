@@ -324,9 +324,13 @@
                             {{ form.purposes.label() }}
                             {{ form.purposes(class='ui dropdown') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="four wide field">
                             {{ form.other_purpose.label() }}
                             {{ form.other_purpose(placeholder='其它研修目的') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.application_major.label() }}
+                            {{ form.application_major(placeholder='申请方向') }}
                         </div>
                     </div>
                     <div class="fields">
@@ -334,7 +338,14 @@
                             {{ form.referrers.label() }}
                             {{ form.referrers(class='ui dropdown') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="four wide field">
+                            {{ form.inviter_email.label() }}
+                            <div class="ui fluid search">
+                                {{ form.inviter_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
+                                <div class="results"></div>
+                            </div>
+                        </div>
+                        <div class="four wide field">
                             {{ form.other_referrer.label() }}
                             {{ form.other_referrer(placeholder='其它了解渠道') }}
                         </div>
@@ -357,20 +368,11 @@
                         {{ form.products.label() }}
                         {{ form.products(class='ui dropdown') }}
                     </div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.inviter_email.label() }}
-                            <div class="ui fluid search">
-                                {{ form.inviter_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                                <div class="results"></div>
-                            </div>
-                        </div>
-                        <div class="eight wide required field">
-                            {{ form.receptionist_email.label() }}
-                            <div class="ui fluid search">
-                                {{ form.receptionist_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                                <div class="results"></div>
-                            </div>
+                    <div class="required field">
+                        {{ form.receptionist_email.label() }}
+                        <div class="ui fluid search">
+                            {{ form.receptionist_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
+                            <div class="results"></div>
                         </div>
                     </div>
                     <h4 class="ui grey dividing header">其它信息</h4>

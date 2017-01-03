@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 42f82dd974f0
+Revision ID: 7184878180fa
 Revises: 
-Create Date: 2017-01-03 00:51:26.325334
+Create Date: 2017-01-03 01:47:42.574394
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '42f82dd974f0'
+revision = '7184878180fa'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -162,6 +162,19 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_toefl_speaking_scores_name'), 'toefl_speaking_scores', ['name'], unique=True)
+    op.create_table('toefl_test_score_types',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_toefl_test_score_types_name'), 'toefl_test_score_types', ['name'], unique=True)
+    op.create_table('toefl_total_scores',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('value', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_toefl_total_scores_name'), 'toefl_total_scores', ['name'], unique=True)
     op.create_table('toefl_writing_scores',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -209,6 +222,7 @@ def upgrade():
     sa.Column('emergency_contact_relationship_id', sa.Integer(), nullable=True),
     sa.Column('worked_in_same_field', sa.Boolean(), nullable=True),
     sa.Column('deformity', sa.Boolean(), nullable=True),
+    sa.Column('application_major', sa.Unicode(length=64), nullable=True),
     sa.ForeignKeyConstraint(['emergency_contact_relationship_id'], ['relationships.id'], ),
     sa.ForeignKeyConstraint(['gender_id'], ['genders.id'], ),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
@@ -414,11 +428,12 @@ def upgrade():
     op.create_table('toefl_test_score',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('type_id', sa.Integer(), nullable=True),
+    sa.Column('total_score_id', sa.Integer(), nullable=True),
     sa.Column('reading_score_id', sa.Integer(), nullable=True),
     sa.Column('listening_score_id', sa.Integer(), nullable=True),
     sa.Column('speaking_score_id', sa.Integer(), nullable=True),
     sa.Column('writing_score_id', sa.Integer(), nullable=True),
-    sa.Column('remark', sa.UnicodeText(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
@@ -426,6 +441,8 @@ def upgrade():
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['reading_score_id'], ['toefl_reading_scores.id'], ),
     sa.ForeignKeyConstraint(['speaking_score_id'], ['toefl_speaking_scores.id'], ),
+    sa.ForeignKeyConstraint(['total_score_id'], ['toefl_total_scores.id'], ),
+    sa.ForeignKeyConstraint(['type_id'], ['toefl_test_score_types.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['writing_score_id'], ['toefl_writing_scores.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -624,6 +641,10 @@ def downgrade():
     op.drop_table('lessons')
     op.drop_index(op.f('ix_toefl_writing_scores_name'), table_name='toefl_writing_scores')
     op.drop_table('toefl_writing_scores')
+    op.drop_index(op.f('ix_toefl_total_scores_name'), table_name='toefl_total_scores')
+    op.drop_table('toefl_total_scores')
+    op.drop_index(op.f('ix_toefl_test_score_types_name'), table_name='toefl_test_score_types')
+    op.drop_table('toefl_test_score_types')
     op.drop_index(op.f('ix_toefl_speaking_scores_name'), table_name='toefl_speaking_scores')
     op.drop_table('toefl_speaking_scores')
     op.drop_index(op.f('ix_toefl_reading_scores_name'), table_name='toefl_reading_scores')
