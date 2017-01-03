@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, Purpose, PurposeType, Referrer, ReferrerType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, Purpose, PurposeType, Referrer, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -1987,10 +1987,107 @@ def create_user():
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
             emergency_contact_mobile=form.emergency_contact_mobile.data,
             worked_in_same_field=form.worked_in_same_field.data,
-            deformity=form.deformity.data
+            deformity=form.deformity.data,
+            application_major=form.application_major.data
         )
         db.session.add(user)
         db.session.commit()
+        # education
+        if form.high_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'高中').first(),
+                school=form.high_school.data,
+                year=form.high_school_year.data
+            )
+        if form.bachelor_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'本科').first(),
+                school=form.bachelor_school.data,
+                major=form.bachelor_major.data,
+                gpa=form.bachelor_gpa.data,
+                full_gpa=form.bachelor_full_gpa.data,
+                year=form.bachelor_year.data
+            )
+        if form.master_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'本科').first(),
+                school=form.master_school.data,
+                major=form.master_major.data,
+                gpa=form.master_gpa.data,
+                full_gpa=form.master_full_gpa.data,
+                year=form.master_year.data
+            )
+        if form.doctor_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'本科').first(),
+                school=form.doctor_school.data,
+                major=form.doctor_major.data,
+                gpa=form.doctor_gpa.data,
+                full_gpa=form.doctor_full_gpa.data,
+                year=form.doctor_year.data
+            )
+        # employment
+        if form.employer_1.data:
+            user.add_employment_record(
+                employer=form.employer_1.data,
+                position=form.position_1.data,
+                year=form.job_year_1.data
+            )
+        if form.employer_2.data:
+            user.add_employment_record(
+                employer=form.employer_2.data,
+                position=form.position_2.data,
+                year=form.job_year_2.data
+            )
+        # scores
+        if form.cee_total.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考总分').first(),
+                score=form.cee_total.data
+            )
+        if form.cee_math.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考数学').first(),
+                score=form.cee_math.data
+            )
+        if form.cee_english.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考英语').first(),
+                score=form.cee_english.data
+            )
+        if form.cet_4.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语四级').first(),
+                score=form.cet_4.data
+            )
+        if form.cet_6.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语六级').first(),
+                score=form.cet_6.data
+            )
+        if form.tem_4.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语四级').first(),
+                score=form.tem_4.data
+            )
+        if form.tem_8.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语八级').first(),
+                score=form.tem_8.data
+            )
+        if form.competition.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'竞赛').first(),
+                remark=form.competition.data
+            )
+        if form.other_score.data:
+            user.add_previous_achievement(
+                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'其它').first(),
+                remark=form.other_score.data
+            )
+        if form.toefl_total.data:
+            pass
+        # registration
         for purpose_type_id in form.purposes.data:
             purpose_type = PurposeType.query.get(int(purpose_type_id))
             user.add_purpose(purpose_type=purpose_type)

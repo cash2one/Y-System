@@ -265,7 +265,7 @@ class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
-    # education
+    # high school
     high_school = StringField(u'毕业高中', validators=[Length(1, 64)])
     cee_total = IntegerField(u'高考总分', validators=[NumberRange(min=0)])
     cee_math = IntegerField(u'高考数学', validators=[NumberRange(min=0)])

@@ -920,9 +920,9 @@ class User(UserMixin, db.Model):
     emergency_contact_name = db.Column(db.Unicode(64))
     emergency_contact_mobile = db.Column(db.Unicode(64))
     emergency_contact_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
-    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
+    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
     worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
     # application properties
@@ -1256,6 +1256,36 @@ class User(UserMixin, db.Model):
         except:
             return None
         return User.query.get(data['id'])
+
+    def add_education_record(self, education_type, school, major=None, gpa=None, full_gpa=None, year=None):
+        education_record = EducationRecord(
+            user_id=self.id,
+            type_id=education_type.id,
+            school=school,
+            major=major,
+            gpa=gpa,
+            full_gpa=full_gpa,
+            year=year
+        )
+        db.session.add(education_record)
+
+    def add_employment_record(self, employer, position=None, year=None):
+        employment_record = EmploymentRecord(
+            user_id=self.id,
+            employer=employer,
+            position=position,
+            year=year
+        )
+        db.session.add(employment_record)
+
+    def add_previous_achievement(self, previous_achievement_type, score=None, remark=None):
+        previous_achievement = PreviousAchievement(
+            user_id=self.id,
+            type_id=previous_achievement_type.id,
+            score=score,
+            remark=remark
+        )
+        db.session.add(previous_achievement)
 
     def add_purpose(self, purpose_type, remark=u''):
         if not self.has_purpose(purpose_type):
@@ -1682,49 +1712,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-class PreviousAchievementType(db.Model):
-    __tablename__ = 'previous_achievement_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    previous_achievements = db.relationship('PreviousAchievement', backref='type', lazy='dynamic')
-
-    @staticmethod
-    def insert_previous_achievement_types():
-        previous_achievement_types = [
-            (u'高考总分', ),
-            (u'高考数学', ),
-            (u'高考英语', ),
-            (u'大学英语四级', ),
-            (u'大学英语六级', ),
-            (u'专业英语四级', ),
-            (u'专业英语八级', ),
-            (u'竞赛', ),
-            (u'其它', ),
-        ]
-        for PAT in previous_achievement_types:
-            previous_achievement_type = PreviousAchievementType.query.filter_by(name=PAT[0]).first()
-            if previous_achievement_type is None:
-                previous_achievement_type = PreviousAchievementType(name=PAT[0])
-                db.session.add(previous_achievement_type)
-                print u'导入既往成绩类型信息', PAT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Previous Achievement Type %r>' % self.name
-
-
-class PreviousAchievement(db.Model):
-    __tablename__ = 'previous_achievements'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    type_id = db.Column(db.Integer, db.ForeignKey('previous_achievement_types.id'))
-    score = db.Column(db.Integer)
-    remark = db.Column(db.UnicodeText)
-
-    def __repr__(self):
-        return '<Previous Achievement %r, %r, %r, %r>' % (self.user.name, self.type.name, self.score)
-
-
 class EducationType(db.Model):
     __tablename__ = 'education_types'
     id = db.Column(db.Integer, primary_key=True)
@@ -1776,6 +1763,49 @@ class EmploymentRecord(db.Model):
 
     def __repr__(self):
         return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
+
+
+class PreviousAchievementType(db.Model):
+    __tablename__ = 'previous_achievement_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    previous_achievements = db.relationship('PreviousAchievement', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_previous_achievement_types():
+        previous_achievement_types = [
+            (u'高考总分', ),
+            (u'高考数学', ),
+            (u'高考英语', ),
+            (u'大学英语四级', ),
+            (u'大学英语六级', ),
+            (u'专业英语四级', ),
+            (u'专业英语八级', ),
+            (u'竞赛', ),
+            (u'其它', ),
+        ]
+        for PAT in previous_achievement_types:
+            previous_achievement_type = PreviousAchievementType.query.filter_by(name=PAT[0]).first()
+            if previous_achievement_type is None:
+                previous_achievement_type = PreviousAchievementType(name=PAT[0])
+                db.session.add(previous_achievement_type)
+                print u'导入既往成绩类型信息', PAT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Previous Achievement Type %r>' % self.name
+
+
+class PreviousAchievement(db.Model):
+    __tablename__ = 'previous_achievements'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('previous_achievement_types.id'))
+    score = db.Column(db.Integer)
+    remark = db.Column(db.UnicodeText)
+
+    def __repr__(self):
+        return '<Previous Achievement %r, %r, %r, %r>' % (self.user.name, self.type.name, self.score)
 
 
 class Product(db.Model):

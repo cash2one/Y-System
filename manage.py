@@ -54,8 +54,8 @@ def deploy():
     from app.models import TOEFLTestScoreType
     from app.models import InvitationType
     from app.models import User
-    from app.models import PreviousAchievementType
     from app.models import EducationType
+    from app.models import PreviousAchievementType
     from app.models import Product
     from app.models import CourseType
     from app.models import Course
@@ -94,8 +94,8 @@ def deploy():
     TOEFLTestScoreType.insert_toefl_test_score_types()
     InvitationType.insert_invitation_types()
     User.insert_admin()
-    PreviousAchievementType.insert_previous_achievement_types()
     EducationType.insert_education_types()
+    PreviousAchievementType.insert_previous_achievement_types()
     Product.insert_products()
     CourseType.insert_course_types()
     Course.insert_courses()
