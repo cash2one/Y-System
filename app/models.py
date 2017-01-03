@@ -770,6 +770,7 @@ class TOEFLTestScore(db.Model):
     listening_score_id = db.Column(db.Integer, db.ForeignKey('toefl_listening_scores.id'))
     speaking_score_id = db.Column(db.Integer, db.ForeignKey('toefl_speaking_scores.id'))
     writing_score_id = db.Column(db.Integer, db.ForeignKey('toefl_writing_scores.id'))
+    remark = db.Column(db.UnicodeText)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
