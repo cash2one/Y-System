@@ -1961,10 +1961,172 @@ def developers():
     return resp
 
 
-@manage.route('/user/create', methods=['GET', 'POST'])
+# @manage.route('/user/create', methods=['GET', 'POST'])
+# @login_required
+# @permission_required(u'管理用户')
+# def create_user():
+#     form = NewUserForm()
+#     if form.validate_on_submit():
+#         if int(form.id_number.data[16]) % 2 == 1:
+#             gender = Gender.query.filter_by(name=u'男').first()
+#         else:
+#             gender = Gender.query.filter_by(name=u'女').first()
+#         user = User(
+#             email=form.email.data,
+#             role_id=int(form.role.data),
+#             password=form.id_number.data[-6:],
+#             name=form.name.data,
+#             gender_id=gender.id,
+#             id_number=form.id_number.data.upper(),
+#             birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14])),
+#             mobile=form.mobile.data,
+#             wechat=form.wechat.data,
+#             qq=form.qq.data,
+#             address=form.address.data,
+#             emergency_contact_name=form.emergency_contact_name.data,
+#             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
+#             emergency_contact_mobile=form.emergency_contact_mobile.data,
+#             worked_in_same_field=form.worked_in_same_field.data,
+#             deformity=form.deformity.data,
+#             application_major=form.application_major.data
+#         )
+#         db.session.add(user)
+#         db.session.commit()
+#         # education
+#         if form.high_school.data:
+#             user.add_education_record(
+#                 education_type=EducationType.query.filter_by(name=u'高中').first(),
+#                 school=form.high_school.data,
+#                 year=form.high_school_year.data
+#             )
+#         if form.bachelor_school.data:
+#             user.add_education_record(
+#                 education_type=EducationType.query.filter_by(name=u'本科').first(),
+#                 school=form.bachelor_school.data,
+#                 major=form.bachelor_major.data,
+#                 gpa=form.bachelor_gpa.data,
+#                 full_gpa=form.bachelor_full_gpa.data,
+#                 year=form.bachelor_year.data
+#             )
+#         if form.master_school.data:
+#             user.add_education_record(
+#                 education_type=EducationType.query.filter_by(name=u'本科').first(),
+#                 school=form.master_school.data,
+#                 major=form.master_major.data,
+#                 gpa=form.master_gpa.data,
+#                 full_gpa=form.master_full_gpa.data,
+#                 year=form.master_year.data
+#             )
+#         if form.doctor_school.data:
+#             user.add_education_record(
+#                 education_type=EducationType.query.filter_by(name=u'本科').first(),
+#                 school=form.doctor_school.data,
+#                 major=form.doctor_major.data,
+#                 gpa=form.doctor_gpa.data,
+#                 full_gpa=form.doctor_full_gpa.data,
+#                 year=form.doctor_year.data
+#             )
+#         # employment
+#         if form.employer_1.data:
+#             user.add_employment_record(
+#                 employer=form.employer_1.data,
+#                 position=form.position_1.data,
+#                 year=form.job_year_1.data
+#             )
+#         if form.employer_2.data:
+#             user.add_employment_record(
+#                 employer=form.employer_2.data,
+#                 position=form.position_2.data,
+#                 year=form.job_year_2.data
+#             )
+#         # scores
+#         if form.cee_total.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考总分').first(),
+#                 score=form.cee_total.data
+#             )
+#         if form.cee_math.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考数学').first(),
+#                 score=form.cee_math.data
+#             )
+#         if form.cee_english.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考英语').first(),
+#                 score=form.cee_english.data
+#             )
+#         if form.cet_4.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语四级').first(),
+#                 score=form.cet_4.data
+#             )
+#         if form.cet_6.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语六级').first(),
+#                 score=form.cet_6.data
+#             )
+#         if form.tem_4.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语四级').first(),
+#                 score=form.tem_4.data
+#             )
+#         if form.tem_8.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语八级').first(),
+#                 score=form.tem_8.data
+#             )
+#         if form.competition.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'竞赛').first(),
+#                 remark=form.competition.data
+#             )
+#         if form.other_score.data:
+#             user.add_previous_achievement(
+#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'其它').first(),
+#                 remark=form.other_score.data
+#             )
+#         if form.toefl_total.data:
+#             user.add_toefl_test_score(
+#                 toefl_test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
+#                 total_score_id=form.toefl_total.data,
+#                 reading_score_id=form.toefl_reading.data,
+#                 listening_score_id=form.toefl_listening.data,
+#                 speaking_score_id=form.toefl_speaking.data,
+#                 writing_score_id=form.toefl_writing.data,
+#                 modified_by=current_user._get_current_object()
+#             )
+#         # registration
+#         for purpose_type_id in form.purposes.data:
+#             user.add_purpose(purpose_type=PurposeType.query.get(int(purpose_type_id)))
+#         if form.other_purpose.data:
+#             user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
+#         for referrer_type_id in form.referrers.data:
+#             user.add_referrer(referrer_type=ReferrerType.query.get(int(referrer_type_id)))
+#         if form.other_referrer.data:
+#             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
+#         if form.inviter_email.data:
+#             inviter = User.query.filter_by(email=form.inviter_email.data).first()
+#             if inviter is not None:
+#                 inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
+#         if int(form.vb_course.data):
+#             user.register_course(course=Course.query.get(int(form.vb_course.data)))
+#         if int(form.y_gre_course.data):
+#             user.register_course(course=Course.query.get(int(form.y_gre_course.data)))
+#         for product_id in form.products.data:
+#             user.purchase_product(product=Product.query.get(int(product_id)))
+#         receptionist = User.query.filter_by(email=form.receptionist_email.data).first()
+#         if receptionist is not None:
+#             receptionist.receive_user(user=user)
+#         current_user.create_user(user=user)
+#         flash(u'成功添加“%s”用户：%s' % (user.role.name, user.name), category='success')
+#         return redirect(request.args.get('next') or url_for('manage.user'))
+#     return render_template('manage/create_user.html', form=form)
+
+
+@manage.route('/user/create/step-1', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
-def create_user():
+def create_user_step_1():
     form = NewUserForm()
     if form.validate_on_submit():
         if int(form.id_number.data[16]) % 2 == 1:
@@ -1985,142 +2147,14 @@ def create_user():
             address=form.address.data,
             emergency_contact_name=form.emergency_contact_name.data,
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
-            emergency_contact_mobile=form.emergency_contact_mobile.data,
-            worked_in_same_field=form.worked_in_same_field.data,
-            deformity=form.deformity.data,
-            application_major=form.application_major.data
+            emergency_contact_mobile=form.emergency_contact_mobile.data
         )
         db.session.add(user)
         db.session.commit()
-        # education
-        if form.high_school.data:
-            user.add_education_record(
-                education_type=EducationType.query.filter_by(name=u'高中').first(),
-                school=form.high_school.data,
-                year=form.high_school_year.data
-            )
-        if form.bachelor_school.data:
-            user.add_education_record(
-                education_type=EducationType.query.filter_by(name=u'本科').first(),
-                school=form.bachelor_school.data,
-                major=form.bachelor_major.data,
-                gpa=form.bachelor_gpa.data,
-                full_gpa=form.bachelor_full_gpa.data,
-                year=form.bachelor_year.data
-            )
-        if form.master_school.data:
-            user.add_education_record(
-                education_type=EducationType.query.filter_by(name=u'本科').first(),
-                school=form.master_school.data,
-                major=form.master_major.data,
-                gpa=form.master_gpa.data,
-                full_gpa=form.master_full_gpa.data,
-                year=form.master_year.data
-            )
-        if form.doctor_school.data:
-            user.add_education_record(
-                education_type=EducationType.query.filter_by(name=u'本科').first(),
-                school=form.doctor_school.data,
-                major=form.doctor_major.data,
-                gpa=form.doctor_gpa.data,
-                full_gpa=form.doctor_full_gpa.data,
-                year=form.doctor_year.data
-            )
-        # employment
-        if form.employer_1.data:
-            user.add_employment_record(
-                employer=form.employer_1.data,
-                position=form.position_1.data,
-                year=form.job_year_1.data
-            )
-        if form.employer_2.data:
-            user.add_employment_record(
-                employer=form.employer_2.data,
-                position=form.position_2.data,
-                year=form.job_year_2.data
-            )
-        # scores
-        if form.cee_total.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考总分').first(),
-                score=form.cee_total.data
-            )
-        if form.cee_math.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考数学').first(),
-                score=form.cee_math.data
-            )
-        if form.cee_english.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考英语').first(),
-                score=form.cee_english.data
-            )
-        if form.cet_4.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语四级').first(),
-                score=form.cet_4.data
-            )
-        if form.cet_6.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语六级').first(),
-                score=form.cet_6.data
-            )
-        if form.tem_4.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语四级').first(),
-                score=form.tem_4.data
-            )
-        if form.tem_8.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语八级').first(),
-                score=form.tem_8.data
-            )
-        if form.competition.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'竞赛').first(),
-                remark=form.competition.data
-            )
-        if form.other_score.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'其它').first(),
-                remark=form.other_score.data
-            )
-        if form.toefl_total.data:
-            user.add_toefl_test_score(
-                toefl_test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
-                total_score_id=form.toefl_total.data,
-                reading_score_id=form.toefl_reading.data,
-                listening_score_id=form.toefl_listening.data,
-                speaking_score_id=form.toefl_speaking.data,
-                writing_score_id=form.toefl_writing.data,
-                modified_by=current_user._get_current_object()
-            )
-        # registration
-        for purpose_type_id in form.purposes.data:
-            user.add_purpose(purpose_type=PurposeType.query.get(int(purpose_type_id)))
-        if form.other_purpose.data:
-            user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
-        for referrer_type_id in form.referrers.data:
-            user.add_referrer(referrer_type=ReferrerType.query.get(int(referrer_type_id)))
-        if form.other_referrer.data:
-            user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
-        if form.inviter_email.data:
-            inviter = User.query.filter_by(email=form.inviter_email.data).first()
-            if inviter is not None:
-                inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
-        if int(form.vb_course.data):
-            user.register_course(course=Course.query.get(int(form.vb_course.data)))
-        if int(form.y_gre_course.data):
-            user.register_course(course=Course.query.get(int(form.y_gre_course.data)))
-        for product_id in form.products.data:
-            user.purchase_product(product=Product.query.get(int(product_id)))
-        receptionist = User.query.filter_by(email=form.receptionist_email.data).first()
-        if receptionist is not None:
-            receptionist.receive_user(user=user)
         current_user.create_user(user=user)
-        flash(u'成功添加“%s”用户：%s' % (user.role.name, user.name), category='success')
-        return redirect(request.args.get('next') or url_for('manage.user'))
-    return render_template('manage/create_user.html', form=form)
+        # flash(u'成功添加“%s”用户：%s' % (user.role.name, user.name), category='success')
+        # return redirect(url_for('manage.create_user_step_2', user_id=user_id))
+    return render_template('manage/create_user_step_1.html', form=form)
 
 
 @manage.route('/user/create-admin', methods=['GET', 'POST'])

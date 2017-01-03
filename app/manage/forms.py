@@ -264,95 +264,95 @@ class DeleteAnnouncementForm(FlaskForm):
 class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    id_number = StringField(u'身份证号', validators=[Required()])
+    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     # high school
-    high_school = StringField(u'毕业高中')
-    cee_total = IntegerField(u'高考总分')
-    cee_math = IntegerField(u'高考数学')
-    cee_english = IntegerField(u'高考英语')
-    high_school_year = SelectField(u'入学年份', coerce=unicode)
+    # high_school = StringField(u'毕业高中', validators=[Length(1, 64)])
+    # cee_total = IntegerField(u'高考总分', validators=[NumberRange(min=0)])
+    # cee_math = IntegerField(u'高考数学', validators=[NumberRange(min=0)])
+    # cee_english = IntegerField(u'高考英语', validators=[NumberRange(min=0)])
+    # high_school_year = SelectField(u'入学年份', coerce=unicode)
     # bachelor
-    bachelor_school = StringField(u'本科学校')
-    bachelor_major = StringField(u'院系（专业）')
-    bachelor_gpa = FloatField(u'GPA')
-    bachelor_full_gpa = FloatField(u'GPA满分')
-    bachelor_year = SelectField(u'入学年份', coerce=unicode)
+    # bachelor_school = StringField(u'本科学校', validators=[Length(1, 64)])
+    # bachelor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
+    # bachelor_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
+    # bachelor_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    # bachelor_year = SelectField(u'入学年份', coerce=unicode)
     # master
-    master_school = StringField(u'研究生学校（硕士）')
-    master_major = StringField(u'院系（专业）')
-    master_gpa = FloatField(u'GPA')
-    master_full_gpa = FloatField(u'GPA满分')
-    master_year = SelectField(u'入学年份', coerce=unicode)
+    # master_school = StringField(u'研究生学校（硕士）', validators=[Length(1, 64)])
+    # master_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
+    # master_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
+    # master_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    # master_year = SelectField(u'入学年份', coerce=unicode)
     # doctor
-    doctor_school = StringField(u'研究生学校（博士）')
-    doctor_major = StringField(u'院系（专业）')
-    doctor_gpa = FloatField(u'GPA')
-    doctor_full_gpa = FloatField(u'GPA满分')
-    doctor_year = SelectField(u'入学年份', coerce=unicode)
+    # doctor_school = StringField(u'研究生学校（博士）', validators=[Length(1, 64)])
+    # doctor_major = StringField(u'院系（专业）', validators=[Length(1, 64)])
+    # doctor_gpa = FloatField(u'GPA', validators=[NumberRange(min=0)])
+    # doctor_full_gpa = FloatField(u'GPA满分', validators=[NumberRange(min=0)])
+    # doctor_year = SelectField(u'入学年份', coerce=unicode)
     # scores
-    cet_4 = IntegerField(u'CET-4')
-    cet_6 = IntegerField(u'CET-6')
-    tem_4 = IntegerField(u'TEM-4')
-    tem_8 = IntegerField(u'TEM-8')
-    toefl_total = SelectField(u'TOEFL', coerce=unicode)
-    toefl_reading = SelectField(u'Reading', coerce=unicode)
-    toefl_listening = SelectField(u'Listening', coerce=unicode)
-    toefl_speaking = SelectField(u'Speaking', coerce=unicode)
-    toefl_writing = SelectField(u'Writing', coerce=unicode)
-    competition = StringField(u'竞赛成绩')
-    other_score = StringField(u'其它成绩')
+    # cet_4 = IntegerField(u'CET-4', validators=[NumberRange(min=0)])
+    # cet_6 = IntegerField(u'CET-6', validators=[NumberRange(min=0)])
+    # tem_4 = IntegerField(u'TEM-4', validators=[NumberRange(min=0)])
+    # tem_8 = IntegerField(u'TEM-8', validators=[NumberRange(min=0)])
+    # toefl_total = SelectField(u'TOEFL', coerce=unicode)
+    # toefl_reading = SelectField(u'Reading', coerce=unicode)
+    # toefl_listening = SelectField(u'Listening', coerce=unicode)
+    # toefl_speaking = SelectField(u'Speaking', coerce=unicode)
+    # toefl_writing = SelectField(u'Writing', coerce=unicode)
+    # competition = StringField(u'竞赛成绩', validators=[Length(1, 128)])
+    # other_score = StringField(u'其它成绩', validators=[Length(1, 128)])
     # job 1
-    employer_1 = StringField(u'工作单位')
-    position_1 = StringField(u'职务')
-    job_year_1 = SelectField(u'入职年份', coerce=unicode)
+    # employer_1 = StringField(u'工作单位', validators=[Length(1, 64)])
+    # position_1 = StringField(u'职务', validators=[Length(1, 64)])
+    # job_year_1 = SelectField(u'入职年份', coerce=unicode)
     # job 2
-    employer_2 = StringField(u'工作单位')
-    position_2 = StringField(u'职务')
-    job_year_2 = SelectField(u'入职年份', coerce=unicode)
+    # employer_2 = StringField(u'工作单位', validators=[Length(1, 64)])
+    # position_2 = StringField(u'职务', validators=[Length(1, 64)])
+    # job_year_2 = SelectField(u'入职年份', coerce=unicode)
     # contact
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
     address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
-    qq = StringField(u'QQ')
-    wechat = StringField(u'微信')
+    qq = StringField(u'QQ', validators=[Length(0, 64)])
+    wechat = StringField(u'微信', validators=[Length(0, 64)])
     # emergency contact
     emergency_contact_name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     emergency_contact_relationship = SelectField(u'关系', coerce=unicode, validators=[Required()])
-    emergency_contact_mobile = StringField(u'联系方式', validators=[Required()])
+    emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
     # registration
-    purposes = SelectMultipleField(u'研修目的', coerce=unicode)
-    other_purpose = StringField(u'其它研修目的')
-    application_major = StringField(u'申请方向')
-    referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
-    other_referrer = StringField(u'其它了解渠道')
-    inviter_email = StringField(u'推荐人（邮箱）')
+    # purposes = SelectMultipleField(u'研修目的', coerce=unicode)
+    # other_purpose = StringField(u'其它研修目的', validators=[Length(1, 64)])
+    # application_major = StringField(u'申请方向', validators=[Length(1, 64)])
+    # referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
+    # other_referrer = StringField(u'其它了解渠道', validators=[Length(1, 64)])
+    # inviter_email = StringField(u'推荐人（邮箱）', validators=[Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'研修类别', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
     y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
     products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
-    worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
-    deformity = BooleanField(u'有严重心理或身体疾病')
+    # worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
+    # deformity = BooleanField(u'有严重心理或身体疾病')
     # submit
-    disclaimer = BooleanField(u'确认无偿授权“云英语”使用申请者姓名、肖像、GRE成绩单以及其它必要信息用于宣传', validators=[Required()])
-    receptionist_email = StringField(u'接待人（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    submit = SubmitField(u'新建学生用户')
+    # disclaimer = BooleanField(u'确认无偿授权“云英语”使用申请者姓名、肖像、GRE成绩单以及其它必要信息用于宣传', validators=[Required()])
+    # receptionist_email = StringField(u'接待人（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    submit = SubmitField(u'下一步')
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
-        self.high_school_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.bachelor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.master_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.doctor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.job_year_1.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.toefl_total.choices = [(u'', u'选择TOEFL总分')] + [(unicode(toefl_total_score.id), toefl_total_score.name) for toefl_total_score in TOEFLTotalScore.query.order_by(TOEFLTotalScore.value.desc()).all()]
-        self.toefl_reading.choices = [(u'', u'选择TOEFL阅读分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLReadingScore.query.order_by(TOEFLReadingScore.value.desc()).all()]
-        self.toefl_listening.choices = [(u'', u'选择TOEFL听力分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLListeningScore.query.order_by(TOEFLListeningScore.value.desc()).all()]
-        self.toefl_speaking.choices = [(u'', u'选择TOEFL口语分数')] + [(unicode(toefl_speaking_score.id), toefl_speaking_score.name) for toefl_speaking_score in TOEFLSpeakingScore.query.order_by(TOEFLSpeakingScore.value.desc()).all()]
-        self.toefl_writing.choices = [(u'', u'选择TOEFL写作分数')] + [(unicode(toefl_writing_score.id), toefl_writing_score.name) for toefl_writing_score in TOEFLWritingScore.query.order_by(TOEFLWritingScore.value.desc()).all()]
+        # self.high_school_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        # self.bachelor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        # self.master_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        # self.doctor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        # self.job_year_1.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        # self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        # self.toefl_total.choices = [(u'', u'选择TOEFL总分')] + [(unicode(toefl_total_score.id), toefl_total_score.name) for toefl_total_score in TOEFLTotalScore.query.order_by(TOEFLTotalScore.value.desc()).all()]
+        # self.toefl_reading.choices = [(u'', u'选择TOEFL阅读分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLReadingScore.query.order_by(TOEFLReadingScore.value.desc()).all()]
+        # self.toefl_listening.choices = [(u'', u'选择TOEFL听力分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLListeningScore.query.order_by(TOEFLListeningScore.value.desc()).all()]
+        # self.toefl_speaking.choices = [(u'', u'选择TOEFL口语分数')] + [(unicode(toefl_speaking_score.id), toefl_speaking_score.name) for toefl_speaking_score in TOEFLSpeakingScore.query.order_by(TOEFLSpeakingScore.value.desc()).all()]
+        # self.toefl_writing.choices = [(u'', u'选择TOEFL写作分数')] + [(unicode(toefl_writing_score.id), toefl_writing_score.name) for toefl_writing_score in TOEFLWritingScore.query.order_by(TOEFLWritingScore.value.desc()).all()]
         self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
-        self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
-        self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
+        # self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
+        # self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
         self.role.choices = [(u'', u'选择研修类别')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
         self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
