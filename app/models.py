@@ -674,6 +674,110 @@ class YGRETestScore(db.Model):
         return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
+class TOEFLReadingScore(db.Model):
+    __tablename__ = 'toefl_reading_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Integer)
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='reading_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_toefl_reading_scores():
+        toefl_reading_scores = [(unicode(x), x, ) for x in range(0, 31)]
+        for TRS in toefl_reading_scores:
+            toefl_reading_score = TOEFLReadingScore.query.filter_by(name=TRS[0]).first()
+            if toefl_reading_score is None:
+                toefl_reading_score = TOEFLReadingScore(name=TRS[0], value=TRS[1])
+                db.session.add(toefl_reading_score)
+                print u'导入TOEFL阅读成绩类型信息', TRS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<TOEFL Reading Score %r>' % self.name
+
+
+class TOEFLListeningScore(db.Model):
+    __tablename__ = 'toefl_listening_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Integer)
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='listening_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_toefl_listening_scores():
+        toefl_listening_scores = [(unicode(x), x, ) for x in range(0, 31)]
+        for TLS in toefl_listening_scores:
+            toefl_listening_score = TOEFLListeningScore.query.filter_by(name=TLS[0]).first()
+            if toefl_listening_score is None:
+                toefl_listening_score = TOEFLListeningScore(name=TLS[0], value=TLS[1])
+                db.session.add(toefl_listening_score)
+                print u'导入TOEFL听力成绩类型信息', TLS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<TOEFL Listening Score %r>' % self.name
+
+
+class TOEFLSpeakingScore(db.Model):
+    __tablename__ = 'toefl_speaking_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Integer)
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='speaking_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_toefl_speaking_scores():
+        toefl_speaking_scores = [(unicode(x), x, ) for x in range(0, 31)]
+        for TSS in toefl_speaking_scores:
+            toefl_speaking_score = TOEFLSpeakingScore.query.filter_by(name=TSS[0]).first()
+            if toefl_speaking_score is None:
+                toefl_speaking_score = TOEFLSpeakingScore(name=TSS[0], value=TSS[1])
+                db.session.add(toefl_speaking_score)
+                print u'导入TOEFL口语成绩类型信息', TSS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<TOEFL Speaking Score %r>' % self.name
+
+
+class TOEFLWritingScore(db.Model):
+    __tablename__ = 'toefl_writing_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    value = db.Column(db.Integer)
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='writing_score', lazy='dynamic')
+
+    @staticmethod
+    def insert_toefl_writing_scores():
+        toefl_writing_scores = [(unicode(x), x, ) for x in range(0, 31)]
+        for TWS in toefl_writing_scores:
+            toefl_writing_score = TOEFLWritingScore.query.filter_by(name=TWS[0]).first()
+            if toefl_writing_score is None:
+                toefl_writing_score = TOEFLWritingScore(name=TWS[0], value=TWS[1])
+                db.session.add(toefl_writing_score)
+                print u'导入TOEFL写作成绩类型信息', TWS[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<TOEFL Writing Score %r>' % self.name
+
+
+class TOEFLTestScore(db.Model):
+    __tablename__ = 'toefl_test_score'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    reading_score_id = db.Column(db.Integer, db.ForeignKey('toefl_reading_scores.id'))
+    listening_score_id = db.Column(db.Integer, db.ForeignKey('toefl_listening_scores.id'))
+    speaking_score_id = db.Column(db.Integer, db.ForeignKey('toefl_speaking_scores.id'))
+    writing_score_id = db.Column(db.Integer, db.ForeignKey('toefl_writing_scores.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __repr__(self):
+        return '<TOEFL Test Score %r, %r>' % (self.user.name, self.test.name)
+
+
 class UserAnnouncement(db.Model):
     __tablename__ = 'user_announcements'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -842,6 +946,13 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    toefl_test_scores = db.relationship(
+        'TOEFLTestScore',
+        foreign_keys=[TOEFLTestScore.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     read_announcements = db.relationship(
         'UserAnnouncement',
         foreign_keys=[UserAnnouncement.user_id],
@@ -893,6 +1004,13 @@ class User(UserMixin, db.Model):
     modified_y_gre_test_scores = db.relationship(
         'YGRETestScore',
         foreign_keys=[YGRETestScore.modified_by_id],
+        backref=db.backref('modified_by', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    modified_toefl_test_scores = db.relationship(
+        'TOEFLTestScore',
+        foreign_keys=[TOEFLTestScore.modified_by_id],
         backref=db.backref('modified_by', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -1521,7 +1639,6 @@ class PreviousAchievementType(db.Model):
             (u'大学英语六级', ),
             (u'专业英语四级', ),
             (u'专业英语八级', ),
-            (u'TOEFL', ),
             (u'竞赛', ),
             (u'其它', ),
         ]
