@@ -339,15 +339,15 @@
                             {{ form.referrers(class='ui dropdown') }}
                         </div>
                         <div class="four wide field">
-                            {{ form.inviter_email.label() }}
-                            <div class="ui fluid search">
-                                {{ form.inviter_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                                <div class="results"></div>
-                            </div>
-                        </div>
-                        <div class="four wide field">
                             {{ form.other_referrer.label() }}
                             {{ form.other_referrer(placeholder='其它了解渠道') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.inviter_email.label() }}
+                            <div class="ui fluid search">
+                                {{ form.inviter_email(placeholder='输入推荐人姓名/邮箱', class='prompt') }}
+                                <div class="results"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="fields">
@@ -368,14 +368,6 @@
                         {{ form.products.label() }}
                         {{ form.products(class='ui dropdown') }}
                     </div>
-                    <div class="required field">
-                        {{ form.receptionist_email.label() }}
-                        <div class="ui fluid search">
-                            {{ form.receptionist_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                            <div class="results"></div>
-                        </div>
-                    </div>
-                    <h4 class="ui grey dividing header">其它信息</h4>
                     <div class="ui segment">
                         <div class="inline field">
                             <div class="ui toggle checkbox">
@@ -390,12 +382,20 @@
                             </div>
                         </div>
                     </div>
+                    <h4 class="ui grey dividing header">其它信息</h4>
                     <div class="ui segment">
                         <div class="inline required field">
                             <div class="ui toggle checkbox">
                                 {{ form.disclaimer() }}
                                 {{ form.disclaimer.label() }}
                             </div>
+                        </div>
+                    </div>
+                    <div class="required field">
+                        {{ form.receptionist_email.label() }}
+                        <div class="ui fluid search">
+                            {{ form.receptionist_email(placeholder='输入接待人姓名/邮箱', class='prompt') }}
+                            <div class="results"></div>
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
