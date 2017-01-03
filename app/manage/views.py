@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, Purpose, PurposeType, Referrer, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -2086,7 +2086,15 @@ def create_user():
                 remark=form.other_score.data
             )
         if form.toefl_total.data:
-            pass
+            user.add_toefl_test_score(
+                toefl_test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
+                total_score_id=form.toefl_total.data,
+                reading_score_id=form.toefl_reading.data,
+                listening_score_id=form.toefl_listening.data,
+                speaking_score_id=form.toefl_speaking.data,
+                writing_score_id=form.toefl_writing.data,
+                modified_by=current_user._get_current_object()
+            )
         # registration
         for purpose_type_id in form.purposes.data:
             purpose_type = PurposeType.query.get(int(purpose_type_id))

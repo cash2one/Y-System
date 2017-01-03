@@ -1624,17 +1624,21 @@ class User(UserMixin, db.Model):
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
-    def add_toefl_test_score(self, toefl_test_score_type, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
+    def add_toefl_test_score(self, toefl_test_score_type, total_score_id, modified_by, reading_score_id=None, listening_score_id=None, speaking_score_id=None, writing_score_id=None):
         toefl_test_score = TOEFLTestScore(
             user_id=self.id,
             type_id=toefl_test_score_type.id,
-            total_score_id=total_score.id,
-            reading_score_id=reading_score.id,
-            listening_score_id=listening_score.id,
-            speaking_score_id=speaking_score.id,
-            writing_score_id=writing_score.id,
+            total_score_id=int(total_score_id),
             modified_by_id=modified_by.id
         )
+        if reading_score_id:
+            toefl_test_score.reading_score_id = int(reading_score_id)
+        if listening_score_id:
+            toefl_test_score.listening_score_id = int(listening_score_id)
+        if speaking_score_id:
+            toefl_test_score.speaking_score_id = int(speaking_score_id)
+        if writing_score_id:
+            toefl_test_score.writing_score_id = int(writing_score_id)
         db.session.add(toefl_test_score)
 
     def notified_by(self, announcement):
