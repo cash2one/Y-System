@@ -1232,18 +1232,18 @@ class User(UserMixin, db.Model):
 
     def is_superior_than(self, user):
         if self.is_developer:
-            if user.is_developer:
-                return False
+            if not user.is_developer:
+                return True
         if self.is_administrator:
-            if user.is_developer or user.is_administrator:
-                return False
+            if not (user.is_developer or user.is_administrator):
+                return True
         if self.is_moderator:
-            if user.is_developer or user.is_administrator or user.is_moderator:
-                return False
+            if not (user.is_developer or user.is_administrator or user.is_moderator):
+                return True
         if self.is_volunteer:
-            if user.is_developer or user.is_administrator or user.is_moderator or user.is_volunteer:
-                return False
-        return True
+            if not (user.is_developer or user.is_administrator or user.is_moderator or user.is_volunteer):
+                return True
+        return False
 
     def ping(self):
         self.last_seen_at = datetime.utcnow()

@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -2107,7 +2107,7 @@ def create_user():
         if form.inviter_email.data:
             inviter = User.query.filter_by(email=form.inviter_email.data).first()
             if inviter is not None:
-                inviter.invite_user(user=user)
+                inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         if int(form.vb_course.data):
             user.register_course(course=Course.query.get(int(form.vb_course.data)))
         if int(form.y_gre_course.data):
@@ -2118,7 +2118,8 @@ def create_user():
         if receptionist is not None:
             receptionist.receive_user(user=user)
         current_user.create_user(user=user)
-        flash(u'成功添加%s用户：%s' % (user.role.name, user.name), category='success')
+        flash(u'成功添加“%s”用户：%s' % (user.role.name, user.name), category='success')
+        return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/create_user.html', form=form)
 
 
@@ -2239,12 +2240,14 @@ def course():
         query = Course.query\
             .join(CourseType, CourseType.id == Course.type_id)\
             .filter(CourseType.name == u'VB')\
-            .filter(Course.deleted == False)
+            .filter(Course.deleted == False)\
+            .order_by(Course.id.desc())
     if show_y_gre_courses:
         query = Course.query\
             .join(CourseType, CourseType.id == Course.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
-            .filter(Course.deleted == False)
+            .filter(Course.deleted == False)\
+            .order_by(Course.id.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     courses = pagination.items
     return render_template('manage/course.html', form=form, courses=courses, show_vb_courses=show_vb_courses, show_y_gre_courses=show_y_gre_courses, pagination=pagination)
