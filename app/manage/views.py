@@ -2151,8 +2151,6 @@ def create_user_step_1():
         )
         db.session.add(user)
         db.session.commit()
-        current_user.create_user(user=user)
-        # flash(u'成功添加“%s”用户：%s' % (user.role.name, user.name), category='success')
         # return redirect(url_for('manage.create_user_step_2', user_id=user_id))
     return render_template('manage/create_user_step_1.html', form=form)
 
@@ -2163,7 +2161,19 @@ def create_user_step_1():
 def create_admin():
     form = NewAdminForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
-        admin = User(email=form.email.data, role_id=int(form.role.data), password=form.activation_code.data, name=form.name.data)
+        if int(form.id_number.data[16]) % 2 == 1:
+            gender = Gender.query.filter_by(name=u'男').first()
+        else:
+            gender = Gender.query.filter_by(name=u'女').first()
+        admin = User(
+            email=form.email.data,
+            role_id=int(form.role.data),
+            password=form.id_number.data[-6:],
+            name=form.name.data,
+            gender_id=gender.id,
+            id_number=form.id_number.data.upper(),
+            birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14]))
+        )
         db.session.add(admin)
         db.session.commit()
         current_user.create_user(user=admin)

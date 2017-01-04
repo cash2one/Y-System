@@ -363,10 +363,27 @@ class NewUserForm(FlaskForm):
             raise ValidationError(u'%s已经被注册' % field.data)
 
 
+class NewEducationRecordForm(FlaskForm):
+    pass
+
+
+class NewEmploymentRecordForm(FlaskForm):
+    pass
+
+
+class NewPreviousAchievementForm(FlaskForm):
+    pass
+
+
+class NewTOEFLTestScoreForm(FlaskForm):
+    pass
+
+
 class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
+    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
+    # activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
     role = SelectField(u'用户组', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'新建管理用户')
 

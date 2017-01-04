@@ -96,6 +96,26 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <div class="ui fluid ordered steps">
+                    <div class="active step">
+                        <div class="content">
+                            <div class="title">新建用户</div>
+                            <div class="description">基本信息、联系方式</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="content">
+                            <div class="title">完善信息</div>
+                            <div class="description">个人履历、研修信息</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="content">
+                            <div class="title">完成注册</div>
+                            <div class="description">确认信息、服务条款</div>
+                        </div>
+                    </div>
+                </div>
                 <form id="create-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <h4 class="ui blue dividing header">基本信息</h4>
@@ -148,25 +168,6 @@
                             {{ form.emergency_contact_mobile.label() }}
                             {{ form.emergency_contact_mobile(placeholder='移动电话') }}
                         </div>
-                    </div>
-                    <h4 class="ui teal dividing header">报名信息</h4>
-                    <div class="fields">
-                        <div class="eight wide required field">
-                            {{ form.role.label() }}
-                            {{ form.role(class='ui dropdown') }}
-                        </div>
-                        <div class="four wide required field">
-                            {{ form.vb_course.label() }}
-                            {{ form.vb_course(class='ui dropdown') }}
-                        </div>
-                        <div class="four wide required field">
-                            {{ form.y_gre_course.label() }}
-                            {{ form.y_gre_course(class='ui dropdown') }}
-                        </div>
-                    </div>
-                    <div class="required field">
-                        {{ form.products.label() }}
-                        {{ form.products(class='ui dropdown') }}
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
