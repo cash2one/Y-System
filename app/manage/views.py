@@ -1780,22 +1780,24 @@ def delete_announcement(id):
 @permission_required(u'管理用户')
 def user():
     page = request.args.get('page', 1, type=int)
-    show_activated = True
-    show_unactivated = False
-    show_suspended = False
+    show_activated_users = True
+    show_unactivated_users = False
+    show_suspended_users = False
     show_volunteers = False
     show_moderators = False
     show_administrators = False
     show_developers = False
+    show_deleted_users = False
     if current_user.is_authenticated:
-        show_activated = bool(request.cookies.get('show_activated', '1'))
-        show_unactivated = bool(request.cookies.get('show_unactivated', ''))
-        show_suspended = bool(request.cookies.get('show_suspended', ''))
+        show_activated_users = bool(request.cookies.get('show_activated_users', '1'))
+        show_unactivated_users = bool(request.cookies.get('show_unactivated_users', ''))
+        show_suspended_users = bool(request.cookies.get('show_suspended_users', ''))
         show_volunteers = bool(request.cookies.get('show_volunteers', ''))
         show_moderators = bool(request.cookies.get('show_moderators', ''))
         show_administrators = bool(request.cookies.get('show_administrators', ''))
         show_developers = bool(request.cookies.get('show_developers', ''))
-    if show_activated:
+        show_deleted_users = bool(request.cookies.get('show_deleted_users', ''))
+    if show_activated_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.activated == True)\
@@ -1807,7 +1809,7 @@ def user():
                 Role.name == u'Y-GRE A权限'
             ))\
             .order_by(User.last_seen_at.desc())
-    if show_unactivated:
+    if show_unactivated_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.activated == False)\
@@ -1820,7 +1822,7 @@ def user():
                 Role.name == u'Y-GRE A权限'
             ))\
             .order_by(User.last_seen_at.desc())
-    if show_suspended:
+    if show_suspended_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.activated == True)\
@@ -1851,9 +1853,14 @@ def user():
             .filter(User.deleted == False)\
             .filter(Role.name == u'开发人员')\
             .order_by(User.last_seen_at.desc())
+    if show_deleted_users:
+        query = User.query\
+            .join(Role, Role.id == User.role_id)\
+            .filter(User.deleted == True)\
+            .order_by(User.last_seen_at.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/user.html', users=users, show_activated=show_activated, show_unactivated=show_unactivated, show_suspended=show_suspended, show_volunteers=show_volunteers, show_moderators=show_moderators, show_administrators=show_administrators, show_developers=show_developers, pagination=pagination)
+    return render_template('manage/user.html', users=users, show_activated_users=show_activated_users, show_unactivated_users=show_unactivated_users, show_suspended_users=show_suspended_users, show_volunteers=show_volunteers, show_moderators=show_moderators, show_administrators=show_administrators, show_developers=show_developers, show_deleted_users=show_deleted_users, pagination=pagination)
 
 
 @manage.route('/user/activated')
@@ -1861,13 +1868,14 @@ def user():
 @permission_required(u'管理用户')
 def activated_users():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_activated', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activated_users', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
     resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1876,13 +1884,14 @@ def activated_users():
 @permission_required(u'管理用户')
 def unactivated_users():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_unactivated', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
     resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1891,13 +1900,14 @@ def unactivated_users():
 @permission_required(u'管理用户')
 def suspended_users():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_suspended', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '1', max_age=30*24*60*60)
     resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1906,13 +1916,14 @@ def suspended_users():
 @permission_required(u'管理用户')
 def volunteers():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
     resp.set_cookie('show_volunteers', '1', max_age=30*24*60*60)
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1921,13 +1932,14 @@ def volunteers():
 @permission_required(u'管理用户')
 def moderators():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
     resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
     resp.set_cookie('show_moderators', '1', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1936,13 +1948,14 @@ def moderators():
 @administrator_required
 def administrators():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
     resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '1', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1951,13 +1964,30 @@ def administrators():
 @developer_required
 def developers():
     resp = make_response(redirect(url_for('manage.user')))
-    resp.set_cookie('show_activated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_unactivated', '', max_age=30*24*60*60)
-    resp.set_cookie('show_suspended', '', max_age=30*24*60*60)
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
     resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/user/deleted')
+@login_required
+@developer_required
+def deleted_users():
+    resp = make_response(redirect(url_for('manage.user')))
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '1', max_age=30*24*60*60)
     return resp
 
 
