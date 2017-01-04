@@ -97,13 +97,13 @@
         <div class="row">
             <div class="column">
                 <div class="ui fluid ordered steps">
-                    <div class="active step">
+                    <div class="completed step">
                         <div class="content">
                             <div class="title">新建用户</div>
                             <div class="description">基本信息、联系方式</div>
                         </div>
                     </div>
-                    <div class="step">
+                    <div class="active step">
                         <div class="content">
                             <div class="title">完善信息</div>
                             <div class="description">个人履历、研修信息</div>
@@ -317,6 +317,64 @@ $(document)
                             {
                                 type: 'exactLength[11]',
                                 prompt: '紧急联系人移动电话号码位数有误'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier: 'role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修类别'
+                            }
+                        ]
+                    },
+                    vb_course: {
+                        identifier: 'vb_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择VB班'
+                            }
+                        ]
+                    },
+                    y_gre_course: {
+                        identifier: 'y_gre_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Y-GRE班'
+                            }
+                        ]
+                    },
+                    products: {
+                        identifier: 'products',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
+                    receptionist_email: {
+                        identifier: 'receptionist_email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写接待人电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    disclaimer: {
+                        identifier: 'disclaimer',
+                        rules: [
+                            {
+                                type: 'checked',
+                                prompt: '请确认用户同意服务条款'
                             }
                         ]
                     }

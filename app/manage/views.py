@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, RestoreUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, EditUserForm, DeleteUserForm, RestoreUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
 from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
@@ -2163,7 +2163,7 @@ def create_user_step_1():
             gender = Gender.query.filter_by(name=u'女').first()
         user = User(
             email=form.email.data,
-            role_id=int(form.role.data),
+            role_id=Role.query.filter_by(name=u'挂起').id,
             password=form.id_number.data[-6:],
             name=form.name.data,
             gender_id=gender.id,
@@ -2181,6 +2181,22 @@ def create_user_step_1():
         db.session.commit()
         # return redirect(url_for('manage.create_user_step_2', user_id=user_id))
     return render_template('manage/create_user_step_1.html', form=form)
+
+
+@manage.route('/user/create/step-2/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理用户')
+def create_user_step_2(id):
+    user = User.query.get_or_404(id)
+    if user.deleted:
+        abort(404)
+    if user.is_superior_than(user=current_user._get_current_object()):
+        abort(403)
+    new_education_record_form = NewEducationRecordForm()
+    new_employment_record_form = NewEmploymentRecordForm()
+    new_previous_achievement_form = NewPreviousAchievementForm()
+    new_toefl_test_score_form = NewTOEFLTestScoreForm()
+    return render_template('manage/create_user_step_2.html', new_education_record_form=new_education_record_form, new_employment_record_form=new_employment_record_form, new_previous_achievement_form=new_previous_achievement_form, new_toefl_test_score_form=new_toefl_test_score_form, user=user)
 
 
 @manage.route('/user/create-admin', methods=['GET', 'POST'])
