@@ -2038,7 +2038,7 @@ def deleted_users():
 #             )
 #         if form.master_school.data:
 #             user.add_education_record(
-#                 education_type=EducationType.query.filter_by(name=u'本科').first(),
+#                 education_type=EducationType.query.filter_by(name=u'硕士').first(),
 #                 school=form.master_school.data,
 #                 major=form.master_major.data,
 #                 gpa=form.master_gpa.data,
@@ -2047,7 +2047,7 @@ def deleted_users():
 #             )
 #         if form.doctor_school.data:
 #             user.add_education_record(
-#                 education_type=EducationType.query.filter_by(name=u'本科').first(),
+#                 education_type=EducationType.query.filter_by(name=u'博士').first(),
 #                 school=form.doctor_school.data,
 #                 major=form.doctor_major.data,
 #                 gpa=form.doctor_gpa.data,
