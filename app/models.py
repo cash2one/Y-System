@@ -1143,6 +1143,11 @@ class User(UserMixin, db.Model):
         self.deleted = True
         db.session.add(self)
 
+    def restore(self, role):
+        self.role_id = role.id
+        self.deleted = False
+        db.session.add(self)
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')

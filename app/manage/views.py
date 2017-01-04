@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewAdminForm, EditUserForm, DeleteUserForm, RestoreUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
 from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
@@ -1815,7 +1815,6 @@ def user():
             .filter(User.activated == False)\
             .filter(User.deleted == False)\
             .filter(or_(
-                Role.name == u'挂起',
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
                 Role.name == u'Y-GRE VBx2',
@@ -1825,7 +1824,6 @@ def user():
     if show_suspended_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
-            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'挂起')\
             .order_by(User.last_seen_at.desc())
@@ -1977,7 +1975,7 @@ def developers():
 
 @manage.route('/user/deleted')
 @login_required
-@developer_required
+@administrator_required
 def deleted_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
@@ -2221,7 +2219,7 @@ def edit_user(id):
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
-    form = EditUserForm(creator=current_user._get_current_object())
+    form = EditUserForm(editor=current_user._get_current_object())
     if form.validate_on_submit():
         user.name = form.name.data
         user.role_id = form.role.data
@@ -2260,6 +2258,24 @@ def delete_user(id):
         flash(u'已注销用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/delete_user.html', form=form, user=user)
+
+
+@manage.route('/user/restore/<int:id>', methods=['GET', 'POST'])
+@login_required
+@administrator_required
+def restore_user(id):
+    user = User.query.get_or_404(id)
+    if not user.deleted:
+        abort(404)
+    if user.is_superior_than(user=current_user._get_current_object()):
+        abort(403)
+    form = RestoreUserForm(restorer=current_user._get_current_object())
+    if form.validate_on_submit():
+        user.restore(role=Role.query.get(int(form.role.data)))
+        flash(u'已恢复用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
+        return redirect(request.args.get('next') or url_for('manage.user'))
+    form.role.data = unicode(user.role_id)
+    return render_template('manage/restore_user.html', form=form, user=user)
 
 
 @manage.route('/user/find', methods=['GET', 'POST'])

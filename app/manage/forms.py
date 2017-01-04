@@ -383,7 +383,6 @@ class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    # activation_code = StringField(u'激活码', validators=[Required(), Length(6, 64)])
     role = SelectField(u'用户组', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'新建管理用户')
 
@@ -406,11 +405,11 @@ class EditUserForm(FlaskForm):
     y_gre_course = SelectField(u'Y-GRE班', coerce=int)
     submit = SubmitField(u'提交')
 
-    def __init__(self, creator, *args, **kwargs):
+    def __init__(self, editor, *args, **kwargs):
         super(EditUserForm, self).__init__(*args, **kwargs)
-        if creator.is_developer:
+        if editor.is_developer:
             self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all()]
-        elif creator.is_administrator:
+        elif editor.is_administrator:
             self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         else:
             self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
@@ -420,6 +419,20 @@ class EditUserForm(FlaskForm):
 
 class DeleteUserForm(FlaskForm):
     submit = SubmitField(u'删除')
+
+
+class RestoreUserForm(FlaskForm):
+    role = SelectField(u'用户组', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'恢复')
+
+    def __init__(self, restorer, *args, **kwargs):
+        super(RestoreUserForm, self).__init__(*args, **kwargs)
+        if restorer.is_developer:
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
+        elif restorer.is_administrator:
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+        else:
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
 
 
 class FindUserForm(FlaskForm):
