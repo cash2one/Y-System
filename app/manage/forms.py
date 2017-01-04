@@ -306,16 +306,17 @@ class NewUserForm(FlaskForm):
 
 
 class NewEducationRecordForm(FlaskForm):
-    education_type = SelectField(u'学历类型', coerce=unicode, validators=[Required()])
+    education_type = SelectField(u'学历', coerce=unicode, validators=[Required()])
     school = StringField(u'学校', validators=[Required(), Length(1, 64)])
-    major = StringField(u'院系（专业）', validators=[Required(), Length(1, 64)])
+    major = StringField(u'院系（专业）', validators=[Length(0, 64)])
     gpa = FloatField(u'GPA')
     full_gpa = FloatField(u'GPA满分')
     year = SelectField(u'入学年份', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'添加教育经历')
 
     def __init__(self, *args, **kwargs):
         super(NewEducationRecordForm, self).__init__(*args, **kwargs)
-        self.education_type.choices = [(u'', u'选择学历类型')] + [(unicode(education_type.id), education_type.name) for education_type in EducationType.query.order_by(EducationType.id.asc()).all()]
+        self.education_type.choices = [(u'', u'选择学历')] + [(unicode(education_type.id), education_type.name) for education_type in EducationType.query.order_by(EducationType.id.asc()).all()]
         self.year.choices = [(u'', u'选择年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
 
 
@@ -323,20 +324,21 @@ class NewEmploymentRecordForm(FlaskForm):
     employer = StringField(u'工作单位', validators=[Required(), Length(1, 64)])
     position = StringField(u'职务', validators=[Required(), Length(1, 64)])
     year = SelectField(u'入职年份', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'添加工作经历')
 
     def __init__(self, *args, **kwargs):
-        super(NewUserForm, self).__init__(*args, **kwargs)
+        super(NewEmploymentRecordForm, self).__init__(*args, **kwargs)
         self.year.choices = [(u'', u'选择年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
 
 
 class NewPreviousAchievementForm(FlaskForm):
-    previous_achievement_type = SelectField(u'成绩类型', coerce=unicode, validators=[Required()])
-    score = IntegerField(u'分数')
-    remark = StringField(u'备注', validators=[Length(0, 128)])
+    previous_achievement_type = SelectField(u'类型', coerce=unicode, validators=[Required()])
+    achievement = StringField(u'成绩', validators=[Required(), Length(0, 128)])
+    submit = SubmitField(u'添加既往成绩')
 
     def __init__(self, *args, **kwargs):
         super(NewPreviousAchievementForm, self).__init__(*args, **kwargs)
-        self.education_type.choices = [(u'', u'选择成绩类型')] + [(unicode(education_type.id), education_type.name) for education_type in EducationType.query.order_by(EducationType.id.asc()).all()]
+        self.previous_achievement_type.choices = [(u'', u'选择类型')] + [(unicode(previous_achievement_type.id), previous_achievement_type.name) for previous_achievement_type in PreviousAchievementType.query.order_by(PreviousAchievementType.id.asc()).all()]
 
 
 class NewTOEFLTestScoreForm(FlaskForm):
@@ -345,6 +347,7 @@ class NewTOEFLTestScoreForm(FlaskForm):
     toefl_listening = SelectField(u'Listening', coerce=unicode)
     toefl_speaking = SelectField(u'Speaking', coerce=unicode)
     toefl_writing = SelectField(u'Writing', coerce=unicode)
+    submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)

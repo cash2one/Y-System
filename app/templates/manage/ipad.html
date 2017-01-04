@@ -279,7 +279,6 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
                     {% with serial_errors = form.serial.errors %}
                     {% if serial_errors %}
                     <div class="ui flask negative message">

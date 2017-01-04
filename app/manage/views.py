@@ -2179,7 +2179,7 @@ def create_user_step_1():
         )
         db.session.add(user)
         db.session.commit()
-        # return redirect(url_for('manage.create_user_step_2', user_id=user_id))
+        # return redirect(url_for('manage.create_user_step_2', id=user_id))
     return render_template('manage/create_user_step_1.html', form=form)
 
 
@@ -2192,6 +2192,9 @@ def create_user_step_2(id):
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
+    if user.activated:
+        flash(u'%s（%s）已经被激活' % (user.name, user.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.user'))
     new_education_record_form = NewEducationRecordForm()
     new_employment_record_form = NewEmploymentRecordForm()
     new_previous_achievement_form = NewPreviousAchievementForm()
@@ -2248,7 +2251,7 @@ def edit_user(id):
         #     user.unregister_course(user.y_gre_course)
         # if form.y_gre_course.data:
         #     user.register_course(Course.query.get(form.y_gre_course.data))
-        flash(u'%s的账户信息已更新' % form.name.data, category='success')
+        flash(u'%s的用户信息已更新' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.name.data = user.name
     form.role.data = unicode(user.role_id)
