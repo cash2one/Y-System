@@ -326,10 +326,10 @@ class NewUserForm(FlaskForm):
     # referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
     # other_referrer = StringField(u'其它了解渠道', validators=[Length(1, 64)])
     # inviter_email = StringField(u'推荐人（邮箱）', validators=[Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    role = SelectField(u'研修类别', coerce=unicode, validators=[Required()])
-    vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
-    y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
-    products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
+    # role = SelectField(u'研修类别', coerce=unicode, validators=[Required()])
+    # vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
+    # y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
+    # products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
     # worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     # deformity = BooleanField(u'有严重心理或身体疾病')
     # submit
@@ -353,10 +353,10 @@ class NewUserForm(FlaskForm):
         self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         # self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         # self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
-        self.role.choices = [(u'', u'选择研修类别')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
-        self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
-        self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
-        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        # self.role.choices = [(u'', u'选择研修类别')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        # self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        # self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+        # self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
@@ -400,21 +400,21 @@ class NewAdminForm(FlaskForm):
 
 class EditUserForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    role = SelectField(u'用户组', coerce=int)
-    vb_course = SelectField(u'VB班', coerce=int)
-    y_gre_course = SelectField(u'Y-GRE班', coerce=int)
+    role = SelectField(u'用户组', coerce=unicode)
+    # vb_course = SelectField(u'VB班', coerce=int)
+    # y_gre_course = SelectField(u'Y-GRE班', coerce=int)
     submit = SubmitField(u'提交')
 
     def __init__(self, editor, *args, **kwargs):
         super(EditUserForm, self).__init__(*args, **kwargs)
         if editor.is_developer:
-            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all()]
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
         elif editor.is_administrator:
-            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         else:
-            self.role.choices = [(role.id, role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
-        self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
-        self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        # self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
+        # self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
 class DeleteUserForm(FlaskForm):

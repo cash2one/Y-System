@@ -1139,11 +1139,14 @@ class User(UserMixin, db.Model):
     )
 
     def safe_delete(self):
+        self.email = u'%s_%s_deleted' % (self.email, self.id)
+        self.confirmed = False
         self.role_id = Role.query.filter_by(name=u'挂起').first().id
         self.deleted = True
         db.session.add(self)
 
     def restore(self, role):
+        self.email = self.email[:-len(u'_%s_deleted' % self.id)]
         self.role_id = role.id
         self.deleted = False
         db.session.add(self)

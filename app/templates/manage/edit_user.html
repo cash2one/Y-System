@@ -96,21 +96,13 @@
                 <form id="edit-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="eight wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="eight wide required field">
                             {{ form.role.label() }}
                             {{ form.role(class='ui dropdown') }}
-                        </div>
-                        <div class="four wide field">
-                            {{ form.vb_course.label() }}
-                            {{ form.vb_course(class='ui dropdown') }}
-                        </div>
-                        <div class="four wide field">
-                            {{ form.y_gre_course.label() }}
-                            {{ form.y_gre_course(class='ui dropdown') }}
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
@@ -153,19 +145,6 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请填写用户姓名'
-                            }
-                        ]
-                    },
-                    email: {
-                        identifier: 'email',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请输入您的电子邮箱地址'
-                            },
-                            {
-                                type: 'email',
-                                prompt: '请输入一个有效的电子邮箱地址'
                             }
                         ]
                     },

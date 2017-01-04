@@ -2222,24 +2222,24 @@ def edit_user(id):
     form = EditUserForm(editor=current_user._get_current_object())
     if form.validate_on_submit():
         user.name = form.name.data
-        user.role_id = form.role.data
+        user.role_id = int(form.role.data)
         db.session.add(user)
-        if user.vb_course:
-            user.unregister_course(user.vb_course)
-        if form.vb_course.data:
-            user.register_course(Course.query.get(form.vb_course.data))
-        if user.y_gre_course:
-            user.unregister_course(user.y_gre_course)
-        if form.y_gre_course.data:
-            user.register_course(Course.query.get(form.y_gre_course.data))
+        # if user.vb_course:
+        #     user.unregister_course(user.vb_course)
+        # if form.vb_course.data:
+        #     user.register_course(Course.query.get(form.vb_course.data))
+        # if user.y_gre_course:
+        #     user.unregister_course(user.y_gre_course)
+        # if form.y_gre_course.data:
+        #     user.register_course(Course.query.get(form.y_gre_course.data))
         flash(u'%s的账户信息已更新' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.name.data = user.name
-    form.role.data = user.role_id
-    if user.vb_course:
-        form.vb_course.data = user.vb_course.id
-    if user.y_gre_course:
-        form.y_gre_course.data = user.y_gre_course.id
+    form.role.data = unicode(user.role_id)
+    # if user.vb_course:
+    #     form.vb_course.data = user.vb_course.id
+    # if user.y_gre_course:
+    #     form.y_gre_course.data = user.y_gre_course.id
     return render_template('manage/edit_user.html', form=form, user=user)
 
 
@@ -2271,8 +2271,9 @@ def restore_user(id):
         abort(403)
     form = RestoreUserForm(restorer=current_user._get_current_object())
     if form.validate_on_submit():
-        user.restore(role=Role.query.get(int(form.role.data)))
-        flash(u'已恢复用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
+        role = Role.query.get(int(form.role.data))
+        user.restore(role=role)
+        flash(u'已恢复用户：%s [%s]（%s）' % (user.name, role.name, user.email), category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.role.data = unicode(user.role_id)
     return render_template('manage/restore_user.html', form=form, user=user)
