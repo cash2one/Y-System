@@ -112,30 +112,10 @@
             <div class="column">
                 <h3 class="header"><i class="exchange icon"></i> iPad借阅记录</h3>
                 <div class="ui tabular menu">
-                    {% if show_today_rental %}
-                    <a class="item active loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
-                    {% endif %}
-                    {% if show_today_rental_1103 %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
-                    {% endif %}
-                    {% if show_today_rental_1707 %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
-                    {% endif %}
-                    {% if show_history_rental %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
-                    {% endif %}
+                    <a class="item {% if show_today_rental %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
+                    <a class="item {% if show_today_rental_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
+                    <a class="item {% if show_today_rental_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
+                    <a class="item {% if show_history_rental %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
