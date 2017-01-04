@@ -401,6 +401,7 @@ class DeleteUserForm(FlaskForm):
 
 
 class RestoreUserForm(FlaskForm):
+    email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户组', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'恢复')
 
@@ -412,6 +413,10 @@ class RestoreUserForm(FlaskForm):
             self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         else:
             self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError(u'%s已经被注册' % field.data)
 
 
 class FindUserForm(FlaskForm):

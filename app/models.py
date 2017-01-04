@@ -1145,8 +1145,8 @@ class User(UserMixin, db.Model):
         self.deleted = True
         db.session.add(self)
 
-    def restore(self, role):
-        self.email = self.email[:-len(u'_%s_deleted' % self.id)]
+    def restore(self, email, role):
+        self.email = email
         self.role_id = role.id
         self.deleted = False
         db.session.add(self)

@@ -2151,10 +2151,10 @@ def deleted_users():
 #     return render_template('manage/create_user.html', form=form)
 
 
-@manage.route('/user/create/step-1', methods=['GET', 'POST'])
+@manage.route('/user/create', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
-def create_user_step_1():
+def create_user():
     form = NewUserForm()
     if form.validate_on_submit():
         if int(form.id_number.data[16]) % 2 == 1:
@@ -2179,14 +2179,14 @@ def create_user_step_1():
         )
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for('manage.create_user_step_2', id=user.id, next=request.args.get('next')))
-    return render_template('manage/create_user_step_1.html', form=form)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    return render_template('manage/create_user.html', form=form)
 
 
-@manage.route('/user/create/step-2/<int:id>', methods=['GET', 'POST'])
+@manage.route('/user/create/confirm/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
-def create_user_step_2(id):
+def create_user_confirm(id):
     user = User.query.get_or_404(id)
     if user.deleted:
         abort(404)
@@ -2199,7 +2199,7 @@ def create_user_step_2(id):
     new_employment_record_form = NewEmploymentRecordForm()
     new_previous_achievement_form = NewPreviousAchievementForm()
     new_toefl_test_score_form = NewTOEFLTestScoreForm()
-    return render_template('manage/create_user_step_2.html', new_education_record_form=new_education_record_form, new_employment_record_form=new_employment_record_form, new_previous_achievement_form=new_previous_achievement_form, new_toefl_test_score_form=new_toefl_test_score_form, user=user)
+    return render_template('manage/create_user_confirm.html', new_education_record_form=new_education_record_form, new_employment_record_form=new_employment_record_form, new_previous_achievement_form=new_previous_achievement_form, new_toefl_test_score_form=new_toefl_test_score_form, user=user)
 
 
 @manage.route('/user/create-admin', methods=['GET', 'POST'])
@@ -2291,9 +2291,10 @@ def restore_user(id):
     form = RestoreUserForm(restorer=current_user._get_current_object())
     if form.validate_on_submit():
         role = Role.query.get(int(form.role.data))
-        user.restore(role=role)
+        user.restore(email=form.email.data, role=role)
         flash(u'已恢复用户：%s [%s]（%s）' % (user.name, role.name, user.email), category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
+    form.email.data = user.email[:-len(u'_%s_deleted' % user.id)]
     form.role.data = unicode(user.role_id)
     return render_template('manage/restore_user.html', form=form, user=user)
 

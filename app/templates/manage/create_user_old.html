@@ -1,0 +1,625 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}新建学生用户{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+.ui.vertical.stripe .ui.form .ui.button.cancel {
+    margin-left: 5px;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="add user icon"></i> 新建学生用户</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <form id="create-user" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <h4 class="ui blue dividing header">基本信息</h4>
+                    <div class="fields">
+                        <div class="eight wide required field">
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='姓名') }}
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.id_number.label() }}
+                            {{ form.id_number(placeholder='身份证号（18位）') }}
+                        </div>
+                    </div>
+                    <h4 class="ui blue dividing header">教育经历</h4>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.high_school.label() }}
+                            {{ form.high_school(placeholder='毕业高中') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_total.label() }}
+                            {{ form.cee_total(placeholder='高考总分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_math.label() }}
+                            {{ form.cee_math(placeholder='高考数学') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_english.label() }}
+                            {{ form.cee_english(placeholder='高考英语') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.high_school_year.label() }}
+                            {{ form.high_school_year(class='ui compact dropdown') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="six wide field">
+                            {{ form.bachelor_school.label() }}
+                            {{ form.bachelor_school(placeholder='本科学校') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.bachelor_major.label() }}
+                            {{ form.bachelor_major(placeholder='院系（专业）') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.bachelor_gpa.label() }}
+                            {{ form.bachelor_gpa(placeholder='GPA') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.bachelor_full_gpa.label() }}
+                            {{ form.bachelor_full_gpa(placeholder='GPA满分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.bachelor_year.label() }}
+                            {{ form.bachelor_year(class='ui compact dropdown') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="six wide field">
+                            {{ form.master_school.label() }}
+                            {{ form.master_school(placeholder='研究生学校（硕士）') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.master_major.label() }}
+                            {{ form.master_major(placeholder='院系（专业）') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.master_gpa.label() }}
+                            {{ form.master_gpa(placeholder='GPA') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.master_full_gpa.label() }}
+                            {{ form.master_full_gpa(placeholder='GPA满分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.master_year.label() }}
+                            {{ form.master_year(class='ui compact dropdown') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="six wide field">
+                            {{ form.doctor_school.label() }}
+                            {{ form.doctor_school(placeholder='研究生学校（博士）') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.doctor_major.label() }}
+                            {{ form.doctor_major(placeholder='院系（专业）') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.doctor_gpa.label() }}
+                            {{ form.doctor_gpa(placeholder='GPA') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.doctor_full_gpa.label() }}
+                            {{ form.doctor_full_gpa(placeholder='GPA满分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.doctor_year.label() }}
+                            {{ form.doctor_year(class='ui compact dropdown') }}
+                        </div>
+                    </div>
+                    <h4 class="ui blue dividing header">既往成绩</h4>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.cet_4.label() }}
+                            {{ form.cet_4(placeholder='大学英语四级') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.cet_6.label() }}
+                            {{ form.cet_6(placeholder='大学英语六级') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.tem_4.label() }}
+                            {{ form.tem_4(placeholder='专业英语四级') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.tem_8.label() }}
+                            {{ form.tem_8(placeholder='专业英语八级') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="four wide field">
+                            {{ form.toefl_total.label() }}
+                            {{ form.toefl_total(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.toefl_reading.label() }}
+                            {{ form.toefl_reading(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.toefl_listening.label() }}
+                            {{ form.toefl_listening(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.toefl_speaking.label() }}
+                            {{ form.toefl_speaking(class='ui dropdown') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.toefl_writing.label() }}
+                            {{ form.toefl_writing(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.competition.label() }}
+                        {{ form.competition(placeholder='竞赛成绩') }}
+                    </div>
+                    <div class="field">
+                        {{ form.other_score.label() }}
+                        {{ form.other_score(placeholder='其它成绩') }}
+                    </div>
+                    <h4 class="ui blue dividing header">工作经历</h4>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.employer_1.label() }}
+                            {{ form.employer_1(placeholder='工作单位') }}
+                        </div>
+                        <div class="six wide field">
+                            {{ form.position_1.label() }}
+                            {{ form.position_1(placeholder='职务') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.job_year_1.label() }}
+                            {{ form.job_year_1(class='ui compact dropdown') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.employer_2.label() }}
+                            {{ form.employer_2(placeholder='工作单位') }}
+                        </div>
+                        <div class="six wide field">
+                            {{ form.position_2.label() }}
+                            {{ form.position_2(placeholder='职务') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.job_year_2.label() }}
+                            {{ form.job_year_2(class='ui compact dropdown') }}
+                        </div>
+                    </div>
+                    <h4 class="ui blue dividing header">联系方式</h4>
+                    <div class="fields">
+                        <div class="eight wide required field">
+                            {{ form.email.label() }}
+                            {{ form.email(placeholder='用于登录系统、接收通知') }}
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.mobile.label() }}
+                            {{ form.mobile(placeholder='移动电话') }}
+                        </div>
+                    </div>
+                    <div class="required field">
+                        {{ form.address.label() }}
+                        {{ form.address(placeholder='联系地址') }}
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.qq.label() }}
+                            {{ form.qq(placeholder='QQ号') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.wechat.label() }}
+                            {{ form.wechat(placeholder='微信号/手机号') }}
+                        </div>
+                    </div>
+                    <h4 class="ui orange dividing header">紧急联系人</h4>
+                    <div class="fields">
+                        <div class="six wide required field">
+                            {{ form.emergency_contact_name.label() }}
+                            {{ form.emergency_contact_name(placeholder='紧急联系人') }}
+                        </div>
+                        <div class="two wide required field">
+                            {{ form.emergency_contact_relationship.label() }}
+                            {{ form.emergency_contact_relationship(class='ui compact dropdown') }}
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.emergency_contact_mobile.label() }}
+                            {{ form.emergency_contact_mobile(placeholder='移动电话') }}
+                        </div>
+                    </div>
+                    <h4 class="ui teal dividing header">报名信息</h4>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.purposes.label() }}
+                            {{ form.purposes(class='ui dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.other_purpose.label() }}
+                            {{ form.other_purpose(placeholder='其它研修目的') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.application_major.label() }}
+                            {{ form.application_major(placeholder='申请方向') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.referrers.label() }}
+                            {{ form.referrers(class='ui dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.other_referrer.label() }}
+                            {{ form.other_referrer(placeholder='其它了解渠道') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.inviter_email.label() }}
+                            <div class="ui fluid search">
+                                {{ form.inviter_email(placeholder='输入推荐人姓名/邮箱', class='prompt') }}
+                                <div class="results"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide required field">
+                            {{ form.role.label() }}
+                            {{ form.role(class='ui dropdown') }}
+                        </div>
+                        <div class="four wide required field">
+                            {{ form.vb_course.label() }}
+                            {{ form.vb_course(class='ui dropdown') }}
+                        </div>
+                        <div class="four wide required field">
+                            {{ form.y_gre_course.label() }}
+                            {{ form.y_gre_course(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    <div class="required field">
+                        {{ form.products.label() }}
+                        {{ form.products(class='ui dropdown') }}
+                    </div>
+                    <div class="ui segment">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ form.worked_in_same_field() }}
+                                {{ form.worked_in_same_field.label() }}
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ form.deformity() }}
+                                {{ form.deformity.label() }}
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="ui grey dividing header">其它信息</h4>
+                    <div class="ui segment">
+                        <div class="inline required field">
+                            <div class="ui toggle checkbox">
+                                {{ form.disclaimer() }}
+                                {{ form.disclaimer.label() }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="required field">
+                        {{ form.receptionist_email.label() }}
+                        <div class="ui fluid search">
+                            {{ form.receptionist_email(placeholder='输入接待人姓名/邮箱', class='prompt') }}
+                            <div class="results"></div>
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
+                    <div class="ui error message"></div>
+                    {% with email_errors = form.email.errors %}
+                    {% if email_errors %}
+                    <div class="ui flask negative message">
+                        <ul class="list">
+                            {% for error in email_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/IDValidator.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('select.dropdown')
+    .dropdown()
+;
+
+$('.ui.checkbox')
+    .checkbox()
+;
+
+var Validator = new IDValidator(GB2260);
+$(document)
+    .ready(function() {
+        $.fn.form.settings.rules.idNumber = function(value) {
+            return (Validator.isValid(value, 18));
+        };
+        $('#create-user')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    name: {
+                        identifier: 'name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写用户姓名'
+                            }
+                        ]
+                    },
+                    id_number: {
+                        identifier: 'id_number',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写身份证号'
+                            },
+                            {
+                                type: 'idNumber',
+                                prompt: '请输入一个有效的身份证号'
+                            }
+                        ]
+                    },
+                    email: {
+                        identifier: 'email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    mobile: {
+                        identifier: 'mobile',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '移动电话号码位数有误'
+                            }
+                        ]
+                    },
+                    address: {
+                        identifier: 'address',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写联系地址'
+                            }
+                        ]
+                    },
+                    emergency_contact_name: {
+                        identifier: 'emergency_contact_name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人姓名'
+                            }
+                        ]
+                    },
+                    emergency_contact_relationship: {
+                        identifier: 'emergency_contact_relationship',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择紧急联系人关系'
+                            }
+                        ]
+                    },
+                    emergency_contact_mobile: {
+                        identifier: 'emergency_contact_mobile',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '紧急联系人移动电话号码位数有误'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier: 'role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修类别'
+                            }
+                        ]
+                    },
+                    vb_course: {
+                        identifier: 'vb_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择VB班'
+                            }
+                        ]
+                    },
+                    y_gre_course: {
+                        identifier: 'y_gre_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Y-GRE班'
+                            }
+                        ]
+                    },
+                    products: {
+                        identifier: 'products',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
+                    receptionist_email: {
+                        identifier: 'receptionist_email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写接待人电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    disclaimer: {
+                        identifier: 'disclaimer',
+                        rules: [
+                            {
+                                type: 'checked',
+                                prompt: '请确认用户同意服务条款'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/?keyword={query}'
+        },
+        showNoResults: false
+    })
+;
+</script>
+{% endblock %}
