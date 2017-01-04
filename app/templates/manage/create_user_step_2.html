@@ -106,7 +106,7 @@
                     <div class="active step">
                         <div class="content">
                             <div class="title">完善信息</div>
-                            <div class="description">个人履历、研修信息</div>
+                            <div class="description">个人履历、报名信息</div>
                         </div>
                     </div>
                     <div class="step">
@@ -119,14 +119,24 @@
                 <h4 class="ui blue dividing header">基本信息</h4>
                 <div class="ui relaxed divided animated list">
                     <div class="item">
-                        <i class="large user middle aligned icon"></i>
                         <div class="content">
                             <div class="header">姓名</div>
                             <div class="description">{{ user.name }}</div>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="large hashtag middle aligned icon"></i>
+                        <div class="content">
+                            <div class="header">性别</div>
+                            <div class="description">{{ user.gender.name }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">生日</div>
+                            <div class="description">{{ moment(user.birthdate).format('YYYY年M月D日') }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
                         <div class="content">
                             <div class="header">身份证号</div>
                             <div class="description">{{ user.id_number }}</div>
@@ -136,44 +146,55 @@
                 <h4 class="ui blue dividing header">联系方式</h4>
                 <div class="ui relaxed divided animated list">
                     <div class="item">
-                        <i class="large mail middle aligned icon"></i>
                         <div class="content">
                             <div class="header">电子邮箱</div>
                             <div class="description">{{ user.email }}</div>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="large mobile middle aligned icon"></i>
                         <div class="content">
                             <div class="header">移动电话</div>
-                            <div class="description">{{ user.mobile }}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <i class="large marker middle aligned icon"></i>
-                        <div class="content">
-                            <div class="header">联系地址</div>
-                            <div class="description">{{ user.address }}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <i class="large qq middle aligned icon"></i>
-                        <div class="content">
-                            <div class="header">QQ</div>
                             <div class="description">
-                                {% if user.qq %}
-                                {{ user.qq }}
+                                {% if user.mobile %}
+                                {{ user.mobile }}
+                                {% else %}
+                                无
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="large wechat middle aligned icon"></i>
+                        <div class="content">
+                            <div class="header">联系地址</div>
+                            <div class="description">
+                                {% if user.address %}
+                                {{ user.address }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">QQ</div>
+                            <div class="description">
+                                {% if user.qq %}
+                                {{ user.qq }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
                         <div class="content">
                             <div class="header">微信</div>
                             <div class="description">
                                 {% if user.wechat %}
                                 {{ user.wechat }}
+                                {% else %}
+                                无
                                 {% endif %}
                             </div>
                         </div>
@@ -182,28 +203,45 @@
                 <h4 class="ui orange dividing header">紧急联系人</h4>
                 <div class="ui relaxed divided animated list">
                     <div class="item">
-                        <i class="large user middle aligned icon"></i>
                         <div class="content">
                             <div class="header">姓名</div>
-                            <div class="description">{{ user.emergency_contact_name }}</div>
+                            <div class="description">
+                                {% if user.emergency_contact_name %}
+                                {{ user.emergency_contact_name }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="large linkify middle aligned icon"></i>
                         <div class="content">
                             <div class="header">关系</div>
-                            <div class="description">{{ user.relationship.name }}</div>
+                            <div class="description">
+                                {% if user.emergency_contact_relationship_id %}
+                                {{ user.relationship.name }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     <div class="item">
-                        <i class="large mobile middle aligned icon"></i>
                         <div class="content">
                             <div class="header">联系方式</div>
-                            <div class="description">{{ user.emergency_contact_mobile }}</div>
+                            <div class="description">
+                                {% if user.emergency_contact_mobile %}
+                                {{ user.emergency_contact_mobile }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
                 <h4 class="ui blue dividing header">教育经历</h4>
+                {% with education_records = user.education_records.all() %}
+                {% if education_records %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -216,7 +254,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for education_record in user.education_records %}
+                        {% for education_record in education_records %}
                         <tr>
                             <td>{{ education_record.type.name }}</td>
                             <td>{{ education_record.school }}</td>
@@ -236,6 +274,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
+                {% endwith %}
                 <form id="new-education-record" method="POST" class="ui form">
                     {{ new_education_record_form.hidden_tag() }}
                     <div class="fields">
@@ -263,6 +303,8 @@
                     </div>
                 </form>
                 <h4 class="ui blue dividing header">工作经历</h4>
+                {% with employment_records = user.employment_records.all() %}
+                {% if employment_records %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -273,7 +315,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for employment_record in user.employment_records %}
+                        {% for employment_record in employment_records %}
                         <tr>
                             <td>{{ employment_record.employer }}</td>
                             <td>{{ employment_record.position }}</td>
@@ -283,6 +325,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
+                {% endwith %}
                 <form id="new-employment-record" method="POST" class="ui form">
                     {{ new_employment_record_form.hidden_tag() }}
                     <div class="fields">
@@ -301,6 +345,8 @@
                     </div>
                 </form>
                 <h4 class="ui blue dividing header">既往成绩</h4>
+                {% with previous_achievements = user.previous_achievements.all() %}
+                {% if previous_achievements %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -325,6 +371,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
+                {% endwith %}
                 <form id="new-previous-achievement" method="POST" class="ui form">
                     {{ new_previous_achievement_form.hidden_tag() }}
                     <div class="fields">

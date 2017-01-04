@@ -2163,7 +2163,7 @@ def create_user_step_1():
             gender = Gender.query.filter_by(name=u'女').first()
         user = User(
             email=form.email.data,
-            role_id=Role.query.filter_by(name=u'挂起').id,
+            role_id=Role.query.filter_by(name=u'挂起').first().id,
             password=form.id_number.data[-6:],
             name=form.name.data,
             gender_id=gender.id,
@@ -2179,7 +2179,7 @@ def create_user_step_1():
         )
         db.session.add(user)
         db.session.commit()
-        # return redirect(url_for('manage.create_user_step_2', id=user_id))
+        return redirect(url_for('manage.create_user_step_2', id=user.id, next=request.args.get('next')))
     return render_template('manage/create_user_step_1.html', form=form)
 
 
