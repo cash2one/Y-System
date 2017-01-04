@@ -332,13 +332,13 @@ class NewEmploymentRecordForm(FlaskForm):
 
 
 class NewPreviousAchievementForm(FlaskForm):
-    previous_achievement_type = SelectField(u'类型', coerce=unicode, validators=[Required()])
+    previous_achievement_type = SelectField(u'成绩类型', coerce=unicode, validators=[Required()])
     achievement = StringField(u'成绩', validators=[Required(), Length(0, 128)])
     submit = SubmitField(u'添加既往成绩')
 
     def __init__(self, *args, **kwargs):
         super(NewPreviousAchievementForm, self).__init__(*args, **kwargs)
-        self.previous_achievement_type.choices = [(u'', u'选择类型')] + [(unicode(previous_achievement_type.id), previous_achievement_type.name) for previous_achievement_type in PreviousAchievementType.query.order_by(PreviousAchievementType.id.asc()).all()]
+        self.previous_achievement_type.choices = [(u'', u'选择成绩类型')] + [(unicode(previous_achievement_type.id), previous_achievement_type.name) for previous_achievement_type in PreviousAchievementType.query.order_by(PreviousAchievementType.id.asc()).all()]
 
 
 class NewTOEFLTestScoreForm(FlaskForm):

@@ -328,10 +328,10 @@
                 <form id="new-previous-achievement" method="POST" class="ui form">
                     {{ new_previous_achievement_form.hidden_tag() }}
                     <div class="fields">
-                        <div class="two wide field">
-                            {{ new_previous_achievement_form.previous_achievement_type(class='ui compact dropdown') }}
+                        <div class="four wide field">
+                            {{ new_previous_achievement_form.previous_achievement_type(class='ui dropdown') }}
                         </div>
-                        <div class="twelve wide field">
+                        <div class="ten wide field">
                             {{ new_previous_achievement_form.achievement(placeholder='成绩') }}
                         </div>
                         <div class="two wide field">
@@ -340,7 +340,7 @@
                     </div>
                 </form>
                 <h4 class="ui teal dividing header">报名信息</h4>
-                <h4 class="ui grey dividing header">其它信息</h4>
+                {# <h4 class="ui grey dividing header">其它信息</h4> #}
             </div>
         </div>
     </div>
