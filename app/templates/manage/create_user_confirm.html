@@ -283,7 +283,6 @@
                             {{ new_education_record_form.submit(class='ui primary mini fluid button') }}
                         </div>
                     </div>
-                    {{ macros.form_validation_error_widget(new_education_record_form) }}
                 </form>
                 <h4 class="ui blue dividing header">工作经历</h4>
                 {% if user.employment_records.count() %}
@@ -401,6 +400,9 @@ $('.ui.checkbox')
 
 $(document)
     .ready(function() {
+        $.fn.form.settings.rules.exceptEducationType = function(value, educationType) {
+            return ($('#education_type').dropdown('get text')[0] === educationType);
+        };
         $('#new-education-record')
             .form({
                 onSuccess: submitForm,
@@ -422,6 +424,15 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请填写学校'
+                            }
+                        ]
+                    },
+                    major: {
+                        identifier: 'major',
+                        rules: [
+                            {
+                                type: 'exceptEducationType[高中]',
+                                prompt: '请填写学院（专业）'
                             }
                         ]
                     },
