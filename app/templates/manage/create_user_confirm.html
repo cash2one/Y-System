@@ -239,7 +239,7 @@
                     {% for education_record in user.education_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}"><i class="remove icon"></i></a>
+                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.school }}</div>
@@ -280,7 +280,7 @@
                             {{ new_education_record_form.year(class='ui compact dropdown') }}
                         </div>
                         <div class="one wide field">
-                            {{ new_education_record_form.submit(class='ui primary mini fluid button') }}
+                            {{ new_education_record_form.submit(class='ui primary mini button') }}
                         </div>
                     </div>
                 </form>
@@ -290,7 +290,7 @@
                     {% for employment_record in user.employment_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}"><i class="remove icon"></i></a>
+                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ employment_record.employer }}</div>
@@ -303,58 +303,55 @@
                 <form id="new-employment-record" method="POST" class="ui mini form">
                     {{ new_employment_record_form.hidden_tag() }}
                     <div class="fields">
-                        <div class="seven wide field">
+                        <div class="eight wide field">
                             {{ new_employment_record_form.employer(placeholder='工作单位') }}
                         </div>
-                        <div class="six wide field">
+                        <div class="five wide field">
                             {{ new_employment_record_form.position(placeholder='职务') }}
                         </div>
                         <div class="two wide field">
                             {{ new_employment_record_form.year(class='ui compact dropdown') }}
                         </div>
                         <div class="one wide field">
-                            {{ new_employment_record_form.submit(class='ui primary mini fluid button') }}
+                            {{ new_employment_record_form.submit(class='ui primary mini button') }}
                         </div>
                     </div>
                 </form>
                 <h4 class="ui blue dividing header">既往成绩</h4>
                 {% if user.previous_achievements.count() %}
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>类型</th>
-                            <th>成绩</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for previous_achievement in user.previous_achievements %}
-                        <tr>
-                            <td>{{ previous_achievement.type.name }}</td>
-                            <td>
+                <div class="ui relaxed divided list">
+                    {% for previous_achievement in user.previous_achievements %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_previous_achievement', id=previous_achievement.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ previous_achievement.type.name }}</div>
+                            <div class="description">
                                 {% if previous_achievement.score %}
-                                {{ previous_achievement.score }}
+                                {{ previous_achievement.score }}分
                                 {% elif previous_achievement.remark %}
                                 {{ previous_achievement.remark }}
+                                {% else %}
+                                无
                                 {% endif %}
-                            </td>
-                            <td><a class="ui mini negative button" href="#"><i class="trash outline icon"></i> 删除</a></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
-                <form id="new-previous-achievement" method="POST" class="ui form">
+                <form id="new-previous-achievement" method="POST" class="ui mini form">
                     {{ new_previous_achievement_form.hidden_tag() }}
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="three wide field">
                             {{ new_previous_achievement_form.previous_achievement_type(class='ui dropdown') }}
                         </div>
-                        <div class="ten wide field">
+                        <div class="twelve wide field">
                             {{ new_previous_achievement_form.achievement(placeholder='成绩') }}
                         </div>
-                        <div class="two wide field">
-                            {{ new_previous_achievement_form.submit(class='ui primary button') }}
+                        <div class="one wide field">
+                            {{ new_previous_achievement_form.submit(class='ui primary mini button') }}
                         </div>
                     </div>
                 </form>
@@ -505,6 +502,44 @@ $(document)
                             }
                         ]
                     },
+                }
+            })
+        ;
+        $.fn.form.settings.rules.previousAchievement = function(value) {
+            if (/^[0-9]*$/.test(value)) {
+                return true;
+            } else {
+                return ($.inArray($('#new_previous_achievement-previous_achievement_type').dropdown('get text')[0], ['竞赛', '其它']) >= 0);
+            };
+        };
+        $('#new-previous-achievement')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    previous_achievement_type: {
+                        identifier: 'new_previous_achievement-previous_achievement_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择成绩类型'
+                            }
+                        ]
+                    },
+                    achievement: {
+                        identifier: 'new_previous_achievement-achievement',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写成绩'
+                            },
+                            {
+                                type: 'previousAchievement',
+                                prompt: '成绩格式有误'
+                            }
+                        ]
+                    }
                 }
             })
         ;

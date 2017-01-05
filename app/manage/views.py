@@ -2348,11 +2348,16 @@ def create_user_confirm(id):
     new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
     if new_previous_achievement_form.validate_on_submit():
         previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
-        user.add_previous_achievement(
-            previous_achievement_type=previous_achievement_type,
-            score=form.score.data,
-            remark=form.remark.data
-        )
+        if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
+            user.add_previous_achievement(
+                previous_achievement_type=previous_achievement_type,
+                score=new_previous_achievement_form.achievement.data
+            )
+        if previous_achievement_type.name in [u'竞赛', u'其它']:
+            user.add_previous_achievement(
+                previous_achievement_type=previous_achievement_type,
+                remark=new_previous_achievement_form.achievement.data
+            )
         flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
