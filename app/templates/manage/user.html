@@ -116,9 +116,11 @@
                             <th>姓名</th>
                             <th>邮箱</th>
                             <th>用户组</th>
+                            {% if not (show_moderators or show_administrators or show_developers) %}
                             <th>VB班</th>
                             <th>Y-GRE班</th>
                             <th>进度</th>
+                            {% endif %}
                             <th>激活时间</th>
                             <th>上次登录</th>
                             <th>操作</th>
@@ -133,12 +135,13 @@
                             <td>
                                 {{ user.email }}
                                 {% if user.confirmed %}
-                                <i class="check circle icon"></i>
+                                <i class="green check icon"></i>
                                 {% else %}
-                                <i class="remove circle icon"></i>
+                                <i class="red remove icon"></i>
                                 {% endif %}
                             </td>
                             <td>{{ user.role.name }}</td>
+                            {% if not (show_moderators or show_administrators or show_developers) %}
                             <td>
                                 {% if user.vb_course %}
                                 <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>
@@ -160,6 +163,11 @@
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
+                            {% else %}
+                            <td>N/A</td>
+                            {% endif %}
+                            {% endif %}
+                            {% if user.activated %}
                             <td>
                                 <div class="popup-trigger">{{ moment(user.activated_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
@@ -169,7 +177,6 @@
                                 <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             {% else %}
-                            <td>N/A</td>
                             <td class="negative">未激活</td>
                             <td>N/A</td>
                             {% endif %}

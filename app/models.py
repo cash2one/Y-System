@@ -592,50 +592,6 @@ class VBTestScore(db.Model):
         return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
-# class GREVScore(db.Model):
-#     __tablename__ = 'gre_v_scores'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     value = db.Column(db.Integer)
-#     y_gre_test_scores = db.relationship('YGRETestScore', backref='v_score', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_gre_v_scores():
-#         gre_v_scores = [(unicode(x), x, ) for x in range(130, 171)]
-#         for GVS in gre_v_scores:
-#             gre_v_score = GREVScore.query.filter_by(name=GVS[0]).first()
-#             if gre_v_score is None:
-#                 gre_v_score = GREVScore(name=GVS[0], value=GVS[1])
-#                 db.session.add(gre_v_score)
-#                 print u'导入GRE Verbal成绩类型信息', GVS[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<GRE Verbal Reasoning Score %r>' % self.name
-
-
-# class GREQScore(db.Model):
-#     __tablename__ = 'gre_q_scores'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     value = db.Column(db.Integer)
-#     y_gre_test_scores = db.relationship('YGRETestScore', backref='q_score', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_gre_q_scores():
-#         gre_q_scores = [(unicode(x), x, ) for x in range(130, 171)]
-#         for GQS in gre_q_scores:
-#             gre_q_score = GREQScore.query.filter_by(name=GQS[0]).first()
-#             if gre_q_score is None:
-#                 gre_q_score = GREQScore(name=GQS[0], value=GQS[1])
-#                 db.session.add(gre_q_score)
-#                 print u'导入GRE Quantitative成绩类型信息', GQS[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<GRE Quantitative Reasoning Score %r>' % self.name
-
-
 class GREAWScore(db.Model):
     __tablename__ = 'gre_aw_scores'
     id = db.Column(db.Integer, primary_key=True)
@@ -672,116 +628,6 @@ class YGRETestScore(db.Model):
 
     def __repr__(self):
         return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
-
-
-# class TOEFLTotalScore(db.Model):
-#     __tablename__ = 'toefl_total_scores'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     value = db.Column(db.Integer)
-#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='total_score', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_toefl_total_scores():
-#         toefl_total_scores = [(unicode(x), x, ) for x in range(0, 121)]
-#         for TTS in toefl_total_scores:
-#             toefl_total_score = TOEFLTotalScore.query.filter_by(name=TTS[0]).first()
-#             if toefl_total_score is None:
-#                 toefl_total_score = TOEFLTotalScore(name=TTS[0], value=TTS[1])
-#                 db.session.add(toefl_total_score)
-#                 print u'导入TOEFL总分成绩类型信息', TTS[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<TOEFL Total Score %r>' % self.name
-
-
-# class TOEFLReadingScore(db.Model):
-#     __tablename__ = 'toefl_reading_scores'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     value = db.Column(db.Integer)
-#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='reading_score', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_toefl_reading_scores():
-#         toefl_reading_scores = [(unicode(x), x, ) for x in range(0, 31)]
-#         for TRS in toefl_reading_scores:
-#             toefl_reading_score = TOEFLReadingScore.query.filter_by(name=TRS[0]).first()
-#             if toefl_reading_score is None:
-#                 toefl_reading_score = TOEFLReadingScore(name=TRS[0], value=TRS[1])
-#                 db.session.add(toefl_reading_score)
-#                 print u'导入TOEFL阅读成绩类型信息', TRS[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<TOEFL Reading Score %r>' % self.name
-
-
-# class TOEFLListeningScore(db.Model):
-#     __tablename__ = 'toefl_listening_scores'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     value = db.Column(db.Integer)
-#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='listening_score', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_toefl_listening_scores():
-#         toefl_listening_scores = [(unicode(x), x, ) for x in range(0, 31)]
-#         for TLS in toefl_listening_scores:
-#             toefl_listening_score = TOEFLListeningScore.query.filter_by(name=TLS[0]).first()
-#             if toefl_listening_score is None:
-#                 toefl_listening_score = TOEFLListeningScore(name=TLS[0], value=TLS[1])
-#                 db.session.add(toefl_listening_score)
-#                 print u'导入TOEFL听力成绩类型信息', TLS[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<TOEFL Listening Score %r>' % self.name
-
-
-# class TOEFLSpeakingScore(db.Model):
-#     __tablename__ = 'toefl_speaking_scores'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     value = db.Column(db.Integer)
-#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='speaking_score', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_toefl_speaking_scores():
-#         toefl_speaking_scores = [(unicode(x), x, ) for x in range(0, 31)]
-#         for TSS in toefl_speaking_scores:
-#             toefl_speaking_score = TOEFLSpeakingScore.query.filter_by(name=TSS[0]).first()
-#             if toefl_speaking_score is None:
-#                 toefl_speaking_score = TOEFLSpeakingScore(name=TSS[0], value=TSS[1])
-#                 db.session.add(toefl_speaking_score)
-#                 print u'导入TOEFL口语成绩类型信息', TSS[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<TOEFL Speaking Score %r>' % self.name
-
-
-# class TOEFLWritingScore(db.Model):
-#     __tablename__ = 'toefl_writing_scores'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.Unicode(64), unique=True, index=True)
-#     value = db.Column(db.Integer)
-#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='writing_score', lazy='dynamic')
-
-#     @staticmethod
-#     def insert_toefl_writing_scores():
-#         toefl_writing_scores = [(unicode(x), x, ) for x in range(0, 31)]
-#         for TWS in toefl_writing_scores:
-#             toefl_writing_score = TOEFLWritingScore.query.filter_by(name=TWS[0]).first()
-#             if toefl_writing_score is None:
-#                 toefl_writing_score = TOEFLWritingScore(name=TWS[0], value=TWS[1])
-#                 db.session.add(toefl_writing_score)
-#                 print u'导入TOEFL写作成绩类型信息', TWS[0]
-#         db.session.commit()
-
-#     def __repr__(self):
-#         return '<TOEFL Writing Score %r>' % self.name
 
 
 class TOEFLTestScoreType(db.Model):
@@ -931,7 +777,7 @@ class User(UserMixin, db.Model):
     worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
     # application properties
-    application_major = db.Column(db.Unicode(64))
+    application_aim = db.Column(db.Unicode(64))
     # study properties
     purposes = db.relationship(
         'Purpose',
@@ -1270,7 +1116,11 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(data['id'])
 
-    def add_education_record(self, education_type, school, major=None, gpa=None, full_gpa=None, year=None):
+    def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
+        if gpa and (not isinstance(gpa, float)):
+            gpa = float(gpa)
+        if full_gpa and (not isinstance(full_gpa, float)):
+            full_gpa = float(full_gpa)
         education_record = EducationRecord(
             user_id=self.id,
             type_id=education_type.id,
@@ -1282,7 +1132,7 @@ class User(UserMixin, db.Model):
         )
         db.session.add(education_record)
 
-    def add_employment_record(self, employer, position=None, year=None):
+    def add_employment_record(self, employer, position, year):
         employment_record = EmploymentRecord(
             user_id=self.id,
             employer=employer,
@@ -1292,6 +1142,8 @@ class User(UserMixin, db.Model):
         db.session.add(employment_record)
 
     def add_previous_achievement(self, previous_achievement_type, score=None, remark=None):
+        if score and (not isinstance(score, int)):
+            score = int(score)
         previous_achievement = PreviousAchievement(
             user_id=self.id,
             type_id=previous_achievement_type.id,
@@ -1869,17 +1721,17 @@ class Product(db.Model):
     @staticmethod
     def insert_products():
         products = [
-            (u'VB基本技术费', 6800.0, ),
-            (u'Y-GRE基本技术费', 6800.0, ),
-            (u'AW费用', 800.0, ),
-            (u'Q费用', 800.0, ),
-            (u'Y-GRE多轮费用', 2000.0, ),
-            (u'在校生减免', -800.0, ),
-            (u'本校减免', -500.0, ),
-            (u'联报优惠', -1000.0, ),
-            (u'团报优惠', -200.0, ),
-            (u'按月延长有效期', 1000.0, ),
-            (u'一次性延长2年有效期', 3000.0, ),
+            (u'VB基本技术费', 6800.0, True, ),
+            (u'Y-GRE基本技术费', 6800.0, True, ),
+            (u'AW费用', 800.0, True, ),
+            (u'Q费用', 800.0, True, ),
+            (u'Y-GRE多轮费用', 2000.0, True, ),
+            (u'在校生减免', -800.0, True, ),
+            (u'本校减免', -500.0, True, ),
+            (u'联报优惠', -1000.0, True, ),
+            (u'团报优惠', -200.0, True, ),
+            (u'按月延长有效期', 1000.0, True, ),
+            (u'一次性延长2年有效期', 3000.0, True, ),
         ]
         for P in products:
             product = Product.query.filter_by(name=P[0]).first()
@@ -1887,6 +1739,7 @@ class Product(db.Model):
                 product = Product(
                     name=P[0],
                     price=P[1],
+                    available=P[2],
                     modified_by_id=User.query.get(1).id
                 )
                 db.session.add(product)

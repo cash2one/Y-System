@@ -322,7 +322,7 @@ class NewUserForm(FlaskForm):
     # registration
     purposes = SelectMultipleField(u'研修目的', coerce=unicode)
     other_purpose = StringField(u'其它研修目的', validators=[Length(0, 64)])
-    application_major = StringField(u'申请方向', validators=[Length(0, 64)])
+    application_aim = StringField(u'申请方向', validators=[Length(0, 64)])
     referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
     other_referrer = StringField(u'其它了解渠道', validators=[Length(0, 64)])
     inviter_email = StringField(u'同学推荐', validators=[Length(0, 64)])
@@ -362,9 +362,10 @@ class NewUserForm(FlaskForm):
             raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
 
     def validate_toefl_total(self, field):
-        toefl_total = int(self.toefl_reading.data) + int(self.toefl_listening.data) + int(self.toefl_speaking.data) + int(self.toefl_writing.data)
-        if int(field.data) != toefl_total:
-            raise ValidationError(u'TOEFL分数有误：%s ≠ %s + %s + %s + %s = %s' % (field.data, self.toefl_reading.data, self.toefl_listening.data, self.toefl_speaking.data, self.toefl_writing.data, toefl_total))
+        if field.data:
+            toefl_total = int(self.toefl_reading.data) + int(self.toefl_listening.data) + int(self.toefl_speaking.data) + int(self.toefl_writing.data)
+            if int(field.data) != toefl_total:
+                raise ValidationError(u'TOEFL分数有误：%s ≠ %s + %s + %s + %s = %s' % (field.data, self.toefl_reading.data, self.toefl_listening.data, self.toefl_speaking.data, self.toefl_writing.data, toefl_total))
 
 
 class NewEducationRecordForm(FlaskForm):

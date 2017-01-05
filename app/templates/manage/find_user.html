@@ -134,9 +134,9 @@
                             <td>
                                 {{ user.email }}
                                 {% if user.confirmed %}
-                                <i class="check circle icon"></i>
+                                <i class="green check icon"></i>
                                 {% else %}
-                                <i class="remove circle icon"></i>
+                                <i class="red remove icon"></i>
                                 {% endif %}
                             </td>
                             <td>{{ user.role.name }}</td>
