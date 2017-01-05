@@ -401,7 +401,10 @@ $('.ui.checkbox')
 $(document)
     .ready(function() {
         $.fn.form.settings.rules.exceptEducationType = function(value, educationType) {
-            return ($('#education_type').dropdown('get text')[0] === educationType);
+            return ($('#new_education_record-education_type').dropdown('get text')[0] === educationType);
+        };
+        $.fn.form.settings.rules.overGPA = function(value) {
+            return (Number(value) <= Number($('#new_education_record-full_gpa').val()));
         };
         $('#new-education-record')
             .form({
@@ -410,7 +413,7 @@ $(document)
                 on: 'blur',
                 fields: {
                     education_type: {
-                        identifier: 'education_type',
+                        identifier: 'new_education_record-education_type',
                         rules: [
                             {
                                 type: 'empty',
@@ -419,7 +422,7 @@ $(document)
                         ]
                     },
                     school: {
-                        identifier: 'school',
+                        identifier: 'new_education_record-school',
                         rules: [
                             {
                                 type: 'empty',
@@ -428,7 +431,7 @@ $(document)
                         ]
                     },
                     major: {
-                        identifier: 'major',
+                        identifier: 'new_education_record-major',
                         rules: [
                             {
                                 type: 'exceptEducationType[高中]',
@@ -437,18 +440,22 @@ $(document)
                         ]
                     },
                     gpa: {
-                        identifier: 'gpa',
+                        identifier: 'new_education_record-gpa',
                         optional: true,
                         rules: [
                             {
                                 type: 'number',
                                 prompt: '请填写一个有效的GPA'
+                            },
+                            {
+                                type: 'overGPA',
+                                prompt: 'GPA数值超过满分'
                             }
                         ]
                     },
                     full_gpa: {
-                        identifier: 'full_gpa',
-                        depends: 'gpa',
+                        identifier: 'new_education_record-full_gpa',
+                        depends: 'new_education_record-gpa',
                         rules: [
                             {
                                 type: 'empty',
@@ -461,7 +468,7 @@ $(document)
                         ]
                     },
                     year: {
-                        identifier: 'year',
+                        identifier: 'new_education_record-year',
                         rules: [
                             {
                                 type: 'empty',

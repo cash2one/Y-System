@@ -2323,7 +2323,7 @@ def create_user_confirm(id):
     if user.activated:
         flash(u'%s（%s）已经被激活' % (user.name, user.email), category='error')
         return redirect(request.args.get('next') or url_for('manage.user'))
-    new_education_record_form = NewEducationRecordForm()
+    new_education_record_form = NewEducationRecordForm(prefix='new_education_record')
     if new_education_record_form.validate_on_submit():
         education_type = EducationType.query.get(int(new_education_record_form.education_type.data))
         user.add_education_record(
