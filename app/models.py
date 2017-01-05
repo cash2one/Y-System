@@ -1119,8 +1119,12 @@ class User(UserMixin, db.Model):
     def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
         if gpa and (not isinstance(gpa, float)):
             gpa = float(gpa)
+        else:
+            gpa = None
         if full_gpa and (not isinstance(full_gpa, float)):
             full_gpa = float(full_gpa)
+        else:
+            full_gpa = None
         education_record = EducationRecord(
             user_id=self.id,
             type_id=education_type.id,
@@ -1144,6 +1148,8 @@ class User(UserMixin, db.Model):
     def add_previous_achievement(self, previous_achievement_type, score=None, remark=None):
         if score and (not isinstance(score, int)):
             score = int(score)
+        else:
+            score = None
         previous_achievement = PreviousAchievement(
             user_id=self.id,
             type_id=previous_achievement_type.id,

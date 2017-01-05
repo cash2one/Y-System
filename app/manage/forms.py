@@ -396,7 +396,7 @@ class NewEducationRecordForm(FlaskForm):
 
     def validate_gpa(self, field):
         if field.data and (float(field.data) > float(self.full_gpa.data)):
-            raise ValidationError(u'博士GPA有误：%s > %s（GPA满分）' % (field.data, self.full_gpa.data))
+            raise ValidationError(u'GPA有误：%s > %s（GPA满分）' % (field.data, self.full_gpa.data))
 
 
 class NewEmploymentRecordForm(FlaskForm):

@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, EditUserForm, DeleteUserForm, RestoreUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationRecord, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -2324,10 +2324,31 @@ def create_user_confirm(id):
         flash(u'%s（%s）已经被激活' % (user.name, user.email), category='error')
         return redirect(request.args.get('next') or url_for('manage.user'))
     new_education_record_form = NewEducationRecordForm()
+    if new_education_record_form.validate_on_submit():
+        education_type = EducationType.query.get(int(new_education_record_form.education_type.data))
+        user.add_education_record(
+            education_type=education_type,
+            school=new_education_record_form.school.data,
+            major=new_education_record_form.major.data,
+            gpa=new_education_record_form.gpa.data,
+            full_gpa=new_education_record_form.full_gpa.data,
+            year=new_education_record_form.year.data
+        )
+        flash(u'已添加教育经历：%s %s' % (education_type.name, new_education_record_form.school.data), category='success')
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     new_employment_record_form = NewEmploymentRecordForm()
     new_previous_achievement_form = NewPreviousAchievementForm()
     new_toefl_test_score_form = NewTOEFLTestScoreForm()
     return render_template('manage/create_user_confirm.html', new_education_record_form=new_education_record_form, new_employment_record_form=new_employment_record_form, new_previous_achievement_form=new_previous_achievement_form, new_toefl_test_score_form=new_toefl_test_score_form, user=user)
+
+
+@manage.route('/user/remove/education-record/<int:id>')
+@login_required
+def remove_education_record(id):
+    education_record = EducationRecord.query.get_or_404(id)
+    db.session.delete(education_record)
+    flash(u'已删除教育经历：%s %s' % (education_record.type.name, education_record.school), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
 
 
 @manage.route('/user/create-admin', methods=['GET', 'POST'])

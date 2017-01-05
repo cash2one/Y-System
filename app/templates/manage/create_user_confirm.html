@@ -239,7 +239,7 @@
                     {% for education_record in user.education_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini icon button loading-trigger" href="#"><i class="remove icon"></i></a>
+                            <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}"><i class="remove icon"></i></a>
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.type.name }}</div>
@@ -283,6 +283,7 @@
                             {{ new_education_record_form.submit(class='ui primary mini fluid button') }}
                         </div>
                     </div>
+                    {{ macros.form_validation_error_widget(new_education_record_form) }}
                 </form>
                 <h4 class="ui blue dividing header">工作经历</h4>
                 {% if user.employment_records.count() %}
@@ -421,15 +422,6 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请填写学校'
-                            }
-                        ]
-                    },
-                    major: {
-                        identifier: 'major',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写院系（专业）'
                             }
                         ]
                     },
