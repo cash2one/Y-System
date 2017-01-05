@@ -242,13 +242,13 @@
                             <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}"><i class="remove icon"></i></a>
                         </div>
                         <div class="content">
-                            <div class="header">{{ education_record.type.name }}</div>
+                            <div class="header">{{ education_record.school }}</div>
                             <div class="description">
-                                {{ education_record.school }}
+                                {{ education_record.type.name }}
+                                &middot; {{ education_record.year }}级
                                 {% if education_record.major %}
                                 &middot; {{ education_record.major }}
                                 {% endif %}
-                                &middot; {{ education_record.year }}级
                                 {% if education_record.gpa %}
                                 &middot; GPA: {{ education_record.gpa }} / {{ education_record.full_gpa }}
                                 {% endif %}
@@ -286,31 +286,24 @@
                 </form>
                 <h4 class="ui blue dividing header">工作经历</h4>
                 {% if user.employment_records.count() %}
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>工作单位</th>
-                            <th>职务</th>
-                            <th>入职年份</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for employment_record in user.employment_records %}
-                        <tr>
-                            <td>{{ employment_record.employer }}</td>
-                            <td>{{ employment_record.position }}</td>
-                            <td>{{ employment_record.year }}</td>
-                            <td><a class="ui mini negative button" href="#"><i class="trash outline icon"></i> 删除</a></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="ui relaxed divided list">
+                    {% for employment_record in user.employment_records %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}"><i class="remove icon"></i></a>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ employment_record.employer }}</div>
+                            <div class="description">{{ employment_record.position }} &middot; {{ employment_record.year }}年</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}
-                <form id="new-employment-record" method="POST" class="ui form">
+                <form id="new-employment-record" method="POST" class="ui mini form">
                     {{ new_employment_record_form.hidden_tag() }}
                     <div class="fields">
-                        <div class="six wide field">
+                        <div class="seven wide field">
                             {{ new_employment_record_form.employer(placeholder='工作单位') }}
                         </div>
                         <div class="six wide field">
@@ -319,8 +312,8 @@
                         <div class="two wide field">
                             {{ new_employment_record_form.year(class='ui compact dropdown') }}
                         </div>
-                        <div class="two wide field">
-                            {{ new_employment_record_form.submit(class='ui primary button') }}
+                        <div class="one wide field">
+                            {{ new_employment_record_form.submit(class='ui primary mini fluid button') }}
                         </div>
                     </div>
                 </form>
@@ -473,6 +466,42 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                }
+            })
+        ;
+        $('#new-employment-record')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    employer: {
+                        identifier: 'new_employment_record-employer',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写工作单位'
+                            }
+                        ]
+                    },
+                    position: {
+                        identifier: 'new_employment_record-position',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写职务'
+                            }
+                        ]
+                    },
+                    year: {
+                        identifier: 'new_employment_record-year',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入职年份'
                             }
                         ]
                     },

@@ -381,17 +381,19 @@ class NewEmploymentRecordForm(FlaskForm):
     employer = StringField(u'工作单位', validators=[Required(), Length(1, 64)])
     position = StringField(u'职务', validators=[Required(), Length(1, 64)])
     year = SelectField(u'入职年份', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'添加工作经历')
+    submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(NewEmploymentRecordForm, self).__init__(*args, **kwargs)
-        self.year.choices = [(u'', u'选择年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.year.choices = [(u'', u'选择入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
 
 
 class NewPreviousAchievementForm(FlaskForm):
     previous_achievement_type = SelectField(u'成绩类型', coerce=unicode, validators=[Required()])
-    achievement = StringField(u'成绩', validators=[Required(), Length(0, 128)])
-    submit = SubmitField(u'添加既往成绩')
+    achievement = StringField(u'成绩', validators=[Length(0, 128)])
+    # score = StringField(u'分数', validators=[Length(0, 64)])
+    # remark = StringField(u'备注', validators=[Length(0, 128)])
+    submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(NewPreviousAchievementForm, self).__init__(*args, **kwargs)

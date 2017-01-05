@@ -10,7 +10,7 @@ from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, EditUserForm, DeleteUserForm, RestoreUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationRecord, EducationType, PreviousAchievementType, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -2336,18 +2336,53 @@ def create_user_confirm(id):
         )
         flash(u'已添加教育经历：%s %s' % (education_type.name, new_education_record_form.school.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    new_employment_record_form = NewEmploymentRecordForm()
-    new_previous_achievement_form = NewPreviousAchievementForm()
-    new_toefl_test_score_form = NewTOEFLTestScoreForm()
+    new_employment_record_form = NewEmploymentRecordForm(prefix='new_employment_record')
+    if new_employment_record_form.validate_on_submit():
+        user.add_employment_record(
+            employer=new_employment_record_form.employer.data,
+            position=new_employment_record_form.position.data,
+            year=new_employment_record_form.year.data
+        )
+        flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
+    if new_previous_achievement_form.validate_on_submit():
+        previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
+        user.add_previous_achievement(
+            previous_achievement_type=previous_achievement_type,
+            score=form.score.data,
+            remark=form.remark.data
+        )
+        flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
     return render_template('manage/create_user_confirm.html', new_education_record_form=new_education_record_form, new_employment_record_form=new_employment_record_form, new_previous_achievement_form=new_previous_achievement_form, new_toefl_test_score_form=new_toefl_test_score_form, user=user)
 
 
-@manage.route('/user/remove/education-record/<int:id>')
+@manage.route('/user/education-record/remove/<int:id>')
 @login_required
 def remove_education_record(id):
     education_record = EducationRecord.query.get_or_404(id)
     db.session.delete(education_record)
     flash(u'已删除教育经历：%s %s' % (education_record.type.name, education_record.school), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/employment-record/remove/<int:id>')
+@login_required
+def remove_employment_record(id):
+    employment_record = EmploymentRecord.query.get_or_404(id)
+    db.session.delete(employment_record)
+    flash(u'已删除工作经历：%s %s' % (employment_record.employer, employment_record.position), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/previous-achievement/remove/<int:id>')
+@login_required
+def remove_previous_achievement(id):
+    previous_achievement = PreviousAchievement.query.get_or_404(id)
+    db.session.delete(previous_achievement)
+    flash(u'已删除既往成绩：%s' % previous_achievement.type.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
