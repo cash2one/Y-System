@@ -72,8 +72,8 @@
                 <div class="two fields">
                     <div class="inline field">
                         <div class="ui checkbox">
-                            {{ form.eula() }}
-                            {{ form.eula.label() }}
+                            {{ form.accept_tos() }}
+                            {{ form.accept_tos.label() }}
                         </div>
                     </div>
                     <div class="field">
@@ -153,8 +153,8 @@ $(document)
                             }
                         ]
                     },
-                    eula: {
-                        identifier: 'eula',
+                    accept_tos: {
+                        identifier: 'accept_tos',
                         rules: [
                             {
                                 type: 'checked',

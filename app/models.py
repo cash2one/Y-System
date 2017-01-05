@@ -592,48 +592,48 @@ class VBTestScore(db.Model):
         return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
-class GREVScore(db.Model):
-    __tablename__ = 'gre_v_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    y_gre_test_scores = db.relationship('YGRETestScore', backref='v_score', lazy='dynamic')
+# class GREVScore(db.Model):
+#     __tablename__ = 'gre_v_scores'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     value = db.Column(db.Integer)
+#     y_gre_test_scores = db.relationship('YGRETestScore', backref='v_score', lazy='dynamic')
 
-    @staticmethod
-    def insert_gre_v_scores():
-        gre_v_scores = [(unicode(x), x, ) for x in range(130, 171)]
-        for GVS in gre_v_scores:
-            gre_v_score = GREVScore.query.filter_by(name=GVS[0]).first()
-            if gre_v_score is None:
-                gre_v_score = GREVScore(name=GVS[0], value=GVS[1])
-                db.session.add(gre_v_score)
-                print u'导入GRE Verbal成绩类型信息', GVS[0]
-        db.session.commit()
+#     @staticmethod
+#     def insert_gre_v_scores():
+#         gre_v_scores = [(unicode(x), x, ) for x in range(130, 171)]
+#         for GVS in gre_v_scores:
+#             gre_v_score = GREVScore.query.filter_by(name=GVS[0]).first()
+#             if gre_v_score is None:
+#                 gre_v_score = GREVScore(name=GVS[0], value=GVS[1])
+#                 db.session.add(gre_v_score)
+#                 print u'导入GRE Verbal成绩类型信息', GVS[0]
+#         db.session.commit()
 
-    def __repr__(self):
-        return '<GRE Verbal Reasoning Score %r>' % self.name
+#     def __repr__(self):
+#         return '<GRE Verbal Reasoning Score %r>' % self.name
 
 
-class GREQScore(db.Model):
-    __tablename__ = 'gre_q_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    y_gre_test_scores = db.relationship('YGRETestScore', backref='q_score', lazy='dynamic')
+# class GREQScore(db.Model):
+#     __tablename__ = 'gre_q_scores'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     value = db.Column(db.Integer)
+#     y_gre_test_scores = db.relationship('YGRETestScore', backref='q_score', lazy='dynamic')
 
-    @staticmethod
-    def insert_gre_q_scores():
-        gre_q_scores = [(unicode(x), x, ) for x in range(130, 171)]
-        for GQS in gre_q_scores:
-            gre_q_score = GREQScore.query.filter_by(name=GQS[0]).first()
-            if gre_q_score is None:
-                gre_q_score = GREQScore(name=GQS[0], value=GQS[1])
-                db.session.add(gre_q_score)
-                print u'导入GRE Quantitative成绩类型信息', GQS[0]
-        db.session.commit()
+#     @staticmethod
+#     def insert_gre_q_scores():
+#         gre_q_scores = [(unicode(x), x, ) for x in range(130, 171)]
+#         for GQS in gre_q_scores:
+#             gre_q_score = GREQScore.query.filter_by(name=GQS[0]).first()
+#             if gre_q_score is None:
+#                 gre_q_score = GREQScore(name=GQS[0], value=GQS[1])
+#                 db.session.add(gre_q_score)
+#                 print u'导入GRE Quantitative成绩类型信息', GQS[0]
+#         db.session.commit()
 
-    def __repr__(self):
-        return '<GRE Quantitative Reasoning Score %r>' % self.name
+#     def __repr__(self):
+#         return '<GRE Quantitative Reasoning Score %r>' % self.name
 
 
 class GREAWScore(db.Model):
@@ -663,8 +663,8 @@ class YGRETestScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
-    v_score_id = db.Column(db.Integer, db.ForeignKey('gre_v_scores.id'))
-    q_score_id = db.Column(db.Integer, db.ForeignKey('gre_q_scores.id'))
+    v_score = db.Column(db.Integer)
+    q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -674,114 +674,114 @@ class YGRETestScore(db.Model):
         return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
-class TOEFLTotalScore(db.Model):
-    __tablename__ = 'toefl_total_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    toefl_test_scores = db.relationship('TOEFLTestScore', backref='total_score', lazy='dynamic')
+# class TOEFLTotalScore(db.Model):
+#     __tablename__ = 'toefl_total_scores'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     value = db.Column(db.Integer)
+#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='total_score', lazy='dynamic')
 
-    @staticmethod
-    def insert_toefl_total_scores():
-        toefl_total_scores = [(unicode(x), x, ) for x in range(0, 121)]
-        for TTS in toefl_total_scores:
-            toefl_total_score = TOEFLTotalScore.query.filter_by(name=TTS[0]).first()
-            if toefl_total_score is None:
-                toefl_total_score = TOEFLTotalScore(name=TTS[0], value=TTS[1])
-                db.session.add(toefl_total_score)
-                print u'导入TOEFL总分成绩类型信息', TTS[0]
-        db.session.commit()
+#     @staticmethod
+#     def insert_toefl_total_scores():
+#         toefl_total_scores = [(unicode(x), x, ) for x in range(0, 121)]
+#         for TTS in toefl_total_scores:
+#             toefl_total_score = TOEFLTotalScore.query.filter_by(name=TTS[0]).first()
+#             if toefl_total_score is None:
+#                 toefl_total_score = TOEFLTotalScore(name=TTS[0], value=TTS[1])
+#                 db.session.add(toefl_total_score)
+#                 print u'导入TOEFL总分成绩类型信息', TTS[0]
+#         db.session.commit()
 
-    def __repr__(self):
-        return '<TOEFL Total Score %r>' % self.name
-
-
-class TOEFLReadingScore(db.Model):
-    __tablename__ = 'toefl_reading_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    toefl_test_scores = db.relationship('TOEFLTestScore', backref='reading_score', lazy='dynamic')
-
-    @staticmethod
-    def insert_toefl_reading_scores():
-        toefl_reading_scores = [(unicode(x), x, ) for x in range(0, 31)]
-        for TRS in toefl_reading_scores:
-            toefl_reading_score = TOEFLReadingScore.query.filter_by(name=TRS[0]).first()
-            if toefl_reading_score is None:
-                toefl_reading_score = TOEFLReadingScore(name=TRS[0], value=TRS[1])
-                db.session.add(toefl_reading_score)
-                print u'导入TOEFL阅读成绩类型信息', TRS[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<TOEFL Reading Score %r>' % self.name
+#     def __repr__(self):
+#         return '<TOEFL Total Score %r>' % self.name
 
 
-class TOEFLListeningScore(db.Model):
-    __tablename__ = 'toefl_listening_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    toefl_test_scores = db.relationship('TOEFLTestScore', backref='listening_score', lazy='dynamic')
+# class TOEFLReadingScore(db.Model):
+#     __tablename__ = 'toefl_reading_scores'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     value = db.Column(db.Integer)
+#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='reading_score', lazy='dynamic')
 
-    @staticmethod
-    def insert_toefl_listening_scores():
-        toefl_listening_scores = [(unicode(x), x, ) for x in range(0, 31)]
-        for TLS in toefl_listening_scores:
-            toefl_listening_score = TOEFLListeningScore.query.filter_by(name=TLS[0]).first()
-            if toefl_listening_score is None:
-                toefl_listening_score = TOEFLListeningScore(name=TLS[0], value=TLS[1])
-                db.session.add(toefl_listening_score)
-                print u'导入TOEFL听力成绩类型信息', TLS[0]
-        db.session.commit()
+#     @staticmethod
+#     def insert_toefl_reading_scores():
+#         toefl_reading_scores = [(unicode(x), x, ) for x in range(0, 31)]
+#         for TRS in toefl_reading_scores:
+#             toefl_reading_score = TOEFLReadingScore.query.filter_by(name=TRS[0]).first()
+#             if toefl_reading_score is None:
+#                 toefl_reading_score = TOEFLReadingScore(name=TRS[0], value=TRS[1])
+#                 db.session.add(toefl_reading_score)
+#                 print u'导入TOEFL阅读成绩类型信息', TRS[0]
+#         db.session.commit()
 
-    def __repr__(self):
-        return '<TOEFL Listening Score %r>' % self.name
-
-
-class TOEFLSpeakingScore(db.Model):
-    __tablename__ = 'toefl_speaking_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    toefl_test_scores = db.relationship('TOEFLTestScore', backref='speaking_score', lazy='dynamic')
-
-    @staticmethod
-    def insert_toefl_speaking_scores():
-        toefl_speaking_scores = [(unicode(x), x, ) for x in range(0, 31)]
-        for TSS in toefl_speaking_scores:
-            toefl_speaking_score = TOEFLSpeakingScore.query.filter_by(name=TSS[0]).first()
-            if toefl_speaking_score is None:
-                toefl_speaking_score = TOEFLSpeakingScore(name=TSS[0], value=TSS[1])
-                db.session.add(toefl_speaking_score)
-                print u'导入TOEFL口语成绩类型信息', TSS[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<TOEFL Speaking Score %r>' % self.name
+#     def __repr__(self):
+#         return '<TOEFL Reading Score %r>' % self.name
 
 
-class TOEFLWritingScore(db.Model):
-    __tablename__ = 'toefl_writing_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    toefl_test_scores = db.relationship('TOEFLTestScore', backref='writing_score', lazy='dynamic')
+# class TOEFLListeningScore(db.Model):
+#     __tablename__ = 'toefl_listening_scores'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     value = db.Column(db.Integer)
+#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='listening_score', lazy='dynamic')
 
-    @staticmethod
-    def insert_toefl_writing_scores():
-        toefl_writing_scores = [(unicode(x), x, ) for x in range(0, 31)]
-        for TWS in toefl_writing_scores:
-            toefl_writing_score = TOEFLWritingScore.query.filter_by(name=TWS[0]).first()
-            if toefl_writing_score is None:
-                toefl_writing_score = TOEFLWritingScore(name=TWS[0], value=TWS[1])
-                db.session.add(toefl_writing_score)
-                print u'导入TOEFL写作成绩类型信息', TWS[0]
-        db.session.commit()
+#     @staticmethod
+#     def insert_toefl_listening_scores():
+#         toefl_listening_scores = [(unicode(x), x, ) for x in range(0, 31)]
+#         for TLS in toefl_listening_scores:
+#             toefl_listening_score = TOEFLListeningScore.query.filter_by(name=TLS[0]).first()
+#             if toefl_listening_score is None:
+#                 toefl_listening_score = TOEFLListeningScore(name=TLS[0], value=TLS[1])
+#                 db.session.add(toefl_listening_score)
+#                 print u'导入TOEFL听力成绩类型信息', TLS[0]
+#         db.session.commit()
 
-    def __repr__(self):
-        return '<TOEFL Writing Score %r>' % self.name
+#     def __repr__(self):
+#         return '<TOEFL Listening Score %r>' % self.name
+
+
+# class TOEFLSpeakingScore(db.Model):
+#     __tablename__ = 'toefl_speaking_scores'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     value = db.Column(db.Integer)
+#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='speaking_score', lazy='dynamic')
+
+#     @staticmethod
+#     def insert_toefl_speaking_scores():
+#         toefl_speaking_scores = [(unicode(x), x, ) for x in range(0, 31)]
+#         for TSS in toefl_speaking_scores:
+#             toefl_speaking_score = TOEFLSpeakingScore.query.filter_by(name=TSS[0]).first()
+#             if toefl_speaking_score is None:
+#                 toefl_speaking_score = TOEFLSpeakingScore(name=TSS[0], value=TSS[1])
+#                 db.session.add(toefl_speaking_score)
+#                 print u'导入TOEFL口语成绩类型信息', TSS[0]
+#         db.session.commit()
+
+#     def __repr__(self):
+#         return '<TOEFL Speaking Score %r>' % self.name
+
+
+# class TOEFLWritingScore(db.Model):
+#     __tablename__ = 'toefl_writing_scores'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.Unicode(64), unique=True, index=True)
+#     value = db.Column(db.Integer)
+#     toefl_test_scores = db.relationship('TOEFLTestScore', backref='writing_score', lazy='dynamic')
+
+#     @staticmethod
+#     def insert_toefl_writing_scores():
+#         toefl_writing_scores = [(unicode(x), x, ) for x in range(0, 31)]
+#         for TWS in toefl_writing_scores:
+#             toefl_writing_score = TOEFLWritingScore.query.filter_by(name=TWS[0]).first()
+#             if toefl_writing_score is None:
+#                 toefl_writing_score = TOEFLWritingScore(name=TWS[0], value=TWS[1])
+#                 db.session.add(toefl_writing_score)
+#                 print u'导入TOEFL写作成绩类型信息', TWS[0]
+#         db.session.commit()
+
+#     def __repr__(self):
+#         return '<TOEFL Writing Score %r>' % self.name
 
 
 class TOEFLTestScoreType(db.Model):
@@ -822,11 +822,11 @@ class TOEFLTestScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     type_id = db.Column(db.Integer, db.ForeignKey('toefl_test_score_types.id'))
-    total_score_id = db.Column(db.Integer, db.ForeignKey('toefl_total_scores.id'))
-    reading_score_id = db.Column(db.Integer, db.ForeignKey('toefl_reading_scores.id'))
-    listening_score_id = db.Column(db.Integer, db.ForeignKey('toefl_listening_scores.id'))
-    speaking_score_id = db.Column(db.Integer, db.ForeignKey('toefl_speaking_scores.id'))
-    writing_score_id = db.Column(db.Integer, db.ForeignKey('toefl_writing_scores.id'))
+    total_score = db.Column(db.Integer)
+    reading_score = db.Column(db.Integer)
+    listening_score = db.Column(db.Integer)
+    speaking_score = db.Column(db.Integer)
+    writing_score = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -915,8 +915,8 @@ class User(UserMixin, db.Model):
     deleted = db.Column(db.Boolean, default=False)
     # profile properties
     name = db.Column(db.Unicode(64), index=True)
-    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
     id_number = db.Column(db.Unicode(64), index=True)
+    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
     birthdate = db.Column(db.Date)
     mobile = db.Column(db.Unicode(64))
     wechat = db.Column(db.Unicode(64))
@@ -1636,21 +1636,17 @@ class User(UserMixin, db.Model):
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
-    def add_toefl_test_score(self, toefl_test_score_type, total_score_id, modified_by, reading_score_id=None, listening_score_id=None, speaking_score_id=None, writing_score_id=None):
+    def add_toefl_test_score(self, toefl_test_score_type, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         toefl_test_score = TOEFLTestScore(
             user_id=self.id,
             type_id=toefl_test_score_type.id,
-            total_score_id=int(total_score_id),
+            total_score=total_score,
+            reading_score=reading_score,
+            listening_score=listening_score,
+            speaking_score=speaking_score,
+            writing_score=writing_score,
             modified_by_id=modified_by.id
         )
-        if reading_score_id:
-            toefl_test_score.reading_score_id = int(reading_score_id)
-        if listening_score_id:
-            toefl_test_score.listening_score_id = int(listening_score_id)
-        if speaking_score_id:
-            toefl_test_score.speaking_score_id = int(speaking_score_id)
-        if writing_score_id:
-            toefl_test_score.writing_score_id = int(writing_score_id)
         db.session.add(toefl_test_score)
 
     def notified_by(self, announcement):

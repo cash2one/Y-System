@@ -2151,23 +2151,26 @@ def deleted_users():
 #     return render_template('manage/create_user.html', form=form)
 
 
+def get_gender_id(id_number):
+    if int(id_number[16]) % 2 == 1:
+        gender = Gender.query.filter_by(name=u'男').first().id
+    else:
+        gender = Gender.query.filter_by(name=u'女').first().id
+
+
 @manage.route('/user/create', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
 def create_user():
     form = NewUserForm()
     if form.validate_on_submit():
-        if int(form.id_number.data[16]) % 2 == 1:
-            gender = Gender.query.filter_by(name=u'男').first()
-        else:
-            gender = Gender.query.filter_by(name=u'女').first()
         user = User(
             email=form.email.data,
-            role_id=Role.query.filter_by(name=u'挂起').first().id,
+            role_id=int(form.role.data),
             password=form.id_number.data[-6:],
             name=form.name.data,
-            gender_id=gender.id,
             id_number=form.id_number.data.upper(),
+            gender_id=get_gender_id(form.id_number.data),
             birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14])),
             mobile=form.mobile.data,
             wechat=form.wechat.data,
@@ -2175,10 +2178,60 @@ def create_user():
             address=form.address.data,
             emergency_contact_name=form.emergency_contact_name.data,
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
-            emergency_contact_mobile=form.emergency_contact_mobile.data
+            emergency_contact_mobile=form.emergency_contact_mobile.data,
+            worked_in_same_field=form.worked_in_same_field.data,
+            deformity=form.deformity.data,
+            application_major=form.application_major.data
         )
         db.session.add(user)
         db.session.commit()
+        # education
+        if form.high_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'高中').first(),
+                school=form.high_school.data,
+                year=form.high_school_year.data
+            )
+        if form.bachelor_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'本科').first(),
+                school=form.bachelor_school.data,
+                major=form.bachelor_major.data,
+                gpa=form.bachelor_gpa.data,
+                full_gpa=form.bachelor_full_gpa.data,
+                year=form.bachelor_year.data
+            )
+        if form.master_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'硕士').first(),
+                school=form.master_school.data,
+                major=form.master_major.data,
+                gpa=form.master_gpa.data,
+                full_gpa=form.master_full_gpa.data,
+                year=form.master_year.data
+            )
+        if form.doctor_school.data:
+            user.add_education_record(
+                education_type=EducationType.query.filter_by(name=u'博士').first(),
+                school=form.doctor_school.data,
+                major=form.doctor_major.data,
+                gpa=form.doctor_gpa.data,
+                full_gpa=form.doctor_full_gpa.data,
+                year=form.doctor_year.data
+            )
+        # employment
+        if form.employer_1.data:
+            user.add_employment_record(
+                employer=form.employer_1.data,
+                position=form.position_1.data,
+                year=form.job_year_1.data
+            )
+        if form.employer_2.data:
+            user.add_employment_record(
+                employer=form.employer_2.data,
+                position=form.position_2.data,
+                year=form.job_year_2.data
+            )
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     return render_template('manage/create_user.html', form=form)
 
@@ -2208,17 +2261,13 @@ def create_user_confirm(id):
 def create_admin():
     form = NewAdminForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
-        if int(form.id_number.data[16]) % 2 == 1:
-            gender = Gender.query.filter_by(name=u'男').first()
-        else:
-            gender = Gender.query.filter_by(name=u'女').first()
         admin = User(
             email=form.email.data,
             role_id=int(form.role.data),
             password=form.id_number.data[-6:],
             name=form.name.data,
-            gender_id=gender.id,
             id_number=form.id_number.data.upper(),
+            gender_id=get_gender_id(form.id_number.data),
             birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14]))
         )
         db.session.add(admin)

@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 7184878180fa
+Revision ID: 05c190dfdadc
 Revises: 
-Create Date: 2017-01-03 01:47:42.574394
+Create Date: 2017-01-05 02:31:53.517341
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '7184878180fa'
+revision = '05c190dfdadc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -61,20 +61,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_gre_aw_scores_name'), 'gre_aw_scores', ['name'], unique=True)
-    op.create_table('gre_q_scores',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('value', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_gre_q_scores_name'), 'gre_q_scores', ['name'], unique=True)
-    op.create_table('gre_v_scores',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('value', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_gre_v_scores_name'), 'gre_v_scores', ['name'], unique=True)
     op.create_table('invitation_types',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -141,47 +127,12 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_rooms_name'), 'rooms', ['name'], unique=True)
-    op.create_table('toefl_listening_scores',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('value', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_toefl_listening_scores_name'), 'toefl_listening_scores', ['name'], unique=True)
-    op.create_table('toefl_reading_scores',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('value', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_toefl_reading_scores_name'), 'toefl_reading_scores', ['name'], unique=True)
-    op.create_table('toefl_speaking_scores',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('value', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_toefl_speaking_scores_name'), 'toefl_speaking_scores', ['name'], unique=True)
     op.create_table('toefl_test_score_types',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_toefl_test_score_types_name'), 'toefl_test_score_types', ['name'], unique=True)
-    op.create_table('toefl_total_scores',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('value', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_toefl_total_scores_name'), 'toefl_total_scores', ['name'], unique=True)
-    op.create_table('toefl_writing_scores',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('value', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_toefl_writing_scores_name'), 'toefl_writing_scores', ['name'], unique=True)
     op.create_table('lessons',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -210,8 +161,8 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('gender_id', sa.Integer(), nullable=True),
     sa.Column('id_number', sa.Unicode(length=64), nullable=True),
+    sa.Column('gender_id', sa.Integer(), nullable=True),
     sa.Column('birthdate', sa.Date(), nullable=True),
     sa.Column('mobile', sa.Unicode(length=64), nullable=True),
     sa.Column('wechat', sa.Unicode(length=64), nullable=True),
@@ -429,22 +380,17 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('type_id', sa.Integer(), nullable=True),
-    sa.Column('total_score_id', sa.Integer(), nullable=True),
-    sa.Column('reading_score_id', sa.Integer(), nullable=True),
-    sa.Column('listening_score_id', sa.Integer(), nullable=True),
-    sa.Column('speaking_score_id', sa.Integer(), nullable=True),
-    sa.Column('writing_score_id', sa.Integer(), nullable=True),
+    sa.Column('total_score', sa.Integer(), nullable=True),
+    sa.Column('reading_score', sa.Integer(), nullable=True),
+    sa.Column('listening_score', sa.Integer(), nullable=True),
+    sa.Column('speaking_score', sa.Integer(), nullable=True),
+    sa.Column('writing_score', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['listening_score_id'], ['toefl_listening_scores.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['reading_score_id'], ['toefl_reading_scores.id'], ),
-    sa.ForeignKeyConstraint(['speaking_score_id'], ['toefl_speaking_scores.id'], ),
-    sa.ForeignKeyConstraint(['total_score_id'], ['toefl_total_scores.id'], ),
     sa.ForeignKeyConstraint(['type_id'], ['toefl_test_score_types.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['writing_score_id'], ['toefl_writing_scores.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_creations',
@@ -542,18 +488,16 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('test_id', sa.Integer(), nullable=True),
-    sa.Column('v_score_id', sa.Integer(), nullable=True),
-    sa.Column('q_score_id', sa.Integer(), nullable=True),
+    sa.Column('v_score', sa.Integer(), nullable=True),
+    sa.Column('q_score', sa.Integer(), nullable=True),
     sa.Column('aw_score_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['aw_score_id'], ['gre_aw_scores.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['q_score_id'], ['gre_q_scores.id'], ),
     sa.ForeignKeyConstraint(['test_id'], ['tests.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['v_score_id'], ['gre_v_scores.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('bookings',
@@ -639,18 +583,8 @@ def downgrade():
     op.drop_table('role_permissions')
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')
-    op.drop_index(op.f('ix_toefl_writing_scores_name'), table_name='toefl_writing_scores')
-    op.drop_table('toefl_writing_scores')
-    op.drop_index(op.f('ix_toefl_total_scores_name'), table_name='toefl_total_scores')
-    op.drop_table('toefl_total_scores')
     op.drop_index(op.f('ix_toefl_test_score_types_name'), table_name='toefl_test_score_types')
     op.drop_table('toefl_test_score_types')
-    op.drop_index(op.f('ix_toefl_speaking_scores_name'), table_name='toefl_speaking_scores')
-    op.drop_table('toefl_speaking_scores')
-    op.drop_index(op.f('ix_toefl_reading_scores_name'), table_name='toefl_reading_scores')
-    op.drop_table('toefl_reading_scores')
-    op.drop_index(op.f('ix_toefl_listening_scores_name'), table_name='toefl_listening_scores')
-    op.drop_table('toefl_listening_scores')
     op.drop_index(op.f('ix_rooms_name'), table_name='rooms')
     op.drop_table('rooms')
     op.drop_index(op.f('ix_roles_name'), table_name='roles')
@@ -672,10 +606,6 @@ def downgrade():
     op.drop_table('ipad_capacities')
     op.drop_index(op.f('ix_invitation_types_name'), table_name='invitation_types')
     op.drop_table('invitation_types')
-    op.drop_index(op.f('ix_gre_v_scores_name'), table_name='gre_v_scores')
-    op.drop_table('gre_v_scores')
-    op.drop_index(op.f('ix_gre_q_scores_name'), table_name='gre_q_scores')
-    op.drop_table('gre_q_scores')
     op.drop_index(op.f('ix_gre_aw_scores_name'), table_name='gre_aw_scores')
     op.drop_table('gre_aw_scores')
     op.drop_index(op.f('ix_genders_name'), table_name='genders')

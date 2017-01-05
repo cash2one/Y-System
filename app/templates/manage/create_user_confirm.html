@@ -106,7 +106,7 @@
                     <div class="active step">
                         <div class="content">
                             <div class="title">确认信息</div>
-                            <div class="description">确认信息、服务条款</div>
+                            <div class="description">接待信息、服务条款</div>
                         </div>
                     </div>
                 </div>
@@ -234,8 +234,7 @@
                     </div>
                 </div>
                 <h4 class="ui blue dividing header">教育经历</h4>
-                {% with education_records = user.education_records.all() %}
-                {% if education_records %}
+                {% if user.education_records.count() %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -248,7 +247,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for education_record in education_records %}
+                        {% for education_record in user.education_records %}
                         <tr>
                             <td>{{ education_record.type.name }}</td>
                             <td>{{ education_record.school }}</td>
@@ -269,7 +268,6 @@
                     </tbody>
                 </table>
                 {% endif %}
-                {% endwith %}
                 <form id="new-education-record" method="POST" class="ui form">
                     {{ new_education_record_form.hidden_tag() }}
                     <div class="fields">
@@ -297,8 +295,7 @@
                     </div>
                 </form>
                 <h4 class="ui blue dividing header">工作经历</h4>
-                {% with employment_records = user.employment_records.all() %}
-                {% if employment_records %}
+                {% if user.employment_records.count() %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -309,7 +306,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for employment_record in employment_records %}
+                        {% for employment_record in user.employment_records %}
                         <tr>
                             <td>{{ employment_record.employer }}</td>
                             <td>{{ employment_record.position }}</td>
@@ -320,7 +317,6 @@
                     </tbody>
                 </table>
                 {% endif %}
-                {% endwith %}
                 <form id="new-employment-record" method="POST" class="ui form">
                     {{ new_employment_record_form.hidden_tag() }}
                     <div class="fields">
@@ -339,8 +335,7 @@
                     </div>
                 </form>
                 <h4 class="ui blue dividing header">既往成绩</h4>
-                {% with previous_achievements = user.previous_achievements.all() %}
-                {% if previous_achievements %}
+                {% if user.previous_achievements.count() %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -366,7 +361,6 @@
                     </tbody>
                 </table>
                 {% endif %}
-                {% endwith %}
                 <form id="new-previous-achievement" method="POST" class="ui form">
                     {{ new_previous_achievement_form.hidden_tag() }}
                     <div class="fields">

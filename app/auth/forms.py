@@ -19,7 +19,7 @@ class ActivationForm(FlaskForm):
     activation_code = PasswordField(u'激活码', validators=[Required(), Length(6, 64)])
     password = PasswordField(u'新密码', validators=[Required(), Length(6, 64), EqualTo('password2')])
     password2 = PasswordField(u'确认密码', validators=[Required(), Length(6, 64)])
-    eula = BooleanField(u'同意使用条款', validators=[Required()])
+    accept_tos = BooleanField(u'同意服务条款', validators=[Required()])
     submit = SubmitField(u'激活')
 
 

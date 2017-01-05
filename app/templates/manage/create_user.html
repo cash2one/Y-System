@@ -106,7 +106,7 @@
                     <div class="step">
                         <div class="content">
                             <div class="title">确认信息</div>
-                            <div class="description">确认信息、服务条款</div>
+                            <div class="description">接待信息、服务条款</div>
                         </div>
                     </div>
                 </div>
@@ -307,23 +307,23 @@
                     <div class="fields">
                         <div class="four wide field">
                             {{ form.toefl_total.label() }}
-                            {{ form.toefl_total(class='ui dropdown') }}
+                            {{ form.toefl_total(placeholder='TOEFL总分') }}
                         </div>
                         <div class="three wide field">
                             {{ form.toefl_reading.label() }}
-                            {{ form.toefl_reading(class='ui dropdown') }}
+                            {{ form.toefl_reading(placeholder='TOEFL阅读分数') }}
                         </div>
                         <div class="three wide field">
                             {{ form.toefl_listening.label() }}
-                            {{ form.toefl_listening(class='ui dropdown') }}
+                            {{ form.toefl_listening(placeholder='TOEFL听力分数') }}
                         </div>
                         <div class="three wide field">
                             {{ form.toefl_speaking.label() }}
-                            {{ form.toefl_speaking(class='ui dropdown') }}
+                            {{ form.toefl_speaking(placeholder='TOEFL口语分数') }}
                         </div>
                         <div class="three wide field">
                             {{ form.toefl_writing.label() }}
-                            {{ form.toefl_writing(class='ui dropdown') }}
+                            {{ form.toefl_writing(placeholder='TOEFL写作分数') }}
                         </div>
                     </div>
                     <div class="field">
@@ -366,6 +366,10 @@
                             </div>
                         </div>
                     </div>
+                    <div class="required field">
+                        {{ form.products.label() }}
+                        {{ form.products(class='ui dropdown') }}
+                    </div>
                     <div class="fields">
                         <div class="eight wide required field">
                             {{ form.role.label() }}
@@ -379,10 +383,6 @@
                             {{ form.y_gre_course.label() }}
                             {{ form.y_gre_course(class='ui dropdown') }}
                         </div>
-                    </div>
-                    <div class="required field">
-                        {{ form.products.label() }}
-                        {{ form.products(class='ui dropdown') }}
                     </div>
                     <div class="ui segment">
                         <div class="inline field">
@@ -400,11 +400,11 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
-                    {% with email_errors = form.email.errors %}
-                    {% if email_errors %}
+                    {% with errors = form.email.errors + form.inviter_email.errors + form.toefl_total.errors %}
+                    {% if errors %}
                     <div class="ui flask negative message">
                         <ul class="list">
-                            {% for error in email_errors %}
+                            {% for error in errors %}
                             <li>{{ error }}</li>
                             {% endfor %}
                         </ul>
@@ -513,6 +513,26 @@ $(document)
                             }
                         ]
                     },
+                    qq: {
+                        identifier: 'qq',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的QQ号码'
+                            }
+                        ]
+                    },
+                    wechat: {
+                        identifier: 'wechat',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'regExp[/^[A-Za-z0-9_-]{6,20}$/]',
+                                prompt: '请输入一个有效的微信号/手机号'
+                            }
+                        ]
+                    },
                     emergency_contact_name: {
                         identifier: 'emergency_contact_name',
                         rules: [
@@ -548,6 +568,358 @@ $(document)
                             }
                         ]
                     },
+                    high_school_year: {
+                        identifier: 'high_school_year',
+                        depends: 'high_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    bachelor_year: {
+                        identifier: 'bachelor_year',
+                        depends: 'bachelor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    bachelor_major: {
+                        identifier: 'bachelor_major',
+                        depends: 'bachelor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写院系（专业）'
+                            }
+                        ]
+                    },
+                    bachelor_gpa: {
+                        identifier: 'bachelor_gpa',
+                        depends: 'bachelor_school',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            }
+                        ]
+                    },
+                    bachelor_full_gpa: {
+                        identifier: 'bachelor_full_gpa',
+                        depends: 'bachelor_gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
+                            }
+                        ]
+                    },
+                    master_year: {
+                        identifier: 'master_year',
+                        depends: 'master_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    master_major: {
+                        identifier: 'master_major',
+                        depends: 'master_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写院系（专业）'
+                            }
+                        ]
+                    },
+                    master_gpa: {
+                        identifier: 'master_gpa',
+                        depends: 'master_school',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            }
+                        ]
+                    },
+                    master_full_gpa: {
+                        identifier: 'master_full_gpa',
+                        depends: 'master_gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
+                            }
+                        ]
+                    },
+                    doctor_year: {
+                        identifier: 'doctor_year',
+                        depends: 'doctor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    doctor_major: {
+                        identifier: 'doctor_major',
+                        depends: 'doctor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写院系（专业）'
+                            }
+                        ]
+                    },
+                    doctor_gpa: {
+                        identifier: 'doctor_gpa',
+                        depends: 'doctor_school',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            }
+                        ]
+                    },
+                    doctor_full_gpa: {
+                        identifier: 'doctor_full_gpa',
+                        depends: 'doctor_gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
+                            }
+                        ]
+                    },
+                    position_1: {
+                        identifier: 'position_1',
+                        depends: 'employer_1',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写职务'
+                            }
+                        ]
+                    },
+                    job_year_1: {
+                        identifier: 'job_year_1',
+                        depends: 'employer_1',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入职年份'
+                            }
+                        ]
+                    },
+                    position_2: {
+                        identifier: 'position_2',
+                        depends: 'employer_2',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写职务'
+                            }
+                        ]
+                    },
+                    job_year_2: {
+                        identifier: 'job_year_2',
+                        depends: 'employer_2',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入职年份'
+                            }
+                        ]
+                    },
+                    cee_total: {
+                        identifier: 'cee_total',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cee_math: {
+                        identifier: 'cee_math',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cee_english: {
+                        identifier: 'cee_english',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cet_4: {
+                        identifier: 'cet_4',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cet_6: {
+                        identifier: 'cet_6',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    tem_4: {
+                        identifier: 'tem_4',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    tem_8: {
+                        identifier: 'tem_8',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    toefl_total: {
+                        identifier: 'toefl_total',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..120]',
+                                prompt: '请填写一个有效的TOEFL分数'
+                            }
+                        ]
+                    },
+                    toefl_reading: {
+                        identifier: 'toefl_reading',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL阅读分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL阅读分数'
+                            }
+                        ]
+                    },
+                    toefl_listening: {
+                        identifier: 'toefl_listening',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL听力分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL听力分数'
+                            }
+                        ]
+                    },
+                    toefl_speaking: {
+                        identifier: 'toefl_speaking',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL口语分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL口语分数'
+                            }
+                        ]
+                    },
+                    toefl_writing: {
+                        identifier: 'toefl_writing',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL写作分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL写作分数'
+                            }
+                        ]
+                    },
+                    inviter_email: {
+                        identifier: 'inviter_email',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    products: {
+                        identifier: 'products',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
                     role: {
                         identifier: 'role',
                         rules: [
@@ -572,15 +944,6 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请选择Y-GRE班'
-                            }
-                        ]
-                    },
-                    products: {
-                        identifier: 'products',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择研修产品'
                             }
                         ]
                     }

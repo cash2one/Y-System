@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Relationship, PurposeType, ReferrerType, TOEFLTotalScore, TOEFLReadingScore, TOEFLListeningScore, TOEFLSpeakingScore, TOEFLWritingScore, EducationType, PreviousAchievementType, Product, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Role, User, Relationship, PurposeType, ReferrerType, EducationType, PreviousAchievementType, Product, TOEFLTestScoreType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 EN_2_CN = {
@@ -302,11 +302,11 @@ class NewUserForm(FlaskForm):
     cet_6 = StringField(u'CET-6', validators=[Length(0, 64)])
     tem_4 = StringField(u'TEM-4', validators=[Length(0, 64)])
     tem_8 = StringField(u'TEM-8', validators=[Length(0, 64)])
-    toefl_total = SelectField(u'TOEFL', coerce=unicode)
-    toefl_reading = SelectField(u'Reading', coerce=unicode)
-    toefl_listening = SelectField(u'Listening', coerce=unicode)
-    toefl_speaking = SelectField(u'Speaking', coerce=unicode)
-    toefl_writing = SelectField(u'Writing', coerce=unicode)
+    toefl_total = StringField(u'TOEFL', validators=[Length(0, 64)])
+    toefl_reading = StringField(u'Reading', validators=[Length(0, 64)])
+    toefl_listening = StringField(u'Listening', validators=[Length(0, 64)])
+    toefl_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
+    toefl_writing = StringField(u'Writing', validators=[Length(0, 64)])
     competition = StringField(u'竞赛成绩', validators=[Length(0, 128)])
     other_score = StringField(u'其它成绩', validators=[Length(0, 128)])
     # contact
@@ -321,15 +321,15 @@ class NewUserForm(FlaskForm):
     emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
     # registration
     purposes = SelectMultipleField(u'研修目的', coerce=unicode)
-    other_purpose = StringField(u'其它研修目的', validators=[Length(1, 64)])
-    application_major = StringField(u'申请方向', validators=[Length(1, 64)])
+    other_purpose = StringField(u'其它研修目的', validators=[Length(0, 64)])
+    application_major = StringField(u'申请方向', validators=[Length(0, 64)])
     referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
-    other_referrer = StringField(u'其它了解渠道', validators=[Length(1, 64)])
-    inviter_email = StringField(u'推荐人（邮箱）', validators=[Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    role = SelectField(u'研修类别', coerce=unicode, validators=[Required()])
+    other_referrer = StringField(u'其它了解渠道', validators=[Length(0, 64)])
+    inviter_email = StringField(u'同学推荐', validators=[Length(0, 64)])
+    products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
+    role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
     y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
-    products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     deformity = BooleanField(u'有严重心理或身体疾病')
     # submit
@@ -345,22 +345,26 @@ class NewUserForm(FlaskForm):
         self.doctor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.job_year_1.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.toefl_total.choices = [(u'', u'选择TOEFL总分')] + [(unicode(toefl_total_score.id), toefl_total_score.name) for toefl_total_score in TOEFLTotalScore.query.order_by(TOEFLTotalScore.value.desc()).all()]
-        self.toefl_reading.choices = [(u'', u'选择TOEFL阅读分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLReadingScore.query.order_by(TOEFLReadingScore.value.desc()).all()]
-        self.toefl_listening.choices = [(u'', u'选择TOEFL听力分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLListeningScore.query.order_by(TOEFLListeningScore.value.desc()).all()]
-        self.toefl_speaking.choices = [(u'', u'选择TOEFL口语分数')] + [(unicode(toefl_speaking_score.id), toefl_speaking_score.name) for toefl_speaking_score in TOEFLSpeakingScore.query.order_by(TOEFLSpeakingScore.value.desc()).all()]
-        self.toefl_writing.choices = [(u'', u'选择TOEFL写作分数')] + [(unicode(toefl_writing_score.id), toefl_writing_score.name) for toefl_writing_score in TOEFLWritingScore.query.order_by(TOEFLWritingScore.value.desc()).all()]
         self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
-        self.role.choices = [(u'', u'选择研修类别')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
         self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
-        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError(u'%s已经被注册' % field.data)
+
+    def validate_inviter_email(self, field):
+        if field.data and User.query.filter_by(email=field.data).first() is None:
+            raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
+
+    def validate_toefl_total(self, field):
+        toefl_total = int(self.toefl_reading.data) + int(self.toefl_listening.data) + int(self.toefl_speaking.data) + int(self.toefl_writing.data)
+        if int(field.data) != toefl_total:
+            raise ValidationError(u'TOEFL分数有误：%s ≠ %s + %s + %s + %s = %s' % (field.data, self.toefl_reading.data, self.toefl_listening.data, self.toefl_speaking.data, self.toefl_writing.data, toefl_total))
 
 
 class NewEducationRecordForm(FlaskForm):
@@ -400,20 +404,17 @@ class NewPreviousAchievementForm(FlaskForm):
 
 
 class NewTOEFLTestScoreForm(FlaskForm):
-    toefl_total = SelectField(u'TOEFL', coerce=unicode, validators=[Required()])
-    toefl_reading = SelectField(u'Reading', coerce=unicode)
-    toefl_listening = SelectField(u'Listening', coerce=unicode)
-    toefl_speaking = SelectField(u'Speaking', coerce=unicode)
-    toefl_writing = SelectField(u'Writing', coerce=unicode)
+    toefl_total = IntegerField(u'TOEFL', validators=[Required(), NumberRange(min=0, max=120)])
+    toefl_reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_test_score_type = SelectField(u'TOEFL分数类型', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.toefl_total.choices = [(u'', u'选择TOEFL总分')] + [(unicode(toefl_total_score.id), toefl_total_score.name) for toefl_total_score in TOEFLTotalScore.query.order_by(TOEFLTotalScore.value.desc()).all()]
-        self.toefl_reading.choices = [(u'', u'选择TOEFL阅读分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLReadingScore.query.order_by(TOEFLReadingScore.value.desc()).all()]
-        self.toefl_listening.choices = [(u'', u'选择TOEFL听力分数')] + [(unicode(toefl_reading_score.id), toefl_reading_score.name) for toefl_reading_score in TOEFLListeningScore.query.order_by(TOEFLListeningScore.value.desc()).all()]
-        self.toefl_speaking.choices = [(u'', u'选择TOEFL口语分数')] + [(unicode(toefl_speaking_score.id), toefl_speaking_score.name) for toefl_speaking_score in TOEFLSpeakingScore.query.order_by(TOEFLSpeakingScore.value.desc()).all()]
-        self.toefl_writing.choices = [(u'', u'选择TOEFL写作分数')] + [(unicode(toefl_writing_score.id), toefl_writing_score.name) for toefl_writing_score in TOEFLWritingScore.query.order_by(TOEFLWritingScore.value.desc()).all()]
+        self.toefl_test_score_type.choices = [(u'', u'选择TOEFL分数类型')] + [(unicode(toefl_test_score_type.id), toefl_test_score_type.name) for toefl_test_score_type in TOEFLTestScoreType.query.order_by(TOEFLTestScoreType.id.asc()).all()]
 
 
 class NewAdminForm(FlaskForm):
