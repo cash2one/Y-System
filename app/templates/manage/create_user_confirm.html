@@ -258,7 +258,7 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <form id="new-education-record" method="POST" class="ui form">
+                <form id="new-education-record" method="POST" class="ui mini form">
                     {{ new_education_record_form.hidden_tag() }}
                     <div class="fields">
                         <div class="two wide field">
@@ -267,20 +267,20 @@
                         <div class="four wide field">
                             {{ new_education_record_form.school(placeholder='学校') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="three wide field">
                             {{ new_education_record_form.major(placeholder='院系（专业）') }}
                         </div>
-                        <div class="one wide field">
+                        <div class="two wide field">
                             {{ new_education_record_form.gpa(placeholder='GPA') }}
                         </div>
-                        <div class="one wide field">
-                            {{ new_education_record_form.full_gpa(placeholder='满分') }}
+                        <div class="two wide field">
+                            {{ new_education_record_form.full_gpa(placeholder='GPA满分') }}
                         </div>
                         <div class="two wide field">
                             {{ new_education_record_form.year(class='ui compact dropdown') }}
                         </div>
-                        <div class="two wide field">
-                            {{ new_education_record_form.submit(class='ui primary button') }}
+                        <div class="one wide field">
+                            {{ new_education_record_form.submit(class='ui primary mini fluid button') }}
                         </div>
                     </div>
                 </form>
@@ -400,153 +400,72 @@ $('.ui.checkbox')
 
 $(document)
     .ready(function() {
-        $('#new_education_record')
+        $('#new-education-record')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    name: {
-                        identifier: 'name',
+                    education_type: {
+                        identifier: 'education_type',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请填写用户姓名'
+                                prompt: '请选择学历类型'
                             }
                         ]
                     },
-                    email: {
-                        identifier: 'email',
+                    school: {
+                        identifier: 'school',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请填写电子邮箱地址'
+                                prompt: '请填写学校'
+                            }
+                        ]
+                    },
+                    major: {
+                        identifier: 'major',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写院系（专业）'
+                            }
+                        ]
+                    },
+                    gpa: {
+                        identifier: 'gpa',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            }
+                        ]
+                    },
+                    full_gpa: {
+                        identifier: 'full_gpa',
+                        depends: 'gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
                             },
                             {
-                                type: 'email',
-                                prompt: '请输入一个有效的电子邮箱地址'
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
                             }
                         ]
                     },
-                    mobile: {
-                        identifier: 'mobile',
+                    year: {
+                        identifier: 'year',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请填写移动电话号码'
-                            },
-                            {
-                                type: 'integer',
-                                prompt: '请输入一个有效的移动电话号码'
-                            },
-                            {
-                                type: 'exactLength[11]',
-                                prompt: '移动电话号码位数有误'
+                                prompt: '请选择入学年份'
                             }
                         ]
                     },
-                    address: {
-                        identifier: 'address',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写联系地址'
-                            }
-                        ]
-                    },
-                    emergency_contact_name: {
-                        identifier: 'emergency_contact_name',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写紧急联系人姓名'
-                            }
-                        ]
-                    },
-                    emergency_contact_relationship: {
-                        identifier: 'emergency_contact_relationship',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择紧急联系人关系'
-                            }
-                        ]
-                    },
-                    emergency_contact_mobile: {
-                        identifier: 'emergency_contact_mobile',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写紧急联系人移动电话号码'
-                            },
-                            {
-                                type: 'integer',
-                                prompt: '请输入一个有效的紧急联系人移动电话号码'
-                            },
-                            {
-                                type: 'exactLength[11]',
-                                prompt: '紧急联系人移动电话号码位数有误'
-                            }
-                        ]
-                    },
-                    role: {
-                        identifier: 'role',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择研修类别'
-                            }
-                        ]
-                    },
-                    vb_course: {
-                        identifier: 'vb_course',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择VB班'
-                            }
-                        ]
-                    },
-                    y_gre_course: {
-                        identifier: 'y_gre_course',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择Y-GRE班'
-                            }
-                        ]
-                    },
-                    products: {
-                        identifier: 'products',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择研修产品'
-                            }
-                        ]
-                    },
-                    receptionist_email: {
-                        identifier: 'receptionist_email',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写接待人电子邮箱地址'
-                            },
-                            {
-                                type: 'email',
-                                prompt: '请输入一个有效的电子邮箱地址'
-                            }
-                        ]
-                    },
-                    disclaimer: {
-                        identifier: 'disclaimer',
-                        rules: [
-                            {
-                                type: 'checked',
-                                prompt: '请确认用户同意服务条款'
-                            }
-                        ]
-                    }
                 }
             })
         ;

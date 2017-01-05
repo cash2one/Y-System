@@ -279,17 +279,7 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    {% with serial_errors = form.serial.errors %}
-                    {% if serial_errors %}
-                    <div class="ui flask negative message">
-                        <ul class="list">
-                            {% for error in serial_errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
+                    {{ macros.form_validation_error_widget(form) }}
                 </form>
             </div>
         </div>

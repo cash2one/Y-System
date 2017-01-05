@@ -400,17 +400,7 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
-                    {% with errors = form.email.errors + form.inviter_email.errors + form.toefl_total.errors %}
-                    {% if errors %}
-                    <div class="ui flask negative message">
-                        <ul class="list">
-                            {% for error in errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
+                    {{ macros.form_validation_error_widget(form) }}
                 </form>
             </div>
         </div>
@@ -604,10 +594,6 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'empty',
-                                prompt: '请填写GPA'
-                            },
-                            {
                                 type: 'number',
                                 prompt: '请填写一个有效的GPA'
                             }
@@ -653,10 +639,6 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'empty',
-                                prompt: '请填写GPA'
-                            },
-                            {
                                 type: 'number',
                                 prompt: '请填写一个有效的GPA'
                             }
@@ -701,10 +683,6 @@ $(document)
                         depends: 'doctor_school',
                         optional: true,
                         rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写GPA'
-                            },
                             {
                                 type: 'number',
                                 prompt: '请填写一个有效的GPA'

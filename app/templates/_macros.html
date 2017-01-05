@@ -95,3 +95,17 @@
 {% endif %}
 {% endwith %}
 {% endmacro %}
+
+{% macro form_validation_error_widget(form) %}
+{% if form.errors %}
+<div class="ui flask negative message">
+    <ul class="list">
+    {% for field, errors in form.errors.items() %}
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endmacro %}

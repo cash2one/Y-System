@@ -357,9 +357,17 @@ class NewUserForm(FlaskForm):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError(u'%s已经被注册' % field.data)
 
-    def validate_inviter_email(self, field):
-        if field.data and User.query.filter_by(email=field.data).first() is None:
-            raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
+    def validate_bachelor_gpa(self, field):
+        if field.data and (float(field.data) > float(self.bachelor_full_gpa.data)):
+            raise ValidationError(u'本科GPA有误：%s > %s（GPA满分）' % (field.data, self.bachelor_full_gpa.data))
+
+    def validate_master_gpa(self, field):
+        if field.data and (float(field.data) > float(self.master_full_gpa.data)):
+            raise ValidationError(u'硕士GPA有误：%s > %s（GPA满分）' % (field.data, self.master_full_gpa.data))
+
+    def validate_doctor_gpa(self, field):
+        if field.data and (float(field.data) > float(self.doctor_full_gpa.data)):
+            raise ValidationError(u'博士GPA有误：%s > %s（GPA满分）' % (field.data, self.doctor_full_gpa.data))
 
     def validate_toefl_total(self, field):
         if field.data:
@@ -367,20 +375,28 @@ class NewUserForm(FlaskForm):
             if int(field.data) != toefl_total:
                 raise ValidationError(u'TOEFL分数有误：%s ≠ %s + %s + %s + %s = %s' % (field.data, self.toefl_reading.data, self.toefl_listening.data, self.toefl_speaking.data, self.toefl_writing.data, toefl_total))
 
+    def validate_inviter_email(self, field):
+        if field.data and User.query.filter_by(email=field.data).first() is None:
+            raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
+
 
 class NewEducationRecordForm(FlaskForm):
-    education_type = SelectField(u'学历', coerce=unicode, validators=[Required()])
+    education_type = SelectField(u'学历类型', coerce=unicode, validators=[Required()])
     school = StringField(u'学校', validators=[Required(), Length(1, 64)])
     major = StringField(u'院系（专业）', validators=[Length(0, 64)])
-    gpa = FloatField(u'GPA')
-    full_gpa = FloatField(u'GPA满分')
+    gpa = StringField(u'GPA', validators=[Length(0, 64)])
+    full_gpa = StringField(u'GPA满分', validators=[Length(0, 64)])
     year = SelectField(u'入学年份', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'添加教育经历')
+    submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(NewEducationRecordForm, self).__init__(*args, **kwargs)
-        self.education_type.choices = [(u'', u'选择学历')] + [(unicode(education_type.id), education_type.name) for education_type in EducationType.query.order_by(EducationType.id.asc()).all()]
-        self.year.choices = [(u'', u'选择年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+        self.education_type.choices = [(u'', u'选择学历类型')] + [(unicode(education_type.id), education_type.name) for education_type in EducationType.query.order_by(EducationType.id.asc()).all()]
+        self.year.choices = [(u'', u'选择入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
+
+    def validate_gpa(self, field):
+        if field.data and (float(field.data) > float(self.full_gpa.data)):
+            raise ValidationError(u'博士GPA有误：%s > %s（GPA满分）' % (field.data, self.full_gpa.data))
 
 
 class NewEmploymentRecordForm(FlaskForm):
