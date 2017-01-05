@@ -390,11 +390,15 @@ $('.ui.checkbox')
 
 $(document)
     .ready(function() {
-        $.fn.form.settings.rules.exceptEducationType = function(value, educationType) {
-            return ($('#new_education_record-education_type').dropdown('get text')[0] === educationType);
+        $.fn.form.settings.rules.exceptEducationType = function(value) {
+            return ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1);
         };
-        $.fn.form.settings.rules.overGPA = function(value) {
-            return (Number(value) <= Number($('#new_education_record-full_gpa').val()));
+        $.fn.form.settings.rules.GPAwithinLimit = function(value) {
+            if ($('#new_education_record-full_gpa').val() === '') {
+                return true;
+            } else {
+                return (Number(value) <= Number($('#new_education_record-full_gpa').val()));
+            };
         };
         $('#new-education-record')
             .form({
@@ -424,7 +428,7 @@ $(document)
                         identifier: 'new_education_record-major',
                         rules: [
                             {
-                                type: 'exceptEducationType[高中]',
+                                type: 'exceptEducationType',
                                 prompt: '请填写学院（专业）'
                             }
                         ]
@@ -438,7 +442,7 @@ $(document)
                                 prompt: '请填写一个有效的GPA'
                             },
                             {
-                                type: 'overGPA',
+                                type: 'GPAwithinLimit',
                                 prompt: 'GPA数值超过满分'
                             }
                         ]
@@ -509,7 +513,7 @@ $(document)
             if (/^[0-9]*$/.test(value)) {
                 return true;
             } else {
-                return ($.inArray($('#new_previous_achievement-previous_achievement_type').dropdown('get text')[0], ['竞赛', '其它']) >= 0);
+                return ($.inArray($('#new_previous_achievement-previous_achievement_type').dropdown('get text')[0], ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
             };
         };
         $('#new-previous-achievement')

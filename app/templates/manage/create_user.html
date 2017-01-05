@@ -436,17 +436,33 @@ $(document)
         $.fn.form.settings.rules.idNumber = function(value) {
             return (Validator.isValid(value, 18));
         };
-        $.fn.form.settings.rules.bachelorOverGPA = function(value) {
-            return (Number(value) <= Number($('#bachelor_full_gpa').val()));
+        $.fn.form.settings.rules.bachelorGPAwithinLimit = function(value) {
+            if ($('#bachelor_full_gpa').val() === '') {
+                return true;
+            } else {
+                return (Number(value) <= Number($('#bachelor_full_gpa').val()));
+            };
         };
-        $.fn.form.settings.rules.masterOverGPA = function(value) {
-            return (Number(value) <= Number($('#master_full_gpa').val()));
+        $.fn.form.settings.rules.masterGPAwithinLimit = function(value) {
+            if ($('#master_full_gpa').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#master_full_gpa').val()));
+            };
         };
-        $.fn.form.settings.rules.doctorOverGPA = function(value) {
-            return (Number(value) <= Number($('#doctor_full_gpa').val()));
+        $.fn.form.settings.rules.doctorGPAwithinLimit = function(value) {
+            if ($('#doctor_full_gpa').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#doctor_full_gpa').val()));
+            };
         };
         $.fn.form.settings.rules.toefl = function(value) {
-            return (Number(value) === Number($('#toefl_reading').val()) + Number($('#toefl_listening').val()) + Number($('#toefl_speaking').val()) + Number($('#toefl_writing').val()));
+            if (($('#toefl_reading').val() === '') || ($('#toefl_listening').val() === '') || ($('#toefl_speaking').val() === '') || ($('#toefl_writing').val() === '')) {
+                return true;
+            } else {
+                return (Number(value) === Number($('#toefl_reading').val()) + Number($('#toefl_listening').val()) + Number($('#toefl_speaking').val()) + Number($('#toefl_writing').val()));
+            };
         };
         $('#create-user')
             .form({
@@ -610,7 +626,7 @@ $(document)
                                 prompt: '请填写一个有效的GPA'
                             },
                             {
-                                type: 'bachelorOverGPA',
+                                type: 'bachelorGPAwithinLimit',
                                 prompt: '本科GPA数值超过满分'
                             }
                         ]
@@ -659,7 +675,7 @@ $(document)
                                 prompt: '请填写一个有效的GPA'
                             },
                             {
-                                type: 'masterOverGPA',
+                                type: 'masterGPAwithinLimit',
                                 prompt: '硕士GPA数值超过满分'
                             }
                         ]
@@ -708,7 +724,7 @@ $(document)
                                 prompt: '请填写一个有效的GPA'
                             },
                             {
-                                type: 'doctorOverGPA',
+                                type: 'doctorGPAwithinLimit',
                                 prompt: '博士GPA数值超过满分'
                             }
                         ]
