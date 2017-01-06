@@ -133,27 +133,11 @@
                             </td>
                             <td>
                                 {{ user.email }}
-                                {% if user.confirmed %}
-                                <i class="green check icon"></i>
-                                {% else %}
-                                <i class="red remove icon"></i>
-                                {% endif %}
+                                <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
                             </td>
                             <td>{{ user.role.name }}</td>
-                            <td>
-                                {% if user.vb_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.vb_course.name }}</a>
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if user.y_gre_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.y_gre_course.name }}</a>
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
+                            <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
                             {% if user.activated %}
                             <td>
                                 {{ user.last_punch.alias2 }}

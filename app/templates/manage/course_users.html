@@ -121,27 +121,11 @@
                             </td>
                             <td>
                                 {{ user.email }}
-                                {% if user.confirmed %}
-                                <i class="check circle icon"></i>
-                                {% else %}
-                                <i class="remove circle icon"></i>
-                                {% endif %}
+                                <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
                             </td>
                             <td>{{ user.role.name }}</td>
-                            <td>
-                                {% if user.vb_course %}
-                                {{ user.vb_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if user.y_gre_course %}
-                                {{ user.y_gre_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
+                            <td>{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</td>
+                            <td>{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</td>
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can('管理学习进度') %}

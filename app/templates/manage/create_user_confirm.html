@@ -243,16 +243,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.school }}</div>
-                            <div class="description">
-                                {{ education_record.type.name }}
-                                &middot; {{ education_record.year }}级
-                                {% if education_record.major %}
-                                &middot; {{ education_record.major }}
-                                {% endif %}
-                                {% if education_record.gpa %}
-                                &middot; GPA: {{ education_record.gpa }} / {{ education_record.full_gpa }}
-                                {% endif %}
-                            </div>
+                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA: {{ education_record.gpa }} / {{ education_record.full_gpa }}{% endif %}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -327,15 +318,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ previous_achievement.type.name }}</div>
-                            <div class="description">
-                                {% if previous_achievement.score %}
-                                {{ previous_achievement.score }}分
-                                {% elif previous_achievement.remark %}
-                                {{ previous_achievement.remark }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if previous_achievement.score %}{{ previous_achievement.score }}分{% elif previous_achievement.remark %}{{ previous_achievement.remark }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -355,6 +338,7 @@
                         </div>
                     </div>
                 </form>
+                <h4 class="ui blue dividing header">TOEFL成绩</h4>
                 <h4 class="ui teal dividing header">报名信息</h4>
                 {# <h4 class="ui grey dividing header">其它信息</h4> #}
             </div>

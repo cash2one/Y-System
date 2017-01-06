@@ -129,7 +129,7 @@
                                 {% endif %}
                                 {{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}
                             </td>
-                            <td {% if schedule.full %}class="negative"{% endif %}>
+                            <td{% if schedule.full %} class="negative"{% endif %}>
                                 {{ schedule.occupied_quota }} / {{ schedule.quota }}
                                 {% if schedule.out_of_date %}
                                 <div class="ui mini icon buttons">
