@@ -265,6 +265,16 @@ class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    # contact
+    email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
+    address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
+    qq = StringField(u'QQ', validators=[Length(0, 64)])
+    wechat = StringField(u'微信', validators=[Length(0, 64)])
+    # emergency contact
+    emergency_contact_name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
+    emergency_contact_relationship = SelectField(u'关系', coerce=unicode, validators=[Required()])
+    emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
     # high school
     high_school = StringField(u'毕业高中', validators=[Length(0, 64)])
     high_school_year = SelectField(u'入学年份', coerce=unicode)
@@ -309,16 +319,6 @@ class NewUserForm(FlaskForm):
     toefl_writing = StringField(u'Writing', validators=[Length(0, 64)])
     competition = StringField(u'竞赛成绩', validators=[Length(0, 128)])
     other_score = StringField(u'其它成绩', validators=[Length(0, 128)])
-    # contact
-    email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
-    address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
-    qq = StringField(u'QQ', validators=[Length(0, 64)])
-    wechat = StringField(u'微信', validators=[Length(0, 64)])
-    # emergency contact
-    emergency_contact_name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    emergency_contact_relationship = SelectField(u'关系', coerce=unicode, validators=[Required()])
-    emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
     # registration
     purposes = SelectMultipleField(u'研修目的', coerce=unicode)
     other_purpose = StringField(u'其它研修目的', validators=[Length(0, 64)])
@@ -335,13 +335,13 @@ class NewUserForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
+        self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.high_school_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.bachelor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.master_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.doctor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.job_year_1.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
         self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
@@ -437,6 +437,64 @@ class NewAdminForm(FlaskForm):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError(u'%s已经被注册' % field.data)
+
+
+class EditNameForm(FlaskForm):
+    name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditIDNumberForm(FlaskForm):
+    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditEmailForm(FlaskForm):
+    email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    submit = SubmitField(u'更新')
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError(u'%s已经被注册' % field.data)
+
+
+class EditMobileForm(FlaskForm):
+    mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditAddressForm(FlaskForm):
+    address = StringField(u'联系地址', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditQQForm(FlaskForm):
+    qq = StringField(u'QQ', validators=[Length(0, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditWeChatForm(FlaskForm):
+    wechat = StringField(u'微信', validators=[Length(0, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditEmergencyContactNameForm(FlaskForm):
+    emergency_contact_name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditEmergencyContactRelationshipForm(FlaskForm):
+    emergency_contact_relationship = SelectField(u'关系', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditEmergencyContactRelationshipForm, self).__init__(*args, **kwargs)
+        self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
+
+
+class EditEmergencyContactMobileForm(FlaskForm):
+    emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
 
 
 class EditUserForm(FlaskForm):

@@ -114,7 +114,7 @@
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-name-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">姓名</div>
@@ -122,18 +122,12 @@
                         </div>
                     </div>
                     <div class="item">
-                        <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
-                        </div>
                         <div class="content">
                             <div class="header">性别</div>
                             <div class="description">{{ user.gender.name }}</div>
                         </div>
                     </div>
                     <div class="item">
-                        <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
-                        </div>
                         <div class="content">
                             <div class="header">生日</div>
                             <div class="description">{{ moment(user.birthdate).format('YYYY年M月D日') }}</div>
@@ -141,7 +135,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-id-number-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">身份证号</div>
@@ -149,11 +143,45 @@
                         </div>
                     </div>
                 </div>
+                <div id="edit-name-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-name" method="POST" class="ui form segment">
+                                    {{ edit_name_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_name_form.name.label() }}
+                                        {{ edit_name_form.name(placeholder='姓名') }}
+                                    </div>
+                                    {{ edit_name_form.submit(class='ui primary button') }}
+                                    <div id="edit-name-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-id-number-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-id-number" method="POST" class="ui form segment">
+                                    {{ edit_id_number_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_id_number_form.id_number.label() }}
+                                        {{ edit_id_number_form.id_number(placeholder='身份证号（18位）') }}
+                                    </div>
+                                    {{ edit_id_number_form.submit(class='ui primary button') }}
+                                    <div id="edit-id-number-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <h4 class="ui blue dividing header">联系方式</h4>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-email-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">电子邮箱</div>
@@ -162,62 +190,38 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-mobile-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">移动电话</div>
-                            <div class="description">
-                                {% if user.mobile %}
-                                {{ user.mobile }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.mobile %}{{ user.mobile }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-address-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">联系地址</div>
-                            <div class="description">
-                                {% if user.address %}
-                                {{ user.address }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.address %}{{ user.address }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-qq-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">QQ</div>
-                            <div class="description">
-                                {% if user.qq %}
-                                {{ user.qq }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.qq %}{{ user.qq }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-wechat-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">微信</div>
-                            <div class="description">
-                                {% if user.wechat %}
-                                {{ user.wechat }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.wechat %}{{ user.wechat }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                 </div>
@@ -225,47 +229,29 @@
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-emergency-contact-name-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">姓名</div>
-                            <div class="description">
-                                {% if user.emergency_contact_name %}
-                                {{ user.emergency_contact_name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.emergency_contact_name %}{{ user.emergency_contact_name }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-emergency-contact-relationship-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">关系</div>
-                            <div class="description">
-                                {% if user.emergency_contact_relationship_id %}
-                                {{ user.relationship.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.emergency_contact_relationship_id %}{{ user.relationship.name }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div id="edit-emergency-contact-mobile-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">联系方式</div>
-                            <div class="description">
-                                {% if user.emergency_contact_mobile %}
-                                {{ user.emergency_contact_mobile }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.emergency_contact_mobile %}{{ user.emergency_contact_mobile }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                 </div>
@@ -420,7 +406,7 @@
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">研修目的</div>
@@ -429,22 +415,16 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">申请方向</div>
-                            <div class="description">
-                                {% if user.application_aim %}
-                                {{ user.application_aim }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">了解渠道</div>
@@ -453,22 +433,16 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">推荐人</div>
-                            <div class="description">
-                                {% if user.emergency_contact_mobile %}
-                                {{ user.emergency_contact_mobile }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </div>
+                            <div class="description">{% if user.accepted_invitations.count() %}{{ user.accepted_invitations.first().inviter.name }}（{{ user.accepted_invitations.first().inviter.email }}）{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
@@ -477,7 +451,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">用户权限</div>
@@ -486,7 +460,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">VB班</div>
@@ -495,7 +469,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button" href="#">编辑</a>
+                            <div class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">Y-GRE班</div>
@@ -504,6 +478,7 @@
                     </div>
                 </div>
                 <form id="confirm-user" method="POST" class="ui form">
+                    {{ confirm_user_form.hidden_tag() }}
                     <h4 class="ui blue dividing header">其它信息</h4>
                     <div class="ui segment">
                         <div class="inline field">
@@ -547,6 +522,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/IDValidator.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -565,8 +542,202 @@ $('.ui.checkbox')
     .checkbox()
 ;
 
+$('#edit-name-trigger')
+    .on('click', function() {
+        $('#edit-name-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-name-hide-trigger')
+    .on('click', function() {
+        $('#edit-name-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-id-number-trigger')
+    .on('click', function() {
+        $('#edit-id-number-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-id-number-hide-trigger')
+    .on('click', function() {
+        $('#edit-id-number-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-email-trigger')
+    .on('click', function() {
+        $('#edit-email-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-email-hide-trigger')
+    .on('click', function() {
+        $('#edit-email-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-mobile-trigger')
+    .on('click', function() {
+        $('#edit-mobile-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-mobile-hide-trigger')
+    .on('click', function() {
+        $('#edit-mobile-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-address-trigger')
+    .on('click', function() {
+        $('#edit-address-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-address-hide-trigger')
+    .on('click', function() {
+        $('#edit-address-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-qq-trigger')
+    .on('click', function() {
+        $('#edit-qq-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-qq-hide-trigger')
+    .on('click', function() {
+        $('#edit-qq-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-wechat-trigger')
+    .on('click', function() {
+        $('#edit-wechat-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-wechat-hide-trigger')
+    .on('click', function() {
+        $('#edit-wechat-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-emergency-contact-name-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-name-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-emergency-contact-name-hide-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-name-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-emergency-contact-relationship-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-relationship-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-emergency-contact-relationship-hide-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-relationship-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-emergency-contact-mobile-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-mobile-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-emergency-contact-mobile-hide-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-mobile-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
+        $('#edit-name')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    name: {
+                        identifier: 'edit_name-name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写用户姓名'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $.fn.form.settings.rules.idNumber = function(value) {
+            return (Validator.isValid(value, 18));
+        };
+        $('#edit-id-number')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    id_number: {
+                        identifier: 'edit_id_number-id_number',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写身份证号'
+                            },
+                            {
+                                type: 'idNumber',
+                                prompt: '请输入一个有效的身份证号'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
         $.fn.form.settings.rules.exceptEducationType = function(value) {
             return ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1);
         };
@@ -808,6 +979,37 @@ $(document)
                             {
                                 type: 'integer[0..30]',
                                 prompt: '请填写一个有效的TOEFL写作分数'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#confirm-user')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    receptionist_email: {
+                        identifier: 'confirm_user-receptionist_email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写接待人电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    disclaimer: {
+                        identifier: 'confirm_user-disclaimer',
+                        rules: [
+                            {
+                                type: 'checked',
+                                prompt: '请确认用户同意服务条款'
                             }
                         ]
                     }

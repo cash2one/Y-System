@@ -7,10 +7,25 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm, NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm, EditPunchLessonForm, EditPunchSectionForm, BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm, NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm, NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, ConfirmUserForm, EditUserForm, DeleteUserForm, RestoreUserForm, FindUserForm, NewCourseForm, EditCourseForm, DeleteCourseForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm
+from .forms import NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm
+from .forms import EditPunchLessonForm, EditPunchSectionForm
+from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
+from .forms import NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, ConfirmUserForm
+from .forms import EditNameForm, EditIDNumberForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm, EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm, EditUserForm
+from .forms import DeleteUserForm, RestoreUserForm, FindUserForm
+from .forms import NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
-from ..models import Role, User, Gender, PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, Product, InvitationType, Booking, BookingState, Rental, Punch, Period, Schedule, Lesson, Section, iPad, iPadState, iPadContent, iPadContentJSON, Room, Course, CourseType, CourseRegistration, Announcement, AnnouncementType
+from ..models import Role, User, Gender
+from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, Product, InvitationType
+from ..models import Booking, BookingState, Rental, Punch
+from ..models import Period, Schedule
+from ..models import Lesson, Section
+from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
+from ..models import Course, CourseType, CourseRegistration
+from ..models import Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -49,7 +64,13 @@ def summary():
         room_id = Room.query.filter_by(name=u'1707').first().id
     if show_summary_ipad_others:
         room_id = 0
-    return render_template('manage/summary.html', room_id=room_id, show_summary_ipad_1103=show_summary_ipad_1103, show_summary_ipad_1707=show_summary_ipad_1707, show_summary_ipad_others=show_summary_ipad_others, announcements=announcements)
+    return render_template('manage/summary.html',
+        room_id=room_id,
+        show_summary_ipad_1103=show_summary_ipad_1103,
+        show_summary_ipad_1707=show_summary_ipad_1707,
+        show_summary_ipad_others=show_summary_ipad_others,
+        announcements=announcements
+    )
 
 
 @manage.route('/summary/ipad/1103')
@@ -211,7 +232,13 @@ def booking():
             .order_by(Booking.timestamp.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     bookings = pagination.items
-    return render_template('manage/booking.html', bookings=bookings, show_today_booking=show_today_booking, show_future_booking=show_future_booking, show_history_booking=show_history_booking, pagination=pagination)
+    return render_template('manage/booking.html',
+        bookings=bookings,
+        show_today_booking=show_today_booking,
+        show_future_booking=show_future_booking,
+        show_history_booking=show_history_booking,
+        pagination=pagination
+    )
 
 
 @manage.route('/booking/today')
@@ -261,12 +288,21 @@ def set_booking_state_valid(user_id, schedule_id):
         return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'预约')
     db.session.commit()
-    send_email(user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=user, schedule=schedule, booking=booking)
+    send_email(user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking',
+        user=user,
+        schedule=schedule,
+        booking=booking
+    )
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=user.last_punch.section.lesson)
     available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
         for manager in User.users_can(u'管理iPad设备'):
-            send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+            send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                schedule=schedule,
+                lesson=user.last_punch.section.lesson,
+                booked_ipads_quantity=booked_ipads_quantity,
+                available_ipads_quantity=available_ipads_quantity
+            )
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -327,12 +363,21 @@ def set_booking_state_canceled(user_id, schedule_id):
     candidate = booking.set_state(u'取消')
     db.session.commit()
     if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking',
+            user=candidate,
+            schedule=schedule,
+            booking=booking
+        )
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.users_can(u'管理iPad设备'):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                    schedule=schedule,
+                    lesson=candidate.last_punch.section.lesson,
+                    booked_ipads_quantity=booked_ipads_quantity,
+                    available_ipads_quantity=available_ipads_quantity
+                )
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -429,7 +474,14 @@ def rental():
             .order_by(Rental.return_time.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     rentals = pagination.items
-    return render_template('manage/rental.html', rentals=rentals, show_today_rental=show_today_rental, show_today_rental_1103=show_today_rental_1103, show_today_rental_1707=show_today_rental_1707, show_history_rental=show_history_rental, pagination=pagination)
+    return render_template('manage/rental.html',
+        rentals=rentals,
+        show_today_rental=show_today_rental,
+        show_today_rental_1103=show_today_rental_1103,
+        show_today_rental_1707=show_today_rental_1707,
+        show_history_rental=show_history_rental,
+        pagination=pagination
+    )
 
 
 @manage.route('/rental/today')
@@ -757,7 +809,11 @@ def rental_return_step_1():
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
             for user in User.users_can(u'管理iPad设备'):
-                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+                    ipad=ipad,
+                    time=datetime.utcnow(),
+                    manager=current_user
+                )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
         if not form.battery.data:
@@ -892,7 +948,11 @@ def rental_exchange_step_1(rental_id):
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
             for user in User.users_can(u'管理iPad设备'):
-                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+                    ipad=ipad,
+                    time=datetime.utcnow(),
+                    manager=current_user
+                )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
         if not form.battery.data:
@@ -1138,7 +1198,14 @@ def period():
         if start_time >= end_time:
             flash(u'无法添加时段模板：%s，时间设置有误' % form.name.data, category='error')
             return redirect(url_for('manage.period'))
-        period = Period(name=form.name.data, start_time=start_time, end_time=end_time, type_id=int(form.period_type.data), show=form.show.data, modified_by_id=current_user.id)
+        period = Period(
+            name=form.name.data,
+            start_time=start_time,
+            end_time=end_time,
+            type_id=int(form.period_type.data),
+            show=form.show.data,
+            modified_by_id=current_user.id
+        )
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
         return redirect(url_for('manage.period'))
@@ -1258,7 +1325,14 @@ def schedule():
             .order_by(Schedule.period_id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
-    return render_template('manage/schedule.html', form=form, schedules=schedules, show_today_schedule=show_today_schedule, show_future_schedule=show_future_schedule, show_history_schedule=show_history_schedule, pagination=pagination)
+    return render_template('manage/schedule.html',
+        form=form,
+        schedules=schedules,
+        show_today_schedule=show_today_schedule,
+        show_future_schedule=show_future_schedule,
+        show_history_schedule=show_history_schedule,
+        pagination=pagination
+    )
 
 
 @manage.route('/schedule/today')
@@ -1337,12 +1411,21 @@ def increase_schedule_quota(id):
     candidate = schedule.increase_quota(modified_by=current_user._get_current_object())
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking',
+            user=candidate,
+            schedule=schedule,
+            booking=booking
+        )
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             for manager in User.users_can(u'管理iPad设备'):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                    schedule=schedule,
+                    lesson=candidate.last_punch.section.lesson,
+                    booked_ipads_quantity=booked_ipads_quantity,
+                    available_ipads_quantity=available_ipads_quantity
+                )
     flash(u'所选时段名额+1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
@@ -1380,7 +1463,15 @@ def ipad():
         if ipad:
             flash(u'序列号为%s的iPad已存在' % serial, category='error')
             return redirect(url_for('manage.ipad'))
-        ipad = iPad(serial=serial, alias=form.alias.data, capacity_id=int(form.capacity.data), room_id=room_id, state_id=int(form.state.data), video_playback=timedelta(hours=form.video_playback.data), modified_by_id=current_user.id)
+        ipad = iPad(
+            serial=serial,
+            alias=form.alias.data,
+            capacity_id=int(form.capacity.data),
+            room_id=room_id,
+            state_id=int(form.state.data),
+            video_playback=timedelta(hours=form.video_playback.data),
+            modified_by_id=current_user.id
+        )
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
@@ -1441,7 +1532,19 @@ def ipad():
             .filter_by(room_id=None, deleted=False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    return render_template('manage/ipad.html', form=form, ipads=ipads, show_ipad_all=show_ipad_all, show_ipad_maintain=show_ipad_maintain, maintain_num=maintain_num, show_ipad_charge=show_ipad_charge, charge_num=charge_num, show_ipad_1103=show_ipad_1103, show_ipad_1707=show_ipad_1707, show_ipad_others=show_ipad_others, pagination=pagination)
+    return render_template('manage/ipad.html',
+        form=form,
+        ipads=ipads,
+        show_ipad_all=show_ipad_all,
+        show_ipad_maintain=show_ipad_maintain,
+        maintain_num=maintain_num,
+        show_ipad_charge=show_ipad_charge,
+        charge_num=charge_num,
+        show_ipad_1103=show_ipad_1103,
+        show_ipad_1707=show_ipad_1707,
+        show_ipad_others=show_ipad_others,
+        pagination=pagination
+    )
 
 
 @manage.route('/ipad/all')
@@ -1565,7 +1668,11 @@ def set_ipad_state_maintain(id):
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
     for user in User.users_can(u'管理iPad设备'):
-        send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+        send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
+            ipad=ipad,
+            time=datetime.utcnow(),
+            manager=current_user
+        )
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
@@ -1683,7 +1790,12 @@ def ipad_contents():
 def announcement():
     form = NewAnnouncementForm()
     if form.validate_on_submit():
-        announcement = Announcement(title=form.title.data, body_html=form.body.data, type_id=int(form.announcement_type.data), modified_by_id=current_user.id)
+        announcement = Announcement(
+            title=form.title.data,
+            body_html=form.body.data,
+            type_id=int(form.announcement_type.data),
+            modified_by_id=current_user.id
+        )
         db.session.add(announcement)
         db.session.commit()
         if form.show.data:
@@ -1698,7 +1810,11 @@ def announcement():
         .order_by(Announcement.modified_at.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     announcements = pagination.items
-    return render_template('manage/announcement.html', form=form, announcements=announcements, pagination=pagination)
+    return render_template('manage/announcement.html',
+        form=form,
+        announcements=announcements,
+        pagination=pagination
+    )
 
 
 @manage.route('/announcement/publish/<int:id>')
@@ -1931,7 +2047,28 @@ def user():
         .count()
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/user.html', users=users, show_activated_users=show_activated_users, activated_users_num=activated_users_num, show_unactivated_users=show_unactivated_users, unactivated_users_num=unactivated_users_num, show_suspended_users=show_suspended_users, suspended_users_num=suspended_users_num, show_draft_users=show_draft_users, draft_users_num=draft_users_num, show_deleted_users=show_deleted_users, deleted_users_num=deleted_users_num, show_volunteers=show_volunteers, volunteers_num=volunteers_num, show_moderators=show_moderators, moderators_num=moderators_num, show_administrators=show_administrators, administrators_num=administrators_num, show_developers=show_developers, developers_num=developers_num, pagination=pagination)
+    return render_template('manage/user.html',
+        users=users,
+        show_activated_users=show_activated_users,
+        activated_users_num=activated_users_num,
+        show_unactivated_users=show_unactivated_users,
+        unactivated_users_num=unactivated_users_num,
+        show_suspended_users=show_suspended_users,
+        suspended_users_num=suspended_users_num,
+        show_draft_users=show_draft_users,
+        draft_users_num=draft_users_num,
+        show_deleted_users=show_deleted_users,
+        deleted_users_num=deleted_users_num,
+        show_volunteers=show_volunteers,
+        volunteers_num=volunteers_num,
+        show_moderators=show_moderators,
+        moderators_num=moderators_num,
+        show_administrators=show_administrators,
+        administrators_num=administrators_num,
+        show_developers=show_developers,
+        developers_num=developers_num,
+        pagination=pagination
+    )
 
 
 @manage.route('/user/activated')
@@ -2085,168 +2222,6 @@ def developers():
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '1', max_age=30*24*60*60)
     return resp
-
-
-# @manage.route('/user/create', methods=['GET', 'POST'])
-# @login_required
-# @permission_required(u'管理用户')
-# def create_user():
-#     form = NewUserForm()
-#     if form.validate_on_submit():
-#         if int(form.id_number.data[16]) % 2 == 1:
-#             gender = Gender.query.filter_by(name=u'男').first()
-#         else:
-#             gender = Gender.query.filter_by(name=u'女').first()
-#         user = User(
-#             email=form.email.data,
-#             role_id=int(form.role.data),
-#             password=form.id_number.data[-6:],
-#             name=form.name.data,
-#             gender_id=gender.id,
-#             id_number=form.id_number.data.upper(),
-#             birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14])),
-#             mobile=form.mobile.data,
-#             wechat=form.wechat.data,
-#             qq=form.qq.data,
-#             address=form.address.data,
-#             emergency_contact_name=form.emergency_contact_name.data,
-#             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
-#             emergency_contact_mobile=form.emergency_contact_mobile.data,
-#             worked_in_same_field=form.worked_in_same_field.data,
-#             deformity=form.deformity.data,
-#             application_major=form.application_major.data
-#         )
-#         db.session.add(user)
-#         db.session.commit()
-#         # education
-#         if form.high_school.data:
-#             user.add_education_record(
-#                 education_type=EducationType.query.filter_by(name=u'高中').first(),
-#                 school=form.high_school.data,
-#                 year=form.high_school_year.data
-#             )
-#         if form.bachelor_school.data:
-#             user.add_education_record(
-#                 education_type=EducationType.query.filter_by(name=u'本科').first(),
-#                 school=form.bachelor_school.data,
-#                 major=form.bachelor_major.data,
-#                 gpa=form.bachelor_gpa.data,
-#                 full_gpa=form.bachelor_full_gpa.data,
-#                 year=form.bachelor_year.data
-#             )
-#         if form.master_school.data:
-#             user.add_education_record(
-#                 education_type=EducationType.query.filter_by(name=u'硕士').first(),
-#                 school=form.master_school.data,
-#                 major=form.master_major.data,
-#                 gpa=form.master_gpa.data,
-#                 full_gpa=form.master_full_gpa.data,
-#                 year=form.master_year.data
-#             )
-#         if form.doctor_school.data:
-#             user.add_education_record(
-#                 education_type=EducationType.query.filter_by(name=u'博士').first(),
-#                 school=form.doctor_school.data,
-#                 major=form.doctor_major.data,
-#                 gpa=form.doctor_gpa.data,
-#                 full_gpa=form.doctor_full_gpa.data,
-#                 year=form.doctor_year.data
-#             )
-#         # employment
-#         if form.employer_1.data:
-#             user.add_employment_record(
-#                 employer=form.employer_1.data,
-#                 position=form.position_1.data,
-#                 year=form.job_year_1.data
-#             )
-#         if form.employer_2.data:
-#             user.add_employment_record(
-#                 employer=form.employer_2.data,
-#                 position=form.position_2.data,
-#                 year=form.job_year_2.data
-#             )
-#         # scores
-#         if form.cee_total.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考总分').first(),
-#                 score=form.cee_total.data
-#             )
-#         if form.cee_math.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考数学').first(),
-#                 score=form.cee_math.data
-#             )
-#         if form.cee_english.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考英语').first(),
-#                 score=form.cee_english.data
-#             )
-#         if form.cet_4.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语四级').first(),
-#                 score=form.cet_4.data
-#             )
-#         if form.cet_6.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语六级').first(),
-#                 score=form.cet_6.data
-#             )
-#         if form.tem_4.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语四级').first(),
-#                 score=form.tem_4.data
-#             )
-#         if form.tem_8.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语八级').first(),
-#                 score=form.tem_8.data
-#             )
-#         if form.competition.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'竞赛').first(),
-#                 remark=form.competition.data
-#             )
-#         if form.other_score.data:
-#             user.add_previous_achievement(
-#                 previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'其它').first(),
-#                 remark=form.other_score.data
-#             )
-#         if form.toefl_total.data:
-#             user.add_toefl_test_score(
-#                 toefl_test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
-#                 total_score_id=form.toefl_total.data,
-#                 reading_score_id=form.toefl_reading.data,
-#                 listening_score_id=form.toefl_listening.data,
-#                 speaking_score_id=form.toefl_speaking.data,
-#                 writing_score_id=form.toefl_writing.data,
-#                 modified_by=current_user._get_current_object()
-#             )
-#         # registration
-#         for purpose_type_id in form.purposes.data:
-#             user.add_purpose(purpose_type=PurposeType.query.get(int(purpose_type_id)))
-#         if form.other_purpose.data:
-#             user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
-#         for referrer_type_id in form.referrers.data:
-#             user.add_referrer(referrer_type=ReferrerType.query.get(int(referrer_type_id)))
-#         if form.other_referrer.data:
-#             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
-#         if form.inviter_email.data:
-#             inviter = User.query.filter_by(email=form.inviter_email.data).first()
-#             if inviter is not None:
-#                 inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
-#         if int(form.vb_course.data):
-#             user.register_course(course=Course.query.get(int(form.vb_course.data)))
-#         if int(form.y_gre_course.data):
-#             user.register_course(course=Course.query.get(int(form.y_gre_course.data)))
-#         for product_id in form.products.data:
-#             user.purchase_product(product=Product.query.get(int(product_id)))
-#         receptionist = User.query.filter_by(email=form.receptionist_email.data).first()
-#         if receptionist is not None:
-#             receptionist.receive_user(user=user)
-#         current_user.create_user(user=user)
-#         flash(u'成功添加“%s”用户：%s' % (user.role.name, user.name), category='success')
-#         return redirect(request.args.get('next') or url_for('manage.user'))
-#     return render_template('manage/create_user.html', form=form)
 
 
 def get_gender_id(id_number):
@@ -2412,13 +2387,89 @@ def create_user():
 @permission_required(u'管理用户')
 def create_user_confirm(id):
     user = User.query.get_or_404(id)
-    if user.created or user.deleted:
+    if user.deleted:
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
+    if user.created:
+        flash(u'%s（%s）已经被创建' % (user.name, user.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.user'))
     if user.activated:
         flash(u'%s（%s）已经被激活' % (user.name, user.email), category='error')
         return redirect(request.args.get('next') or url_for('manage.user'))
+    # name
+    edit_name_form = EditNameForm(prefix='edit_name')
+    if edit_name_form.validate_on_submit():
+        user.name = edit_name_form.name.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_name_form.name.data = user.name
+    # id number
+    edit_id_number_form = EditIDNumberForm(prefix='edit_id_number')
+    if edit_id_number_form.validate_on_submit():
+        user.id_number = edit_id_number_form.id_number.data
+        user.gender_id = get_gender_id(edit_id_number_form.id_number.data)
+        user.birthdate = date(year=int(edit_id_number_form.id_number.data[6:10]), month=int(edit_id_number_form.id_number.data[10:12]), day=int(edit_id_number_form.id_number.data[12:14]))
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_id_number_form.id_number.data = user.id_number
+    # email
+    edit_email_form = EditEmailForm(prefix='edit_email')
+    if edit_email_form.validate_on_submit():
+        user.email = edit_email_form.email.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_email_form.email.data = user.email
+    # mobile
+    edit_mobile_form = EditMobileForm(prefix='edit_mobile')
+    if edit_mobile_form.validate_on_submit():
+        user.mobile = edit_mobile_form.mobile.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_mobile_form.mobile.data = user.mobile
+    # address
+    edit_address_form = EditAddressForm(prefix='edit_address')
+    if edit_address_form.validate_on_submit():
+        user.address = edit_address_form.address.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_address_form.address.data = user.address
+    # qq
+    edit_qq_form = EditQQForm(prefix='edit_qq')
+    if edit_qq_form.validate_on_submit():
+        user.qq = edit_qq_form.qq.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_qq_form.qq.data = user.qq
+    # wechat
+    edit_wechat_form = EditWeChatForm(prefix='edit_wechat')
+    if edit_wechat_form.validate_on_submit():
+        user.wechat = edit_wechat_form.wechat.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_wechat_form.wechat.data = user.wechat
+    # emergency contact name
+    edit_emergency_contact_name_form = EditEmergencyContactNameForm(prefix='edit_emergency_contact_name')
+    if edit_emergency_contact_name_form.validate_on_submit():
+        user.emergency_contact_name = edit_emergency_contact_name.emergency_contact_name.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_emergency_contact_name.emergency_contact_name.data = user.emergency_contact_name
+    # emergency contact relationship
+    edit_emergency_contact_relationship_form = EditEmergencyContactRelationshipForm(prefix='edit_emergency_contact_relationship')
+    if edit_emergency_contact_relationship_form.validate_on_submit():
+        user.emergency_contact_relationship_id = int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_emergency_contact_relationship_form.emergency_contact_relationship.data = unicode(user.emergency_contact_relationship_id)
+    # emergency contact mobile
+    edit_emergency_contact_mobile_form = EditEmergencyContactMobileForm(prefix='edit_emergency_contact_mobile')
+    if edit_emergency_contact_mobile_form.validate_on_submit():
+        user.emergency_contact_mobile = edit_emergency_contact_mobile_form.emergency_contact_mobile.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_emergency_contact_mobile_form.emergency_contact_mobile.data = user.emergency_contact_mobile
+    # education
     new_education_record_form = NewEducationRecordForm(prefix='new_education_record')
     if new_education_record_form.validate_on_submit():
         education_type = EducationType.query.get(int(new_education_record_form.education_type.data))
@@ -2432,6 +2483,7 @@ def create_user_confirm(id):
         )
         flash(u'已添加教育经历：%s %s' % (education_type.name, new_education_record_form.school.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # employment
     new_employment_record_form = NewEmploymentRecordForm(prefix='new_employment_record')
     if new_employment_record_form.validate_on_submit():
         user.add_employment_record(
@@ -2441,6 +2493,7 @@ def create_user_confirm(id):
         )
         flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # scores
     new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
     if new_previous_achievement_form.validate_on_submit():
         previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
@@ -2456,6 +2509,7 @@ def create_user_confirm(id):
             )
         flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # toefl
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.validate_on_submit():
         test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
@@ -2470,13 +2524,37 @@ def create_user_confirm(id):
         )
         flash(u'已添加TOEFL成绩：%s' % test_score_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # confirm
     confirm_user_form = ConfirmUserForm(prefix='confirm_user')
     if confirm_user_form.validate_on_submit():
+        user.worked_in_same_field = confirm_user_form.worked_in_same_field.data
+        user.deformity = confirm_user_form.deformity.data
+        db.session.add(user)
         receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data).first()
         if receptionist is not None:
             receptionist.receive_user(user=user)
+        current_user.create_user(user=user)
         return redirect(request.args.get('next') or url_for('manage.user'))
-    return render_template('manage/create_user_confirm.html', new_education_record_form=new_education_record_form, new_employment_record_form=new_employment_record_form, new_previous_achievement_form=new_previous_achievement_form, new_toefl_test_score_form=new_toefl_test_score_form, confirm_user_form=confirm_user_form, user=user)
+    confirm_user_form.worked_in_same_field.data = user.worked_in_same_field
+    confirm_user_form.deformity.data = user.deformity
+    return render_template('manage/create_user_confirm.html',
+        edit_name_form=edit_name_form,
+        edit_id_number_form=edit_id_number_form,
+        edit_email_form=edit_email_form,
+        edit_mobile_form=edit_mobile_form,
+        edit_address_form=edit_address_form,
+        edit_qq_form=edit_qq_form,
+        edit_wechat_form=edit_wechat_form,
+        edit_emergency_contact_name_form=edit_emergency_contact_name_form,
+        edit_emergency_contact_relationship_form=edit_emergency_contact_relationship_form,
+        edit_emergency_contact_mobile_form=edit_emergency_contact_mobile_form,
+        new_education_record_form=new_education_record_form,
+        new_employment_record_form=new_employment_record_form,
+        new_previous_achievement_form=new_previous_achievement_form,
+        new_toefl_test_score_form=new_toefl_test_score_form,
+        confirm_user_form=confirm_user_form,
+        user=user
+    )
 
 
 @manage.route('/user/education-record/remove/<int:id>')
@@ -2672,7 +2750,13 @@ def course():
             .order_by(Course.id.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     courses = pagination.items
-    return render_template('manage/course.html', form=form, courses=courses, show_vb_courses=show_vb_courses, show_y_gre_courses=show_y_gre_courses, pagination=pagination)
+    return render_template('manage/course.html',
+        form=form,
+        courses=courses,
+        show_vb_courses=show_vb_courses,
+        show_y_gre_courses=show_y_gre_courses,
+        pagination=pagination
+    )
 
 
 @manage.route('/course/vb')
