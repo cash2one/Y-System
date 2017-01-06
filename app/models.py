@@ -1541,7 +1541,7 @@ class User(UserMixin, db.Model):
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
-    def activate(self, new_password=''):
+    def activate(self, new_password=None):
         self.activated = True
         self.activated_at = datetime.utcnow()
         if new_password:
@@ -1581,8 +1581,12 @@ class User(UserMixin, db.Model):
         if admin is None:
             admin = User(
                 email=current_app.config['YSYS_ADMIN'],
+                confirmed=True,
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD'],
+                activated=True,
+                activated_at=datetime.utcnow(),
+                last_seen_at=datetime.utcnow(),
                 name=u'SysOp'
             )
             db.session.add(admin)

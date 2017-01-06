@@ -1394,14 +1394,6 @@ def ipad():
         iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad'))
-    maintain_num = iPad.query\
-        .join(iPadState, iPadState.id == iPad.state_id)\
-        .filter(iPadState.name == u'维护')\
-        .count()
-    charge_num = iPad.query\
-        .join(iPadState, iPadState.id == iPad.state_id)\
-        .filter(iPadState.name == u'充电')\
-        .count()
     page = request.args.get('page', 1, type=int)
     show_ipad_all = True
     show_ipad_maintain = False
@@ -1424,11 +1416,21 @@ def ipad():
             .join(iPadState, iPadState.id == iPad.state_id)\
             .filter(iPadState.name == u'维护')\
             .filter(iPad.deleted == False)
+    maintain_num = iPad.query\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadState.name == u'维护')\
+        .filter(iPad.deleted == False)\
+        .count()
     if show_ipad_charge:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
             .filter(iPadState.name == u'充电')\
             .filter(iPad.deleted == False)
+    charge_num = iPad.query\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadState.name == u'充电')\
+        .filter(iPad.deleted == False)\
+        .count()
     if show_ipad_1103:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
@@ -1444,7 +1446,7 @@ def ipad():
             .filter_by(room_id=None, deleted=False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
-    return render_template('manage/ipad.html', form=form, ipads=ipads, maintain_num=maintain_num, charge_num=charge_num, show_ipad_all=show_ipad_all, show_ipad_maintain=show_ipad_maintain, show_ipad_charge=show_ipad_charge, show_ipad_1103=show_ipad_1103, show_ipad_1707=show_ipad_1707, show_ipad_others=show_ipad_others, pagination=pagination)
+    return render_template('manage/ipad.html', form=form, ipads=ipads, show_ipad_all=show_ipad_all, show_ipad_maintain=show_ipad_maintain, maintain_num=maintain_num, show_ipad_charge=show_ipad_charge, charge_num=charge_num, show_ipad_1103=show_ipad_1103, show_ipad_1707=show_ipad_1707, show_ipad_others=show_ipad_others, pagination=pagination)
 
 
 @manage.route('/ipad/all')
@@ -1809,6 +1811,17 @@ def user():
                 Role.name == u'Y-GRE A权限'
             ))\
             .order_by(User.last_seen_at.desc())
+    activated_users_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.activated == True)\
+        .filter(User.deleted == False)\
+        .filter(or_(
+            Role.name == u'单VB',
+            Role.name == u'Y-GRE 普通',
+            Role.name == u'Y-GRE VB×2',
+            Role.name == u'Y-GRE A权限'
+        ))\
+        .count()
     if show_unactivated_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
@@ -1821,44 +1834,84 @@ def user():
                 Role.name == u'Y-GRE A权限'
             ))\
             .order_by(User.last_seen_at.desc())
+    unactivated_users_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.activated == False)\
+        .filter(User.deleted == False)\
+        .filter(or_(
+            Role.name == u'单VB',
+            Role.name == u'Y-GRE 普通',
+            Role.name == u'Y-GRE VB×2',
+            Role.name == u'Y-GRE A权限'
+        ))\
+        .count()
     if show_suspended_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'挂起')\
             .order_by(User.last_seen_at.desc())
+    suspended_users_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.deleted == False)\
+        .filter(Role.name == u'挂起')\
+        .count()
     if show_volunteers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'志愿者')\
             .order_by(User.last_seen_at.desc())
+    volunteers_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.deleted == False)\
+        .filter(Role.name == u'志愿者')\
+        .count()
     if show_moderators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'协管员')\
             .order_by(User.last_seen_at.desc())
+    moderators_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.deleted == False)\
+        .filter(Role.name == u'协管员')\
+        .count()
     if show_administrators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'管理员')\
             .order_by(User.last_seen_at.desc())
+    administrators_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.deleted == False)\
+        .filter(Role.name == u'管理员')\
+        .count()
     if show_developers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'开发人员')\
             .order_by(User.last_seen_at.desc())
+    developers_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.deleted == False)\
+        .filter(Role.name == u'开发人员')\
+        .count()
     if show_deleted_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
             .filter(User.deleted == True)\
             .order_by(User.last_seen_at.desc())
+    deleted_users_num = User.query\
+        .join(Role, Role.id == User.role_id)\
+        .filter(User.deleted == True)\
+        .count()
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/user.html', users=users, show_activated_users=show_activated_users, show_unactivated_users=show_unactivated_users, show_suspended_users=show_suspended_users, show_volunteers=show_volunteers, show_moderators=show_moderators, show_administrators=show_administrators, show_developers=show_developers, show_deleted_users=show_deleted_users, pagination=pagination)
+    return render_template('manage/user.html', users=users, show_activated_users=show_activated_users, activated_users_num=activated_users_num, show_unactivated_users=show_unactivated_users, unactivated_users_num=unactivated_users_num, show_suspended_users=show_suspended_users, suspended_users_num=suspended_users_num, show_volunteers=show_volunteers, volunteers_num=volunteers_num, show_moderators=show_moderators, moderators_num=moderators_num, show_administrators=show_administrators, administrators_num=administrators_num, show_developers=show_developers, developers_num=developers_num, show_deleted_users=show_deleted_users, deleted_users_num=deleted_users_num, pagination=pagination)
 
 
 @manage.route('/user/activated')

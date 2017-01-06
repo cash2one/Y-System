@@ -45,12 +45,23 @@
         <form id="activate" method="POST" class="ui inverted form">
             <div class="ui inverted segment">
                 {{ form.hidden_tag() }}
-                <div class="field">
+                {% with email_errors = form.email.errors %}
+                {% if email_errors %}
+                <div class="field error">
                     <div class="ui large left icon input">
-                        <i class="user icon"></i>
-                        {{ form.name(placeholder='姓名') }}
+                        <i class="at icon"></i>
+                        {{ form.email(placeholder='邮箱') }}
                     </div>
                 </div>
+                {% else %}
+                <div class="field">
+                    <div class="ui large left icon input">
+                        <i class="at icon"></i>
+                        {{ form.email(placeholder='邮箱') }}
+                    </div>
+                </div>
+                {% endif %}
+                {% endwith %}
                 <div class="field">
                     <div class="ui large left icon input">
                         <i class="key icon"></i>
@@ -105,12 +116,16 @@ $(document)
             .form({
                 onSuccess: submitForm,
                 fields: {
-                    name: {
-                        identifier: 'name',
+                    email: {
+                        identifier: 'email',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请输入您的姓名'
+                                prompt: '请输入您的电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
                             }
                         ]
                     },
