@@ -420,7 +420,7 @@
                     </div>
                     <div class="item">
                         <div class="content">
-                            <div class="header">研修产品</div>
+                            <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
                             <div class="description">{{ user.purchases_alias }}</div>
                         </div>
                     </div>
@@ -443,7 +443,42 @@
                         </div>
                     </div>
                 </div>
-                {# <h4 class="ui grey dividing header">其它信息</h4> #}
+                <form id="confirm-user" method="POST" class="ui form">
+                    <h4 class="ui blue dividing header">其它信息</h4>
+                    <div class="ui segment">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ confirm_user_form.worked_in_same_field() }}
+                                {{ confirm_user_form.worked_in_same_field.label() }}
+                            </div>
+                        </div>
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ confirm_user_form.deformity() }}
+                                {{ confirm_user_form.deformity.label() }}
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="ui red dividing header">服务条款</h4>
+                    <div class="ui segment">
+                        <div class="inline required field">
+                            <div class="ui toggle checkbox">
+                                {{ confirm_user_form.disclaimer() }}
+                                {{ confirm_user_form.disclaimer.label() }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="required field">
+                        {{ confirm_user_form.receptionist_email.label() }}
+                        <div class="ui fluid search">
+                            {{ confirm_user_form.receptionist_email(placeholder='输入接待人姓名/邮箱', class='prompt') }}
+                            <div class="results"></div>
+                        </div>
+                    </div>
+                    {{ confirm_user_form.submit(class='ui primary button') }}
+                    <a class="ui button cancel negative loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">放弃并删除用户资料</a>
+                    {{ macros.form_validation_error_widget(confirm_user_form) }}
+                </form>
             </div>
         </div>
     </div>

@@ -330,11 +330,7 @@ class NewUserForm(FlaskForm):
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
     y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
-    worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
-    deformity = BooleanField(u'有严重心理或身体疾病')
     # submit
-    # disclaimer = BooleanField(u'确认无偿授权“云英语”使用申请者姓名、肖像、GRE成绩单以及其它必要信息用于宣传', validators=[Required()])
-    # receptionist_email = StringField(u'接待人（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'下一步')
 
     def __init__(self, *args, **kwargs):
@@ -360,6 +356,18 @@ class NewUserForm(FlaskForm):
     def validate_inviter_email(self, field):
         if field.data and User.query.filter_by(email=field.data).first() is None:
             raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
+
+
+class ConfirmUserForm(FlaskForm):
+    worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
+    deformity = BooleanField(u'有严重心理或身体疾病')
+    disclaimer = BooleanField(u'确认无偿授权“云英语”使用申请者姓名、肖像、GRE成绩单以及其它必要信息用于宣传', validators=[Required()])
+    receptionist_email = StringField(u'接待人（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    submit = SubmitField(u'确认并新建学生用户')
+
+    def validate_receptionist_email(self, field):
+        if field.data and User.query.filter_by(email=field.data).first() is None:
+            raise ValidationError(u'接待人邮箱不存在：%s' % field.data)
 
 
 class NewEducationRecordForm(FlaskForm):

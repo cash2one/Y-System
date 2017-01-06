@@ -166,10 +166,10 @@ class Relationship(db.Model):
             (u'兄妹', ),
             (u'姊妹', ),
             (u'姊弟', ),
+            (u'朋友', ),
+            (u'恋人', ),
             (u'同学', ),
             (u'同事', ),
-            (u'恋人', ),
-            (u'朋友', ),
         ]
         for R in relationships:
             relationship = Relationship.query.filter_by(name=R[0]).first()
@@ -1229,8 +1229,11 @@ class User(UserMixin, db.Model):
             return u'无'
         if self.purchases.count() == 1:
             return u'%s ×%s' % (self.purchases.first().product.name, self.purchases.first().quantity)
-        return reduce(lambda purchase1, purchase2: u'%s · %s' % (purchase1, purchase2), [u'%s（%s元）×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
+        return reduce(lambda purchase1, purchase2: u'%s · %s' % (purchase1, purchase2), [u'%s[%s元]×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
 
+    @property
+    def purchases_total(self):
+        return sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):

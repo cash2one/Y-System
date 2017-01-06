@@ -96,7 +96,7 @@
                 <h3 class="header"><i class="user icon"></i> 用户列表</h3>
                 <div class="ui tabular menu">
                     <a class="item {% if show_activated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.activated_users') }}">学生用户<i class="lightning icon"></i>[{{ activated_users_num }}]</a>
-                    <a class="item {% if show_unactivated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.unactivated_users') }}">学生用户<i class="wait icon"></i>[{{ unactivated_users_num }}]</a>
+                    <a class="item {% if show_unactivated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.unactivated_users') }}">学生用户<i class="warning sign icon"></i>[{{ unactivated_users_num }}]</a>
                     <a class="item {% if show_suspended_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户 [{{ suspended_users_num }}]</a>
                     {% if current_user.is_administrator or current_user.is_developer %}
                     <a class="item {% if show_volunteers %}active {% endif %}loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者 [{{ volunteers_num }}]</a>
