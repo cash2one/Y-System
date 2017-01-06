@@ -335,7 +335,7 @@ class NewUserForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
-        self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
+        self.emergency_contact_relationship.choices = [(u'', u'选择关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.high_school_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.bachelor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.master_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
@@ -479,22 +479,92 @@ class EditWeChatForm(FlaskForm):
 
 
 class EditEmergencyContactNameForm(FlaskForm):
-    emergency_contact_name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
+    emergency_contact_name = StringField(u'紧急联系人姓名', validators=[Required(), Length(1, 64)])
     submit = SubmitField(u'更新')
 
 
 class EditEmergencyContactRelationshipForm(FlaskForm):
-    emergency_contact_relationship = SelectField(u'关系', coerce=unicode, validators=[Required()])
+    emergency_contact_relationship = SelectField(u'紧急联系人关系', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'更新')
 
     def __init__(self, *args, **kwargs):
         super(EditEmergencyContactRelationshipForm, self).__init__(*args, **kwargs)
-        self.emergency_contact_relationship.choices = [(u'', u'关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
+        self.emergency_contact_relationship.choices = [(u'', u'选择紧急联系人关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
 
 
 class EditEmergencyContactMobileForm(FlaskForm):
-    emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
+    emergency_contact_mobile = StringField(u'紧急联系人联系方式', validators=[Required(), Length(1, 64)])
     submit = SubmitField(u'更新')
+
+
+class EditPurposeForm(FlaskForm):
+    purposes = SelectMultipleField(u'研修目的', coerce=unicode)
+    other_purpose = StringField(u'其它研修目的', validators=[Length(0, 64)])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditPurposeForm, self).__init__(*args, **kwargs)
+        self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
+
+
+class EditApplicationAimForm(FlaskForm):
+    application_aim = StringField(u'申请方向', validators=[Length(0, 64)])
+    submit = SubmitField(u'更新')
+
+
+class EditReferrerForm(FlaskForm):
+    referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
+    other_referrer = StringField(u'其它了解渠道', validators=[Length(0, 64)])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditReferrerForm, self).__init__(*args, **kwargs)
+        self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
+
+
+class EditInviterForm(FlaskForm):
+    inviter_email = StringField(u'同学推荐', validators=[Length(0, 64)])
+    submit = SubmitField(u'更新')
+
+    def validate_inviter_email(self, field):
+        if field.data and User.query.filter_by(email=field.data).first() is None:
+            raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
+
+
+class EditPurchaseForm(FlaskForm):
+    products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditPurchaseForm, self).__init__(*args, **kwargs)
+        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+
+
+class EditRoleForm(FlaskForm):
+    role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditRoleForm, self).__init__(*args, **kwargs)
+        self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
+
+
+class EditVBCourseForm(FlaskForm):
+    vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditVBCourseForm, self).__init__(*args, **kwargs)
+        self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
+
+
+class EditYGRECourseForm(FlaskForm):
+    y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditYGRECourseForm, self).__init__(*args, **kwargs)
+        self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
 class EditUserForm(FlaskForm):

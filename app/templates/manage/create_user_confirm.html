@@ -225,6 +225,92 @@
                         </div>
                     </div>
                 </div>
+                <div id="edit-email-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-email" method="POST" class="ui form segment">
+                                    {{ edit_email_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_email_form.email.label() }}
+                                        {{ edit_email_form.email(placeholder='用于登录系统、接收通知') }}
+                                    </div>
+                                    {{ edit_email_form.submit(class='ui primary button') }}
+                                    <div id="edit-email-hide-trigger" class="ui button cancel">取消</div>
+                                    {{ macros.form_validation_error_widget(edit_email_form) }}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-mobile-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-mobile" method="POST" class="ui form segment">
+                                    {{ edit_mobile_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_mobile_form.mobile.label() }}
+                                        {{ edit_mobile_form.mobile(placeholder='移动电话') }}
+                                    </div>
+                                    {{ edit_mobile_form.submit(class='ui primary button') }}
+                                    <div id="edit-mobile-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-address-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-address" method="POST" class="ui form segment">
+                                    {{ edit_address_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_address_form.address.label() }}
+                                        {{ edit_address_form.address(placeholder='联系地址') }}
+                                    </div>
+                                    {{ edit_address_form.submit(class='ui primary button') }}
+                                    <div id="edit-address-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-qq-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-qq" method="POST" class="ui form segment">
+                                    {{ edit_qq_form.hidden_tag() }}
+                                    <div class="field">
+                                        {{ edit_qq_form.qq.label() }}
+                                        {{ edit_qq_form.qq(placeholder='QQ号') }}
+                                    </div>
+                                    {{ edit_qq_form.submit(class='ui primary button') }}
+                                    <div id="edit-qq-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-wechat-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-wechat" method="POST" class="ui form segment">
+                                    {{ edit_wechat_form.hidden_tag() }}
+                                    <div class="field">
+                                        {{ edit_wechat_form.wechat.label() }}
+                                        {{ edit_wechat_form.wechat(placeholder='微信号/手机号') }}
+                                    </div>
+                                    {{ edit_wechat_form.submit(class='ui primary button') }}
+                                    <div id="edit-wechat-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <h4 class="ui orange dividing header">紧急联系人</h4>
                 <div class="ui relaxed divided list">
                     <div class="item">
@@ -252,6 +338,57 @@
                         <div class="content">
                             <div class="header">联系方式</div>
                             <div class="description">{% if user.emergency_contact_mobile %}{{ user.emergency_contact_mobile }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-emergency-contact-name-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-emergency-contact-name" method="POST" class="ui form segment">
+                                    {{ edit_emergency_contact_name_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_emergency_contact_name_form.emergency_contact_name.label() }}
+                                        {{ edit_emergency_contact_name_form.emergency_contact_name(placeholder='紧急联系人姓名') }}
+                                    </div>
+                                    {{ edit_emergency_contact_name_form.submit(class='ui primary button') }}
+                                    <div id="edit-emergency-contact-name-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-emergency-contact-relationship-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-emergency-contact-relationship" method="POST" class="ui form segment">
+                                    {{ edit_emergency_contact_relationship_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_emergency_contact_relationship_form.emergency_contact_relationship.label() }}
+                                        {{ edit_emergency_contact_relationship_form.emergency_contact_relationship(class='ui dropdown') }}
+                                    </div>
+                                    {{ edit_emergency_contact_relationship_form.submit(class='ui primary button') }}
+                                    <div id="edit-emergency-contact-relationship-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-emergency-contact-mobile-dimmer" class="ui page dimmer">
+                    <div class="content">
+                        <div class="center">
+                            <div class="ui text container left aligned">
+                                <form id="edit-emergency-contact-mobile" method="POST" class="ui form segment">
+                                    {{ edit_emergency_contact_mobile_form.hidden_tag() }}
+                                    <div class="required field">
+                                        {{ edit_emergency_contact_mobile_form.emergency_contact_mobile.label() }}
+                                        {{ edit_emergency_contact_mobile_form.emergency_contact_mobile(placeholder='紧急联系人移动电话') }}
+                                    </div>
+                                    {{ edit_emergency_contact_mobile_form.submit(class='ui primary button') }}
+                                    <div id="edit-emergency-contact-mobile-hide-trigger" class="ui button cancel">取消</div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -732,6 +869,172 @@ $(document)
                             {
                                 type: 'idNumber',
                                 prompt: '请输入一个有效的身份证号'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-email')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'edit_email-email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-mobile')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    mobile: {
+                        identifier: 'edit_mobile-mobile',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '移动电话号码位数有误'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-address')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    address: {
+                        identifier: 'edit_address-address',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写联系地址'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-qq')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    qq: {
+                        identifier: 'edit_qq-qq',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的QQ号码'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-wechat')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    wechat: {
+                        identifier: 'edit_wechat-wechat',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'regExp[/^[A-Za-z0-9_-]{6,20}$/]',
+                                prompt: '请输入一个有效的微信号/手机号'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-emergency-contact-name')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    emergency_contact_name: {
+                        identifier: 'edit_emergency_contact_name-emergency_contact_name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人姓名'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-emergency-contact-relationship')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    emergency_contact_relationship: {
+                        identifier: 'edit_emergency_contact_relationship-emergency_contact_relationship',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择紧急联系人关系'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-emergency-contact-mobile')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    emergency_contact_mobile: {
+                        identifier: 'edit_emergency_contact_mobile-emergency_contact_mobile',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '紧急联系人移动电话号码位数有误'
                             }
                         ]
                     }

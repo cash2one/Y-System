@@ -2451,10 +2451,10 @@ def create_user_confirm(id):
     # emergency contact name
     edit_emergency_contact_name_form = EditEmergencyContactNameForm(prefix='edit_emergency_contact_name')
     if edit_emergency_contact_name_form.validate_on_submit():
-        user.emergency_contact_name = edit_emergency_contact_name.emergency_contact_name.data
+        user.emergency_contact_name = edit_emergency_contact_name_form.emergency_contact_name.data
         db.session.add(user)
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    edit_emergency_contact_name.emergency_contact_name.data = user.emergency_contact_name
+    edit_emergency_contact_name_form.emergency_contact_name.data = user.emergency_contact_name
     # emergency contact relationship
     edit_emergency_contact_relationship_form = EditEmergencyContactRelationshipForm(prefix='edit_emergency_contact_relationship')
     if edit_emergency_contact_relationship_form.validate_on_submit():
