@@ -162,8 +162,13 @@ class Relationship(db.Model):
             (u'父母', ),
             (u'配偶', ),
             (u'子女', ),
+            (u'兄弟', ),
+            (u'兄妹', ),
+            (u'姊妹', ),
+            (u'姊弟', ),
             (u'同学', ),
             (u'同事', ),
+            (u'恋人', ),
             (u'朋友', ),
         ]
         for R in relationships:
