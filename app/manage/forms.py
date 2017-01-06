@@ -531,7 +531,7 @@ class EditInviterForm(FlaskForm):
             raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
 
 
-class EditPurchaseForm(FlaskForm):
+class EditPurchasedProductForm(FlaskForm):
     products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'更新')
 

@@ -13,7 +13,9 @@ from .forms import EditPunchLessonForm, EditPunchSectionForm
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .forms import NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, ConfirmUserForm
-from .forms import EditNameForm, EditIDNumberForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm, EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm, EditUserForm
+from .forms import EditNameForm, EditIDNumberForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
+from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm, EditUserForm
+from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditInviterForm, EditPurchasedProductForm, EditRoleForm, EditVBCourseForm, EditYGRECourseForm
 from .forms import DeleteUserForm, RestoreUserForm, FindUserForm
 from .forms import NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
@@ -1475,8 +1477,7 @@ def ipad():
         db.session.add(ipad)
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            lesson = Lesson.query.get(int(lesson_id))
-            ipad.add_lesson(lesson)
+            ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
         iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad'))
@@ -1726,10 +1727,9 @@ def edit_ipad(id):
         db.session.add(ipad)
         db.session.commit()
         for ipad_content in ipad.contents:
-            ipad.remove_lesson(ipad_content.lesson)
+            ipad.remove_lesson(lesson=ipad_content.lesson)
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            lesson = Lesson.query.get(int(lesson_id))
-            ipad.add_lesson(lesson)
+            ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
         iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新', category='success')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
@@ -2404,7 +2404,7 @@ def create_user_confirm(id):
         db.session.add(user)
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_name_form.name.data = user.name
-    # id number
+    # ID number
     edit_id_number_form = EditIDNumberForm(prefix='edit_id_number')
     if edit_id_number_form.validate_on_submit():
         user.id_number = edit_id_number_form.id_number.data
@@ -2434,14 +2434,14 @@ def create_user_confirm(id):
         db.session.add(user)
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_address_form.address.data = user.address
-    # qq
+    # QQ
     edit_qq_form = EditQQForm(prefix='edit_qq')
     if edit_qq_form.validate_on_submit():
         user.qq = edit_qq_form.qq.data
         db.session.add(user)
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_qq_form.qq.data = user.qq
-    # wechat
+    # WeChat
     edit_wechat_form = EditWeChatForm(prefix='edit_wechat')
     if edit_wechat_form.validate_on_submit():
         user.wechat = edit_wechat_form.wechat.data
@@ -2509,7 +2509,7 @@ def create_user_confirm(id):
             )
         flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    # toefl
+    # TOEFL
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.validate_on_submit():
         test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
@@ -2524,6 +2524,70 @@ def create_user_confirm(id):
         )
         flash(u'已添加TOEFL成绩：%s' % test_score_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # purpose
+    edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
+    if edit_purpose_form.validate_on_submit():
+        for purpose in user.purposes:
+            if purpose.type.name != u'其它':
+                user.remove_purpose(purpose_type=purpose.type)
+        for purpose_type_id in edit_purpose_form.purposes.data:
+            user.add_purpose(purpose_type=PurposeType.query.get(int(purpose_type_id)))
+        if form.other_purpose.data:
+            user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    for purpose in user.purposes:
+        if purpose.type.name != u'其它':
+            edit_purpose_form.purposes.data.append(unicode(purpose.type_id))
+        else:
+            edit_purpose_form.other_purpose.data = purpose.remark
+    # application aim
+    edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
+    if edit_application_aim_form.validate_on_submit():
+        user.application_aim = edit_application_aim_form.application_aim.data
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_application_aim_form.application_aim.data = user.application_aim
+    # referrer
+    edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
+    if edit_referrer_form.validate_on_submit():
+        if form.other_referrer.data:
+            user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # inviter
+    edit_inviter_form = EditInviterForm(prefix='edit_inviter')
+    if edit_inviter_form.validate_on_submit():
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # purchased product
+    edit_purchased_products_form = EditPurchasedProductForm(prefix='edit_purchased_product')
+    if edit_purchased_products_form.validate_on_submit():
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    # role
+    edit_role_form = EditRoleForm(prefix='edit_role')
+    if edit_role_form.validate_on_submit():
+        user.role_id = int(edit_role_form.role.data)
+        db.session.add(user)
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_role_form.role.data = unicode(user.role_id)
+    # VB course
+    edit_vb_course_form = EditVBCourseForm(prefix='edit_vb_course')
+    if edit_vb_course_form.validate_on_submit():
+        if user.vb_course:
+            user.unregister_course(user.vb_course)
+        if edit_vb_course_form.vb_course.data:
+            user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    if user.vb_course:
+        edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
+    # Y-GRE course
+    edit_y_gre_course_form = EditYGRECourseForm(prefix='edit_y_gre_course')
+    if edit_y_gre_course_form.validate_on_submit():
+        if user.y_gre_course:
+            user.unregister_course(user.y_gre_course)
+        if edit_y_gre_course_form.y_gre_course.data:
+            user.register_course(Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)))
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    if user.y_gre_course:
+        edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
     # confirm
     confirm_user_form = ConfirmUserForm(prefix='confirm_user')
     if confirm_user_form.validate_on_submit():

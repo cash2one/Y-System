@@ -543,7 +543,7 @@
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-purpose-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">研修目的</div>
@@ -552,7 +552,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-application-aim-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">申请方向</div>
@@ -561,7 +561,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-referrer-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">了解渠道</div>
@@ -570,7 +570,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-inviter-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">推荐人</div>
@@ -579,7 +579,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-purchased-product-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
@@ -588,7 +588,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-role-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">用户权限</div>
@@ -597,7 +597,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-vb-class-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">VB班</div>
@@ -606,7 +606,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui mini button">编辑</div>
+                            <div id="edit-y-gre-class-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">Y-GRE班</div>
@@ -824,6 +824,126 @@ $('#edit-emergency-contact-mobile-trigger')
 $('#edit-emergency-contact-mobile-hide-trigger')
     .on('click', function() {
         $('#edit-emergency-contact-mobile-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-purpose-trigger')
+    .on('click', function() {
+        $('#edit-purpose-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-purpose-hide-trigger')
+    .on('click', function() {
+        $('#edit-purpose-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-application-aim-trigger')
+    .on('click', function() {
+        $('#edit-application-aim-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-application-aim-hide-trigger')
+    .on('click', function() {
+        $('#edit-application-aim-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-referrer-trigger')
+    .on('click', function() {
+        $('#edit-referrer-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-referrer-hide-trigger')
+    .on('click', function() {
+        $('#edit-referrer-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-inviter-trigger')
+    .on('click', function() {
+        $('#edit-inviter-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-inviter-hide-trigger')
+    .on('click', function() {
+        $('#edit-inviter-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-purchased-product-trigger')
+    .on('click', function() {
+        $('#edit-purchased-product-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-purchased-product-hide-trigger')
+    .on('click', function() {
+        $('#edit-purchased-product-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-role-trigger')
+    .on('click', function() {
+        $('#edit-role-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-role-hide-trigger')
+    .on('click', function() {
+        $('#edit-role-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-vb-class-trigger')
+    .on('click', function() {
+        $('#edit-vb-class-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-vb-class-hide-trigger')
+    .on('click', function() {
+        $('#edit-vb-class-dimmer')
+            .dimmer('hide')
+        ;
+    })
+;
+
+$('#edit-y-gre-class-trigger')
+    .on('click', function() {
+        $('#edit-y-gre-class-dimmer')
+            .dimmer('show')
+        ;
+    })
+;
+$('#edit-y-gre-class-hide-trigger')
+    .on('click', function() {
+        $('#edit-y-gre-class-dimmer')
             .dimmer('hide')
         ;
     })
