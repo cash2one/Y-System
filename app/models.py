@@ -40,7 +40,7 @@ class Permission(db.Model):
             (u'预约', ),
             (u'预约VB课程', ),
             (u'预约Y-GRE课程', ),
-            (u'预约VB课程x2', ),
+            (u'预约VB课程×2', ),
             (u'预约任意课程', ),
             (u'管理', ),
             (u'管理课程预约', ),
@@ -103,7 +103,7 @@ class Role(db.Model):
             (u'挂起', [], ),
             (u'单VB', [u'预约', u'预约VB课程'], ),
             (u'Y-GRE 普通', [u'预约', u'预约VB课程', u'预约Y-GRE课程'], ),
-            (u'Y-GRE VBx2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程x2'], ),
+            (u'Y-GRE VB×2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程×2'], ),
             (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
             (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅'], ),
             (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级'], ),
@@ -1175,6 +1175,17 @@ class User(UserMixin, db.Model):
     def has_purpose(self, purpose_type):
         return self.purposes.filter_by(type_id=purpose_type.id).first() is not None
 
+    @property
+    def purposes_alias(self):
+        if self.purposes.count() == 0:
+            return u'无'
+        if self.purposes.count() == 1:
+            if self.purposes.first().type.name == u'其它':
+                return self.purposes.first().remark
+            else:
+                return self.purposes.first().type.name
+        return reduce(lambda purpose1, purpose2: u'%s · %s' % (purpose1, purpose2), [purpose.type.name for purpose in self.purposes if purpose.type.name != u'其它'] + [purpose.remark for purpose in self.purposes if purpose.type.name == u'其它'])
+
     def add_referrer(self, referrer_type, remark=None):
         if not self.has_referrer(referrer_type):
             referrer = Referrer(user_id=self.id, type_id=referrer_type.id, remark=remark)
@@ -1192,9 +1203,29 @@ class User(UserMixin, db.Model):
     def has_referrer(self, referrer_type):
         return self.referrers.filter_by(type_id=referrer_type.id).first() is not None
 
+    @property
+    def referrers_alias(self):
+        if self.referrers.count() == 0:
+            return u'无'
+        if self.referrers.count() == 1:
+            if self.referrers.first().type.name == u'其它':
+                return self.referrers.first().remark
+            else:
+                return self.referrers.first().type.name
+        return reduce(lambda referrer1, referrer2: u'%s · %s' % (referrer1, referrer2), [referrer.type.name for referrer in self.referrers if referrer.type.name != u'其它'] + [referrer.remark for referrer in self.referrers if referrer.type.name == u'其它'])
+
     def purchase_product(self, product, quantity=1):
         purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
         db.session.add(purchase)
+
+    @property
+    def purchases_alias(self):
+        if self.purchases.count() == 0:
+            return u'无'
+        if self.purchases.count() == 1:
+            return u'%s ×%s' % (self.purchases.first().product.name, self.purchases.first().quantity)
+        return reduce(lambda purchase1, purchase2: u'%s · %s' % (purchase1, purchase2), [u'%s（%s元）×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
+
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -1494,10 +1525,10 @@ class User(UserMixin, db.Model):
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
-    def add_toefl_test_score(self, toefl_test_score_type, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
+    def add_toefl_test_score(self, test_score_type, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         toefl_test_score = TOEFLTestScore(
             user_id=self.id,
-            type_id=toefl_test_score_type.id,
+            type_id=test_score_type.id,
             total_score=total_score,
             reading_score=reading_score,
             listening_score=listening_score,

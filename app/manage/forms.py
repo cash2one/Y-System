@@ -349,7 +349,7 @@ class NewUserForm(FlaskForm):
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
         self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
-        self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+        self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
         self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
@@ -391,8 +391,6 @@ class NewEmploymentRecordForm(FlaskForm):
 class NewPreviousAchievementForm(FlaskForm):
     previous_achievement_type = SelectField(u'成绩类型', coerce=unicode, validators=[Required()])
     achievement = StringField(u'成绩', validators=[Length(0, 128)])
-    # score = StringField(u'分数', validators=[Length(0, 64)])
-    # remark = StringField(u'备注', validators=[Length(0, 128)])
     submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
@@ -401,17 +399,17 @@ class NewPreviousAchievementForm(FlaskForm):
 
 
 class NewTOEFLTestScoreForm(FlaskForm):
-    toefl_total = IntegerField(u'TOEFL', validators=[Required(), NumberRange(min=0, max=120)])
-    toefl_reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
-    toefl_listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
-    toefl_speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
-    toefl_writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
-    toefl_test_score_type = SelectField(u'TOEFL分数类型', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'提交')
+    test_score_type = SelectField(u'TOEFL成绩类型', coerce=unicode, validators=[Required()])
+    total = IntegerField(u'TOEFL', validators=[Required(), NumberRange(min=0, max=120)])
+    reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
+    listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
+    speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
+    writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.toefl_test_score_type.choices = [(u'', u'选择TOEFL分数类型')] + [(unicode(toefl_test_score_type.id), toefl_test_score_type.name) for toefl_test_score_type in TOEFLTestScoreType.query.order_by(TOEFLTestScoreType.id.asc()).all()]
+        self.test_score_type.choices = [(u'', u'选择TOEFL成绩类型')] + [(unicode(toefl_test_score_type.id), toefl_test_score_type.name) for toefl_test_score_type in TOEFLTestScoreType.query.order_by(TOEFLTestScoreType.id.asc()).all()]
 
 
 class NewAdminForm(FlaskForm):
@@ -447,7 +445,7 @@ class EditUserForm(FlaskForm):
         elif editor.is_administrator:
             self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         else:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
         # self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         # self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
@@ -468,7 +466,7 @@ class RestoreUserForm(FlaskForm):
         elif restorer.is_administrator:
             self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         else:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VBx2', u'Y-GRE A权限']]
+            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():

@@ -339,7 +339,110 @@
                     </div>
                 </form>
                 <h4 class="ui blue dividing header">TOEFL成绩</h4>
+                {% if user.toefl_test_scores.count() %}
+                <div class="ui relaxed divided list">
+                    {% for toefl_test_score in user.toefl_test_scores %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ toefl_test_score.type.name }}成绩</div>
+                            <div class="description">总分: {{ toefl_test_score.total_score }}分（阅读: {{ toefl_test_score.reading_score }}分 &middot; 听力: {{ toefl_test_score.listening_score }}分 &middot; 口语: {{ toefl_test_score.speaking_score }}分 &middot; 写作: {{ toefl_test_score.writing_score }}分）</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form id="new-toefl-test-score" method="POST" class="ui mini form">
+                    {{ new_toefl_test_score_form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="three wide field">
+                            {{ new_toefl_test_score_form.test_score_type(class='ui dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ new_toefl_test_score_form.total(placeholder='TOEFL总分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.reading(placeholder='TOEFL阅读') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.listening(placeholder='TOEFL听力') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.speaking(placeholder='TOEFL口语') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.writing(placeholder='TOEFL写作') }}
+                        </div>
+                        <div class="one wide field">
+                            {{ new_toefl_test_score_form.submit(class='ui primary mini button') }}
+                        </div>
+                    </div>
+                </form>
                 <h4 class="ui teal dividing header">报名信息</h4>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">研修目的</div>
+                            <div class="description">{{ user.purposes_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">申请方向</div>
+                            <div class="description">
+                                {% if user.appliccation_aim %}
+                                {{ user.appliccation_aim }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">了解渠道</div>
+                            <div class="description">{{ user.referrers_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">推荐人</div>
+                            <div class="description">
+                                {% if user.emergency_contact_mobile %}
+                                {{ user.emergency_contact_mobile }}
+                                {% else %}
+                                无
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">研修产品</div>
+                            <div class="description">{{ user.purchases_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">用户权限</div>
+                            <div class="description">{{ user.role.name }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">VB班</div>
+                            <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">Y-GRE班</div>
+                            <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
                 {# <h4 class="ui grey dividing header">其它信息</h4> #}
             </div>
         </div>
@@ -349,7 +452,6 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -358,10 +460,6 @@ $('.message .close')
             .transition('fade')
         ;
     })
-;
-
-$('table')
-    .tablesort()
 ;
 
 $('select.dropdown')
@@ -525,6 +623,96 @@ $(document)
                             {
                                 type: 'previousAchievement',
                                 prompt: '成绩格式有误'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $.fn.form.settings.rules.toefl = function(value) {
+            if (($('#new_toefl_test_score-reading').val() === '') || ($('#new_toefl_test_score-listening').val() === '') || ($('#new_toefl_test_score-speaking').val() === '') || ($('#new_toefl_test_score-writing').val() === '')) {
+                return true;
+            } else {
+                return (Number(value) === Number($('#new_toefl_test_score-reading').val()) + Number($('#new_toefl_test_score-listening').val()) + Number($('#new_toefl_test_score-speaking').val()) + Number($('#new_toefl_test_score-writing').val()));
+            };
+        };
+        $('#new-toefl-test-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    test_score_type: {
+                        identifier: 'new_toefl_test_score-test_score_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择TOEFL成绩类型'
+                            }
+                        ]
+                    },
+                    total: {
+                        identifier: 'new_toefl_test_score-total',
+                        rules: [
+                            {
+                                type: 'integer[0..120]',
+                                prompt: '请填写一个有效的TOEFL分数'
+                            },
+                            {
+                                type: 'toefl',
+                                prompt: 'TOEFL分数有误'
+                            }
+                        ]
+                    },
+                    reading: {
+                        identifier: 'new_toefl_test_score-reading',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL阅读分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL阅读分数'
+                            }
+                        ]
+                    },
+                    listening: {
+                        identifier: 'new_toefl_test_score-listening',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL听力分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL听力分数'
+                            }
+                        ]
+                    },
+                    speaking: {
+                        identifier: 'new_toefl_test_score-speaking',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL口语分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL口语分数'
+                            }
+                        ]
+                    },
+                    writing: {
+                        identifier: 'new_toefl_test_score-writing',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL写作分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL写作分数'
                             }
                         ]
                     }

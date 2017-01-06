@@ -1805,7 +1805,7 @@ def user():
             .filter(or_(
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
-                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE VB×2',
                 Role.name == u'Y-GRE A权限'
             ))\
             .order_by(User.last_seen_at.desc())
@@ -1817,7 +1817,7 @@ def user():
             .filter(or_(
                 Role.name == u'单VB',
                 Role.name == u'Y-GRE 普通',
-                Role.name == u'Y-GRE VBx2',
+                Role.name == u'Y-GRE VB×2',
                 Role.name == u'Y-GRE A权限'
             ))\
             .order_by(User.last_seen_at.desc())
@@ -2270,7 +2270,7 @@ def create_user():
             )
         if form.toefl_total.data:
             user.add_toefl_test_score(
-                toefl_test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
+                test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
                 total_score=int(form.toefl_total.data),
                 reading_score=int(form.toefl_reading.data),
                 listening_score=int(form.toefl_listening.data),
@@ -2361,6 +2361,19 @@ def create_user_confirm(id):
         flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
+    if new_toefl_test_score_form.validate_on_submit():
+        test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
+        user.add_toefl_test_score(
+            test_score_type=test_score_type,
+            total_score=int(new_toefl_test_score_form.total.data),
+            reading_score=int(new_toefl_test_score_form.reading.data),
+            listening_score=int(new_toefl_test_score_form.listening.data),
+            speaking_score=int(new_toefl_test_score_form.speaking.data),
+            writing_score=int(new_toefl_test_score_form.writing.data),
+            modified_by=current_user._get_current_object()
+        )
+        flash(u'已添加TOEFL成绩：%s' % test_score_type.name, category='success')
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     return render_template('manage/create_user_confirm.html', new_education_record_form=new_education_record_form, new_employment_record_form=new_employment_record_form, new_previous_achievement_form=new_previous_achievement_form, new_toefl_test_score_form=new_toefl_test_score_form, user=user)
 
 
@@ -2388,6 +2401,15 @@ def remove_previous_achievement(id):
     previous_achievement = PreviousAchievement.query.get_or_404(id)
     db.session.delete(previous_achievement)
     flash(u'已删除既往成绩：%s' % previous_achievement.type.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/toefl-test-score/remove/<int:id>')
+@login_required
+def remove_toefl_test_score(id):
+    toefl_test_score = TOEFLTestScore.query.get_or_404(id)
+    db.session.delete(toefl_test_score)
+    flash(u'已删除TOEFL成绩：%s' % toefl_test_score.type.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
