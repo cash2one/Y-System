@@ -1281,15 +1281,15 @@ class User(UserMixin, db.Model):
         return self.made_receptions.filter_by(user_id=user.id).first() is not None
 
     def create_user(self, user):
-        self.created = True
-        self.created_at = datetime.utcnow()
-        db.session.add(self)
+        user.created = True
+        user.created_at = datetime.utcnow()
+        db.session.add(user)
         db.session.commit()
         if not self.created_user(user):
-            user_creation = UserCreation(creator_id=self.id, user_id=user.id, timestamp=self.created_at)
+            user_creation = UserCreation(creator_id=self.id, user_id=user.id, timestamp=user.created_at)
         else:
             user_creation = self.made_user_creations.filter_by(user_id=user.id).first()
-            user_creation.timestamp = self.created_at
+            user_creation.timestamp = user.created_at
         db.session.add(user_creation)
 
     def uncreate_user(self, user):
