@@ -759,10 +759,11 @@ class User(UserMixin, db.Model):
     confirmed = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
+    created = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime)
     activated = db.Column(db.Boolean, default=False)
     activated_at = db.Column(db.DateTime)
     last_seen_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
     # profile properties
     name = db.Column(db.Unicode(64), index=True)
@@ -1069,6 +1070,17 @@ class User(UserMixin, db.Model):
     def can(self, permission_name):
         return self.role is not None and self.role.has_permission(permission=Permission.query.filter_by(name=permission_name).first())
 
+    @staticmethod
+    def users_can(permission_name):
+        return User.query\
+            .join(Role, Role.id == User.role_id)\
+            .join(RolePermission, RolePermission.role_id == Role.id)\
+            .join(Permission, Permission.id == RolePermission.permission_id)\
+            .filter(Permission.name == permission_name)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)
+
     @property
     def is_suspended(self):
         return self.role.name == u'挂起'
@@ -1269,11 +1281,15 @@ class User(UserMixin, db.Model):
         return self.made_receptions.filter_by(user_id=user.id).first() is not None
 
     def create_user(self, user):
+        self.created = True
+        self.created_at = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
         if not self.created_user(user):
-            user_creation = UserCreation(creator_id=self.id, user_id=user.id)
+            user_creation = UserCreation(creator_id=self.id, user_id=user.id, timestamp=self.created_at)
         else:
             user_creation = self.made_user_creations.filter_by(user_id=user.id).first()
-            user_creation.timestamp = datetime.utcnow()
+            user_creation.timestamp = self.created_at
         db.session.add(user_creation)
 
     def uncreate_user(self, user):
@@ -2931,13 +2947,11 @@ class Announcement(db.Model):
             for announcement in announcements:
                 announcement.retract(modified_by=modified_by)
         if self.type.name == u'用户邮件通知':
-            for user in User.query.all():
-                if user.can(Permission.BOOK):
-                    send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
+            for user in User.users_can(u'预约'):
+                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         if self.type.name == u'管理邮件通知':
-            for user in User.query.all():
-                if user.can(Permission.MANAGE):
-                    send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
+            for user in User.users_can(u'管理'):
+                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         self.show = True
         self.ping(modified_by=modified_by)
         db.session.add(self)

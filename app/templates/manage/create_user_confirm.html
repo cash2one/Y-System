@@ -113,24 +113,36 @@
                 <h4 class="ui blue dividing header">基本信息</h4>
                 <div class="ui relaxed divided list">
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">姓名</div>
                             <div class="description">{{ user.name }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">性别</div>
                             <div class="description">{{ user.gender.name }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">生日</div>
                             <div class="description">{{ moment(user.birthdate).format('YYYY年M月D日') }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">身份证号</div>
                             <div class="description">{{ user.id_number }}</div>
@@ -140,12 +152,18 @@
                 <h4 class="ui blue dividing header">联系方式</h4>
                 <div class="ui relaxed divided list">
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">电子邮箱</div>
                             <div class="description">{{ user.email }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">移动电话</div>
                             <div class="description">
@@ -158,6 +176,9 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">联系地址</div>
                             <div class="description">
@@ -170,6 +191,9 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">QQ</div>
                             <div class="description">
@@ -182,6 +206,9 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">微信</div>
                             <div class="description">
@@ -197,6 +224,9 @@
                 <h4 class="ui orange dividing header">紧急联系人</h4>
                 <div class="ui relaxed divided list">
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">姓名</div>
                             <div class="description">
@@ -209,6 +239,9 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">关系</div>
                             <div class="description">
@@ -221,6 +254,9 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">联系方式</div>
                             <div class="description">
@@ -239,7 +275,7 @@
                     {% for education_record in user.education_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.school }}</div>
@@ -281,7 +317,7 @@
                     {% for employment_record in user.employment_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ employment_record.employer }}</div>
@@ -314,7 +350,7 @@
                     {% for previous_achievement in user.previous_achievements %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_previous_achievement', id=previous_achievement.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_previous_achievement', id=previous_achievement.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ previous_achievement.type.name }}</div>
@@ -344,7 +380,7 @@
                     {% for toefl_test_score in user.toefl_test_scores %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ toefl_test_score.type.name }}成绩</div>
@@ -383,12 +419,18 @@
                 <h4 class="ui teal dividing header">报名信息</h4>
                 <div class="ui relaxed divided list">
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">研修目的</div>
                             <div class="description">{{ user.purposes_alias }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">申请方向</div>
                             <div class="description">
@@ -401,12 +443,18 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">了解渠道</div>
                             <div class="description">{{ user.referrers_alias }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">推荐人</div>
                             <div class="description">
@@ -419,24 +467,36 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
                             <div class="description">{{ user.purchases_alias }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">用户权限</div>
                             <div class="description">{{ user.role.name }}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">VB班</div>
                             <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini button" href="#">编辑</a>
+                        </div>
                         <div class="content">
                             <div class="header">Y-GRE班</div>
                             <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>

@@ -252,7 +252,7 @@ def history_booking():
 @permission_required(u'管理课程预约')
 def set_booking_state_valid(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
@@ -265,9 +265,8 @@ def set_booking_state_valid(user_id, schedule_id):
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=user.last_punch.section.lesson)
     available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
-        for manager in User.query.all():
-            if manager.can(u'管理iPad设备'):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+        for manager in User.users_can(u'管理iPad设备'):
+            send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -321,7 +320,7 @@ def set_booking_state_missed(user_id, schedule_id):
 @permission_required(u'管理课程预约')
 def set_booking_state_canceled(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
@@ -332,9 +331,8 @@ def set_booking_state_canceled(user_id, schedule_id):
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            for manager in User.query.all():
-                if manager.can(u'管理iPad设备'):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+            for manager in User.users_can(u'管理iPad设备'):
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -513,7 +511,7 @@ def rental_rent_step_1():
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_2(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     schedule = Schedule.query.get_or_404(schedule_id)
     form = RentiPadForm(user=user)
@@ -527,7 +525,7 @@ def rental_rent_step_2(user_id, schedule_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_3(user_id, ipad_id, schedule_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
@@ -558,7 +556,7 @@ def rental_rent_step_3(user_id, ipad_id, schedule_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_2_lesson(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     schedule = Schedule.query.get_or_404(schedule_id)
     form = SelectLessonForm()
@@ -572,7 +570,7 @@ def rental_rent_step_2_lesson(user_id, schedule_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_3_lesson(user_id, lesson_id, schedule_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     schedule = Schedule.query.get_or_404(schedule_id)
@@ -587,7 +585,7 @@ def rental_rent_step_3_lesson(user_id, lesson_id, schedule_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_4_lesson(user_id, lesson_id, ipad_id, schedule_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     ipad = iPad.query.get_or_404(ipad_id)
@@ -620,7 +618,7 @@ def rental_rent_step_4_lesson(user_id, lesson_id, ipad_id, schedule_id):
 def rental_rent_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data, created=True, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_rent_step_1_alt'))
@@ -633,7 +631,7 @@ def rental_rent_step_1_alt():
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
@@ -646,7 +644,7 @@ def rental_rent_step_2_alt(user_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_3_alt(user_id, ipad_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
@@ -680,7 +678,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_2_lesson_alt(user_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = SelectLessonForm()
     if form.validate_on_submit():
@@ -693,7 +691,7 @@ def rental_rent_step_2_lesson_alt(user_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_3_lesson_alt(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = RentiPadByLessonForm(lesson=lesson)
@@ -707,7 +705,7 @@ def rental_rent_step_3_lesson_alt(user_id, lesson_id):
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_4_lesson_alt(user_id, lesson_id, ipad_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     ipad = iPad.query.get_or_404(ipad_id)
@@ -758,9 +756,8 @@ def rental_return_step_1():
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            for user in User.query.all():
-                if user.can(u'管理iPad设备'):
-                    send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+            for user in User.users_can(u'管理iPad设备'):
+                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id))
         if not form.battery.data:
@@ -778,7 +775,7 @@ def rental_return_step_1():
 @permission_required(u'管理iPad借阅')
 def rental_return_step_2(user_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
@@ -791,7 +788,7 @@ def rental_return_step_2(user_id):
 @permission_required(u'管理iPad借阅')
 def rental_return_step_3(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
@@ -805,7 +802,7 @@ def rental_return_step_3(user_id, lesson_id):
 @permission_required(u'管理iPad借阅')
 def rental_return_step_4(user_id, section_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
@@ -822,7 +819,7 @@ def rental_return_step_4(user_id, section_id):
 def rental_return_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data, created=True, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_return_step_1_alt'))
@@ -835,7 +832,7 @@ def rental_return_step_1_alt():
 @permission_required(u'管理iPad借阅')
 def rental_return_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
@@ -848,7 +845,7 @@ def rental_return_step_2_alt(user_id):
 @permission_required(u'管理iPad借阅')
 def rental_return_step_3_alt(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
@@ -862,7 +859,7 @@ def rental_return_step_3_alt(user_id, lesson_id):
 @permission_required(u'管理iPad借阅')
 def rental_return_step_4_alt(user_id, section_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
@@ -894,9 +891,8 @@ def rental_exchange_step_1(rental_id):
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            for user in User.query.all():
-                if user.can(u'管理iPad设备'):
-                    send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+            for user in User.users_can(u'管理iPad设备'):
+                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
         if not form.battery.data:
@@ -918,7 +914,7 @@ def rental_exchange_step_2(rental_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
@@ -935,7 +931,7 @@ def rental_exchange_step_3(rental_id, lesson_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
@@ -953,7 +949,7 @@ def rental_exchange_step_4(rental_id, section_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
@@ -973,7 +969,7 @@ def rental_exchange_step_5(rental_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
@@ -990,7 +986,7 @@ def rental_exchange_step_6(rental_id, ipad_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     ipad = iPad.query.get_or_404(ipad_id)
     if ipad.deleted:
@@ -1025,7 +1021,7 @@ def rental_exchange_step_5_lesson(rental_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = SelectLessonForm()
     if form.validate_on_submit():
@@ -1042,7 +1038,7 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = RentiPadByLessonForm(lesson=lesson)
@@ -1060,7 +1056,7 @@ def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
         flash(u'iPad尚未归还', category='error')
         return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
     user = User.query.get_or_404(rental.user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     ipad = iPad.query.get_or_404(ipad_id)
@@ -1092,7 +1088,7 @@ def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
 @permission_required(u'管理学习进度')
 def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     form = EditPunchLessonForm()
     if form.validate_on_submit():
@@ -1106,7 +1102,7 @@ def edit_punch_step_1(user_id):
 @permission_required(u'管理学习进度')
 def edit_punch_step_2(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     lesson = Lesson.query.get_or_404(lesson_id)
     form = EditPunchSectionForm(lesson=lesson)
@@ -1120,7 +1116,7 @@ def edit_punch_step_2(user_id, lesson_id):
 @permission_required(u'管理学习进度')
 def edit_punch_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     section = Section.query.get_or_404(section_id)
     form = ConfirmPunchForm()
@@ -1345,9 +1341,8 @@ def increase_schedule_quota(id):
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            for manager in User.query.all():
-                if manager.can(u'管理iPad设备'):
-                    send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+            for manager in User.users_can(u'管理iPad设备'):
+                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     flash(u'所选时段名额+1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
@@ -1569,9 +1564,8 @@ def set_ipad_state_maintain(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
-    for user in User.query.all():
-        if user.can(u'管理iPad设备'):
-            send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
+    for user in User.users_can(u'管理iPad设备'):
+        send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad', ipad=ipad, time=datetime.utcnow(), manager=current_user)
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
@@ -1802,6 +1796,7 @@ def user():
     if show_activated_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(or_(
@@ -1813,6 +1808,7 @@ def user():
             .order_by(User.last_seen_at.desc())
     activated_users_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.activated == True)\
         .filter(User.deleted == False)\
         .filter(or_(
@@ -1825,6 +1821,7 @@ def user():
     if show_unactivated_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.activated == False)\
             .filter(User.deleted == False)\
             .filter(or_(
@@ -1836,6 +1833,7 @@ def user():
             .order_by(User.last_seen_at.desc())
     unactivated_users_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.activated == False)\
         .filter(User.deleted == False)\
         .filter(or_(
@@ -1848,65 +1846,77 @@ def user():
     if show_suspended_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'挂起')\
             .order_by(User.last_seen_at.desc())
     suspended_users_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.deleted == False)\
         .filter(Role.name == u'挂起')\
         .count()
     if show_volunteers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'志愿者')\
             .order_by(User.last_seen_at.desc())
     volunteers_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.deleted == False)\
         .filter(Role.name == u'志愿者')\
         .count()
     if show_moderators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'协管员')\
             .order_by(User.last_seen_at.desc())
     moderators_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.deleted == False)\
         .filter(Role.name == u'协管员')\
         .count()
     if show_administrators:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'管理员')\
             .order_by(User.last_seen_at.desc())
     administrators_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.deleted == False)\
         .filter(Role.name == u'管理员')\
         .count()
     if show_developers:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(Role.name == u'开发人员')\
             .order_by(User.last_seen_at.desc())
     developers_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.deleted == False)\
         .filter(Role.name == u'开发人员')\
         .count()
     if show_deleted_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
+            .filter(User.created == True)\
             .filter(User.deleted == True)\
             .order_by(User.last_seen_at.desc())
     deleted_users_num = User.query\
         .join(Role, Role.id == User.role_id)\
+        .filter(User.created == True)\
         .filter(User.deleted == True)\
         .count()
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -2367,7 +2377,7 @@ def create_user():
 @permission_required(u'管理用户')
 def create_user_confirm(id):
     user = User.query.get_or_404(id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
@@ -2498,7 +2508,7 @@ def create_admin():
 @permission_required(u'管理用户')
 def edit_user(id):
     user = User.query.get_or_404(id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
@@ -2531,7 +2541,7 @@ def edit_user(id):
 @permission_required(u'管理用户')
 def delete_user(id):
     user = User.query.get_or_404(id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
@@ -2548,7 +2558,7 @@ def delete_user(id):
 @administrator_required
 def restore_user(id):
     user = User.query.get_or_404(id)
-    if not user.deleted:
+    if not user.created or not user.deleted:
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
@@ -2571,6 +2581,7 @@ def find_user():
     name_or_email = request.args.get('keyword')
     if name_or_email:
         users = User.query\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(or_(
                 User.name.like('%' + name_or_email + '%'),
@@ -2583,6 +2594,7 @@ def find_user():
         name_or_email = form.name_or_email.data
         if name_or_email:
             users = User.query\
+                .filter(User.created == True)\
                 .filter(User.deleted == False)\
                 .filter(or_(
                     User.name.like('%' + name_or_email + '%'),
@@ -2659,6 +2671,7 @@ def course_users(id):
     query = User.query\
         .join(CourseRegistration, CourseRegistration.user_id == User.id)\
         .join(Course, Course.id == CourseRegistration.course_id)\
+        .filter(User.created == True)\
         .filter(User.deleted == False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
@@ -2733,6 +2746,7 @@ def suggest_user():
     name_or_email = request.args.get('keyword')
     if name_or_email:
         users = User.query\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(or_(
                 User.name.like('%' + name_or_email + '%'),
@@ -2750,6 +2764,7 @@ def suggest_email():
     name_or_email = request.args.get('keyword')
     if name_or_email:
         users = User.query\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(or_(
                 User.name.like('%' + name_or_email + '%'),
@@ -2767,6 +2782,7 @@ def search_user():
     name_or_email = request.args.get('keyword')
     if name_or_email:
         users = User.query\
+            .filter(User.created == True)\
             .filter(User.deleted == False)\
             .filter(or_(
                 User.name.like('%' + name_or_email + '%'),
