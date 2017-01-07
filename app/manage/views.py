@@ -1882,6 +1882,22 @@ def delete_announcement(id):
 @login_required
 @permission_required(u'管理用户')
 def user():
+    form = NewAdminForm(creator=current_user._get_current_object())
+    if form.validate_on_submit():
+        admin = User(
+            email=form.email.data,
+            role_id=int(form.role.data),
+            password=form.id_number.data.upper()[-6:],
+            name=form.name.data,
+            id_number=form.id_number.data.upper(),
+            gender_id=get_gender_id(form.id_number.data),
+            birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14]))
+        )
+        db.session.add(admin)
+        db.session.commit()
+        current_user.create_user(user=admin)
+        flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
+        return redirect(request.args.get('next') or url_for('manage.user'))
     page = request.args.get('page', 1, type=int)
     show_activated_users = True
     show_unactivated_users = False
@@ -2039,6 +2055,7 @@ def user():
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
     return render_template('manage/user.html',
+        form=form,
         users=users,
         show_activated_users=show_activated_users,
         activated_users_num=activated_users_num,
@@ -2687,29 +2704,6 @@ def create_user_delete(id):
     user.delete()
     flash(u'已删除用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
-
-
-@manage.route('/user/create-admin', methods=['GET', 'POST'])
-@login_required
-@administrator_required
-def create_admin():
-    form = NewAdminForm(creator=current_user._get_current_object())
-    if form.validate_on_submit():
-        admin = User(
-            email=form.email.data,
-            role_id=int(form.role.data),
-            password=form.id_number.data.upper()[-6:],
-            name=form.name.data,
-            id_number=form.id_number.data.upper(),
-            gender_id=get_gender_id(form.id_number.data),
-            birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14]))
-        )
-        db.session.add(admin)
-        db.session.commit()
-        current_user.create_user(user=admin)
-        flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
-        return redirect(request.args.get('next') or url_for('manage.user'))
-    return render_template('manage/create_admin.html', form=form)
 
 
 @manage.route('/user/edit/<int:id>', methods=['GET', 'POST'])
