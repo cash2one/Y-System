@@ -1231,7 +1231,7 @@ class User(UserMixin, db.Model):
                 return self.referrers.first().type.name
         return reduce(lambda referrer1, referrer2: u'%s · %s' % (referrer1, referrer2), [referrer.type.name for referrer in self.referrers if referrer.type.name != u'其它'] + [referrer.remark for referrer in self.referrers if referrer.type.name == u'其它'])
 
-    def purchase_product(self, product, quantity=1):
+    def add_purchase(self, product, quantity=1):
         purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
         db.session.add(purchase)
 
@@ -1263,6 +1263,14 @@ class User(UserMixin, db.Model):
 
     def invited_user(self, user):
         return self.sent_invitations.filter_by(user_id=user.id).first() is not None
+
+    @property
+    def inviters(self):
+        if self.accepted_invitations.count() == 0:
+            return u'无'
+        if self.accepted_invitations.count() == 1:
+            return u'%s（%s）[%s]' % (self.accepted_invitations.first().inviter.name, self.accepted_invitations.first().inviter.email, self.accepted_invitations.first().type.name)
+        return reduce(lambda inviter1, inviter2: u'%s · %s' % (inviter1, inviter2, [u'%s（%s）[%s]' % (invitation.inviter.name, invitation.inviter.email, invitation.type.name) for invitation in self.accepted_invitations]))
 
     def receive_user(self, user):
         if not self.received_user(user):
@@ -1584,17 +1592,23 @@ class User(UserMixin, db.Model):
         }
         return user_json
 
-    def to_json_suggestion(self, suggest_email=False, include_url=False):
+    def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False):
         if suggest_email:
             user_json_suggestion = {
                 'title': self.email,
-                'description': '%s [%s]' % (self.name, self.role.name),
             }
+            if include_role:
+                user_json_suggestion['description'] = '%s [%s]' % (self.name, self.role.name)
+            else:
+                user_json_suggestion['description'] = self.name
         else:
             user_json_suggestion = {
                 'title': self.name,
-                'description': '%s [%s]' % (self.email, self.role.name),
             }
+            if include_role:
+                user_json_suggestion['description'] = '%s [%s]' % (self.email, self.role.name)
+            else:
+                user_json_suggestion['description'] = self.email
         if include_url:
             user_json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
         return user_json_suggestion

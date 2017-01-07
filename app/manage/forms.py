@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Relationship, PurposeType, ReferrerType, EducationType, PreviousAchievementType, Product, TOEFLTestScoreType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Role, User, Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType, Product, TOEFLTestScoreType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 EN_2_CN = {
@@ -325,7 +325,7 @@ class NewUserForm(FlaskForm):
     application_aim = StringField(u'申请方向', validators=[Length(0, 64)])
     referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
     other_referrer = StringField(u'其它了解渠道', validators=[Length(0, 64)])
-    inviter_email = StringField(u'同学推荐', validators=[Length(0, 64)])
+    inviter_email = StringField(u'同学推荐（邮箱）', validators=[Length(0, 64)])
     products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
@@ -522,9 +522,14 @@ class EditReferrerForm(FlaskForm):
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
 
 
-class EditInviterForm(FlaskForm):
-    inviter_email = StringField(u'同学推荐', validators=[Length(0, 64)])
-    submit = SubmitField(u'更新')
+class NewInviterForm(FlaskForm):
+    inviter_email = StringField(u'推荐人（邮箱）', validators=[Required(), Length(0, 64)])
+    invitation_type = SelectField(u'推荐类型', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(NewInviterForm, self).__init__(*args, **kwargs)
+        self.invitation_type.choices = [(u'', u'选择推荐类型')] + [(unicode(invitation_type.id), invitation_type.name) for invitation_type in InvitationType.query.order_by(InvitationType.id.asc()).all()]
 
     def validate_inviter_email(self, field):
         if field.data and User.query.filter_by(email=field.data).first() is None:
@@ -536,7 +541,7 @@ class EditPurchasedProductForm(FlaskForm):
     submit = SubmitField(u'更新')
 
     def __init__(self, *args, **kwargs):
-        super(EditPurchaseForm, self).__init__(*args, **kwargs)
+        super(EditPurchasedProductForm, self).__init__(*args, **kwargs)
         self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
 

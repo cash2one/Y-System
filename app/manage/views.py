@@ -15,7 +15,7 @@ from .forms import NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncement
 from .forms import NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, ConfirmUserForm
 from .forms import EditNameForm, EditIDNumberForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm, EditUserForm
-from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditInviterForm, EditPurchasedProductForm, EditRoleForm, EditVBCourseForm, EditYGRECourseForm
+from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, NewInviterForm, EditPurchasedProductForm, EditRoleForm, EditVBCourseForm, EditYGRECourseForm
 from .forms import DeleteUserForm, RestoreUserForm, FindUserForm
 from .forms import NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
@@ -29,6 +29,12 @@ from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Course, CourseType, CourseRegistration
 from ..models import Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
+
+
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u'[%s]%s' % (getattr(form, field).label.text, error), category='error')
 
 
 @manage.after_app_request
@@ -672,7 +678,7 @@ def rental_rent_step_4_lesson(user_id, lesson_id, ipad_id, schedule_id):
 def rental_rent_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, created=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_rent_step_1_alt'))
@@ -877,7 +883,7 @@ def rental_return_step_4(user_id, section_id):
 def rental_return_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, created=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_return_step_1_alt'))
@@ -2369,7 +2375,7 @@ def create_user():
         if form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
         if form.inviter_email.data:
-            inviter = User.query.filter_by(email=form.inviter_email.data).first()
+            inviter = User.query.filter_by(email=form.inviter_email.data, created=True, activated=True, deleted=False).first()
             if inviter is not None:
                 inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         if int(form.vb_course.data):
@@ -2377,7 +2383,8 @@ def create_user():
         if int(form.y_gre_course.data):
             user.register_course(course=Course.query.get(int(form.y_gre_course.data)))
         for product_id in form.products.data:
-            user.purchase_product(product=Product.query.get(int(product_id)))
+            user.add_purchase(product=Product.query.get(int(product_id)))
+        flash(u'资料填写完成，请确认信息', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     return render_template('manage/create_user.html', form=form)
 
@@ -2402,6 +2409,7 @@ def create_user_confirm(id):
     if edit_name_form.validate_on_submit():
         user.name = edit_name_form.name.data
         db.session.add(user)
+        flash(u'已更新用户姓名', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_name_form.name.data = user.name
     # ID number
@@ -2411,6 +2419,7 @@ def create_user_confirm(id):
         user.gender_id = get_gender_id(edit_id_number_form.id_number.data)
         user.birthdate = date(year=int(edit_id_number_form.id_number.data[6:10]), month=int(edit_id_number_form.id_number.data[10:12]), day=int(edit_id_number_form.id_number.data[12:14]))
         db.session.add(user)
+        flash(u'已更新身份证号', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_id_number_form.id_number.data = user.id_number
     # email
@@ -2418,13 +2427,16 @@ def create_user_confirm(id):
     if edit_email_form.validate_on_submit():
         user.email = edit_email_form.email.data
         db.session.add(user)
+        flash(u'已更新用户邮箱', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_email_form.email.data = user.email
+    flash_errors(edit_email_form)
     # mobile
     edit_mobile_form = EditMobileForm(prefix='edit_mobile')
     if edit_mobile_form.validate_on_submit():
         user.mobile = edit_mobile_form.mobile.data
         db.session.add(user)
+        flash(u'已更新移动电话', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_mobile_form.mobile.data = user.mobile
     # address
@@ -2432,6 +2444,7 @@ def create_user_confirm(id):
     if edit_address_form.validate_on_submit():
         user.address = edit_address_form.address.data
         db.session.add(user)
+        flash(u'已更新联系地址', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_address_form.address.data = user.address
     # QQ
@@ -2439,6 +2452,7 @@ def create_user_confirm(id):
     if edit_qq_form.validate_on_submit():
         user.qq = edit_qq_form.qq.data
         db.session.add(user)
+        flash(u'已更新QQ号', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_qq_form.qq.data = user.qq
     # WeChat
@@ -2446,6 +2460,7 @@ def create_user_confirm(id):
     if edit_wechat_form.validate_on_submit():
         user.wechat = edit_wechat_form.wechat.data
         db.session.add(user)
+        flash(u'已更新微信账号', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_wechat_form.wechat.data = user.wechat
     # emergency contact name
@@ -2453,6 +2468,7 @@ def create_user_confirm(id):
     if edit_emergency_contact_name_form.validate_on_submit():
         user.emergency_contact_name = edit_emergency_contact_name_form.emergency_contact_name.data
         db.session.add(user)
+        flash(u'已更新紧急联系人姓名', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_name_form.emergency_contact_name.data = user.emergency_contact_name
     # emergency contact relationship
@@ -2460,6 +2476,7 @@ def create_user_confirm(id):
     if edit_emergency_contact_relationship_form.validate_on_submit():
         user.emergency_contact_relationship_id = int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)
         db.session.add(user)
+        flash(u'已更新紧急联系人关系', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_relationship_form.emergency_contact_relationship.data = unicode(user.emergency_contact_relationship_id)
     # emergency contact mobile
@@ -2467,6 +2484,7 @@ def create_user_confirm(id):
     if edit_emergency_contact_mobile_form.validate_on_submit():
         user.emergency_contact_mobile = edit_emergency_contact_mobile_form.emergency_contact_mobile.data
         db.session.add(user)
+        flash(u'已更新紧急联系人移动电话', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_mobile_form.emergency_contact_mobile.data = user.emergency_contact_mobile
     # education
@@ -2532,9 +2550,11 @@ def create_user_confirm(id):
                 user.remove_purpose(purpose_type=purpose.type)
         for purpose_type_id in edit_purpose_form.purposes.data:
             user.add_purpose(purpose_type=PurposeType.query.get(int(purpose_type_id)))
-        if form.other_purpose.data:
-            user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=form.other_purpose.data)
+        if edit_purpose_form.other_purpose.data:
+            user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=edit_purpose_form.other_purpose.data)
+        flash(u'已更新研修目的', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_purpose_form.purposes.data = []
     for purpose in user.purposes:
         if purpose.type.name != u'其它':
             edit_purpose_form.purposes.data.append(unicode(purpose.type_id))
@@ -2545,27 +2565,48 @@ def create_user_confirm(id):
     if edit_application_aim_form.validate_on_submit():
         user.application_aim = edit_application_aim_form.application_aim.data
         db.session.add(user)
+        flash(u'已更新申请方向', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_application_aim_form.application_aim.data = user.application_aim
     # referrer
     edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
     if edit_referrer_form.validate_on_submit():
-        if form.other_referrer.data:
-            user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
+        for referrer in user.referrers:
+            if referrer.type.name != u'其它':
+                user.remove_referrer(referrer_type=referrer.type)
+        for referrer_type_id in edit_referrer_form.referrers.data:
+            user.add_referrer(referrer_type=ReferrerType.query.get(int(referrer_type_id)))
+        if edit_referrer_form.other_referrer.data:
+            user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=edit_referrer_form.other_referrer.data)
+        flash(u'已更新了解渠道', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_referrer_form.referrers.data = []
+    for referrer in user.referrers:
+        if referrer.type.name != u'其它':
+            edit_referrer_form.referrers.data.append(unicode(referrer.type_id))
+        else:
+            edit_referrer_form.other_referrer.data = referrer.remark
     # inviter
-    edit_inviter_form = EditInviterForm(prefix='edit_inviter')
-    if edit_inviter_form.validate_on_submit():
+    new_inviter_form = NewInviterForm(prefix='new_inviter')
+    if new_inviter_form.validate_on_submit():
+        flash(u'已更新推荐人', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purchased product
     edit_purchased_products_form = EditPurchasedProductForm(prefix='edit_purchased_product')
     if edit_purchased_products_form.validate_on_submit():
+        for purchase in user.purchases:
+            db.session.delete(purchase)
+        for product_id in edit_purchased_products_form.products.data:
+            user.add_purchase(product=Product.query.get(int(product_id)))
+        flash(u'已更新研修产品', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_purchased_products_form.products.data = [unicode(purchase.product.id) for purchase in user.purchases]
     # role
     edit_role_form = EditRoleForm(prefix='edit_role')
     if edit_role_form.validate_on_submit():
         user.role_id = int(edit_role_form.role.data)
         db.session.add(user)
+        flash(u'已更新用户权限', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_role_form.role.data = unicode(user.role_id)
     # VB course
@@ -2573,8 +2614,9 @@ def create_user_confirm(id):
     if edit_vb_course_form.validate_on_submit():
         if user.vb_course:
             user.unregister_course(user.vb_course)
-        if edit_vb_course_form.vb_course.data:
+        if int(dit_vb_course_form.vb_course.data):
             user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
+        flash(u'已更新VB班级', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     if user.vb_course:
         edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
@@ -2583,8 +2625,9 @@ def create_user_confirm(id):
     if edit_y_gre_course_form.validate_on_submit():
         if user.y_gre_course:
             user.unregister_course(user.y_gre_course)
-        if edit_y_gre_course_form.y_gre_course.data:
+        if int(edit_y_gre_course_form.y_gre_course.data):
             user.register_course(Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)))
+        flash(u'已更新Y-GRE班', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
@@ -2594,10 +2637,11 @@ def create_user_confirm(id):
         user.worked_in_same_field = confirm_user_form.worked_in_same_field.data
         user.deformity = confirm_user_form.deformity.data
         db.session.add(user)
-        receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data).first()
+        receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data, created=True, activated=True, deleted=False).first()
         if receptionist is not None:
             receptionist.receive_user(user=user)
         current_user.create_user(user=user)
+        flash(u'成功添加%s：%s' % (user.role.name, user.name), category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     confirm_user_form.worked_in_same_field.data = user.worked_in_same_field
     confirm_user_form.deformity.data = user.deformity
@@ -2616,6 +2660,14 @@ def create_user_confirm(id):
         new_employment_record_form=new_employment_record_form,
         new_previous_achievement_form=new_previous_achievement_form,
         new_toefl_test_score_form=new_toefl_test_score_form,
+        edit_purpose_form=edit_purpose_form,
+        edit_application_aim_form=edit_application_aim_form,
+        edit_referrer_form=edit_referrer_form,
+        new_inviter_form=new_inviter_form,
+        edit_purchased_products_form=edit_purchased_products_form,
+        edit_role_form=edit_role_form,
+        edit_vb_course_form=edit_vb_course_form,
+        edit_y_gre_course_form=edit_y_gre_course_form,
         confirm_user_form=confirm_user_form,
         user=user
     )
@@ -2654,6 +2706,16 @@ def remove_toefl_test_score(id):
     toefl_test_score = TOEFLTestScore.query.get_or_404(id)
     db.session.delete(toefl_test_score)
     flash(u'已删除TOEFL成绩：%s' % toefl_test_score.type.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/inviter/remove/<int:user_id>/<int:inviter_id>')
+@login_required
+def remove_inviter(user_id, inviter_id):
+    user = User.query.get_or_404(id)
+    inviter = User.query.get_or_404(id)
+    inviter.uninvite_user(user=user)
+    flash(u'已删除推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -2940,7 +3002,7 @@ def suggest_user():
     return jsonify({'results': [user.to_json_suggestion() for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
-@manage.route('/suggest/email/')
+@manage.route('/suggest/email')
 @permission_required(u'管理')
 def suggest_email():
     users = []
@@ -2958,7 +3020,25 @@ def suggest_email():
     return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
-@manage.route('/search/user/')
+@manage.route('/suggest/email/all')
+@permission_required(u'管理')
+def suggest_referrer():
+    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        users = User.query\
+            .filter(User.created == True)\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                User.name.like('%' + name_or_email + '%'),
+                User.email.like('%' + name_or_email + '%')
+            ))\
+            .order_by(User.last_seen_at.desc())\
+            .limit(current_app.config['RECORD_PER_QUERY'])
+    return jsonify({'results': [user.to_json_suggestion(suggest_email=True, include_role=False) for user in users]})
+
+
+@manage.route('/search/user')
 @permission_required(u'管理')
 def search_user():
     users = []
