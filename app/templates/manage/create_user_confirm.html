@@ -154,7 +154,6 @@
                                 {{ edit_name_form.name(placeholder='姓名') }}
                             </div>
                             {{ edit_name_form.submit(class='ui primary button') }}
-                            <div id="edit-name-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -169,7 +168,6 @@
                                 {{ edit_id_number_form.id_number(placeholder='身份证号（18位）') }}
                             </div>
                             {{ edit_id_number_form.submit(class='ui primary button') }}
-                            <div id="edit-id-number-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -232,7 +230,6 @@
                                 {{ edit_email_form.email(placeholder='用于登录系统、接收通知') }}
                             </div>
                             {{ edit_email_form.submit(class='ui primary button') }}
-                            <div id="edit-email-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -247,7 +244,6 @@
                                 {{ edit_mobile_form.mobile(placeholder='移动电话') }}
                             </div>
                             {{ edit_mobile_form.submit(class='ui primary button') }}
-                            <div id="edit-mobile-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -262,7 +258,6 @@
                                 {{ edit_address_form.address(placeholder='联系地址') }}
                             </div>
                             {{ edit_address_form.submit(class='ui primary button') }}
-                            <div id="edit-address-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -277,7 +272,6 @@
                                 {{ edit_qq_form.qq(placeholder='QQ号') }}
                             </div>
                             {{ edit_qq_form.submit(class='ui primary button') }}
-                            <div id="edit-qq-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -292,7 +286,6 @@
                                 {{ edit_wechat_form.wechat(placeholder='微信号/手机号') }}
                             </div>
                             {{ edit_wechat_form.submit(class='ui primary button') }}
-                            <div id="edit-wechat-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -337,7 +330,6 @@
                                 {{ edit_emergency_contact_name_form.emergency_contact_name(placeholder='紧急联系人姓名') }}
                             </div>
                             {{ edit_emergency_contact_name_form.submit(class='ui primary button') }}
-                            <div id="edit-emergency-contact-name-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -352,7 +344,6 @@
                                 {{ edit_emergency_contact_relationship_form.emergency_contact_relationship(class='ui dropdown') }}
                             </div>
                             {{ edit_emergency_contact_relationship_form.submit(class='ui primary button') }}
-                            <div id="edit-emergency-contact-relationship-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -367,7 +358,6 @@
                                 {{ edit_emergency_contact_mobile_form.emergency_contact_mobile(placeholder='紧急联系人移动电话') }}
                             </div>
                             {{ edit_emergency_contact_mobile_form.submit(class='ui primary button') }}
-                            <div id="edit-emergency-contact-mobile-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -608,7 +598,6 @@
                                 {{ edit_purpose_form.other_purpose(placeholder='其它研修目的') }}
                             </div>
                             {{ edit_purpose_form.submit(class='ui primary button') }}
-                            <div id="edit-purpose-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -623,7 +612,6 @@
                                 {{ edit_application_aim_form.application_aim(placeholder='申请方向') }}
                             </div>
                             {{ edit_referrer_form.submit(class='ui primary button') }}
-                            <div id="edit-application-aim-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -642,7 +630,6 @@
                                 {{ edit_referrer_form.other_referrer(placeholder='其它了解渠道') }}
                             </div>
                             {{ edit_referrer_form.submit(class='ui primary button') }}
-                            <div id="edit-referrer-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -681,7 +668,6 @@
                                 </div>
                             </div>
                             {{ new_inviter_form.submit(class='ui primary button') }}
-                            <div id="edit-inviter-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -696,7 +682,6 @@
                                 {{ edit_purchased_products_form.products(class='ui dropdown') }}
                             </div>
                             {{ edit_purchased_products_form.submit(class='ui primary button') }}
-                            <div id="edit-purchased-product-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -711,7 +696,6 @@
                                 {{ edit_role_form.role(class='ui dropdown') }}
                             </div>
                             {{ edit_role_form.submit(class='ui primary button') }}
-                            <div id="edit-role-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -726,7 +710,6 @@
                                 {{ edit_vb_course_form.vb_course(class='ui dropdown') }}
                             </div>
                             {{ edit_vb_course_form.submit(class='ui primary button') }}
-                            <div id="edit-vb-course-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -741,7 +724,6 @@
                                 {{ edit_y_gre_course_form.y_gre_course(class='ui dropdown') }}
                             </div>
                             {{ edit_y_gre_course_form.submit(class='ui primary button') }}
-                            <div id="edit-y-gre-course-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -819,20 +801,10 @@ $('#edit-name-trigger')
         $('#edit-name-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-name-hide-trigger')
-    .on('click', function() {
-        $('#edit-name-modal').modal('hide');
-    })
-;
 
 $('#edit-id-number-trigger')
     .on('click', function() {
         $('#edit-id-number-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-id-number-hide-trigger')
-    .on('click', function() {
-        $('#edit-id-number-modal').modal('hide');
     })
 ;
 
@@ -841,20 +813,10 @@ $('#edit-email-trigger')
         $('#edit-email-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-email-hide-trigger')
-    .on('click', function() {
-        $('#edit-email-modal').modal('hide');
-    })
-;
 
 $('#edit-mobile-trigger')
     .on('click', function() {
         $('#edit-mobile-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-mobile-hide-trigger')
-    .on('click', function() {
-        $('#edit-mobile-modal').modal('hide');
     })
 ;
 
@@ -863,20 +825,10 @@ $('#edit-address-trigger')
         $('#edit-address-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-address-hide-trigger')
-    .on('click', function() {
-        $('#edit-address-modal').modal('hide');
-    })
-;
 
 $('#edit-qq-trigger')
     .on('click', function() {
         $('#edit-qq-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-qq-hide-trigger')
-    .on('click', function() {
-        $('#edit-qq-modal').modal('hide');
     })
 ;
 
@@ -885,20 +837,10 @@ $('#edit-wechat-trigger')
         $('#edit-wechat-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-wechat-hide-trigger')
-    .on('click', function() {
-        $('#edit-wechat-modal').modal('hide');
-    })
-;
 
 $('#edit-emergency-contact-name-trigger')
     .on('click', function() {
         $('#edit-emergency-contact-name-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-emergency-contact-name-hide-trigger')
-    .on('click', function() {
-        $('#edit-emergency-contact-name-modal').modal('hide');
     })
 ;
 
@@ -907,20 +849,10 @@ $('#edit-emergency-contact-relationship-trigger')
         $('#edit-emergency-contact-relationship-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-emergency-contact-relationship-hide-trigger')
-    .on('click', function() {
-        $('#edit-emergency-contact-relationship-modal').modal('hide');
-    })
-;
 
 $('#edit-emergency-contact-mobile-trigger')
     .on('click', function() {
         $('#edit-emergency-contact-mobile-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-emergency-contact-mobile-hide-trigger')
-    .on('click', function() {
-        $('#edit-emergency-contact-mobile-modal').modal('hide');
     })
 ;
 
@@ -929,20 +861,10 @@ $('#edit-purpose-trigger')
         $('#edit-purpose-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-purpose-hide-trigger')
-    .on('click', function() {
-        $('#edit-purpose-modal').modal('hide');
-    })
-;
 
 $('#edit-application-aim-trigger')
     .on('click', function() {
         $('#edit-application-aim-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-application-aim-hide-trigger')
-    .on('click', function() {
-        $('#edit-application-aim-modal').modal('hide');
     })
 ;
 
@@ -951,20 +873,10 @@ $('#edit-referrer-trigger')
         $('#edit-referrer-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-referrer-hide-trigger')
-    .on('click', function() {
-        $('#edit-referrer-modal').modal('hide');
-    })
-;
 
 $('#edit-inviter-trigger')
     .on('click', function() {
         $('#edit-inviter-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-inviter-hide-trigger')
-    .on('click', function() {
-        $('#edit-inviter-modal').modal('hide');
     })
 ;
 
@@ -973,20 +885,10 @@ $('#edit-purchased-product-trigger')
         $('#edit-purchased-product-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-purchased-product-hide-trigger')
-    .on('click', function() {
-        $('#edit-purchased-product-modal').modal('hide');
-    })
-;
 
 $('#edit-role-trigger')
     .on('click', function() {
         $('#edit-role-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-role-hide-trigger')
-    .on('click', function() {
-        $('#edit-role-modal').modal('hide');
     })
 ;
 
@@ -995,20 +897,10 @@ $('#edit-vb-course-trigger')
         $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-vb-course-hide-trigger')
-    .on('click', function() {
-        $('#edit-vb-course-modal').modal('hide');
-    })
-;
 
 $('#edit-y-gre-course-trigger')
     .on('click', function() {
         $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-y-gre-course-hide-trigger')
-    .on('click', function() {
-        $('#edit-y-gre-course-modal').modal('hide');
     })
 ;
 
