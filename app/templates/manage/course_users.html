@@ -145,8 +145,15 @@
                             <td>
                                 {% if not user.is_superior_than(user=current_user) %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.course_users', id=course.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
+                                </div>
+                                <div id="delete-modal-{{ user.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i> 确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.course_users', id=course.id, page=pagination.page)) }}"><i class="remove user icon"></i> 注销</a>
+                                        <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
+                                    </div>
                                 </div>
                                 {% else %}
                                 <div class="ui mini icon buttons">
@@ -185,8 +192,19 @@ $('.message .close')
     })
 ;
 
-$('table')
-    .tablesort()
+$('table').tablesort();
+
+{% for user in users %}
+$('#delete-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
+    })
 ;
+$('#delete-hide-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal('hide');
+    })
+;
+{% endfor %}
 </script>
 {% endblock %}

@@ -424,15 +424,15 @@ class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    role = SelectField(u'用户组', coerce=unicode, validators=[Required()])
+    role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'新建管理用户')
 
     def __init__(self, creator, *args, **kwargs):
         super(NewAdminForm, self).__init__(*args, **kwargs)
         if creator.is_developer:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
+            self.role.choices = [(u'', u'选择权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
         else:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
+            self.role.choices = [(u'', u'选择权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
@@ -537,13 +537,27 @@ class EditPurchasedProductForm(FlaskForm):
         self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
 
-class EditRoleForm(FlaskForm):
+class EditStudentRoleForm(FlaskForm):
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'更新')
 
     def __init__(self, *args, **kwargs):
-        super(EditRoleForm, self).__init__(*args, **kwargs)
+        super(EditStudentRoleForm, self).__init__(*args, **kwargs)
         self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
+
+
+class EditRoleForm(FlaskForm):
+    role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, editor, *args, **kwargs):
+        super(EditRoleForm, self).__init__(*args, **kwargs)
+        if editor.is_developer:
+            self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
+        elif editor.is_administrator:
+            self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+        else:
+            self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
 
 
 class EditVBCourseForm(FlaskForm):
@@ -564,38 +578,29 @@ class EditYGRECourseForm(FlaskForm):
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
-class EditUserForm(FlaskForm):
-    name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    role = SelectField(u'用户组', coerce=unicode)
-    # vb_course = SelectField(u'VB班', coerce=int)
-    # y_gre_course = SelectField(u'Y-GRE班', coerce=int)
-    submit = SubmitField(u'提交')
+class EditWorkInSameFieldForm(FlaskForm):
+    worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
+    submit = SubmitField(u'更新')
 
-    def __init__(self, editor, *args, **kwargs):
-        super(EditUserForm, self).__init__(*args, **kwargs)
-        if editor.is_developer:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
-        elif editor.is_administrator:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
-        else:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
-        # self.vb_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
-        # self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+
+class EditDeformityForm(FlaskForm):
+    deformity = BooleanField(u'有严重心理或身体疾病')
+    submit = SubmitField(u'更新')
 
 
 class RestoreUserForm(FlaskForm):
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    role = SelectField(u'用户组', coerce=unicode, validators=[Required()])
+    role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'恢复')
 
     def __init__(self, restorer, *args, **kwargs):
         super(RestoreUserForm, self).__init__(*args, **kwargs)
         if restorer.is_developer:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
+            self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
         elif restorer.is_administrator:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
+            self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name not in [u'开发人员']]
         else:
-            self.role.choices = [(u'', u'选择用户组')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
+            self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'挂起', u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():

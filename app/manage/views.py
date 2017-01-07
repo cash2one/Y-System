@@ -14,9 +14,9 @@ from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadFo
 from .forms import NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
-from .forms import EditNameForm, EditIDNumberForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
-from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm, EditUserForm
-from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditRoleForm, EditVBCourseForm, EditYGRECourseForm
+from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
+from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
+from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
@@ -2607,7 +2607,7 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_purchased_products_form.products.data = [unicode(purchase.product.id) for purchase in user.purchases]
     # role
-    edit_role_form = EditRoleForm(prefix='edit_role')
+    edit_role_form = EditStudentRoleForm(prefix='edit_role')
     if edit_role_form.validate_on_submit():
         user.role_id = int(edit_role_form.role.data)
         db.session.add(user)
@@ -2619,7 +2619,7 @@ def create_user_confirm(id):
     if edit_vb_course_form.validate_on_submit():
         if user.vb_course:
             user.unregister_course(user.vb_course)
-        if int(dit_vb_course_form.vb_course.data):
+        if int(edit_vb_course_form.vb_course.data):
             user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
         flash(u'已更新VB班级', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
@@ -2730,28 +2730,288 @@ def edit_user(id):
         abort(404)
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
-    form = EditUserForm(editor=current_user._get_current_object())
-    if form.validate_on_submit():
-        user.name = form.name.data
-        user.role_id = int(form.role.data)
+    # name
+    edit_name_form = EditNameForm(prefix='edit_name')
+    if edit_name_form.validate_on_submit():
+        user.name = edit_name_form.name.data
         db.session.add(user)
-        # if user.vb_course:
-        #     user.unregister_course(user.vb_course)
-        # if form.vb_course.data:
-        #     user.register_course(Course.query.get(form.vb_course.data))
-        # if user.y_gre_course:
-        #     user.unregister_course(user.y_gre_course)
-        # if form.y_gre_course.data:
-        #     user.register_course(Course.query.get(form.y_gre_course.data))
-        flash(u'%s的用户信息已更新' % form.name.data, category='success')
-        return redirect(request.args.get('next') or url_for('manage.user'))
-    form.name.data = user.name
-    form.role.data = unicode(user.role_id)
-    # if user.vb_course:
-    #     form.vb_course.data = user.vb_course.id
-    # if user.y_gre_course:
-    #     form.y_gre_course.data = user.y_gre_course.id
-    return render_template('manage/edit_user.html', form=form, user=user)
+        flash(u'已更新用户姓名', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_name_form.name.data = user.name
+    # ID number
+    edit_id_number_form = EditIDNumberForm(prefix='edit_id_number')
+    if edit_id_number_form.validate_on_submit():
+        user.id_number = edit_id_number_form.id_number.data
+        user.gender_id = get_gender_id(edit_id_number_form.id_number.data)
+        user.birthdate = date(year=int(edit_id_number_form.id_number.data[6:10]), month=int(edit_id_number_form.id_number.data[10:12]), day=int(edit_id_number_form.id_number.data[12:14]))
+        db.session.add(user)
+        flash(u'已更新身份证号', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_id_number_form.id_number.data = user.id_number
+    # role
+    edit_role_form = EditRoleForm(prefix='edit_role', editor=current_user._get_current_object())
+    if edit_role_form.validate_on_submit():
+        user.role_id = int(edit_role_form.role.data)
+        db.session.add(user)
+        flash(u'已更新用户权限', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_role_form.role.data = unicode(user.role_id)
+    # email
+    edit_email_form = EditEmailForm(prefix='edit_email')
+    if edit_email_form.validate_on_submit():
+        if User.query.filter_by(email=edit_email_form.email.data).first() and edit_email_form.email.data != user.email:
+            flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
+            return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+        if edit_email_form.email.data != user.email:
+            user.email = edit_email_form.email.data
+            db.session.add(user)
+        flash(u'已更新用户邮箱', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_email_form.email.data = user.email
+    # mobile
+    edit_mobile_form = EditMobileForm(prefix='edit_mobile')
+    if edit_mobile_form.validate_on_submit():
+        user.mobile = edit_mobile_form.mobile.data
+        db.session.add(user)
+        flash(u'已更新移动电话', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_mobile_form.mobile.data = user.mobile
+    # address
+    edit_address_form = EditAddressForm(prefix='edit_address')
+    if edit_address_form.validate_on_submit():
+        user.address = edit_address_form.address.data
+        db.session.add(user)
+        flash(u'已更新联系地址', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_address_form.address.data = user.address
+    # QQ
+    edit_qq_form = EditQQForm(prefix='edit_qq')
+    if edit_qq_form.validate_on_submit():
+        user.qq = edit_qq_form.qq.data
+        db.session.add(user)
+        flash(u'已更新QQ号', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_qq_form.qq.data = user.qq
+    # WeChat
+    edit_wechat_form = EditWeChatForm(prefix='edit_wechat')
+    if edit_wechat_form.validate_on_submit():
+        user.wechat = edit_wechat_form.wechat.data
+        db.session.add(user)
+        flash(u'已更新微信账号', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_wechat_form.wechat.data = user.wechat
+    # emergency contact name
+    edit_emergency_contact_name_form = EditEmergencyContactNameForm(prefix='edit_emergency_contact_name')
+    if edit_emergency_contact_name_form.validate_on_submit():
+        user.emergency_contact_name = edit_emergency_contact_name_form.emergency_contact_name.data
+        db.session.add(user)
+        flash(u'已更新紧急联系人姓名', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_emergency_contact_name_form.emergency_contact_name.data = user.emergency_contact_name
+    # emergency contact relationship
+    edit_emergency_contact_relationship_form = EditEmergencyContactRelationshipForm(prefix='edit_emergency_contact_relationship')
+    if edit_emergency_contact_relationship_form.validate_on_submit():
+        user.emergency_contact_relationship_id = int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)
+        db.session.add(user)
+        flash(u'已更新紧急联系人关系', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_emergency_contact_relationship_form.emergency_contact_relationship.data = unicode(user.emergency_contact_relationship_id)
+    # emergency contact mobile
+    edit_emergency_contact_mobile_form = EditEmergencyContactMobileForm(prefix='edit_emergency_contact_mobile')
+    if edit_emergency_contact_mobile_form.validate_on_submit():
+        user.emergency_contact_mobile = edit_emergency_contact_mobile_form.emergency_contact_mobile.data
+        db.session.add(user)
+        flash(u'已更新紧急联系人移动电话', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_emergency_contact_mobile_form.emergency_contact_mobile.data = user.emergency_contact_mobile
+    # education
+    new_education_record_form = NewEducationRecordForm(prefix='new_education_record')
+    if new_education_record_form.validate_on_submit():
+        education_type = EducationType.query.get(int(new_education_record_form.education_type.data))
+        user.add_education_record(
+            education_type=education_type,
+            school=new_education_record_form.school.data,
+            major=new_education_record_form.major.data,
+            gpa=new_education_record_form.gpa.data,
+            full_gpa=new_education_record_form.full_gpa.data,
+            year=new_education_record_form.year.data
+        )
+        flash(u'已添加教育经历：%s %s' % (education_type.name, new_education_record_form.school.data), category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    # employment
+    new_employment_record_form = NewEmploymentRecordForm(prefix='new_employment_record')
+    if new_employment_record_form.validate_on_submit():
+        user.add_employment_record(
+            employer=new_employment_record_form.employer.data,
+            position=new_employment_record_form.position.data,
+            year=new_employment_record_form.year.data
+        )
+        flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    # scores
+    new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
+    if new_previous_achievement_form.validate_on_submit():
+        previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
+        if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
+            user.add_previous_achievement(
+                previous_achievement_type=previous_achievement_type,
+                score=new_previous_achievement_form.achievement.data
+            )
+        if previous_achievement_type.name in [u'竞赛', u'其它']:
+            user.add_previous_achievement(
+                previous_achievement_type=previous_achievement_type,
+                remark=new_previous_achievement_form.achievement.data
+            )
+        flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    # TOEFL
+    new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
+    if new_toefl_test_score_form.validate_on_submit():
+        test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
+        user.add_toefl_test_score(
+            test_score_type=test_score_type,
+            total_score=int(new_toefl_test_score_form.total.data),
+            reading_score=int(new_toefl_test_score_form.reading.data),
+            listening_score=int(new_toefl_test_score_form.listening.data),
+            speaking_score=int(new_toefl_test_score_form.speaking.data),
+            writing_score=int(new_toefl_test_score_form.writing.data),
+            modified_by=current_user._get_current_object()
+        )
+        flash(u'已添加TOEFL成绩：%s' % test_score_type.name, category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    # purpose
+    edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
+    if edit_purpose_form.validate_on_submit():
+        for purpose in user.purposes:
+            if purpose.type.name != u'其它':
+                user.remove_purpose(purpose_type=purpose.type)
+        for purpose_type_id in edit_purpose_form.purposes.data:
+            user.add_purpose(purpose_type=PurposeType.query.get(int(purpose_type_id)))
+        if edit_purpose_form.other_purpose.data:
+            user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=edit_purpose_form.other_purpose.data)
+        flash(u'已更新研修目的', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_purpose_form.purposes.data = []
+    for purpose in user.purposes:
+        if purpose.type.name != u'其它':
+            edit_purpose_form.purposes.data.append(unicode(purpose.type_id))
+        else:
+            edit_purpose_form.other_purpose.data = purpose.remark
+    # application aim
+    edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
+    if edit_application_aim_form.validate_on_submit():
+        user.application_aim = edit_application_aim_form.application_aim.data
+        db.session.add(user)
+        flash(u'已更新申请方向', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_application_aim_form.application_aim.data = user.application_aim
+    # referrer
+    edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
+    if edit_referrer_form.validate_on_submit():
+        for referrer in user.referrers:
+            if referrer.type.name != u'其它':
+                user.remove_referrer(referrer_type=referrer.type)
+        for referrer_type_id in edit_referrer_form.referrers.data:
+            user.add_referrer(referrer_type=ReferrerType.query.get(int(referrer_type_id)))
+        if edit_referrer_form.other_referrer.data:
+            user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=edit_referrer_form.other_referrer.data)
+        flash(u'已更新了解渠道', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_referrer_form.referrers.data = []
+    for referrer in user.referrers:
+        if referrer.type.name != u'其它':
+            edit_referrer_form.referrers.data.append(unicode(referrer.type_id))
+        else:
+            edit_referrer_form.other_referrer.data = referrer.remark
+    # inviter
+    new_inviter_form = NewInviterForm(prefix='new_inviter')
+    if new_inviter_form.validate_on_submit():
+        inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data, created=True, activated=True, deleted=False).first()
+        if inviter is None:
+            flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
+            return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+        if inviter.invited_user(user=user):
+            flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data, category='warning')
+            return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+        inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
+        flash(u'已添加推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    # purchased product
+    edit_purchased_products_form = EditPurchasedProductForm(prefix='edit_purchased_product')
+    if edit_purchased_products_form.validate_on_submit():
+        for purchase in user.purchases:
+            db.session.delete(purchase)
+        for product_id in edit_purchased_products_form.products.data:
+            user.add_purchase(product=Product.query.get(int(product_id)))
+        flash(u'已更新研修产品', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_purchased_products_form.products.data = [unicode(purchase.product.id) for purchase in user.purchases]
+    # VB course
+    edit_vb_course_form = EditVBCourseForm(prefix='edit_vb_course')
+    if edit_vb_course_form.validate_on_submit():
+        if user.vb_course:
+            user.unregister_course(user.vb_course)
+        if int(edit_vb_course_form.vb_course.data):
+            user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
+        flash(u'已更新VB班级', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    if user.vb_course:
+        edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
+    # Y-GRE course
+    edit_y_gre_course_form = EditYGRECourseForm(prefix='edit_y_gre_course')
+    if edit_y_gre_course_form.validate_on_submit():
+        if user.y_gre_course:
+            user.unregister_course(user.y_gre_course)
+        if int(edit_y_gre_course_form.y_gre_course.data):
+            user.register_course(Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)))
+        flash(u'已更新Y-GRE班', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    if user.y_gre_course:
+        edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
+    # worked_in_same_field
+    edit_worked_in_same_field_form = EditWorkInSameFieldForm(prefix='edit_worked_in_same_field')
+    if edit_worked_in_same_field_form.validate_on_submit():
+        user.worked_in_same_field = edit_worked_in_same_field_form.worked_in_same_field.data
+        db.session.add(user)
+        flash(u'已更新"（曾）在培训/留学机构任职"状态', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_worked_in_same_field_form.worked_in_same_field.data = user.worked_in_same_field
+    # deformity
+    edit_deformity_form = EditDeformityForm(prefix='edit_deformity')
+    if edit_deformity_form.validate_on_submit():
+        user.deformity = edit_deformity_form.deformity.data
+        db.session.add(user)
+        flash(u'已更新"有严重心理或身体疾病"状态', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_deformity_form.deformity.data = user.deformity
+    # receptionist
+    return render_template('manage/edit_user.html',
+        edit_name_form=edit_name_form,
+        edit_id_number_form=edit_id_number_form,
+        edit_role_form=edit_role_form,
+        edit_email_form=edit_email_form,
+        edit_mobile_form=edit_mobile_form,
+        edit_address_form=edit_address_form,
+        edit_qq_form=edit_qq_form,
+        edit_wechat_form=edit_wechat_form,
+        edit_emergency_contact_name_form=edit_emergency_contact_name_form,
+        edit_emergency_contact_relationship_form=edit_emergency_contact_relationship_form,
+        edit_emergency_contact_mobile_form=edit_emergency_contact_mobile_form,
+        new_education_record_form=new_education_record_form,
+        new_employment_record_form=new_employment_record_form,
+        new_previous_achievement_form=new_previous_achievement_form,
+        new_toefl_test_score_form=new_toefl_test_score_form,
+        edit_purpose_form=edit_purpose_form,
+        edit_application_aim_form=edit_application_aim_form,
+        edit_referrer_form=edit_referrer_form,
+        new_inviter_form=new_inviter_form,
+        edit_purchased_products_form=edit_purchased_products_form,
+        edit_vb_course_form=edit_vb_course_form,
+        edit_y_gre_course_form=edit_y_gre_course_form,
+        edit_worked_in_same_field_form=edit_worked_in_same_field_form,
+        edit_deformity_form=edit_deformity_form,
+        user=user
+    )
 
 
 @manage.route('/user/education-record/remove/<int:id>')

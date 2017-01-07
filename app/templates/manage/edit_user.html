@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}编辑用户信息{% endblock %}
+{% block title %}编辑{{ user.name }}的用户信息{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -42,6 +42,9 @@
 }
 .ui.vertical.stripe .horizontal.divider {
     margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
 }
 .ui.vertical.stripe .ui.form .ui.button.cancel {
     margin-left: 5px;
@@ -84,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑用户信息</h1>
+    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑{{ user.name }}的用户信息</h1>
 </div>
 {% endblock %}
 
@@ -93,21 +96,674 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="edit-user" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="eight wide required field">
-                            {{ form.name.label() }}
-                            {{ form.name(placeholder='姓名') }}
+                <h4 class="ui blue dividing header">基本信息</h4>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-name-trigger" class="ui mini button">编辑</div>
                         </div>
-                        <div class="eight wide required field">
-                            {{ form.role.label() }}
-                            {{ form.role(class='ui dropdown') }}
+                        <div class="content">
+                            <div class="header">姓名</div>
+                            <div class="description">{{ user.name }}</div>
                         </div>
                     </div>
-                    {{ form.submit(class='ui primary button') }}
-                    <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">性别</div>
+                            <div class="description">{% if user.gender_id %}{{ user.gender.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">生日</div>
+                            <div class="description">{% if user.birthdate %}{{ moment(user.birthdate).format('YYYY年M月D日') }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-id-number-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">身份证号</div>
+                            <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-name-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑用户姓名</div>
+                    <div class="content">
+                        <form id="edit-name" method="POST" class="ui form">
+                            {{ edit_name_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_name_form.name.label() }}
+                                {{ edit_name_form.name(placeholder='姓名') }}
+                            </div>
+                            {{ edit_name_form.submit(class='ui primary button') }}
+                            <div id="edit-name-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-id-number-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑身份证号</div>
+                    <div class="content">
+                        <form id="edit-id-number" method="POST" class="ui form">
+                            {{ edit_id_number_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_id_number_form.id_number.label() }}
+                                {{ edit_id_number_form.id_number(placeholder='身份证号（18位）') }}
+                            </div>
+                            {{ edit_id_number_form.submit(class='ui primary button') }}
+                            <div id="edit-id-number-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <h4 class="ui blue dividing header">研修信息</h4>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-role-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">用户权限</div>
+                            <div class="description">{{ user.role.name }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-vb-course-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">VB班</div>
+                            <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-y-gre-course-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">Y-GRE班</div>
+                            <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-role-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑用户权限</div>
+                    <div class="content">
+                        <form id="edit-role" method="POST" class="ui form">
+                            {{ edit_role_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_role_form.role.label() }}
+                                {{ edit_role_form.role(class='ui dropdown') }}
+                            </div>
+                            {{ edit_role_form.submit(class='ui primary button') }}
+                            <div id="edit-role-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-vb-course-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑VB班</div>
+                    <div class="content">
+                        <form id="edit-vb-course" method="POST" class="ui form">
+                            {{ edit_vb_course_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_vb_course_form.vb_course.label() }}
+                                {{ edit_vb_course_form.vb_course(class='ui dropdown') }}
+                            </div>
+                            {{ edit_vb_course_form.submit(class='ui primary button') }}
+                            <div id="edit-vb-course-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-y-gre-course-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑Y-GRE班</div>
+                    <div class="content">
+                        <form id="edit-y-gre-course" method="POST" class="ui form">
+                            {{ edit_y_gre_course_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_y_gre_course_form.y_gre_course.label() }}
+                                {{ edit_y_gre_course_form.y_gre_course(class='ui dropdown') }}
+                            </div>
+                            {{ edit_y_gre_course_form.submit(class='ui primary button') }}
+                            <div id="edit-y-gre-course-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <h4 class="ui blue dividing header">联系方式</h4>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-email-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">电子邮箱</div>
+                            <div class="description">{{ user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-mobile-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">移动电话</div>
+                            <div class="description">{% if user.mobile %}{{ user.mobile }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-address-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">联系地址</div>
+                            <div class="description">{% if user.address %}{{ user.address }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-qq-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">QQ</div>
+                            <div class="description">{% if user.qq %}{{ user.qq }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-wechat-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">微信</div>
+                            <div class="description">{% if user.wechat %}{{ user.wechat }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-email-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑电子邮箱</div>
+                    <div class="content">
+                        <form id="edit-email" method="POST" class="ui form">
+                            {{ edit_email_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_email_form.email.label() }}
+                                {{ edit_email_form.email(placeholder='用于登录系统、接收通知') }}
+                            </div>
+                            {{ edit_email_form.submit(class='ui primary button') }}
+                            <div id="edit-email-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-mobile-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑移动电话</div>
+                    <div class="content">
+                        <form id="edit-mobile" method="POST" class="ui form">
+                            {{ edit_mobile_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_mobile_form.mobile.label() }}
+                                {{ edit_mobile_form.mobile(placeholder='移动电话') }}
+                            </div>
+                            {{ edit_mobile_form.submit(class='ui primary button') }}
+                            <div id="edit-mobile-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-address-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑联系地址</div>
+                    <div class="content">
+                        <form id="edit-address" method="POST" class="ui form">
+                            {{ edit_address_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_address_form.address.label() }}
+                                {{ edit_address_form.address(placeholder='联系地址') }}
+                            </div>
+                            {{ edit_address_form.submit(class='ui primary button') }}
+                            <div id="edit-address-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-qq-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑QQ</div>
+                    <div class="content">
+                        <form id="edit-qq" method="POST" class="ui form">
+                            {{ edit_qq_form.hidden_tag() }}
+                            <div class="field">
+                                {{ edit_qq_form.qq.label() }}
+                                {{ edit_qq_form.qq(placeholder='QQ号') }}
+                            </div>
+                            {{ edit_qq_form.submit(class='ui primary button') }}
+                            <div id="edit-qq-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-wechat-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑微信</div>
+                    <div class="content">
+                        <form id="edit-wechat" method="POST" class="ui form">
+                            {{ edit_wechat_form.hidden_tag() }}
+                            <div class="field">
+                                {{ edit_wechat_form.wechat.label() }}
+                                {{ edit_wechat_form.wechat(placeholder='微信号/手机号') }}
+                            </div>
+                            {{ edit_wechat_form.submit(class='ui primary button') }}
+                            <div id="edit-wechat-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <h4 class="ui orange dividing header">紧急联系人</h4>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-emergency-contact-name-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">姓名</div>
+                            <div class="description">{% if user.emergency_contact_name %}{{ user.emergency_contact_name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-emergency-contact-relationship-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">关系</div>
+                            <div class="description">{% if user.emergency_contact_relationship_id %}{{ user.relationship.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-emergency-contact-mobile-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">联系方式</div>
+                            <div class="description">{% if user.emergency_contact_mobile %}{{ user.emergency_contact_mobile }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-emergency-contact-name-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑紧急联系人姓名</div>
+                    <div class="content">
+                        <form id="edit-emergency-contact-name" method="POST" class="ui form">
+                            {{ edit_emergency_contact_name_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_emergency_contact_name_form.emergency_contact_name.label() }}
+                                {{ edit_emergency_contact_name_form.emergency_contact_name(placeholder='紧急联系人姓名') }}
+                            </div>
+                            {{ edit_emergency_contact_name_form.submit(class='ui primary button') }}
+                            <div id="edit-emergency-contact-name-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-emergency-contact-relationship-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑紧急联系人关系</div>
+                    <div class="content">
+                        <form id="edit-emergency-contact-relationship" method="POST" class="ui form">
+                            {{ edit_emergency_contact_relationship_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_emergency_contact_relationship_form.emergency_contact_relationship.label() }}
+                                {{ edit_emergency_contact_relationship_form.emergency_contact_relationship(class='ui dropdown') }}
+                            </div>
+                            {{ edit_emergency_contact_relationship_form.submit(class='ui primary button') }}
+                            <div id="edit-emergency-contact-relationship-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-emergency-contact-mobile-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑紧急联系人移动电话</div>
+                    <div class="content">
+                        <form id="edit-emergency-contact-mobile" method="POST" class="ui form">
+                            {{ edit_emergency_contact_mobile_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_emergency_contact_mobile_form.emergency_contact_mobile.label() }}
+                                {{ edit_emergency_contact_mobile_form.emergency_contact_mobile(placeholder='紧急联系人移动电话') }}
+                            </div>
+                            {{ edit_emergency_contact_mobile_form.submit(class='ui primary button') }}
+                            <div id="edit-emergency-contact-mobile-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <h4 class="ui blue dividing header">教育经历</h4>
+                {% if user.education_records.count() %}
+                <div class="ui relaxed divided list">
+                    {% for education_record in user.education_records %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ education_record.school }}</div>
+                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA: {{ education_record.gpa }} / {{ education_record.full_gpa }}{% endif %}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form id="new-education-record" method="POST" class="ui mini form">
+                    {{ new_education_record_form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="two wide field">
+                            {{ new_education_record_form.education_type(class='ui compact dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ new_education_record_form.school(placeholder='学校') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ new_education_record_form.major(placeholder='院系（专业）') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_education_record_form.gpa(placeholder='GPA') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_education_record_form.full_gpa(placeholder='GPA满分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_education_record_form.year(class='ui compact dropdown') }}
+                        </div>
+                        <div class="one wide field">
+                            {{ new_education_record_form.submit(class='ui primary mini button') }}
+                        </div>
+                    </div>
                 </form>
+                <h4 class="ui blue dividing header">工作经历</h4>
+                {% if user.employment_records.count() %}
+                <div class="ui relaxed divided list">
+                    {% for employment_record in user.employment_records %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ employment_record.employer }}</div>
+                            <div class="description">{{ employment_record.position }} &middot; {{ employment_record.year }}年</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form id="new-employment-record" method="POST" class="ui mini form">
+                    {{ new_employment_record_form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ new_employment_record_form.employer(placeholder='工作单位') }}
+                        </div>
+                        <div class="five wide field">
+                            {{ new_employment_record_form.position(placeholder='职务') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_employment_record_form.year(class='ui compact dropdown') }}
+                        </div>
+                        <div class="one wide field">
+                            {{ new_employment_record_form.submit(class='ui primary mini button') }}
+                        </div>
+                    </div>
+                </form>
+                <h4 class="ui blue dividing header">既往成绩</h4>
+                {% if user.previous_achievements.count() %}
+                <div class="ui relaxed divided list">
+                    {% for previous_achievement in user.previous_achievements %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_previous_achievement', id=previous_achievement.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ previous_achievement.type.name }}</div>
+                            <div class="description">{% if previous_achievement.score %}{{ previous_achievement.score }}分{% elif previous_achievement.remark %}{{ previous_achievement.remark }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form id="new-previous-achievement" method="POST" class="ui mini form">
+                    {{ new_previous_achievement_form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="three wide field">
+                            {{ new_previous_achievement_form.previous_achievement_type(class='ui dropdown') }}
+                        </div>
+                        <div class="twelve wide field">
+                            {{ new_previous_achievement_form.achievement(placeholder='成绩') }}
+                        </div>
+                        <div class="one wide field">
+                            {{ new_previous_achievement_form.submit(class='ui primary mini button') }}
+                        </div>
+                    </div>
+                </form>
+                <h4 class="ui blue dividing header">TOEFL成绩</h4>
+                {% if user.toefl_test_scores.count() %}
+                <div class="ui relaxed divided list">
+                    {% for toefl_test_score in user.toefl_test_scores %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ toefl_test_score.type.name }}成绩</div>
+                            <div class="description">总分: {{ toefl_test_score.total_score }}分（阅读: {{ toefl_test_score.reading_score }}分 &middot; 听力: {{ toefl_test_score.listening_score }}分 &middot; 口语: {{ toefl_test_score.speaking_score }}分 &middot; 写作: {{ toefl_test_score.writing_score }}分）</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form id="new-toefl-test-score" method="POST" class="ui mini form">
+                    {{ new_toefl_test_score_form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="three wide field">
+                            {{ new_toefl_test_score_form.test_score_type(class='ui dropdown') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ new_toefl_test_score_form.total(placeholder='TOEFL总分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.reading(placeholder='TOEFL阅读') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.listening(placeholder='TOEFL听力') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.speaking(placeholder='TOEFL口语') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ new_toefl_test_score_form.writing(placeholder='TOEFL写作') }}
+                        </div>
+                        <div class="one wide field">
+                            {{ new_toefl_test_score_form.submit(class='ui primary mini button') }}
+                        </div>
+                    </div>
+                </form>
+                <h4 class="ui teal dividing header">报名信息</h4>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-purpose-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">研修目的</div>
+                            <div class="description">{{ user.purposes_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-application-aim-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">申请方向</div>
+                            <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-referrer-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">了解渠道</div>
+                            <div class="description">{{ user.referrers_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-inviter-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">推荐人</div>
+                            <div class="description">{{ user.inviters }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-purchased-product-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
+                            <div class="description">{{ user.purchases_alias }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="edit-purpose-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑研修目的</div>
+                    <div class="content">
+                        <form id="edit-purpose" method="POST" class="ui form">
+                            {{ edit_purpose_form.hidden_tag() }}
+                            <div class="field">
+                                {{ edit_purpose_form.purposes.label() }}
+                                {{ edit_purpose_form.purposes(class='ui dropdown') }}
+                            </div>
+                            <div class="field">
+                                {{ edit_purpose_form.other_purpose.label() }}
+                                {{ edit_purpose_form.other_purpose(placeholder='其它研修目的') }}
+                            </div>
+                            {{ edit_purpose_form.submit(class='ui primary button') }}
+                            <div id="edit-purpose-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-application-aim-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑申请方向</div>
+                    <div class="content">
+                        <form id="edit-application-aim" method="POST" class="ui form">
+                            {{ edit_application_aim_form.hidden_tag() }}
+                            <div class="field">
+                                {{ edit_application_aim_form.application_aim.label() }}
+                                {{ edit_application_aim_form.application_aim(placeholder='申请方向') }}
+                            </div>
+                            {{ edit_referrer_form.submit(class='ui primary button') }}
+                            <div id="edit-application-aim-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-referrer-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑了解渠道</div>
+                    <div class="content">
+                        <form id="edit-referrer" method="POST" class="ui form">
+                            {{ edit_referrer_form.hidden_tag() }}
+                            <div class="field">
+                                {{ edit_referrer_form.referrers.label() }}
+                                {{ edit_referrer_form.referrers(class='ui dropdown') }}
+                            </div>
+                            <div class="field">
+                                {{ edit_referrer_form.other_referrer.label() }}
+                                {{ edit_referrer_form.other_referrer(placeholder='其它了解渠道') }}
+                            </div>
+                            {{ edit_referrer_form.submit(class='ui primary button') }}
+                            <div id="edit-referrer-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-inviter-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑推荐人</div>
+                    <div class="content">
+                        {% if user.accepted_invitations.count() %}
+                        <div class="ui relaxed divided list">
+                            {% for invitation in user.accepted_invitations %}
+                            <div class="item">
+                                <div class="right floated content">
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_inviter', user_id=user.id, inviter_id=invitation.inviter.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                                </div>
+                                <div class="content">
+                                    <div class="header">{{ invitation.inviter.name }}（{{ invitation.inviter.email }}）</div>
+                                    <div class="description">推荐类型：{{ invitation.type.name }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <form id="new-inviter" method="POST" class="ui form">
+                            {{ new_inviter_form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="twelve wide required field">
+                                    {{ new_inviter_form.inviter_email.label() }}
+                                    <div class="ui fluid search">
+                                        {{ new_inviter_form.inviter_email(placeholder='输入推荐人姓名/邮箱查询', class='prompt') }}
+                                        <div class="results"></div>
+                                    </div>
+                                </div>
+                                <div class="four wide required field">
+                                    {{ new_inviter_form.invitation_type.label() }}
+                                    {{ new_inviter_form.invitation_type(class='ui compact dropdown') }}
+                                </div>
+                            </div>
+                            {{ new_inviter_form.submit(class='ui primary button') }}
+                            <div id="edit-inviter-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-purchased-product-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑研修产品</div>
+                    <div class="content">
+                        <form id="edit-purchased-product" method="POST" class="ui form">
+                            {{ edit_purchased_products_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_purchased_products_form.products.label() }}
+                                {{ edit_purchased_products_form.products(class='ui dropdown') }}
+                            </div>
+                            {{ edit_purchased_products_form.submit(class='ui primary button') }}
+                            <div id="edit-purchased-product-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <h4 class="ui blue dividing header">其它信息</h4>
+                <form id="edit-worked-in-same-field" method="POST" class="ui mini form">
+                    {{ edit_worked_in_same_field_form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="fifteen wide field">
+                            <div class="ui toggle checkbox">
+                                {{ edit_worked_in_same_field_form.worked_in_same_field() }}
+                                {{ edit_worked_in_same_field_form.worked_in_same_field.label() }}
+                            </div>
+                        </div>
+                        <div class="one wide field">
+                            {{ edit_worked_in_same_field_form.submit(class='ui mini primary button') }}
+                        </div>
+                    </div>
+                </form>
+                <form id="edit-deformity" method="POST" class="ui mini form">
+                    {{ edit_deformity_form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="fifteen wide field">
+                            <div class="ui toggle checkbox">
+                                {{ edit_deformity_form.deformity() }}
+                                {{ edit_deformity_form.deformity.label() }}
+                            </div>
+                        </div>
+                        <div class="one wide field">
+                            {{ edit_deformity_form.submit(class='ui mini primary button') }}
+                        </div>
+                    </div>
+                </form>
+                <a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}"><i class="left arrow icon"></i> 返回</a>
             </div>
         </div>
     </div>
@@ -116,6 +772,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/IDValidator.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -126,39 +784,779 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
+$('select.dropdown').dropdown();
+
+$('.ui.checkbox').checkbox();
+
+$('#edit-name-trigger')
+    .on('click', function() {
+        $('#edit-name-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-name-hide-trigger')
+    .on('click', function() {
+        $('#edit-name-modal').modal('hide');
+    })
 ;
 
+$('#edit-id-number-trigger')
+    .on('click', function() {
+        $('#edit-id-number-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-id-number-hide-trigger')
+    .on('click', function() {
+        $('#edit-id-number-modal').modal('hide');
+    })
+;
+
+$('#edit-role-trigger')
+    .on('click', function() {
+        $('#edit-role-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-role-hide-trigger')
+    .on('click', function() {
+        $('#edit-role-modal').modal('hide');
+    })
+;
+
+$('#edit-vb-course-trigger')
+    .on('click', function() {
+        $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-vb-course-hide-trigger')
+    .on('click', function() {
+        $('#edit-vb-course-modal').modal('hide');
+    })
+;
+
+$('#edit-y-gre-course-trigger')
+    .on('click', function() {
+        $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-y-gre-course-hide-trigger')
+    .on('click', function() {
+        $('#edit-y-gre-course-modal').modal('hide');
+    })
+;
+
+$('#edit-email-trigger')
+    .on('click', function() {
+        $('#edit-email-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-email-hide-trigger')
+    .on('click', function() {
+        $('#edit-email-modal').modal('hide');
+    })
+;
+
+$('#edit-mobile-trigger')
+    .on('click', function() {
+        $('#edit-mobile-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-mobile-hide-trigger')
+    .on('click', function() {
+        $('#edit-mobile-modal').modal('hide');
+    })
+;
+
+$('#edit-address-trigger')
+    .on('click', function() {
+        $('#edit-address-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-address-hide-trigger')
+    .on('click', function() {
+        $('#edit-address-modal').modal('hide');
+    })
+;
+
+$('#edit-qq-trigger')
+    .on('click', function() {
+        $('#edit-qq-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-qq-hide-trigger')
+    .on('click', function() {
+        $('#edit-qq-modal').modal('hide');
+    })
+;
+
+$('#edit-wechat-trigger')
+    .on('click', function() {
+        $('#edit-wechat-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-wechat-hide-trigger')
+    .on('click', function() {
+        $('#edit-wechat-modal').modal('hide');
+    })
+;
+
+$('#edit-emergency-contact-name-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-name-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-emergency-contact-name-hide-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-name-modal').modal('hide');
+    })
+;
+
+$('#edit-emergency-contact-relationship-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-relationship-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-emergency-contact-relationship-hide-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-relationship-modal').modal('hide');
+    })
+;
+
+$('#edit-emergency-contact-mobile-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-mobile-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-emergency-contact-mobile-hide-trigger')
+    .on('click', function() {
+        $('#edit-emergency-contact-mobile-modal').modal('hide');
+    })
+;
+
+$('#edit-purpose-trigger')
+    .on('click', function() {
+        $('#edit-purpose-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-purpose-hide-trigger')
+    .on('click', function() {
+        $('#edit-purpose-modal').modal('hide');
+    })
+;
+
+$('#edit-application-aim-trigger')
+    .on('click', function() {
+        $('#edit-application-aim-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-application-aim-hide-trigger')
+    .on('click', function() {
+        $('#edit-application-aim-modal').modal('hide');
+    })
+;
+
+$('#edit-referrer-trigger')
+    .on('click', function() {
+        $('#edit-referrer-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-referrer-hide-trigger')
+    .on('click', function() {
+        $('#edit-referrer-modal').modal('hide');
+    })
+;
+
+$('#edit-inviter-trigger')
+    .on('click', function() {
+        $('#edit-inviter-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-inviter-hide-trigger')
+    .on('click', function() {
+        $('#edit-inviter-modal').modal('hide');
+    })
+;
+
+$('#edit-purchased-product-trigger')
+    .on('click', function() {
+        $('#edit-purchased-product-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-purchased-product-hide-trigger')
+    .on('click', function() {
+        $('#edit-purchased-product-modal').modal('hide');
+    })
+;
+
+var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
-        $('#edit-user')
+        $('#edit-name')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
                     name: {
-                        identifier: 'name',
+                        identifier: 'edit_name-name',
                         rules: [
                             {
                                 type: 'empty',
                                 prompt: '请填写用户姓名'
                             }
                         ]
-                    },
-                    role: {
-                        identifier: 'role',
+                    }
+                }
+            })
+        ;
+        $.fn.form.settings.rules.idNumber = function(value) {
+            return (Validator.isValid(value, 18));
+        };
+        $('#edit-id-number')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    id_number: {
+                        identifier: 'edit_id_number-id_number',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择用户组'
+                                prompt: '请填写身份证号'
+                            },
+                            {
+                                type: 'idNumber',
+                                prompt: '请输入一个有效的身份证号'
                             }
                         ]
                     }
                 }
             })
         ;
+        $('#edit-role')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    role: {
+                        identifier: 'edit_role-role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择用户权限'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-vb-course')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    vb_course: {
+                        identifier: 'edit_vb_course-vb_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择VB班'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-y-gre-course')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    y_gre_course: {
+                        identifier: 'edit_y_gre_course-y_gre_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Y-GRE班'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-email')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'edit_email-email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-mobile')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    mobile: {
+                        identifier: 'edit_mobile-mobile',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '移动电话号码位数有误'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-address')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    address: {
+                        identifier: 'edit_address-address',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写联系地址'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-qq')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    qq: {
+                        identifier: 'edit_qq-qq',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的QQ号码'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-wechat')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    wechat: {
+                        identifier: 'edit_wechat-wechat',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'regExp[/^[A-Za-z0-9_-]{6,20}$/]',
+                                prompt: '请输入一个有效的微信号/手机号'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-emergency-contact-name')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    emergency_contact_name: {
+                        identifier: 'edit_emergency_contact_name-emergency_contact_name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人姓名'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-emergency-contact-relationship')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    emergency_contact_relationship: {
+                        identifier: 'edit_emergency_contact_relationship-emergency_contact_relationship',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择紧急联系人关系'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-emergency-contact-mobile')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    emergency_contact_mobile: {
+                        identifier: 'edit_emergency_contact_mobile-emergency_contact_mobile',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的紧急联系人移动电话号码'
+                            },
+                            {
+                                type: 'exactLength[11]',
+                                prompt: '紧急联系人移动电话号码位数有误'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $.fn.form.settings.rules.exceptEducationType = function(value) {
+            return ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1);
+        };
+        $.fn.form.settings.rules.GPAwithinLimit = function(value) {
+            if ($('#new_education_record-full_gpa').val() === '') {
+                return true;
+            } else {
+                return (Number(value) <= Number($('#new_education_record-full_gpa').val()));
+            };
+        };
+        $('#new-education-record')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    education_type: {
+                        identifier: 'new_education_record-education_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择学历类型'
+                            }
+                        ]
+                    },
+                    school: {
+                        identifier: 'new_education_record-school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写学校'
+                            }
+                        ]
+                    },
+                    major: {
+                        identifier: 'new_education_record-major',
+                        rules: [
+                            {
+                                type: 'exceptEducationType',
+                                prompt: '请填写学院（专业）'
+                            }
+                        ]
+                    },
+                    gpa: {
+                        identifier: 'new_education_record-gpa',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            },
+                            {
+                                type: 'GPAwithinLimit',
+                                prompt: 'GPA数值超过满分'
+                            }
+                        ]
+                    },
+                    full_gpa: {
+                        identifier: 'new_education_record-full_gpa',
+                        depends: 'new_education_record-gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
+                            }
+                        ]
+                    },
+                    year: {
+                        identifier: 'new_education_record-year',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                }
+            })
+        ;
+        $('#new-employment-record')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    employer: {
+                        identifier: 'new_employment_record-employer',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写工作单位'
+                            }
+                        ]
+                    },
+                    position: {
+                        identifier: 'new_employment_record-position',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写职务'
+                            }
+                        ]
+                    },
+                    year: {
+                        identifier: 'new_employment_record-year',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入职年份'
+                            }
+                        ]
+                    },
+                }
+            })
+        ;
+        $.fn.form.settings.rules.previousAchievement = function(value) {
+            if (/^[0-9]*$/.test(value)) {
+                return true;
+            } else {
+                return ($.inArray($('#new_previous_achievement-previous_achievement_type').dropdown('get text')[0], ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
+            };
+        };
+        $('#new-previous-achievement')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    previous_achievement_type: {
+                        identifier: 'new_previous_achievement-previous_achievement_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择成绩类型'
+                            }
+                        ]
+                    },
+                    achievement: {
+                        identifier: 'new_previous_achievement-achievement',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写成绩'
+                            },
+                            {
+                                type: 'previousAchievement',
+                                prompt: '成绩格式有误'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $.fn.form.settings.rules.toefl = function(value) {
+            if (($('#new_toefl_test_score-reading').val() === '') || ($('#new_toefl_test_score-listening').val() === '') || ($('#new_toefl_test_score-speaking').val() === '') || ($('#new_toefl_test_score-writing').val() === '')) {
+                return true;
+            } else {
+                return (Number(value) === Number($('#new_toefl_test_score-reading').val()) + Number($('#new_toefl_test_score-listening').val()) + Number($('#new_toefl_test_score-speaking').val()) + Number($('#new_toefl_test_score-writing').val()));
+            };
+        };
+        $('#new-toefl-test-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    test_score_type: {
+                        identifier: 'new_toefl_test_score-test_score_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择TOEFL成绩类型'
+                            }
+                        ]
+                    },
+                    total: {
+                        identifier: 'new_toefl_test_score-total',
+                        rules: [
+                            {
+                                type: 'integer[0..120]',
+                                prompt: '请填写一个有效的TOEFL分数'
+                            },
+                            {
+                                type: 'toefl',
+                                prompt: 'TOEFL分数有误'
+                            }
+                        ]
+                    },
+                    reading: {
+                        identifier: 'new_toefl_test_score-reading',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL阅读分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL阅读分数'
+                            }
+                        ]
+                    },
+                    listening: {
+                        identifier: 'new_toefl_test_score-listening',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL听力分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL听力分数'
+                            }
+                        ]
+                    },
+                    speaking: {
+                        identifier: 'new_toefl_test_score-speaking',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL口语分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL口语分数'
+                            }
+                        ]
+                    },
+                    writing: {
+                        identifier: 'new_toefl_test_score-writing',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL写作分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL写作分数'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#new-inviter')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    inviter_email: {
+                        identifier: 'new_inviter-inviter_email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入推荐人电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    invitation_type: {
+                        identifier: 'new_inviter-invitation_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择推荐人类型'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-purchased-product')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    products: {
+                        identifier: 'edit_purchased_product-products',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修产品'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
+        },
+        showNoResults: false
     })
 ;
 </script>

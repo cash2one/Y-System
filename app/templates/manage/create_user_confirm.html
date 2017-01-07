@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}新建学生用户{% endblock %}
+{% block title %}确认{{ user.name }}的信息{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -87,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="add user icon"></i> 新建学生用户</h1>
+    <h1 class="ui inverted header"><i class="add user icon"></i> 确认{{ user.name }}的信息</h1>
 </div>
 {% endblock %}
 
@@ -124,13 +124,13 @@
                     <div class="item">
                         <div class="content">
                             <div class="header">性别</div>
-                            <div class="description">{{ user.gender.name }}</div>
+                            <div class="description">{% if user.gender_id %}{{ user.gender.name }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
                         <div class="content">
                             <div class="header">生日</div>
-                            <div class="description">{{ moment(user.birthdate).format('YYYY年M月D日') }}</div>
+                            <div class="description">{% if user.birthdate %}{{ moment(user.birthdate).format('YYYY年M月D日') }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
@@ -139,7 +139,7 @@
                         </div>
                         <div class="content">
                             <div class="header">身份证号</div>
-                            <div class="description">{{ user.id_number }}</div>
+                            <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                 </div>
@@ -786,8 +786,8 @@
                 <div id="delete-modal" class="ui modal">
                     <div class="header"><i class="warning sign icon"></i> 确定要删除未完成注册的用户信息：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
                     <div class="actions">
+                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.create_user_delete', id=user.id, next=request.args.get('next')) }}"><i class="remove user icon"></i> 删除</a>
                         <div id="delete-hide-trigger" class="ui black button">保留</div>
-                        <a class="ui negative right labeled icon button loading-trigger" href="{{ url_for('manage.create_user_delete', id=user.id, next=request.args.get('next')) }}">删除 <i class="remove user icon"></i></a>
                     </div>
                 </div>
             </div>
