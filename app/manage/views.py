@@ -1751,13 +1751,10 @@ def delete_ipad(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.deleted:
         abort(404)
-    form = DeleteiPadForm(ipad=ipad)
-    if form.validate_on_submit():
-        ipad.safe_delete(modified_by=current_user._get_current_object())
-        iPadContentJSON.mark_out_of_date()
-        flash(u'已删除序列号为%s的iPad' % ipad.serial, category='success')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
+    ipad.safe_delete(modified_by=current_user._get_current_object())
+    iPadContentJSON.mark_out_of_date()
+    flash(u'已删除序列号为%s的iPad' % ipad.serial, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
 @manage.route('/ipad/filter', methods=['GET', 'POST'])
