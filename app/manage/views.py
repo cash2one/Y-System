@@ -31,12 +31,6 @@ from ..models import Announcement, AnnouncementType
 from ..decorators import permission_required, administrator_required, developer_required
 
 
-def flash_errors(form):
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(u'[%s]%s' % (getattr(form, field).label.text, error), category='error')
-
-
 @manage.after_app_request
 def after_request(response):
     for query in get_debug_queries():
@@ -2425,12 +2419,15 @@ def create_user_confirm(id):
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
     if edit_email_form.validate_on_submit():
-        user.email = edit_email_form.email.data
-        db.session.add(user)
+        if User.query.filter_by(email=edit_email_form.email.data).first() and edit_email_form.email.data != user.email:
+            flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
+            return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+        if edit_email_form.email.data != user.email:
+            user.email = edit_email_form.email.data
+            db.session.add(user)
         flash(u'已更新用户邮箱', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_email_form.email.data = user.email
-    flash_errors(edit_email_form)
     # mobile
     edit_mobile_form = EditMobileForm(prefix='edit_mobile')
     if edit_mobile_form.validate_on_submit():
@@ -2589,7 +2586,13 @@ def create_user_confirm(id):
     # inviter
     new_inviter_form = NewInviterForm(prefix='new_inviter')
     if new_inviter_form.validate_on_submit():
-        flash(u'已更新推荐人', category='success')
+        inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data, created=True, activated=True, deleted=False).first()
+        if inviter is not None:
+            inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
+        else:
+            flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
+            return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+        flash(u'已添加推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purchased product
     edit_purchased_products_form = EditPurchasedProductForm(prefix='edit_purchased_product')
@@ -2712,8 +2715,8 @@ def remove_toefl_test_score(id):
 @manage.route('/user/inviter/remove/<int:user_id>/<int:inviter_id>')
 @login_required
 def remove_inviter(user_id, inviter_id):
-    user = User.query.get_or_404(id)
-    inviter = User.query.get_or_404(id)
+    user = User.query.get_or_404(user_id)
+    inviter = User.query.get_or_404(inviter_id)
     inviter.uninvite_user(user=user)
     flash(u'已删除推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))

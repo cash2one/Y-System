@@ -47,28 +47,20 @@ $('#copyright')
 // footer contacts
 $('#contacts-footer-link')
     .on('click', function () {
-        $('#contacts-dimmer')
-            .dimmer('show')
-        ;
+        $('#contacts-dimmer').dimmer('show');
     })
 ;
 
 // submit form
 function submitForm() {
-    $('#loading-dimmer')
-        .dimmer('show')
-    ;
-    $(this)
-        .form('submit')
-    ;
+    $('#loading-dimmer').dimmer('show');
+    $(this).form('submit');
 };
 
 // loading dimmer
 $('.loading-trigger')
     .on('click', function () {
-        $('#loading-dimmer')
-            .dimmer('show')
-        ;
+        $('#loading-dimmer').dimmer('show');
     })
 ;
 

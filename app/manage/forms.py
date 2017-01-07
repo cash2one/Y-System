@@ -354,7 +354,7 @@ class NewUserForm(FlaskForm):
             raise ValidationError(u'%s已经被注册' % field.data)
 
     def validate_inviter_email(self, field):
-        if field.data and User.query.filter_by(email=field.data).first() is None:
+        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
             raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
 
 
@@ -453,10 +453,6 @@ class EditEmailForm(FlaskForm):
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'更新')
 
-    def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
-            raise ValidationError(u'%s已经被注册' % field.data)
-
 
 class EditMobileForm(FlaskForm):
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
@@ -530,10 +526,6 @@ class NewInviterForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewInviterForm, self).__init__(*args, **kwargs)
         self.invitation_type.choices = [(u'', u'选择推荐类型')] + [(unicode(invitation_type.id), invitation_type.name) for invitation_type in InvitationType.query.order_by(InvitationType.id.asc()).all()]
-
-    def validate_inviter_email(self, field):
-        if field.data and User.query.filter_by(email=field.data).first() is None:
-            raise ValidationError(u'推荐人邮箱不存在：%s' % field.data)
 
 
 class EditPurchasedProductForm(FlaskForm):

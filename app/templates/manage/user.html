@@ -175,7 +175,7 @@
                                 </div>
                                 {% else %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui primary button loading-trigger" href="{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="add user icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
                                 </div>
                                 {% endif %}

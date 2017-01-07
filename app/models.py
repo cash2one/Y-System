@@ -1270,7 +1270,7 @@ class User(UserMixin, db.Model):
             return u'无'
         if self.accepted_invitations.count() == 1:
             return u'%s（%s）[%s]' % (self.accepted_invitations.first().inviter.name, self.accepted_invitations.first().inviter.email, self.accepted_invitations.first().type.name)
-        return reduce(lambda inviter1, inviter2: u'%s · %s' % (inviter1, inviter2, [u'%s（%s）[%s]' % (invitation.inviter.name, invitation.inviter.email, invitation.type.name) for invitation in self.accepted_invitations]))
+        return reduce(lambda inviter1, inviter2: u'%s · %s' % (inviter1, inviter2), [u'%s（%s）[%s]' % (invitation.inviter.name, invitation.inviter.email, invitation.type.name) for invitation in self.accepted_invitations])
 
     def receive_user(self, user):
         if not self.received_user(user):

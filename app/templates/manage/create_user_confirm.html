@@ -671,7 +671,7 @@
                                 <div class="twelve wide required field">
                                     {{ new_inviter_form.inviter_email.label() }}
                                     <div class="ui fluid search">
-                                        {{ new_inviter_form.inviter_email(placeholder='输入推荐人姓名/邮箱查询') }}
+                                        {{ new_inviter_form.inviter_email(placeholder='输入推荐人姓名/邮箱查询', class='prompt') }}
                                         <div class="results"></div>
                                     </div>
                                 </div>
@@ -779,7 +779,8 @@
                         </div>
                     </div>
                     {{ confirm_user_form.submit(class='ui primary button') }}
-                    <a class="ui button cancel negative loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">放弃并删除用户资料</a>
+                    <a class="ui negative button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">删除</a>
+                    <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                     {{ macros.form_validation_error_widget(confirm_user_form) }}
                 </form>
             </div>
@@ -808,12 +809,7 @@ $('.ui.checkbox').checkbox();
 
 $('#edit-name-trigger')
     .on('click', function() {
-        $('#edit-name-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-name-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-name-hide-trigger')
@@ -824,12 +820,7 @@ $('#edit-name-hide-trigger')
 
 $('#edit-id-number-trigger')
     .on('click', function() {
-        $('#edit-id-number-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-id-number-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-id-number-hide-trigger')
@@ -840,12 +831,7 @@ $('#edit-id-number-hide-trigger')
 
 $('#edit-email-trigger')
     .on('click', function() {
-        $('#edit-email-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-email-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-email-hide-trigger')
@@ -856,12 +842,7 @@ $('#edit-email-hide-trigger')
 
 $('#edit-mobile-trigger')
     .on('click', function() {
-        $('#edit-mobile-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-mobile-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-mobile-hide-trigger')
@@ -872,12 +853,7 @@ $('#edit-mobile-hide-trigger')
 
 $('#edit-address-trigger')
     .on('click', function() {
-        $('#edit-address-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-address-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-address-hide-trigger')
@@ -888,12 +864,7 @@ $('#edit-address-hide-trigger')
 
 $('#edit-qq-trigger')
     .on('click', function() {
-        $('#edit-qq-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-qq-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-qq-hide-trigger')
@@ -904,12 +875,7 @@ $('#edit-qq-hide-trigger')
 
 $('#edit-wechat-trigger')
     .on('click', function() {
-        $('#edit-wechat-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-wechat-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-wechat-hide-trigger')
@@ -920,12 +886,7 @@ $('#edit-wechat-hide-trigger')
 
 $('#edit-emergency-contact-name-trigger')
     .on('click', function() {
-        $('#edit-emergency-contact-name-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-emergency-contact-name-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-emergency-contact-name-hide-trigger')
@@ -936,12 +897,7 @@ $('#edit-emergency-contact-name-hide-trigger')
 
 $('#edit-emergency-contact-relationship-trigger')
     .on('click', function() {
-        $('#edit-emergency-contact-relationship-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-emergency-contact-relationship-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-emergency-contact-relationship-hide-trigger')
@@ -952,12 +908,7 @@ $('#edit-emergency-contact-relationship-hide-trigger')
 
 $('#edit-emergency-contact-mobile-trigger')
     .on('click', function() {
-        $('#edit-emergency-contact-mobile-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-emergency-contact-mobile-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-emergency-contact-mobile-hide-trigger')
@@ -968,12 +919,7 @@ $('#edit-emergency-contact-mobile-hide-trigger')
 
 $('#edit-purpose-trigger')
     .on('click', function() {
-        $('#edit-purpose-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-purpose-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-purpose-hide-trigger')
@@ -984,12 +930,7 @@ $('#edit-purpose-hide-trigger')
 
 $('#edit-application-aim-trigger')
     .on('click', function() {
-        $('#edit-application-aim-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-application-aim-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-application-aim-hide-trigger')
@@ -1000,12 +941,7 @@ $('#edit-application-aim-hide-trigger')
 
 $('#edit-referrer-trigger')
     .on('click', function() {
-        $('#edit-referrer-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-referrer-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-referrer-hide-trigger')
@@ -1016,12 +952,7 @@ $('#edit-referrer-hide-trigger')
 
 $('#edit-inviter-trigger')
     .on('click', function() {
-        $('#edit-inviter-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-inviter-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-inviter-hide-trigger')
@@ -1032,12 +963,7 @@ $('#edit-inviter-hide-trigger')
 
 $('#edit-purchased-product-trigger')
     .on('click', function() {
-        $('#edit-purchased-product-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-purchased-product-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-purchased-product-hide-trigger')
@@ -1048,12 +974,7 @@ $('#edit-purchased-product-hide-trigger')
 
 $('#edit-role-trigger')
     .on('click', function() {
-        $('#edit-role-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-role-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-role-hide-trigger')
@@ -1064,12 +985,7 @@ $('#edit-role-hide-trigger')
 
 $('#edit-vb-course-trigger')
     .on('click', function() {
-        $('#edit-vb-course-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-vb-course-hide-trigger')
@@ -1080,12 +996,7 @@ $('#edit-vb-course-hide-trigger')
 
 $('#edit-y-gre-course-trigger')
     .on('click', function() {
-        $('#edit-y-gre-course-modal')
-            .modal({
-                autofocus: false
-            })
-            .modal('show')
-        ;
+        $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#edit-y-gre-course-hide-trigger')
@@ -1099,7 +1010,7 @@ $(document)
     .ready(function() {
         $('#edit-name')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1120,7 +1031,7 @@ $(document)
         };
         $('#edit-id-number')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1142,7 +1053,7 @@ $(document)
         ;
         $('#edit-email')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1164,7 +1075,7 @@ $(document)
         ;
         $('#edit-mobile')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1190,7 +1101,7 @@ $(document)
         ;
         $('#edit-address')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1208,7 +1119,7 @@ $(document)
         ;
         $('#edit-qq')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1227,7 +1138,7 @@ $(document)
         ;
         $('#edit-wechat')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1246,7 +1157,7 @@ $(document)
         ;
         $('#edit-emergency-contact-name')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1264,7 +1175,7 @@ $(document)
         ;
         $('#edit-emergency-contact-relationship')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1282,7 +1193,7 @@ $(document)
         ;
         $('#edit-emergency-contact-mobile')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1318,7 +1229,7 @@ $(document)
         };
         $('#new-education-record')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1391,7 +1302,7 @@ $(document)
         ;
         $('#new-employment-record')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1434,7 +1345,7 @@ $(document)
         };
         $('#new-previous-achievement')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1472,7 +1383,7 @@ $(document)
         };
         $('#new-toefl-test-score')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1555,7 +1466,7 @@ $(document)
         ;
         $('#new-inviter')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1586,7 +1497,7 @@ $(document)
         ;
         $('#edit-purchased-product')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1604,7 +1515,7 @@ $(document)
         ;
         $('#edit-role')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1622,7 +1533,7 @@ $(document)
         ;
         $('#edit-vb-course')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1640,7 +1551,7 @@ $(document)
         ;
         $('#edit-y-gre-course')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
@@ -1658,7 +1569,7 @@ $(document)
         ;
         $('#confirm-user')
             .form({
-                // onSuccess: submitForm,
+                onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
