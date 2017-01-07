@@ -129,7 +129,14 @@
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.flip_period_show', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_period', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_period', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="trash outline icon"></i></a>
+                                    <div id="delete-trigger-{{ period.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                </div>
+                                <div id="delete-modal-{{ period.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i> 确定要删除时段模板{{ period.name }}？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_period', id=period.id, next=url_for('manage.period', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ period.id }}" class="ui black button">保留</div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -197,17 +204,24 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
-;
+$('select.dropdown').dropdown();
 
-$('.ui.checkbox')
-    .checkbox()
-;
+$('.ui.checkbox').checkbox();
 
-$('table')
-    .tablesort()
+$('table').tablesort();
+
+{% for period in periods %}
+$('#delete-trigger-{{ period.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ period.id }}').modal({ autofocus: false }).modal('show');
+    })
 ;
+$('#delete-hide-trigger-{{ period.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ period.id }}').modal('hide');
+    })
+;
+{% endfor %}
 
 $(document)
     .ready(function() {

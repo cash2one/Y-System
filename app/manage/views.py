@@ -7,7 +7,7 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import EditPunchLessonForm, EditPunchSectionForm
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
@@ -1272,12 +1272,9 @@ def delete_period(id):
     period = Period.query.get_or_404(id)
     if period.deleted:
         abort(404)
-    form = DeletePeriodForm()
-    if form.validate_on_submit():
-        period.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除时段模板：%s' % period.name, category='success')
-        return redirect(request.args.get('next') or url_for('manage.period'))
-    return render_template('manage/delete_period.html', form=form, period=period)
+    period.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除时段模板：%s' % period.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.period'))
 
 
 @manage.route('/schedule', methods=['GET', 'POST'])

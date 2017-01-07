@@ -74,10 +74,6 @@ class EditPeriodForm(FlaskForm):
         self.period_type.choices = [(u'', u'选择时段类型')] + [(unicode(period_type.id), period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
-class DeletePeriodForm(FlaskForm):
-    submit = SubmitField(u'删除')
-
-
 class NewiPadForm(FlaskForm):
     alias = StringField(u'编号')
     serial = StringField(u'序列号', validators=[Required()])
