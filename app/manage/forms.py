@@ -74,10 +74,6 @@ class EditPeriodForm(FlaskForm):
         self.period_type.choices = [(u'', u'选择时段类型')] + [(unicode(period_type.id), period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
-class DeletePeriodForm(FlaskForm):
-    submit = SubmitField(u'删除')
-
-
 class NewiPadForm(FlaskForm):
     alias = StringField(u'编号')
     serial = StringField(u'序列号', validators=[Required()])
@@ -125,10 +121,6 @@ class EditiPadForm(FlaskForm):
     def validate_serial(self, field):
         if field.data != self.ipad.serial and iPad.query.filter_by(serial=field.data).first():
             raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
-
-
-class DeleteiPadForm(FlaskForm):
-    submit = SubmitField(u'删除')
 
 
 class FilteriPadForm(FlaskForm):
@@ -255,10 +247,6 @@ class EditAnnouncementForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditAnnouncementForm, self).__init__(*args, **kwargs)
         self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
-
-
-class DeleteAnnouncementForm(FlaskForm):
-    submit = SubmitField(u'删除')
 
 
 class NewUserForm(FlaskForm):
@@ -632,7 +620,3 @@ class EditCourseForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditCourseForm, self).__init__(*args, **kwargs)
         self.course_type.choices = [(u'', u'选择班级类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
-
-
-class DeleteCourseForm(FlaskForm):
-    submit = SubmitField(u'删除')

@@ -7,17 +7,17 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
-from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm
-from .forms import NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm
+from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
+from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import EditPunchLessonForm, EditPunchSectionForm
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
-from .forms import NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
-from .forms import NewCourseForm, EditCourseForm, DeleteCourseForm
+from .forms import NewCourseForm, EditCourseForm
 from .. import db
 from ..email import send_email
 from ..models import Role, User, Gender
@@ -1272,12 +1272,9 @@ def delete_period(id):
     period = Period.query.get_or_404(id)
     if period.deleted:
         abort(404)
-    form = DeletePeriodForm()
-    if form.validate_on_submit():
-        period.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除时段模板：%s' % period.name, category='success')
-        return redirect(request.args.get('next') or url_for('manage.period'))
-    return render_template('manage/delete_period.html', form=form, period=period)
+    period.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除时段模板：%s' % period.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.period'))
 
 
 @manage.route('/schedule', methods=['GET', 'POST'])
@@ -1751,13 +1748,10 @@ def delete_ipad(id):
     ipad = iPad.query.get_or_404(id)
     if ipad.deleted:
         abort(404)
-    form = DeleteiPadForm(ipad=ipad)
-    if form.validate_on_submit():
-        ipad.safe_delete(modified_by=current_user._get_current_object())
-        iPadContentJSON.mark_out_of_date()
-        flash(u'已删除序列号为%s的iPad' % ipad.serial, category='success')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    return render_template('manage/delete_ipad.html', form=form, ipad=ipad)
+    ipad.safe_delete(modified_by=current_user._get_current_object())
+    iPadContentJSON.mark_out_of_date()
+    flash(u'已删除序列号为%s的iPad' % ipad.serial, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
 @manage.route('/ipad/filter', methods=['GET', 'POST'])
@@ -1879,12 +1873,9 @@ def delete_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.deleted:
         abort(404)
-    form = DeleteAnnouncementForm()
-    if form.validate_on_submit():
-        announcement.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除通知：“%s”' % announcement.title, category='success')
-        return redirect(request.args.get('next') or url_for('manage.announcement'))
-    return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
+    announcement.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除通知：“%s”' % announcement.title, category='success')
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
 @manage.route('/user', methods=['GET', 'POST'])
@@ -3250,12 +3241,9 @@ def delete_course(id):
     course = Course.query.get_or_404(id)
     if course.deleted:
         abort(404)
-    form = DeleteCourseForm()
-    if form.validate_on_submit():
-        course.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除班级：%s' % course.name, category='success')
-        return redirect(request.args.get('next') or url_for('manage.course'))
-    return render_template('manage/delete_course.html', form=form, course=course)
+    course.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除班级：%s' % course.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.course'))
 
 
 @manage.route('/analytics')
