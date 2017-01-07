@@ -115,7 +115,7 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                     {% endif %}
                     {% if current_user.can('管理预约时段') %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i> 时段管理</a>
                     {% endif %}
                     {% if current_user.can('管理作业') %}
                     <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
@@ -231,7 +231,7 @@
                 <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                 {% endif %}
                 {% if current_user.can('管理预约时段') %}
-                <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
+                <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i> 时段管理</a>
                 {% endif %}
                 {% if current_user.can('管理作业') %}
                 <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
@@ -339,7 +339,7 @@
                             <a class="item loading-trigger" href="{{ url_for('manage.booking') }}"><i class="calendar icon"></i> 预约管理</a>
                             {% endif %}
                             {% if current_user.can('管理预约时段') %}
-                            <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="wait icon"></i> 时段管理</a>
+                            <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i> 时段管理</a>
                             {% endif %}
                             {% if current_user.can('管理作业') %}
                             <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>

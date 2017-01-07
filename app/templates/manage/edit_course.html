@@ -108,7 +108,7 @@
                             {{ form.course_type(class='ui dropdown') }}
                         </div>
                     </div>
-                    <div class="field">
+                    <div class="inline field">
                         <div class="ui toggle checkbox">
                             {{ form.show() }}
                             {{ form.show.label() }}
@@ -116,7 +116,6 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.course') }}">取消</a>
-                    <div class="ui error message"></div>
                 </form>
             </div>
         </div>

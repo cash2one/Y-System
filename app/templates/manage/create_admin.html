@@ -96,20 +96,20 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="create-user" method="POST" class="ui form">
+                <form id="create-admin" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="four wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
-                        <div class="six wide required field">
-                            {{ form.email.label() }}
-                            {{ form.email(placeholder='邮箱') }}
+                        <div class="five wide required field">
+                            {{ form.id_number.label() }}
+                            {{ form.id_number(placeholder='身份证号（18位）') }}
                         </div>
-                        <div class="four wide required field">
-                            {{ form.activation_code.label() }}
-                            {{ form.activation_code(placeholder='激活码') }}
+                        <div class="five wide required field">
+                            {{ form.email.label() }}
+                            {{ form.email(placeholder='用于登录系统、接收通知') }}
                         </div>
                         <div class="two wide required field">
                             {{ form.role.label() }}
@@ -118,18 +118,7 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
-                    <div class="ui error message"></div>
-                    {% with email_errors = form.email.errors %}
-                    {% if email_errors %}
-                    <div class="ui flask negative message">
-                        <ul class="list">
-                            {% for error in email_errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
+                    {{ macros.form_validation_error_widget(form) }}
                 </form>
             </div>
         </div>
@@ -139,6 +128,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/IDValidator.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -153,9 +144,13 @@ $('select.dropdown')
     .dropdown()
 ;
 
+var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
-        $('#create-user')
+        $.fn.form.settings.rules.idNumber = function(value) {
+            return (Validator.isValid(value, 18));
+        };
+        $('#create-admin')
             .form({
                 onSuccess: submitForm,
                 inline: true,
@@ -170,6 +165,19 @@ $(document)
                             }
                         ]
                     },
+                    id_number: {
+                        identifier: 'id_number',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写身份证号'
+                            },
+                            {
+                                type: 'idNumber',
+                                prompt: '请输入一个有效的身份证号'
+                            }
+                        ]
+                    },
                     email: {
                         identifier: 'email',
                         rules: [
@@ -180,19 +188,6 @@ $(document)
                             {
                                 type: 'email',
                                 prompt: '请输入一个有效的电子邮箱地址'
-                            }
-                        ]
-                    },
-                    activation_code: {
-                        identifier: 'activation_code',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写激活码'
-                            },
-                            {
-                                type: 'length[6]',
-                                prompt: '激活码至少为6位'
                             }
                         ]
                     },

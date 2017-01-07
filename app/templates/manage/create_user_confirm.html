@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}编辑{{ user.name }}的用户信息{% endblock %}
+{% block title %}确认{{ user.name }}的信息{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -87,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="edit icon"></i> 编辑{{ user.name }}的用户信息</h1>
+    <h1 class="ui inverted header"><i class="add user icon"></i> 确认{{ user.name }}的信息</h1>
 </div>
 {% endblock %}
 
@@ -96,6 +96,20 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <div class="ui fluid ordered steps">
+                    <div class="completed step">
+                        <div class="content">
+                            <div class="title">填写资料</div>
+                            <div class="description">用户资料、报名信息</div>
+                        </div>
+                    </div>
+                    <div class="active step">
+                        <div class="content">
+                            <div class="title">确认信息</div>
+                            <div class="description">接待信息、服务条款</div>
+                        </div>
+                    </div>
+                </div>
                 <h4 class="ui blue dividing header">基本信息</h4>
                 <div class="ui relaxed divided list">
                     <div class="item">
@@ -156,81 +170,6 @@
                             </div>
                             {{ edit_id_number_form.submit(class='ui primary button') }}
                             <div id="edit-id-number-hide-trigger" class="ui button cancel">取消</div>
-                        </form>
-                    </div>
-                </div>
-                <h4 class="ui blue dividing header">研修信息</h4>
-                <div class="ui relaxed divided list">
-                    <div class="item">
-                        <div class="right floated content">
-                            <div id="edit-role-trigger" class="ui mini button">编辑</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">用户权限</div>
-                            <div class="description">{{ user.role.name }}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="right floated content">
-                            <div id="edit-vb-course-trigger" class="ui mini button">编辑</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">VB班</div>
-                            <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="right floated content">
-                            <div id="edit-y-gre-course-trigger" class="ui mini button">编辑</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">Y-GRE班</div>
-                            <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
-                </div>
-                <div id="edit-role-modal" class="ui modal">
-                    <i class="close icon"></i>
-                    <div class="header">编辑用户权限</div>
-                    <div class="content">
-                        <form id="edit-role" method="POST" class="ui form">
-                            {{ edit_role_form.hidden_tag() }}
-                            <div class="required field">
-                                {{ edit_role_form.role.label() }}
-                                {{ edit_role_form.role(class='ui dropdown') }}
-                            </div>
-                            {{ edit_role_form.submit(class='ui primary button') }}
-                            <div id="edit-role-hide-trigger" class="ui button cancel">取消</div>
-                        </form>
-                    </div>
-                </div>
-                <div id="edit-vb-course-modal" class="ui modal">
-                    <i class="close icon"></i>
-                    <div class="header">编辑VB班</div>
-                    <div class="content">
-                        <form id="edit-vb-course" method="POST" class="ui form">
-                            {{ edit_vb_course_form.hidden_tag() }}
-                            <div class="required field">
-                                {{ edit_vb_course_form.vb_course.label() }}
-                                {{ edit_vb_course_form.vb_course(class='ui dropdown') }}
-                            </div>
-                            {{ edit_vb_course_form.submit(class='ui primary button') }}
-                            <div id="edit-vb-course-hide-trigger" class="ui button cancel">取消</div>
-                        </form>
-                    </div>
-                </div>
-                <div id="edit-y-gre-course-modal" class="ui modal">
-                    <i class="close icon"></i>
-                    <div class="header">编辑Y-GRE班</div>
-                    <div class="content">
-                        <form id="edit-y-gre-course" method="POST" class="ui form">
-                            {{ edit_y_gre_course_form.hidden_tag() }}
-                            <div class="required field">
-                                {{ edit_y_gre_course_form.y_gre_course.label() }}
-                                {{ edit_y_gre_course_form.y_gre_course(class='ui dropdown') }}
-                            </div>
-                            {{ edit_y_gre_course_form.submit(class='ui primary button') }}
-                            <div id="edit-y-gre-course-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -626,6 +565,33 @@
                             <div class="description">{{ user.purchases_alias }}</div>
                         </div>
                     </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-role-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">用户权限</div>
+                            <div class="description">{{ user.role.name }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-vb-course-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">VB班</div>
+                            <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-y-gre-course-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">Y-GRE班</div>
+                            <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
                 </div>
                 <div id="edit-purpose-modal" class="ui modal">
                     <i class="close icon"></i>
@@ -734,36 +700,96 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">其它信息</h4>
-                <form id="edit-worked-in-same-field" method="POST" class="ui mini form">
-                    {{ edit_worked_in_same_field_form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="fifteen wide field">
+                <div id="edit-role-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑用户权限</div>
+                    <div class="content">
+                        <form id="edit-role" method="POST" class="ui form">
+                            {{ edit_role_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_role_form.role.label() }}
+                                {{ edit_role_form.role(class='ui dropdown') }}
+                            </div>
+                            {{ edit_role_form.submit(class='ui primary button') }}
+                            <div id="edit-role-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-vb-course-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑VB班</div>
+                    <div class="content">
+                        <form id="edit-vb-course" method="POST" class="ui form">
+                            {{ edit_vb_course_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_vb_course_form.vb_course.label() }}
+                                {{ edit_vb_course_form.vb_course(class='ui dropdown') }}
+                            </div>
+                            {{ edit_vb_course_form.submit(class='ui primary button') }}
+                            <div id="edit-vb-course-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-y-gre-course-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header">编辑Y-GRE班</div>
+                    <div class="content">
+                        <form id="edit-y-gre-course" method="POST" class="ui form">
+                            {{ edit_y_gre_course_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_y_gre_course_form.y_gre_course.label() }}
+                                {{ edit_y_gre_course_form.y_gre_course(class='ui dropdown') }}
+                            </div>
+                            {{ edit_y_gre_course_form.submit(class='ui primary button') }}
+                            <div id="edit-y-gre-course-hide-trigger" class="ui button cancel">取消</div>
+                        </form>
+                    </div>
+                </div>
+                <form id="confirm-user" method="POST" class="ui form">
+                    {{ confirm_user_form.hidden_tag() }}
+                    <h4 class="ui blue dividing header">其它信息</h4>
+                    <div class="ui segment">
+                        <div class="inline field">
                             <div class="ui toggle checkbox">
-                                {{ edit_worked_in_same_field_form.worked_in_same_field() }}
-                                {{ edit_worked_in_same_field_form.worked_in_same_field.label() }}
+                                {{ confirm_user_form.worked_in_same_field() }}
+                                {{ confirm_user_form.worked_in_same_field.label() }}
                             </div>
                         </div>
-                        <div class="one wide field">
-                            {{ edit_worked_in_same_field_form.submit(class='ui mini primary button') }}
-                        </div>
-                    </div>
-                </form>
-                <form id="edit-deformity" method="POST" class="ui mini form">
-                    {{ edit_deformity_form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="fifteen wide field">
+                        <div class="inline field">
                             <div class="ui toggle checkbox">
-                                {{ edit_deformity_form.deformity() }}
-                                {{ edit_deformity_form.deformity.label() }}
+                                {{ confirm_user_form.deformity() }}
+                                {{ confirm_user_form.deformity.label() }}
                             </div>
                         </div>
-                        <div class="one wide field">
-                            {{ edit_deformity_form.submit(class='ui mini primary button') }}
+                    </div>
+                    <h4 class="ui red dividing header">服务条款</h4>
+                    <div class="ui segment">
+                        <div class="inline required field">
+                            <div class="ui toggle checkbox">
+                                {{ confirm_user_form.disclaimer() }}
+                                {{ confirm_user_form.disclaimer.label() }}
+                            </div>
                         </div>
                     </div>
+                    <div class="required field">
+                        {{ confirm_user_form.receptionist_email.label() }}
+                        <div class="ui fluid search">
+                            {{ confirm_user_form.receptionist_email(placeholder='输入接待人姓名/邮箱查询', class='prompt') }}
+                            <div class="results"></div>
+                        </div>
+                    </div>
+                    {{ confirm_user_form.submit(class='ui primary button') }}
+                    <div id="delete-trigger" class="ui negative button cancel">删除</div>
+                    <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
+                    {{ macros.form_validation_error_widget(confirm_user_form) }}
                 </form>
-                <a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}"><i class="left arrow icon"></i> 返回</a>
+                <div id="delete-modal" class="ui modal">
+                    <div class="header"><i class="warning sign icon"></i> 确定要删除未完成注册的用户信息：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                    <div class="actions">
+                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.create_user_delete', id=user.id, next=request.args.get('next')) }}"><i class="remove user icon"></i> 删除</a>
+                        <div id="delete-hide-trigger" class="ui black button">保留</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -807,39 +833,6 @@ $('#edit-id-number-trigger')
 $('#edit-id-number-hide-trigger')
     .on('click', function() {
         $('#edit-id-number-modal').modal('hide');
-    })
-;
-
-$('#edit-role-trigger')
-    .on('click', function() {
-        $('#edit-role-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-role-hide-trigger')
-    .on('click', function() {
-        $('#edit-role-modal').modal('hide');
-    })
-;
-
-$('#edit-vb-course-trigger')
-    .on('click', function() {
-        $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-vb-course-hide-trigger')
-    .on('click', function() {
-        $('#edit-vb-course-modal').modal('hide');
-    })
-;
-
-$('#edit-y-gre-course-trigger')
-    .on('click', function() {
-        $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-y-gre-course-hide-trigger')
-    .on('click', function() {
-        $('#edit-y-gre-course-modal').modal('hide');
     })
 ;
 
@@ -986,6 +979,50 @@ $('#edit-purchased-product-hide-trigger')
     })
 ;
 
+$('#edit-role-trigger')
+    .on('click', function() {
+        $('#edit-role-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-role-hide-trigger')
+    .on('click', function() {
+        $('#edit-role-modal').modal('hide');
+    })
+;
+
+$('#edit-vb-course-trigger')
+    .on('click', function() {
+        $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-vb-course-hide-trigger')
+    .on('click', function() {
+        $('#edit-vb-course-modal').modal('hide');
+    })
+;
+
+$('#edit-y-gre-course-trigger')
+    .on('click', function() {
+        $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#edit-y-gre-course-hide-trigger')
+    .on('click', function() {
+        $('#edit-y-gre-course-modal').modal('hide');
+    })
+;
+
+$('#delete-trigger')
+    .on('click', function() {
+        $('#delete-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger')
+    .on('click', function() {
+        $('#delete-modal').modal('hide');
+    })
+;
+
 var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
@@ -1026,60 +1063,6 @@ $(document)
                             {
                                 type: 'idNumber',
                                 prompt: '请输入一个有效的身份证号'
-                            }
-                        ]
-                    }
-                }
-            })
-        ;
-        $('#edit-role')
-            .form({
-                onSuccess: submitForm,
-                inline: true,
-                on: 'blur',
-                fields: {
-                    role: {
-                        identifier: 'edit_role-role',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择用户权限'
-                            }
-                        ]
-                    }
-                }
-            })
-        ;
-        $('#edit-vb-course')
-            .form({
-                onSuccess: submitForm,
-                inline: true,
-                on: 'blur',
-                fields: {
-                    vb_course: {
-                        identifier: 'edit_vb_course-vb_course',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择VB班'
-                            }
-                        ]
-                    }
-                }
-            })
-        ;
-        $('#edit-y-gre-course')
-            .form({
-                onSuccess: submitForm,
-                inline: true,
-                on: 'blur',
-                fields: {
-                    y_gre_course: {
-                        identifier: 'edit_y_gre_course-y_gre_course',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择Y-GRE班'
                             }
                         ]
                     }
@@ -1542,6 +1525,91 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请选择研修产品'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-role')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    role: {
+                        identifier: 'edit_role-role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修类别'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-vb-course')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    vb_course: {
+                        identifier: 'edit_vb_course-vb_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择VB班'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-y-gre-course')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    y_gre_course: {
+                        identifier: 'edit_y_gre_course-y_gre_course',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Y-GRE班'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#confirm-user')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    receptionist_email: {
+                        identifier: 'confirm_user-receptionist_email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写接待人电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    disclaimer: {
+                        identifier: 'confirm_user-disclaimer',
+                        rules: [
+                            {
+                                type: 'checked',
+                                prompt: '请确认用户同意服务条款'
                             }
                         ]
                     }

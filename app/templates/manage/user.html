@@ -95,68 +95,18 @@
             <div class="column">
                 <h3 class="header"><i class="user icon"></i> 用户列表</h3>
                 <div class="ui tabular menu">
-                    {% if show_activated %}
-                    <a class="item active loading-trigger" href="{{ url_for('manage.activated_users') }}">普通用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
+                    <a class="item {% if show_activated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.activated_users') }}">已激活 [{{ activated_users_num }}]</a>
+                    <a class="item {% if show_unactivated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活 [{{ unactivated_users_num }}]</a>
+                    <a class="item {% if show_suspended_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起 [{{ suspended_users_num }}]</a>
+                    <a class="item {% if show_draft_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.draft_users') }}">创建中 [{{ draft_users_num }}]</a>
+                    {% if current_user.is_administrator or current_user.is_developer %}
+                    <a class="item {% if show_deleted_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.deleted_users') }}">已注销 [{{ deleted_users_num }}]</a>
+                    <a class="item {% if show_volunteers %}active {% endif %}loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者 [{{ volunteers_num }}]</a>
+                    <a class="item {% if show_moderators %}active {% endif %}loading-trigger" href="{{ url_for('manage.moderators') }}">协管员 [{{ moderators_num }}]</a>
+                    <a class="item {% if show_administrators %}active {% endif %}loading-trigger" href="{{ url_for('manage.administrators') }}">管理员 [{{ administrators_num }}]</a>
                     {% endif %}
-                    {% if show_unactivated %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">普通用户</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
-                    {% endif %}
-                    {% if show_suspended %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">普通用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
-                    {% endif %}
-                    {% if show_volunteers %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">普通用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
-                    {% endif %}
-                    {% if show_moderators %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">普通用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
-                    {% endif %}
-                    {% if show_administrators and (current_user.is_administrator or current_user.is_developer) %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">普通用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
-                    {% endif %}
-                    {% if show_developers and current_user.is_developer %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.activated_users') }}">普通用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起用户</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
+                    {% if current_user.is_developer %}
+                    <a class="item {% if show_developers %}active {% endif %}loading-trigger" href="{{ url_for('manage.developers') }}">开发人员 [{{ developers_num }}]</a>
                     {% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">
@@ -165,9 +115,11 @@
                             <th>姓名</th>
                             <th>邮箱</th>
                             <th>用户组</th>
+                            {% if not (show_moderators or show_administrators or show_developers) %}
                             <th>VB班</th>
                             <th>Y-GRE班</th>
                             <th>进度</th>
+                            {% endif %}
                             <th>激活时间</th>
                             <th>上次登录</th>
                             <th>操作</th>
@@ -178,30 +130,16 @@
                         <tr>
                             <td>
                                 <a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank">{{ user.name }}</a>
+                                {% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
                             </td>
                             <td>
                                 {{ user.email }}
-                                {% if user.confirmed %}
-                                <i class="check circle icon"></i>
-                                {% else %}
-                                <i class="remove circle icon"></i>
-                                {% endif %}
+                                <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
                             </td>
                             <td>{{ user.role.name }}</td>
-                            <td>
-                                {% if user.vb_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if user.y_gre_course %}
-                                <a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
+                            {% if not (show_moderators or show_administrators or show_developers) %}
+                            <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
                             {% if user.activated %}
                             <td>
                                 {{ user.last_punch.alias2 }}
@@ -209,6 +147,11 @@
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
+                            {% else %}
+                            <td>N/A</td>
+                            {% endif %}
+                            {% endif %}
+                            {% if user.activated %}
                             <td>
                                 <div class="popup-trigger">{{ moment(user.activated_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
@@ -218,15 +161,25 @@
                                 <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             {% else %}
-                            <td>N/A</td>
                             <td class="negative">未激活</td>
                             <td>N/A</td>
                             {% endif %}
                             <td>
+                                {% if user.deleted %}
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.restore_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="undo icon"></i> 恢复</a>
+                                {% else %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
                                 </div>
+                                <div id="delete-modal-{{ user.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i> 确定要{% if user.created %}注销用户{% else %}删除未完成注册的用户信息{% endif %}：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_delete', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="remove user icon"></i> {% if user.created %}注销{% else %}删除{% endif %}</a>
+                                        <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -263,8 +216,19 @@ $('.message .close')
     })
 ;
 
-$('table')
-    .tablesort()
+$('table').tablesort();
+
+{% for user in users %}
+$('#delete-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
+    })
 ;
+$('#delete-hide-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal('hide');
+    })
+;
+{% endfor %}
 </script>
 {% endblock %}

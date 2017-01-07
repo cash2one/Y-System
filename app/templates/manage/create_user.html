@@ -96,6 +96,20 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <div class="ui fluid ordered steps">
+                    <div class="active step">
+                        <div class="content">
+                            <div class="title">填写资料</div>
+                            <div class="description">用户资料、报名信息</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="content">
+                            <div class="title">确认信息</div>
+                            <div class="description">接待信息、服务条款</div>
+                        </div>
+                    </div>
+                </div>
                 <form id="create-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <h4 class="ui blue dividing header">基本信息</h4>
@@ -109,23 +123,51 @@
                             {{ form.id_number(placeholder='身份证号（18位）') }}
                         </div>
                     </div>
-                    <h4 class="ui blue dividing header">教育经历</h4>
+                    <h4 class="ui blue dividing header">联系方式</h4>
+                    <div class="fields">
+                        <div class="eight wide required field">
+                            {{ form.email.label() }}
+                            {{ form.email(placeholder='用于登录系统、接收通知') }}
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.mobile.label() }}
+                            {{ form.mobile(placeholder='移动电话') }}
+                        </div>
+                    </div>
+                    <div class="required field">
+                        {{ form.address.label() }}
+                        {{ form.address(placeholder='联系地址') }}
+                    </div>
                     <div class="fields">
                         <div class="eight wide field">
+                            {{ form.qq.label() }}
+                            {{ form.qq(placeholder='QQ号') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.wechat.label() }}
+                            {{ form.wechat(placeholder='微信号/手机号') }}
+                        </div>
+                    </div>
+                    <h4 class="ui orange dividing header">紧急联系人</h4>
+                    <div class="fields">
+                        <div class="six wide required field">
+                            {{ form.emergency_contact_name.label() }}
+                            {{ form.emergency_contact_name(placeholder='紧急联系人') }}
+                        </div>
+                        <div class="two wide required field">
+                            {{ form.emergency_contact_relationship.label() }}
+                            {{ form.emergency_contact_relationship(class='ui compact dropdown') }}
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.emergency_contact_mobile.label() }}
+                            {{ form.emergency_contact_mobile(placeholder='移动电话') }}
+                        </div>
+                    </div>
+                    <h4 class="ui blue dividing header">教育经历</h4>
+                    <div class="fields">
+                        <div class="fourteen wide field">
                             {{ form.high_school.label() }}
                             {{ form.high_school(placeholder='毕业高中') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.cee_total.label() }}
-                            {{ form.cee_total(placeholder='高考总分') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.cee_math.label() }}
-                            {{ form.cee_math(placeholder='高考数学') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.cee_english.label() }}
-                            {{ form.cee_english(placeholder='高考英语') }}
                         </div>
                         <div class="two wide field">
                             {{ form.high_school_year.label() }}
@@ -198,57 +240,6 @@
                             {{ form.doctor_year(class='ui compact dropdown') }}
                         </div>
                     </div>
-                    <h4 class="ui blue dividing header">既往成绩</h4>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.cet_4.label() }}
-                            {{ form.cet_4(placeholder='大学英语四级') }}
-                        </div>
-                        <div class="eight wide field">
-                            {{ form.cet_6.label() }}
-                            {{ form.cet_6(placeholder='大学英语六级') }}
-                        </div>
-                    </div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.tem_4.label() }}
-                            {{ form.tem_4(placeholder='专业英语四级') }}
-                        </div>
-                        <div class="eight wide field">
-                            {{ form.tem_8.label() }}
-                            {{ form.tem_8(placeholder='专业英语八级') }}
-                        </div>
-                    </div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.toefl_total.label() }}
-                            {{ form.toefl_total(placeholder='TOFEL总分') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.toefl_reading.label() }}
-                            {{ form.toefl_reading(placeholder='TOFEL阅读') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.toefl_listening.label() }}
-                            {{ form.toefl_listening(placeholder='TOFEL听力') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.toefl_speaking.label() }}
-                            {{ form.toefl_speaking(placeholder='TOFEL口语') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.toefl_writing.label() }}
-                            {{ form.toefl_writing(placeholder='TOFEL写作') }}
-                        </div>
-                    </div>
-                    <div class="field">
-                        {{ form.competition.label() }}
-                        {{ form.competition(placeholder='竞赛成绩') }}
-                    </div>
-                    <div class="field">
-                        {{ form.other_score.label() }}
-                        {{ form.other_score(placeholder='其它成绩') }}
-                    </div>
                     <h4 class="ui blue dividing header">工作经历</h4>
                     <div class="fields">
                         <div class="eight wide field">
@@ -278,45 +269,70 @@
                             {{ form.job_year_2(class='ui compact dropdown') }}
                         </div>
                     </div>
-                    <h4 class="ui blue dividing header">联系方式</h4>
+                    <h4 class="ui blue dividing header">既往成绩</h4>
                     <div class="fields">
-                        <div class="eight wide required field">
-                            {{ form.email.label() }}
-                            {{ form.email(placeholder='用于登录系统、接收通知') }}
+                        <div class="eight wide field">
+                            {{ form.cee_total.label() }}
+                            {{ form.cee_total(placeholder='高考总分') }}
                         </div>
-                        <div class="eight wide required field">
-                            {{ form.mobile.label() }}
-                            {{ form.mobile(placeholder='移动电话') }}
+                        <div class="four wide field">
+                            {{ form.cee_math.label() }}
+                            {{ form.cee_math(placeholder='高考数学') }}
                         </div>
-                    </div>
-                    <div class="required field">
-                        {{ form.address.label() }}
-                        {{ form.address(placeholder='联系地址') }}
+                        <div class="four wide field">
+                            {{ form.cee_english.label() }}
+                            {{ form.cee_english(placeholder='高考英语') }}
+                        </div>
                     </div>
                     <div class="fields">
                         <div class="eight wide field">
-                            {{ form.qq.label() }}
-                            {{ form.qq(placeholder='QQ号') }}
+                            {{ form.cet_4.label() }}
+                            {{ form.cet_4(placeholder='大学英语四级') }}
                         </div>
                         <div class="eight wide field">
-                            {{ form.wechat.label() }}
-                            {{ form.wechat(placeholder='微信号/手机号') }}
+                            {{ form.cet_6.label() }}
+                            {{ form.cet_6(placeholder='大学英语六级') }}
                         </div>
                     </div>
-                    <h4 class="ui orange dividing header">紧急联系人</h4>
                     <div class="fields">
-                        <div class="six wide required field">
-                            {{ form.emergency_contact_name.label() }}
-                            {{ form.emergency_contact_name(placeholder='紧急联系人') }}
+                        <div class="eight wide field">
+                            {{ form.tem_4.label() }}
+                            {{ form.tem_4(placeholder='专业英语四级') }}
                         </div>
-                        <div class="two wide required field">
-                            {{ form.emergency_contact_relationship.label() }}
-                            {{ form.emergency_contact_relationship(class='ui compact dropdown') }}
+                        <div class="eight wide field">
+                            {{ form.tem_8.label() }}
+                            {{ form.tem_8(placeholder='专业英语八级') }}
                         </div>
-                        <div class="eight wide required field">
-                            {{ form.emergency_contact_mobile.label() }}
-                            {{ form.emergency_contact_mobile(placeholder='移动电话') }}
+                    </div>
+                    <div class="fields">
+                        <div class="four wide field">
+                            {{ form.toefl_total.label() }}
+                            {{ form.toefl_total(placeholder='TOEFL总分') }}
                         </div>
+                        <div class="three wide field">
+                            {{ form.toefl_reading.label() }}
+                            {{ form.toefl_reading(placeholder='TOEFL阅读分数') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.toefl_listening.label() }}
+                            {{ form.toefl_listening(placeholder='TOEFL听力分数') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.toefl_speaking.label() }}
+                            {{ form.toefl_speaking(placeholder='TOEFL口语分数') }}
+                        </div>
+                        <div class="three wide field">
+                            {{ form.toefl_writing.label() }}
+                            {{ form.toefl_writing(placeholder='TOEFL写作分数') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        {{ form.competition.label() }}
+                        {{ form.competition(placeholder='竞赛成绩') }}
+                    </div>
+                    <div class="field">
+                        {{ form.other_score.label() }}
+                        {{ form.other_score(placeholder='其它成绩') }}
                     </div>
                     <h4 class="ui teal dividing header">报名信息</h4>
                     <div class="fields">
@@ -324,9 +340,13 @@
                             {{ form.purposes.label() }}
                             {{ form.purposes(class='ui dropdown') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="four wide field">
                             {{ form.other_purpose.label() }}
                             {{ form.other_purpose(placeholder='其它研修目的') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.application_aim.label() }}
+                            {{ form.application_aim(placeholder='申请方向') }}
                         </div>
                     </div>
                     <div class="fields">
@@ -334,10 +354,21 @@
                             {{ form.referrers.label() }}
                             {{ form.referrers(class='ui dropdown') }}
                         </div>
-                        <div class="eight wide field">
+                        <div class="four wide field">
                             {{ form.other_referrer.label() }}
                             {{ form.other_referrer(placeholder='其它了解渠道') }}
                         </div>
+                        <div class="four wide field">
+                            {{ form.inviter_email.label() }}
+                            <div class="ui fluid search">
+                                {{ form.inviter_email(placeholder='输入推荐人姓名/邮箱查询', class='prompt') }}
+                                <div class="results"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="required field">
+                        {{ form.products.label() }}
+                        {{ form.products(class='ui dropdown') }}
                     </div>
                     <div class="fields">
                         <div class="eight wide required field">
@@ -353,63 +384,9 @@
                             {{ form.y_gre_course(class='ui dropdown') }}
                         </div>
                     </div>
-                    <div class="required field">
-                        {{ form.products.label() }}
-                        {{ form.products(class='ui dropdown') }}
-                    </div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.inviter_email.label() }}
-                            <div class="ui fluid search">
-                                {{ form.inviter_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                                <div class="results"></div>
-                            </div>
-                        </div>
-                        <div class="eight wide required field">
-                            {{ form.receptionist_email.label() }}
-                            <div class="ui fluid search">
-                                {{ form.receptionist_email(placeholder='输入用户姓名/邮箱', class='prompt') }}
-                                <div class="results"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <h4 class="ui grey dividing header">其它信息</h4>
-                    <div class="ui segment">
-                        <div class="inline field">
-                            <div class="ui toggle checkbox">
-                                {{ form.worked_in_same_field() }}
-                                {{ form.worked_in_same_field.label() }}
-                            </div>
-                        </div>
-                        <div class="inline field">
-                            <div class="ui toggle checkbox">
-                                {{ form.deformity() }}
-                                {{ form.deformity.label() }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui segment">
-                        <div class="inline required field">
-                            <div class="ui toggle checkbox">
-                                {{ form.disclaimer() }}
-                                {{ form.disclaimer.label() }}
-                            </div>
-                        </div>
-                    </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
-                    <div class="ui error message"></div>
-                    {% with email_errors = form.email.errors %}
-                    {% if email_errors %}
-                    <div class="ui flask negative message">
-                        <ul class="list">
-                            {% for error in email_errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
+                    {{ macros.form_validation_error_widget(form) }}
                 </form>
             </div>
         </div>
@@ -431,19 +408,43 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
-;
+$('select.dropdown').dropdown();
 
-$('.ui.checkbox')
-    .checkbox()
-;
+$('.ui.checkbox').checkbox();
 
 var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
         $.fn.form.settings.rules.idNumber = function(value) {
             return (Validator.isValid(value, 18));
+        };
+        $.fn.form.settings.rules.bachelorGPAwithinLimit = function(value) {
+            if ($('#bachelor_full_gpa').val() === '') {
+                return true;
+            } else {
+                return (Number(value) <= Number($('#bachelor_full_gpa').val()));
+            };
+        };
+        $.fn.form.settings.rules.masterGPAwithinLimit = function(value) {
+            if ($('#master_full_gpa').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#master_full_gpa').val()));
+            };
+        };
+        $.fn.form.settings.rules.doctorGPAwithinLimit = function(value) {
+            if ($('#doctor_full_gpa').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#doctor_full_gpa').val()));
+            };
+        };
+        $.fn.form.settings.rules.toefl = function(value) {
+            if (($('#toefl_reading').val() === '') || ($('#toefl_listening').val() === '') || ($('#toefl_speaking').val() === '') || ($('#toefl_writing').val() === '')) {
+                return true;
+            } else {
+                return (Number(value) === Number($('#toefl_reading').val()) + Number($('#toefl_listening').val()) + Number($('#toefl_speaking').val()) + Number($('#toefl_writing').val()));
+            };
         };
         $('#create-user')
             .form({
@@ -512,6 +513,26 @@ $(document)
                             }
                         ]
                     },
+                    qq: {
+                        identifier: 'qq',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer',
+                                prompt: '请输入一个有效的QQ号码'
+                            }
+                        ]
+                    },
+                    wechat: {
+                        identifier: 'wechat',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'regExp[/^[A-Za-z0-9_-]{6,20}$/]',
+                                prompt: '请输入一个有效的微信号/手机号'
+                            }
+                        ]
+                    },
                     emergency_contact_name: {
                         identifier: 'emergency_contact_name',
                         rules: [
@@ -547,6 +568,362 @@ $(document)
                             }
                         ]
                     },
+                    high_school_year: {
+                        identifier: 'high_school_year',
+                        depends: 'high_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    bachelor_year: {
+                        identifier: 'bachelor_year',
+                        depends: 'bachelor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    bachelor_major: {
+                        identifier: 'bachelor_major',
+                        depends: 'bachelor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写院系（专业）'
+                            }
+                        ]
+                    },
+                    bachelor_gpa: {
+                        identifier: 'bachelor_gpa',
+                        depends: 'bachelor_school',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            },
+                            {
+                                type: 'bachelorGPAwithinLimit',
+                                prompt: '本科GPA数值超过满分'
+                            }
+                        ]
+                    },
+                    bachelor_full_gpa: {
+                        identifier: 'bachelor_full_gpa',
+                        depends: 'bachelor_gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
+                            }
+                        ]
+                    },
+                    master_year: {
+                        identifier: 'master_year',
+                        depends: 'master_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    master_major: {
+                        identifier: 'master_major',
+                        depends: 'master_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写院系（专业）'
+                            }
+                        ]
+                    },
+                    master_gpa: {
+                        identifier: 'master_gpa',
+                        depends: 'master_school',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            },
+                            {
+                                type: 'masterGPAwithinLimit',
+                                prompt: '硕士GPA数值超过满分'
+                            }
+                        ]
+                    },
+                    master_full_gpa: {
+                        identifier: 'master_full_gpa',
+                        depends: 'master_gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
+                            }
+                        ]
+                    },
+                    doctor_year: {
+                        identifier: 'doctor_year',
+                        depends: 'doctor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入学年份'
+                            }
+                        ]
+                    },
+                    doctor_major: {
+                        identifier: 'doctor_major',
+                        depends: 'doctor_school',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写院系（专业）'
+                            }
+                        ]
+                    },
+                    doctor_gpa: {
+                        identifier: 'doctor_gpa',
+                        depends: 'doctor_school',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA'
+                            },
+                            {
+                                type: 'doctorGPAwithinLimit',
+                                prompt: '博士GPA数值超过满分'
+                            }
+                        ]
+                    },
+                    doctor_full_gpa: {
+                        identifier: 'doctor_full_gpa',
+                        depends: 'doctor_gpa',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写GPA满分'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的GPA满分'
+                            }
+                        ]
+                    },
+                    position_1: {
+                        identifier: 'position_1',
+                        depends: 'employer_1',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写职务'
+                            }
+                        ]
+                    },
+                    job_year_1: {
+                        identifier: 'job_year_1',
+                        depends: 'employer_1',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入职年份'
+                            }
+                        ]
+                    },
+                    position_2: {
+                        identifier: 'position_2',
+                        depends: 'employer_2',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写职务'
+                            }
+                        ]
+                    },
+                    job_year_2: {
+                        identifier: 'job_year_2',
+                        depends: 'employer_2',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择入职年份'
+                            }
+                        ]
+                    },
+                    cee_total: {
+                        identifier: 'cee_total',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cee_math: {
+                        identifier: 'cee_math',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cee_english: {
+                        identifier: 'cee_english',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cet_4: {
+                        identifier: 'cet_4',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cet_6: {
+                        identifier: 'cet_6',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    tem_4: {
+                        identifier: 'tem_4',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    tem_8: {
+                        identifier: 'tem_8',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    toefl_total: {
+                        identifier: 'toefl_total',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..120]',
+                                prompt: '请填写一个有效的TOEFL分数'
+                            },
+                            {
+                                type: 'toefl',
+                                prompt: 'TOEFL分数有误'
+                            }
+                        ]
+                    },
+                    toefl_reading: {
+                        identifier: 'toefl_reading',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL阅读分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL阅读分数'
+                            }
+                        ]
+                    },
+                    toefl_listening: {
+                        identifier: 'toefl_listening',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL听力分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL听力分数'
+                            }
+                        ]
+                    },
+                    toefl_speaking: {
+                        identifier: 'toefl_speaking',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL口语分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL口语分数'
+                            }
+                        ]
+                    },
+                    toefl_writing: {
+                        identifier: 'toefl_writing',
+                        depends: 'toefl_total',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL写作分数'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL写作分数'
+                            }
+                        ]
+                    },
+                    inviter_email: {
+                        identifier: 'inviter_email',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    products: {
+                        identifier: 'products',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
                     role: {
                         identifier: 'role',
                         rules: [
@@ -573,37 +950,6 @@ $(document)
                                 prompt: '请选择Y-GRE班'
                             }
                         ]
-                    },
-                    products: {
-                        identifier: 'products',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择研修产品'
-                            }
-                        ]
-                    },
-                    receptionist_email: {
-                        identifier: 'receptionist_email',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写接待人电子邮箱地址'
-                            },
-                            {
-                                type: 'email',
-                                prompt: '请输入一个有效的电子邮箱地址'
-                            }
-                        ]
-                    },
-                    disclaimer: {
-                        identifier: 'disclaimer',
-                        rules: [
-                            {
-                                type: 'checked',
-                                prompt: '请确认用户同意服务条款'
-                            }
-                        ]
                     }
                 }
             })
@@ -614,7 +960,7 @@ $(document)
 $('.ui.search')
     .search({
         apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/?keyword={query}'
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
         },
         showNoResults: false
     })

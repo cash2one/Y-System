@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="wait icon"></i> 时段管理</h1>
+    <h1 class="ui inverted header"><i class="clock icon"></i> 时段管理</h1>
 </div>
 {% endblock %}
 
@@ -93,23 +93,11 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="wait icon"></i> 时段信息</h3>
+                <h3 class="header"><i class="clock icon"></i> 时段信息</h3>
                 <div class="ui tabular menu">
-                    {% if show_today_schedule %}
-                    <a class="item active loading-trigger" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
-                    {% endif %}
-                    {% if show_future_schedule %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
-                    {% endif %}
-                    {% if show_history_schedule %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
-                    {% endif %}
+                    <a class="item {% if show_today_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
+                    <a class="item {% if show_future_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
+                    <a class="item {% if show_history_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -141,7 +129,7 @@
                                 {% endif %}
                                 {{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}
                             </td>
-                            <td {% if schedule.full %}class="negative"{% endif %}>
+                            <td{% if schedule.full %} class="negative"{% endif %}>
                                 {{ schedule.occupied_quota }} / {{ schedule.quota }}
                                 {% if schedule.out_of_date %}
                                 <div class="ui mini icon buttons">
@@ -228,7 +216,6 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button loading-trigger" href="{{ url_for('manage.period') }}">编辑时段模板</a>
-                    <div class="ui error message"></div>
                 </form>
             </div>
         </div>

@@ -68,7 +68,7 @@ def profile():
 @permission_required(u'管理')
 def profile_user(user_id):
     user = User.query.get_or_404(user_id)
-    if user.deleted:
+    if not user.created or user.deleted:
         abort(404)
     page = request.args.get('page', 1, type=int)
     punches = user.punches.order_by(Punch.timestamp.desc()).limit(10)

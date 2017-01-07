@@ -95,114 +95,22 @@
             <div class="column">
                 <h3 class="header"><i class="tablet icon"></i> iPad列表</h3>
                 <div class="ui tabular menu">
-                    {% if show_ipad_all %}
-                    <a class="item active loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
+                    <a class="item {% if show_ipad_all %}active {% endif %}loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
+                    <a class="item {% if show_ipad_maintain %}active {% endif %}loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
                         维护
                         {% if maintain_num %}
-                        <div class="ui circular label">{{ maintain_num }}</div>
+                        <div class="ui {% if show_ipad_maintain %}red {% endif %}circular label">{{ maintain_num }}</div>
                         {% endif %}
                     </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
+                    <a class="item {% if show_ipad_charge %}active {% endif %}loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
                         充电
                         {% if charge_num %}
-                        <div class="ui circular label">{{ charge_num }}</div>
+                        <div class="ui {% if show_ipad_charge %}green {% endif %}circular label">{{ charge_num }}</div>
                         {% endif %}
                     </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
-                    {% endif %}
-                    {% if show_ipad_maintain %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
-                        维护
-                        {% if maintain_num %}
-                        <div class="ui red circular label">{{ maintain_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
-                        充电
-                        {% if charge_num %}
-                        <div class="ui circular label">{{ charge_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
-                    {% endif %}
-                    {% if show_ipad_charge %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
-                        维护
-                        {% if maintain_num %}
-                        <div class="ui circular label">{{ maintain_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
-                        充电
-                        {% if charge_num %}
-                        <div class="ui green circular label">{{ charge_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
-                    {% endif %}
-                    {% if show_ipad_1103 %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
-                        维护
-                        {% if maintain_num %}
-                        <div class="ui circular label">{{ maintain_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
-                        充电
-                        {% if charge_num %}
-                        <div class="ui circular label">{{ charge_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
-                    {% endif %}
-                    {% if show_ipad_1707 %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
-                        维护
-                        {% if maintain_num %}
-                        <div class="ui circular label">{{ maintain_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
-                        充电
-                        {% if charge_num %}
-                        <div class="ui circular label">{{ charge_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
-                    {% endif %}
-                    {% if show_ipad_others %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
-                        维护
-                        {% if maintain_num %}
-                        <div class="ui circular label">{{ maintain_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.charge_ipads') }}">
-                        充电
-                        {% if charge_num %}
-                        <div class="ui circular label">{{ charge_num }}</div>
-                        {% endif %}
-                    </a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
-                    {% endif %}
+                    <a class="item {% if show_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
+                    <a class="item {% if show_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
+                    <a class="item {% if show_ipad_others %}active {% endif %}loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -371,18 +279,7 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
-                    {% with serial_errors = form.serial.errors %}
-                    {% if serial_errors %}
-                    <div class="ui flask negative message">
-                        <ul class="list">
-                            {% for error in serial_errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
+                    {{ macros.form_validation_error_widget(form) }}
                 </form>
             </div>
         </div>

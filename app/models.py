@@ -40,7 +40,7 @@ class Permission(db.Model):
             (u'预约', ),
             (u'预约VB课程', ),
             (u'预约Y-GRE课程', ),
-            (u'预约VB课程x2', ),
+            (u'预约VB课程×2', ),
             (u'预约任意课程', ),
             (u'管理', ),
             (u'管理课程预约', ),
@@ -103,11 +103,11 @@ class Role(db.Model):
             (u'挂起', [], ),
             (u'单VB', [u'预约', u'预约VB课程'], ),
             (u'Y-GRE 普通', [u'预约', u'预约VB课程', u'预约Y-GRE课程'], ),
-            (u'Y-GRE VBx2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程x2'], ),
+            (u'Y-GRE VB×2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程×2'], ),
             (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
-            (u'志愿者', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅'], ),
-            (u'协管员', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级'], ),
-            (u'管理员', [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级', u'管理权限'], ),
+            (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅'], ),
+            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级'], ),
+            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级', u'管理权限'], ),
             (u'开发人员', [permission.name for permission in Permission.query.all()], ),
         ]
         for R in roles:
@@ -162,9 +162,14 @@ class Relationship(db.Model):
             (u'父母', ),
             (u'配偶', ),
             (u'子女', ),
+            (u'兄弟', ),
+            (u'兄妹', ),
+            (u'姊妹', ),
+            (u'姊弟', ),
+            (u'朋友', ),
+            (u'恋人', ),
             (u'同学', ),
             (u'同事', ),
-            (u'朋友', ),
         ]
         for R in relationships:
             relationship = Relationship.query.filter_by(name=R[0]).first()
@@ -592,50 +597,6 @@ class VBTestScore(db.Model):
         return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
-class GREVScore(db.Model):
-    __tablename__ = 'gre_v_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    y_gre_test_scores = db.relationship('YGRETestScore', backref='v_score', lazy='dynamic')
-
-    @staticmethod
-    def insert_gre_v_scores():
-        gre_v_scores = [(unicode(x), x, ) for x in range(130, 171)]
-        for GVS in gre_v_scores:
-            gre_v_score = GREVScore.query.filter_by(name=GVS[0]).first()
-            if gre_v_score is None:
-                gre_v_score = GREVScore(name=GVS[0], value=GVS[1])
-                db.session.add(gre_v_score)
-                print u'导入GRE Verbal成绩类型信息', GVS[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<GRE Verbal Reasoning Score %r>' % self.name
-
-
-class GREQScore(db.Model):
-    __tablename__ = 'gre_q_scores'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    value = db.Column(db.Integer)
-    y_gre_test_scores = db.relationship('YGRETestScore', backref='q_score', lazy='dynamic')
-
-    @staticmethod
-    def insert_gre_q_scores():
-        gre_q_scores = [(unicode(x), x, ) for x in range(130, 171)]
-        for GQS in gre_q_scores:
-            gre_q_score = GREQScore.query.filter_by(name=GQS[0]).first()
-            if gre_q_score is None:
-                gre_q_score = GREQScore(name=GQS[0], value=GQS[1])
-                db.session.add(gre_q_score)
-                print u'导入GRE Quantitative成绩类型信息', GQS[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<GRE Quantitative Reasoning Score %r>' % self.name
-
-
 class GREAWScore(db.Model):
     __tablename__ = 'gre_aw_scores'
     id = db.Column(db.Integer, primary_key=True)
@@ -663,8 +624,8 @@ class YGRETestScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
-    v_score_id = db.Column(db.Integer, db.ForeignKey('gre_v_scores.id'))
-    q_score_id = db.Column(db.Integer, db.ForeignKey('gre_q_scores.id'))
+    v_score = db.Column(db.Integer)
+    q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -672,6 +633,62 @@ class YGRETestScore(db.Model):
 
     def __repr__(self):
         return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
+
+
+class TOEFLTestScoreType(db.Model):
+    __tablename__ = 'toefl_test_score_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_toefl_test_score_types():
+        toefl_test_score_types = [
+            (u'初始', ),
+            (u'目标', ),
+            (u'第1次', ),
+            (u'第2次', ),
+            (u'第3次', ),
+            (u'第4次', ),
+            (u'第5次', ),
+            (u'第6次', ),
+            (u'第7次', ),
+            (u'第8次', ),
+            (u'第9次', ),
+        ]
+        for TTST in toefl_test_score_types:
+            toefl_test_score_type = TOEFLTestScoreType.query.filter_by(name=TTST[0]).first()
+            if toefl_test_score_type is None:
+                toefl_test_score_type = TOEFLTestScoreType(name=TTST[0])
+                db.session.add(toefl_test_score_type)
+                print u'导入TOEFL考试成绩类型信息', TTST[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<TOEFL Test Score Type %r>' % self.name
+
+
+class TOEFLTestScore(db.Model):
+    __tablename__ = 'toefl_test_score'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('toefl_test_score_types.id'))
+    total_score = db.Column(db.Integer)
+    reading_score = db.Column(db.Integer)
+    listening_score = db.Column(db.Integer)
+    speaking_score = db.Column(db.Integer)
+    writing_score = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def __repr__(self):
+        return '<TOEFL Test Score %r, %r>' % (self.user.name, self.test.name)
 
 
 class UserAnnouncement(db.Model):
@@ -742,15 +759,16 @@ class User(UserMixin, db.Model):
     confirmed = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
+    created = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime)
     activated = db.Column(db.Boolean, default=False)
     activated_at = db.Column(db.DateTime)
     last_seen_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted = db.Column(db.Boolean, default=False)
     # profile properties
     name = db.Column(db.Unicode(64), index=True)
-    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
     id_number = db.Column(db.Unicode(64), index=True)
+    gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
     birthdate = db.Column(db.Date)
     mobile = db.Column(db.Unicode(64))
     wechat = db.Column(db.Unicode(64))
@@ -759,11 +777,13 @@ class User(UserMixin, db.Model):
     emergency_contact_name = db.Column(db.Unicode(64))
     emergency_contact_mobile = db.Column(db.Unicode(64))
     emergency_contact_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
-    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
+    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
     worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
+    # application properties
+    application_aim = db.Column(db.Unicode(64))
     # study properties
     purposes = db.relationship(
         'Purpose',
@@ -842,6 +862,13 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    toefl_test_scores = db.relationship(
+        'TOEFLTestScore',
+        foreign_keys=[TOEFLTestScore.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     read_announcements = db.relationship(
         'UserAnnouncement',
         foreign_keys=[UserAnnouncement.user_id],
@@ -893,6 +920,13 @@ class User(UserMixin, db.Model):
     modified_y_gre_test_scores = db.relationship(
         'YGRETestScore',
         foreign_keys=[YGRETestScore.modified_by_id],
+        backref=db.backref('modified_by', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    modified_toefl_test_scores = db.relationship(
+        'TOEFLTestScore',
+        foreign_keys=[TOEFLTestScore.modified_by_id],
         backref=db.backref('modified_by', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -956,9 +990,42 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
 
+    def delete(self):
+        for purpose in self.purposes:
+            self.remove_purpose(purpose_type=purpose.type)
+        for referrer in self.referrers:
+            self.remove_referrer(referrer_type=referrer.type)
+        for education_record in self.education_records:
+            db.session.delete(education_record)
+        for employment_record in self.employment_records:
+            db.session.delete(employment_record)
+        for previous_achievement in self.previous_achievements:
+            db.session.delete(previous_achievement)
+        for toefl_test_score in self.toefl_test_scores:
+            db.session.delete(toefl_test_score)
+        for purchase in self.purchases:
+            db.session.delete(purchase)
+        for course_registration in self.course_registrations:
+            self.unregister_course(course=course_registration.course)
+        for invitation in self.accepted_invitations:
+            invitation.inviter.uninvite_user(user=self)
+        for reception in self.received_receptions:
+            reception.receptionist.unreceive_user(user=self)
+        for user_creation in self.received_user_creations:
+            user_creation.creator.uncreate_user(user=self)
+        db.session.delete(self)
+
     def safe_delete(self):
+        self.email = u'%s_%s_deleted' % (self.email, self.id)
+        self.confirmed = False
         self.role_id = Role.query.filter_by(name=u'挂起').first().id
         self.deleted = True
+        db.session.add(self)
+
+    def restore(self, email, role):
+        self.email = email
+        self.role_id = role.id
+        self.deleted = False
         db.session.add(self)
 
     @property
@@ -1028,6 +1095,17 @@ class User(UserMixin, db.Model):
     def can(self, permission_name):
         return self.role is not None and self.role.has_permission(permission=Permission.query.filter_by(name=permission_name).first())
 
+    @staticmethod
+    def users_can(permission_name):
+        return User.query\
+            .join(Role, Role.id == User.role_id)\
+            .join(RolePermission, RolePermission.role_id == Role.id)\
+            .join(Permission, Permission.id == RolePermission.permission_id)\
+            .filter(Permission.name == permission_name)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)
+
     @property
     def is_suspended(self):
         return self.role.name == u'挂起'
@@ -1050,18 +1128,18 @@ class User(UserMixin, db.Model):
 
     def is_superior_than(self, user):
         if self.is_developer:
-            if user.is_developer:
-                return False
+            if not user.is_developer:
+                return True
         if self.is_administrator:
-            if user.is_developer or user.is_administrator:
-                return False
+            if not (user.is_developer or user.is_administrator):
+                return True
         if self.is_moderator:
-            if user.is_developer or user.is_administrator or user.is_moderator:
-                return False
+            if not (user.is_developer or user.is_administrator or user.is_moderator):
+                return True
         if self.is_volunteer:
-            if user.is_developer or user.is_administrator or user.is_moderator or user.is_volunteer:
-                return False
-        return True
+            if not (user.is_developer or user.is_administrator or user.is_moderator or user.is_volunteer):
+                return True
+        return False
 
     def ping(self):
         self.last_seen_at = datetime.utcnow()
@@ -1080,7 +1158,49 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(data['id'])
 
-    def add_purpose(self, purpose_type, remark=u''):
+    def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
+        if gpa and (not isinstance(gpa, float)):
+            gpa = float(gpa)
+        else:
+            gpa = None
+        if full_gpa and (not isinstance(full_gpa, float)):
+            full_gpa = float(full_gpa)
+        else:
+            full_gpa = None
+        education_record = EducationRecord(
+            user_id=self.id,
+            type_id=education_type.id,
+            school=school,
+            major=major,
+            gpa=gpa,
+            full_gpa=full_gpa,
+            year=year
+        )
+        db.session.add(education_record)
+
+    def add_employment_record(self, employer, position, year):
+        employment_record = EmploymentRecord(
+            user_id=self.id,
+            employer=employer,
+            position=position,
+            year=year
+        )
+        db.session.add(employment_record)
+
+    def add_previous_achievement(self, previous_achievement_type, score=None, remark=None):
+        if score and (not isinstance(score, int)):
+            score = int(score)
+        else:
+            score = None
+        previous_achievement = PreviousAchievement(
+            user_id=self.id,
+            type_id=previous_achievement_type.id,
+            score=score,
+            remark=remark
+        )
+        db.session.add(previous_achievement)
+
+    def add_purpose(self, purpose_type, remark=None):
         if not self.has_purpose(purpose_type):
             purpose = Purpose(user_id=self.id, type_id=purpose_type.id, remark=remark)
         else:
@@ -1097,7 +1217,18 @@ class User(UserMixin, db.Model):
     def has_purpose(self, purpose_type):
         return self.purposes.filter_by(type_id=purpose_type.id).first() is not None
 
-    def add_referrer(self, referrer_type, remark=u''):
+    @property
+    def purposes_alias(self):
+        if self.purposes.count() == 0:
+            return u'无'
+        if self.purposes.count() == 1:
+            if self.purposes.first().type.name == u'其它':
+                return self.purposes.first().remark
+            else:
+                return self.purposes.first().type.name
+        return reduce(lambda purpose1, purpose2: u'%s · %s' % (purpose1, purpose2), [purpose.type.name for purpose in self.purposes if purpose.type.name != u'其它'] + [purpose.remark for purpose in self.purposes if purpose.type.name == u'其它'])
+
+    def add_referrer(self, referrer_type, remark=None):
         if not self.has_referrer(referrer_type):
             referrer = Referrer(user_id=self.id, type_id=referrer_type.id, remark=remark)
         else:
@@ -1113,6 +1244,33 @@ class User(UserMixin, db.Model):
 
     def has_referrer(self, referrer_type):
         return self.referrers.filter_by(type_id=referrer_type.id).first() is not None
+
+    @property
+    def referrers_alias(self):
+        if self.referrers.count() == 0:
+            return u'无'
+        if self.referrers.count() == 1:
+            if self.referrers.first().type.name == u'其它':
+                return self.referrers.first().remark
+            else:
+                return self.referrers.first().type.name
+        return reduce(lambda referrer1, referrer2: u'%s · %s' % (referrer1, referrer2), [referrer.type.name for referrer in self.referrers if referrer.type.name != u'其它'] + [referrer.remark for referrer in self.referrers if referrer.type.name == u'其它'])
+
+    def add_purchase(self, product, quantity=1):
+        purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
+        db.session.add(purchase)
+
+    @property
+    def purchases_alias(self):
+        if self.purchases.count() == 0:
+            return u'无'
+        if self.purchases.count() == 1:
+            return u'%s ×%s' % (self.purchases.first().product.name, self.purchases.first().quantity)
+        return reduce(lambda purchase1, purchase2: u'%s · %s' % (purchase1, purchase2), [u'%s[%s元]×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
+
+    @property
+    def purchases_total(self):
+        return sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -1131,6 +1289,14 @@ class User(UserMixin, db.Model):
     def invited_user(self, user):
         return self.sent_invitations.filter_by(user_id=user.id).first() is not None
 
+    @property
+    def inviters(self):
+        if self.accepted_invitations.count() == 0:
+            return u'无'
+        if self.accepted_invitations.count() == 1:
+            return u'%s（%s）[%s]' % (self.accepted_invitations.first().inviter.name, self.accepted_invitations.first().inviter.email, self.accepted_invitations.first().type.name)
+        return reduce(lambda inviter1, inviter2: u'%s · %s' % (inviter1, inviter2), [u'%s（%s）[%s]' % (invitation.inviter.name, invitation.inviter.email, invitation.type.name) for invitation in self.accepted_invitations])
+
     def receive_user(self, user):
         if not self.received_user(user):
             reception = Reception(receptionist_id=self.id, user_id=user.id)
@@ -1148,11 +1314,15 @@ class User(UserMixin, db.Model):
         return self.made_receptions.filter_by(user_id=user.id).first() is not None
 
     def create_user(self, user):
+        user.created = True
+        user.created_at = datetime.utcnow()
+        db.session.add(user)
+        db.session.commit()
         if not self.created_user(user):
-            user_creation = UserCreation(creator_id=self.id, user_id=user.id)
+            user_creation = UserCreation(creator_id=self.id, user_id=user.id, timestamp=user.created_at)
         else:
             user_creation = self.made_user_creations.filter_by(user_id=user.id).first()
-            user_creation.timestamp = datetime.utcnow()
+            user_creation.timestamp = user.created_at
         db.session.add(user_creation)
 
     def uncreate_user(self, user):
@@ -1412,10 +1582,23 @@ class User(UserMixin, db.Model):
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
+    def add_toefl_test_score(self, test_score_type, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
+        toefl_test_score = TOEFLTestScore(
+            user_id=self.id,
+            type_id=test_score_type.id,
+            total_score=total_score,
+            reading_score=reading_score,
+            listening_score=listening_score,
+            speaking_score=speaking_score,
+            writing_score=writing_score,
+            modified_by_id=modified_by.id
+        )
+        db.session.add(toefl_test_score)
+
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
-    def activate(self, new_password=''):
+    def activate(self, new_password=None):
         self.activated = True
         self.activated_at = datetime.utcnow()
         if new_password:
@@ -1434,17 +1617,23 @@ class User(UserMixin, db.Model):
         }
         return user_json
 
-    def to_json_suggestion(self, suggest_email=False, include_url=False):
+    def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False):
         if suggest_email:
             user_json_suggestion = {
                 'title': self.email,
-                'description': '%s [%s]' % (self.name, self.role.name),
             }
+            if include_role:
+                user_json_suggestion['description'] = '%s [%s]' % (self.name, self.role.name)
+            else:
+                user_json_suggestion['description'] = self.name
         else:
             user_json_suggestion = {
                 'title': self.name,
-                'description': '%s [%s]' % (self.email, self.role.name),
             }
+            if include_role:
+                user_json_suggestion['description'] = '%s [%s]' % (self.email, self.role.name)
+            else:
+                user_json_suggestion['description'] = self.email
         if include_url:
             user_json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
         return user_json_suggestion
@@ -1455,8 +1644,12 @@ class User(UserMixin, db.Model):
         if admin is None:
             admin = User(
                 email=current_app.config['YSYS_ADMIN'],
+                confirmed=True,
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
                 password=current_app.config['YSYS_ADMIN_PASSWORD'],
+                activated=True,
+                activated_at=datetime.utcnow(),
+                last_seen_at=datetime.utcnow(),
                 name=u'SysOp'
             )
             db.session.add(admin)
@@ -1503,50 +1696,6 @@ login_manager.anonymous_user = AnonymousUser
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-class PreviousAchievementType(db.Model):
-    __tablename__ = 'previous_achievement_types'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    previous_achievements = db.relationship('PreviousAchievement', backref='type', lazy='dynamic')
-
-    @staticmethod
-    def insert_previous_achievement_types():
-        previous_achievement_types = [
-            (u'高考总分', ),
-            (u'高考数学', ),
-            (u'高考英语', ),
-            (u'大学英语四级', ),
-            (u'大学英语六级', ),
-            (u'专业英语四级', ),
-            (u'专业英语八级', ),
-            (u'TOEFL', ),
-            (u'竞赛', ),
-            (u'其它', ),
-        ]
-        for PAT in previous_achievement_types:
-            previous_achievement_type = PreviousAchievementType.query.filter_by(name=PAT[0]).first()
-            if previous_achievement_type is None:
-                previous_achievement_type = PreviousAchievementType(name=PAT[0])
-                db.session.add(previous_achievement_type)
-                print u'导入既往成绩类型信息', PAT[0]
-        db.session.commit()
-
-    def __repr__(self):
-        return '<Previous Achievement Type %r>' % self.name
-
-
-class PreviousAchievement(db.Model):
-    __tablename__ = 'previous_achievements'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    type_id = db.Column(db.Integer, db.ForeignKey('previous_achievement_types.id'))
-    score = db.Column(db.Integer)
-    remark = db.Column(db.UnicodeText)
-
-    def __repr__(self):
-        return '<Previous Achievement %r, %r, %r, %r>' % (self.user.name, self.type.name, self.score)
 
 
 class EducationType(db.Model):
@@ -1602,6 +1751,49 @@ class EmploymentRecord(db.Model):
         return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
 
 
+class PreviousAchievementType(db.Model):
+    __tablename__ = 'previous_achievement_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    previous_achievements = db.relationship('PreviousAchievement', backref='type', lazy='dynamic')
+
+    @staticmethod
+    def insert_previous_achievement_types():
+        previous_achievement_types = [
+            (u'高考总分', ),
+            (u'高考数学', ),
+            (u'高考英语', ),
+            (u'大学英语四级', ),
+            (u'大学英语六级', ),
+            (u'专业英语四级', ),
+            (u'专业英语八级', ),
+            (u'竞赛', ),
+            (u'其它', ),
+        ]
+        for PAT in previous_achievement_types:
+            previous_achievement_type = PreviousAchievementType.query.filter_by(name=PAT[0]).first()
+            if previous_achievement_type is None:
+                previous_achievement_type = PreviousAchievementType(name=PAT[0])
+                db.session.add(previous_achievement_type)
+                print u'导入既往成绩类型信息', PAT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Previous Achievement Type %r>' % self.name
+
+
+class PreviousAchievement(db.Model):
+    __tablename__ = 'previous_achievements'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('previous_achievement_types.id'))
+    score = db.Column(db.Integer)
+    remark = db.Column(db.UnicodeText)
+
+    def __repr__(self):
+        return '<Previous Achievement %r, %r, %r, %r>' % (self.user.name, self.type.name, self.score)
+
+
 class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
@@ -1633,17 +1825,17 @@ class Product(db.Model):
     @staticmethod
     def insert_products():
         products = [
-            (u'VB基本技术费', 6800.0, ),
-            (u'Y-GRE基本技术费', 6800.0, ),
-            (u'AW费用', 800.0, ),
-            (u'Q费用', 800.0, ),
-            (u'Y-GRE多轮费用', 2000.0, ),
-            (u'在校生减免', -800.0, ),
-            (u'本校减免', -500.0, ),
-            (u'联报优惠', -1000.0, ),
-            (u'团报优惠', -200.0, ),
-            (u'按月延长有效期', 1000.0, ),
-            (u'一次性延长2年有效期', 3000.0, ),
+            (u'VB基本技术费', 6800.0, True, ),
+            (u'Y-GRE基本技术费', 6800.0, True, ),
+            (u'AW费用', 800.0, True, ),
+            (u'Q费用', 800.0, True, ),
+            (u'Y-GRE多轮费用', 2000.0, True, ),
+            (u'在校生减免', -800.0, True, ),
+            (u'本校减免', -500.0, True, ),
+            (u'联报优惠', -1000.0, True, ),
+            (u'团报优惠', -200.0, True, ),
+            (u'按月延长有效期', 1000.0, True, ),
+            (u'一次性延长2年有效期', 3000.0, True, ),
         ]
         for P in products:
             product = Product.query.filter_by(name=P[0]).first()
@@ -1651,6 +1843,7 @@ class Product(db.Model):
                 product = Product(
                     name=P[0],
                     price=P[1],
+                    available=P[2],
                     modified_by_id=User.query.get(1).id
                 )
                 db.session.add(product)
@@ -2793,13 +2986,11 @@ class Announcement(db.Model):
             for announcement in announcements:
                 announcement.retract(modified_by=modified_by)
         if self.type.name == u'用户邮件通知':
-            for user in User.query.all():
-                if user.can(Permission.BOOK):
-                    send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
+            for user in User.users_can(u'预约'):
+                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         if self.type.name == u'管理邮件通知':
-            for user in User.query.all():
-                if user.can(Permission.MANAGE):
-                    send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
+            for user in User.users_can(u'管理'):
+                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         self.show = True
         self.ping(modified_by=modified_by)
         db.session.add(self)

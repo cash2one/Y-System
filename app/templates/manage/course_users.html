@@ -118,30 +118,15 @@
                         <tr>
                             <td>
                                 <a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank">{{ user.name }}</a>
+                                {% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
                             </td>
                             <td>
                                 {{ user.email }}
-                                {% if user.confirmed %}
-                                <i class="check circle icon"></i>
-                                {% else %}
-                                <i class="remove circle icon"></i>
-                                {% endif %}
+                                <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
                             </td>
                             <td>{{ user.role.name }}</td>
-                            <td>
-                                {% if user.vb_course %}
-                                {{ user.vb_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if user.y_gre_course %}
-                                {{ user.y_gre_course.name }}
-                                {% else %}
-                                无
-                                {% endif %}
-                            </td>
+                            <td>{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</td>
+                            <td>{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</td>
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can('管理学习进度') %}
@@ -160,8 +145,15 @@
                             <td>
                                 {% if not user.is_superior_than(user=current_user) %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.course_users', id=course.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
+                                </div>
+                                <div id="delete-modal-{{ user.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i> 确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.course_users', id=course.id, page=pagination.page)) }}"><i class="remove user icon"></i> 注销</a>
+                                        <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
+                                    </div>
                                 </div>
                                 {% else %}
                                 <div class="ui mini icon buttons">
@@ -200,8 +192,19 @@ $('.message .close')
     })
 ;
 
-$('table')
-    .tablesort()
+$('table').tablesort();
+
+{% for user in users %}
+$('#delete-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
+    })
 ;
+$('#delete-hide-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal('hide');
+    })
+;
+{% endfor %}
 </script>
 {% endblock %}

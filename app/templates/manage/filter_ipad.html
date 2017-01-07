@@ -106,7 +106,6 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <div class="ui error message"></div>
                 </form>
                 {% if ipads %}
                 <h3 class="header"><i class="filter icon"></i> 筛选结果</h3>
@@ -251,6 +250,16 @@ $('select.dropdown')
 
 $('table')
     .tablesort()
+;
+
+$(document)
+    .ready(function() {
+        $('#filter-ipad')
+            .form({
+                onSuccess: submitForm,
+            })
+        ;
+    })
 ;
 </script>
 {% endblock %}

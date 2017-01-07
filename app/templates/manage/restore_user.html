@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}注销用户{% endblock %}
+{% block title %}恢复用户{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -87,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="remove user icon"></i> 注销用户</h1>
+    <h1 class="ui inverted header"><i class="undo icon"></i> 恢复用户</h1>
 </div>
 {% endblock %}
 
@@ -96,12 +96,32 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="warning sign icon"></i> 确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</h3>
-                <form id="delete-user" method="POST" class="ui form">
+                <h3 class="header"><i class="undo icon"></i> 恢复用户：{{ user.name }}</h3>
+                <form id="restore-user" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
-                    {{ form.submit(class='ui negative button') }}
+                    <div class="fields">
+                        <div class="eight wide required field">
+                            {{ form.email.label() }}
+                            {{ form.email(placeholder='邮箱') }}
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.role.label() }}
+                            {{ form.role(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
-                    <div class="ui error message"></div>
+                    {% with email_errors = form.email.errors %}
+                    {% if email_errors %}
+                    <div class="ui flask negative message">
+                        <ul class="list">
+                            {% for error in email_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
                 </form>
             </div>
         </div>
@@ -127,9 +147,35 @@ $('select.dropdown')
 
 $(document)
     .ready(function() {
-        $('#delete-user')
+        $('#restore-user')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier: 'role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择用户组'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })
