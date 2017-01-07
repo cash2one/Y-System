@@ -91,7 +91,40 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="announcement icon"></i> 通知</h3>
+                <h3 class="header">
+                    <i class="announcement icon"></i> 通知
+                    <div id="new-announcement-trigger" class="ui right floated positive circular icon button" data-content="新建通知" data-position="left center"><i class="add icon"></i></div>
+                    <div id="new-announcement-modal" class="ui modal">
+                        <i class="close icon"></i>
+                        <div class="header"><i class="add circle icon"></i> 新建通知</div>
+                        <div class="content">
+                        <form id="new-announcement" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="twelve wide required field">
+                                    {{ form.title.label() }}
+                                    {{ form.title(placeholder='通知标题') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ form.announcement_type.label() }}
+                                    {{ form.announcement_type(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            <div class="required field">
+                                {{ form.body.label() }}
+                                {{ form.body(placeholder='通知内容') }}
+                            </div>
+                            <div class="inline field">
+                                <div class="ui toggle checkbox">
+                                    {{ form.show() }}
+                                    {{ form.show.label() }}
+                                </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
+                        </div>
+                    </div>
+                </h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -149,40 +182,6 @@
         </div>
     </div>
 </div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="header"><i class="add circle icon"></i> 新建通知</h3>
-                <form id="new-announcement" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="twelve wide required field">
-                            {{ form.title.label() }}
-                            {{ form.title(placeholder='通知标题') }}
-                        </div>
-                        <div class="four wide required field">
-                            {{ form.announcement_type.label() }}
-                            {{ form.announcement_type(class='ui dropdown') }}
-                        </div>
-                    </div>
-                    <div class="required field">
-                        {{ form.body.label() }}
-                        {{ form.body(placeholder='通知内容') }}
-                    </div>
-                    <div class="inline field">
-                        <div class="ui toggle checkbox">
-                            {{ form.show() }}
-                            {{ form.show.label() }}
-                        </div>
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block customized_scripts %}
@@ -217,6 +216,13 @@ $('#delete-hide-trigger-{{ announcement.id }}')
     })
 ;
 {% endfor %}
+
+$('#new-announcement-trigger').popup();
+$('#new-announcement-trigger')
+    .on('click', function() {
+        $('#new-announcement-modal').modal({ autofocus: false }).modal('show');
+    })
+;
 
 $(document)
     .ready(function() {
