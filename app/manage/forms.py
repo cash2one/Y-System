@@ -583,10 +583,6 @@ class EditUserForm(FlaskForm):
         # self.y_gre_course.choices = [(0, u'无')] + [(course.id, course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
-class DeleteUserForm(FlaskForm):
-    submit = SubmitField(u'删除')
-
-
 class RestoreUserForm(FlaskForm):
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户组', coerce=unicode, validators=[Required()])

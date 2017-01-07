@@ -168,17 +168,17 @@
                                 {% if user.deleted %}
                                 <a class="ui mini button loading-trigger" href="{{ url_for('manage.restore_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="undo icon"></i> 恢复</a>
                                 {% else %}
-                                {% if user.created %}
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
+                                    <div id="delete-modal-{{ user.id }}" class="ui modal">
+                                        <div class="header"><i class="warning sign icon"></i> 确定要{% if user.created %}注销用户{% else %}删除未完成注册的用户信息{% endif %}：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                        <div class="actions">
+                                            <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
+                                            <a class="ui negative right labeled icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_delete', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}">{% if user.created %}注销{% else %}删除{% endif %} <i class="remove user icon"></i></a>
+                                        </div>
+                                    </div>
                                 </div>
-                                {% else %}
-                                <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <a class="ui negative button loading-trigger" href="{{ url_for('manage.create_user_delete', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="remove user icon"></i></a>
-                                </div>
-                                {% endif %}
                                 {% endif %}
                             </td>
                         </tr>
@@ -216,8 +216,19 @@ $('.message .close')
     })
 ;
 
-$('table')
-    .tablesort()
+$('table').tablesort();
+
+{% for user in users %}
+$('#delete-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
+    })
 ;
+$('#delete-hide-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal('hide');
+    })
+;
+{% endfor %}
 </script>
 {% endblock %}

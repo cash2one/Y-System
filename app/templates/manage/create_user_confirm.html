@@ -779,10 +779,17 @@
                         </div>
                     </div>
                     {{ confirm_user_form.submit(class='ui primary button') }}
-                    <a class="ui negative button cancel loading-trigger" href="{{ url_for('manage.create_user_delete', id=user.id, next=request.args.get('next')) }}">删除</a>
+                    <div id="delete-trigger" class="ui negative button cancel">删除</div>
                     <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                     {{ macros.form_validation_error_widget(confirm_user_form) }}
                 </form>
+                <div id="delete-modal" class="ui modal">
+                    <div class="header"><i class="warning sign icon"></i> 确定要删除未完成注册的用户信息：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                    <div class="actions">
+                        <div id="delete-hide-trigger" class="ui black button">保留</div>
+                        <a class="ui negative right labeled icon button loading-trigger" href="{{ url_for('manage.create_user_delete', id=user.id, next=request.args.get('next')) }}">删除 <i class="remove user icon"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1002,6 +1009,17 @@ $('#edit-y-gre-course-trigger')
 $('#edit-y-gre-course-hide-trigger')
     .on('click', function() {
         $('#edit-y-gre-course-modal').modal('hide');
+    })
+;
+
+$('#delete-trigger')
+    .on('click', function() {
+        $('#delete-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger')
+    .on('click', function() {
+        $('#delete-modal').modal('hide');
     })
 ;
 

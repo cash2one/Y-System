@@ -12,11 +12,11 @@ from .forms import NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm
 from .forms import EditPunchLessonForm, EditPunchSectionForm
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
-from .forms import NewUserForm, NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewAdminForm, ConfirmUserForm
+from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
+from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
 from .forms import EditNameForm, EditIDNumberForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm, EditUserForm
-from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, NewInviterForm, EditPurchasedProductForm, EditRoleForm, EditVBCourseForm, EditYGRECourseForm
-from .forms import DeleteUserForm, RestoreUserForm, FindUserForm
+from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditRoleForm, EditVBCourseForm, EditYGRECourseForm
 from .forms import NewCourseForm, EditCourseForm, DeleteCourseForm
 from .. import db
 from ..email import send_email
@@ -2807,14 +2807,11 @@ def delete_user(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.is_superior_than(user=current_user._get_current_object()):
+    if user.is_superior_than(user=current_user._get_current_object()) or user.id == current_user.id:
         abort(403)
-    form = DeleteUserForm()
-    if form.validate_on_submit():
-        user.safe_delete()
-        flash(u'已注销用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
-        return redirect(request.args.get('next') or url_for('manage.user'))
-    return render_template('manage/delete_user.html', form=form, user=user)
+    user.safe_delete()
+    flash(u'已注销用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
 
 
 @manage.route('/user/restore/<int:id>', methods=['GET', 'POST'])
