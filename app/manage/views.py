@@ -17,7 +17,7 @@ from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousA
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
-from .forms import NewCourseForm, EditCourseForm, DeleteCourseForm
+from .forms import NewCourseForm, EditCourseForm
 from .. import db
 from ..email import send_email
 from ..models import Role, User, Gender
@@ -3241,12 +3241,9 @@ def delete_course(id):
     course = Course.query.get_or_404(id)
     if course.deleted:
         abort(404)
-    form = DeleteCourseForm()
-    if form.validate_on_submit():
-        course.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除班级：%s' % course.name, category='success')
-        return redirect(request.args.get('next') or url_for('manage.course'))
-    return render_template('manage/delete_course.html', form=form, course=course)
+    course.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除班级：%s' % course.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.course'))
 
 
 @manage.route('/analytics')

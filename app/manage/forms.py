@@ -620,7 +620,3 @@ class EditCourseForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditCourseForm, self).__init__(*args, **kwargs)
         self.course_type.choices = [(u'', u'选择班级类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
-
-
-class DeleteCourseForm(FlaskForm):
-    submit = SubmitField(u'删除')
