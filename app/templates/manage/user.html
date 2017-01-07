@@ -93,7 +93,51 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="user icon"></i> 用户列表</h3>
+                <h3 class="header">
+                    <i class="user icon"></i> 用户列表
+                    {% if current_user.can('管理权限') %}
+                    <div class="ui right floated positive circular top left pointing dropdown icon button">
+                        <i class="add user icon"></i>
+                        <div class="menu">
+                            <a class="item loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="student icon"></i> 新建学生用户</a>
+                            <div id="create-admin-trigger" class="item"><i class="wrench icon"></i> 新建管理用户</div>
+                        </div>
+                    </div>
+                    <div id="create-admin-modal" class="ui modal">
+                        <i class="close icon"></i>
+                        <div class="header"><i class="add user icon"></i> 新建管理用户</div>
+                        <div class="content">
+                            <form id="create-admin" method="POST" class="ui form">
+                                {{ form.hidden_tag() }}
+                                <div class="fields">
+                                    <div class="eight wide required field">
+                                        {{ form.name.label() }}
+                                        {{ form.name(placeholder='姓名') }}
+                                    </div>
+                                    <div class="eight wide required field">
+                                        {{ form.id_number.label() }}
+                                        {{ form.id_number(placeholder='身份证号（18位）') }}
+                                    </div>
+                                </div>
+                                <div class="fields">
+                                    <div class="eight wide required field">
+                                        {{ form.email.label() }}
+                                        {{ form.email(placeholder='用于登录系统、接收通知') }}
+                                    </div>
+                                    <div class="eight wide required field">
+                                        {{ form.role.label() }}
+                                        {{ form.role(class='ui dropdown') }}
+                                    </div>
+                                </div>
+                                {{ form.submit(class='ui primary button') }}
+                                {{ macros.form_validation_error_widget(form) }}
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a id="create-user-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}" data-content="新建学生用户" data-position="left center"><i class="add user icon"></i></a>
+                    {% endif %}
+                </h3>
                 <div class="ui tabular menu">
                     <a class="item {% if show_activated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.activated_users') }}">已激活 [{{ activated_users_num }}]</a>
                     <a class="item {% if show_unactivated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活 [{{ unactivated_users_num }}]</a>
@@ -188,15 +232,6 @@
                 {% if pagination %}
                 {{ macros.pagination_widget(pagination, 'manage.user') }}
                 {% endif %}
-                {% if current_user.can('管理权限') %}
-                <div class="ui buttons">
-                    <a class="ui primary labeled icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="add user icon"></i> 新建学生用户</a>
-                    <div class="or" data-text="或"></div>
-                    <a class="ui positive right labeled icon button loading-trigger" href="{{ url_for('manage.create_admin', next=url_for('manage.user', page=pagination.page)) }}"><i class="add user icon"></i> 新建管理用户</a>
-                </div>
-                {% else %}
-                <a class="ui primary labeled icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="add user icon"></i> 新建学生用户</a>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -206,6 +241,8 @@
 {% block customized_scripts %}
 {{ super() }}
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/IDValidator.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -216,7 +253,17 @@ $('.message .close')
     })
 ;
 
+$('.ui.dropdown').dropdown();
+
 $('table').tablesort();
+
+$('#create-user-trigger').popup();
+
+$('#create-admin-trigger')
+    .on('click', function() {
+        $('#create-admin-modal').modal({ autofocus: false }).modal('show');
+    })
+;
 
 {% for user in users %}
 $('#delete-trigger-{{ user.id }}')
@@ -230,5 +277,67 @@ $('#delete-hide-trigger-{{ user.id }}')
     })
 ;
 {% endfor %}
+
+var Validator = new IDValidator(GB2260);
+$(document)
+    .ready(function() {
+        $.fn.form.settings.rules.idNumber = function(value) {
+            return (Validator.isValid(value, 18));
+        };
+        $('#create-admin')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    name: {
+                        identifier: 'name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写用户姓名'
+                            }
+                        ]
+                    },
+                    id_number: {
+                        identifier: 'id_number',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写身份证号'
+                            },
+                            {
+                                type: 'idNumber',
+                                prompt: '请输入一个有效的身份证号'
+                            }
+                        ]
+                    },
+                    email: {
+                        identifier: 'email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写电子邮箱地址'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    },
+                    role: {
+                        identifier: 'role',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择用户组'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
 </script>
 {% endblock %}
