@@ -8,10 +8,10 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm, DeletePeriodForm
-from .forms import NewiPadForm, EditiPadForm, DeleteiPadForm, FilteriPadForm
+from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import EditPunchLessonForm, EditPunchSectionForm
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
-from .forms import NewAnnouncementForm, EditAnnouncementForm, DeleteAnnouncementForm
+from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
@@ -1876,12 +1876,9 @@ def delete_announcement(id):
     announcement = Announcement.query.get_or_404(id)
     if announcement.deleted:
         abort(404)
-    form = DeleteAnnouncementForm()
-    if form.validate_on_submit():
-        announcement.safe_delete(modified_by=current_user._get_current_object())
-        flash(u'已删除通知：“%s”' % announcement.title, category='success')
-        return redirect(request.args.get('next') or url_for('manage.announcement'))
-    return render_template('manage/delete_announcement.html', form=form, announcement=announcement)
+    announcement.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除通知：“%s”' % announcement.title, category='success')
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
 @manage.route('/user', methods=['GET', 'POST'])

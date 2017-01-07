@@ -127,10 +127,6 @@ class EditiPadForm(FlaskForm):
             raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
 
 
-class DeleteiPadForm(FlaskForm):
-    submit = SubmitField(u'删除')
-
-
 class FilteriPadForm(FlaskForm):
     vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
     y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
@@ -255,10 +251,6 @@ class EditAnnouncementForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditAnnouncementForm, self).__init__(*args, **kwargs)
         self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
-
-
-class DeleteAnnouncementForm(FlaskForm):
-    submit = SubmitField(u'删除')
 
 
 class NewUserForm(FlaskForm):
