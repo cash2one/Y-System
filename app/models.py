@@ -990,6 +990,31 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
 
+    def delete(self):
+        for purpose in self.purposes:
+            self.remove_purpose(purpose_type=purpose.type)
+        for referrer in self.referrers:
+            self.remove_referrer(referrer_type=referrer.type)
+        for education_record in self.education_records:
+            db.session.delete(education_record)
+        for employment_record in self.employment_records:
+            db.session.delete(employment_record)
+        for previous_achievement in self.previous_achievements:
+            db.session.delete(previous_achievement)
+        for toefl_test_score in self.toefl_test_scores:
+            db.session.delete(toefl_test_score)
+        for purchase in self.purchases:
+            db.session.delete(purchase)
+        for course_registration in self.course_registrations:
+            self.unregister_course(course=course_registration.course)
+        for invitation in self.accepted_invitations:
+            invitation.inviter.uninvite_user(user=self)
+        for reception in self.received_receptions:
+            reception.receptionist.unreceive_user(user=self)
+        for user_creation in self.received_user_creations:
+            user_creation.creator.uncreate_user(user=self)
+        db.session.delete(self)
+
     def safe_delete(self):
         self.email = u'%s_%s_deleted' % (self.email, self.id)
         self.confirmed = False

@@ -2587,11 +2587,13 @@ def create_user_confirm(id):
     new_inviter_form = NewInviterForm(prefix='new_inviter')
     if new_inviter_form.validate_on_submit():
         inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data, created=True, activated=True, deleted=False).first()
-        if inviter is not None:
-            inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
-        else:
+        if inviter is None:
             flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
             return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+        if inviter.invited_user(user=user):
+            flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data, category='warning')
+            return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+        inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         flash(u'已添加推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purchased product
@@ -2676,49 +2678,23 @@ def create_user_confirm(id):
     )
 
 
-@manage.route('/user/education-record/remove/<int:id>')
+@manage.route('/user/create/delete/<int:id>', methods=['GET', 'POST'])
 @login_required
-def remove_education_record(id):
-    education_record = EducationRecord.query.get_or_404(id)
-    db.session.delete(education_record)
-    flash(u'已删除教育经历：%s %s' % (education_record.type.name, education_record.school), category='success')
-    return redirect(request.args.get('next') or url_for('manage.user'))
-
-
-@manage.route('/user/employment-record/remove/<int:id>')
-@login_required
-def remove_employment_record(id):
-    employment_record = EmploymentRecord.query.get_or_404(id)
-    db.session.delete(employment_record)
-    flash(u'已删除工作经历：%s %s' % (employment_record.employer, employment_record.position), category='success')
-    return redirect(request.args.get('next') or url_for('manage.user'))
-
-
-@manage.route('/user/previous-achievement/remove/<int:id>')
-@login_required
-def remove_previous_achievement(id):
-    previous_achievement = PreviousAchievement.query.get_or_404(id)
-    db.session.delete(previous_achievement)
-    flash(u'已删除既往成绩：%s' % previous_achievement.type.name, category='success')
-    return redirect(request.args.get('next') or url_for('manage.user'))
-
-
-@manage.route('/user/toefl-test-score/remove/<int:id>')
-@login_required
-def remove_toefl_test_score(id):
-    toefl_test_score = TOEFLTestScore.query.get_or_404(id)
-    db.session.delete(toefl_test_score)
-    flash(u'已删除TOEFL成绩：%s' % toefl_test_score.type.name, category='success')
-    return redirect(request.args.get('next') or url_for('manage.user'))
-
-
-@manage.route('/user/inviter/remove/<int:user_id>/<int:inviter_id>')
-@login_required
-def remove_inviter(user_id, inviter_id):
-    user = User.query.get_or_404(user_id)
-    inviter = User.query.get_or_404(inviter_id)
-    inviter.uninvite_user(user=user)
-    flash(u'已删除推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
+@permission_required(u'管理用户')
+def create_user_delete(id):
+    user = User.query.get_or_404(id)
+    if user.deleted:
+        abort(404)
+    if user.is_superior_than(user=current_user._get_current_object()):
+        abort(403)
+    if user.created:
+        flash(u'%s（%s）已经被创建' % (user.name, user.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.user'))
+    if user.activated:
+        flash(u'%s（%s）已经被激活' % (user.name, user.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.user'))
+    user.delete()
+    flash(u'已删除用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -2776,6 +2752,52 @@ def edit_user(id):
     # if user.y_gre_course:
     #     form.y_gre_course.data = user.y_gre_course.id
     return render_template('manage/edit_user.html', form=form, user=user)
+
+
+@manage.route('/user/education-record/remove/<int:id>')
+@login_required
+def remove_education_record(id):
+    education_record = EducationRecord.query.get_or_404(id)
+    db.session.delete(education_record)
+    flash(u'已删除教育经历：%s %s' % (education_record.type.name, education_record.school), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/employment-record/remove/<int:id>')
+@login_required
+def remove_employment_record(id):
+    employment_record = EmploymentRecord.query.get_or_404(id)
+    db.session.delete(employment_record)
+    flash(u'已删除工作经历：%s %s' % (employment_record.employer, employment_record.position), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/previous-achievement/remove/<int:id>')
+@login_required
+def remove_previous_achievement(id):
+    previous_achievement = PreviousAchievement.query.get_or_404(id)
+    db.session.delete(previous_achievement)
+    flash(u'已删除既往成绩：%s' % previous_achievement.type.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/toefl-test-score/remove/<int:id>')
+@login_required
+def remove_toefl_test_score(id):
+    toefl_test_score = TOEFLTestScore.query.get_or_404(id)
+    db.session.delete(toefl_test_score)
+    flash(u'已删除TOEFL成绩：%s' % toefl_test_score.type.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/inviter/remove/<int:user_id>/<int:inviter_id>')
+@login_required
+def remove_inviter(user_id, inviter_id):
+    user = User.query.get_or_404(user_id)
+    inviter = User.query.get_or_404(inviter_id)
+    inviter.uninvite_user(user=user)
+    flash(u'已删除推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
 
 
 @manage.route('/user/delete/<int:id>', methods=['GET', 'POST'])
@@ -3031,6 +3053,7 @@ def suggest_referrer():
     if name_or_email:
         users = User.query\
             .filter(User.created == True)\
+            .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(or_(
                 User.name.like('%' + name_or_email + '%'),
