@@ -93,7 +93,36 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="student icon"></i> 班级列表</h3>
+                <h3 class="header">
+                    <i class="student icon"></i> 班级列表
+                    <div id="new-course-trigger" class="ui right floated positive circular icon button" data-content="新建班级" data-position="left center"><i class="add icon"></i></div>
+                    <div id="new-course-modal" class="ui modal">
+                        <i class="close icon"></i>
+                        <div class="header"><i class="add circle icon"></i> 新建班级</div>
+                        <div class="content">
+                            <form id="new-course" method="POST" class="ui form">
+                                {{ form.hidden_tag() }}
+                                <div class="fields">
+                                    <div class="eight wide required field">
+                                        {{ form.name.label() }}
+                                        {{ form.name(placeholder='班级名称') }}
+                                    </div>
+                                    <div class="eight wide required field">
+                                        {{ form.course_type.label() }}
+                                        {{ form.course_type(class='ui dropdown') }}
+                                    </div>
+                                </div>
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.show() }}
+                                        {{ form.show.label() }}
+                                    </div>
+                                </div>
+                                {{ form.submit(class='ui primary button') }}
+                            </form>
+                        </div>
+                    </div>
+                </h3>
                 <div class="ui tabular menu">
                     <a class="item {% if show_vb_courses %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_courses') }}">VB班</a>
                     <a class="item {% if show_y_gre_courses %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_courses') }}">Y-GRE班</a>
@@ -156,36 +185,6 @@
         </div>
     </div>
 </div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="header"><i class="add circle icon"></i> 新建班级</h3>
-                <form id="new-course" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="eight wide required field">
-                            {{ form.name.label() }}
-                            {{ form.name(placeholder='班级名称') }}
-                        </div>
-                        <div class="eight wide required field">
-                            {{ form.course_type.label() }}
-                            {{ form.course_type(class='ui dropdown') }}
-                        </div>
-                    </div>
-                    <div class="inline field">
-                        <div class="ui toggle checkbox">
-                            {{ form.show() }}
-                            {{ form.show.label() }}
-                        </div>
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block customized_scripts %}
@@ -219,6 +218,13 @@ $('#delete-hide-trigger-{{ course.id }}')
     })
 ;
 {% endfor %}
+
+$('#new-course-trigger').popup();
+$('#new-course-trigger')
+    .on('click', function() {
+        $('#new-course-modal').modal({ autofocus: false }).modal('show');
+    })
+;
 
 $(document)
     .ready(function() {
