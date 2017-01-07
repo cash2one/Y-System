@@ -98,30 +98,30 @@
                         <i class="close icon"></i>
                         <div class="header"><i class="add circle icon"></i> 新建通知</div>
                         <div class="content">
-                        <form id="new-announcement" method="POST" class="ui form">
-                            {{ form.hidden_tag() }}
-                            <div class="fields">
-                                <div class="twelve wide required field">
-                                    {{ form.title.label() }}
-                                    {{ form.title(placeholder='通知标题') }}
+                            <form id="new-announcement" method="POST" class="ui form">
+                                {{ form.hidden_tag() }}
+                                <div class="fields">
+                                    <div class="twelve wide required field">
+                                        {{ form.title.label() }}
+                                        {{ form.title(placeholder='通知标题') }}
+                                    </div>
+                                    <div class="four wide required field">
+                                        {{ form.announcement_type.label() }}
+                                        {{ form.announcement_type(class='ui dropdown') }}
+                                    </div>
                                 </div>
-                                <div class="four wide required field">
-                                    {{ form.announcement_type.label() }}
-                                    {{ form.announcement_type(class='ui dropdown') }}
+                                <div class="required field">
+                                    {{ form.body.label() }}
+                                    {{ form.body(placeholder='通知内容') }}
                                 </div>
-                            </div>
-                            <div class="required field">
-                                {{ form.body.label() }}
-                                {{ form.body(placeholder='通知内容') }}
-                            </div>
-                            <div class="inline field">
-                                <div class="ui toggle checkbox">
-                                    {{ form.show() }}
-                                    {{ form.show.label() }}
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.show() }}
+                                        {{ form.show.label() }}
+                                    </div>
                                 </div>
-                            </div>
-                            {{ form.submit(class='ui primary button') }}
-                        </form>
+                                {{ form.submit(class='ui primary button') }}
+                            </form>
                         </div>
                     </div>
                 </h3>

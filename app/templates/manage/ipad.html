@@ -93,7 +93,62 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="tablet icon"></i> iPad列表</h3>
+                <h3 class="header">
+                    <i class="tablet icon"></i> iPad列表
+                    {% if current_user.can('管理iPad设备') %}
+                    <div id="new-ipad-trigger" class="ui right floated positive circular icon button" data-content="新增iPad" data-position="left center"><i class="add icon"></i></div>
+                    <div id="new-ipad-modal" class="ui modal">
+                        <i class="close icon"></i>
+                        <div class="header"><i class="add circle icon"></i> 新建通知</div>
+                        <div class="content">
+                            <form id="new-ipad" method="POST" class="ui form">
+                                {{ form.hidden_tag() }}
+                                <div class="fields">
+                                    <div class="eight wide required field">
+                                        {{ form.alias.label() }}
+                                        {{ form.alias(placeholder='编号') }}
+                                    </div>
+                                    <div class="eight wide required field">
+                                        {{ form.serial.label() }}
+                                        {{ form.serial(placeholder='序列号') }}
+                                    </div>
+                                </div>
+                                <div class="fields">
+                                    <div class="four wide required field">
+                                        {{ form.capacity.label() }}
+                                        {{ form.capacity(class='ui dropdown') }}
+                                    </div>
+                                    <div class="four wide required field">
+                                        {{ form.room.label() }}
+                                        {{ form.room(class='ui dropdown') }}
+                                    </div>
+                                    <div class="four wide required field">
+                                        {{ form.video_playback.label() }}
+                                        <div class="ui right labeled input">
+                                            {{ form.video_playback(placeholder='0') }}
+                                            <div class="ui basic label">小时</div>
+                                        </div>
+                                    </div>
+                                    <div class="four wide required field">
+                                        {{ form.state.label() }}
+                                        {{ form.state(class='ui dropdown') }}
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    {{ form.vb_lessons.label() }}
+                                    {{ form.vb_lessons(class='ui dropdown') }}
+                                </div>
+                                <div class="field">
+                                    {{ form.y_gre_lessons.label() }}
+                                    {{ form.y_gre_lessons(class='ui dropdown') }}
+                                </div>
+                                {{ form.submit(class='ui primary button') }}
+                                {{ macros.form_validation_error_widget(form) }}
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </h3>
                 <div class="ui tabular menu">
                     <a class="item {% if show_ipad_all %}active {% endif %}loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
                     <a class="item {% if show_ipad_maintain %}active {% endif %}loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">
@@ -237,62 +292,6 @@
         </div>
     </div>
 </div>
-
-{% if current_user.can('管理iPad设备') %}
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="header"><i class="add circle icon"></i> 新增iPad</h3>
-                <form id="new-ipad" method="POST" class="ui form">
-                    {{ form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="four wide required field">
-                            {{ form.alias.label() }}
-                            {{ form.alias(placeholder='编号') }}
-                        </div>
-                        <div class="four wide required field">
-                            {{ form.serial.label() }}
-                            {{ form.serial(placeholder='序列号') }}
-                        </div>
-                        <div class="two wide required field">
-                            {{ form.capacity.label() }}
-                            {{ form.capacity(class='ui compact dropdown') }}
-                        </div>
-                        <div class="two wide required field">
-                            {{ form.room.label() }}
-                            {{ form.room(class='ui compact dropdown') }}
-                        </div>
-                        <div class="two wide required field">
-                            {{ form.video_playback.label() }}
-                            <div class="ui right labeled input">
-                                {{ form.video_playback(placeholder='0') }}
-                                <div class="ui basic label">小时</div>
-                            </div>
-                        </div>
-                        <div class="two wide required field">
-                            {{ form.state.label() }}
-                            {{ form.state(class='ui compact dropdown') }}
-                        </div>
-                    </div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.vb_lessons.label() }}
-                            {{ form.vb_lessons(class='ui dropdown') }}
-                        </div>
-                        <div class="eight wide field">
-                            {{ form.y_gre_lessons.label() }}
-                            {{ form.y_gre_lessons(class='ui dropdown') }}
-                        </div>
-                    </div>
-                    {{ form.submit(class='ui primary button') }}
-                    {{ macros.form_validation_error_widget(form) }}
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
 {% endblock %}
 
 {% block customized_scripts %}
@@ -324,6 +323,13 @@ $('#delete-hide-trigger-{{ ipad.id }}')
     })
 ;
 {% endfor %}
+
+$('#new-ipad-trigger').popup();
+$('#new-ipad-trigger')
+    .on('click', function() {
+        $('#new-ipad-modal').modal({ autofocus: false }).modal('show');
+    })
+;
 
 $(document)
     .ready(function() {
