@@ -433,7 +433,9 @@ function updateStats(updateProgressBar) {
     });
 };
 updateStats(true);
-setInterval(updateStats(false), 15000);
+setInterval(function() {
+    updateStats(false);
+}, 15000);
 
 // update iPad info
 function updateCards(updateProgressBar) {
@@ -581,6 +583,8 @@ function updateCards(updateProgressBar) {
     });
 };
 updateCards(true);
-setInterval(updateCards(false), 15000);
+setInterval(function() {
+    updateCards(false);
+}, 15000);
 </script>
 {% endblock %}
