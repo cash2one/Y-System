@@ -96,11 +96,11 @@
                 <h3 class="header">
                     <i class="user icon"></i> 用户列表
                     {% if current_user.can('管理权限') %}
-                    <div class="ui right floated positive circular top left pointing dropdown icon button">
+                    <div class="ui right floated positive circular pointing dropdown icon button">
                         <i class="add user icon"></i>
                         <div class="menu">
-                            <a class="item loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="student icon"></i> 新建学生用户</a>
-                            <div id="create-admin-trigger" class="item"><i class="configure icon"></i> 新建管理用户</div>
+                            <a class="item loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="blue student icon"></i> 新建学生用户</a>
+                            <div id="create-admin-trigger" class="item"><i class="green configure icon"></i> 新建管理用户</div>
                         </div>
                     </div>
                     <div id="create-admin-modal" class="ui modal">
