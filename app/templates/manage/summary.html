@@ -498,15 +498,37 @@ function updateCards(updateProgressBar) {
                         )
                         .append(
                             $('<div>')
+                                .addClass('content')
+                                .append(
+                                    $('<div>')
+                                        .attr('id', 'ipad-battery-' + i)
+                                        .addClass('ui indicating progress disabled')
+                                        .append(
+                                            $('<div>')
+                                                .addClass('bar')
+                                                .append(
+                                                    $('<div>')
+                                                        .addClass('progress')
+                                                )
+                                        )
+                                        .append(
+                                            $('<div>')
+                                                .addClass('label')
+                                                .text('无电量信息')
+                                        )
+                                )
+                        )
+                        .append(
+                            $('<div>')
                                 .addClass('extra content')
                                 .append(
                                     $('<span>')
-                                        .append(moment(data.ipads[i].modified_at, 'YYYY-MM-DDTh:mm:ssZ').fromNow() + ' [' + data.ipads[i].modified_by + ']')
+                                        .append('<i class="notched circle loading icon"></i>' + moment(data.ipads[i].modified_at, 'YYYY-MM-DDTh:mm:ssZ').fromNow())
                                 )
                                 .append(
                                     $('<span>')
-                                        .attr('id', 'ipad-battery-' + i)
                                         .addClass('right floated')
+                                        .append('<i class="configure icon"></i>' + data.ipads[i].modified_by)
                                 )
                         )
                 );
@@ -516,7 +538,24 @@ function updateCards(updateProgressBar) {
                 $('#ipad-content-' + i + ' .statistic').addClass('grey');
                 $('#ipad-content-' + i + ' .value').html('<i class="wait icon"></i>');
             } else if (data.ipads[i].state == '借出') {
-                $('#ipad-battery-' + i).html(data.ipads[i].battery_life.percent + '% <i class="' + data.ipads[i].battery_life.level + ' battery icon"></i>');
+                $('#ipad-battery-' + i).removeClass('disabled').progress({
+                    percent: data.ipads[i].battery_life.percent,
+                    text: {
+                        active: '剩余电量：{percent}%',
+                        success: '满电量：{percent}%'
+                    }
+                });
+                if (data.ipads[i].battery_life.percent <= 20) {
+                    if (data.ipads[i].battery_life.percent === 0) {
+                        $('#ipad-battery-' + i).removeClass('indicating').addClass('red').progress({
+                            text: { active: '电量已耗尽' }
+                        });
+                    } else {
+                        $('#ipad-battery-' + i).removeClass('indicating').addClass('yellow').progress({
+                            text: { active: '电量低：{percent}%' }
+                        });
+                    };
+                };
                 if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
                     $('#ipad-' + i).addClass('blue');
                     $('#ipad-state-' + i).append(
@@ -544,16 +583,6 @@ function updateCards(updateProgressBar) {
                     $('#ipad-state-' + i).html('<i class="upload icon"></i>' + data.ipads[i].state);
                     $('#ipad-content-' + i + ' .statistic').addClass('yellow');
                     $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
-                };
-                if (data.ipads[i].battery_life.percent < 20) {
-                    $('#ipad-' + i).removeClass('blue teal').addClass('orange');
-                    $('#ipad-content-' + i + ' .statistic').removeClass('blue teal').addClass('orange');
-                    $('#ipad-content-' + i + ' .value').html('<i class="empty battery icon"></i>');
-                    if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
-                        $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias2);
-                    } else if (data.ipads[i].now_rented_by.last_punch.course_type == 'Y-GRE') {
-                        $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias3);
-                    };
                 };
             } else if (data.ipads[i].state == '候补') {
                 $('#ipad-' + i).addClass('grey');
