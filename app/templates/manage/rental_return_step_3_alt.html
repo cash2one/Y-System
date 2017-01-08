@@ -166,7 +166,20 @@ $(document)
     .ready(function() {
         $('#punch-section')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    section: {
+                        identifier: 'section',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择视频进度'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })

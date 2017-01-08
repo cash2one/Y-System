@@ -166,7 +166,20 @@ $(document)
     .ready(function() {
         $('#select-lesson')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    lesson: {
+                        identifier: 'lesson',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择课程进度'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })

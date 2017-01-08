@@ -167,7 +167,20 @@ $(document)
     .ready(function() {
         $('#select-ipad')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    ipad: {
+                        identifier: 'ipad',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择iPad'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })
