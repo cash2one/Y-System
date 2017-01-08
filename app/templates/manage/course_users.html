@@ -134,11 +134,11 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="popup-trigger">{{ moment(user.activated_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(user.activated_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
-                                <div class="popup-trigger">{{ moment(user.last_seen_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             {% if current_user.can('管理用户') %}

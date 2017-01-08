@@ -153,7 +153,7 @@
                             <td>不可选</td>
                             {% endif %}
                             <td>
-                                <div class="popup-trigger">{{ moment(course.modified_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(course.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(course.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ course.modified_by.name }}</td>
