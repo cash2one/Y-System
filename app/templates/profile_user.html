@@ -277,7 +277,7 @@
                         {% for punch in punches %}
                         <tr>
                             <td>
-                                <div class="popup-trigger">{{ moment(punch.timestamp).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(punch.timestamp).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ punch.section.lesson.type.name }}</td>

@@ -151,7 +151,7 @@
                             <td>未发布</td>
                             {% endif %}
                             <td>
-                                <div class="popup-trigger">{{ moment(announcement.modified_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(announcement.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(announcement.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ announcement.modified_by.name }}</td>

@@ -206,7 +206,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="popup-trigger">{{ moment(ipad.modified_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(ipad.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(ipad.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ ipad.modified_by.name }}</td>

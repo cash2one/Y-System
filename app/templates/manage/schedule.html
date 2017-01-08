@@ -189,7 +189,7 @@
                             {% if schedule.out_of_date %}
                             <td class="negative">已过期</td>
                             <td>
-                                <div class="popup-trigger">{{ moment(schedule.modified_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(schedule.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ schedule.modified_by.name }}</td>
@@ -198,7 +198,7 @@
                             {% if schedule.available %}
                             <td class="positive">已发布</td>
                             <td>
-                                <div class="popup-trigger">{{ moment(schedule.modified_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(schedule.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ schedule.modified_by.name }}</td>
@@ -207,7 +207,7 @@
                             {% else %}
                             <td>未发布</td>
                             <td>
-                                <div class="popup-trigger">{{ moment(schedule.modified_at).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(schedule.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ schedule.modified_by.name }}</td>
