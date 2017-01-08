@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -138,10 +138,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="field">
-                                <div class="ui toggle checkbox">
-                                    {{ form.root() }}
-                                    {{ form.root.label() }}
+                            <div class="ui segment">
+                                <div class="inline required field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.root() }}
+                                        {{ form.root.label() }}
+                                    </div>
                                 </div>
                             </div>
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_3_lesson_alt', user_id=user.id, lesson_id=lesson.id) }}">上一步</a>

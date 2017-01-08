@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -46,8 +46,8 @@
 .ui.vertical.stripe .ui.form .ui.flask.message {
     display: block;
 }
-.ui.vertical.stripe .ui.form .ui.button.cancel {
-    margin-left: 5px;
+.ui.vertical.stripe .ui.list .right.floated .ui.button {
+    margin: auto;
 }
 
 .stats.stripe.segment,
@@ -140,7 +140,6 @@
                                 {{ edit_name_form.name(placeholder='姓名') }}
                             </div>
                             {{ edit_name_form.submit(class='ui primary button') }}
-                            <div id="edit-name-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -155,7 +154,6 @@
                                 {{ edit_id_number_form.id_number(placeholder='身份证号（18位）') }}
                             </div>
                             {{ edit_id_number_form.submit(class='ui primary button') }}
-                            <div id="edit-id-number-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -200,7 +198,6 @@
                                 {{ edit_role_form.role(class='ui dropdown') }}
                             </div>
                             {{ edit_role_form.submit(class='ui primary button') }}
-                            <div id="edit-role-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -215,7 +212,6 @@
                                 {{ edit_vb_course_form.vb_course(class='ui dropdown') }}
                             </div>
                             {{ edit_vb_course_form.submit(class='ui primary button') }}
-                            <div id="edit-vb-course-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -230,7 +226,6 @@
                                 {{ edit_y_gre_course_form.y_gre_course(class='ui dropdown') }}
                             </div>
                             {{ edit_y_gre_course_form.submit(class='ui primary button') }}
-                            <div id="edit-y-gre-course-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -293,7 +288,6 @@
                                 {{ edit_email_form.email(placeholder='用于登录系统、接收通知') }}
                             </div>
                             {{ edit_email_form.submit(class='ui primary button') }}
-                            <div id="edit-email-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -308,7 +302,6 @@
                                 {{ edit_mobile_form.mobile(placeholder='移动电话') }}
                             </div>
                             {{ edit_mobile_form.submit(class='ui primary button') }}
-                            <div id="edit-mobile-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -323,7 +316,6 @@
                                 {{ edit_address_form.address(placeholder='联系地址') }}
                             </div>
                             {{ edit_address_form.submit(class='ui primary button') }}
-                            <div id="edit-address-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -338,7 +330,6 @@
                                 {{ edit_qq_form.qq(placeholder='QQ号') }}
                             </div>
                             {{ edit_qq_form.submit(class='ui primary button') }}
-                            <div id="edit-qq-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -353,7 +344,6 @@
                                 {{ edit_wechat_form.wechat(placeholder='微信号/手机号') }}
                             </div>
                             {{ edit_wechat_form.submit(class='ui primary button') }}
-                            <div id="edit-wechat-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -398,7 +388,6 @@
                                 {{ edit_emergency_contact_name_form.emergency_contact_name(placeholder='紧急联系人姓名') }}
                             </div>
                             {{ edit_emergency_contact_name_form.submit(class='ui primary button') }}
-                            <div id="edit-emergency-contact-name-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -413,7 +402,6 @@
                                 {{ edit_emergency_contact_relationship_form.emergency_contact_relationship(class='ui dropdown') }}
                             </div>
                             {{ edit_emergency_contact_relationship_form.submit(class='ui primary button') }}
-                            <div id="edit-emergency-contact-relationship-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -428,7 +416,6 @@
                                 {{ edit_emergency_contact_mobile_form.emergency_contact_mobile(placeholder='紧急联系人移动电话') }}
                             </div>
                             {{ edit_emergency_contact_mobile_form.submit(class='ui primary button') }}
-                            <div id="edit-emergency-contact-mobile-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -642,7 +629,6 @@
                                 {{ edit_purpose_form.other_purpose(placeholder='其它研修目的') }}
                             </div>
                             {{ edit_purpose_form.submit(class='ui primary button') }}
-                            <div id="edit-purpose-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -657,7 +643,6 @@
                                 {{ edit_application_aim_form.application_aim(placeholder='申请方向') }}
                             </div>
                             {{ edit_referrer_form.submit(class='ui primary button') }}
-                            <div id="edit-application-aim-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -676,7 +661,6 @@
                                 {{ edit_referrer_form.other_referrer(placeholder='其它了解渠道') }}
                             </div>
                             {{ edit_referrer_form.submit(class='ui primary button') }}
-                            <div id="edit-referrer-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -715,7 +699,6 @@
                                 </div>
                             </div>
                             {{ new_inviter_form.submit(class='ui primary button') }}
-                            <div id="edit-inviter-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>
@@ -730,7 +713,6 @@
                                 {{ edit_purchased_products_form.products(class='ui dropdown') }}
                             </div>
                             {{ edit_purchased_products_form.submit(class='ui primary button') }}
-                            <div id="edit-purchased-product-hide-trigger" class="ui button cancel">取消</div>
                         </form>
                     </div>
                 </div>

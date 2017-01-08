@@ -1155,7 +1155,7 @@ def edit_punch_step_1(user_id):
     form = EditPunchLessonForm()
     if form.validate_on_submit():
         return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
-    form.lesson.data = user.last_punch.section.lesson_id
+    form.lesson.data = unicode(user.last_punch.section.lesson_id)
     return render_template('manage/edit_punch_step_1.html', user=user, form=form)
 
 

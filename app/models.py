@@ -1655,6 +1655,7 @@ class User(UserMixin, db.Model):
             db.session.add(admin)
             db.session.commit()
             admin.create_user(user=admin)
+            admin.punch(section=Section.query.get(1))
             db.session.commit()
             print u'初始化系统管理员信息'
 
@@ -1913,6 +1914,14 @@ class Course(db.Model):
         self.show = not self.show
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    @property
+    def valid_registrations(self):
+        return CourseRegistration.query\
+            .join(Course, Course.id == CourseRegistration.course_id)\
+            .join(User, User.id == CourseRegistration.user_id)\
+            .filter(User.created == True)\
+            .filter(User.deleted == False)
 
     @staticmethod
     def insert_courses():

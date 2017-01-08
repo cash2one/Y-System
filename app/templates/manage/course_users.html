@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -171,7 +171,7 @@
                 {{ macros.pagination_widget(pagination, 'manage.course_users', id=course.id, next=request.args.get('next')) }}
                 {% endif %}
                 {% if request.args.get('next') %}
-                <a class="ui button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i> 返回</a>
+                <a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i> 返回</a>
                 {% endif %}
             </div>
         </div>
