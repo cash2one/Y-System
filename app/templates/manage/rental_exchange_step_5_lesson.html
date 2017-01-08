@@ -131,7 +131,7 @@
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.lesson.label() }}
-                                {{ form.lesson(class='ui search dropdown') }}
+                                {{ form.lesson(class='ui dropdown') }}
                             </div>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>

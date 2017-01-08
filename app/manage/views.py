@@ -837,7 +837,7 @@ def rental_return_step_2(user_id):
         abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_3', user_id=user_id, lesson_id=form.lesson.data))
+        return redirect(url_for('manage.rental_return_step_3', user_id=user_id, lesson_id=int(form.lesson.data)))
     return render_template('manage/rental_return_step_2.html', user=user, form=form)
 
 
@@ -851,7 +851,7 @@ def rental_return_step_3(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4', user_id=user_id, section_id=form.section.data))
+        return redirect(url_for('manage.rental_return_step_4', user_id=user_id, section_id=int(form.section.data)))
     return render_template('manage/rental_return_step_3.html', user=user, lesson=lesson, form=form)
 
 
@@ -894,7 +894,7 @@ def rental_return_step_2_alt(user_id):
         abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, lesson_id=form.lesson.data))
+        return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, lesson_id=int(form.lesson.data)))
     return render_template('manage/rental_return_step_2_alt.html', user=user, form=form)
 
 
@@ -908,7 +908,7 @@ def rental_return_step_3_alt(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4_alt', user_id=user_id, section_id=form.section.data))
+        return redirect(url_for('manage.rental_return_step_4_alt', user_id=user_id, section_id=int(form.section.data)))
     return render_template('manage/rental_return_step_3_alt.html', user=user, lesson=lesson, form=form)
 
 
@@ -980,7 +980,7 @@ def rental_exchange_step_2(rental_id):
         abort(404)
     form = PunchLessonForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_3', rental_id=rental_id, lesson_id=form.lesson.data, next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_3', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_2.html', rental=rental, form=form)
 
 
@@ -998,7 +998,7 @@ def rental_exchange_step_3(rental_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = PunchSectionForm(user=user, lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, section_id=form.section.data, next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_3.html', rental=rental, lesson=lesson, form=form)
 
 

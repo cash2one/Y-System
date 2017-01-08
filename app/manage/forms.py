@@ -204,21 +204,21 @@ class iPadSerialForm(FlaskForm):
 
 
 class PunchLessonForm(FlaskForm):
-    lesson = SelectField(u'课程进度', coerce=int)
+    lesson = SelectField(u'课程进度', coerce=unicode)
     submit = SubmitField(u'下一步')
 
     def __init__(self, user, *args, **kwargs):
         super(PunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
+        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
 
 
 class PunchSectionForm(FlaskForm):
-    section = SelectField(u'视频进度', coerce=int)
+    section = SelectField(u'视频进度', coerce=unicode)
     submit = SubmitField(u'下一步')
 
     def __init__(self, user, lesson, *args, **kwargs):
         super(PunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(section.id, u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
+        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
 
 
 class ConfirmPunchForm(FlaskForm):
