@@ -163,6 +163,9 @@
 
 {% block page_content %}
 <div class="ui vertical stripe stats segment">
+    <div id="page-loading-progress" class="ui top attached blue inverted progress">
+        <div class="bar"></div>
+    </div>
     <div class="ui equal width stackable internally celled grid">
         <div class="center aligned row">
             <div class="column">
@@ -276,29 +279,17 @@
     </div>
 </div>
 
-<div class="ui vertical stripe segment">
+<div id="ipads" class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="tablet icon"></i> iPad状态</h3>
                 <div class="ui tabular menu">
-                    {% if show_summary_ipad_1103 %}
-                    <a class="item active loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
-                    {% endif %}
-                    {% if show_summary_ipad_1707 %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
-                    {% endif %}
-                    {% if show_summary_ipad_others %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}">1103</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}">1707</a>
-                    <a class="item active loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}">其它</a>
-                    {% endif %}
+                    <a class="item {% if show_summary_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}#ipads">1103</a>
+                    <a class="item {% if show_summary_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}#ipads">1707</a>
+                    <a class="item {% if show_summary_ipad_others %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}#ipads">其它</a>
                 </div>
-                <div id="ipads" class="ui five stackable cards"></div>
+                <div id="ipads-container" class="ui five stackable cards"></div>
             </div>
         </div>
     </div>
@@ -364,6 +355,17 @@ $('.message .close')
     })
 ;
 
+// progress bar
+$('#page-loading-progress').progress({
+    total: 2,
+    onSuccess: function() {
+        $('#page-loading-progress').fadeOut(1000, function() {
+            $('#page-loading-progress').remove();
+        });
+    }
+});
+
+// search
 $('.ui.search')
     .search({
         apiSettings: {
@@ -372,8 +374,6 @@ $('.ui.search')
         showNoResults: false
     })
 ;
-
-var roomID = '{{ room_id }}';
 
 // update statistics
 var countUpOptions = {
@@ -404,7 +404,7 @@ var VBL4_10CountUp = new CountUp('stat-vb-l4-10', 0, 0, 0, 2.5, countUpOptions);
 var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-10-total', 0, 0, 0, 2.5, countUpOptions);
 var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
 var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
-function updateStats() {
+function updateStats(updateProgressBar) {
     var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/statistics';
     $.getJSON(url, function(data) {
         iPadRent1103CountUp.update(data.room_1103.ipad.rent);
@@ -427,18 +427,22 @@ function updateStats() {
         VBL4_10TotalCountUp.update(data.booking.vb.l4_10.total);
         YGRECountUp.update(data.booking.y_gre.y_gre.show_up);
         YGRETotalCountUp.update(data.booking.y_gre.y_gre.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
 };
-updateStats();
-setInterval(updateStats, 15000);
+updateStats(true);
+setInterval(updateStats(false), 15000);
 
 // update iPad info
-function updateCards() {
+var roomID = '{{ room_id }}';
+function updateCards(updateProgressBar) {
     var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/' + roomID;
     $.getJSON(url, function(data) {
         $('.card').remove();
         for (var i in data.ipads) {
-            $('#ipads')
+            $('#ipads-container')
                 .append(
                     $('<div>')
                         .attr('id', 'ipad-' + i)
@@ -572,9 +576,12 @@ function updateCards() {
                 $('#ipad-content-' + i + ' .value').html('<i class="recycle icon"></i>');
             };
         };
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
 };
-updateCards();
-setInterval(updateCards, 15000);
+updateCards(true);
+setInterval(updateCards(false), 15000);
 </script>
 {% endblock %}
