@@ -94,7 +94,7 @@
             <div class="column">
                 <h3 class="header">
                     <i class="checked calendar icon"></i> 预约记录
-                    <a id="batch-mark-trigger" class="ui right floated circular icon button loading-trigger" href="{{ url_for('manage.set_booking_state_missed_all', next=url_for('manage.booking', page=pagination.page)) }}" data-content="批量标记爽约/失效" data-position="left center"><i class="repeat icon"></i></a>
+                    <a id="batch-mark-trigger" class="ui right floated circular icon button loading-trigger" href="{{ url_for('manage.set_booking_state_missed_all', next=url_for('manage.booking', page=pagination.page)) }}" data-content="批量标记爽约/失效" data-position="top center" data-variation="inverted"><i class="repeat icon"></i></a>
                 </h3>
                 <div class="ui tabular menu">
                     <a class="item {% if show_today_booking %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_booking') }}">当日记录</a>
@@ -122,7 +122,7 @@
                         <tr>
                             <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td>
-                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=booking.user.id) }}" target="_blank">{{ booking.user.name }}</a>
+                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=booking.user.id) }}" target="_blank" data-variation="inverted">{{ booking.user.name }}</a>
                                 <div class="ui flowing popup popup-content">{{ booking.user.name }}（{{ booking.user.email }}）</div>
                             </td>
                             <td>{{ booking.schedule.period.type.name }}</td>
@@ -183,7 +183,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="popup-trigger">{{ moment(booking.timestamp).fromNow() }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(booking.timestamp).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(booking.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>
