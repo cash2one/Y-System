@@ -163,6 +163,9 @@
 
 {% block page_content %}
 <div class="ui vertical stripe stats segment">
+    <div id="page-loading-progress" class="ui top attached blue inverted progress">
+        <div class="bar"></div>
+    </div>
     <div class="ui equal width stackable internally celled grid">
         <div class="center aligned row">
             <div class="column">
@@ -352,6 +355,17 @@ $('.message .close')
     })
 ;
 
+// progress bar
+$('#page-loading-progress').progress({
+    total: 2,
+    onSuccess: function() {
+        $('#page-loading-progress').fadeOut(1000, function() {
+            $('#page-loading-progress').remove();
+        });
+    }
+});
+
+// search
 $('.ui.search')
     .search({
         apiSettings: {
@@ -360,8 +374,6 @@ $('.ui.search')
         showNoResults: false
     })
 ;
-
-var roomID = '{{ room_id }}';
 
 // update statistics
 var countUpOptions = {
@@ -392,7 +404,7 @@ var VBL4_10CountUp = new CountUp('stat-vb-l4-10', 0, 0, 0, 2.5, countUpOptions);
 var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-10-total', 0, 0, 0, 2.5, countUpOptions);
 var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
 var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
-function updateStats() {
+function updateStats(updateProgressBar) {
     var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/statistics';
     $.getJSON(url, function(data) {
         iPadRent1103CountUp.update(data.room_1103.ipad.rent);
@@ -415,13 +427,17 @@ function updateStats() {
         VBL4_10TotalCountUp.update(data.booking.vb.l4_10.total);
         YGRECountUp.update(data.booking.y_gre.y_gre.show_up);
         YGRETotalCountUp.update(data.booking.y_gre.y_gre.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
 };
-updateStats();
-setInterval(updateStats, 15000);
+updateStats(true);
+setInterval(updateStats(false), 15000);
 
 // update iPad info
-function updateCards() {
+var roomID = '{{ room_id }}';
+function updateCards(updateProgressBar) {
     var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/' + roomID;
     $.getJSON(url, function(data) {
         $('.card').remove();
@@ -560,9 +576,12 @@ function updateCards() {
                 $('#ipad-content-' + i + ' .value').html('<i class="recycle icon"></i>');
             };
         };
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
     });
 };
-updateCards();
-setInterval(updateCards, 15000);
+updateCards(true);
+setInterval(updateCards(false), 15000);
 </script>
 {% endblock %}
