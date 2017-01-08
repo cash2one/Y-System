@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -117,10 +117,12 @@
                                         {{ form.period_type(class='ui dropdown') }}
                                     </div>
                                 </div>
-                                <div class="inline field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.show() }}
-                                        {{ form.show.label() }}
+                                <div class="ui segment">
+                                    <div class="inline field">
+                                        <div class="ui toggle checkbox">
+                                            {{ form.show() }}
+                                            {{ form.show.label() }}
+                                        </div>
                                     </div>
                                 </div>
                                 {{ form.submit(class='ui primary button') }}

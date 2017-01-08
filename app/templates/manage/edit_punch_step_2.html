@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -125,7 +125,7 @@
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.section.label() }}
-                                {{ form.section(class='ui search dropdown') }}
+                                {{ form.section(class='ui dropdown') }}
                             </div>
                             <a class="ui button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
@@ -151,15 +151,26 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
-;
+$('select.dropdown').dropdown();
 
 $(document)
     .ready(function() {
         $('#punch-section')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    section: {
+                        identifier: 'section',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择视频进度'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })

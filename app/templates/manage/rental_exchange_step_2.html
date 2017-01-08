@@ -31,8 +31,8 @@
 .ui.vertical.stripe .ui.list + h3 {
     margin-top: 3em;
 }
-.ui.vertical.stripe .floated.image {
-    clear: both;
+.ui.vertical.stripe .ui.table .ui.button {
+    margin: auto;
 }
 .ui.vertical.stripe .ui.tabular.menu,
 .ui.vertical.stripe .ui.statistic .label,
@@ -143,7 +143,7 @@
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.lesson.label() }}
-                                {{ form.lesson(class='ui search dropdown') }}
+                                {{ form.lesson(class='ui dropdown') }}
                             </div>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
@@ -170,15 +170,26 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
-;
+$('select.dropdown').dropdown();
 
 $(document)
     .ready(function() {
         $('#punch-lesson')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    lesson: {
+                        identifier: 'lesson',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择课程进度'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })

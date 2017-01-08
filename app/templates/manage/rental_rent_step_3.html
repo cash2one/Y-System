@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -132,10 +132,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="field">
-                                <div class="ui toggle checkbox">
-                                    {{ form.root() }}
-                                    {{ form.root.label() }}
+                            <div class="ui segment">
+                                <div class="inline required field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.root() }}
+                                        {{ form.root.label() }}
+                                    </div>
                                 </div>
                             </div>
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_2', user_id=user.id, schedule_id=schedule.id) }}">上一步</a>
@@ -163,9 +165,7 @@ $('.message .close')
     })
 ;
 
-$('.ui.checkbox')
-    .checkbox()
-;
+$('.ui.checkbox').checkbox();
 
 $(document)
     .ready(function() {

@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -218,16 +218,14 @@ $('.message .close')
     })
 ;
 
-$('table')
-    .tablesort()
-;
+$('table').tablesort();
 
 {% for schedule in schedules %}
 {% if current_user.booking_success(schedule) %}
 $('#booking-qr-code-click-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}')
     .popup({
-        popup : $('#booking-qr-code-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}'),
-        on    : 'click'
+        popup: $('#booking-qr-code-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}'),
+        on: 'click'
     })
 ;
 {% endif %}

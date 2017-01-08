@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -45,9 +45,6 @@
 }
 .ui.vertical.stripe .ui.form .ui.flask.message {
     display: block;
-}
-.ui.vertical.stripe .ui.form .ui.button.cancel {
-    margin-left: 5px;
 }
 
 .stats.stripe.segment,
@@ -103,7 +100,7 @@
                             <div class="description">用户资料、报名信息</div>
                         </div>
                     </div>
-                    <div class="step">
+                    <div class="disabled step">
                         <div class="content">
                             <div class="title">确认信息</div>
                             <div class="description">接待信息、服务条款</div>
@@ -385,7 +382,7 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <a class="ui button cancel loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
+                    <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                     {{ macros.form_validation_error_widget(form) }}
                 </form>
             </div>
