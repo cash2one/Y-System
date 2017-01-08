@@ -132,7 +132,7 @@
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.ipad.label() }}
-                                {{ form.ipad(class='ui search dropdown') }}
+                                {{ form.ipad(class='ui dropdown') }}
                             </div>
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_2_lesson', user_id=user.id, schedule_id=schedule.id) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
@@ -167,7 +167,20 @@ $(document)
     .ready(function() {
         $('#select-ipad')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    ipad: {
+                        identifier: 'ipad',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择iPad'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })

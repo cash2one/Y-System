@@ -433,12 +433,13 @@ function updateStats(updateProgressBar) {
     });
 };
 updateStats(true);
-setInterval(updateStats(false), 15000);
+setInterval(function() {
+    updateStats(false);
+}, 15000);
 
 // update iPad info
-var roomID = '{{ room_id }}';
 function updateCards(updateProgressBar) {
-    var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/' + roomID;
+    var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/{{ room_id }}';
     $.getJSON(url, function(data) {
         $('.card').remove();
         for (var i in data.ipads) {
@@ -582,6 +583,8 @@ function updateCards(updateProgressBar) {
     });
 };
 updateCards(true);
-setInterval(updateCards(false), 15000);
+setInterval(function() {
+    updateCards(false);
+}, 15000);
 </script>
 {% endblock %}

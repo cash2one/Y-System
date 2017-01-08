@@ -125,7 +125,7 @@
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.ipad.label() }}
-                                {{ form.ipad(class='ui search dropdown') }}
+                                {{ form.ipad(class='ui dropdown') }}
                             </div>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
@@ -160,7 +160,20 @@ $(document)
     .ready(function() {
         $('#select-ipad')
             .form({
-                onSuccess: submitForm
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    ipad: {
+                        identifier: 'ipad',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择iPad'
+                            }
+                        ]
+                    }
+                }
             })
         ;
     })

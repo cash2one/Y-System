@@ -135,21 +135,21 @@ class FilteriPadForm(FlaskForm):
 
 
 class EditPunchLessonForm(FlaskForm):
-    lesson = SelectField(u'课程进度', coerce=int)
+    lesson = SelectField(u'课程进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, *args, **kwargs):
         super(EditPunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
 
 
 class EditPunchSectionForm(FlaskForm):
-    section = SelectField(u'视频进度', coerce=int)
+    section = SelectField(u'视频进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, lesson, *args, **kwargs):
         super(EditPunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(section.id, u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
+        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
 
 
 class BookingCodeForm(FlaskForm):
@@ -158,12 +158,12 @@ class BookingCodeForm(FlaskForm):
 
 
 class RentiPadForm(FlaskForm):
-    ipad = SelectField(u'可用iPad', coerce=int)
+    ipad = SelectField(u'可用iPad', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, user, *args, **kwargs):
         super(RentiPadForm, self).__init__(*args, **kwargs)
-        self.ipad.choices = [(ipad.id, u'%s %s %s %s：%s' % (ipad.alias, ipad.capacity.name, ipad.state.name, ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in ipad.has_lessons]))) for ipad in user.fitted_ipads if ipad.state.name in [u'待机', u'候补']]
+        self.ipad.choices = [(u'', u'选择iPad')] + [(unicode(ipad.id), u'%s %s %s %s：%s' % (ipad.alias, ipad.capacity.name, ipad.state.name, ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in ipad.has_lessons]))) for ipad in user.fitted_ipads if ipad.state.name in [u'待机', u'候补']]
 
 
 class RentalEmailForm(FlaskForm):
@@ -179,21 +179,21 @@ class ConfirmiPadForm(FlaskForm):
 
 
 class SelectLessonForm(FlaskForm):
-    lesson = SelectField(u'课程', coerce=int)
+    lesson = SelectField(u'课程', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, *args, **kwargs):
         super(SelectLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
 
 
 class RentiPadByLessonForm(FlaskForm):
-    ipad = SelectField(u'可用iPad', coerce=int)
+    ipad = SelectField(u'可用iPad', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, lesson, *args, **kwargs):
         super(RentiPadByLessonForm, self).__init__(*args, **kwargs)
-        self.ipad.choices = [(item.ipad_id, u'%s %s %s %s：%s' % (item.ipad.alias, item.ipad.capacity.name, item.ipad.state.name, item.ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in item.ipad.has_lessons]))) for item in lesson.occupied_ipads if (item.ipad.state.name in [u'待机', u'候补']) and (item.ipad.deleted == False)]
+        self.ipad.choices = [(u'', u'选择iPad')] + [(unicode(item.ipad_id), u'%s %s %s %s：%s' % (item.ipad.alias, item.ipad.capacity.name, item.ipad.state.name, item.ipad.room.name, reduce(lambda x, y: x + u'、' + y, [lesson.name for lesson in item.ipad.has_lessons]))) for item in lesson.occupied_ipads if (item.ipad.state.name in [u'待机', u'候补']) and (item.ipad.deleted == False)]
 
 
 class iPadSerialForm(FlaskForm):
@@ -204,21 +204,21 @@ class iPadSerialForm(FlaskForm):
 
 
 class PunchLessonForm(FlaskForm):
-    lesson = SelectField(u'课程进度', coerce=int)
+    lesson = SelectField(u'课程进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, user, *args, **kwargs):
         super(PunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(lesson.id, u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
+        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
 
 
 class PunchSectionForm(FlaskForm):
-    section = SelectField(u'视频进度', coerce=int)
+    section = SelectField(u'视频进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, user, lesson, *args, **kwargs):
         super(PunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(section.id, u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
+        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
 
 
 class ConfirmPunchForm(FlaskForm):
