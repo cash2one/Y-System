@@ -23,7 +23,7 @@
 .ui.vertical.stripe h3 {
     font-size: 2em;
 }
-.ui.vertical.stripe .ui.button {
+.ui.vertical.stripe .ui.table .ui.button {
     margin: auto;
 }
 .ui.vertical.stripe .button + h3,
@@ -112,10 +112,12 @@
                                         {{ form.course_type(class='ui dropdown') }}
                                     </div>
                                 </div>
-                                <div class="inline field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.show() }}
-                                        {{ form.show.label() }}
+                                <div class="ui segment">
+                                    <div class="inline field">
+                                        <div class="ui toggle checkbox">
+                                            {{ form.show() }}
+                                            {{ form.show.label() }}
+                                        </div>
                                     </div>
                                 </div>
                                 {{ form.submit(class='ui primary button') }}
@@ -142,9 +144,9 @@
                     <tbody>
                         {% for course in courses %}
                         <tr>
-                            <td>{{ course.name }}</td>
+                            <td><a class="loading-trigger" href="{{ url_for('manage.course_users', id=course.id, next=url_for('manage.course', page=pagination.page)) }}">{{ course.name }}</a></td>
                             <td>{{ course.type.name }}</td>
-                            <td>{{ course.registrations.count() }}</td>
+                            <td>{{ course.valid_registrations.count() }}</td>
                             {% if course.show %}
                             <td class="positive">可选</td>
                             {% else %}
@@ -162,7 +164,6 @@
                                     {% else %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.flip_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.course_users', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="search icon"></i></a>
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ course.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>

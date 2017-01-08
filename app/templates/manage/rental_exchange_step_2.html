@@ -31,8 +31,8 @@
 .ui.vertical.stripe .ui.list + h3 {
     margin-top: 3em;
 }
-.ui.vertical.stripe .floated.image {
-    clear: both;
+.ui.vertical.stripe .ui.table .ui.button {
+    margin: auto;
 }
 .ui.vertical.stripe .ui.tabular.menu,
 .ui.vertical.stripe .ui.statistic .label,
@@ -170,9 +170,7 @@ $('.message .close')
     })
 ;
 
-$('select.dropdown')
-    .dropdown()
-;
+$('select.dropdown').dropdown();
 
 $(document)
     .ready(function() {
