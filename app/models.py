@@ -2118,32 +2118,32 @@ class Schedule(db.Model):
 
     @property
     def time_state(self):
-        start_time = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
-        end_time = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
-        if datetime.now() < start_time:
+        start_time_utc = datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET'])
+        end_time_utc = datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET'])
+        if datetime.utcnow() < start_time_utc:
             return u'未开始'
-        if start_time <= datetime.now() and datetime.now() <= end_time:
+        if start_time_utc <= datetime.utcnow() and datetime.utcnow() <= end_time_utc:
             return u'进行中'
-        if end_time < datetime.now():
+        if end_time_utc < datetime.utcnow():
             return u'已结束'
 
     @property
     def unstarted(self):
-        return datetime.now() < datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute)
+        return datetime.utcnow() < datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET'])
 
     def unstarted_n_min(self, n_min):
-        return datetime.now() < datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) + timedelta(minutes=n_min)
+        return datetime.utcnow() < datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET']) + timedelta(minutes=n_min)
 
     @property
     def started(self):
-        return datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) <= datetime.now() and datetime.now() <= datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
+        return datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET']) <= datetime.utcnow() and datetime.utcnow() <= datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET'])
 
     def started_n_min(self, n_min):
-        return datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) + timedelta(minutes=n_min) <= datetime.now() and datetime.now() <= datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute)
+        return datetime(self.date.year, self.date.month, self.date.day, self.period.start_time.hour, self.period.start_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET']) + timedelta(minutes=n_min) <= datetime.utcnow() and datetime.utcnow() <= datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET'])
 
     @property
     def ended(self):
-        return datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute) < datetime.now()
+        return datetime(self.date.year, self.date.month, self.date.day, self.period.end_time.hour, self.period.end_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET']) < datetime.utcnow()
 
     def is_booked_by(self, user):
         return (self.booked_users.filter_by(user_id=user.id).first() is not None) and\
