@@ -570,7 +570,7 @@ def rental_rent_step_2(user_id, schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=form.ipad.data, schedule_id=schedule_id))
+        return redirect(url_for('manage.rental_rent_step_3', user_id=user_id, ipad_id=int(form.ipad.data), schedule_id=schedule_id))
     return render_template('manage/rental_rent_step_2.html', user=user, schedule=schedule, form=form)
 
 
@@ -615,7 +615,7 @@ def rental_rent_step_2_lesson(user_id, schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     form = SelectLessonForm()
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_3_lesson', user_id=user_id, lesson_id=form.lesson.data, schedule_id=schedule_id))
+        return redirect(url_for('manage.rental_rent_step_3_lesson', user_id=user_id, lesson_id=int(form.lesson.data), schedule_id=schedule_id))
     return render_template('manage/rental_rent_step_2_lesson.html', user=user, schedule=schedule, form=form)
 
 
@@ -630,7 +630,7 @@ def rental_rent_step_3_lesson(user_id, lesson_id, schedule_id):
     schedule = Schedule.query.get_or_404(schedule_id)
     form = RentiPadByLessonForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_4_lesson', user_id=user_id, lesson_id=lesson_id, ipad_id=form.ipad.data, schedule_id=schedule_id))
+        return redirect(url_for('manage.rental_rent_step_4_lesson', user_id=user_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data), schedule_id=schedule_id))
     return render_template('manage/rental_rent_step_3_lesson.html', user=user, lesson=lesson, schedule=schedule, form=form)
 
 
@@ -689,7 +689,7 @@ def rental_rent_step_2_alt(user_id):
         abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=form.ipad.data))
+        return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=int(form.ipad.data)))
     return render_template('manage/rental_rent_step_2_alt.html', user=user, form=form)
 
 
@@ -736,7 +736,7 @@ def rental_rent_step_2_lesson_alt(user_id):
         abort(404)
     form = SelectLessonForm()
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_3_lesson_alt', user_id=user_id, lesson_id=form.lesson.data))
+        return redirect(url_for('manage.rental_rent_step_3_lesson_alt', user_id=user_id, lesson_id=int(form.lesson.data)))
     return render_template('manage/rental_rent_step_2_lesson_alt.html', user=user, form=form)
 
 
@@ -750,7 +750,7 @@ def rental_rent_step_3_lesson_alt(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = RentiPadByLessonForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=form.ipad.data))
+        return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data)))
     return render_template('manage/rental_rent_step_3_lesson_alt.html', user=user, lesson=lesson, form=form)
 
 
@@ -1035,7 +1035,7 @@ def rental_exchange_step_5(rental_id):
         abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=form.ipad.data, next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_5.html', rental=rental, form=form)
 
 
@@ -1087,7 +1087,7 @@ def rental_exchange_step_5_lesson(rental_id):
         abort(404)
     form = SelectLessonForm()
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=form.lesson.data, next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_5_lesson.html', rental=rental, form=form)
 
 
@@ -1105,7 +1105,7 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = RentiPadByLessonForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=form.ipad.data, next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_6_lesson.html', rental=rental, lesson=lesson, form=form)
 
 
@@ -1154,7 +1154,7 @@ def edit_punch_step_1(user_id):
         abort(404)
     form = EditPunchLessonForm()
     if form.validate_on_submit():
-        return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=form.lesson.data, next=request.args.get('next')))
+        return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
     form.lesson.data = user.last_punch.section.lesson_id
     return render_template('manage/edit_punch_step_1.html', user=user, form=form)
 
@@ -1169,7 +1169,7 @@ def edit_punch_step_2(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = EditPunchSectionForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, section_id=form.section.data, next=request.args.get('next')))
+        return redirect(url_for('manage.edit_punch_step_3', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/edit_punch_step_2.html', user=user, lesson=lesson, form=form)
 
 
