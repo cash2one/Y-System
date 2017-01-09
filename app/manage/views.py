@@ -1292,7 +1292,7 @@ def schedule():
                 period = Period.query.get_or_404(int(period_id))
                 if period.deleted:
                     abort(404)
-                if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
+                if datetime(day.year, day.month, day.day, period.end_time.hour, period.end_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET']) < datetime.utcnow():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time), category='error')
                 else:
                     schedule = Schedule(date=day, period_id=int(period_id), quota=form.quota.data, available=form.publish_now.data, modified_by_id=current_user.id)
