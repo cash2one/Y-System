@@ -6,8 +6,8 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import book
 from .. import db
-from ..email import send_email
 from ..models import User, Schedule, Period, CourseType, Booking, Announcement, AnnouncementType
+from ..email import send_email
 from ..decorators import permission_required
 
 

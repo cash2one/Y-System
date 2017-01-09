@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="users icon"></i> 用户管理</h1>
+    <h1 class="ui inverted header"><i class="users icon"></i>用户管理</h1>
 </div>
 {% endblock %}
 
@@ -94,18 +94,18 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">
-                    <i class="user icon"></i> 用户列表
+                    <i class="user icon"></i>用户列表
                     {% if current_user.can('管理权限') %}
                     <div class="ui right floated positive circular pointing dropdown icon button">
                         <i class="add user icon"></i>
                         <div class="menu">
-                            <a class="item loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="blue student icon"></i> 新建学生用户</a>
-                            <div id="create-admin-trigger" class="item"><i class="green configure icon"></i> 新建管理用户</div>
+                            <a class="item loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}"><i class="blue student icon"></i>新建学生用户</a>
+                            <div id="create-admin-trigger" class="item"><i class="green configure icon"></i>新建管理用户</div>
                         </div>
                     </div>
                     <div id="create-admin-modal" class="ui modal">
                         <i class="close icon"></i>
-                        <div class="header"><i class="add user icon"></i> 新建管理用户</div>
+                        <div class="header"><i class="add user icon"></i>新建管理用户</div>
                         <div class="content">
                             <form id="create-admin" method="POST" class="ui form">
                                 {{ form.hidden_tag() }}
@@ -214,16 +214,16 @@
                             {% endif %}
                             <td>
                                 {% if user.deleted %}
-                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.restore_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="undo icon"></i> 恢复</a>
+                                <a class="ui mini button loading-trigger" href="{{ url_for('manage.restore_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="undo icon"></i>恢复</a>
                                 {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ user.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i> 确定要{% if user.created %}注销用户{% else %}删除未完成注册的用户信息{% endif %}：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要{% if user.created %}注销用户{% else %}删除未完成注册的用户信息{% endif %}：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
                                     <div class="actions">
-                                        <a class="ui negative left labeled icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_delete', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="remove user icon"></i> {% if user.created %}注销{% else %}删除{% endif %}</a>
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_delete', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="remove user icon"></i>{% if user.created %}注销{% else %}删除{% endif %}</a>
                                         <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
                                     </div>
                                 </div>

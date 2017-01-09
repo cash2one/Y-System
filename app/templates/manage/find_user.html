@@ -87,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="find icon"></i> 检索用户</h1>
+    <h1 class="ui inverted header"><i class="find icon"></i>检索用户</h1>
 </div>
 {% endblock %}
 
@@ -108,7 +108,7 @@
                     {{ form.submit(class='ui primary button') }}
                 </form>
                 {% if users %}
-                <h3 class="header"><i class="find icon"></i> 检索结果</h3>
+                <h3 class="header"><i class="find icon"></i>检索结果</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -167,7 +167,7 @@
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ user.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i> 确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="remove user icon"></i>注销</a>
                                         <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
@@ -186,7 +186,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <h3 class="header"><i class="ban icon"></i> 暂无检索结果</h3>
+                <h3 class="header"><i class="ban icon"></i>暂无检索结果</h3>
                 {% endif %}
             </div>
         </div>

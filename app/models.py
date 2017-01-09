@@ -1824,6 +1824,11 @@ class Product(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
+    def toggle_availability(self, modified_by):
+        self.available = not self.available
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
     @staticmethod
     def insert_products():
         products = [
@@ -1911,7 +1916,7 @@ class Course(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def flip_show(self, modified_by):
+    def toggle_show(self, modified_by):
         self.show = not self.show
         self.ping(modified_by=modified_by)
         db.session.add(self)
@@ -1971,7 +1976,7 @@ class Period(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
-    def flip_show(self, modified_by):
+    def toggle_show(self, modified_by):
         self.show = not self.show
         self.ping(modified_by=modified_by)
         db.session.add(self)

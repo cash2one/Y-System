@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="tablet icon"></i> iPad管理</h1>
+    <h1 class="ui inverted header"><i class="tablet icon"></i>iPad管理</h1>
 </div>
 {% endblock %}
 
@@ -94,12 +94,12 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">
-                    <i class="tablet icon"></i> iPad列表
+                    <i class="tablet icon"></i>iPad列表
                     {% if current_user.can('管理iPad设备') %}
                     <div id="new-ipad-trigger" class="ui right floated positive circular icon button" data-content="新建iPad" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                     <div id="new-ipad-modal" class="ui modal">
                         <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i> 新建iPad</div>
+                        <div class="header"><i class="add circle icon"></i>新建iPad</div>
                         <div class="content">
                             <form id="new-ipad" method="POST" class="ui form">
                                 {{ form.hidden_tag() }}
@@ -243,19 +243,19 @@
                                     {{ ipad.state.name }}
                                     <div class="menu">
                                         {% if ipad.state.name != '待机' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wait icon"></i> 待机</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wait icon"></i>待机</a>
                                         {% endif %}
                                         {% if ipad.state.name != '候补' and current_user.can('管理iPad设备') %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="cube icon"></i> 候补</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="cube icon"></i>候补</a>
                                         {% endif %}
                                         {% if ipad.state.name != '维护' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_maintain', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wrench icon"></i> 维护</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_maintain', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wrench icon"></i>维护</a>
                                         {% endif %}
                                         {% if ipad.state.name != '充电' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_charge', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="plug icon"></i> 充电</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_charge', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="plug icon"></i>充电</a>
                                         {% endif %}
                                         {% if ipad.state.name != '退役' and current_user.can('管理iPad设备') %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_obsolete', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="recycle icon"></i> 退役</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_obsolete', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="recycle icon"></i>退役</a>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -273,7 +273,7 @@
                                     <div id="delete-trigger-{{ ipad.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ ipad.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i> 确定要删除序列号为<code>{{ ipad.serial }}</code>的iPad？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除序列号为<code>{{ ipad.serial }}</code>的iPad？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_ipad', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ ipad.id }}" class="ui black button">保留</div>

@@ -18,10 +18,10 @@ from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, Ed
 from .forms import NewCourseForm, EditCourseForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
+from .forms import NewProductForm, EditProductForm
 from .. import db
-from ..email import send_email
 from ..models import Role, User, Gender
-from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, Product, InvitationType
+from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import Booking, BookingState
 from ..models import Rental
@@ -30,6 +30,8 @@ from ..models import Period, Schedule
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Lesson, Section
 from ..models import Announcement, AnnouncementType
+from ..models import Product
+from ..email import send_email
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -1220,18 +1222,18 @@ def period():
     return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
 
 
-@manage.route('/period/flip-show/<int:id>')
+@manage.route('/period/toggle-show/<int:id>')
 @login_required
 @permission_required(u'管理预约时段')
-def flip_period_show(id):
+def toggle_period_show(id):
     period = Period.query.get_or_404(id)
     if period.deleted:
         abort(404)
-    period.flip_show(modified_by=current_user._get_current_object())
+    period.toggle_show(modified_by=current_user._get_current_object())
     if period.show:
-        flash(u'%s的可选状态改为：可选' % period.alias, category='success')
+        flash(u'“%s”的可选状态改为：可选' % period.alias, category='success')
     else:
-        flash(u'%s的可选状态改为：不可选' % period.alias, category='success')
+        flash(u'“%s”的可选状态改为：不可选' % period.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.period'))
 
 
@@ -2762,14 +2764,14 @@ def course_users(id):
     return render_template('manage/course_users.html', course=course, users=users, pagination=pagination)
 
 
-@manage.route('/course/flip-show/<int:id>')
+@manage.route('/course/toggle-show/<int:id>')
 @login_required
 @permission_required(u'管理班级')
-def flip_course_show(id):
+def toggle_course_show(id):
     course = Course.query.get_or_404(id)
     if course.deleted:
         abort(404)
-    course.flip_show(modified_by=current_user._get_current_object())
+    course.toggle_show(modified_by=current_user._get_current_object())
     if course.show:
         flash(u'班级：%s的可选状态改为：可选' % course.name, category='success')
     else:
@@ -3240,6 +3242,78 @@ def delete_announcement(id):
     announcement.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除通知：“%s”' % announcement.title, category='success')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
+
+
+@manage.route('/product', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理产品')
+def product():
+    form = NewProductForm()
+    if form.validate_on_submit():
+        product = Product(
+            name=form.name.data,
+            price=float(form.price.data),
+            available=form.available.data,
+            modified_by_id=current_user.id
+        )
+        db.session.add(product)
+        flash(u'已添加研修产品：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.product'))
+    page = request.args.get('page', 1, type=int)
+    query = Product.query.filter_by(deleted=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    products = pagination.items
+    return render_template('manage/product.html', form=form, products=products, pagination=pagination)
+
+
+@manage.route('/product/toggle-availability/<int:id>')
+@login_required
+@permission_required(u'管理产品')
+def toggle_product_availability(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted:
+        abort(404)
+    product.toggle_availability(modified_by=current_user._get_current_object())
+    if product.available:
+        flash(u'“%s”的可选状态改为：可选' % product.name, category='success')
+    else:
+        flash(u'“%s”的可选状态改为：不可选' % product.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.product'))
+
+
+@manage.route('/product/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理产品')
+def edit_product(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted:
+        abort(404)
+    form = EditProductForm()
+    if form.validate_on_submit():
+        product.name = form.name.data
+        product.price = float(form.price.data)
+        product.available = form.available.data
+        product.modified_at = datetime.utcnow()
+        product.modified_by_id = current_user.id
+        db.session.add(product)
+        flash(u'已更新研修产品：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.product'))
+    form.name.data = product.name
+    form.price.data = unicode(product.price)
+    form.available.data = product.available
+    return render_template('manage/edit_product.html', form=form, product=product)
+
+
+@manage.route('/product/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理产品')
+def delete_product(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted:
+        abort(404)
+    product.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除研修产品：%s' % product.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.product'))
 
 
 @manage.route('/analytics')

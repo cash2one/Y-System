@@ -87,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="retweet icon"></i> iPad借阅管理</h1>
+    <h1 class="ui inverted header"><i class="retweet icon"></i>iPad借阅管理</h1>
 </div>
 {% endblock %}
 
@@ -97,14 +97,14 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">
-                    <i class="retweet icon"></i> iPad借阅记录
+                    <i class="retweet icon"></i>iPad借阅记录
                     <div class="ui right floated positive circular pointing dropdown icon button">
                         <i class="retweet icon"></i>
                         <div class="menu">
                             <a class="item loading-trigger" href="{{ url_for('manage.rental_rent_step_1') }}"><i class="blue
-                            upload icon"></i> 借出iPad</a>
+                            upload icon"></i>借出iPad</a>
                             <div class="or" data-text="或"></div>
-                            <a class="item loading-trigger" href="{{ url_for('manage.rental_return_step_1') }}"><i class="green download icon"></i> 回收iPad</a>
+                            <a class="item loading-trigger" href="{{ url_for('manage.rental_return_step_1') }}"><i class="green download icon"></i>回收iPad</a>
                         </div>
                     </div>
                 </h3>
@@ -168,12 +168,12 @@
                             </td>
                             <td>{{ rental.return_agent.name }}</td>
                             <td class="positive">归还</td>
-                            <td><div class="ui mini button disabled"><i class="ban icon"></i> 无</a></td>
+                            <td><div class="ui mini button disabled"><i class="ban icon"></i>无</a></td>
                             {% else %}
                             <td>无</td>
                             <td>无</td>
                             <td class="negative">借出</td>
-                            <td><a class="ui orange mini button loading-trigger" href="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="retweet icon"></i> 调换</a></td>
+                            <td><a class="ui orange mini button loading-trigger" href="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="retweet icon"></i>调换</a></td>
                             {% endif %}
                         </tr>
                         {% endfor %}

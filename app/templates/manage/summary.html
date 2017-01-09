@@ -157,7 +157,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="dashboard icon"></i> 系统实况</h1>
+    <h1 class="ui inverted header"><i class="dashboard icon"></i>系统实况</h1>
 </div>
 {% endblock %}
 
@@ -283,7 +283,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="tablet icon"></i> iPad状态</h3>
+                <h3 class="ui header"><i class="tablet icon"></i>iPad状态</h3>
                 <div class="ui tabular menu">
                     <a class="item {% if show_summary_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}#ipads">1103</a>
                     <a class="item {% if show_summary_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}#ipads">1707</a>
@@ -299,7 +299,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="user icon"></i> 查询用户档案</h3>
+                <h3 class="ui header"><i class="user icon"></i>查询用户档案</h3>
                 <div class="ui search">
                     <div class="ui left icon input">
                         <input class="prompt" type="text" placeholder="姓名/邮箱">
@@ -317,7 +317,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="announcement icon"></i> 通知</h3>
+                <h3 class="ui header"><i class="announcement icon"></i>通知</h3>
                 <div class="ui divided items">
                     {% for announcement in announcements %}
                     <div class="item">

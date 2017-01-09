@@ -73,67 +73,6 @@ class EditPeriodForm(FlaskForm):
         self.end_time.choices = [(u'', u'选择结束时间')] + [(NextHalfHourString(x), NextHalfHourString(x), ) for x in range(36)]
         self.period_type.choices = [(u'', u'选择时段类型')] + [(unicode(period_type.id), period_type.name) for period_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
-
-class NewiPadForm(FlaskForm):
-    alias = StringField(u'编号')
-    serial = StringField(u'序列号', validators=[Required()])
-    capacity = SelectField(u'容量', coerce=unicode, validators=[Required()])
-    room = SelectField(u'房间', coerce=unicode, validators=[Required()])
-    state = SelectField(u'状态', coerce=unicode, validators=[Required()])
-    video_playback = FloatField(u'电池寿命', validators=[Required(), NumberRange(min=0)])
-    vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
-    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
-    submit = SubmitField(u'提交')
-
-    def __init__(self, *args, **kwargs):
-        super(NewiPadForm, self).__init__(*args, **kwargs)
-        self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
-        self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
-        self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
-
-    def validate_serial(self, field):
-        if iPad.query.filter_by(serial=field.data).first():
-            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
-
-
-class EditiPadForm(FlaskForm):
-    alias = StringField(u'编号')
-    serial = StringField(u'序列号', validators=[Required()])
-    capacity = SelectField(u'容量', coerce=unicode, validators=[Required()])
-    room = SelectField(u'房间', coerce=unicode, validators=[Required()])
-    state = SelectField(u'状态', coerce=unicode, validators=[Required()])
-    video_playback = FloatField(u'电池寿命', validators=[Required(), NumberRange(min=0)])
-    vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
-    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
-    submit = SubmitField(u'提交')
-
-    def __init__(self, ipad, *args, **kwargs):
-        super(EditiPadForm, self).__init__(*args, **kwargs)
-        self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
-        self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
-        self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
-        self.ipad = ipad
-
-    def validate_serial(self, field):
-        if field.data != self.ipad.serial and iPad.query.filter_by(serial=field.data).first():
-            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
-
-
-class FilteriPadForm(FlaskForm):
-    vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
-    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
-    submit = SubmitField(u'筛选')
-
-    def __init__(self, *args, **kwargs):
-        super(FilteriPadForm, self).__init__(*args, **kwargs)
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
-
-
 class EditPunchLessonForm(FlaskForm):
     lesson = SelectField(u'课程进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
@@ -223,30 +162,6 @@ class PunchSectionForm(FlaskForm):
 
 class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
-
-
-class NewAnnouncementForm(FlaskForm):
-    title = StringField(u'通知标题', validators=[Required()])
-    body = TextAreaField(u'通知内容', validators=[Required()])
-    announcement_type = SelectField(u'通知类型', coerce=unicode, validators=[Required()])
-    show = BooleanField(u'立即发布')
-    submit = SubmitField(u'提交')
-
-    def __init__(self, *args, **kwargs):
-        super(NewAnnouncementForm, self).__init__(*args, **kwargs)
-        self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
-
-
-class EditAnnouncementForm(FlaskForm):
-    title = StringField(u'通知标题', validators=[Required()])
-    body = TextAreaField(u'通知内容', validators=[Required()])
-    announcement_type = SelectField(u'通知类型', coerce=unicode, validators=[Required()])
-    show = BooleanField(u'发布')
-    submit = SubmitField(u'提交')
-
-    def __init__(self, *args, **kwargs):
-        super(EditAnnouncementForm, self).__init__(*args, **kwargs)
-        self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
 
 
 class NewUserForm(FlaskForm):
@@ -622,3 +537,101 @@ class EditCourseForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditCourseForm, self).__init__(*args, **kwargs)
         self.course_type.choices = [(u'', u'选择班级类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class NewiPadForm(FlaskForm):
+    alias = StringField(u'编号', validators=[Required(), Length(1, 64)])
+    serial = StringField(u'序列号', validators=[Required()])
+    capacity = SelectField(u'容量', coerce=unicode, validators=[Required()])
+    room = SelectField(u'房间', coerce=unicode, validators=[Required()])
+    state = SelectField(u'状态', coerce=unicode, validators=[Required()])
+    video_playback = FloatField(u'电池寿命', validators=[Required(), NumberRange(min=0)])
+    vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
+    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewiPadForm, self).__init__(*args, **kwargs)
+        self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
+        self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
+        self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
+
+    def validate_serial(self, field):
+        if iPad.query.filter_by(serial=field.data).first():
+            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
+
+
+class EditiPadForm(FlaskForm):
+    alias = StringField(u'编号', validators=[Required(), Length(1, 64)])
+    serial = StringField(u'序列号', validators=[Required()])
+    capacity = SelectField(u'容量', coerce=unicode, validators=[Required()])
+    room = SelectField(u'房间', coerce=unicode, validators=[Required()])
+    state = SelectField(u'状态', coerce=unicode, validators=[Required()])
+    video_playback = FloatField(u'电池寿命', validators=[Required(), NumberRange(min=0)])
+    vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
+    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
+    submit = SubmitField(u'提交')
+
+    def __init__(self, ipad, *args, **kwargs):
+        super(EditiPadForm, self).__init__(*args, **kwargs)
+        self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
+        self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
+        self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
+        self.ipad = ipad
+
+    def validate_serial(self, field):
+        if field.data != self.ipad.serial and iPad.query.filter_by(serial=field.data).first():
+            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
+
+
+class FilteriPadForm(FlaskForm):
+    vb_lessons = SelectMultipleField(u'VB内容', coerce=unicode)
+    y_gre_lessons = SelectMultipleField(u'Y-GRE内容', coerce=unicode)
+    submit = SubmitField(u'筛选')
+
+    def __init__(self, *args, **kwargs):
+        super(FilteriPadForm, self).__init__(*args, **kwargs)
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE']
+
+
+class NewAnnouncementForm(FlaskForm):
+    title = StringField(u'通知标题', validators=[Required(), Length(1, 64)])
+    body = TextAreaField(u'通知内容', validators=[Required()])
+    announcement_type = SelectField(u'通知类型', coerce=unicode, validators=[Required()])
+    show = BooleanField(u'立即发布')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewAnnouncementForm, self).__init__(*args, **kwargs)
+        self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
+
+
+class EditAnnouncementForm(FlaskForm):
+    title = StringField(u'通知标题', validators=[Required(), Length(1, 64)])
+    body = TextAreaField(u'通知内容', validators=[Required()])
+    announcement_type = SelectField(u'通知类型', coerce=unicode, validators=[Required()])
+    show = BooleanField(u'立即发布')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditAnnouncementForm, self).__init__(*args, **kwargs)
+        self.announcement_type.choices = [(u'', u'选择通知类型')] + [(unicode(announcement_type.id), announcement_type.name) for announcement_type in AnnouncementType.query.order_by(AnnouncementType.id.asc()).all()]
+
+
+class NewProductForm(FlaskForm):
+    name = StringField(u'产品名称', validators=[Required(), Length(1, 64)])
+    price = StringField(u'单价', validators=[Required()])
+    available = BooleanField(u'显示为可选')
+    submit = SubmitField(u'提交')
+
+
+class EditProductForm(FlaskForm):
+    name = StringField(u'产品名称', validators=[Required(), Length(1, 64)])
+    price = StringField(u'单价', validators=[Required()])
+    available = BooleanField(u'显示为可选')
+    submit = SubmitField(u'提交')
