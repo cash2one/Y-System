@@ -5,8 +5,8 @@ from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
-from ..email import send_email
 from ..models import User, Role, Announcement, AnnouncementType
+from ..email import send_email
 
 
 @auth.before_app_request

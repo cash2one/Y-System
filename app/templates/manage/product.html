@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}班级管理{% endblock %}
+{% block title %}产品管理{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="student icon"></i>班级管理</h1>
+    <h1 class="ui inverted header"><i class="yen icon"></i>产品管理</h1>
 </div>
 {% endblock %}
 
@@ -94,29 +94,32 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">
-                    <i class="student icon"></i>班级列表
-                    <div id="new-course-trigger" class="ui right floated positive circular icon button" data-content="新建班级" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
-                    <div id="new-course-modal" class="ui modal">
+                    <i class="yen icon"></i>产品列表
+                    <div id="new-product-trigger" class="ui right floated positive circular icon button" data-content="新建产品" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                    <div id="new-product-modal" class="ui modal">
                         <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i>新建班级</div>
+                        <div class="header"><i class="add circle icon"></i>新建产品</div>
                         <div class="content">
-                            <form id="new-course" method="POST" class="ui form">
+                            <form id="new-product" method="POST" class="ui form">
                                 {{ form.hidden_tag() }}
                                 <div class="fields">
                                     <div class="eight wide required field">
                                         {{ form.name.label() }}
-                                        {{ form.name(placeholder='班级名称') }}
+                                        {{ form.name(placeholder='研修产品名称') }}
                                     </div>
                                     <div class="eight wide required field">
-                                        {{ form.course_type.label() }}
-                                        {{ form.course_type(class='ui dropdown') }}
+                                        {{ form.price.label() }}
+                                        <div class="ui left labeled input">
+                                            <div class="ui basic label"><i class="yen icon"></i></div>
+                                            {{ form.price(placeholder='0') }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="ui segment">
                                     <div class="inline field">
                                         <div class="ui toggle checkbox">
-                                            {{ form.show() }}
-                                            {{ form.show.label() }}
+                                            {{ form.available() }}
+                                            {{ form.available.label() }}
                                         </div>
                                     </div>
                                 </div>
@@ -125,16 +128,12 @@
                         </div>
                     </div>
                 </h3>
-                <div class="ui tabular menu">
-                    <a class="item {% if show_vb_courses %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_courses') }}">VB班</a>
-                    <a class="item {% if show_y_gre_courses %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_courses') }}">Y-GRE班</a>
-                </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
-                            <th>班级</th>
-                            <th>类型</th>
-                            <th>人数</th>
+                            <th>研修产品</th>
+                            <th>单价</th>
+                            <th>购买人次</th>
                             <th>可选状态</th>
                             <th>上次操作</th>
                             <th>操作人</th>
@@ -142,36 +141,32 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for course in courses %}
+                        {% for product in products %}
                         <tr>
-                            <td>{% if course.valid_registrations.count() %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=course.id, next=url_for('manage.course', page=pagination.page)) }}">{{ course.name }}</a>{% else %}{{ course.name }}{% endif %}</td>
-                            <td>{{ course.type.name }}</td>
-                            <td>{{ course.valid_registrations.count() }}</td>
-                            {% if course.show %}
-                            <td class="positive">可选</td>
-                            {% else %}
-                            <td>不可选</td>
-                            {% endif %}
+                            <td>{{ product.name }}</td>
+                            <td><i class="fitted yen icon"></i>{{ product.price }}</td>
+                            <td></td>
+                            <td{% if product.available %} class="positive"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
                             <td>
-                                <div class="popup-trigger" data-variation="inverted">{{ moment(course.modified_at).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(course.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(product.modified_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(product.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ course.modified_by.name }}</td>
+                            <td>{{ product.modified_by.name }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    {% if course.show %}
-                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="unhide icon"></i></a>
+                                    {% if product.available %}
+                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="unhide icon"></i></a>
                                     {% else %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <div id="delete-trigger-{{ course.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ product.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
-                                <div id="delete-modal-{{ course.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i>确定要删除班级“{{ course.name }}”？</div>
+                                <div id="delete-modal-{{ product.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除产品“{{ product.name }}”？</div>
                                     <div class="actions">
-                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
-                                        <div id="delete-hide-trigger-{{ course.id }}" class="ui black button">保留</div>
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ product.id }}" class="ui black button">保留</div>
                                     </div>
                                 </div>
                             </td>
@@ -180,7 +175,7 @@
                     </tbody>
                 </table>
                 {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.course') }}
+                {{ macros.pagination_widget(pagination, 'manage.product') }}
                 {% endif %}
             </div>
         </div>
@@ -205,29 +200,29 @@ $('.ui.checkbox').checkbox();
 
 $('table').tablesort();
 
-{% for course in courses %}
-$('#delete-trigger-{{ course.id }}')
+{% for product in products %}
+$('#delete-trigger-{{ product.id }}')
     .on('click', function() {
-        $('#delete-modal-{{ course.id }}').modal({ autofocus: false }).modal('show');
+        $('#delete-modal-{{ product.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#delete-hide-trigger-{{ course.id }}')
+$('#delete-hide-trigger-{{ product.id }}')
     .on('click', function() {
-        $('#delete-modal-{{ course.id }}').modal('hide');
+        $('#delete-modal-{{ product.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
-$('#new-course-trigger').popup();
-$('#new-course-trigger')
+$('#new-product-trigger').popup();
+$('#new-product-trigger')
     .on('click', function() {
-        $('#new-course-modal').modal({ autofocus: false }).modal('show');
+        $('#new-product-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
     .ready(function() {
-        $('#new-course')
+        $('#new-product')
             .form({
                 onSuccess: submitForm,
                 inline: true,
@@ -238,16 +233,20 @@ $(document)
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请输入班级名称'
+                                prompt: '请输入研修产品名称'
                             }
                         ]
                     },
-                    course_type: {
-                        identifier: 'course_type',
+                    price: {
+                        identifier: 'price',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择班级类型'
+                                prompt: '请输入研修产品单价'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请输入有效的产品单价'
                             }
                         ]
                     }

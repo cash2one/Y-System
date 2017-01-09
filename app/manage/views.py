@@ -8,26 +8,30 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
-from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import EditPunchLessonForm, EditPunchSectionForm
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
-from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm
+from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
+from .forms import NewAnnouncementForm, EditAnnouncementForm
+from .forms import NewProductForm, EditProductForm
 from .. import db
-from ..email import send_email
 from ..models import Role, User, Gender
-from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, Product, InvitationType
-from ..models import Booking, BookingState, Rental, Punch
-from ..models import Period, Schedule
-from ..models import Lesson, Section
-from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
+from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
+from ..models import Booking, BookingState
+from ..models import Rental
+from ..models import Punch
+from ..models import Period, Schedule
+from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
+from ..models import Lesson, Section
 from ..models import Announcement, AnnouncementType
+from ..models import Product
+from ..email import send_email
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -1218,18 +1222,18 @@ def period():
     return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
 
 
-@manage.route('/period/flip-show/<int:id>')
+@manage.route('/period/toggle-show/<int:id>')
 @login_required
 @permission_required(u'管理预约时段')
-def flip_period_show(id):
+def toggle_period_show(id):
     period = Period.query.get_or_404(id)
     if period.deleted:
         abort(404)
-    period.flip_show(modified_by=current_user._get_current_object())
+    period.toggle_show(modified_by=current_user._get_current_object())
     if period.show:
-        flash(u'%s的可选状态改为：可选' % period.alias, category='success')
+        flash(u'“%s”的可选状态改为：可选' % period.alias, category='success')
     else:
-        flash(u'%s的可选状态改为：不可选' % period.alias, category='success')
+        flash(u'“%s”的可选状态改为：不可选' % period.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.period'))
 
 
@@ -1292,7 +1296,7 @@ def schedule():
                 period = Period.query.get_or_404(int(period_id))
                 if period.deleted:
                     abort(404)
-                if datetime(day.year, day.month, day.day, period.start_time.hour, period.start_time.minute) < datetime.now():
+                if datetime(day.year, day.month, day.day, period.end_time.hour, period.end_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET']) < datetime.utcnow():
                     flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time), category='error')
                 else:
                     schedule = Schedule(date=day, period_id=int(period_id), quota=form.quota.data, available=form.publish_now.data, modified_by_id=current_user.id)
@@ -1446,436 +1450,6 @@ def decrease_schedule_quota(id):
     schedule.decrease_quota(modified_by=current_user._get_current_object())
     flash(u'所选时段名额-1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
-
-
-@manage.route('/ipad', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理')
-def ipad():
-    form = NewiPadForm()
-    if form.validate_on_submit() and current_user.can(u'管理iPad设备'):
-        serial = form.serial.data.upper()
-        room_id = int(form.room.data)
-        if room_id == 0:
-            room_id = None
-        ipad = iPad.query.filter_by(serial=serial).first()
-        if ipad:
-            flash(u'序列号为%s的iPad已存在' % serial, category='error')
-            return redirect(url_for('manage.ipad'))
-        ipad = iPad(
-            serial=serial,
-            alias=form.alias.data,
-            capacity_id=int(form.capacity.data),
-            room_id=room_id,
-            state_id=int(form.state.data),
-            video_playback=timedelta(hours=form.video_playback.data),
-            modified_by_id=current_user.id
-        )
-        db.session.add(ipad)
-        db.session.commit()
-        for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
-        iPadContentJSON.mark_out_of_date()
-        flash(u'成功添加序列号为%s的iPad' % serial, category='success')
-        return redirect(url_for('manage.ipad'))
-    page = request.args.get('page', 1, type=int)
-    show_ipad_all = True
-    show_ipad_maintain = False
-    show_ipad_charge = False
-    show_ipad_1103 = False
-    show_ipad_1707 = False
-    show_ipad_others = False
-    if current_user.is_authenticated:
-        show_ipad_all = bool(request.cookies.get('show_ipad_all', '1'))
-        show_ipad_maintain = bool(request.cookies.get('show_ipad_maintain', ''))
-        show_ipad_charge = bool(request.cookies.get('show_ipad_charge', ''))
-        show_ipad_1103 = bool(request.cookies.get('show_ipad_1103', ''))
-        show_ipad_1707 = bool(request.cookies.get('show_ipad_1707', ''))
-        show_ipad_others = bool(request.cookies.get('show_ipad_others', ''))
-    if show_ipad_all:
-        query = iPad.query\
-            .filter_by(deleted=False)
-    if show_ipad_maintain:
-        query = iPad.query\
-            .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadState.name == u'维护')\
-            .filter(iPad.deleted == False)
-    maintain_num = iPad.query\
-        .join(iPadState, iPadState.id == iPad.state_id)\
-        .filter(iPadState.name == u'维护')\
-        .filter(iPad.deleted == False)\
-        .count()
-    if show_ipad_charge:
-        query = iPad.query\
-            .join(iPadState, iPadState.id == iPad.state_id)\
-            .filter(iPadState.name == u'充电')\
-            .filter(iPad.deleted == False)
-    charge_num = iPad.query\
-        .join(iPadState, iPadState.id == iPad.state_id)\
-        .filter(iPadState.name == u'充电')\
-        .filter(iPad.deleted == False)\
-        .count()
-    if show_ipad_1103:
-        query = iPad.query\
-            .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1103')\
-            .filter(iPad.deleted == False)
-    if show_ipad_1707:
-        query = iPad.query\
-            .join(Room, Room.id == iPad.room_id)\
-            .filter(Room.name == u'1707')\
-            .filter(iPad.deleted == False)
-    if show_ipad_others:
-        query = iPad.query\
-            .filter_by(room_id=None, deleted=False)
-    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    ipads = pagination.items
-    return render_template('manage/ipad.html',
-        form=form,
-        ipads=ipads,
-        show_ipad_all=show_ipad_all,
-        show_ipad_maintain=show_ipad_maintain,
-        maintain_num=maintain_num,
-        show_ipad_charge=show_ipad_charge,
-        charge_num=charge_num,
-        show_ipad_1103=show_ipad_1103,
-        show_ipad_1707=show_ipad_1707,
-        show_ipad_others=show_ipad_others,
-        pagination=pagination
-    )
-
-
-@manage.route('/ipad/all')
-@login_required
-@permission_required(u'管理')
-def all_ipads():
-    resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_ipad_all', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    return resp
-
-
-@manage.route('/ipad/maintain')
-@login_required
-@permission_required(u'管理')
-def maintain_ipads():
-    resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_maintain', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    return resp
-
-
-@manage.route('/ipad/charge')
-@login_required
-@permission_required(u'管理')
-def charge_ipads():
-    resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_charge', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    return resp
-
-
-@manage.route('/ipad/1103')
-@login_required
-@permission_required(u'管理')
-def room_1103_ipads():
-    resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1103', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    return resp
-
-
-@manage.route('/ipad/1707')
-@login_required
-@permission_required(u'管理')
-def room_1707_ipads():
-    resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1707', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    return resp
-
-
-@manage.route('/ipad/others')
-@login_required
-@permission_required(u'管理')
-def other_ipads():
-    resp = make_response(redirect(url_for('manage.ipad')))
-    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_others', '1', max_age=30*24*60*60)
-    return resp
-
-
-@manage.route('/ipad/set-state/standby/<int:id>')
-@login_required
-@permission_required(u'管理')
-def set_ipad_state_standby(id):
-    ipad = iPad.query.get_or_404(id)
-    if ipad.state.name == u'借出':
-        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    ipad.set_state(u'待机', modified_by=current_user._get_current_object())
-    flash(u'修改iPad“%s”的状态为：待机' % ipad.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.ipad'))
-
-
-@manage.route('/ipad/set-state/candidate/<int:id>')
-@login_required
-@permission_required(u'管理iPad设备')
-def set_ipad_state_candidate(id):
-    ipad = iPad.query.get_or_404(id)
-    if ipad.state.name == u'借出':
-        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    ipad.set_state(u'候补', modified_by=current_user._get_current_object())
-    flash(u'修改iPad“%s”的状态为：候补' % ipad.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.ipad'))
-
-
-@manage.route('/ipad/set-state/maintain/<int:id>')
-@login_required
-@permission_required(u'管理')
-def set_ipad_state_maintain(id):
-    ipad = iPad.query.get_or_404(id)
-    if ipad.state.name == u'借出':
-        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    ipad.set_state(u'维护', modified_by=current_user._get_current_object())
-    db.session.commit()
-    for user in User.users_can(u'管理iPad设备'):
-        send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
-            ipad=ipad,
-            time=datetime.utcnow(),
-            manager=current_user
-        )
-    flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.ipad'))
-
-
-@manage.route('/ipad/set-state/charge/<int:id>')
-@login_required
-@permission_required(u'管理')
-def set_ipad_state_charge(id):
-    ipad = iPad.query.get_or_404(id)
-    if ipad.state.name == u'借出':
-        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    ipad.set_state(u'充电', modified_by=current_user._get_current_object())
-    flash(u'修改iPad“%s”的状态为：充电' % ipad.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.ipad'))
-
-
-@manage.route('/ipad/set-state/obsolete/<int:id>')
-@login_required
-@permission_required(u'管理iPad设备')
-def set_ipad_state_obsolete(id):
-    ipad = iPad.query.get_or_404(id)
-    if ipad.state.name == u'借出':
-        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    ipad.set_state(u'退役', modified_by=current_user._get_current_object())
-    flash(u'修改iPad“%s”的状态为：退役' % ipad.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.ipad'))
-
-
-@manage.route('/ipad/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad设备')
-def edit_ipad(id):
-    ipad = iPad.query.get_or_404(id)
-    if ipad.deleted:
-        abort(404)
-    form = EditiPadForm(ipad=ipad)
-    if form.validate_on_submit():
-        ipad.alias = form.alias.data
-        ipad.serial = form.serial.data.upper()
-        ipad.capacity_id = form.capacity.data
-        if int(form.room.data) == 0:
-            ipad.room_id = None
-        else:
-            ipad.room_id = int(form.room.data)
-        ipad.state_id = int(form.state.data)
-        ipad.video_playback = timedelta(hours=form.video_playback.data)
-        ipad.modified_at = datetime.utcnow()
-        ipad.modified_by_id = current_user.id
-        db.session.add(ipad)
-        db.session.commit()
-        for ipad_content in ipad.contents:
-            ipad.remove_lesson(lesson=ipad_content.lesson)
-        for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
-            ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
-        iPadContentJSON.mark_out_of_date()
-        flash(u'iPad信息已更新', category='success')
-        return redirect(request.args.get('next') or url_for('manage.ipad'))
-    form.alias.data = ipad.alias
-    form.serial.data = ipad.serial
-    form.capacity.data = unicode(ipad.capacity_id)
-    form.room.data = unicode(ipad.room_id)
-    form.state.data = unicode(ipad.state_id)
-    form.video_playback.data = ipad.video_playback.total_seconds() / 3600
-    form.vb_lessons.data = ipad.vb_lesson_ids_included_unicode
-    form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included_unicode
-    return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
-
-
-@manage.route('/ipad/delete/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad设备')
-def delete_ipad(id):
-    ipad = iPad.query.get_or_404(id)
-    if ipad.deleted:
-        abort(404)
-    ipad.safe_delete(modified_by=current_user._get_current_object())
-    iPadContentJSON.mark_out_of_date()
-    flash(u'已删除序列号为%s的iPad' % ipad.serial, category='success')
-    return redirect(request.args.get('next') or url_for('manage.ipad'))
-
-
-@manage.route('/ipad/filter', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理')
-def filter_ipad():
-    ipads = []
-    form = FilteriPadForm()
-    if form.validate_on_submit():
-        lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
-        if len(lesson_ids):
-            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
-            ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
-    return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
-
-
-@manage.route('/ipad/contents')
-@login_required
-@permission_required(u'管理')
-def ipad_contents():
-    ipad_contents = iPadContentJSON.query.get_or_404(1)
-    if ipad_contents.out_of_date:
-        iPadContentJSON.update()
-    return render_template('manage/ipad_contents.html', ipad_contents=json.loads(ipad_contents.json_string))
-
-
-@manage.route('/announcement', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理通知')
-def announcement():
-    form = NewAnnouncementForm()
-    if form.validate_on_submit():
-        announcement = Announcement(
-            title=form.title.data,
-            body_html=form.body.data,
-            type_id=int(form.announcement_type.data),
-            modified_by_id=current_user.id
-        )
-        db.session.add(announcement)
-        db.session.commit()
-        if form.show.data:
-            announcement.publish(modified_by=current_user._get_current_object())
-        else:
-            announcement.clean_up()
-        flash(u'已添加通知：“%s”' % form.title.data, category='success')
-        return redirect(url_for('manage.announcement'))
-    page = request.args.get('page', 1, type=int)
-    query = Announcement.query.filter_by(deleted=False)
-    pagination = query\
-        .order_by(Announcement.modified_at.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    announcements = pagination.items
-    return render_template('manage/announcement.html',
-        form=form,
-        announcements=announcements,
-        pagination=pagination
-    )
-
-
-@manage.route('/announcement/publish/<int:id>')
-@login_required
-@permission_required(u'管理通知')
-def publish_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if announcement.show:
-        flash(u'所选通知已经发布', category='warning')
-        return redirect(request.args.get('next') or url_for('manage.announcement'))
-    announcement.publish(modified_by=current_user._get_current_object())
-    flash(u'“%s”发布成功！' % announcement.title, category='success')
-    return redirect(request.args.get('next') or url_for('manage.announcement'))
-
-
-@manage.route('/announcement/retract/<int:id>')
-@login_required
-@permission_required(u'管理通知')
-def retract_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if not announcement.show:
-        flash(u'所选通知尚未发布', category='warning')
-        return redirect(request.args.get('next') or url_for('manage.announcement'))
-    announcement.retract(modified_by=current_user._get_current_object())
-    flash(u'“%s”撤销成功！' % announcement.title, category='success')
-    return redirect(request.args.get('next') or url_for('manage.announcement'))
-
-
-@manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理通知')
-def edit_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if announcement.deleted:
-        abort(404)
-    form = EditAnnouncementForm()
-    if form.validate_on_submit():
-        announcement.title = form.title.data
-        announcement.body_html = form.body.data
-        announcement.type_id = int(form.announcement_type.data)
-        announcement.modified_at = datetime.utcnow()
-        announcement.modified_by_id = current_user.id
-        db.session.add(announcement)
-        db.session.commit()
-        if form.show.data:
-            announcement.publish(modified_by=current_user._get_current_object())
-        else:
-            announcement.clean_up()
-        flash(u'已更新通知：“%s”' % form.title.data, category='success')
-        return redirect(request.args.get('next') or url_for('manage.announcement'))
-    form.title.data = announcement.title
-    form.body.data = announcement.body_html
-    form.announcement_type.data = unicode(announcement.type_id)
-    form.show.data = announcement.show
-    return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
-
-
-@manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理通知')
-def delete_announcement(id):
-    announcement = Announcement.query.get_or_404(id)
-    if announcement.deleted:
-        abort(404)
-    announcement.safe_delete(modified_by=current_user._get_current_object())
-    flash(u'已删除通知：“%s”' % announcement.title, category='success')
-    return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
 @manage.route('/user', methods=['GET', 'POST'])
@@ -2713,7 +2287,7 @@ def edit_user(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.is_superior_than(user=current_user._get_current_object()):
+    if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and user.id != current_user.id):
         abort(403)
     # name
     edit_name_form = EditNameForm(prefix='edit_name')
@@ -2734,7 +2308,7 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_id_number_form.id_number.data = user.id_number
     # role
-    edit_role_form = EditRoleForm(prefix='edit_role', editor=current_user._get_current_object())
+    edit_role_form = EditRoleForm(prefix='edit_role', editor=current_user._get_current_object(), is_self=(user.id == current_user.id))
     if edit_role_form.validate_on_submit():
         user.role_id = int(edit_role_form.role.data)
         db.session.add(user)
@@ -3190,14 +2764,14 @@ def course_users(id):
     return render_template('manage/course_users.html', course=course, users=users, pagination=pagination)
 
 
-@manage.route('/course/flip-show/<int:id>')
+@manage.route('/course/toggle-show/<int:id>')
 @login_required
 @permission_required(u'管理班级')
-def flip_course_show(id):
+def toggle_course_show(id):
     course = Course.query.get_or_404(id)
     if course.deleted:
         abort(404)
-    course.flip_show(modified_by=current_user._get_current_object())
+    course.toggle_show(modified_by=current_user._get_current_object())
     if course.show:
         flash(u'班级：%s的可选状态改为：可选' % course.name, category='success')
     else:
@@ -3238,6 +2812,508 @@ def delete_course(id):
     course.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除班级：%s' % course.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.course'))
+
+
+@manage.route('/ipad', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理')
+def ipad():
+    form = NewiPadForm()
+    if form.validate_on_submit() and current_user.can(u'管理iPad设备'):
+        serial = form.serial.data.upper()
+        room_id = int(form.room.data)
+        if room_id == 0:
+            room_id = None
+        ipad = iPad.query.filter_by(serial=serial).first()
+        if ipad:
+            flash(u'序列号为%s的iPad已存在' % serial, category='error')
+            return redirect(url_for('manage.ipad'))
+        ipad = iPad(
+            serial=serial,
+            alias=form.alias.data,
+            capacity_id=int(form.capacity.data),
+            room_id=room_id,
+            state_id=int(form.state.data),
+            video_playback=timedelta(hours=form.video_playback.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(ipad)
+        db.session.commit()
+        for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
+            ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
+        iPadContentJSON.mark_out_of_date()
+        flash(u'成功添加序列号为%s的iPad' % serial, category='success')
+        return redirect(url_for('manage.ipad'))
+    page = request.args.get('page', 1, type=int)
+    show_ipad_all = True
+    show_ipad_maintain = False
+    show_ipad_charge = False
+    show_ipad_1103 = False
+    show_ipad_1707 = False
+    show_ipad_others = False
+    if current_user.is_authenticated:
+        show_ipad_all = bool(request.cookies.get('show_ipad_all', '1'))
+        show_ipad_maintain = bool(request.cookies.get('show_ipad_maintain', ''))
+        show_ipad_charge = bool(request.cookies.get('show_ipad_charge', ''))
+        show_ipad_1103 = bool(request.cookies.get('show_ipad_1103', ''))
+        show_ipad_1707 = bool(request.cookies.get('show_ipad_1707', ''))
+        show_ipad_others = bool(request.cookies.get('show_ipad_others', ''))
+    if show_ipad_all:
+        query = iPad.query\
+            .filter_by(deleted=False)
+    if show_ipad_maintain:
+        query = iPad.query\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadState.name == u'维护')\
+            .filter(iPad.deleted == False)
+    maintain_num = iPad.query\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadState.name == u'维护')\
+        .filter(iPad.deleted == False)\
+        .count()
+    if show_ipad_charge:
+        query = iPad.query\
+            .join(iPadState, iPadState.id == iPad.state_id)\
+            .filter(iPadState.name == u'充电')\
+            .filter(iPad.deleted == False)
+    charge_num = iPad.query\
+        .join(iPadState, iPadState.id == iPad.state_id)\
+        .filter(iPadState.name == u'充电')\
+        .filter(iPad.deleted == False)\
+        .count()
+    if show_ipad_1103:
+        query = iPad.query\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1103')\
+            .filter(iPad.deleted == False)
+    if show_ipad_1707:
+        query = iPad.query\
+            .join(Room, Room.id == iPad.room_id)\
+            .filter(Room.name == u'1707')\
+            .filter(iPad.deleted == False)
+    if show_ipad_others:
+        query = iPad.query\
+            .filter_by(room_id=None, deleted=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    ipads = pagination.items
+    return render_template('manage/ipad.html',
+        form=form,
+        ipads=ipads,
+        show_ipad_all=show_ipad_all,
+        show_ipad_maintain=show_ipad_maintain,
+        maintain_num=maintain_num,
+        show_ipad_charge=show_ipad_charge,
+        charge_num=charge_num,
+        show_ipad_1103=show_ipad_1103,
+        show_ipad_1707=show_ipad_1707,
+        show_ipad_others=show_ipad_others,
+        pagination=pagination
+    )
+
+
+@manage.route('/ipad/all')
+@login_required
+@permission_required(u'管理')
+def all_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_ipad_all', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/maintain')
+@login_required
+@permission_required(u'管理')
+def maintain_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/charge')
+@login_required
+@permission_required(u'管理')
+def charge_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/1103')
+@login_required
+@permission_required(u'管理')
+def room_1103_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/1707')
+@login_required
+@permission_required(u'管理')
+def room_1707_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/others')
+@login_required
+@permission_required(u'管理')
+def other_ipads():
+    resp = make_response(redirect(url_for('manage.ipad')))
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/set-state/standby/<int:id>')
+@login_required
+@permission_required(u'管理')
+def set_ipad_state_standby(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'待机', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：待机' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/candidate/<int:id>')
+@login_required
+@permission_required(u'管理iPad设备')
+def set_ipad_state_candidate(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'候补', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：候补' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/maintain/<int:id>')
+@login_required
+@permission_required(u'管理')
+def set_ipad_state_maintain(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'维护', modified_by=current_user._get_current_object())
+    db.session.commit()
+    for user in User.users_can(u'管理iPad设备'):
+        send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
+            ipad=ipad,
+            time=datetime.utcnow(),
+            manager=current_user
+        )
+    flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/charge/<int:id>')
+@login_required
+@permission_required(u'管理')
+def set_ipad_state_charge(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'充电', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：充电' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/set-state/obsolete/<int:id>')
+@login_required
+@permission_required(u'管理iPad设备')
+def set_ipad_state_obsolete(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.state.name == u'借出':
+        flash(u'iPad“%s”为借出状态，请先回收该iPad', category='error')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    ipad.set_state(u'退役', modified_by=current_user._get_current_object())
+    flash(u'修改iPad“%s”的状态为：退役' % ipad.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理iPad设备')
+def edit_ipad(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.deleted:
+        abort(404)
+    form = EditiPadForm(ipad=ipad)
+    if form.validate_on_submit():
+        ipad.alias = form.alias.data
+        ipad.serial = form.serial.data.upper()
+        ipad.capacity_id = form.capacity.data
+        if int(form.room.data) == 0:
+            ipad.room_id = None
+        else:
+            ipad.room_id = int(form.room.data)
+        ipad.state_id = int(form.state.data)
+        ipad.video_playback = timedelta(hours=form.video_playback.data)
+        ipad.modified_at = datetime.utcnow()
+        ipad.modified_by_id = current_user.id
+        db.session.add(ipad)
+        db.session.commit()
+        for ipad_content in ipad.contents:
+            ipad.remove_lesson(lesson=ipad_content.lesson)
+        for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
+            ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
+        iPadContentJSON.mark_out_of_date()
+        flash(u'iPad信息已更新', category='success')
+        return redirect(request.args.get('next') or url_for('manage.ipad'))
+    form.alias.data = ipad.alias
+    form.serial.data = ipad.serial
+    form.capacity.data = unicode(ipad.capacity_id)
+    form.room.data = unicode(ipad.room_id)
+    form.state.data = unicode(ipad.state_id)
+    form.video_playback.data = ipad.video_playback.total_seconds() / 3600
+    form.vb_lessons.data = ipad.vb_lesson_ids_included_unicode
+    form.y_gre_lessons.data = ipad.y_gre_lesson_ids_included_unicode
+    return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
+
+
+@manage.route('/ipad/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理iPad设备')
+def delete_ipad(id):
+    ipad = iPad.query.get_or_404(id)
+    if ipad.deleted:
+        abort(404)
+    ipad.safe_delete(modified_by=current_user._get_current_object())
+    iPadContentJSON.mark_out_of_date()
+    flash(u'已删除序列号为%s的iPad' % ipad.serial, category='success')
+    return redirect(request.args.get('next') or url_for('manage.ipad'))
+
+
+@manage.route('/ipad/filter', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理')
+def filter_ipad():
+    ipads = []
+    form = FilteriPadForm()
+    if form.validate_on_submit():
+        lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
+        if len(lesson_ids):
+            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
+            ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
+    return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
+
+
+@manage.route('/ipad/contents')
+@login_required
+@permission_required(u'管理')
+def ipad_contents():
+    ipad_contents = iPadContentJSON.query.get_or_404(1)
+    if ipad_contents.out_of_date:
+        iPadContentJSON.update()
+    return render_template('manage/ipad_contents.html', ipad_contents=json.loads(ipad_contents.json_string))
+
+
+@manage.route('/announcement', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理通知')
+def announcement():
+    form = NewAnnouncementForm()
+    if form.validate_on_submit():
+        announcement = Announcement(
+            title=form.title.data,
+            body_html=form.body.data,
+            type_id=int(form.announcement_type.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(announcement)
+        db.session.commit()
+        if form.show.data:
+            announcement.publish(modified_by=current_user._get_current_object())
+        else:
+            announcement.clean_up()
+        flash(u'已添加通知：“%s”' % form.title.data, category='success')
+        return redirect(url_for('manage.announcement'))
+    page = request.args.get('page', 1, type=int)
+    query = Announcement.query.filter_by(deleted=False)
+    pagination = query\
+        .order_by(Announcement.modified_at.desc())\
+        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    announcements = pagination.items
+    return render_template('manage/announcement.html',
+        form=form,
+        announcements=announcements,
+        pagination=pagination
+    )
+
+
+@manage.route('/announcement/publish/<int:id>')
+@login_required
+@permission_required(u'管理通知')
+def publish_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if announcement.show:
+        flash(u'所选通知已经发布', category='warning')
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
+    announcement.publish(modified_by=current_user._get_current_object())
+    flash(u'“%s”发布成功！' % announcement.title, category='success')
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
+
+
+@manage.route('/announcement/retract/<int:id>')
+@login_required
+@permission_required(u'管理通知')
+def retract_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if not announcement.show:
+        flash(u'所选通知尚未发布', category='warning')
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
+    announcement.retract(modified_by=current_user._get_current_object())
+    flash(u'“%s”撤销成功！' % announcement.title, category='success')
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
+
+
+@manage.route('/announcement/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理通知')
+def edit_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if announcement.deleted:
+        abort(404)
+    form = EditAnnouncementForm()
+    if form.validate_on_submit():
+        announcement.title = form.title.data
+        announcement.body_html = form.body.data
+        announcement.type_id = int(form.announcement_type.data)
+        announcement.modified_at = datetime.utcnow()
+        announcement.modified_by_id = current_user.id
+        db.session.add(announcement)
+        db.session.commit()
+        if form.show.data:
+            announcement.publish(modified_by=current_user._get_current_object())
+        else:
+            announcement.clean_up()
+        flash(u'已更新通知：“%s”' % form.title.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.announcement'))
+    form.title.data = announcement.title
+    form.body.data = announcement.body_html
+    form.announcement_type.data = unicode(announcement.type_id)
+    form.show.data = announcement.show
+    return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
+
+
+@manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理通知')
+def delete_announcement(id):
+    announcement = Announcement.query.get_or_404(id)
+    if announcement.deleted:
+        abort(404)
+    announcement.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除通知：“%s”' % announcement.title, category='success')
+    return redirect(request.args.get('next') or url_for('manage.announcement'))
+
+
+@manage.route('/product', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理产品')
+def product():
+    form = NewProductForm()
+    if form.validate_on_submit():
+        product = Product(
+            name=form.name.data,
+            price=float(form.price.data),
+            available=form.available.data,
+            modified_by_id=current_user.id
+        )
+        db.session.add(product)
+        flash(u'已添加研修产品：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.product'))
+    page = request.args.get('page', 1, type=int)
+    query = Product.query.filter_by(deleted=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    products = pagination.items
+    return render_template('manage/product.html', form=form, products=products, pagination=pagination)
+
+
+@manage.route('/product/toggle-availability/<int:id>')
+@login_required
+@permission_required(u'管理产品')
+def toggle_product_availability(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted:
+        abort(404)
+    product.toggle_availability(modified_by=current_user._get_current_object())
+    if product.available:
+        flash(u'“%s”的可选状态改为：可选' % product.name, category='success')
+    else:
+        flash(u'“%s”的可选状态改为：不可选' % product.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.product'))
+
+
+@manage.route('/product/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理产品')
+def edit_product(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted:
+        abort(404)
+    form = EditProductForm()
+    if form.validate_on_submit():
+        product.name = form.name.data
+        product.price = float(form.price.data)
+        product.available = form.available.data
+        product.modified_at = datetime.utcnow()
+        product.modified_by_id = current_user.id
+        db.session.add(product)
+        flash(u'已更新研修产品：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.product'))
+    form.name.data = product.name
+    form.price.data = unicode(product.price)
+    form.available.data = product.available
+    return render_template('manage/edit_product.html', form=form, product=product)
+
+
+@manage.route('/product/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理产品')
+def delete_product(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted:
+        abort(404)
+    product.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除研修产品：%s' % product.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.product'))
 
 
 @manage.route('/analytics')

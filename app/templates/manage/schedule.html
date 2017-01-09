@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="clock icon"></i> 时段管理</h1>
+    <h1 class="ui inverted header"><i class="clock icon"></i>时段管理</h1>
 </div>
 {% endblock %}
 
@@ -94,17 +94,17 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">
-                    <i class="clock icon"></i> 时段信息
+                    <i class="clock icon"></i>时段信息
                     <div class="ui right floated positive circular pointing dropdown icon button">
                         <i class="add icon"></i>
                         <div class="menu">
-                            <div id="new-schedule-trigger" class="item"><i class="green add circle icon"></i> 新建预约时段</div>
-                            <a class="item loading-trigger" href="{{ url_for('manage.period') }}"><i class="tasks icon"></i> 管理时段模板</a>
+                            <div id="new-schedule-trigger" class="item"><i class="green add circle icon"></i>新建预约时段</div>
+                            <a class="item loading-trigger" href="{{ url_for('manage.period') }}"><i class="tasks icon"></i>管理时段模板</a>
                         </div>
                     </div>
                     <div id="new-schedule-modal" class="ui modal">
                         <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i> 新建预约时段</div>
+                        <div class="header"><i class="add circle icon"></i>新建预约时段</div>
                         <div class="content">
                             <form id="new-schedule" method="POST" class="ui form">
                                 {{ form.hidden_tag() }}
@@ -193,7 +193,7 @@
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ schedule.modified_by.name }}</td>
-                            <td><div class="ui disabled mini button"><i class="setting icon"></i> 操作</div></td>
+                            <td><div class="ui disabled mini button"><i class="setting icon"></i>操作</div></td>
                             {% else %}
                             {% if schedule.available %}
                             <td class="positive">已发布</td>
@@ -202,7 +202,7 @@
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ schedule.modified_by.name }}</td>
-                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('manage.retract_schedule', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="undo icon"></i> 撤销</a>
+                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('manage.retract_schedule', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="undo icon"></i>撤销</a>
                             </td>
                             {% else %}
                             <td>未发布</td>
@@ -211,7 +211,7 @@
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
                             <td>{{ schedule.modified_by.name }}</td>
-                            <td><a class="ui primary mini button loading-trigger" href="{{ url_for('manage.publish_schedule', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="send icon"></i> 发布</a></td>
+                            <td><a class="ui primary mini button loading-trigger" href="{{ url_for('manage.publish_schedule', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="send icon"></i>发布</a></td>
                             {% endif %}
                             {% endif %}
                         </tr>
@@ -239,8 +239,6 @@ $('.message .close')
         ;
     })
 ;
-
-$('select.dropdown').dropdown();
 
 $('.ui.checkbox').checkbox();
 

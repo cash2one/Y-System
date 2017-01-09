@@ -82,7 +82,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="announcement icon"></i> 通知管理</h1>
+    <h1 class="ui inverted header"><i class="announcement icon"></i>通知管理</h1>
 </div>
 {% endblock %}
 
@@ -92,11 +92,11 @@
         <div class="row">
             <div class="column">
                 <h3 class="header">
-                    <i class="announcement icon"></i> 通知
+                    <i class="announcement icon"></i>通知
                     <div id="new-announcement-trigger" class="ui right floated positive circular icon button" data-content="新建通知" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                     <div id="new-announcement-modal" class="ui modal">
                         <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i> 新建通知</div>
+                        <div class="header"><i class="add circle icon"></i>新建通知</div>
                         <div class="content">
                             <form id="new-announcement" method="POST" class="ui form">
                                 {{ form.hidden_tag() }}
@@ -166,7 +166,7 @@
                                     <div id="delete-trigger-{{ announcement.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ announcement.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i> 确定要删除通知“{{ announcement.title }}”？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除通知“{{ announcement.title }}”？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ announcement.id }}" class="ui black button">保留</div>
@@ -199,8 +199,6 @@ $('.message .close')
         ;
     })
 ;
-
-$('select.dropdown').dropdown();
 
 $('.ui.checkbox').checkbox();
 

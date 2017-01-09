@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}恢复用户{% endblock %}
+{% block title %}编辑研修产品信息{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="undo icon"></i>恢复用户</h1>
+    <h1 class="ui inverted header"><i class="edit icon"></i>编辑研修产品信息</h1>
 </div>
 {% endblock %}
 
@@ -93,32 +93,31 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header"><i class="undo icon"></i>恢复用户：{{ user.name }}</h3>
-                <form id="restore-user" method="POST" class="ui form">
+                <form id="edit-product" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="eight wide required field">
-                            {{ form.email.label() }}
-                            {{ form.email(placeholder='邮箱') }}
+                            {{ form.name.label() }}
+                            {{ form.name(placeholder='研修产品名称') }}
                         </div>
                         <div class="eight wide required field">
-                            {{ form.role.label() }}
-                            {{ form.role(class='ui dropdown') }}
+                            {{ form.price.label() }}
+                            <div class="ui left labeled input">
+                                <div class="ui basic label"><i class="yen icon"></i></div>
+                                {{ form.price(placeholder='0') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui segment">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ form.available() }}
+                                {{ form.available.label() }}
+                            </div>
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
-                    {% with email_errors = form.email.errors %}
-                    {% if email_errors %}
-                    <div class="ui flask negative message">
-                        <ul class="list">
-                            {% for error in email_errors %}
-                            <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
+                    <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.product') }}">取消</a>
                 </form>
             </div>
         </div>
@@ -140,31 +139,31 @@ $('.message .close')
 
 $(document)
     .ready(function() {
-        $('#restore-user')
+        $('#edit-product')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    email: {
-                        identifier: 'email',
+                    name: {
+                        identifier: 'name',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请填写电子邮箱地址'
-                            },
-                            {
-                                type: 'email',
-                                prompt: '请输入一个有效的电子邮箱地址'
+                                prompt: '请输入研修产品名称'
                             }
                         ]
                     },
-                    role: {
-                        identifier: 'role',
+                    price: {
+                        identifier: 'price',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择用户组'
+                                prompt: '请输入研修产品单价'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请输入有效的产品单价'
                             }
                         ]
                     }

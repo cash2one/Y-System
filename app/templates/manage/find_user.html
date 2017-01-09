@@ -87,7 +87,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="find icon"></i> 检索用户</h1>
+    <h1 class="ui inverted header"><i class="find icon"></i>检索用户</h1>
 </div>
 {% endblock %}
 
@@ -108,7 +108,7 @@
                     {{ form.submit(class='ui primary button') }}
                 </form>
                 {% if users %}
-                <h3 class="header"><i class="find icon"></i> 检索结果</h3>
+                <h3 class="header"><i class="find icon"></i>检索结果</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -161,17 +161,24 @@
                             {% endif %}
                             {% if current_user.can('管理用户') %}
                             <td>
+                                {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ user.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i> 确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="remove user icon"></i>注销</a>
                                         <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
                                     </div>
                                 </div>
+                                {% else %}
+                                <div class="ui mini icon buttons">
+                                    <div class="ui button disabled"><i class="edit icon"></i></div>
+                                    <div class="ui negative button disabled"><i class="remove user icon"></i></div>
+                                </div>
+                                {% endif %}
                             </td>
                             {% endif %}
                         </tr>
@@ -179,7 +186,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <h3 class="header"><i class="ban icon"></i> 暂无检索结果</h3>
+                <h3 class="header"><i class="ban icon"></i>暂无检索结果</h3>
                 {% endif %}
             </div>
         </div>
@@ -199,8 +206,6 @@ $('.message .close')
         ;
     })
 ;
-
-$('select.dropdown').dropdown();
 
 $('table').tablesort();
 
