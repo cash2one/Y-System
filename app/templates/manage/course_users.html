@@ -128,9 +128,13 @@
                             <td>{% if course.type.name == 'VB' %}{{ course.name }}{% else %}{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=request.args.get('next')) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
                             <td>{% if course.type.name == 'Y-GRE' %}{{ course.name }}{% else %}{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=request.args.get('next')) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
                             <td>
+                                {% if user.activated %}
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can('管理学习进度') %}
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.course_users', id=course.id, page=pagination.page)) }}"><i class="refresh icon"></i></a>
+                                {% endif %}
+                                {% else %}
+                                N/A
                                 {% endif %}
                             </td>
                             <td>

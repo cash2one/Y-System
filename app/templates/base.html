@@ -141,11 +141,12 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                     {% endif %}
                     {% if current_user.can('管理产品') %}
-                    <a class="item loading-trigger" href="#"><i class="book icon"></i> 产品管理</a>
+                    <a class="item loading-trigger" href="#"><i class="yen icon"></i> 产品管理</a>
                     {% endif %}
                     {% if current_user.is_developer%}
                     <div class="divider"></div>
-                    <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
+                    <div class="header">开发权限</div>
+                    <a class="item loading-trigger" href="#"><i class="spy icon"></i> 角色管理</a>
                     {% endif %}
                 </div>
             </div>
@@ -258,13 +259,18 @@
                 <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                 {% endif %}
                 {% if current_user.can('管理产品') %}
-                <a class="item loading-trigger" href="#"><i class="book icon"></i> 产品管理</a>
-                {% endif %}
-                {% if current_user.is_developer%}
-                <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
+                <a class="item loading-trigger" href="#"><i class="yen icon"></i> 产品管理</a>
                 {% endif %}
             </div>
         </div>
+        {% if current_user.is_developer%}
+        <div class="item">
+            <div class="header">开发权限</div>
+            <div class="menu">
+                <a class="item loading-trigger" href="#"><i class="spy icon"></i> 角色管理</a>
+            </div>
+        </div>
+        {% endif %}
         <div class="item">
             <div class="header">查询功能</div>
             <div class="menu">
@@ -371,11 +377,12 @@
                             <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                             {% endif %}
                             {% if current_user.can('管理产品') %}
-                            <a class="item loading-trigger" href="#"><i class="book icon"></i> 产品管理</a>
+                            <a class="item loading-trigger" href="#"><i class="yen icon"></i> 产品管理</a>
                             {% endif %}
                             {% if current_user.is_developer%}
                             <div class="divider"></div>
-                            <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
+                            <div class="header">开发权限</div>
+                            <a class="item loading-trigger" href="#"><i class="spy icon"></i> 角色管理</a>
                             {% endif %}
                         </div>
                     </div>
