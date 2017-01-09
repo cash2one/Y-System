@@ -449,12 +449,12 @@ class EditStudentRoleForm(FlaskForm):
         self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
 
 
-class EditRoleForm(FlaskForm):
+class EditUserRoleForm(FlaskForm):
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'更新')
 
     def __init__(self, editor, is_self=False, *args, **kwargs):
-        super(EditRoleForm, self).__init__(*args, **kwargs)
+        super(EditUserRoleForm, self).__init__(*args, **kwargs)
         if editor.is_developer:
             self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
         elif editor.is_administrator:
@@ -634,4 +634,9 @@ class EditProductForm(FlaskForm):
     name = StringField(u'产品名称', validators=[Required(), Length(1, 64)])
     price = StringField(u'单价', validators=[Required()])
     available = BooleanField(u'显示为可选')
+    submit = SubmitField(u'提交')
+
+
+class EditRoleForm(FlaskForm):
+    name = StringField(u'角色名称', validators=[Required(), Length(1, 64)])
     submit = SubmitField(u'提交')

@@ -1829,6 +1829,13 @@ class Product(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
+    @property
+    def sales_volume(self):
+        if self.name == u'团报优惠':
+            return GroupRegistration.query.count()
+        else:
+            return sum([purchase.quantity for purchase in self.purchases])
+
     @staticmethod
     def insert_products():
         products = [
