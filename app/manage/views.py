@@ -2713,7 +2713,7 @@ def edit_user(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.is_superior_than(user=current_user._get_current_object()):
+    if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and user.id != current_user.id):
         abort(403)
     # name
     edit_name_form = EditNameForm(prefix='edit_name')
@@ -2734,7 +2734,7 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_id_number_form.id_number.data = user.id_number
     # role
-    edit_role_form = EditRoleForm(prefix='edit_role', editor=current_user._get_current_object())
+    edit_role_form = EditRoleForm(prefix='edit_role', editor=current_user._get_current_object(), is_self=(user.id == current_user.id))
     if edit_role_form.validate_on_submit():
         user.role_id = int(edit_role_form.role.data)
         db.session.add(user)

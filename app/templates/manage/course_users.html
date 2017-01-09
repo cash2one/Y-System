@@ -125,12 +125,12 @@
                                 <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
                             </td>
                             <td>{{ user.role.name }}</td>
-                            <td>{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</td>
-                            <td>{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</td>
+                            <td>{% if course.type.name == 'VB' %}{{ course.name }}{% else %}{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=request.args.get('next')) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
+                            <td>{% if course.type.name == 'Y-GRE' %}{{ course.name }}{% else %}{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=request.args.get('next')) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
                             <td>
                                 {{ user.last_punch.alias2 }}
                                 {% if current_user.can('管理学习进度') %}
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>
+                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.course_users', id=course.id, page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -143,7 +143,7 @@
                             </td>
                             {% if current_user.can('管理用户') %}
                             <td>
-                                {% if not user.is_superior_than(user=current_user) %}
+                                {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.course_users', id=course.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>

@@ -135,7 +135,7 @@
                         </div>
                     </div>
                     {% else %}
-                    <a id="create-user-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}" data-content="新建学生用户" data-position="left center"><i class="add user icon"></i></a>
+                    <a id="create-user-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}" data-content="新建学生用户" data-position="top center" data-variation="inverted"><i class="add user icon"></i></a>
                     {% endif %}
                 </h3>
                 <div class="ui tabular menu">
@@ -145,8 +145,12 @@
                     <a class="item {% if show_draft_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.draft_users') }}">创建中 [{{ draft_users_num }}]</a>
                     {% if current_user.is_administrator or current_user.is_developer %}
                     <a class="item {% if show_deleted_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.deleted_users') }}">已注销 [{{ deleted_users_num }}]</a>
+                    {% endif %}
+                    {% if current_user.is_moderator or current_user.is_administrator or current_user.is_developer %}
                     <a class="item {% if show_volunteers %}active {% endif %}loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者 [{{ volunteers_num }}]</a>
                     <a class="item {% if show_moderators %}active {% endif %}loading-trigger" href="{{ url_for('manage.moderators') }}">协管员 [{{ moderators_num }}]</a>
+                    {% endif %}
+                    {% if current_user.is_administrator or current_user.is_developer %}
                     <a class="item {% if show_administrators %}active {% endif %}loading-trigger" href="{{ url_for('manage.administrators') }}">管理员 [{{ administrators_num }}]</a>
                     {% endif %}
                     {% if current_user.is_developer %}
@@ -173,7 +177,7 @@
                         {% for user in users %}
                         <tr>
                             <td>
-                                {% if user.created %}<a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank">{% endif %}{{ user.name }}{% if user.created %}</a>{% endif %}
+                                {% if user.created %}<a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank">{{ user.name }}</a>{% else %}{{ user.name }}{% endif %}
                                 {% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
                             </td>
                             <td>
@@ -211,7 +215,7 @@
                             <td>
                                 {% if user.deleted %}
                                 <a class="ui mini button loading-trigger" href="{{ url_for('manage.restore_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="undo icon"></i> 恢复</a>
-                                {% else %}
+                                {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
@@ -222,6 +226,11 @@
                                         <a class="ui negative left labeled icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_delete', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="remove user icon"></i> {% if user.created %}注销{% else %}删除{% endif %}</a>
                                         <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
                                     </div>
+                                </div>
+                                {% else %}
+                                <div class="ui mini icon buttons">
+                                    <div class="ui button disabled"><i class="edit icon"></i></div>
+                                    <div class="ui negative button disabled"><i class="remove user icon"></i></div>
                                 </div>
                                 {% endif %}
                             </td>

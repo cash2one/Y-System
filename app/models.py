@@ -47,15 +47,16 @@ class Permission(db.Model):
             (u'管理学习进度', ),
             (u'管理iPad借阅', ),
             (u'管理预约时段', ),
-            (u'管理iPad设备', ),
             (u'管理作业', ),
             (u'管理考试', ),
+            (u'管理用户', ),
+            (u'管理班级', ),
+            (u'管理iPad设备', ),
             (u'管理通知', ),
             (u'管理站内信', ),
             (u'管理反馈', ),
             (u'管理进站', ),
-            (u'管理用户', ),
-            (u'管理班级', ),
+            (u'管理产品', ),
             (u'管理权限', ),
             (u'开发权限', ),
         ]
@@ -106,8 +107,8 @@ class Role(db.Model):
             (u'Y-GRE VB×2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程×2'], ),
             (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
             (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅'], ),
-            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级'], ),
-            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理iPad设备', u'管理作业', u'管理考试', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理用户', u'管理班级', u'管理权限'], ),
+            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理作业', u'管理考试', u'管理用户', u'管理班级', u'管理iPad设备', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理产品'], ),
+            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理作业', u'管理考试', u'管理用户', u'管理班级', u'管理iPad设备', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理产品', u'管理权限'], ),
             (u'开发人员', [permission.name for permission in Permission.query.all()], ),
         ]
         for R in roles:
@@ -1918,8 +1919,8 @@ class Course(db.Model):
     @property
     def valid_registrations(self):
         return CourseRegistration.query\
-            .join(Course, Course.id == CourseRegistration.course_id)\
             .join(User, User.id == CourseRegistration.user_id)\
+            .filter(CourseRegistration.course_id == self.id)\
             .filter(User.created == True)\
             .filter(User.deleted == False)
 

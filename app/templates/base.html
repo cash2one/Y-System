@@ -140,6 +140,9 @@
                     {% if current_user.can('管理通知') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                     {% endif %}
+                    {% if current_user.can('管理产品') %}
+                    <a class="item loading-trigger" href="#"><i class="book icon"></i> 产品管理</a>
+                    {% endif %}
                     {% if current_user.is_developer%}
                     <div class="divider"></div>
                     <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
@@ -254,6 +257,9 @@
                 {% if current_user.can('管理通知') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
                 {% endif %}
+                {% if current_user.can('管理产品') %}
+                <a class="item loading-trigger" href="#"><i class="book icon"></i> 产品管理</a>
+                {% endif %}
                 {% if current_user.is_developer%}
                 <a class="item loading-trigger" href="#"><i class="bomb icon"></i> 开发权限</a>
                 {% endif %}
@@ -363,6 +369,9 @@
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i> iPad管理</a>
                             {% if current_user.can('管理通知') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.announcement') }}"><i class="announcement icon"></i> 通知管理</a>
+                            {% endif %}
+                            {% if current_user.can('管理产品') %}
+                            <a class="item loading-trigger" href="#"><i class="book icon"></i> 产品管理</a>
                             {% endif %}
                             {% if current_user.is_developer%}
                             <div class="divider"></div>
