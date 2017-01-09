@@ -121,7 +121,7 @@
                     <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
                     {% endif %}
                     {% if current_user.can('管理考试') %}
-                    <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                    <a class="item loading-trigger" href="#"><i class="pencil icon"></i> 考试管理</a>
                     {% endif %}
                 </div>
             </div>
@@ -145,8 +145,9 @@
                     {% endif %}
                     {% if current_user.is_developer%}
                     <div class="divider"></div>
-                    <div class="header">开发权限</div>
+                    <div class="header">开发人员</div>
                     <a class="item loading-trigger" href="#"><i class="spy icon"></i> 角色管理</a>
+                    <a class="item loading-trigger" href="#"><i class="checkmark box icon"></i> 权限管理</a>
                     {% endif %}
                 </div>
             </div>
@@ -241,7 +242,7 @@
                 <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
                 {% endif %}
                 {% if current_user.can('管理考试') %}
-                <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                <a class="item loading-trigger" href="#"><i class="pencil icon"></i> 考试管理</a>
                 {% endif %}
             </div>
         </div>
@@ -265,8 +266,9 @@
         </div>
         {% if current_user.is_developer%}
         <div class="item">
-            <div class="header">开发权限</div>
+            <div class="header">开发人员</div>
             <div class="menu">
+                <a class="item loading-trigger" href="#"><i class="spy icon"></i> 角色管理</a>
                 <a class="item loading-trigger" href="#"><i class="spy icon"></i> 角色管理</a>
             </div>
         </div>
@@ -357,7 +359,7 @@
                             <a class="item loading-trigger" href="#"><i class="file text outline icon"></i> 作业管理</a>
                             {% endif %}
                             {% if current_user.can('管理考试') %}
-                            <a class="item loading-trigger" href="#"><i class="write icon"></i> 考试管理</a>
+                            <a class="item loading-trigger" href="#"><i class="pencil icon"></i> 考试管理</a>
                             {% endif %}
                         </div>
                     </div>
@@ -381,8 +383,9 @@
                             {% endif %}
                             {% if current_user.is_developer%}
                             <div class="divider"></div>
-                            <div class="header">开发权限</div>
+                            <div class="header">开发人员</div>
                             <a class="item loading-trigger" href="#"><i class="spy icon"></i> 角色管理</a>
+                            <a class="item loading-trigger" href="#"><i class="checkmark box icon"></i> 权限管理</a>
                             {% endif %}
                         </div>
                     </div>
