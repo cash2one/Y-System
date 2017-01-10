@@ -284,6 +284,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="tablet icon"></i>iPad状态</h3>
+                <a id="rental-rent-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.summary')) }}" data-content="借出iPad" data-position="top center" data-variation="inverted"><i class="upload icon"></i></a>
                 <div class="ui secondary menu">
                     <a class="item {% if show_summary_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}#ipads">1103</a>
                     <a class="item {% if show_summary_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}#ipads">1707</a>
@@ -361,6 +362,8 @@ $('.message .close')
         ;
     })
 ;
+
+$('#rental-rent-trigger').popup();
 
 // progress bar
 $('#page-loading-progress').progress({
