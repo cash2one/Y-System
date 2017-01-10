@@ -28,6 +28,7 @@ def vb():
         .filter(AnnouncementType.name == u'预约VB通知')\
         .filter(Announcement.show == True)\
         .filter(Announcement.deleted == False)\
+        .order_by(Announcement.modified_at.desc())\
         .all()
     for announcement in announcements:
         if not current_user.notified_by(announcement=announcement):
@@ -175,6 +176,7 @@ def y_gre():
         .filter(AnnouncementType.name == u'预约Y-GRE通知')\
         .filter(Announcement.show == True)\
         .filter(Announcement.deleted == False)\
+        .order_by(Announcement.modified_at.desc())\
         .all()
     for announcement in announcements:
         if not current_user.notified_by(announcement=announcement):
