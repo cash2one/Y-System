@@ -107,8 +107,8 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                 </form>
-                {% if ipads %}
-                <h3 class="header"><i class="filter icon"></i>筛选结果</h3>
+                {% if ipads_num %}
+                <h3 class="header"><i class="filter icon"></i>筛选得到{{ ipads_num }}个iPad</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -231,7 +231,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <h3 class="header"><i class="ban icon"></i>暂无筛选结果</h3>
+                <h3 class="header"><i class="ban icon"></i>无筛选结果</h3>
                 {% endif %}
             </div>
         </div>

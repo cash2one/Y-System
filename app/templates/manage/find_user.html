@@ -108,7 +108,7 @@
                     {{ form.submit(class='ui primary button') }}
                 </form>
                 {% if users %}
-                <h3 class="header"><i class="find icon"></i>检索结果</h3>
+                <h3 class="header"><i class="find icon"></i>检索得到{{ users_num }}个用户</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -186,7 +186,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <h3 class="header"><i class="ban icon"></i>暂无检索结果</h3>
+                <h3 class="header"><i class="ban icon"></i>无检索结果</h3>
                 {% endif %}
             </div>
         </div>
@@ -209,8 +209,8 @@ $('.message .close')
 
 $('table').tablesort();
 
-{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
 {% for user in users %}
+{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
 $('#delete-trigger-{{ user.id }}')
     .on('click', function() {
         $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
@@ -221,8 +221,8 @@ $('#delete-hide-trigger-{{ user.id }}')
         $('#delete-modal-{{ user.id }}').modal('hide');
     })
 ;
-{% endfor %}
 {% endif %}
+{% endfor %}
 
 $(document)
     .ready(function() {

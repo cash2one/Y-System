@@ -198,8 +198,8 @@ $('.message .close')
 
 $('table').tablesort();
 
-{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
 {% for user in users %}
+{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
 $('#delete-trigger-{{ user.id }}')
     .on('click', function() {
         $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
@@ -210,7 +210,7 @@ $('#delete-hide-trigger-{{ user.id }}')
         $('#delete-modal-{{ user.id }}').modal('hide');
     })
 ;
-{% endfor %}
 {% endif %}
+{% endfor %}
 </script>
 {% endblock %}
