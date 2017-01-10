@@ -666,3 +666,17 @@ class EditRoleForm(FlaskForm):
     def validate_name(self, field):
         if field.data != self.role.name and Role.query.filter_by(name=field.data).first():
             raise ValidationError(u'“%s”角色已存在' % field.data)
+
+
+class NewPermission(FlaskForm):
+    name = StringField(u'权限名称', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'提交')
+
+
+class EditPermission(FlaskForm):
+    name = StringField(u'权限名称', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'提交')
+
+    def validate_name(self, field):
+        if field.data != self.role.name and Permission.query.filter_by(name=field.data).first():
+            raise ValidationError(u'“%s”权限已存在' % field.data)
