@@ -550,20 +550,19 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].charge_url)
                                             .html('<i class="green plug icon"></i>充电')
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].maintain_url)
                                             .html('<i class="red configure icon"></i>维护')
                                     )
                             )
                     );
             } else if (data.ipads[i].state == '借出') {
-                // $('#ipad-operation-' + i).attr('href', data.ipads[i].exchange_url).html('<i class="retweet icon"></i>调换');
                 $('#ipad-battery-' + i).removeClass('disabled').progress({
                     percent: data.ipads[i].battery_life.percent,
                     text: {
@@ -620,14 +619,14 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].return_url)
                                             .html('<i class="green download icon"></i>回收')
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].exchange_url)
                                             .html('<i class="orange retweet icon"></i>调换')
                                     )
                             )
@@ -652,14 +651,14 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].standby_url)
                                             .html('<i class="wait icon"></i>待机')
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].charge_url)
                                             .html('<i class="green plug icon"></i>充电')
                                     )
                             )
@@ -669,7 +668,7 @@ function updateCards(updateProgressBar) {
                 $('#ipad-state-' + i).html('<i class="plug icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('green');
                 $('#ipad-content-' + i + ' .value').html('<i class="plug icon"></i>');
-                $('#ipad-extra' + i)
+                $('#ipad-extra-' + i)
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
@@ -679,14 +678,14 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].standby_url)
                                             .html('<i class="wait icon"></i>待机')
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item')
-                                            .attr('href', '')
+                                            .addClass('item loading-trigger')
+                                            .attr('href', data.ipads[i].maintain_url)
                                             .html('<i class="red configure icon"></i>维护')
                                     )
                             )
