@@ -19,8 +19,9 @@ from .forms import NewCourseForm, EditCourseForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
+from .forms import NewRoleForm, EditRoleForm
 from .. import db
-from ..models import Role, User, Gender
+from ..models import Permission, Role, User, Gender
 from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import Booking, BookingState
@@ -3316,6 +3317,69 @@ def delete_product(id):
     return redirect(request.args.get('next') or url_for('manage.product'))
 
 
+@manage.route('/role', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def role():
+    form = NewRoleForm()
+    if form.validate_on_submit():
+        if Role.query.filter_by(name=form.name.data).first() is not None:
+            flash(u'“%s”角色已存在' % form.name.data, category='error')
+            return redirect(url_for('manage.role'))
+        role = Role(name=form.name.data)
+        db.session.add(role)
+        db.session.commit()
+        for permission_id in form.booking_permissions.data + form.manage_permissions.data:
+            role.add_permission(permission=Permission.query.get(int(permission_id)))
+        if form.is_developer.data:
+            role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
+        flash(u'已添加角色：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.role'))
+    page = request.args.get('page', 1, type=int)
+    query = Role.query
+    pagination = Role.query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    roles = pagination.items
+    return render_template('manage/role.html', form=form, roles=roles, pagination=pagination)
+
+
+@manage.route('/role/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def edit_role(id):
+    role = Role.query.get_or_404(id)
+    form = EditRoleForm(role=role)
+    if form.validate_on_submit():
+        role.name = form.name.data
+        db.session.add(role)
+        for role_permission in role.permissions:
+            role.remove_permission(permission=Permission.query.get(role_permission.permission_id))
+        for permission_id in form.booking_permissions.data + form.manage_permissions.data:
+            role.add_permission(permission=Permission.query.get(int(permission_id)))
+        if form.is_developer.data:
+            role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
+        flash(u'已更新角色：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.role'))
+    form.name.data = role.name
+    form.booking_permissions.data = [unicode(permission.id) for permission in role.permissions_alias(prefix=u'预约', formatted=False)]
+    form.manage_permissions.data = [unicode(permission.id) for permission in role.permissions_alias(prefix=u'管理', formatted=False)]
+    form.is_developer.data = role.has_permission(Permission.query.filter_by(name=u'开发权限').first())
+    return render_template('manage/edit_role.html', form=form, role=role)
+
+
+@manage.route('/role/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def delete_role(id):
+    role = Role.query.get_or_404(id)
+    if role.users.count():
+        abort(403)
+    for role_permission in role.permissions:
+        role.remove_permission(permission=Permission.query.get(role_permission.permission_id))
+    db.session.delete(role)
+    flash(u'已删除角色：%s' % role.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.role'))
+
+
 @manage.route('/analytics')
 @login_required
 @permission_required(u'管理')
@@ -3376,7 +3440,7 @@ def suggest_referrer():
             ))\
             .order_by(User.last_seen_at.desc())\
             .limit(current_app.config['RECORD_PER_QUERY'])
-    return jsonify({'results': [user.to_json_suggestion(suggest_email=True, include_role=False) for user in users]})
+    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if user.role.name != u'开发人员']})
 
 
 @manage.route('/search/user')

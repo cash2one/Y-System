@@ -309,6 +309,7 @@ $('.message .close')
 
 $('table').tablesort();
 
+{% if current_user.can('管理iPad设备') %}
 {% for ipad in ipads %}
 $('#delete-trigger-{{ ipad.id }}')
     .on('click', function() {
@@ -404,5 +405,6 @@ $(document)
         ;
     })
 ;
+{% endif %}
 </script>
 {% endblock %}
