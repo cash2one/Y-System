@@ -581,39 +581,11 @@ function updateCards(updateProgressBar) {
                         });
                     };
                 };
-                if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
-                    $('#ipad-' + i).addClass('blue');
-                    $('#ipad-state-' + i).append(
-                        $('<a>')
-                            .attr('href', data.ipads[i].now_rented_by.url)
-                            .attr('target', '_blank')
-                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
-                    );
-                    $('#ipad-content-' + i + ' .statistic').addClass('blue');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias);
-                } else if (data.ipads[i].now_rented_by.last_punch.course_type == 'Y-GRE') {
-                    $('#ipad-' + i).addClass('teal');
-                    $('#ipad-state-' + i).append(
-                        $('<a>')
-                            .attr('href', data.ipads[i].now_rented_by.url)
-                            .attr('target', '_blank')
-                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
-                    );
-                    $('#ipad-content-' + i + ' .statistic').addClass('teal');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.lesson);
-                } else {
-                    $('#ipad-' + i).addClass('yellow');
-                    $('#ipad-state-' + i).html('<i class="upload icon"></i>' + data.ipads[i].state);
-                    $('#ipad-content-' + i + ' .statistic').addClass('yellow');
-                    $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
-                };
                 $('#ipad-extra-' + i)
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="blue upload icon"></i>借出')
+                            .html('<i class="upload icon"></i>借出')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
@@ -631,6 +603,37 @@ function updateCards(updateProgressBar) {
                                     )
                             )
                     );
+                if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
+                    $('#ipad-' + i).addClass('blue');
+                    $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('blue');
+                    $('#ipad-state-' + i).append(
+                        $('<a>')
+                            .attr('href', data.ipads[i].now_rented_by.url)
+                            .attr('target', '_blank')
+                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                    );
+                    $('#ipad-content-' + i + ' .statistic').addClass('blue');
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias);
+                } else if (data.ipads[i].now_rented_by.last_punch.course_type == 'Y-GRE') {
+                    $('#ipad-' + i).addClass('teal');
+                    $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('teal');
+                    $('#ipad-state-' + i).append(
+                        $('<a>')
+                            .attr('href', data.ipads[i].now_rented_by.url)
+                            .attr('target', '_blank')
+                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                    );
+                    $('#ipad-content-' + i + ' .statistic').addClass('teal');
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.lesson);
+                } else {
+                    $('#ipad-' + i).addClass('yellow');
+                    $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('yellow');
+                    $('#ipad-state-' + i).html('<i class="upload icon"></i>' + data.ipads[i].state);
+                    $('#ipad-content-' + i + ' .statistic').addClass('yellow');
+                    $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
+                };
             } else if (data.ipads[i].state == '候补') {
                 $('#ipad-' + i).addClass('grey');
                 $('#ipad-state-' + i).html('<i class="cube icon"></i>' + data.ipads[i].state);
