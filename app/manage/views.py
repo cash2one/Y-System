@@ -3126,7 +3126,7 @@ def delete_ipad(id):
 @login_required
 @permission_required(u'管理')
 def filter_ipad():
-    ipads = []
+    # ipads = []
     form = FilteriPadForm()
     if form.validate_on_submit():
         lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
@@ -3134,7 +3134,7 @@ def filter_ipad():
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
             ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
         else:
-            pass
+            ipads = [ipad for ipad in iPad.query.filter_by(deleted=False).all() if ipad.contents.count()]
     return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
 
 
