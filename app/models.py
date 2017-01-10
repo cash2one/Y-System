@@ -2572,6 +2572,7 @@ class iPad(db.Model):
             'state': self.state.name,
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
+            'edit_url': url_for('manage.edit_ipad', id=self.id, next=url_for('manage.summary')),
         }
         if self.state.name == u'借出':
             ipad_json['now_rented_by'] = self.now_rented_by.to_json()
@@ -2580,6 +2581,7 @@ class iPad(db.Model):
                 'level': self.current_battery_life_level,
             }
             ipad_json['overtime'] = self.current_rental.is_overtime
+            ipad_json['exchange_url'] = url_for('manage.rental_exchange_step_1', rental_id=self.current_rental.id, next=url_for('manage.summary'))
         return ipad_json
 
     @staticmethod

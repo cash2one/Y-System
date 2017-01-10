@@ -220,7 +220,7 @@
                                     {% endif %}
                                     {% if ipad.state.name == '维护' %}
                                 <div class="ui red simple dropdown mini button">
-                                    <i class="wrench icon"></i>
+                                    <i class="configure icon"></i>
                                     {% endif %}
                                     {% if ipad.state.name == '充电' %}
                                 <div class="ui green simple dropdown mini button">
@@ -239,7 +239,7 @@
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="cube icon"></i>候补</a>
                                         {% endif %}
                                         {% if ipad.state.name != '维护' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_maintain', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wrench icon"></i>维护</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_maintain', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="configure icon"></i>维护</a>
                                         {% endif %}
                                         {% if ipad.state.name != '充电' %}
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_charge', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="plug icon"></i>充电</a>

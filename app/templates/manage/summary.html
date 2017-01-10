@@ -527,15 +527,11 @@ function updateCards(updateProgressBar) {
                         )
                         .append(
                             $('<div>')
+                                .attr('id', 'ipad-extra-' + i)
                                 .addClass('extra content')
                                 .append(
                                     $('<span>')
                                         .append('<i class="notched circle loading icon"></i>' + moment(data.ipads[i].modified_at, 'YYYY-MM-DDTh:mm:ssZ').fromNow())
-                                )
-                                .append(
-                                    $('<span>')
-                                        .addClass('right floated')
-                                        .append('<i class="configure icon"></i>' + data.ipads[i].modified_by)
                                 )
                         )
                 );
@@ -544,7 +540,30 @@ function updateCards(updateProgressBar) {
                 $('#ipad-state-' + i).html('<i class="wait icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('grey');
                 $('#ipad-content-' + i + ' .value').html('<i class="wait icon"></i>');
+                $('#ipad-extra-' + i)
+                    .append(
+                        $('<div>')
+                            .addClass('right floated ui simple dropdown')
+                            .html('<i class="wait icon"></i>待机')
+                            .append(
+                                $('<div>')
+                                    .addClass('menu')
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="green plug icon"></i>充电')
+                                    )
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="red configure icon"></i>维护')
+                                    )
+                            )
+                    );
             } else if (data.ipads[i].state == '借出') {
+                // $('#ipad-operation-' + i).attr('href', data.ipads[i].exchange_url).html('<i class="retweet icon"></i>调换');
                 $('#ipad-battery-' + i).removeClass('disabled').progress({
                     percent: data.ipads[i].battery_life.percent,
                     text: {
@@ -591,6 +610,28 @@ function updateCards(updateProgressBar) {
                     $('#ipad-content-' + i + ' .statistic').addClass('yellow');
                     $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
                 };
+                $('#ipad-extra-' + i)
+                    .append(
+                        $('<div>')
+                            .addClass('right floated ui simple dropdown')
+                            .html('<i class="blue upload icon"></i>借出')
+                            .append(
+                                $('<div>')
+                                    .addClass('menu')
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="green download icon"></i>回收')
+                                    )
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="orange retweet icon"></i>调换')
+                                    )
+                            )
+                    );
             } else if (data.ipads[i].state == '候补') {
                 $('#ipad-' + i).addClass('grey');
                 $('#ipad-state-' + i).html('<i class="cube icon"></i>' + data.ipads[i].state);
@@ -601,11 +642,55 @@ function updateCards(updateProgressBar) {
                 $('#ipad-state-' + i).html('<i class="configure icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('red');
                 $('#ipad-content-' + i + ' .value').html('<i class="configure icon"></i>');
+                $('#ipad-extra-' + i)
+                    .append(
+                        $('<div>')
+                            .addClass('right floated ui simple dropdown')
+                            .html('<i class="red configure icon"></i>维护')
+                            .append(
+                                $('<div>')
+                                    .addClass('menu')
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="wait icon"></i>待机')
+                                    )
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="green plug icon"></i>充电')
+                                    )
+                            )
+                    );
             } else if (data.ipads[i].state == '充电') {
                 $('#ipad-' + i).addClass('green');
                 $('#ipad-state-' + i).html('<i class="plug icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('green');
                 $('#ipad-content-' + i + ' .value').html('<i class="plug icon"></i>');
+                $('#ipad-extra' + i)
+                    .append(
+                        $('<div>')
+                            .addClass('right floated ui simple dropdown')
+                            .html('<i class="green plug icon"></i>充电')
+                            .append(
+                                $('<div>')
+                                    .addClass('menu')
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="wait icon"></i>待机')
+                                    )
+                                    .append(
+                                        $('<a>')
+                                            .addClass('item')
+                                            .attr('href', '')
+                                            .html('<i class="red configure icon"></i>维护')
+                                    )
+                            )
+                    );
             } else if (data.ipads[i].state == '退役') {
                 $('#ipad-' + i).addClass('olive');
                 $('#ipad-state-' + i).html('<i class="recycle icon"></i>' + data.ipads[i].state);
