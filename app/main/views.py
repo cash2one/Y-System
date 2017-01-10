@@ -46,6 +46,7 @@ def profile():
         .filter(AnnouncementType.name == u'用户主页通知')\
         .filter(Announcement.show == True)\
         .filter(Announcement.deleted == False)\
+        .order_by(Announcement.modified_at.desc())\
         .all()
     for announcement in announcements:
         if not current_user.notified_by(announcement=announcement):
