@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, date, time, timedelta
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 import json
 from flask import render_template, redirect, url_for, abort, flash, current_app, make_response, request, jsonify
 from flask_login import login_required, current_user
@@ -20,6 +20,7 @@ from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
 from .forms import NewRoleForm, EditRoleForm
+from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
 from ..models import Permission, Role, User, Gender
 from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
@@ -3340,7 +3341,7 @@ def role():
         return redirect(url_for('manage.role'))
     page = request.args.get('page', 1, type=int)
     query = Role.query
-    pagination = Role.query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     roles = pagination.items
     return render_template('manage/role.html', form=form, roles=roles, pagination=pagination)
 
@@ -3381,6 +3382,137 @@ def delete_role(id):
     db.session.delete(role)
     flash(u'已删除角色：%s' % role.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.role'))
+
+
+@manage.route('/permission', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def permission():
+    form = NewPermissionForm()
+    if form.validate_on_submit():
+        if Permission.query.filter_by(name=form.name.data).first() is not None:
+            flash(u'“%s”权限已存在' % form.name.data, category='error')
+            return redirect(url_for('manage.permission'))
+        permission = Permission(name=form.name.data)
+        db.session.add(permission)
+        flash(u'已添加权限：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.permission'))
+    page = request.args.get('page', 1, type=int)
+    show_booking_permissions = True
+    show_manage_permissions = False
+    show_develop_permissions = False
+    show_other_permissions = False
+    if current_user.is_authenticated:
+        show_booking_permissions = bool(request.cookies.get('show_booking_permissions', '1'))
+        show_manage_permissions = bool(request.cookies.get('show_manage_permissions', ''))
+        show_develop_permissions = bool(request.cookies.get('show_develop_permissions', ''))
+        show_other_permissions = bool(request.cookies.get('show_other_permissions', ''))
+    if show_booking_permissions:
+        query = Permission.query\
+            .filter(Permission.name.like(u'预约%'))\
+            .order_by(Permission.id.asc())
+    if show_manage_permissions:
+        query = Permission.query\
+            .filter(Permission.name.like(u'管理%'))\
+            .order_by(Permission.id.asc())
+    if show_develop_permissions:
+        query = Permission.query\
+            .filter(Permission.name.like(u'开发%'))\
+            .order_by(Permission.id.asc())
+    if show_other_permissions:
+        query = Permission.query\
+            .filter(and_(
+                Permission.name.notlike(u'预约%'),
+                Permission.name.notlike(u'管理%'),
+                Permission.name.notlike(u'开发%'),
+            ))\
+            .order_by(Permission.id.asc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    permissions = pagination.items
+    return render_template('manage/permission.html',
+        form=form,
+        permissions=permissions,
+        show_booking_permissions=show_booking_permissions,
+        show_manage_permissions=show_manage_permissions,
+        show_develop_permissions=show_develop_permissions,
+        show_other_permissions=show_other_permissions,
+        pagination=pagination
+    )
+
+
+@manage.route('/permission/book')
+@login_required
+@developer_required
+def permission_book():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/permission/manage')
+@login_required
+@developer_required
+def permission_manage():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/permission/develop')
+@login_required
+@developer_required
+def permission_develop():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/permission/other')
+@login_required
+@developer_required
+def permission_other():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/permission/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def edit_permission(id):
+    permission = Permission.query.get_or_404(id)
+    form = EditPermissionForm(permission=permission)
+    if form.validate_on_submit():
+        permission.name = form.name.data
+        db.session.add(permission)
+        flash(u'已更新权限：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.permission'))
+    form.name.data = permission.name
+    return render_template('manage/edit_permission.html', form=form, permission=permission)
+
+
+@manage.route('/permission/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def delete_permission(id):
+    permission = Permission.query.get_or_404(id)
+    if permission.roles.count():
+        abort(403)
+    db.session.delete(permission)
+    flash(u'已删除权限：%s' % permission.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.permission'))
 
 
 @manage.route('/analytics')

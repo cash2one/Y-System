@@ -100,16 +100,32 @@ class Role(db.Model):
 
     def permissions_alias(self, prefix=None, formatted=False):
         if prefix is not None:
-            permissions = [role_permission.permission for role_permission in self.permissions if role_permission.permission.name[:len(prefix)] == prefix]
+            permissions = Permission.query\
+                .join(RolePermission, RolePermission.permission_id == Permission.id)\
+                .filter(RolePermission.role_id == self.id)\
+                .filter(Permission.name.like(prefix + '%'))\
+                .order_by(Permission.id.asc())
         else:
-            permissions = [role_permission.permission for role_permission in self.permissions if role_permission.permission.name]
+            permissions = Permission.query\
+                .join(RolePermission, RolePermission.permission_id == Permission.id)\
+                .filter(RolePermission.role_id == self.id)\
+                .order_by(Permission.id.asc())
         if formatted:
-            if len(permissions) == 0:
+            if permissions.count() == 0:
                 return u'无'
-            if len(permissions) == 1:
-                return permissions[0].name
-            return reduce(lambda permission1, permission2: u'%s · %s' % (permission1, permission2), [permission.name for permission in permissions])
+            if permissions.count() == 1:
+                return permissions.first().name
+            return reduce(lambda permission1, permission2: u'%s · %s' % (permission1, permission2), [permission.name for permission in permissions.all()])
         return permissions
+
+    def permissions_num(self, prefix=None):
+        if prefix is not None:
+            return Permission.query\
+                .join(RolePermission, RolePermission.permission_id == Permission.id)\
+                .filter(RolePermission.role_id == self.id)\
+                .filter(Permission.name.like(prefix + '%'))\
+                .count()
+        return len(self.permissions)
 
     @staticmethod
     def insert_roles():

@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}权限管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.table .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="checkmark box icon"></i>权限管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="header">
+                    <i class="checkmark box icon"></i>权限列表
+                    <div id="new-permission-trigger" class="ui right floated positive circular icon button" data-content="新建权限" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                    <div id="new-permission-modal" class="ui modal">
+                        <i class="close icon"></i>
+                        <div class="header"><i class="add circle icon"></i>新建权限</div>
+                        <div class="content">
+                            <form id="new-permission" method="POST" class="ui form">
+                                {{ form.hidden_tag() }}
+                                <div class="required field">
+                                    {{ form.name.label() }}
+                                    {{ form.name(placeholder='权限名称') }}
+                                </div>
+                                {{ form.submit(class='ui primary button') }}
+                            </form>
+                        </div>
+                    </div>
+                </h3>
+                <div class="ui secondary menu">
+                    <a class="item {% if show_booking_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_book') }}">预约权限</a>
+                    <a class="item {% if show_manage_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_manage') }}">管理权限</a>
+                    <a class="item {% if show_develop_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_develop') }}">开发权限</a>
+                    <a class="item {% if show_other_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_other') }}">其它权限</a>
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>权限名称</th>
+                            <th>角色数量</th>
+                            <th>赋予角色</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for permission in permissions %}
+                        <tr{% if permission.roles.count() > 1 %} class="top aligned"{% endif %}>
+                            <td>{{ permission.name }}</td>
+                            <td>{{ permission.roles.count() }}</td>
+                            <td>
+                                {% if permission.roles.count() %}
+                                <div class="ui ordered list">
+                                    {% for role_permission in permission.roles %}<div class="item">{{ role_permission.role.name }} <a href="{{ url_for('manage.edit_role', id=role_permission.role.id, next=url_for('manage.permission', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
+                                </div>
+                                {% else %}
+                                无
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.permission', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    {% if permission.roles.count() %}
+                                    <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
+                                    {% else %}
+                                    <div id="delete-trigger-{{ permission.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                    {% endif %}
+                                </div>
+                                {% if permission.roles.count() == 0 %}
+                                <div id="delete-modal-{{ permission.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除权限“{{ permission.name }}”？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_permission', id=permission.id, next=url_for('manage.permission', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ permission.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}
+                {{ macros.pagination_widget(pagination, 'manage.permission') }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.checkbox').checkbox();
+
+$('table').tablesort();
+
+{% for permission in permissions %}
+{% if permission.roles.count() == 0 %}
+$('#delete-trigger-{{ permission.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ permission.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger-{{ permission.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ permission.id }}').modal('hide');
+    })
+;
+{% endif %}
+{% endfor %}
+
+$('#new-permission-trigger').popup();
+$('#new-permission-trigger')
+    .on('click', function() {
+        $('#new-permission-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$(document)
+    .ready(function() {
+        $('#new-permission')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    name: {
+                        identifier: 'name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入权限名称'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
+{% endblock %}
