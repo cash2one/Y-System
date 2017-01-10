@@ -3133,6 +3133,8 @@ def filter_ipad():
         if len(lesson_ids):
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
             ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
+        else:
+            pass
     return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
 
 
