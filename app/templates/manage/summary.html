@@ -563,23 +563,24 @@ function updateCards(updateProgressBar) {
                             )
                     );
             } else if (data.ipads[i].state == '借出') {
-                $('#ipad-battery-' + i).removeClass('disabled').progress({
-                    percent: data.ipads[i].battery_life.percent,
-                    text: {
-                        active: '剩余电量：{percent}%',
-                        success: '满电量：{percent}%'
-                    }
-                });
-                if (data.ipads[i].battery_life.percent <= 20) {
-                    if (data.ipads[i].battery_life.percent === 0) {
-                        $('#ipad-battery-' + i).removeClass('indicating').addClass('red').progress({
-                            text: { active: '电量已耗尽' }
-                        });
-                    } else {
-                        $('#ipad-battery-' + i).removeClass('indicating').addClass('yellow').progress({
-                            text: { active: '电量低：{percent}%' }
-                        });
-                    };
+                if (data.ipads[i].battery_life.percent === 0) {
+                    $('#ipad-battery-' + i).removeClass('indicating disabled').addClass('red').progress({
+                        percent: data.ipads[i].battery_life.percent,
+                        text: { active: '电量已耗尽' }
+                    });
+                } else if (data.ipads[i].battery_life.percent <= 20) {
+                    $('#ipad-battery-' + i).removeClass('indicating disabled').addClass('yellow').progress({
+                        percent: data.ipads[i].battery_life.percent,
+                        text: { active: '电量低：{percent}%' }
+                    });
+                } else {
+                    $('#ipad-battery-' + i).removeClass('disabled').progress({
+                        percent: data.ipads[i].battery_life.percent,
+                        text: {
+                            active: '剩余电量：{percent}%',
+                            success: '满电量：{percent}%'
+                        }
+                    });
                 };
                 $('#ipad-extra-' + i)
                     .append(

@@ -282,7 +282,7 @@
         {% endblock %}
         {% block sidebar_menu_auth %}
         {% if current_user.is_authenticated %}
-        <div><i class="alarm icon"></i>无未读消息</div>
+        <a class="item loading-trigger" href="#"><i class="alarm icon"></i>无未读消息</a>
         <div class="item">
             <div class="header">账户设置</div>
             <div class="menu">
