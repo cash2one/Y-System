@@ -134,8 +134,8 @@
                                 {{ form.lesson(class='ui dropdown') }}
                             </div>
                             {{ form.submit(class='ui primary button') }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
-                            <a class="loading-trigger" href="{{ url_for('manage.rental_rent_step_2_alt', user_id=user.id) }}">按进度选iPad？</a>
+                            <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
+                            <a class="loading-trigger" href="{{ url_for('manage.rental_rent_step_2_alt', user_id=user.id, next=request.args.get('next')) }}">按进度选iPad？</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>

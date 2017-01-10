@@ -2573,6 +2573,15 @@ class iPad(db.Model):
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
         }
+        if self.state.name == u'待机':
+            ipad_json['charge_url'] = url_for('manage.set_ipad_state_charge', id=self.id, next=url_for('manage.summary'))
+            ipad_json['maintain_url'] = url_for('manage.set_ipad_state_maintain', id=self.id, next=url_for('manage.summary'))
+        if self.state.name == u'充电':
+            ipad_json['standby_url'] = url_for('manage.set_ipad_state_standby', id=self.id, next=url_for('manage.summary'))
+            ipad_json['maintain_url'] = url_for('manage.set_ipad_state_maintain', id=self.id, next=url_for('manage.summary'))
+        if self.state.name == u'维护':
+            ipad_json['standby_url'] = url_for('manage.set_ipad_state_standby', id=self.id, next=url_for('manage.summary'))
+            ipad_json['charge_url'] = url_for('manage.set_ipad_state_charge', id=self.id, next=url_for('manage.summary'))
         if self.state.name == u'借出':
             ipad_json['now_rented_by'] = self.now_rented_by.to_json()
             ipad_json['battery_life'] = {
@@ -2580,6 +2589,8 @@ class iPad(db.Model):
                 'level': self.current_battery_life_level,
             }
             ipad_json['overtime'] = self.current_rental.is_overtime
+            ipad_json['return_url'] = url_for('manage.rental_return_step_1', next=url_for('manage.summary'))
+            ipad_json['exchange_url'] = url_for('manage.rental_exchange_step_1', rental_id=self.current_rental.id, next=url_for('manage.summary'))
         return ipad_json
 
     @staticmethod
