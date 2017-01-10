@@ -1118,6 +1118,7 @@ class User(UserMixin, db.Model):
             .filter(Permission.name == permission_name)\
             .filter(User.created == True)\
             .filter(User.activated == True)\
+            .filter(User.confirmed == True)\
             .filter(User.deleted == False)
 
     @property
