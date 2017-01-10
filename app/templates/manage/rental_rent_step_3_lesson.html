@@ -134,9 +134,9 @@
                                 {{ form.ipad.label() }}
                                 {{ form.ipad(class='ui dropdown') }}
                             </div>
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_2_lesson', user_id=user.id, schedule_id=schedule.id) }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_2_lesson', user_id=user.id, schedule_id=schedule.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
+                            <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>

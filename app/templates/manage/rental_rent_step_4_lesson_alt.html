@@ -146,9 +146,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_3_lesson_alt', user_id=user.id, lesson_id=lesson.id) }}">上一步</a>
+                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_rent_step_3_lesson_alt', user_id=user.id, lesson_id=lesson.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental') }}">取消</a>
+                            <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>
