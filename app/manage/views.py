@@ -20,6 +20,7 @@ from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
 from .forms import NewRoleForm, EditRoleForm
+from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
 from ..models import Permission, Role, User, Gender
 from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
@@ -3340,7 +3341,7 @@ def role():
         return redirect(url_for('manage.role'))
     page = request.args.get('page', 1, type=int)
     query = Role.query
-    pagination = Role.query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     roles = pagination.items
     return render_template('manage/role.html', form=form, roles=roles, pagination=pagination)
 
@@ -3381,6 +3382,53 @@ def delete_role(id):
     db.session.delete(role)
     flash(u'已删除角色：%s' % role.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.role'))
+
+
+@manage.route('/permission', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def permission():
+    form = NewPermissionForm()
+    if form.validate_on_submit():
+        if Permission.query.filter_by(name=form.name.data).first() is not None:
+            flash(u'“%s”权限已存在' % form.name.data, category='error')
+            return redirect(url_for('manage.permission'))
+        permission = Permission(name=form.name.data)
+        db.session.add(permission)
+        flash(u'已添加权限：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.permission'))
+    page = request.args.get('page', 1, type=int)
+    query = Permission.query
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    permissions = pagination.items
+    return render_template('manage/permission.html', form=form, permissions=permissions, pagination=pagination)
+
+
+@manage.route('/permission/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def edit_permission(id):
+    permission = Permission.query.get_or_404(id)
+    form = EditPermissionForm(permission=permission)
+    if form.validate_on_submit():
+        permission.name = form.name.data
+        db.session.add(permission)
+        flash(u'已更新权限：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.permission'))
+    form.name.data = permission.name
+    return render_template('manage/edit_permission.html', form=form, permission=permission)
+
+
+@manage.route('/permission/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@developer_required
+def delete_permission(id):
+    permission = Permission.query.get_or_404(id)
+    if permission.roles.count():
+        abort(403)
+    db.session.delete(permission)
+    flash(u'已删除权限：%s' % permission.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.permission'))
 
 
 @manage.route('/analytics')

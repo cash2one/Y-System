@@ -89,7 +89,7 @@
 {% endblock %}
 
 {% block page_content %}
-<div id="users" class="ui vertical stripe segment">
+<div class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
@@ -142,14 +142,14 @@
                     </thead>
                     <tbody>
                         {% for role in roles %}
-                        <tr{% if role.permissions_alias(formatted=False) %} class="top aligned"{% endif %}>
+                        <tr{% if role.permissions_num(prefix='预约') > 1 or role.permissions_num(prefix='管理') > 1 or role.permissions_num(prefix='开发') > 1 %} class="top aligned"{% endif %}>
                             <td>{{ role.name }}</td>
                             <td>{{ role.users.count() }}</td>
                             <td>
                                 {% with permissions = role.permissions_alias(prefix='预约', formatted=False) %}
-                                {% if permissions %}
+                                {% if permissions.count() %}
                                 <div class="ui ordered list">
-                                    {% for permission in permissions %}<div class="item">{{ permission.name }}</div>{% endfor %}
+                                    {% for permission in permissions %}<div class="item">{{ permission.name }} <a href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
                                 </div>
                                 {% else %}
                                 无
@@ -158,9 +158,9 @@
                             </td>
                             <td>
                                 {% with permissions = role.permissions_alias(prefix='管理', formatted=False) %}
-                                {% if permissions %}
+                                {% if permissions.count() %}
                                 <div class="ui ordered list">
-                                    {% for permission in permissions %}<div class="item">{{ permission.name }}</div>{% endfor %}
+                                    {% for permission in permissions %}<div class="item">{{ permission.name }} <a href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
                                 </div>
                                 {% else %}
                                 无
@@ -169,11 +169,9 @@
                              </td>
                             <td>
                                 {% with permissions = role.permissions_alias(prefix='开发', formatted=False) %}
-                                {% if permissions %}
+                                {% if permissions.count() %}
                                 <div class="ui ordered list">
-                                    {% for permission in permissions %}
-                                    <div class="item">{{ permission.name }}</div>
-                                    {% endfor %}
+                                    {% for permission in permissions %}<div class="item">{{ permission.name }} <a href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
                                 </div>
                                 {% else %}
                                 无
@@ -189,7 +187,7 @@
                                     <div id="delete-trigger-{{ role.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                     {% endif %}
                                 </div>
-                                {% if role.users.count() %}
+                                {% if role.users.count() == 0 %}
                                 <div id="delete-modal-{{ role.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除角色“{{ role.name }}”？</div>
                                     <div class="actions">
