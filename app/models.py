@@ -98,6 +98,19 @@ class Role(db.Model):
     def has_permission(self, permission):
         return self.permissions.filter_by(permission_id=permission.id).first() is not None
 
+    def permissions_alias(self, prefix=None, formatted=False):
+        if prefix is not None:
+            permissions = [role_permission.permission for role_permission in self.permissions if role_permission.permission.name[:len(prefix)] == prefix]
+        else:
+            permissions = [role_permission.permission for role_permission in self.permissions if role_permission.permission.name]
+        if formatted:
+            if len(permissions) == 0:
+                return u'无'
+            if len(permissions) == 1:
+                return permissions[0].name
+            return reduce(lambda permission1, permission2: u'%s · %s' % (permission1, permission2), [permission.name for permission in permissions])
+        return permissions
+
     @staticmethod
     def insert_roles():
         roles = [
@@ -1159,6 +1172,12 @@ class User(UserMixin, db.Model):
             return None
         return User.query.get(data['id'])
 
+    @property
+    def birthdate_alias(self):
+        if self.birthdate:
+            return u'%s年%s月%s日' % (self.birthdate.year, self.birthdate.month, self.birthdate.day)
+        return u'无'
+
     def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
         if gpa and (not isinstance(gpa, float)):
             gpa = float(gpa)
@@ -1828,6 +1847,13 @@ class Product(db.Model):
         self.available = not self.available
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    @property
+    def sales_volume(self):
+        if self.name == u'团报优惠':
+            return GroupRegistration.query.count()
+        else:
+            return sum([purchase.quantity for purchase in self.purchases])
 
     @staticmethod
     def insert_products():

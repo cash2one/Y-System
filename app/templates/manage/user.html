@@ -266,12 +266,7 @@ $('table').tablesort();
 
 $('#create-user-trigger').popup();
 
-$('#create-admin-trigger')
-    .on('click', function() {
-        $('#create-admin-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-
+{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
 {% for user in users %}
 $('#delete-trigger-{{ user.id }}')
     .on('click', function() {
@@ -284,6 +279,14 @@ $('#delete-hide-trigger-{{ user.id }}')
     })
 ;
 {% endfor %}
+{% endif %}
+
+{% if current_user.can('管理权限') %}
+$('#create-admin-trigger')
+    .on('click', function() {
+        $('#create-admin-modal').modal({ autofocus: false }).modal('show');
+    })
+;
 
 var Validator = new IDValidator(GB2260);
 $(document)
@@ -346,5 +349,6 @@ $(document)
         ;
     })
 ;
+{% endif %}
 </script>
 {% endblock %}

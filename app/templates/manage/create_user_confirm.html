@@ -130,7 +130,7 @@
                     <div class="item">
                         <div class="content">
                             <div class="header">生日</div>
-                            <div class="description">{% if user.birthdate %}{{ moment(user.birthdate).format('YYYY年M月D日') }}{% else %}无{% endif %}</div>
+                            <div class="description">{{ user.birthdate_alias }}</div>
                         </div>
                     </div>
                     <div class="item">

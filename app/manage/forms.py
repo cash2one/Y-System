@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Role, User, Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType, Product, TOEFLTestScoreType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Permission, Role, User, Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType, Product, TOEFLTestScoreType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
 
 
 EN_2_CN = {
@@ -449,12 +449,12 @@ class EditStudentRoleForm(FlaskForm):
         self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
 
 
-class EditRoleForm(FlaskForm):
+class EditUserRoleForm(FlaskForm):
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'更新')
 
     def __init__(self, editor, is_self=False, *args, **kwargs):
-        super(EditRoleForm, self).__init__(*args, **kwargs)
+        super(EditUserRoleForm, self).__init__(*args, **kwargs)
         if editor.is_developer:
             self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all()]
         elif editor.is_administrator:
@@ -560,7 +560,7 @@ class NewiPadForm(FlaskForm):
 
     def validate_serial(self, field):
         if iPad.query.filter_by(serial=field.data).first():
-            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
+            raise ValidationError(u'序列号为“%s”的iPad已存在' % field.data)
 
 
 class EditiPadForm(FlaskForm):
@@ -585,7 +585,7 @@ class EditiPadForm(FlaskForm):
 
     def validate_serial(self, field):
         if field.data != self.ipad.serial and iPad.query.filter_by(serial=field.data).first():
-            raise ValidationError(u'序列号为%s的iPad已存在' % field.data)
+            raise ValidationError(u'序列号为“%s”的iPad已存在' % field.data)
 
 
 class FilteriPadForm(FlaskForm):
@@ -635,3 +635,34 @@ class EditProductForm(FlaskForm):
     price = StringField(u'单价', validators=[Required()])
     available = BooleanField(u'显示为可选')
     submit = SubmitField(u'提交')
+
+
+class NewRoleForm(FlaskForm):
+    name = StringField(u'角色名称', validators=[Required(), Length(1, 64)])
+    booking_permissions = SelectMultipleField(u'预约权限', coerce=unicode)
+    manage_permissions = SelectMultipleField(u'管理权限', coerce=unicode)
+    is_developer = BooleanField(u'开发权限')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewRoleForm, self).__init__(*args, **kwargs)
+        self.booking_permissions.choices = [(u'', u'选择预约权限')] + [(unicode(permission.id), permission.name) for permission in Permission.query.order_by(Permission.id.asc()).all() if permission.name[:2] == u'预约']
+        self.manage_permissions.choices = [(u'', u'选择管理权限')] + [(unicode(permission.id), permission.name) for permission in Permission.query.order_by(Permission.id.asc()).all() if permission.name[:2] == u'管理']
+
+
+class EditRoleForm(FlaskForm):
+    name = StringField(u'角色名称', validators=[Required(), Length(1, 64)])
+    booking_permissions = SelectMultipleField(u'预约权限', coerce=unicode)
+    manage_permissions = SelectMultipleField(u'管理权限', coerce=unicode)
+    is_developer = BooleanField(u'开发权限')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, role, *args, **kwargs):
+        super(EditRoleForm, self).__init__(*args, **kwargs)
+        self.booking_permissions.choices = [(u'', u'选择预约权限')] + [(unicode(permission.id), permission.name) for permission in Permission.query.order_by(Permission.id.asc()).all() if permission.name[:2] == u'预约']
+        self.manage_permissions.choices = [(u'', u'选择管理权限')] + [(unicode(permission.id), permission.name) for permission in Permission.query.order_by(Permission.id.asc()).all() if permission.name[:2] == u'管理']
+        self.role = role
+
+    def validate_name(self, field):
+        if field.data != self.role.name and Role.query.filter_by(name=field.data).first():
+            raise ValidationError(u'“%s”角色已存在' % field.data)

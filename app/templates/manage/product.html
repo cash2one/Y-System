@@ -133,7 +133,7 @@
                         <tr>
                             <th>研修产品</th>
                             <th>单价</th>
-                            <th>购买人次</th>
+                            <th>销量</th>
                             <th>可选状态</th>
                             <th>上次操作</th>
                             <th>操作人</th>
@@ -144,8 +144,8 @@
                         {% for product in products %}
                         <tr>
                             <td>{{ product.name }}</td>
-                            <td><i class="fitted yen icon"></i>{{ product.price }}</td>
-                            <td></td>
+                            <td><i class="fitted yen icon"></i> {{ product.price }}</td>
+                            <td>{{ product.sales_volume }}</td>
                             <td{% if product.available %} class="positive"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(product.modified_at).fromNow() }}</div>
