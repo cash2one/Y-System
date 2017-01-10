@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, date, time, timedelta
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 import json
 from flask import render_template, redirect, url_for, abort, flash, current_app, make_response, request, jsonify
 from flask_login import login_required, current_user
@@ -3398,10 +3398,94 @@ def permission():
         flash(u'已添加权限：%s' % form.name.data, category='success')
         return redirect(url_for('manage.permission'))
     page = request.args.get('page', 1, type=int)
-    query = Permission.query
+    show_booking_permissions = True
+    show_manage_permissions = False
+    show_develop_permissions = False
+    show_other_permissions = False
+    if current_user.is_authenticated:
+        show_booking_permissions = bool(request.cookies.get('show_booking_permissions', '1'))
+        show_manage_permissions = bool(request.cookies.get('show_manage_permissions', ''))
+        show_develop_permissions = bool(request.cookies.get('show_develop_permissions', ''))
+        show_other_permissions = bool(request.cookies.get('show_other_permissions', ''))
+    if show_booking_permissions:
+        query = Permission.query\
+            .filter(Permission.name.like(u'预约%'))\
+            .order_by(Permission.id.asc())
+    if show_manage_permissions:
+        query = Permission.query\
+            .filter(Permission.name.like(u'管理%'))\
+            .order_by(Permission.id.asc())
+    if show_develop_permissions:
+        query = Permission.query\
+            .filter(Permission.name.like(u'开发%'))\
+            .order_by(Permission.id.asc())
+    if show_other_permissions:
+        query = Permission.query\
+            .filter(and_(
+                Permission.name.notlike(u'预约%'),
+                Permission.name.notlike(u'管理%'),
+                Permission.name.notlike(u'开发%'),
+            ))\
+            .order_by(Permission.id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     permissions = pagination.items
-    return render_template('manage/permission.html', form=form, permissions=permissions, pagination=pagination)
+    return render_template('manage/permission.html',
+        form=form,
+        permissions=permissions,
+        show_booking_permissions=show_booking_permissions,
+        show_manage_permissions=show_manage_permissions,
+        show_develop_permissions=show_develop_permissions,
+        show_other_permissions=show_other_permissions,
+        pagination=pagination
+    )
+
+
+@manage.route('/permission/book')
+@login_required
+@developer_required
+def permission_book():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/permission/manage')
+@login_required
+@developer_required
+def permission_manage():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/permission/develop')
+@login_required
+@developer_required
+def permission_develop():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/permission/other')
+@login_required
+@developer_required
+def permission_other():
+    resp = make_response(redirect(url_for('manage.permission')))
+    resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_develop_permissions', '', max_age=30*24*60*60)
+    resp.set_cookie('show_other_permissions', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/permission/edit/<int:id>', methods=['GET', 'POST'])

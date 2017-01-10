@@ -100,14 +100,12 @@ class Role(db.Model):
 
     def permissions_alias(self, prefix=None, formatted=False):
         if prefix is not None:
-            # permissions = [role_permission.permission for role_permission in self.permissions if role_permission.permission.name[:len(prefix)] == prefix]
             permissions = Permission.query\
                 .join(RolePermission, RolePermission.permission_id == Permission.id)\
                 .filter(RolePermission.role_id == self.id)\
                 .filter(Permission.name.like(prefix + '%'))\
                 .order_by(Permission.id.asc())
         else:
-            # permissions = [role_permission.permission for role_permission in self.permissions if role_permission.permission.name]
             permissions = Permission.query\
                 .join(RolePermission, RolePermission.permission_id == Permission.id)\
                 .filter(RolePermission.role_id == self.id)\
