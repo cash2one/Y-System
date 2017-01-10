@@ -2686,7 +2686,7 @@ def find_user():
                 .limit(current_app.config['RECORD_PER_QUERY'])
     form.name_or_email.data = name_or_email
     users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
-    return render_template('manage/find_user.html', form=form, users=users, keyword=name_or_email)
+    return render_template('manage/find_user.html', form=form, users=users, users_num=len(users), keyword=name_or_email)
 
 
 @manage.route('/course', methods=['GET', 'POST'])
@@ -3134,8 +3134,8 @@ def filter_ipad():
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
             ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
         else:
-            pass
-    return render_template('manage/filter_ipad.html', form=form, ipads=ipads)
+            ipads = [ipad for ipad in iPad.query.filter_by(deleted=False).all() if ipad.contents.count() == 0]
+    return render_template('manage/filter_ipad.html', form=form, ipads=ipads, ipads_num=len(ipads))
 
 
 @manage.route('/ipad/contents')
