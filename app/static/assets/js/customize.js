@@ -66,3 +66,6 @@ $('.popup-trigger')
         popup: '.popup-content'
     })
 ;
+
+// menu popup
+$('.menu-popup-trigger').popup();
