@@ -1867,6 +1867,10 @@ class Product(db.Model):
         db.session.add(self)
 
     @property
+    def price_alias(self):
+        return u'%g' % self.price
+
+    @property
     def sales_volume(self):
         if self.name == u'团报优惠':
             return GroupRegistration.query.count()
@@ -2702,8 +2706,7 @@ class Lesson(db.Model):
 
     @property
     def hour(self):
-        # return sum([section.hour.total_seconds() for section in self.sections]) / 3600
-        return reduce(lambda td1, td2: td1 + td2, [timedelta(hours=0)] + [section.hour for section in self.sections])
+        return u'%g小时' % (sum([section.hour.total_seconds() for section in self.sections]) / 3600)
 
     @property
     def first_section(self):

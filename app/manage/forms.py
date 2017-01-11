@@ -171,28 +171,6 @@ class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
 
 
-# class NewLessonForm(FlaskForm):
-#     name = StringField(u'课程名称', validators=[Required(), Length(1, 64)])
-#     lesson_type = SelectField(u'课程类型', coerce=unicode, validators=[Required()])
-#     advanced = BooleanField(u'高阶课程')
-#     submit = SubmitField(u'提交')
-
-#     def __init__(self, *args, **kwargs):
-#         super(NewLessonForm, self).__init__(*args, **kwargs)
-#         self.lesson_type.choices = [(u'', u'选择课程类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
-
-
-# class EditLessonForm(FlaskForm):
-#     name = StringField(u'课程名称', validators=[Required(), Length(1, 64)])
-#     lesson_type = SelectField(u'课程类型', coerce=unicode, validators=[Required()])
-#     advanced = BooleanField(u'高阶课程')
-#     submit = SubmitField(u'提交')
-
-#     def __init__(self, *args, **kwargs):
-#         super(EditLessonForm, self).__init__(*args, **kwargs)
-#         self.lesson_type.choices = [(u'', u'选择课程类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
-
-
 class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
@@ -276,7 +254,7 @@ class NewUserForm(FlaskForm):
         self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
-        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
         self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
         self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
@@ -466,7 +444,7 @@ class EditPurchasedProductForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditPurchasedProductForm, self).__init__(*args, **kwargs)
-        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%s元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
 
 class EditStudentRoleForm(FlaskForm):
