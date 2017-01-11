@@ -93,25 +93,23 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">
-                    <i class="checkmark box icon"></i>权限列表
-                    <div id="new-permission-trigger" class="ui right floated positive circular icon button" data-content="新建权限" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
-                    <div id="new-permission-modal" class="ui modal">
-                        <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i>新建权限</div>
-                        <div class="content">
-                            <form id="new-permission" method="POST" class="ui form">
-                                {{ form.hidden_tag() }}
-                                <div class="required field">
-                                    {{ form.name.label() }}
-                                    {{ form.name(placeholder='权限名称') }}
-                                </div>
-                                {{ form.submit(class='ui primary button') }}
-                            </form>
-                        </div>
+                <h3 class="ui header"><i class="checkmark box icon"></i>权限列表</h3>
+                <div id="new-permission-trigger" class="ui right floated positive circular icon button" data-content="新建权限" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-permission-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建权限</div>
+                    <div class="content">
+                        <form id="new-permission" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="required field">
+                                {{ form.name.label() }}
+                                {{ form.name(placeholder='权限名称') }}
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
                     </div>
-                </h3>
-                <div class="ui secondary menu">
+                </div>
+                <div class="ui secondary stackable menu">
                     <a class="item {% if show_booking_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_book') }}">预约权限</a>
                     <a class="item {% if show_manage_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_manage') }}">管理权限</a>
                     <a class="item {% if show_develop_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_develop') }}">开发权限</a>

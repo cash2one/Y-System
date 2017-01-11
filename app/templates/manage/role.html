@@ -93,42 +93,43 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">
-                    <i class="spy icon"></i>角色列表
-                    <div id="new-role-trigger" class="ui right floated positive circular icon button" data-content="新建角色" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
-                    <div id="new-role-modal" class="ui modal">
-                        <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i>新建角色</div>
-                        <div class="content">
-                            <form id="new-role" method="POST" class="ui form">
-                                {{ form.hidden_tag() }}
-                                <div class="required field">
-                                    {{ form.name.label() }}
-                                    {{ form.name(placeholder='角色名称') }}
+                <h3 class="ui header"><i class="spy icon"></i>角色列表</h3>
+                <div id="new-role-trigger" class="ui right floated positive circular icon button" data-content="新建角色" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-role-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建角色</div>
+                    <div class="content">
+                        <form id="new-role" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="required field">
+                                {{ form.name.label() }}
+                                {{ form.name(placeholder='角色名称') }}
+                            </div>
+                            <div class="fields">
+                                <div class="eight wide field">
+                                    {{ form.booking_permissions.label() }}
+                                    {{ form.booking_permissions(class='ui dropdown') }}
                                 </div>
-                                <div class="fields">
-                                    <div class="eight wide field">
-                                        {{ form.booking_permissions.label() }}
-                                        {{ form.booking_permissions(class='ui dropdown') }}
-                                    </div>
-                                    <div class="eight wide field">
-                                        {{ form.manage_permissions.label() }}
-                                        {{ form.manage_permissions(class='ui dropdown') }}
-                                    </div>
+                                <div class="eight wide field">
+                                    {{ form.manage_permissions.label() }}
+                                    {{ form.manage_permissions(class='ui dropdown') }}
                                 </div>
-                                <div class="ui segment">
-                                    <div class="inline field">
-                                        <div class="ui toggle checkbox">
-                                            {{ form.is_developer() }}
-                                            {{ form.is_developer.label() }}
-                                        </div>
+                            </div>
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.is_developer() }}
+                                        {{ form.is_developer.label() }}
                                     </div>
                                 </div>
-                                {{ form.submit(class='ui primary button') }}
-                            </form>
-                        </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
                     </div>
-                </h3>
+                </div>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.role', page=pagination.page) }}">全部</a>
+                </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>

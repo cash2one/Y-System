@@ -1,5 +1,5 @@
 {% macro pagination_widget(pagination, endpoint, fragment='') %}
-<div class="ui secondary mini menu">
+<div class="ui mini secondary stackable menu">
     {% if not pagination.has_prev %}
     <div class="disabled item"><i class="chevron left icon"></i></div>
     {% else %}

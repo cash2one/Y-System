@@ -90,52 +90,53 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">
-                    <i class="tasks icon"></i>时段模板
-                    <div class="ui right floated positive circular pointing dropdown icon button">
-                        <i class="add icon"></i>
-                        <div class="menu">
-                            <div id="new-period-trigger" class="item"><i class="green add circle icon"></i>新建时段模板</div>
-                            <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i>管理时段信息</a>
-                        </div>
+                <h3 class="ui header"><i class="tasks icon"></i>时段模板列表</h3>
+                <div class="ui right floated positive circular pointing dropdown icon button">
+                    <i class="add icon"></i>
+                    <div class="menu">
+                        <div id="new-period-trigger" class="item"><i class="green add circle icon"></i>新建时段模板</div>
+                        <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i>管理时段信息</a>
                     </div>
-                    <div id="new-period-modal" class="ui modal">
-                        <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i>新建时段模板</div>
-                        <div class="content">
-                            <form id="new-period" method="POST" class="ui form">
-                                {{ form.hidden_tag() }}
-                                <div class="fields">
-                                    <div class="four wide required field">
-                                        {{ form.name.label() }}
-                                        {{ form.name(placeholder='时段名称') }}
-                                    </div>
-                                    <div class="four wide required field">
-                                        {{ form.start_time.label() }}
-                                        {{ form.start_time(class='ui dropdown') }}
-                                    </div>
-                                    <div class="four wide required field">
-                                        {{ form.end_time.label() }}
-                                        {{ form.end_time(class='ui dropdown') }}
-                                    </div>
-                                    <div class="four wide required field">
-                                        {{ form.period_type.label() }}
-                                        {{ form.period_type(class='ui dropdown') }}
+                </div>
+                <div id="new-period-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建时段模板</div>
+                    <div class="content">
+                        <form id="new-period" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="four wide required field">
+                                    {{ form.name.label() }}
+                                    {{ form.name(placeholder='时段名称') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ form.start_time.label() }}
+                                    {{ form.start_time(class='ui dropdown') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ form.end_time.label() }}
+                                    {{ form.end_time(class='ui dropdown') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ form.period_type.label() }}
+                                    {{ form.period_type(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.show() }}
+                                        {{ form.show.label() }}
                                     </div>
                                 </div>
-                                <div class="ui segment">
-                                    <div class="inline field">
-                                        <div class="ui toggle checkbox">
-                                            {{ form.show() }}
-                                            {{ form.show.label() }}
-                                        </div>
-                                    </div>
-                                </div>
-                                {{ form.submit(class='ui primary button') }}
-                            </form>
-                        </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
                     </div>
-                </h3>
+                </div>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.period', page=pagination.page) }}">全部</a>
+                </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>

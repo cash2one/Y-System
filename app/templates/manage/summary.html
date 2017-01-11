@@ -284,6 +284,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="tablet icon"></i>iPad状态</h3>
+                <a id="rental-rent-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.summary')) }}" data-content="借出iPad" data-position="top center" data-variation="inverted"><i class="upload icon"></i></a>
                 <div class="ui secondary menu">
                     <a class="item {% if show_summary_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}#ipads">1103</a>
                     <a class="item {% if show_summary_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1707_ipads') }}#ipads">1707</a>
@@ -361,6 +362,8 @@ $('.message .close')
         ;
     })
 ;
+
+$('#rental-rent-trigger').popup();
 
 // progress bar
 $('#page-loading-progress').progress({
@@ -544,7 +547,7 @@ function updateCards(updateProgressBar) {
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="grey wait icon"></i>待机')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
@@ -563,29 +566,30 @@ function updateCards(updateProgressBar) {
                             )
                     );
             } else if (data.ipads[i].state == '借出') {
-                $('#ipad-battery-' + i).removeClass('disabled').progress({
-                    percent: data.ipads[i].battery_life.percent,
-                    text: {
-                        active: '剩余电量：{percent}%',
-                        success: '满电量：{percent}%'
-                    }
-                });
-                if (data.ipads[i].battery_life.percent <= 20) {
-                    if (data.ipads[i].battery_life.percent === 0) {
-                        $('#ipad-battery-' + i).removeClass('indicating').addClass('red').progress({
-                            text: { active: '电量已耗尽' }
-                        });
-                    } else {
-                        $('#ipad-battery-' + i).removeClass('indicating').addClass('yellow').progress({
-                            text: { active: '电量低：{percent}%' }
-                        });
-                    };
+                if (data.ipads[i].battery_life.percent === 0) {
+                    $('#ipad-battery-' + i).removeClass('indicating disabled').addClass('red').progress({
+                        percent: data.ipads[i].battery_life.percent,
+                        text: { active: '电量已耗尽' }
+                    });
+                } else if (data.ipads[i].battery_life.percent <= 20) {
+                    $('#ipad-battery-' + i).removeClass('indicating disabled').addClass('yellow').progress({
+                        percent: data.ipads[i].battery_life.percent,
+                        text: { active: '电量低：{percent}%' }
+                    });
+                } else {
+                    $('#ipad-battery-' + i).removeClass('disabled').progress({
+                        percent: data.ipads[i].battery_life.percent,
+                        text: {
+                            active: '剩余电量：{percent}%',
+                            success: '满电量：{percent}%'
+                        }
+                    });
                 };
                 $('#ipad-extra-' + i)
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="upload icon"></i>借出')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
@@ -610,7 +614,12 @@ function updateCards(updateProgressBar) {
                         $('<a>')
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
+                            .attr('data-content', '查看' + data.ipads[i].now_rented_by.name + '的档案')
+                            .attr('data-position', 'top center')
+                            .attr('data-variation', 'inverted')
                             .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                            .popup('destroy')
+                            .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('blue');
                     $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
@@ -623,6 +632,12 @@ function updateCards(updateProgressBar) {
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
                             .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                            .attr('data-content', '查看' + data.ipads[i].now_rented_by.name + '的档案')
+                            .attr('data-position', 'top center')
+                            .attr('data-variation', 'inverted')
+                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                            .popup('destroy')
+                            .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('teal');
                     $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
@@ -648,7 +663,7 @@ function updateCards(updateProgressBar) {
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="red configure icon"></i>维护')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
@@ -675,7 +690,7 @@ function updateCards(updateProgressBar) {
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="green plug icon"></i>充电')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')

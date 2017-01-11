@@ -93,41 +93,42 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">
-                    <i class="yen icon"></i>产品列表
-                    <div id="new-product-trigger" class="ui right floated positive circular icon button" data-content="新建产品" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
-                    <div id="new-product-modal" class="ui modal">
-                        <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i>新建产品</div>
-                        <div class="content">
-                            <form id="new-product" method="POST" class="ui form">
-                                {{ form.hidden_tag() }}
-                                <div class="fields">
-                                    <div class="eight wide required field">
-                                        {{ form.name.label() }}
-                                        {{ form.name(placeholder='研修产品名称') }}
-                                    </div>
-                                    <div class="eight wide required field">
-                                        {{ form.price.label() }}
-                                        <div class="ui left labeled input">
-                                            <div class="ui basic label"><i class="yen icon"></i></div>
-                                            {{ form.price(placeholder='0') }}
-                                        </div>
+                <h3 class="ui header"><i class="yen icon"></i>产品列表</h3>
+                <div id="new-product-trigger" class="ui right floated positive circular icon button" data-content="新建产品" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-product-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建产品</div>
+                    <div class="content">
+                        <form id="new-product" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ form.name.label() }}
+                                    {{ form.name(placeholder='研修产品名称') }}
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ form.price.label() }}
+                                    <div class="ui left labeled input">
+                                        <div class="ui basic label"><i class="yen icon"></i></div>
+                                        {{ form.price(placeholder='0') }}
                                     </div>
                                 </div>
-                                <div class="ui segment">
-                                    <div class="inline field">
-                                        <div class="ui toggle checkbox">
-                                            {{ form.available() }}
-                                            {{ form.available.label() }}
-                                        </div>
+                            </div>
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.available() }}
+                                        {{ form.available.label() }}
                                     </div>
                                 </div>
-                                {{ form.submit(class='ui primary button') }}
-                            </form>
-                        </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
                     </div>
-                </h3>
+                </div>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.product', page=pagination.page) }}">全部</a>
+                </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
