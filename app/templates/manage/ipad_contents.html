@@ -97,32 +97,11 @@
                     <thead>
                         <tr>
                             <th><i class="tablet icon"></i></th>
-                            <th>VB总论</th>
-                            <th>L1</th>
-                            <th>L2</th>
-                            <th>L3</th>
-                            <th>L4</th>
-                            <th>L5</th>
-                            <th>L6</th>
-                            <th>L7</th>
-                            <th>L8</th>
-                            <th>L9</th>
-                            <th>Y-GRE总论</th>
-                            <th>1st</th>
-                            <th>2nd</th>
-                            <th>3rd</th>
-                            <th>4th</th>
-                            <th>5th</th>
-                            <th>6th</th>
-                            <th>7th</th>
-                            <th>8th</th>
-                            <th>9th</th>
-                            <th>Test</th>
-                            <th>AW总论</th>
+                            {% for lesson in ipad_contents.lessons %}<th>{{ lesson }}</th>{% endfor %}
                         </tr>
                     </thead>
                     <tbody>
-                        {% for ipad in ipad_contents %}
+                        {% for ipad in ipad_contents.contents %}
                         <tr>
                             <td>{{ ipad['alias'] }}</td>
                             {% for lesson in ipad['lessons'] %}

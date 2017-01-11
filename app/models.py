@@ -2409,7 +2409,10 @@ class iPadContentJSON(db.Model):
             u'Test',
             u'AW总论',
         ]
-        json_string = unicode(json.dumps([{'alias': ipad.alias, 'lessons': [{'name': lesson.name, 'exist': ipad.has_lesson(lesson=Lesson.query.filter_by(name=lesson).first())} for lesson in critical_lessons]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()]))
+        json_string = unicode(json.dumps({
+            'lessons': critical_lessons,
+            'contents': [{'alias': ipad.alias, 'lessons': [{'name': lesson, 'exist': ipad.has_lesson(lesson=Lesson.query.filter_by(name=lesson).first())} for lesson in critical_lessons]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()],
+        }))
         ipad_content_json = iPadContentJSON.query.get(1)
         if ipad_content_json is not None:
             ipad_content_json.json_string = json_string
