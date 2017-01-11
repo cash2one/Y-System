@@ -145,11 +145,7 @@
                             <td>{% if course.valid_registrations.count() %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=course.id, next=url_for('manage.course', page=pagination.page)) }}">{{ course.name }}</a>{% else %}{{ course.name }}{% endif %}</td>
                             <td>{{ course.type.name }}</td>
                             <td>{{ course.valid_registrations.count() }}</td>
-                            {% if course.show %}
-                            <td class="positive">可选</td>
-                            {% else %}
-                            <td>不可选</td>
-                            {% endif %}
+                            {% if course.show %}<td class="positive">可选</td>{% else %}<td>不可选</td>{% endif %}
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(course.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(course.modified_at).format('YYYY-M-D H:mm:ss') }}</div>

@@ -171,6 +171,28 @@ class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
 
 
+# class NewLessonForm(FlaskForm):
+#     name = StringField(u'课程名称', validators=[Required(), Length(1, 64)])
+#     lesson_type = SelectField(u'课程类型', coerce=unicode, validators=[Required()])
+#     advanced = BooleanField(u'高阶课程')
+#     submit = SubmitField(u'提交')
+
+#     def __init__(self, *args, **kwargs):
+#         super(NewLessonForm, self).__init__(*args, **kwargs)
+#         self.lesson_type.choices = [(u'', u'选择课程类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+# class EditLessonForm(FlaskForm):
+#     name = StringField(u'课程名称', validators=[Required(), Length(1, 64)])
+#     lesson_type = SelectField(u'课程类型', coerce=unicode, validators=[Required()])
+#     advanced = BooleanField(u'高阶课程')
+#     submit = SubmitField(u'提交')
+
+#     def __init__(self, *args, **kwargs):
+#         super(EditLessonForm, self).__init__(*args, **kwargs)
+#         self.lesson_type.choices = [(u'', u'选择课程类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
 class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
