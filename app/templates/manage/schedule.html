@@ -93,47 +93,45 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="header">
-                    <i class="clock icon"></i>时段信息
-                    <div class="ui right floated positive circular pointing dropdown icon button">
-                        <i class="add icon"></i>
-                        <div class="menu">
-                            <div id="new-schedule-trigger" class="item"><i class="green add circle icon"></i>新建预约时段</div>
-                            <a class="item loading-trigger" href="{{ url_for('manage.period') }}"><i class="tasks icon"></i>管理时段模板</a>
-                        </div>
+                <h3 class="ui header"><i class="clock icon"></i>时段信息</h3>
+                <div class="ui right floated positive circular pointing dropdown icon button">
+                    <i class="add icon"></i>
+                    <div class="menu">
+                        <div id="new-schedule-trigger" class="item"><i class="green add circle icon"></i>新建预约时段</div>
+                        <a class="item loading-trigger" href="{{ url_for('manage.period') }}"><i class="tasks icon"></i>管理时段模板</a>
                     </div>
-                    <div id="new-schedule-modal" class="ui modal">
-                        <i class="close icon"></i>
-                        <div class="header"><i class="add circle icon"></i>新建预约时段</div>
-                        <div class="content">
-                            <form id="new-schedule" method="POST" class="ui form">
-                                {{ form.hidden_tag() }}
-                                <div class="fields">
-                                    <div class="four wide required field">
-                                        {{ form.date.label() }}
-                                        {{ form.date(class='ui dropdown') }}
-                                    </div>
-                                    <div class="ten wide required field">
-                                        {{ form.period.label() }}
-                                        {{ form.period(class='ui dropdown') }}
-                                    </div>
-                                    <div class="two wide required field">
-                                        {{ form.quota.label() }}
-                                        {{ form.quota(placeholder='0') }}
-                                    </div>
+                </div>
+                <div id="new-schedule-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建预约时段</div>
+                    <div class="content">
+                        <form id="new-schedule" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="four wide required field">
+                                    {{ form.date.label() }}
+                                    {{ form.date(class='ui dropdown') }}
                                 </div>
-                                <div class="inline field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.publish_now() }}
-                                        {{ form.publish_now.label() }}
-                                    </div>
+                                <div class="ten wide required field">
+                                    {{ form.period.label() }}
+                                    {{ form.period(class='ui dropdown') }}
                                 </div>
-                                {{ form.submit(class='ui primary button') }}
-                            </form>
-                        </div>
+                                <div class="two wide required field">
+                                    {{ form.quota.label() }}
+                                    {{ form.quota(placeholder='0') }}
+                                </div>
+                            </div>
+                            <div class="inline field">
+                                <div class="ui toggle checkbox">
+                                    {{ form.publish_now() }}
+                                    {{ form.publish_now.label() }}
+                                </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
                     </div>
-                </h3>
-                <div class="ui secondary menu">
+                </div>
+                <div class="ui secondary stackable menu">
                     <a class="item {% if show_today_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
                     <a class="item {% if show_future_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
                     <a class="item {% if show_history_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
