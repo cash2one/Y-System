@@ -305,8 +305,8 @@
                             <div class="header">{{ announcement.title }}</div>
                             {% if current_user.can('管理通知') %}
                             <div class="right floated">
-                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('manage.summary')) }}" data-content="撤回" data-position="top center" data-variation="inverted"><i class="undo icon"></i></a>
-                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('manage.summary')) }}" data-content="编辑" data-position="top center" data-variation="inverted"><i class="edit icon"></i></a>
+                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('main.profile', page=pagination.page)) }}" data-content="撤回" data-position="top center" data-variation="inverted"><i class="undo icon"></i></a>
+                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('main.profile', page=pagination.page)) }}" data-content="编辑" data-position="top center" data-variation="inverted"><i class="edit icon"></i></a>
                                 {% endif %}
                             </div>
                             <div class="meta"><i class="send outline icon"></i>{{ moment(announcement.modified_at).fromNow() }}</div>
