@@ -194,7 +194,7 @@
                             <td><div class="ui disabled mini button"><i class="setting icon"></i>操作</div></td>
                             {% else %}
                             {% if schedule.available %}
-                            <td class="positive">已发布</td>
+                            <td class="active">已发布</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(schedule.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>

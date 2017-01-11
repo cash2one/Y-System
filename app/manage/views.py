@@ -7,9 +7,9 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
+from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
+from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
-from .forms import EditPunchLessonForm, EditPunchSectionForm
-from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm, PunchLessonForm, PunchSectionForm, ConfirmPunchForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
@@ -29,8 +29,8 @@ from ..models import Booking, BookingState
 from ..models import Rental
 from ..models import Punch
 from ..models import Period, Schedule
-from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Lesson, Section
+from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product
 from ..email import send_email
@@ -1453,6 +1453,124 @@ def decrease_schedule_quota(id):
     schedule.decrease_quota(modified_by=current_user._get_current_object())
     flash(u'所选时段名额-1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
+
+
+@manage.route('/lesson', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理课程')
+def lesson():
+    page = request.args.get('page', 1, type=int)
+    show_vb_lessons = True
+    show_y_gre_lessons = False
+    if current_user.is_authenticated:
+        show_vb_lessons = bool(request.cookies.get('show_vb_lessons', '1'))
+        show_y_gre_lessons = bool(request.cookies.get('show_y_gre_lessons', ''))
+    if show_vb_lessons:
+        query = Lesson.query\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .order_by(Lesson.id.asc())
+    if show_y_gre_lessons:
+        query = Lesson.query\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .order_by(Lesson.id.asc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    lessons = pagination.items
+    return render_template('manage/lesson.html',
+        lessons=lessons,
+        show_vb_lessons=show_vb_lessons,
+        show_y_gre_lessons=show_y_gre_lessons,
+        pagination=pagination
+    )
+
+
+@manage.route('/lesson/vb')
+@login_required
+@permission_required(u'管理课程')
+def vb_lessons():
+    resp = make_response(redirect(url_for('manage.lesson')))
+    resp.set_cookie('show_vb_lessons', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_lessons', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/lesson/y-gre')
+@login_required
+@permission_required(u'管理课程')
+def y_gre_lessons():
+    resp = make_response(redirect(url_for('manage.lesson')))
+    resp.set_cookie('show_vb_lessons', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_lessons', '1', max_age=30*24*60*60)
+    return resp
+
+
+# @manage.route('/course/<int:id>')
+# @login_required
+# @permission_required(u'管理')
+# def course_users(id):
+#     course = Course.query.get_or_404(id)
+#     if course.deleted:
+#         abort(404)
+#     page = request.args.get('page', 1, type=int)
+#     query = User.query\
+#         .join(CourseRegistration, CourseRegistration.user_id == User.id)\
+#         .join(Course, Course.id == CourseRegistration.course_id)\
+#         .filter(User.created == True)\
+#         .filter(User.deleted == False)
+#     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+#     users = pagination.items
+#     return render_template('manage/course_users.html', course=course, users=users, pagination=pagination)
+
+
+# @manage.route('/course/toggle-show/<int:id>')
+# @login_required
+# @permission_required(u'管理班级')
+# def toggle_course_show(id):
+#     course = Course.query.get_or_404(id)
+#     if course.deleted:
+#         abort(404)
+#     course.toggle_show(modified_by=current_user._get_current_object())
+#     if course.show:
+#         flash(u'班级：%s的可选状态改为：可选' % course.name, category='success')
+#     else:
+#         flash(u'班级：%s的可选状态改为：不可选' % course.name, category='success')
+#     return redirect(request.args.get('next') or url_for('manage.course'))
+
+
+# @manage.route('/course/edit/<int:id>', methods=['GET', 'POST'])
+# @login_required
+# @permission_required(u'管理班级')
+# def edit_course(id):
+#     course = Course.query.get_or_404(id)
+#     if course.deleted:
+#         abort(404)
+#     form = EditCourseForm()
+#     if form.validate_on_submit():
+#         course.name = form.name.data
+#         course.type_id = int(form.course_type.data)
+#         course.show = form.show.data
+#         course.modified_at = datetime.utcnow()
+#         course.modified_by_id = current_user.id
+#         db.session.add(course)
+#         flash(u'已更新班级：%s' % form.name.data, category='success')
+#         return redirect(request.args.get('next') or url_for('manage.course'))
+#     form.name.data = course.name
+#     form.course_type.data = unicode(course.type_id)
+#     form.show.data = course.show
+#     return render_template('manage/edit_course.html', form=form, course=course)
+
+
+# @manage.route('/course/delete/<int:id>', methods=['GET', 'POST'])
+# @login_required
+# @permission_required(u'管理班级')
+# def delete_course(id):
+#     course = Course.query.get_or_404(id)
+#     if course.deleted:
+#         abort(404)
+#     course.safe_delete(modified_by=current_user._get_current_object())
+#     flash(u'已删除班级：%s' % course.name, category='success')
+#     return redirect(request.args.get('next') or url_for('manage.course'))
 
 
 @manage.route('/user', methods=['GET', 'POST'])

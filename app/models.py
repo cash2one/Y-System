@@ -1867,6 +1867,10 @@ class Product(db.Model):
         db.session.add(self)
 
     @property
+    def price_alias(self):
+        return u'%g' % self.price
+
+    @property
     def sales_volume(self):
         if self.name == u'团报优惠':
             return GroupRegistration.query.count()
@@ -2701,16 +2705,28 @@ class Lesson(db.Model):
         return abbreviations[self.name]
 
     @property
+    def hour(self):
+        return u'%g 小时' % (sum([section.hour.total_seconds() for section in self.sections]) / 3600)
+
+    @property
     def first_section(self):
         return self.sections\
             .order_by(Section.id.asc())\
             .first()
 
     @property
+    def occupied_ipads_alias(self):
+        return iPadContent.query\
+            .join(iPad, iPad.id == iPadContent.ipad_id)\
+            .filter(iPadContent.lesson_id == self.id)\
+            .filter(iPad.deleted == False)
+
+    @property
     def available_ipads(self):
         return iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
             .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .filter(iPad.deleted == False)\
             .filter(iPadState.name != u'退役')\
             .filter(iPadContent.lesson_id == self.id)
 
@@ -2786,6 +2802,12 @@ class Section(db.Model):
     @property
     def alias3(self):
         return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
+
+    @property
+    def abbr(self):
+        if self.name[:3] == u'Day':
+            return u'0.%s%s' % (self.name[4], self.name[6])
+        return self.name
 
     @staticmethod
     def insert_sections():

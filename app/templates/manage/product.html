@@ -145,9 +145,9 @@
                         {% for product in products %}
                         <tr>
                             <td>{{ product.name }}</td>
-                            <td><i class="fitted yen icon"></i> {{ product.price }}</td>
+                            <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
                             <td>{{ product.sales_volume }}</td>
-                            <td{% if product.available %} class="positive"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
+                            <td{% if product.available %} class="active"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(product.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(product.modified_at).format('YYYY-M-D H:mm:ss') }}</div>

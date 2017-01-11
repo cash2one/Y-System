@@ -107,8 +107,8 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                 </form>
+                <h3 class="ui header">{% if ipads_num %}<i class="filter icon"></i>筛选得到{{ ipads_num }}个iPad{% else %}<i class="ban icon"></i>无筛选结果{% endif %}</h3>
                 {% if ipads_num %}
-                <h3 class="ui header"><i class="filter icon"></i>筛选得到{{ ipads_num }}个iPad</h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -134,28 +134,8 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>
-                                {% with lessons = ipad.has_vb_lessons %}
-                                {% if lessons.count() %}
-                                {% for lesson in lessons %}
-                                <div class="ui blue circular label">{{ lesson.abbr }}</div>
-                                {% endfor %}
-                                {% else %}
-                                无
-                                {% endif %}
-                                {% endwith %}
-                            </td>
-                            <td>
-                                {% with lessons = ipad.has_y_gre_lessons %}
-                                {% if lessons.count() %}
-                                {% for lesson in lessons %}
-                                <div class="ui teal circular label">{{ lesson.abbr }}</div>
-                                {% endfor %}
-                                {% else %}
-                                无
-                                {% endif %}
-                                {% endwith %}
-                            </td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<div class="ui blue circular label">{{ lesson.abbr }}</div>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<div class="ui teal circular label">{{ lesson.abbr }}</div>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
                             <td>{{ ipad.room.name }}</td>
                             <td>
                                 {% if ipad.state.name == '借出' %}
@@ -230,8 +210,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% else %}
-                <h3 class="ui header"><i class="ban icon"></i>无筛选结果</h3>
                 {% endif %}
             </div>
         </div>

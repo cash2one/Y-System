@@ -146,11 +146,7 @@
                             <td>{{ announcement.title }}</td>
                             <td>{{ announcement.body_html | safe }}</td>
                             <td class="single line">{{ announcement.type.name }}</td>
-                            {% if announcement.show %}
-                            <td class="positive">发布中</td>
-                            {% else %}
-                            <td>未发布</td>
-                            {% endif %}
+                            {% if announcement.show %}<td class="active">发布中</td>{% else %}<td>未发布</td>{% endif %}
                             <td class="single line">
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(announcement.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(announcement.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
