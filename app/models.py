@@ -2706,7 +2706,7 @@ class Lesson(db.Model):
 
     @property
     def hour(self):
-        return u'%g小时' % (sum([section.hour.total_seconds() for section in self.sections]) / 3600)
+        return u'%g 小时' % (sum([section.hour.total_seconds() for section in self.sections]) / 3600)
 
     @property
     def first_section(self):
