@@ -547,7 +547,7 @@ function updateCards(updateProgressBar) {
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="grey wait icon"></i>待机')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
@@ -589,7 +589,7 @@ function updateCards(updateProgressBar) {
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="upload icon"></i>借出')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
@@ -614,7 +614,12 @@ function updateCards(updateProgressBar) {
                         $('<a>')
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
+                            .attr('data-content', '查看' + data.ipads[i].now_rented_by.name + '的档案')
+                            .attr('data-position', 'top center')
+                            .attr('data-variation', 'inverted')
                             .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                            .popup('destroy')
+                            .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('blue');
                     $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
@@ -627,6 +632,12 @@ function updateCards(updateProgressBar) {
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
                             .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                            .attr('data-content', '查看' + data.ipads[i].now_rented_by.name + '的档案')
+                            .attr('data-position', 'top center')
+                            .attr('data-variation', 'inverted')
+                            .html('<i class="user icon"></i>' + data.ipads[i].now_rented_by.name)
+                            .popup('destroy')
+                            .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('teal');
                     $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
@@ -652,7 +663,7 @@ function updateCards(updateProgressBar) {
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="red configure icon"></i>维护')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
@@ -679,7 +690,7 @@ function updateCards(updateProgressBar) {
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
-                            .html('<i class="green plug icon"></i>充电')
+                            .html('操作<i class="dropdown icon"></i>')
                             .append(
                                 $('<div>')
                                     .addClass('menu')
