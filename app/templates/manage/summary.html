@@ -551,15 +551,21 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].maintain_url)
                                             .html('<i class="red configure icon"></i>维护')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].charge_url)
                                             .html('<i class="green plug icon"></i>充电')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                             )
                     );
@@ -593,15 +599,21 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].return_url)
                                             .html('<i class="green download icon"></i>回收')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].exchange_url)
                                             .html('<i class="orange retweet icon"></i>调换')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                             )
                     );
@@ -667,15 +679,21 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].standby_url)
                                             .html('<i class="grey wait icon"></i>待机')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].charge_url)
                                             .html('<i class="green plug icon"></i>充电')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                             )
                     );
@@ -694,15 +712,21 @@ function updateCards(updateProgressBar) {
                                     .addClass('menu')
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].standby_url)
                                             .html('<i class="grey wait icon"></i>待机')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                                     .append(
                                         $('<a>')
-                                            .addClass('item loading-trigger')
+                                            .addClass('item')
                                             .attr('href', data.ipads[i].maintain_url)
                                             .html('<i class="red configure icon"></i>维护')
+                                            .on('click', function () {
+                                                $('#loading-dimmer').dimmer('show');
+                                            })
                                     )
                             )
                     );
