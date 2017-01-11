@@ -554,14 +554,14 @@ function updateCards(updateProgressBar) {
                                     .append(
                                         $('<a>')
                                             .addClass('item loading-trigger')
-                                            .attr('href', data.ipads[i].charge_url)
-                                            .html('<i class="green plug icon"></i>充电')
+                                            .attr('href', data.ipads[i].maintain_url)
+                                            .html('<i class="red configure icon"></i>维护')
                                     )
                                     .append(
                                         $('<a>')
                                             .addClass('item loading-trigger')
-                                            .attr('href', data.ipads[i].maintain_url)
-                                            .html('<i class="red configure icon"></i>维护')
+                                            .attr('href', data.ipads[i].charge_url)
+                                            .html('<i class="green plug icon"></i>充电')
                                     )
                             )
                     );
