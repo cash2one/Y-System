@@ -10,6 +10,7 @@ from . import manage
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
 from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
+from .forms import EditSectionHourForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
@@ -1455,7 +1456,7 @@ def decrease_schedule_quota(id):
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
-@manage.route('/lesson', methods=['GET', 'POST'])
+@manage.route('/lesson')
 @login_required
 @permission_required(u'管理课程')
 def lesson():
@@ -1505,72 +1506,22 @@ def y_gre_lessons():
     return resp
 
 
-# @manage.route('/course/<int:id>')
-# @login_required
-# @permission_required(u'管理')
-# def course_users(id):
-#     course = Course.query.get_or_404(id)
-#     if course.deleted:
-#         abort(404)
-#     page = request.args.get('page', 1, type=int)
-#     query = User.query\
-#         .join(CourseRegistration, CourseRegistration.user_id == User.id)\
-#         .join(Course, Course.id == CourseRegistration.course_id)\
-#         .filter(User.created == True)\
-#         .filter(User.deleted == False)
-#     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-#     users = pagination.items
-#     return render_template('manage/course_users.html', course=course, users=users, pagination=pagination)
-
-
-# @manage.route('/course/toggle-show/<int:id>')
-# @login_required
-# @permission_required(u'管理班级')
-# def toggle_course_show(id):
-#     course = Course.query.get_or_404(id)
-#     if course.deleted:
-#         abort(404)
-#     course.toggle_show(modified_by=current_user._get_current_object())
-#     if course.show:
-#         flash(u'班级：%s的可选状态改为：可选' % course.name, category='success')
-#     else:
-#         flash(u'班级：%s的可选状态改为：不可选' % course.name, category='success')
-#     return redirect(request.args.get('next') or url_for('manage.course'))
-
-
-# @manage.route('/course/edit/<int:id>', methods=['GET', 'POST'])
-# @login_required
-# @permission_required(u'管理班级')
-# def edit_course(id):
-#     course = Course.query.get_or_404(id)
-#     if course.deleted:
-#         abort(404)
-#     form = EditCourseForm()
-#     if form.validate_on_submit():
-#         course.name = form.name.data
-#         course.type_id = int(form.course_type.data)
-#         course.show = form.show.data
-#         course.modified_at = datetime.utcnow()
-#         course.modified_by_id = current_user.id
-#         db.session.add(course)
-#         flash(u'已更新班级：%s' % form.name.data, category='success')
-#         return redirect(request.args.get('next') or url_for('manage.course'))
-#     form.name.data = course.name
-#     form.course_type.data = unicode(course.type_id)
-#     form.show.data = course.show
-#     return render_template('manage/edit_course.html', form=form, course=course)
-
-
-# @manage.route('/course/delete/<int:id>', methods=['GET', 'POST'])
-# @login_required
-# @permission_required(u'管理班级')
-# def delete_course(id):
-#     course = Course.query.get_or_404(id)
-#     if course.deleted:
-#         abort(404)
-#     course.safe_delete(modified_by=current_user._get_current_object())
-#     flash(u'已删除班级：%s' % course.name, category='success')
-#     return redirect(request.args.get('next') or url_for('manage.course'))
+@manage.route('/section/hour/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理课程')
+def edit_section_hour(id):
+    section = Section.query.get_or_404(id)
+    form = EditSectionHourForm()
+    if form.validate_on_submit():
+        if float(form.hour.data) < 0:
+            flash(u'输入的学习时间有误：%s' % form.hour.data, category='error')
+            return redirect(url_for('manage.edit_section_hour', id=section.id))
+        section.hour = timedelta(hours=float(form.hour.data))
+        db.session.add(section)
+        flash(u'已更新“%s”的学习时间为：%s小时' % (section.name, form.hour.data), category='success')
+        return redirect(request.args.get('next') or url_for('manage.lesson'))
+    form.hour.data = u'%g' % (section.hour.total_seconds() / 3600)
+    return render_template('manage/edit_section_hour.html', form=form, section=section)
 
 
 @manage.route('/user', methods=['GET', 'POST'])

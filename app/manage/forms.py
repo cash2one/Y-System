@@ -171,6 +171,11 @@ class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
 
 
+class EditSectionHourForm(FlaskForm):
+    hour = StringField('学习时间', validators=[Required()])
+    submit = SubmitField(u'提交')
+
+
 class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
