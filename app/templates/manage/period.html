@@ -157,11 +157,7 @@
                             <td>{{ moment(period.start_time_utc).format('H:mm') }}</td>
                             <td>{{ moment(period.end_time_utc).format('H:mm') }}</td>
                             <td>{{ period.type.name }}</td>
-                            {% if period.show %}
-                            <td class="positive">可选</td>
-                            {% else %}
-                            <td>不可选</td>
-                            {% endif %}
+                            {% if period.show %}<td class="active">可选</td>{% else %}<td>不可选</td>{% endif %}
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(period.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(period.modified_at).format('YYYY-M-D H:mm:ss') }}</div>

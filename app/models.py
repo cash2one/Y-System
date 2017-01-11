@@ -2701,16 +2701,29 @@ class Lesson(db.Model):
         return abbreviations[self.name]
 
     @property
+    def hour(self):
+        # return sum([section.hour.total_seconds() for section in self.sections]) / 3600
+        return reduce(lambda td1, td2: td1 + td2, [timedelta(hours=0)] + [section.hour for section in self.sections])
+
+    @property
     def first_section(self):
         return self.sections\
             .order_by(Section.id.asc())\
             .first()
 
     @property
+    def occupied_ipads_alias(self):
+        return iPadContent.query\
+            .join(iPad, iPad.id == iPadContent.ipad_id)\
+            .filter(iPadContent.lesson_id == self.id)\
+            .filter(iPad.deleted == False)
+
+    @property
     def available_ipads(self):
         return iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
             .join(iPadContent, iPadContent.ipad_id == iPad.id)\
+            .filter(iPad.deleted == False)\
             .filter(iPadState.name != u'退役')\
             .filter(iPadContent.lesson_id == self.id)
 
@@ -2786,6 +2799,12 @@ class Section(db.Model):
     @property
     def alias3(self):
         return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
+
+    @property
+    def abbr(self):
+        if self.name[:3] == u'Day':
+            return u'0.%s%s' % (self.name[4], self.name[6])
+        return self.name
 
     @staticmethod
     def insert_sections():

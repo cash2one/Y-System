@@ -134,28 +134,8 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>
-                                {% with lessons = ipad.has_vb_lessons %}
-                                {% if lessons.count() %}
-                                {% for lesson in lessons %}
-                                <div class="ui blue circular label">{{ lesson.abbr }}</div>
-                                {% endfor %}
-                                {% else %}
-                                无
-                                {% endif %}
-                                {% endwith %}
-                            </td>
-                            <td>
-                                {% with lessons = ipad.has_y_gre_lessons %}
-                                {% if lessons.count() %}
-                                {% for lesson in lessons %}
-                                <div class="ui teal circular label">{{ lesson.abbr }}</div>
-                                {% endfor %}
-                                {% else %}
-                                无
-                                {% endif %}
-                                {% endwith %}
-                            </td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<div class="ui blue circular label">{{ lesson.abbr }}</div>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<div class="ui teal circular label">{{ lesson.abbr }}</div>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
                             <td>{{ ipad.room.name }}</td>
                             <td>
                                 {% if ipad.state.name == '借出' %}

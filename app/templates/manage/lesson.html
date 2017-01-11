@@ -103,6 +103,8 @@
                         <tr>
                             <th>课程名称</th>
                             <th>课程类型</th>
+                            <th>视频内容</th>
+                            <th>内容时长</th>
                             <th>占用iPad</th>
                             <th>阶段分级</th>
                         </tr>
@@ -111,9 +113,11 @@
                         {% for lesson in lessons %}
                         <tr>
                             <td>{{ lesson.name }}</td>
-                            <td>{{ lesson.type.name }}课程</td>
-                            <td>{{ lesson.occupied_ipads.count() }}台</td>
-                            {% if lesson.advanced %}<td class="warning">高阶</td>{% else %}<td>普通</td>{% endif %}
+                            <td>{{ lesson.type.name }}</td>
+                            <td>{% for section in lesson.sections %}<a class="ui {% if show_vb_lessons %}blue {% else %}teal {% endif%}circular label">{{ section.abbr }}</a>{% endfor %}</td>
+                            <td>{{ lesson.hour }}</td>
+                            <td><a class="loading-trigger" href="#">{{ lesson.occupied_ipads_alias.count() }}台</a></td>
+                            {% if lesson.advanced %}<td class="active">高阶</td>{% else %}<td>普通</td>{% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

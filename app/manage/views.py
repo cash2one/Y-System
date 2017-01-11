@@ -1470,16 +1470,15 @@ def lesson():
         query = Lesson.query\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'VB')\
-            .order_by(Lesson.id.desc())
+            .order_by(Lesson.id.asc())
     if show_y_gre_lessons:
         query = Lesson.query\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
-            .order_by(Lesson.id.desc())
+            .order_by(Lesson.id.asc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     lessons = pagination.items
     return render_template('manage/lesson.html',
-        form=form,
         lessons=lessons,
         show_vb_lessons=show_vb_lessons,
         show_y_gre_lessons=show_y_gre_lessons,
