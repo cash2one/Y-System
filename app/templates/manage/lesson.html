@@ -116,7 +116,7 @@
                             <td>{{ lesson.type.name }}</td>
                             <td>{% for section in lesson.sections %}<a class="ui {% if show_vb_lessons %}blue {% else %}teal {% endif%}circular label">{{ section.abbr }}</a>{% endfor %}</td>
                             <td>{{ lesson.hour }}</td>
-                            <td><a class="loading-trigger ipad" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="查看含有“{{ lesson.name }}”的iPad", data-position="top center" data-variation="inverted">{{ lesson.occupied_ipads_alias.count() }}台</a></td>
+                            <td><a class="ipad loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="查看含有“{{ lesson.name }}”的iPad", data-position="top center" data-variation="inverted">{{ lesson.occupied_ipads_alias.count() }}台</a></td>
                             {% if lesson.advanced %}<td class="active">高阶</td>{% else %}<td>普通</td>{% endif %}
                         </tr>
                         {% endfor %}
