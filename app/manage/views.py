@@ -2780,6 +2780,10 @@ def restore_user(id):
 def find_user():
     users = []
     name_or_email = request.args.get('keyword')
+    form = FindUserForm()
+    if form.validate_on_submit():
+        name_or_email = form.name_or_email.data
+        return redirect(url_for('manage.find_user', keyword=name_or_email))
     if name_or_email:
         users = User.query\
             .filter(User.created == True)\
@@ -2790,19 +2794,6 @@ def find_user():
             ))\
             .order_by(User.last_seen_at.desc())\
             .limit(current_app.config['RECORD_PER_QUERY'])
-    form = FindUserForm()
-    if form.validate_on_submit():
-        name_or_email = form.name_or_email.data
-        if name_or_email:
-            users = User.query\
-                .filter(User.created == True)\
-                .filter(User.deleted == False)\
-                .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
-                ))\
-                .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
     form.name_or_email.data = name_or_email
     users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
     return render_template('manage/find_user.html', form=form, users=users, users_num=len(users), keyword=name_or_email)
@@ -3246,15 +3237,26 @@ def delete_ipad(id):
 @permission_required(u'管理')
 def filter_ipad():
     ipads = []
+    vb_lesson_ids = []
+    y_gre_lesson_ids = []
+    lesson_keyword = request.args.get('keyword')
+    if lesson_keyword:
+        vb_lesson_ids = [unicode(lesson_id) for lesson_id in request.args.get('keyword').split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'VB']
+        y_gre_lesson_ids = [unicode(lesson_id) for lesson_id in request.args.get('keyword').split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'Y-GRE']
+    lesson_ids = vb_lesson_ids + y_gre_lesson_ids
     form = FilteriPadForm()
     if form.validate_on_submit():
         lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
-        if len(lesson_ids):
-            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
-            ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if not ipad.deleted]
-        else:
-            ipads = [ipad for ipad in iPad.query.filter_by(deleted=False).all() if ipad.contents.count() == 0]
-    return render_template('manage/filter_ipad.html', form=form, ipads=ipads, ipads_num=len(ipads))
+        lesson_keyword = u'_'.join(lesson_ids)
+        return redirect(url_for('manage.filter_ipad', keyword=lesson_keyword))
+    if len(lesson_ids):
+        ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
+        ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if ipad is not None and not ipad.deleted]
+    else:
+        ipads = [ipad for ipad in iPad.query.filter_by(deleted=False).all() if ipad.contents.count() == 0]
+    form.vb_lessons.data = vb_lesson_ids
+    form.y_gre_lessons.data = y_gre_lesson_ids
+    return render_template('manage/filter_ipad.html', form=form, ipads=ipads, ipads_num=len(ipads), keyword=lesson_keyword)
 
 
 @manage.route('/ipad/contents')

@@ -116,7 +116,7 @@ class Role(db.Model):
                 return u'无'
             if permissions.count() == 1:
                 return permissions.first().name
-            return reduce(lambda permission1, permission2: u'%s · %s' % (permission1, permission2), [permission.name for permission in permissions.all()])
+            return u' · '.join([permission.name for permission in permissions.all()])
         return permissions
 
     def permissions_num(self, prefix=None):
@@ -1259,12 +1259,7 @@ class User(UserMixin, db.Model):
     def purposes_alias(self):
         if self.purposes.count() == 0:
             return u'无'
-        if self.purposes.count() == 1:
-            if self.purposes.first().type.name == u'其它':
-                return self.purposes.first().remark
-            else:
-                return self.purposes.first().type.name
-        return reduce(lambda purpose1, purpose2: u'%s · %s' % (purpose1, purpose2), [purpose.type.name for purpose in self.purposes if purpose.type.name != u'其它'] + [purpose.remark for purpose in self.purposes if purpose.type.name == u'其它'])
+        return u' · '.join([purpose.type.name for purpose in self.purposes if purpose.type.name != u'其它'] + [purpose.remark for purpose in self.purposes if purpose.type.name == u'其它'])
 
     def add_referrer(self, referrer_type, remark=None):
         if not self.has_referrer(referrer_type):
@@ -1287,12 +1282,7 @@ class User(UserMixin, db.Model):
     def referrers_alias(self):
         if self.referrers.count() == 0:
             return u'无'
-        if self.referrers.count() == 1:
-            if self.referrers.first().type.name == u'其它':
-                return self.referrers.first().remark
-            else:
-                return self.referrers.first().type.name
-        return reduce(lambda referrer1, referrer2: u'%s · %s' % (referrer1, referrer2), [referrer.type.name for referrer in self.referrers if referrer.type.name != u'其它'] + [referrer.remark for referrer in self.referrers if referrer.type.name == u'其它'])
+        return u' · '.join([referrer.type.name for referrer in self.referrers if referrer.type.name != u'其它'] + [referrer.remark for referrer in self.referrers if referrer.type.name == u'其它'])
 
     def add_purchase(self, product, quantity=1):
         purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
@@ -1302,9 +1292,7 @@ class User(UserMixin, db.Model):
     def purchases_alias(self):
         if self.purchases.count() == 0:
             return u'无'
-        if self.purchases.count() == 1:
-            return u'%s ×%s' % (self.purchases.first().product.name, self.purchases.first().quantity)
-        return reduce(lambda purchase1, purchase2: u'%s · %s' % (purchase1, purchase2), [u'%s[%s元]×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
+        return u' · '.join([u'%s[%g元]×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
 
     @property
     def purchases_total(self):
@@ -1331,9 +1319,7 @@ class User(UserMixin, db.Model):
     def inviters(self):
         if self.accepted_invitations.count() == 0:
             return u'无'
-        if self.accepted_invitations.count() == 1:
-            return u'%s（%s）[%s]' % (self.accepted_invitations.first().inviter.name, self.accepted_invitations.first().inviter.email, self.accepted_invitations.first().type.name)
-        return reduce(lambda inviter1, inviter2: u'%s · %s' % (inviter1, inviter2), [u'%s（%s）[%s]' % (invitation.inviter.name, invitation.inviter.email, invitation.type.name) for invitation in self.accepted_invitations])
+        return u' · '.join([u'%s（%s）[%s]' % (invitation.inviter.name, invitation.inviter.email, invitation.type.name) for invitation in self.accepted_invitations])
 
     def receive_user(self, user):
         if not self.received_user(user):
@@ -3135,7 +3121,7 @@ class Announcement(db.Model):
     def on_changed_body_html(target, value, oldvalue, initiator):
         newline_tags = ['p', 'li']
         soup = BeautifulSoup(value, 'html.parser')
-        target.body = reduce(lambda paragraph1, paragraph2: paragraph1 + '\n\n' + paragraph2, [child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1))==1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2))==1, newline_tags))] if child.get_text()])
+        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
 
     def __repr__(self):
         return '<Announcement %r>' % self.title
