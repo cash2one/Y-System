@@ -179,8 +179,8 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<div class="ui blue circular label">{{ lesson.abbr }}</div>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
-                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<div class="ui teal circular label">{{ lesson.abbr }}</div>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
                             <td>
                                 {% if ipad.state.name == '借出' %}
                                 <div class="ui orange mini button" style="cursor: not-allowed;">
@@ -276,6 +276,8 @@ $('.message .close')
 ;
 
 $('table').tablesort();
+
+$('td .ui.circular.label').popup();
 
 {% if current_user.can('管理iPad设备') %}
 {% for ipad in ipads %}

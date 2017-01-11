@@ -186,21 +186,15 @@
                     <div class="item">
                         <div class="content">
                             <div class="header">{{ announcement.title }}</div>
-                            <div class="meta"><i class="send outline icon"></i>{{ moment(announcement.modified_at).fromNow() }}</div>
-                            <div class="description">{{ announcement.body_html | safe }}</div>
-                            <div class="extra">
-                                发布人：{{ announcement.modified_by.name }}
-                                {% if current_user.can('管理通知') %}
-                                <div class="ui right floated mini icon buttons">
-                                    {% if announcement.show %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('book.y_gre', page=pagination.page)) }}" title="撤回"><i class="undo icon"></i></a>
-                                    {% else %}
-                                    <a class="ui primary button loading-trigger" href="{{ url_for('manage.publish_announcement', id=announcement.id, next=url_for('book.y_gre', page=pagination.page)) }}" title="发布"><i class="send icon"></i></a>
-                                    {% endif %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                </div>
+                            {% if current_user.can('管理通知') %}
+                            <div class="right floated">
+                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('book.y_gre', page=pagination.page)) }}" data-content="撤回" data-position="top center" data-variation="inverted"><i class="undo icon"></i></a>
+                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('book.y_gre', page=pagination.page)) }}" data-content="编辑" data-position="top center" data-variation="inverted"><i class="edit icon"></i></a>
                                 {% endif %}
                             </div>
+                            <div class="meta"><i class="send outline icon"></i>{{ moment(announcement.modified_at).fromNow() }}</div>
+                            <div class="description">{{ announcement.body_html | safe }}</div>
+                            <div class="extra">发布人：{{ announcement.modified_by.name }}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -226,6 +220,10 @@ $('.message .close')
 ;
 
 $('table').tablesort();
+
+{% if announcements and current_user.can('管理通知') %}
+$('.right.floated .ui.circular.icon.button').popup();
+{% endif %}
 
 {% for schedule in schedules %}
 {% if current_user.booking_success(schedule) %}
