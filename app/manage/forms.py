@@ -5,7 +5,14 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
-from ..models import Permission, Role, User, Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType, Product, TOEFLTestScoreType, Period, iPad, iPadCapacity, iPadState, Room, Lesson, Section, Course, CourseType, Announcement, AnnouncementType
+from ..models import Permission, Role, User
+from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType, TOEFLTestScoreType
+from ..models import Period
+from ..models import Lesson, Section
+from ..models import iPad, iPadCapacity, iPadState, Room
+from ..models import Course, CourseType
+from ..models import Announcement, AnnouncementType
+from ..models import Product
 
 
 EN_2_CN = {

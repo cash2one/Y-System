@@ -117,6 +117,9 @@
                     {% if current_user.can('管理预约时段') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i>时段管理</a>
                     {% endif %}
+                    {% if current_user.can('管理课程') %}
+                    <a class="item loading-trigger" href="#"><i class="book icon"></i>课程管理</a>
+                    {% endif %}
                     {% if current_user.can('管理作业') %}
                     <a class="item loading-trigger" href="#"><i class="file text outline icon"></i>作业管理</a>
                     {% endif %}
@@ -233,6 +236,9 @@
                 {% if current_user.can('管理预约时段') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i>时段管理</a>
                 {% endif %}
+                {% if current_user.can('管理课程') %}
+                <a class="item loading-trigger" href="#"><i class="book icon"></i>课程管理</a>
+                {% endif %}
                 {% if current_user.can('管理作业') %}
                 <a class="item loading-trigger" href="#"><i class="file text outline icon"></i>作业管理</a>
                 {% endif %}
@@ -347,6 +353,9 @@
                             {% endif %}
                             {% if current_user.can('管理预约时段') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i>时段管理</a>
+                            {% endif %}
+                            {% if current_user.can('管理课程') %}
+                            <a class="item loading-trigger" href="#"><i class="book icon"></i>课程管理</a>
                             {% endif %}
                             {% if current_user.can('管理作业') %}
                             <a class="item loading-trigger" href="#"><i class="file text outline icon"></i>作业管理</a>
