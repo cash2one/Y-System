@@ -86,3 +86,6 @@ Thumbs.db
 
 # Initial data files
 *initial-*.xlsx
+
+# Analytics
+_analytics.html
