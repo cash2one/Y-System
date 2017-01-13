@@ -216,9 +216,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.schedule') }}
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.schedule') }}{% endif %}
             </div>
         </div>
     </div>

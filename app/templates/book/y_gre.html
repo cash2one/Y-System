@@ -167,9 +167,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'book.y_gre') }}
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'book.y_gre') }}{% endif %}
             </div>
         </div>
     </div>

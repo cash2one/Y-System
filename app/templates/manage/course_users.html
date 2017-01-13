@@ -174,12 +174,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.course_users', id=course.id, next=request.args.get('next')) }}
-                {% endif %}
-                {% if request.args.get('next') %}
-                <a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.course_users', id=course.id, next=request.args.get('next')) }}{% endif %}
+                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
             </div>
         </div>
     </div>

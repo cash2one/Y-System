@@ -122,9 +122,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.lesson') }}
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.lesson') }}{% endif %}
             </div>
         </div>
     </div>
