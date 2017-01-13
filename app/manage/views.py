@@ -2890,7 +2890,7 @@ def group():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.organizer_email.data, created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'团报成员邮箱不存在：%s' % form.organizer_email.data, category='error')
+            flash(u'团报发起人邮箱不存在：%s' % form.organizer_email.data, category='error')
             return redirect(url_for('manage.group'))
         if user.organized_groups.count():
             flash(u'%s（%s）已经发起过团报' % (user.name, user.email), category='error')
@@ -2926,10 +2926,38 @@ def delete_group(id):
     return redirect(request.args.get('next') or url_for('manage.group'))
 
 
+@manage.route('/group/add/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理团报')
+def add_group_member(id):
+    organizer = User.query.get_or_404(id)
+    if not organizer.created or organizer.deleted:
+        abort(404)
+    form = NewGroupMemberForm()
+    if form.validate_on_submit():
+        member = User.query.filter_by(email=form.member_email.data, created=True, activated=True, deleted=False).first()
+        if member is None:
+            flash(u'团报成员邮箱不存在：%s' % form.member_email.data, category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
+        if member.organized_groups.count():
+            flash(u'%s（%s）已经发起过团报' % (member.name, member.email), category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
+        if member.registered_groups.count():
+            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (member.name, member.email, member.registered_groups.first().organizer.name, member.registered_groups.first().organizer.email), category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
+        if member.is_registering_group(organizer=organizer):
+            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='error')
+            return redirect(request.args.get('next') or url_for('manage.add_group_member', id=organizer.id))
+        member.register_group(organizer=organizer)
+        flash(u'%s（%s）已成功加入%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='success')
+        return redirect(request.args.get('next') or url_for('manage.group'))
+    return render_template('manage/add_group_member.html', form=form, organizer=organizer)
+
+
 @manage.route('/group/remove/<int:organizer_id>/<int:member_id>')
 @login_required
 @permission_required(u'管理团报')
-def group_remove_member(organizer_id, member_id):
+def remove_group_member(organizer_id, member_id):
     organizer = User.query.get_or_404(organizer_id)
     if not organizer.created or organizer.deleted:
         abort(404)
