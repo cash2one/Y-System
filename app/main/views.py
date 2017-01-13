@@ -64,11 +64,11 @@ def profile():
     return render_template('profile.html', user=current_user, punches=punches, bookings=bookings, pagination=pagination, announcements=announcements)
 
 
-@main.route('/profile/<int:user_id>')
+@main.route('/profile/<int:id>')
 @login_required
 @permission_required(u'管理')
-def profile_user(user_id):
-    user = User.query.get_or_404(user_id)
+def profile_user(id):
+    user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
     page = request.args.get('page', 1, type=int)

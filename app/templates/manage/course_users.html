@@ -119,14 +119,8 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>
-                                <a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank">{{ user.name }}</a>
-                                {% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
-                            </td>
-                            <td>
-                                {{ user.email }}
-                                <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
-                            </td>
+                            <td>{{ macros.user_url(user) }}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}</td>
+                            <td>{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i></td>
                             <td>{{ user.role.name }}</td>
                             <td>{% if course.type.name == 'VB' %}{{ course.name }}{% else %}{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=request.args.get('next')) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
                             <td>{% if course.type.name == 'Y-GRE' %}{{ course.name }}{% else %}{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=request.args.get('next')) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
@@ -174,12 +168,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.course_users', id=course.id, next=request.args.get('next')) }}
-                {% endif %}
-                {% if request.args.get('next') %}
-                <a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.course_users', id=course.id, next=request.args.get('next')) }}{% endif %}
+                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
             </div>
         </div>
     </div>

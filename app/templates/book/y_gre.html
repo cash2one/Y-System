@@ -130,7 +130,7 @@
                                     <img class="ui small image" src="{{ qrcode(current_user.booking(schedule).booking_code) }}">
                                 </div>
                             </td>
-                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.unbook_y_gre', schedule_id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a></td>
+                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.unbook_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a></td>
                             {% else %}
                             <td class="warning">{{ current_user.booking_state(schedule).name }}</td>
                             <td><div class="ui disabled mini button"><i class="ban icon"></i>无</div></td>
@@ -138,17 +138,17 @@
                             {% else %}
                             {% if schedule.full %}
                             <td>未预约</td>
-                            <td><a class="ui teal mini button loading-trigger" href="{{ url_for('book.wait_y_gre', schedule_id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="wait icon"></i>排队</a></td>
+                            <td><a class="ui teal mini button loading-trigger" href="{{ url_for('book.wait_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="wait icon"></i>排队</a></td>
                             {% else %}
                             <td>未预约</td>
-                            <td><a class="ui primary mini button loading-trigger" href="{{ url_for('book.book_y_gre', schedule_id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="add to calendar icon"></i>预约</a></td>
+                            <td><a class="ui primary mini button loading-trigger" href="{{ url_for('book.book_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="add to calendar icon"></i>预约</a></td>
                             {% endif %}
                             {% endif %}
                             {% endif %}
                             {% if schedule.started %}
                             {% if schedule.is_booked_by(current_user) %}
                             <td>{{ current_user.booking_state(schedule).name }}</td>
-                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.miss_y_gre', schedule_id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a></td>
+                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.miss_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a></td>
                             {% else %}
                             <td>未预约</td>
                             <td><div class="ui disabled mini button"><i class="ban icon"></i>无</div></td>
@@ -167,9 +167,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'book.y_gre') }}
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'book.y_gre') }}{% endif %}
             </div>
         </div>
     </div>

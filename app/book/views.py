@@ -48,11 +48,11 @@ def vb():
     return render_template('book/vb.html', schedules=schedules, pagination=pagination, announcements=announcements)
 
 
-@book.route('/vb/book/<int:schedule_id>')
+@book.route('/vb/book/<int:id>')
 @login_required
 @permission_required(u'预约VB课程')
-def book_vb(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def book_vb(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.vb'))
@@ -76,7 +76,7 @@ def book_vb(schedule_id):
         flash(u'您当天已经预约过VB课程，不要太贪心哦~', category='warning')
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'预约')
-    booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
+    booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！', category='success')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
@@ -87,11 +87,11 @@ def book_vb(schedule_id):
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
-@book.route('/vb/wait/<int:schedule_id>')
+@book.route('/vb/wait/<int:id>')
 @login_required
 @permission_required(u'预约VB课程')
-def wait_vb(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def wait_vb(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.vb'))
@@ -119,11 +119,11 @@ def wait_vb(schedule_id):
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
-@book.route('/vb/unbook/<int:schedule_id>')
+@book.route('/vb/unbook/<int:id>')
 @login_required
 @permission_required(u'预约VB课程')
-def unbook_vb(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def unbook_vb(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.vb'))
@@ -135,7 +135,7 @@ def unbook_vb(schedule_id):
         return redirect(request.args.get('next') or url_for('book.vb'))
     candidate = current_user.unbook(schedule)
     if candidate:
-        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
+        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule.id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
@@ -146,11 +146,11 @@ def unbook_vb(schedule_id):
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
-@book.route('/vb/miss/<int:schedule_id>')
+@book.route('/vb/miss/<int:id>')
 @login_required
 @permission_required(u'预约VB课程')
-def miss_vb(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def miss_vb(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.vb'))
@@ -194,11 +194,11 @@ def y_gre():
     return render_template('book/y_gre.html', schedules=schedules, pagination=pagination, announcements=announcements)
 
 
-@book.route('/y-gre/book/<int:schedule_id>')
+@book.route('/y-gre/book/<int:id>')
 @login_required
 @permission_required(u'预约Y-GRE课程')
-def book_y_gre(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def book_y_gre(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
@@ -219,7 +219,7 @@ def book_y_gre(schedule_id):
         flash(u'您当天已经预约过Y-GRE课程，不要太贪心哦~' % same_day_bookings, category='warning')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'预约')
-    booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule_id).first()
+    booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！', category='success')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
@@ -230,11 +230,11 @@ def book_y_gre(schedule_id):
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
-@book.route('/y-gre/wait/<int:schedule_id>')
+@book.route('/y-gre/wait/<int:id>')
 @login_required
 @permission_required(u'预约Y-GRE课程')
-def wait_y_gre(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def wait_y_gre(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
@@ -259,11 +259,11 @@ def wait_y_gre(schedule_id):
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
-@book.route('/y-gre/unbook/<int:schedule_id>')
+@book.route('/y-gre/unbook/<int:id>')
 @login_required
 @permission_required(u'预约Y-GRE课程')
-def unbook_y_gre(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def unbook_y_gre(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
@@ -275,7 +275,7 @@ def unbook_y_gre(schedule_id):
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     candidate = current_user.unbook(schedule)
     if candidate:
-        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
+        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule.id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
@@ -286,11 +286,11 @@ def unbook_y_gre(schedule_id):
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
-@book.route('/y_gre/miss/<int:schedule_id>')
+@book.route('/y_gre/miss/<int:id>')
 @login_required
 @permission_required(u'预约Y-GRE课程')
-def miss_y_gre(schedule_id):
-    schedule = Schedule.query.get_or_404(schedule_id)
+def miss_y_gre(id):
+    schedule = Schedule.query.get_or_404(id)
     if not schedule.available:
         flash(u'所选时段尚未开放', category='error')
         return redirect(request.args.get('next') or url_for('book.y_gre'))

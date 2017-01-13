@@ -17,6 +17,7 @@ from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUser
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm
+from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
@@ -26,6 +27,7 @@ from .. import db
 from ..models import Permission, Role, User, Gender
 from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
+from ..models import GroupRegistration
 from ..models import Booking, BookingState
 from ..models import Rental
 from ..models import Punch
@@ -2024,8 +2026,10 @@ def create_user():
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
         if form.inviter_email.data:
             inviter = User.query.filter_by(email=form.inviter_email.data, created=True, activated=True, deleted=False).first()
-            if inviter is not None:
-                inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
+            if inviter is None:
+                flash(u'推荐人邮箱不存在：%s' % form.inviter_email.data, category='error')
+                return redirect(url_for('manage.create_user', id=user.id, next=request.args.get('next')))
+            inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         if int(form.vb_course.data):
             user.register_course(course=Course.query.get(int(form.vb_course.data)))
         if int(form.y_gre_course.data):
@@ -2297,8 +2301,9 @@ def create_user_confirm(id):
         user.deformity = confirm_user_form.deformity.data
         db.session.add(user)
         receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data, created=True, activated=True, deleted=False).first()
-        if receptionist is not None:
-            receptionist.receive_user(user=user)
+        if receptionist is None:
+            flash(u'接待人邮箱不存在：%s' % confirm_user_form.receptionist_email.data, category='error')
+        receptionist.receive_user(user=user)
         current_user.create_user(user=user)
         flash(u'成功添加%s：%s' % (user.role.name, user.name), category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
@@ -2875,6 +2880,99 @@ def delete_course(id):
     course.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除班级：%s' % course.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.course'))
+
+
+@manage.route('/group', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理团报')
+def group():
+    form = NewGroupForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.organizer_email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'团报发起人邮箱不存在：%s' % form.organizer_email.data, category='error')
+            return redirect(url_for('manage.group'))
+        if user.organized_groups.count():
+            flash(u'%s（%s）已经发起过团报' % (user.name, user.email), category='error')
+            return redirect(url_for('manage.group'))
+        if user.registered_groups.count():
+            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (user.name, user.email, user.registered_groups.first().organizer.name, user.registered_groups.first().organizer.email), category='error')
+            return redirect(url_for('manage.group'))
+        user.register_group(organizer=user)
+        flash(u'%s（%s）已成功发起团报' % (user.name, user.email), category='success')
+        return redirect(url_for('manage.group'))
+    page = request.args.get('page', 1, type=int)
+    query = GroupRegistration.query\
+        .filter(GroupRegistration.organizer_id == GroupRegistration.member_id)\
+        .order_by(GroupRegistration.timestamp.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    groups = pagination.items
+    return render_template('manage/group.html', form=form, groups=groups, pagination=pagination)
+
+
+@manage.route('/group/delete/<int:id>')
+@login_required
+@permission_required(u'管理团报')
+def delete_group(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    if user.organized_groups.count() == 0:
+        flash(u'%s（%s）未曾发起过团报' % (user.name, user.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.group'))
+    for group_registration in user.organized_groups:
+        group_registration.member.unregister_group(organizer=user)
+    flash(u'已删除%s（%s）发起的团报' % (user.name, user.email), category='success')
+    return redirect(request.args.get('next') or url_for('manage.group'))
+
+
+@manage.route('/group/add/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理团报')
+def add_group_member(id):
+    organizer = User.query.get_or_404(id)
+    if not organizer.created or organizer.deleted:
+        abort(404)
+    form = NewGroupMemberForm(organizer=organizer)
+    if form.validate_on_submit():
+        member = User.query.filter_by(email=form.member_email.data, created=True, activated=True, deleted=False).first()
+        if member is None:
+            flash(u'团报成员邮箱不存在：%s' % form.member_email.data, category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
+        if member.organized_groups.count():
+            flash(u'%s（%s）已经发起过团报' % (member.name, member.email), category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
+        if member.registered_groups.count():
+            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (member.name, member.email, member.registered_groups.first().organizer.name, member.registered_groups.first().organizer.email), category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
+        if member.is_registering_group(organizer=organizer):
+            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='error')
+            return redirect(request.args.get('next') or url_for('manage.add_group_member', id=organizer.id))
+        if organizer.organized_groups.count() > 5:
+            flash(u'%s（%s）发起的团报人数已达到上限（5人）', category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
+        member.register_group(organizer=organizer)
+        flash(u'%s（%s）已成功加入%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='success')
+        return redirect(request.args.get('next') or url_for('manage.group'))
+    return render_template('manage/add_group_member.html', form=form, organizer=organizer)
+
+
+@manage.route('/group/remove/<int:organizer_id>/<int:member_id>')
+@login_required
+@permission_required(u'管理团报')
+def remove_group_member(organizer_id, member_id):
+    organizer = User.query.get_or_404(organizer_id)
+    if not organizer.created or organizer.deleted:
+        abort(404)
+    member = User.query.get_or_404(member_id)
+    if not member.created or member.deleted:
+        abort(404)
+    if not member.is_registering_group(organizer=organizer):
+        flash(u'%s（%s）未曾参加过%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.group'))
+    member.unregister_group(organizer=organizer)
+    flash(u'已删除%s（%s）发起的团报成员：%s（%s）' % (organizer.name, organizer.email, member.name, member.email), category='success')
+    return redirect(request.args.get('next') or url_for('manage.group'))
 
 
 @manage.route('/ipad', methods=['GET', 'POST'])

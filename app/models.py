@@ -51,6 +51,7 @@ class Permission(db.Model):
             (u'管理作业', ),
             (u'管理考试', ),
             (u'管理用户', ),
+            (u'管理团报', ),
             (u'管理班级', ),
             (u'管理iPad设备', ),
             (u'管理通知', ),
@@ -137,8 +138,8 @@ class Role(db.Model):
             (u'Y-GRE VB×2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程×2'], ),
             (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
             (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅'], ),
-            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理班级', u'管理iPad设备', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理产品'], ),
-            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理班级', u'管理iPad设备', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理产品', u'管理权限'], ),
+            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理iPad设备', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理产品'], ),
+            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理iPad设备', u'管理通知', u'管理站内信', u'管理反馈', u'管理进站', u'管理产品', u'管理权限'], ),
             (u'开发人员', [permission.name for permission in Permission.query.all()], ),
         ]
         for R in roles:
@@ -147,10 +148,12 @@ class Role(db.Model):
                 role = Role(name=R[0])
                 db.session.add(role)
                 db.session.commit()
-                for P in R[1]:
-                    permission = Permission.query.filter_by(name=P).first()
-                    role.add_permission(permission=permission)
                 print u'导入用户角色信息', R[0]
+            for P in R[1]:
+                permission = Permission.query.filter_by(name=P).first()
+                if not role.has_permission(permission=permission):
+                    role.add_permission(permission=permission)
+                    print u'赋予权限', R[0], P
         db.session.commit()
 
     def __repr__(self):
@@ -1637,7 +1640,7 @@ class User(UserMixin, db.Model):
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'url': url_for('main.profile_user', user_id=self.id),
+            'url': url_for('main.profile_user', id=self.id),
         }
         return user_json
 
@@ -1659,7 +1662,7 @@ class User(UserMixin, db.Model):
             else:
                 user_json_suggestion['description'] = self.email
         if include_url:
-            user_json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
+            user_json_suggestion['url'] = url_for('main.profile_user', id=self.id)
         return user_json_suggestion
 
     @staticmethod

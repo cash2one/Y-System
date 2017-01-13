@@ -128,24 +128,13 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>
-                                <a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank">{{ user.name }}</a>
-                                {% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
-                            </td>
-                            <td>
-                                {{ user.email }}
-                                <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
-                            </td>
+                            <td>{{ macros.user_url(user) }}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}</td>
+                            <td>{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i></td>
                             <td>{{ user.role.name }}</td>
                             <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
                             <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.find_user', keyword=keyword)) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
                             {% if user.activated %}
-                            <td>
-                                {{ user.last_punch.alias2 }}
-                                {% if current_user.can('管理学习进度') %}
-                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="refresh icon"></i></a>
-                                {% endif %}
-                            </td>
+                            <td>{{ user.last_punch.alias2 }}{% if current_user.can('管理学习进度') %}<a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.find_user', keyword=keyword)) }}"><i class="refresh icon"></i></a>{% endif %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(user.activated_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>

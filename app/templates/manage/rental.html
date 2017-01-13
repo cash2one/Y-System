@@ -129,40 +129,22 @@
                     <tbody>
                         {% for rental in rentals %}
                         <tr>
-                            <td>
-                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=rental.user.id) }}" target="_blank" data-variation="inverted">{{ rental.user.name }}</a>
-                                <div class="ui flowing popup popup-content">{{ rental.user.name }}（{{ rental.user.email }}）</div>
-                            </td>
-                            <td>
-                                {{ rental.ipad.alias }}
-                                [<code>{{ rental.ipad.serial }}</code>]
-                            </td>
+                            <td>{{ macros.user_popup(rental.user) }}</td>
+                            <td>{{ rental.ipad.alias }} [<code>{{ rental.ipad.serial }}</code>]</td>
                             <td>{{ rental.schedule.period.alias }}</td>
-                            {% if rental.walk_in %}
-                            <td class="negative">未预约</td>
-                            {% else %}
-                            <td class="positive">有预约</td>
-                            {% endif %}
-                            {% if rental.returned %}
-                            <td>N/A</td>
-                            {% else %}
-                            {% if rental.is_overtime %}
-                            <td class="negative">已超时</td>
-                            {% else %}
-                            <td class="positive">未超时</td>
-                            {% endif %}
-                            {% endif %}
+                            {% if rental.walk_in %}<td class="negative">未预约</td>{% else %}<td class="positive">有预约</td>{% endif %}
+                            {% if rental.returned %}<td>N/A</td>{% else %}{% if rental.is_overtime %}<td class="negative">已超时</td>{% else %}<td class="positive">未超时</td>{% endif %}{% endif %}
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(rental.rent_time).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(rental.rent_time).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ rental.rent_agent.name }}</td>
+                            <td>{{ macros.user_popup(rental.rent_agent) }}</td>
                             {% if rental.returned %}
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(rental.return_time).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ rental.return_agent.name }}</td>
+                            <td>{{ macros.user_popup(rental.return_agent) }}</td>
                             <td class="positive">归还</td>
                             <td><div class="ui mini button disabled"><i class="ban icon"></i>无</a></td>
                             {% else %}
@@ -175,9 +157,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.rental') }}
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.rental') }}{% endif %}
             </div>
         </div>
     </div>
