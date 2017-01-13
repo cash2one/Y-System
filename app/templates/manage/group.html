@@ -103,19 +103,17 @@
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="eight wide required field">
-                                    {{ form.name.label() }}
-                                    {{ form.name(placeholder='团报名称') }}
+                                    {{ form.organizer_email.label() }}
+                                    <div class="ui fluid search">
+                                        {{ form.organizer_email(placeholder='输入团报发起人姓名/邮箱查询', class='prompt') }}
+                                        <div class="results"></div>
+                                    </div>
                                 </div>
                                 <div class="eight wide required field">
-                                    {{ form.course_type.label() }}
-                                    {{ form.course_type(class='ui dropdown') }}
-                                </div>
-                            </div>
-                            <div class="ui segment">
-                                <div class="inline field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.show() }}
-                                        {{ form.show.label() }}
+                                    {{ form.member_email.label() }}
+                                    <div class="ui fluid search">
+                                        {{ form.member_email(placeholder='输入团报成员姓名/邮箱查询', class='prompt') }}
+                                        <div class="results"></div>
                                     </div>
                                 </div>
                             </div>
@@ -129,52 +127,27 @@
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
-                            <th>团报</th>
-                            <th>类型</th>
-                            <th>人数</th>
-                            <th>可选状态</th>
-                            <th>上次操作</th>
-                            <th>操作人</th>
+                            <th>团报发起人</th>
+                            <th>团报成员</th>
+                            <th>发起时间</th>
                             <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for group in groups %}
                         <tr>
-                            <td>{% if group.valid_registrations.count() %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=group.id, next=url_for('manage.group', page=pagination.page)) }}">{{ group.name }}</a>{% else %}{{ group.name }}{% endif %}</td>
-                            <td>{{ group.type.name }}</td>
-                            <td>{{ group.valid_registrations.count() }}</td>
-                            {% if group.show %}<td class="active">可选</td>{% else %}<td>不可选</td>{% endif %}
+                            <td><a href="{{ url_for('main.profile_user', id=group.organizer_id) }}" target="_blank">{{ group.organizer.name }}</a></td>
+                            <td></td>
                             <td>
-                                <div class="popup-trigger" data-variation="inverted">{{ moment(group.modified_at).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(group.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(group.timestamp).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(group.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ group.modified_by.name }}</td>
-                            <td>
-                                <div class="ui mini icon buttons">
-                                    {% if group.show %}
-                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=group.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="unhide icon"></i></a>
-                                    {% else %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=group.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="hide icon"></i></a>
-                                    {% endif %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_course', id=group.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <div id="delete-trigger-{{ group.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
-                                </div>
-                                <div id="delete-modal-{{ group.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i>确定要删除团报“{{ group.name }}”？</div>
-                                    <div class="actions">
-                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_course', id=group.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
-                                        <div id="delete-hide-trigger-{{ group.id }}" class="ui black button">保留</div>
-                                    </div>
-                                </div>
-                            </td>
+                            <td></td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}
-                {{ macros.pagination_widget(pagination, 'manage.group') }}
-                {% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.group') }}{% endif %}
             </div>
         </div>
     </div>
@@ -194,22 +167,7 @@ $('.message .close')
     })
 ;
 
-$('.ui.checkbox').checkbox();
-
 $('table').tablesort();
-
-{% for group in groups %}
-$('#delete-trigger-{{ group.id }}')
-    .on('click', function() {
-        $('#delete-modal-{{ group.id }}').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#delete-hide-trigger-{{ group.id }}')
-    .on('click', function() {
-        $('#delete-modal-{{ group.id }}').modal('hide');
-    })
-;
-{% endfor %}
 
 $('#new-group-trigger').popup();
 $('#new-group-trigger')
@@ -255,6 +213,15 @@ $(document)
                 }
             })
         ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
+        },
+        showNoResults: false
     })
 ;
 </script>

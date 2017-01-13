@@ -2895,7 +2895,7 @@ def group():
         .order_by(GroupRegistration.timestamp.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     groups = pagination.items
-    return render_template('manage/group.html', form=form, groups=groups)
+    return render_template('manage/group.html', form=form, groups=groups, pagination=pagination)
 
 
 @manage.route('/ipad', methods=['GET', 'POST'])
