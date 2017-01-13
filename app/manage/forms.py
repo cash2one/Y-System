@@ -560,6 +560,10 @@ class NewGroupMemberForm(FlaskForm):
     member_email = StringField(u'团报成员（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'提交')
 
+    def __init__(self, *args, **kwargs):
+        super(NewGroupMemberForm, self).__init__(*args, **kwargs)
+        self.organizer = organizer
+
     def validate_member_email(self, field):
         if field.data:
             user = User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first()
@@ -569,6 +573,8 @@ class NewGroupMemberForm(FlaskForm):
                 raise ValidationError(u'%s（%s）已经发起过团报' % (user.name, user.email))
             elif user.registered_groups.count():
                 raise ValidationError(u'%s（%s）已经参加过%s（%s）发起的团报' % (user.name, user.email, user.registered_groups.first().organizer.name, user.registered_groups.first().organizer.email))
+            elif self.organizer.organized_groups.count() > 5:
+                raise ValidationError(u'%s（%s）发起的团报人数已达到上限（5人）' % (self.organizer.name, self.organizer.email))
 
 
 class NewiPadForm(FlaskForm):

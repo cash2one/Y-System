@@ -2933,7 +2933,7 @@ def add_group_member(id):
     organizer = User.query.get_or_404(id)
     if not organizer.created or organizer.deleted:
         abort(404)
-    form = NewGroupMemberForm()
+    form = NewGroupMemberForm(organizer=organizer)
     if form.validate_on_submit():
         member = User.query.filter_by(email=form.member_email.data, created=True, activated=True, deleted=False).first()
         if member is None:
@@ -2948,6 +2948,9 @@ def add_group_member(id):
         if member.is_registering_group(organizer=organizer):
             flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='error')
             return redirect(request.args.get('next') or url_for('manage.add_group_member', id=organizer.id))
+        if organizer.organized_groups.count() > 5:
+            flash(u'%s（%s）发起的团报人数已达到上限（5人）', category='error')
+            return redirect(url_for('manage.add_group_member', id=organizer.id))
         member.register_group(organizer=organizer)
         flash(u'%s（%s）已成功加入%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='success')
         return redirect(request.args.get('next') or url_for('manage.group'))
