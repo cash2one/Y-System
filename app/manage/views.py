@@ -26,6 +26,7 @@ from .. import db
 from ..models import Permission, Role, User, Gender
 from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
+from ..models import GroupRegistration
 from ..models import Booking, BookingState
 from ..models import Rental
 from ..models import Punch
@@ -2875,6 +2876,17 @@ def delete_course(id):
     course.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除班级：%s' % course.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.course'))
+
+
+@manage.route('/group', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理团报')
+def group():
+    query = GroupRegistration.query\
+        .distinct(GroupRegistration.organizer_id)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    groups = pagination.items
+    return render_template('manage/group.html', groups=groups)
 
 
 @manage.route('/ipad', methods=['GET', 'POST'])
