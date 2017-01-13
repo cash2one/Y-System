@@ -560,7 +560,7 @@ class NewGroupMemberForm(FlaskForm):
     member_email = StringField(u'团报成员（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'提交')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, organizer, *args, **kwargs):
         super(NewGroupMemberForm, self).__init__(*args, **kwargs)
         self.organizer = organizer
 
