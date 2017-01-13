@@ -101,20 +101,11 @@
                     <div class="content">
                         <form id="new-group" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <div class="fields">
-                                <div class="eight wide required field">
-                                    {{ form.organizer_email.label() }}
-                                    <div class="ui fluid search">
-                                        {{ form.organizer_email(placeholder='输入团报发起人姓名/邮箱查询', class='prompt') }}
-                                        <div class="results"></div>
-                                    </div>
-                                </div>
-                                <div class="eight wide required field">
-                                    {{ form.member_email.label() }}
-                                    <div class="ui fluid search">
-                                        {{ form.member_email(placeholder='输入团报成员姓名/邮箱查询', class='prompt') }}
-                                        <div class="results"></div>
-                                    </div>
+                            <div class="required field">
+                                {{ form.organizer_email.label() }}
+                                <div class="ui fluid search">
+                                    {{ form.organizer_email(placeholder='输入团报发起人姓名/邮箱查询', class='prompt') }}
+                                    <div class="results"></div>
                                 </div>
                             </div>
                             {{ form.submit(class='ui primary button') }}
@@ -136,8 +127,8 @@
                     <tbody>
                         {% for group in groups %}
                         <tr>
-                            <td><a href="{{ url_for('main.profile_user', id=group.organizer_id) }}" target="_blank">{{ group.organizer.name }}</a></td>
-                            <td></td>
+                            <td>{{ macros.user_popup(group.organizer) }}</td>
+                            <td>{% for group_registration in group.organizer.organized_groups %}<a class="ui label" href="">{{ group_registration.member.name }}</a>{% endfor %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(group.timestamp).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(group.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
@@ -194,19 +185,6 @@ $(document)
                             {
                                 type: 'email',
                                 prompt: '请输入有效的团报发起人邮箱'
-                            }
-                        ]
-                    },
-                    member_email: {
-                        identifier: 'member_email',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请输入团报成员邮箱'
-                            },
-                            {
-                                type: 'email',
-                                prompt: '请输入有效的团报成员邮箱'
                             }
                         ]
                     }

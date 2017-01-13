@@ -434,7 +434,7 @@ class EditReferrerForm(FlaskForm):
 
 
 class NewInviterForm(FlaskForm):
-    inviter_email = StringField(u'推荐人（邮箱）', validators=[Required(), Length(1, 64)])
+    inviter_email = StringField(u'推荐人（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     invitation_type = SelectField(u'推荐类型', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
 
@@ -551,18 +551,24 @@ class EditCourseForm(FlaskForm):
         self.course_type.choices = [(u'', u'选择班级类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
-class NewGroupRegistrationForm(FlaskForm):
-    organizer_email = StringField(u'团报发起人（邮箱）', validators=[Required(), Length(1, 64)])
-    member_email = StringField(u'团报成员（邮箱）', validators=[Required(), Length(1, 64)])
+class NewGroupForm(FlaskForm):
+    organizer_email = StringField(u'团报发起人（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'提交')
 
-    def validate_organizer_email(self, field):
-        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
-            raise ValidationError(u'团报发起人邮箱不存在：%s' % field.data)
 
-    def validate_organizer_email(self, field):
-        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
-            raise ValidationError(u'团报成员邮箱不存在：%s' % field.data)
+class NewGroupMemberForm(FlaskForm):
+    member_email = StringField(u'团报成员（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    submit = SubmitField(u'提交')
+
+    def validate_member_email(self, field):
+        if field.data:
+            user = User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first()
+            if user is None:
+                raise ValidationError(u'团报成员邮箱不存在：%s' % field.data)
+            elif user.organized_groups.count():
+                raise ValidationError(u'%s（%s）已经发起过团报' % (user.name, user.email))
+            elif user.registered_groups.count():
+                raise ValidationError(u'%s（%s）已经参加过%s（%s）发起的团报' % (user.name, user.email, user.registered_groups.first().organizer.name, user.registered_groups.first().organizer.email))
 
 
 class NewiPadForm(FlaskForm):

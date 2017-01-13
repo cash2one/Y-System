@@ -17,7 +17,7 @@ from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUser
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm
-from .forms import NewGroupRegistrationForm
+from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
@@ -2886,9 +2886,21 @@ def delete_course(id):
 @login_required
 @permission_required(u'管理团报')
 def group():
-    form = NewGroupRegistrationForm()
+    form = NewGroupForm()
     if form.validate_on_submit():
-        pass
+        user = User.query.filter_by(email=form.organizer_email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'团报成员邮箱不存在：%s' % form.organizer_email.data, category='error')
+            return redirect(url_for('manage.group'))
+        if user.organized_groups.count():
+            flash(u'%s（%s）已经发起过团报' % (user.name, user.email), category='error')
+            return redirect(url_for('manage.group'))
+        if user.registered_groups.count():
+            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (user.name, user.email, user.registered_groups.first().organizer.name, user.registered_groups.first().organizer.email), category='error')
+            return redirect(url_for('manage.group'))
+        user.register_group(organizer=user)
+        flash(u'%s（%s）已成功发起团报' % (user.name, user.email), category='success')
+        return redirect(url_for('manage.group'))
     page = request.args.get('page', 1, type=int)
     query = GroupRegistration.query\
         .filter(GroupRegistration.organizer_id == GroupRegistration.member_id)\

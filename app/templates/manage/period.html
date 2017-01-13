@@ -162,7 +162,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(period.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(period.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ period.modified_by.name }}</td>
+                            <td>{{ macros.user_popup(period.modified_by) }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
                                     {% if period.show %}
