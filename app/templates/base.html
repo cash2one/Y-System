@@ -99,11 +99,11 @@
                     {% if current_user.can('管理用户') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i>用户管理</a>
                     {% endif %}
-                    {% if current_user.can('管理班级') %}
-                    <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i>班级管理</a>
-                    {% endif %}
                     {% if current_user.can('管理团报') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.group') }}"><i class="users icon"></i>团报管理</a>
+                    {% endif %}
+                    {% if current_user.can('管理班级') %}
+                    <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i>班级管理</a>
                     {% endif %}
                     <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i>iPad管理</a>
                     {% if current_user.can('管理通知') %}
@@ -219,11 +219,11 @@
                 {% if current_user.can('管理用户') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i>用户管理</a>
                 {% endif %}
-                {% if current_user.can('管理班级') %}
-                <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i>班级管理</a>
-                {% endif %}
                 {% if current_user.can('管理团报') %}
                 <a class="item loading-trigger" href="{{ url_for('manage.group') }}"><i class="users icon"></i>团报管理</a>
+                {% endif %}
+                {% if current_user.can('管理班级') %}
+                <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i>班级管理</a>
                 {% endif %}
                 <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i>iPad管理</a>
                 {% if current_user.can('管理通知') %}
@@ -342,11 +342,11 @@
                             {% if current_user.can('管理用户') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i>用户管理</a>
                             {% endif %}
-                            {% if current_user.can('管理班级') %}
-                            <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i>班级管理</a>
-                            {% endif %}
                             {% if current_user.can('管理团报') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.group') }}"><i class="users icon"></i>团报管理</a>
+                            {% endif %}
+                            {% if current_user.can('管理班级') %}
+                            <a class="item loading-trigger" href="{{ url_for('manage.course') }}"><i class="student icon"></i>班级管理</a>
                             {% endif %}
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad') }}"><i class="tablet icon"></i>iPad管理</a>
                             {% if current_user.can('管理通知') %}

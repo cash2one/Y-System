@@ -2910,6 +2910,40 @@ def group():
     return render_template('manage/group.html', form=form, groups=groups, pagination=pagination)
 
 
+@manage.route('/group/delete/<int:id>')
+@login_required
+@permission_required(u'管理团报')
+def delete_group(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    if user.organized_groups.count() == 0:
+        flash(u'%s（%s）未曾发起过团报' % (user.name, user.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.group'))
+    for group_registration in user.organized_groups:
+        group_registration.member.unregister_group(organizer=user)
+    flash(u'已删除%s（%s）发起的团报' % (user.name, user.email), category='success')
+    return redirect(request.args.get('next') or url_for('manage.group'))
+
+
+@manage.route('/group/remove/<int:organizer_id>/<int:member_id>')
+@login_required
+@permission_required(u'管理团报')
+def group_remove_member(organizer_id, member_id):
+    organizer = User.query.get_or_404(organizer_id)
+    if not organizer.created or organizer.deleted:
+        abort(404)
+    member = User.query.get_or_404(member_id)
+    if not member.created or member.deleted:
+        abort(404)
+    if not member.is_registering_group(organizer=organizer):
+        flash(u'%s（%s）未曾参加过%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='error')
+        return redirect(request.args.get('next') or url_for('manage.group'))
+    member.unregister_group(organizer=organizer)
+    flash(u'已删除%s（%s）发起的团报成员：%s（%s）' % (organizer.name, organizer.email, member.name, member.email), category='success')
+    return redirect(request.args.get('next') or url_for('manage.group'))
+
+
 @manage.route('/ipad', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理')

@@ -118,8 +118,9 @@
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
-                            <th>团报发起人</th>
-                            <th>团报成员</th>
+                            <th>发起人</th>
+                            <th>人数</th>
+                            <th>成员</th>
                             <th>发起时间</th>
                             <th>操作</th>
                         </tr>
@@ -128,12 +129,25 @@
                         {% for group in groups %}
                         <tr>
                             <td>{{ macros.user_popup(group.organizer) }}</td>
-                            <td>{% for group_registration in group.organizer.organized_groups %}<a class="ui label" href="">{{ group_registration.member.name }}</a>{% endfor %}</td>
+                            <td>{{ group.organizer.organized_groups.count() }}</td>
+                            <td>{% if group.organizer.organized_groups.count() > 1 %}{% for group_registration in group.organizer.organized_groups %}<a class="ui label" href="">{{ group_registration.member.name }}<i class="delete icon"></i></a>{% endfor %}{% else %}无{% endif %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(group.timestamp).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(group.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td></td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href=""><i class="add user icon"></i></a>
+                                    <div id="delete-trigger-{{ group.organizer.id }}" class="ui negative button" href=""><i class="trash outline icon"></i></div>
+                                </div>
+                                <div id="delete-modal-{{ group.organizer.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除{{ group.organizer.name }}（{{ group.organizer.email }}）发起的团报么？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_group', id=group.organizer.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ group.organizer.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -159,6 +173,19 @@ $('.message .close')
 ;
 
 $('table').tablesort();
+
+{% for group in groups %}
+$('#delete-trigger-{{ group.organizer.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ group.organizer.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger-{{ group.organizer.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ group.organizer.id }}').modal('hide');
+    })
+;
+{% endfor %}
 
 $('#new-group-trigger').popup();
 $('#new-group-trigger')
