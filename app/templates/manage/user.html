@@ -175,7 +175,7 @@
                         {% for user in users %}
                         <tr>
                             <td>
-                                {% if user.created %}<a href="{{ url_for('main.profile_user', user_id=user.id) }}" target="_blank">{{ user.name }}</a>{% else %}{{ user.name }}{% endif %}
+                                {% if user.created %}<a href="{{ url_for('main.profile_user', id=user.id) }}" target="_blank">{{ user.name }}</a>{% else %}{{ user.name }}{% endif %}
                                 {% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
                             </td>
                             <td>

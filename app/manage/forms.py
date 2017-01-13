@@ -281,7 +281,7 @@ class ConfirmUserForm(FlaskForm):
     submit = SubmitField(u'确认并新建学生用户')
 
     def validate_receptionist_email(self, field):
-        if field.data and User.query.filter_by(email=field.data).first() is None:
+        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
             raise ValidationError(u'接待人邮箱不存在：%s' % field.data)
 
 
@@ -434,7 +434,7 @@ class EditReferrerForm(FlaskForm):
 
 
 class NewInviterForm(FlaskForm):
-    inviter_email = StringField(u'推荐人（邮箱）', validators=[Required(), Length(0, 64)])
+    inviter_email = StringField(u'推荐人（邮箱）', validators=[Required(), Length(1, 64)])
     invitation_type = SelectField(u'推荐类型', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
 
@@ -549,6 +549,20 @@ class EditCourseForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditCourseForm, self).__init__(*args, **kwargs)
         self.course_type.choices = [(u'', u'选择班级类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class NewGroupRegistrationForm(FlaskForm):
+    organizer_email = StringField(u'团报发起人（邮箱）', validators=[Required(), Length(1, 64)])
+    member_email = StringField(u'团报成员（邮箱）', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'提交')
+
+    def validate_organizer_email(self, field):
+        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
+            raise ValidationError(u'团报发起人邮箱不存在：%s' % field.data)
+
+    def validate_organizer_email(self, field):
+        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
+            raise ValidationError(u'团报成员邮箱不存在：%s' % field.data)
 
 
 class NewiPadForm(FlaskForm):

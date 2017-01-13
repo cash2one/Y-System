@@ -1640,7 +1640,7 @@ class User(UserMixin, db.Model):
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'url': url_for('main.profile_user', user_id=self.id),
+            'url': url_for('main.profile_user', id=self.id),
         }
         return user_json
 
@@ -1662,7 +1662,7 @@ class User(UserMixin, db.Model):
             else:
                 user_json_suggestion['description'] = self.email
         if include_url:
-            user_json_suggestion['url'] = url_for('main.profile_user', user_id=self.id)
+            user_json_suggestion['url'] = url_for('main.profile_user', id=self.id)
         return user_json_suggestion
 
     @staticmethod

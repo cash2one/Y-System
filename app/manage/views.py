@@ -17,6 +17,7 @@ from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUser
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm
+from .forms import NewGroupRegistrationForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
@@ -2025,8 +2026,10 @@ def create_user():
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
         if form.inviter_email.data:
             inviter = User.query.filter_by(email=form.inviter_email.data, created=True, activated=True, deleted=False).first()
-            if inviter is not None:
-                inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
+            if inviter is None:
+                flash(u'推荐人邮箱不存在：%s' % form.inviter_email.data, category='error')
+                return redirect(url_for('manage.create_user', id=user.id, next=request.args.get('next')))
+            inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         if int(form.vb_course.data):
             user.register_course(course=Course.query.get(int(form.vb_course.data)))
         if int(form.y_gre_course.data):
@@ -2298,8 +2301,9 @@ def create_user_confirm(id):
         user.deformity = confirm_user_form.deformity.data
         db.session.add(user)
         receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data, created=True, activated=True, deleted=False).first()
-        if receptionist is not None:
-            receptionist.receive_user(user=user)
+        if receptionist is None:
+            flash(u'接待人邮箱不存在：%s' % confirm_user_form.receptionist_email.data, category='error')
+        receptionist.receive_user(user=user)
         current_user.create_user(user=user)
         flash(u'成功添加%s：%s' % (user.role.name, user.name), category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
@@ -2882,11 +2886,16 @@ def delete_course(id):
 @login_required
 @permission_required(u'管理团报')
 def group():
+    form = NewGroupRegistrationForm()
+    if form.validate_on_submit():
+        pass
+    page = request.args.get('page', 1, type=int)
     query = GroupRegistration.query\
-        .distinct(GroupRegistration.organizer_id)
+        .filter(GroupRegistration.organizer_id == GroupRegistration.member_id)\
+        .order_by(GroupRegistration.timestamp.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     groups = pagination.items
-    return render_template('manage/group.html', groups=groups)
+    return render_template('manage/group.html', form=form, groups=groups)
 
 
 @manage.route('/ipad', methods=['GET', 'POST'])

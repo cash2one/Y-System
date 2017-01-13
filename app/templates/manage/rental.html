@@ -130,7 +130,7 @@
                         {% for rental in rentals %}
                         <tr>
                             <td>
-                                <a class="popup-trigger" href="{{ url_for('main.profile_user', user_id=rental.user.id) }}" target="_blank" data-variation="inverted">{{ rental.user.name }}</a>
+                                <a class="popup-trigger" href="{{ url_for('main.profile_user', id=rental.user.id) }}" target="_blank" data-variation="inverted">{{ rental.user.name }}</a>
                                 <div class="ui flowing popup popup-content">{{ rental.user.name }}（{{ rental.user.email }}）</div>
                             </td>
                             <td>
