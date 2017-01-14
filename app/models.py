@@ -1904,10 +1904,7 @@ class Product(db.Model):
 
     @property
     def sales_volume(self):
-        if self.name == u'团报优惠':
-            return GroupRegistration.query.count()
-        else:
-            return sum([purchase.quantity for purchase in self.purchases])
+        return sum([purchase.quantity for purchase in self.purchases if purchase.user.created and purchase.user.activated and not purchase.user.deleted])
 
     @staticmethod
     def insert_products():

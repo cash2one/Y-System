@@ -3519,7 +3519,11 @@ def product_purchase(id):
         abort(404)
     page = request.args.get('page', 1, type=int)
     query = Purchase.query\
-        .filter_by(product_id=product.id)\
+        .join(User, User.id == Purchase.user_id)\
+        .filter(Purchase.product_id == product.id)\
+        .filter(User.created == True)\
+        .filter(User.activated == True)\
+        .filter(User.deleted == False)\
         .order_by(Purchase.timestamp.desc())
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     purchases = pagination.items
