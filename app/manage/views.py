@@ -2334,7 +2334,7 @@ def create_user_confirm(id):
     )
 
 
-@manage.route('/user/create/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/user/create/delete/<int:id>')
 @login_required
 @permission_required(u'管理用户')
 def create_user_delete(id):
@@ -2396,6 +2396,11 @@ def edit_user(id):
             flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         if edit_email_form.email.data != user.email:
+            if user.confirmed:
+                token = user.generate_email_change_token(edit_email_form.email.data)
+                send_email(edit_email_form.email.data, u'确认您的邮箱账户', 'auth/mail/change_email', user=user, token=token)
+                flash(u'一封确认邮件已经发送至邮箱：%s' % edit_email_form.email.data, category='info')
+                return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
             user.email = edit_email_form.email.data
             db.session.add(user)
         flash(u'已更新用户邮箱', category='success')
@@ -2708,7 +2713,7 @@ def remove_purchase(id):
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
-@manage.route('/user/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/user/delete/<int:id>')
 @login_required
 @permission_required(u'管理用户')
 def delete_user(id):
@@ -2831,12 +2836,12 @@ def y_gre_courses():
 @permission_required(u'管理')
 def course_users(id):
     course = Course.query.get_or_404(id)
-    if course.deleted:
+    if course.deleted or course.valid_registrations.count() == 0:
         abort(404)
     page = request.args.get('page', 1, type=int)
     query = User.query\
         .join(CourseRegistration, CourseRegistration.user_id == User.id)\
-        .join(Course, Course.id == CourseRegistration.course_id)\
+        .filter(CourseRegistration.course_id == course.id)\
         .filter(User.created == True)\
         .filter(User.deleted == False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -2882,7 +2887,7 @@ def edit_course(id):
     return render_template('manage/edit_course.html', form=form, course=course)
 
 
-@manage.route('/course/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/course/delete/<int:id>')
 @login_required
 @permission_required(u'管理班级')
 def delete_course(id):
@@ -2960,8 +2965,8 @@ def add_group_member(id):
         if member.is_registering_group(organizer=organizer):
             flash(u'%s已经参加过%s发起的团报' % (member.name_alias, organizer.name_alias), category='error')
             return redirect(request.args.get('next') or url_for('manage.add_group_member', id=organizer.id))
-        if organizer.organized_groups.count() > 5:
-            flash(u'%s发起的团报人数已达到上限（5人）', category='error')
+        if organizer.organized_groups.count() > current_app.config['MAX_GROUP_SIZE']:
+            flash(u'%s发起的团报人数已达到上限（%s人）' % (organizer.name_alias, current_app.config['MAX_GROUP_SIZE']), category='error')
             return redirect(url_for('manage.add_group_member', id=organizer.id))
         member.register_group(organizer=organizer)
         flash(u'%s已成功加入%s发起的团报' % (member.name_alias, organizer.name_alias), category='success')
@@ -3283,7 +3288,7 @@ def edit_ipad(id):
     return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
 
 
-@manage.route('/ipad/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/ipad/delete/<int:id>')
 @login_required
 @permission_required(u'管理iPad设备')
 def delete_ipad(id):
@@ -3421,7 +3426,7 @@ def edit_announcement(id):
     return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
 
 
-@manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/announcement/delete/<int:id>')
 @login_required
 @permission_required(u'管理通知')
 def delete_announcement(id):
@@ -3493,7 +3498,7 @@ def edit_product(id):
     return render_template('manage/edit_product.html', form=form, product=product)
 
 
-@manage.route('/product/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/product/delete/<int:id>')
 @login_required
 @permission_required(u'管理产品')
 def delete_product(id):
@@ -3503,6 +3508,26 @@ def delete_product(id):
     product.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除研修产品：%s' % product.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.product'))
+
+
+@manage.route('/product/purchase/<int:id>')
+@login_required
+@permission_required(u'管理产品')
+def product_purchase(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted or product.sales_volume == 0:
+        abort(404)
+    page = request.args.get('page', 1, type=int)
+    query = Purchase.query\
+        .join(User, User.id == Purchase.user_id)\
+        .filter(Purchase.product_id == product.id)\
+        .filter(User.created == True)\
+        .filter(User.activated == True)\
+        .filter(User.deleted == False)\
+        .order_by(Purchase.timestamp.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    purchases = pagination.items
+    return render_template('manage/product_purchase.html', product=product, purchases=purchases, pagination=pagination)
 
 
 @manage.route('/role', methods=['GET', 'POST'])
@@ -3554,7 +3579,7 @@ def edit_role(id):
     return render_template('manage/edit_role.html', form=form, role=role)
 
 
-@manage.route('/role/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/role/delete/<int:id>')
 @login_required
 @developer_required
 def delete_role(id):
@@ -3687,7 +3712,7 @@ def edit_permission(id):
     return render_template('manage/edit_permission.html', form=form, permission=permission)
 
 
-@manage.route('/permission/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/permission/delete/<int:id>')
 @login_required
 @developer_required
 def delete_permission(id):

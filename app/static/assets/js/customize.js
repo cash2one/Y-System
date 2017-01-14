@@ -49,6 +49,7 @@ $('#contacts-footer-link')
 
 // submit form
 function submitForm() {
+    $('.ui.modal').modal('hide');
     $('#loading-dimmer').dimmer('show');
     $(this).form('submit');
 };
@@ -56,6 +57,7 @@ function submitForm() {
 // loading dimmer
 $('.loading-trigger')
     .on('click', function () {
+        $('.ui.modal').modal('hide');
         $('#loading-dimmer').dimmer('show');
     })
 ;

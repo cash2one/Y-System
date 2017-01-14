@@ -314,7 +314,18 @@ class Purchase(db.Model):
 
     @property
     def alias(self):
-        return u'%s×%s' % (self.product.alias, self.quantity)
+        return u'%s ×%s' % (self.product.alias, self.quantity)
+
+    @property
+    def total(self):
+        return self.product.price * self.quantity
+
+    @property
+    def total_alias(self):
+        return u'%g' % self.total
+
+    def __repr__(self):
+        return '<Purchase %r, %r, %r>' % (self.user.name, self.product.name, self.quantity)
 
 
 class SuspensionRecord(db.Model):
@@ -1319,7 +1330,7 @@ class User(UserMixin, db.Model):
 
     @property
     def purchases_total(self):
-        return u'%g' % sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
+        return u'%g' % sum([purchase.total for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -1885,7 +1896,7 @@ class Product(db.Model):
 
     @property
     def alias(self):
-        return u'%s[%g]' % (self.name, self.price)
+        return u'%s [%g元]' % (self.name, self.price)
 
     @property
     def price_alias(self):
@@ -1893,10 +1904,7 @@ class Product(db.Model):
 
     @property
     def sales_volume(self):
-        if self.name == u'团报优惠':
-            return GroupRegistration.query.count()
-        else:
-            return sum([purchase.quantity for purchase in self.purchases])
+        return sum([purchase.quantity for purchase in self.purchases if purchase.user.created and purchase.user.activated and not purchase.user.deleted])
 
     @staticmethod
     def insert_products():
