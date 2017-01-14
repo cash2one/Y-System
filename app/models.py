@@ -314,7 +314,7 @@ class Purchase(db.Model):
 
     @property
     def alias(self):
-        return u'%s×%s' % (self.product.alias, self.quantity)
+        return u'%s ×%s' % (self.product.alias, self.quantity)
 
     @property
     def total(self):
@@ -1896,7 +1896,7 @@ class Product(db.Model):
 
     @property
     def alias(self):
-        return u'%s[%g元]' % (self.name, self.price)
+        return u'%s [%g元]' % (self.name, self.price)
 
     @property
     def price_alias(self):
