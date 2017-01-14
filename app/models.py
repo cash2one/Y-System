@@ -320,6 +320,9 @@ class Purchase(db.Model):
     def total(self):
         return self.product.price * self.quantity
 
+    def __repr__(self):
+        return '<Purchase %r, %r, %r>' % (self.user.name, self.product.name, self.quantity)
+
 
 class SuspensionRecord(db.Model):
     __tablename__ = 'suspension_records'
