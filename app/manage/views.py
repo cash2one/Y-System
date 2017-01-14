@@ -2960,8 +2960,8 @@ def add_group_member(id):
         if member.is_registering_group(organizer=organizer):
             flash(u'%s已经参加过%s发起的团报' % (member.name_alias, organizer.name_alias), category='error')
             return redirect(request.args.get('next') or url_for('manage.add_group_member', id=organizer.id))
-        if organizer.organized_groups.count() > 5:
-            flash(u'%s发起的团报人数已达到上限（5人）', category='error')
+        if organizer.organized_groups.count() > current_app.config['MAX_GROUP_SIZE']:
+            flash(u'%s发起的团报人数已达到上限（%s人）' % (organizer.name_alias, current_app.config['MAX_GROUP_SIZE']), category='error')
             return redirect(url_for('manage.add_group_member', id=organizer.id))
         member.register_group(organizer=organizer)
         flash(u'%s已成功加入%s发起的团报' % (member.name_alias, organizer.name_alias), category='success')
