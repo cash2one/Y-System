@@ -12,10 +12,10 @@ from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunc
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import EditSectionHourForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
-from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm
+from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
-from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditPurchasedProductForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
+from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
@@ -35,7 +35,7 @@ from ..models import Period, Schedule
 from ..models import Lesson, Section
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
-from ..models import Product
+from ..models import Product, Purchase
 from ..email import send_email
 from ..decorators import permission_required, administrator_required, developer_required
 
@@ -2254,16 +2254,13 @@ def create_user_confirm(id):
         inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         flash(u'已添加推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    # purchased product
-    edit_purchased_products_form = EditPurchasedProductForm(prefix='edit_purchased_product')
-    if edit_purchased_products_form.validate_on_submit():
-        for purchase in user.purchases:
-            db.session.delete(purchase)
-        for product_id in edit_purchased_products_form.products.data:
-            user.add_purchase(product=Product.query.get(int(product_id)))
-        flash(u'已更新研修产品', category='success')
+    # purchase
+    new_purchase_form = NewPurchaseForm(prefix='new_purchase')
+    if new_purchase_form.validate_on_submit():
+        product = Product.query.get_or_404(int(new_purchase_form.product.data))
+        user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
+        flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    edit_purchased_products_form.products.data = [unicode(purchase.product.id) for purchase in user.purchases]
     # role
     edit_role_form = EditStudentRoleForm(prefix='edit_role')
     if edit_role_form.validate_on_submit():
@@ -2328,7 +2325,7 @@ def create_user_confirm(id):
         edit_application_aim_form=edit_application_aim_form,
         edit_referrer_form=edit_referrer_form,
         new_inviter_form=new_inviter_form,
-        edit_purchased_products_form=edit_purchased_products_form,
+        new_purchase_form=new_purchase_form,
         edit_role_form=edit_role_form,
         edit_vb_course_form=edit_vb_course_form,
         edit_y_gre_course_form=edit_y_gre_course_form,
@@ -2513,7 +2510,7 @@ def edit_user(id):
             writing_score=int(new_toefl_test_score_form.writing.data),
             modified_by=current_user._get_current_object()
         )
-        flash(u'已添加TOEFL成绩：%s' % test_score_type.name, category='success')
+        flash(u'已添加TOEFL%s成绩' % test_score_type.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
@@ -2575,16 +2572,13 @@ def edit_user(id):
         inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         flash(u'已添加推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    # purchased product
-    edit_purchased_products_form = EditPurchasedProductForm(prefix='edit_purchased_product')
-    if edit_purchased_products_form.validate_on_submit():
-        for purchase in user.purchases:
-            db.session.delete(purchase)
-        for product_id in edit_purchased_products_form.products.data:
-            user.add_purchase(product=Product.query.get(int(product_id)))
-        flash(u'已更新研修产品', category='success')
+    # purchase
+    new_purchase_form = NewPurchaseForm(prefix='new_purchase')
+    if new_purchase_form.validate_on_submit():
+        product = Product.query.get_or_404(int(new_purchase_form.product.data))
+        user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
+        flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    edit_purchased_products_form.products.data = [unicode(purchase.product.id) for purchase in user.purchases]
     # VB course
     edit_vb_course_form = EditVBCourseForm(prefix='edit_vb_course')
     if edit_vb_course_form.validate_on_submit():
@@ -2644,7 +2638,7 @@ def edit_user(id):
         edit_application_aim_form=edit_application_aim_form,
         edit_referrer_form=edit_referrer_form,
         new_inviter_form=new_inviter_form,
-        edit_purchased_products_form=edit_purchased_products_form,
+        new_purchase_form=new_purchase_form,
         edit_vb_course_form=edit_vb_course_form,
         edit_y_gre_course_form=edit_y_gre_course_form,
         edit_worked_in_same_field_form=edit_worked_in_same_field_form,
@@ -2655,6 +2649,7 @@ def edit_user(id):
 
 @manage.route('/user/education-record/remove/<int:id>')
 @login_required
+@permission_required(u'管理用户')
 def remove_education_record(id):
     education_record = EducationRecord.query.get_or_404(id)
     db.session.delete(education_record)
@@ -2664,6 +2659,7 @@ def remove_education_record(id):
 
 @manage.route('/user/employment-record/remove/<int:id>')
 @login_required
+@permission_required(u'管理用户')
 def remove_employment_record(id):
     employment_record = EmploymentRecord.query.get_or_404(id)
     db.session.delete(employment_record)
@@ -2673,6 +2669,7 @@ def remove_employment_record(id):
 
 @manage.route('/user/previous-achievement/remove/<int:id>')
 @login_required
+@permission_required(u'管理用户')
 def remove_previous_achievement(id):
     previous_achievement = PreviousAchievement.query.get_or_404(id)
     db.session.delete(previous_achievement)
@@ -2682,6 +2679,7 @@ def remove_previous_achievement(id):
 
 @manage.route('/user/toefl-test-score/remove/<int:id>')
 @login_required
+@permission_required(u'管理用户')
 def remove_toefl_test_score(id):
     toefl_test_score = TOEFLTestScore.query.get_or_404(id)
     db.session.delete(toefl_test_score)
@@ -2691,11 +2689,22 @@ def remove_toefl_test_score(id):
 
 @manage.route('/user/inviter/remove/<int:user_id>/<int:inviter_id>')
 @login_required
+@permission_required(u'管理用户')
 def remove_inviter(user_id, inviter_id):
     user = User.query.get_or_404(user_id)
     inviter = User.query.get_or_404(inviter_id)
     inviter.uninvite_user(user=user)
     flash(u'已删除推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/user/purchase/remove/<int:id>')
+@login_required
+@permission_required(u'管理用户')
+def remove_purchase(id):
+    purchase = Purchase.query.get_or_404(id)
+    db.session.delete(purchase)
+    flash(u'已删除研修产品：%s' % purchase.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 

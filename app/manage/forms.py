@@ -443,13 +443,14 @@ class NewInviterForm(FlaskForm):
         self.invitation_type.choices = [(u'', u'选择推荐类型')] + [(unicode(invitation_type.id), invitation_type.name) for invitation_type in InvitationType.query.order_by(InvitationType.id.asc()).all()]
 
 
-class EditPurchasedProductForm(FlaskForm):
-    products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'更新')
+class NewPurchaseForm(FlaskForm):
+    product = SelectField(u'研修产品', coerce=unicode, validators=[Required()])
+    quantity = IntegerField(u'数量', validators=[Required(), NumberRange(min=1)])
+    submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
-        super(EditPurchasedProductForm, self).__init__(*args, **kwargs)
-        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        super(NewPurchaseForm, self).__init__(*args, **kwargs)
+        self.product.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
 
 class EditStudentRoleForm(FlaskForm):

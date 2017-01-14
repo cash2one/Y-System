@@ -312,6 +312,10 @@ class Purchase(db.Model):
     quantity = db.Column(db.Integer, default=1)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    @property
+    def alias(self):
+        return u'%s×%s' % (self.product.alias, self.quantity)
+
 
 class SuspensionRecord(db.Model):
     __tablename__ = 'suspension_records'
@@ -1295,11 +1299,11 @@ class User(UserMixin, db.Model):
     def purchases_alias(self):
         if self.purchases.count() == 0:
             return u'无'
-        return u' · '.join([u'%s[%g元]×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
+        return u' · '.join([purchase.alias for purchase in self.purchases])
 
     @property
     def purchases_total(self):
-        return sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
+        return u'%g' % sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -1856,8 +1860,8 @@ class Product(db.Model):
         db.session.add(self)
 
     @property
-    def price_alias(self):
-        return u'%g' % self.price
+    def alias(self):
+        return u'%s[%g]' % (self.name, self.price)
 
     @property
     def sales_volume(self):
