@@ -2836,12 +2836,12 @@ def y_gre_courses():
 @permission_required(u'管理')
 def course_users(id):
     course = Course.query.get_or_404(id)
-    if course.deleted:
+    if course.deleted or course.valid_registrations.count() == 0:
         abort(404)
     page = request.args.get('page', 1, type=int)
     query = User.query\
         .join(CourseRegistration, CourseRegistration.user_id == User.id)\
-        .join(Course, Course.id == CourseRegistration.course_id)\
+        .filter(CourseRegistration.course_id == course.id)\
         .filter(User.created == True)\
         .filter(User.deleted == False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -3515,7 +3515,7 @@ def delete_product(id):
 @permission_required(u'管理产品')
 def product_purchase(id):
     product = Product.query.get_or_404(id)
-    if product.deleted:
+    if product.deleted or product.sales_volume == 0:
         abort(404)
     page = request.args.get('page', 1, type=int)
     query = Purchase.query\
