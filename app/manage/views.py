@@ -2396,6 +2396,11 @@ def edit_user(id):
             flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         if edit_email_form.email.data != user.email:
+            if user.confirmed:
+                token = user.generate_email_change_token(edit_email_form.email.data)
+                send_email(edit_email_form.email.data, u'确认您的邮箱账户', 'auth/mail/change_email', user=user, token=token)
+                flash(u'一封确认邮件已经发送至邮箱：%s' % edit_email_form.email.data, category='info')
+                return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
             user.email = edit_email_form.email.data
             db.session.add(user)
         flash(u'已更新用户邮箱', category='success')
