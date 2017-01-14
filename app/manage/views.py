@@ -2334,7 +2334,7 @@ def create_user_confirm(id):
     )
 
 
-@manage.route('/user/create/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/user/create/delete/<int:id>')
 @login_required
 @permission_required(u'管理用户')
 def create_user_delete(id):
@@ -2713,7 +2713,7 @@ def remove_purchase(id):
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
-@manage.route('/user/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/user/delete/<int:id>')
 @login_required
 @permission_required(u'管理用户')
 def delete_user(id):
@@ -2887,7 +2887,7 @@ def edit_course(id):
     return render_template('manage/edit_course.html', form=form, course=course)
 
 
-@manage.route('/course/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/course/delete/<int:id>')
 @login_required
 @permission_required(u'管理班级')
 def delete_course(id):
@@ -3288,7 +3288,7 @@ def edit_ipad(id):
     return render_template('manage/edit_ipad.html', form=form, ipad=ipad)
 
 
-@manage.route('/ipad/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/ipad/delete/<int:id>')
 @login_required
 @permission_required(u'管理iPad设备')
 def delete_ipad(id):
@@ -3426,7 +3426,7 @@ def edit_announcement(id):
     return render_template('manage/edit_announcement.html', form=form, announcement=announcement)
 
 
-@manage.route('/announcement/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/announcement/delete/<int:id>')
 @login_required
 @permission_required(u'管理通知')
 def delete_announcement(id):
@@ -3498,7 +3498,7 @@ def edit_product(id):
     return render_template('manage/edit_product.html', form=form, product=product)
 
 
-@manage.route('/product/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/product/delete/<int:id>')
 @login_required
 @permission_required(u'管理产品')
 def delete_product(id):
@@ -3508,6 +3508,9 @@ def delete_product(id):
     product.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除研修产品：%s' % product.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.product'))
+
+
+# @manage.route('/product/purchase/<int:id>')
 
 
 @manage.route('/role', methods=['GET', 'POST'])
@@ -3559,7 +3562,7 @@ def edit_role(id):
     return render_template('manage/edit_role.html', form=form, role=role)
 
 
-@manage.route('/role/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/role/delete/<int:id>')
 @login_required
 @developer_required
 def delete_role(id):
@@ -3692,7 +3695,7 @@ def edit_permission(id):
     return render_template('manage/edit_permission.html', form=form, permission=permission)
 
 
-@manage.route('/permission/delete/<int:id>', methods=['GET', 'POST'])
+@manage.route('/permission/delete/<int:id>')
 @login_required
 @developer_required
 def delete_permission(id):
