@@ -2952,19 +2952,19 @@ def add_group_member(id):
             flash(u'团报成员邮箱不存在：%s' % form.member_email.data, category='error')
             return redirect(url_for('manage.add_group_member', id=organizer.id))
         if member.organized_groups.count():
-            flash(u'%s（%s）已经发起过团报' % (member.name, member.email), category='error')
+            flash(u'%s已经发起过团报' % (member.name_alias), category='error')
             return redirect(url_for('manage.add_group_member', id=organizer.id))
         if member.registered_groups.count():
-            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (member.name, member.email, member.registered_groups.first().organizer.name, member.registered_groups.first().organizer.email), category='error')
+            flash(u'%s已经参加过%s发起的团报' % (member.name_alias, member.registered_groups.first().organizer.name_alias), category='error')
             return redirect(url_for('manage.add_group_member', id=organizer.id))
         if member.is_registering_group(organizer=organizer):
-            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='error')
+            flash(u'%s已经参加过%s发起的团报' % (member.name_alias, organizer.name_alias), category='error')
             return redirect(request.args.get('next') or url_for('manage.add_group_member', id=organizer.id))
         if organizer.organized_groups.count() > 5:
-            flash(u'%s（%s）发起的团报人数已达到上限（5人）', category='error')
+            flash(u'%s发起的团报人数已达到上限（5人）', category='error')
             return redirect(url_for('manage.add_group_member', id=organizer.id))
         member.register_group(organizer=organizer)
-        flash(u'%s（%s）已成功加入%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='success')
+        flash(u'%s已成功加入%s发起的团报' % (member.name_alias, organizer.name_alias), category='success')
         return redirect(request.args.get('next') or url_for('manage.group'))
     return render_template('manage/add_group_member.html', form=form, organizer=organizer)
 
@@ -2979,11 +2979,14 @@ def remove_group_member(organizer_id, member_id):
     member = User.query.get_or_404(member_id)
     if not member.created or member.deleted:
         abort(404)
+    if organizer.id == member.id:
+        flash(u'需先删除%s所发起团报的其他成员' % organizer.name_alias, category='error')
+        return redirect(request.args.get('next') or url_for('manage.group'))
     if not member.is_registering_group(organizer=organizer):
-        flash(u'%s（%s）未曾参加过%s（%s）发起的团报' % (member.name, member.email, organizer.name, organizer.email), category='error')
+        flash(u'%s未曾参加过%s发起的团报' % (member.name_alias, organizer.name_alias), category='error')
         return redirect(request.args.get('next') or url_for('manage.group'))
     member.unregister_group(organizer=organizer)
-    flash(u'已删除%s（%s）发起的团报成员：%s（%s）' % (organizer.name, organizer.email, member.name, member.email), category='success')
+    flash(u'已删除%s发起的团报成员：%s' % (organizer.name_alias, member.name_alias), category='success')
     return redirect(request.args.get('next') or url_for('manage.group'))
 
 
