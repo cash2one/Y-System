@@ -876,7 +876,7 @@ def rental_return_step_4(user_id, section_id):
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         user.punch(section=section)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_4.html', user=user, section=section, form=form)
 
@@ -933,7 +933,7 @@ def rental_return_step_4_alt(user_id, section_id):
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         user.punch(section=section)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_4_alt.html', user=user, section=section, form=form)
 
@@ -1027,7 +1027,7 @@ def rental_exchange_step_4(rental_id, section_id):
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         user.punch(section=section)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_4.html', rental=rental, section=section, form=form)
 
@@ -1194,7 +1194,7 @@ def edit_punch_step_3(user_id, section_id):
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         user.punch(section=section)
-        flash(u'已保存%s的进度信息为：%s - %s - %s' % (user.name, section.lesson.type.name, section.lesson.name, section.name), category='success')
+        flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.find_user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
 
@@ -1297,18 +1297,18 @@ def schedule():
         for period_id in form.period.data:
             schedule = Schedule.query.filter_by(date=day, period_id=int(period_id)).first()
             if schedule:
-                flash(u'该时段已存在：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='warning')
+                flash(u'该时段已存在：%s，%s' % (schedule.date, schedule.period.alias), category='warning')
             else:
                 period = Period.query.get_or_404(int(period_id))
                 if period.deleted:
                     abort(404)
                 if datetime(day.year, day.month, day.day, period.end_time.hour, period.end_time.minute) - timedelta(hours=current_app.config['UTC_OFFSET']) < datetime.utcnow():
-                    flash(u'该时段已过期：%s，%s时段：%s - %s' % (day, period.type.name, period.start_time, period.end_time), category='error')
+                    flash(u'该时段已过期：%s，%s' % (day, period.alias), category='error')
                 else:
                     schedule = Schedule(date=day, period_id=int(period_id), quota=form.quota.data, available=form.publish_now.data, modified_by_id=current_user.id)
                     db.session.add(schedule)
                     db.session.commit()
-                    flash(u'添加时段：%s，%s时段：%s - %s' % (schedule.date, schedule.period.type.name, schedule.period.start_time, schedule.period.end_time), category='success')
+                    flash(u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category='success')
         return redirect(url_for('manage.schedule'))
     page = request.args.get('page', 1, type=int)
     show_today_schedule = True
@@ -2051,10 +2051,10 @@ def create_user_confirm(id):
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
     if user.created:
-        flash(u'%s（%s）已经被创建' % (user.name, user.email), category='error')
+        flash(u'%s已经被创建' % user.name_alias, category='error')
         return redirect(request.args.get('next') or url_for('manage.user'))
     if user.activated:
-        flash(u'%s（%s）已经被激活' % (user.name, user.email), category='error')
+        flash(u'%s已经被激活' % user.name_alias, category='error')
         return redirect(request.args.get('next') or url_for('manage.user'))
     # name
     edit_name_form = EditNameForm(prefix='edit_name')
@@ -2252,7 +2252,7 @@ def create_user_confirm(id):
             flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data, category='warning')
             return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
         inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
-        flash(u'已添加推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
+        flash(u'已添加推荐人：%s' % inviter.name_alias, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purchase
     new_purchase_form = NewPurchaseForm(prefix='new_purchase')
@@ -2344,13 +2344,13 @@ def create_user_delete(id):
     if user.is_superior_than(user=current_user._get_current_object()):
         abort(403)
     if user.created:
-        flash(u'%s（%s）已经被创建' % (user.name, user.email), category='error')
+        flash(u'%s已经被创建' % user.name_alias, category='error')
         return redirect(request.args.get('next') or url_for('manage.user'))
     if user.activated:
-        flash(u'%s（%s）已经被激活' % (user.name, user.email), category='error')
+        flash(u'%s已经被激活' % user.name_alias, category='error')
         return redirect(request.args.get('next') or url_for('manage.user'))
     user.delete()
-    flash(u'已删除用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
+    flash(u'已删除用户：%s' % user.name_alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -2570,7 +2570,7 @@ def edit_user(id):
             flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data, category='warning')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
-        flash(u'已添加推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
+        flash(u'已添加推荐人：%s' % inviter.name_alias, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purchase
     new_purchase_form = NewPurchaseForm(prefix='new_purchase')
@@ -2694,7 +2694,7 @@ def remove_inviter(user_id, inviter_id):
     user = User.query.get_or_404(user_id)
     inviter = User.query.get_or_404(inviter_id)
     inviter.uninvite_user(user=user)
-    flash(u'已删除推荐人：%s（%s）' % (inviter.name, inviter.email), category='success')
+    flash(u'已删除推荐人：%s' % inviter.name_alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -2718,7 +2718,7 @@ def delete_user(id):
     if user.is_superior_than(user=current_user._get_current_object()) or user.id == current_user.id:
         abort(403)
     user.safe_delete()
-    flash(u'已注销用户：%s [%s]（%s）' % (user.name, user.role.name, user.email), category='success')
+    flash(u'已注销用户：%s' % user.name_alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -2735,7 +2735,7 @@ def restore_user(id):
     if form.validate_on_submit():
         role = Role.query.get(int(form.role.data))
         user.restore(email=form.email.data, role=role)
-        flash(u'已恢复用户：%s [%s]（%s）' % (user.name, role.name, user.email), category='success')
+        flash(u'已恢复用户：%s' % user.name_alias, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.email.data = user.email[:-len(u'_%s_deleted' % user.id)]
     form.role.data = unicode(user.role_id)
@@ -2905,13 +2905,13 @@ def group():
             flash(u'团报发起人邮箱不存在：%s' % form.organizer_email.data, category='error')
             return redirect(url_for('manage.group'))
         if user.organized_groups.count():
-            flash(u'%s（%s）已经发起过团报' % (user.name, user.email), category='error')
+            flash(u'%s已经发起过团报' % user.name_alias, category='error')
             return redirect(url_for('manage.group'))
         if user.registered_groups.count():
-            flash(u'%s（%s）已经参加过%s（%s）发起的团报' % (user.name, user.email, user.registered_groups.first().organizer.name, user.registered_groups.first().organizer.email), category='error')
+            flash(u'%s已经参加过%s发起的团报' % (user.name_alias, user.registered_groups.first().organizer.name_alias), category='error')
             return redirect(url_for('manage.group'))
         user.register_group(organizer=user)
-        flash(u'%s（%s）已成功发起团报' % (user.name, user.email), category='success')
+        flash(u'%s已成功发起团报' % user.name_alias, category='success')
         return redirect(url_for('manage.group'))
     page = request.args.get('page', 1, type=int)
     query = GroupRegistration.query\
@@ -2930,11 +2930,11 @@ def delete_group(id):
     if not user.created or user.deleted:
         abort(404)
     if user.organized_groups.count() == 0:
-        flash(u'%s（%s）未曾发起过团报' % (user.name, user.email), category='error')
+        flash(u'%s未曾发起过团报' % user.name_alias, category='error')
         return redirect(request.args.get('next') or url_for('manage.group'))
     for group_registration in user.organized_groups:
         group_registration.member.unregister_group(organizer=user)
-    flash(u'已删除%s（%s）发起的团报' % (user.name, user.email), category='success')
+    flash(u'已删除%s发起的团报' % user.name_alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.group'))
 
 
@@ -3208,7 +3208,7 @@ def set_ipad_state_maintain(id):
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
     for user in User.users_can(u'管理iPad设备'):
-        send_email(user.email, u'序列号为%s的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
+        send_email(user.email, u'序列号为“%s”的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
             ipad=ipad,
             time=datetime.utcnow(),
             manager=current_user
@@ -3292,7 +3292,7 @@ def delete_ipad(id):
         abort(404)
     ipad.safe_delete(modified_by=current_user._get_current_object())
     iPadContentJSON.mark_out_of_date()
-    flash(u'已删除序列号为%s的iPad' % ipad.serial, category='success')
+    flash(u'已删除序列号为“%s”的iPad' % ipad.serial, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
