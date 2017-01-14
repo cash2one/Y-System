@@ -2566,6 +2566,9 @@ def edit_user(id):
         if inviter is None:
             flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+        if inviter.id == user.id:
+            flash(u'推荐人邮箱有误：%s' % new_inviter_form.inviter_email.data, category='error')
+            return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         if inviter.invited_user(user=user):
             flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data, category='warning')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
