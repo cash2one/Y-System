@@ -320,6 +320,10 @@ class Purchase(db.Model):
     def total(self):
         return self.product.price * self.quantity
 
+    @property
+    def total_alias(self):
+        return u'%g' % self.total
+
     def __repr__(self):
         return '<Purchase %r, %r, %r>' % (self.user.name, self.product.name, self.quantity)
 
@@ -1892,7 +1896,7 @@ class Product(db.Model):
 
     @property
     def alias(self):
-        return u'%s[%g]' % (self.name, self.price)
+        return u'%s[%g元]' % (self.name, self.price)
 
     @property
     def price_alias(self):

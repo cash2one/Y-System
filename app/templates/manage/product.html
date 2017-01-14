@@ -146,7 +146,7 @@
                         <tr>
                             <td>{{ product.name }}</td>
                             <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
-                            <td>{{ product.sales_volume }}</td>
+                            <td><a class="loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id, next=url_for('manage.product', page=pagination.page)) }}">{{ product.sales_volume }}</a></td>
                             <td{% if product.available %} class="active"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(product.modified_at).fromNow() }}</div>

@@ -3510,7 +3510,20 @@ def delete_product(id):
     return redirect(request.args.get('next') or url_for('manage.product'))
 
 
-# @manage.route('/product/purchase/<int:id>')
+@manage.route('/product/purchase/<int:id>')
+@login_required
+@permission_required(u'管理产品')
+def product_purchase(id):
+    product = Product.query.get_or_404(id)
+    if product.deleted:
+        abort(404)
+    page = request.args.get('page', 1, type=int)
+    query = Purchase.query\
+        .filter_by(product_id=product.id)\
+        .order_by(Purchase.timestamp.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    purchases = pagination.items
+    return render_template('manage/product_purchase.html', product=product, purchases=purchases, pagination=pagination)
 
 
 @manage.route('/role', methods=['GET', 'POST'])

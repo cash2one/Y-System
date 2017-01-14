@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}产品购买记录{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.table .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="shop icon"></i>产品购买记录</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="shop icon"></i>产品购买记录：{{ product.name }}（单价：{{ product.price_alias }}元）</h3>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id, page=pagination.page) }}">全部</a>
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>购买用户</th>
+                            <th>数量</th>
+                            <th>总价</th>
+                            <th>购买时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for purchase in purchases %}
+                        <tr>
+                            <td>{{ macros.user_popup(purchase.user) }}</td>
+                            <td>{{ purchase.quantity }}</td>
+                            <td><i class="fitted yen icon"></i> {{ purchase.total_alias }}</td>
+                            <td>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(purchase.timestamp).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(purchase.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.product_purchase', id=product.id) }}{% endif %}
+                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('table').tablesort();
+</script>
+{% endblock %}
