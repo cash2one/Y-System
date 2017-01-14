@@ -316,6 +316,10 @@ class Purchase(db.Model):
     def alias(self):
         return u'%s×%s' % (self.product.alias, self.quantity)
 
+    @property
+    def total(self):
+        return self.product.price * self.quantity
+
 
 class SuspensionRecord(db.Model):
     __tablename__ = 'suspension_records'
@@ -1319,7 +1323,7 @@ class User(UserMixin, db.Model):
 
     @property
     def purchases_total(self):
-        return u'%g' % sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
+        return u'%g' % sum([purchase.total for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
