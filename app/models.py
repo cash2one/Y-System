@@ -1300,13 +1300,16 @@ class User(UserMixin, db.Model):
         db.session.add(purchase)
 
     def update_group_registration_purchase(self, quantity):
-        purchase = Purchase.query.filter_by(user_id=self.id, product_id=Product.query.filter_by(name=u'团报优惠').first().id)
-        if quantity > 0:
-            purchase.quantity = quantity
-            purchase.timestamp = datetime.utcnow()
-            db.session.add(purchase)
+        purchase = Purchase.query.filter_by(user_id=self.id, product_id=Product.query.filter_by(name=u'团报优惠').first().id).first()
+        if purchase is not None:
+            if quantity > 0:
+                purchase.quantity = quantity
+                purchase.timestamp = datetime.utcnow()
+                db.session.add(purchase)
+            else:
+                db.session.delete(purchase)
         else:
-            db.session.delete(purchase)
+            self.add_purchase(product=Product.query.filter_by(name=u'团报优惠').first(), quantity=quantity)
 
     @property
     def purchases_alias(self):
