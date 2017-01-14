@@ -371,7 +371,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.school }}</div>
-                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA: {{ education_record.gpa }} / {{ education_record.full_gpa }}{% endif %}</div>
+                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA：{{ education_record.gpa }} / {{ education_record.full_gpa }}{% endif %}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -476,7 +476,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ toefl_test_score.type.name }}成绩</div>
-                            <div class="description">总分: {{ toefl_test_score.total_score }}分（阅读: {{ toefl_test_score.reading_score }}分 &middot; 听力: {{ toefl_test_score.listening_score }}分 &middot; 口语: {{ toefl_test_score.speaking_score }}分 &middot; 写作: {{ toefl_test_score.writing_score }}分）</div>
+                            <div class="description">总分：{{ toefl_test_score.total_score }}分（阅读：{{ toefl_test_score.reading_score }}分 &middot; 听力：{{ toefl_test_score.listening_score }}分 &middot; 口语：{{ toefl_test_score.speaking_score }}分 &middot; 写作：{{ toefl_test_score.writing_score }}分）</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -548,7 +548,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div id="edit-purchased-product-trigger" class="ui mini button">编辑</div>
+                            <div id="edit-purchase-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
@@ -671,17 +671,38 @@
                         </form>
                     </div>
                 </div>
-                <div id="edit-purchased-product-modal" class="ui modal">
+                <div id="edit-purchase-modal" class="ui modal">
                     <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑研修产品</div>
+                    <div class="header"><i class="edit icon"></i>编辑研修产品（总计：{{ user.purchases_total }}元）</div>
                     <div class="content">
-                        <form id="edit-purchased-product" method="POST" class="ui form">
-                            {{ edit_purchased_products_form.hidden_tag() }}
-                            <div class="required field">
-                                {{ edit_purchased_products_form.products.label() }}
-                                {{ edit_purchased_products_form.products(class='ui dropdown') }}
+                        {% if user.purchases.count() %}
+                        <div class="ui relaxed divided list">
+                            {% for purchase in user.purchases %}
+                            <div class="item">
+                                <div class="right floated content">
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_purchase', id=purchase.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                                </div>
+                                <div class="content">
+                                    <div class="header">{{ purchase.alias }}</div>
+                                    <div class="description">购买时间：{{ moment(purchase.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
+                                </div>
                             </div>
-                            {{ edit_purchased_products_form.submit(class='ui primary button') }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <form id="new-purchase" method="POST" class="ui form">
+                            {{ new_purchase_form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="twelve wide required field">
+                                    {{ new_purchase_form.product.label() }}
+                                    {{ new_purchase_form.product(class='ui dropdown') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ new_purchase_form.quantity.label() }}
+                                    {{ new_purchase_form.quantity(placeholder='0') }}
+                                </div>
+                            </div>
+                            {{ new_purchase_form.submit(class='ui primary button') }}
                         </form>
                     </div>
                 </div>
@@ -878,9 +899,9 @@ $('#edit-inviter-trigger')
     })
 ;
 
-$('#edit-purchased-product-trigger')
+$('#edit-purchase-trigger')
     .on('click', function() {
-        $('#edit-purchased-product-modal').modal({ autofocus: false }).modal('show');
+        $('#edit-purchase-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
@@ -1126,7 +1147,11 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.exceptEducationType = function(value) {
-            return ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1);
+            if ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1) {
+                return true;
+            } else {
+                return ($('#new_education_record-major').val() !== '');
+            };
         };
         $.fn.form.settings.rules.GPAwithinLimit = function(value) {
             if ($('#new_education_record-full_gpa').val() === '') {
@@ -1403,18 +1428,31 @@ $(document)
                 }
             })
         ;
-        $('#edit-purchased-product')
+        $('#new-purchase')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    products: {
-                        identifier: 'edit_purchased_product-products',
+                    product: {
+                        identifier: 'new_purchase-product',
                         rules: [
                             {
                                 type: 'empty',
                                 prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
+                    quantity: {
+                        identifier: 'new_purchase-quantity',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入购买数量'
+                            },
+                            {
+                                type: 'integer[1..]',
+                                prompt: '请输入一个大于0的整数'
                             }
                         ]
                     }

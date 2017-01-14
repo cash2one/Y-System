@@ -4,4 +4,4 @@ iPad序列号：{{ ipad.serial }}
 
 目前状态：{{ ipad.state.name }}
 
-标记人：{{ manager.name }}（{{ manager.email }}）
+标记人：{{ manager.name_alias }}

@@ -425,11 +425,11 @@
                     {% for education_record in user.education_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_education_record', id=education_record.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.school }}</div>
-                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA: {{ education_record.gpa }} / {{ education_record.full_gpa }}{% endif %}</div>
+                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA：{{ education_record.gpa }} / {{ education_record.full_gpa }}{% endif %}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -467,7 +467,7 @@
                     {% for employment_record in user.employment_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_employment_record', id=employment_record.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ employment_record.employer }}</div>
@@ -500,7 +500,7 @@
                     {% for previous_achievement in user.previous_achievements %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_previous_achievement', id=previous_achievement.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_previous_achievement', id=previous_achievement.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ previous_achievement.type.name }}</div>
@@ -530,11 +530,11 @@
                     {% for toefl_test_score in user.toefl_test_scores %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
                             <div class="header">{{ toefl_test_score.type.name }}成绩</div>
-                            <div class="description">总分: {{ toefl_test_score.total_score }}分（阅读: {{ toefl_test_score.reading_score }}分 &middot; 听力: {{ toefl_test_score.listening_score }}分 &middot; 口语: {{ toefl_test_score.speaking_score }}分 &middot; 写作: {{ toefl_test_score.writing_score }}分）</div>
+                            <div class="description">总分：{{ toefl_test_score.total_score }}分（阅读：{{ toefl_test_score.reading_score }}分 &middot; 听力：{{ toefl_test_score.listening_score }}分 &middot; 口语：{{ toefl_test_score.speaking_score }}分 &middot; 写作：{{ toefl_test_score.writing_score }}分）</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -606,7 +606,7 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div id="edit-purchased-product-trigger" class="ui mini button">编辑</div>
+                            <div id="edit-purchase-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
                             <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
@@ -673,7 +673,7 @@
                             {% for invitation in user.accepted_invitations %}
                             <div class="item">
                                 <div class="right floated content">
-                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_inviter', user_id=user.id, inviter_id=invitation.inviter.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_inviter', user_id=user.id, inviter_id=invitation.inviter.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
                                 </div>
                                 <div class="content">
                                     <div class="header">{{ invitation.inviter.name }}（{{ invitation.inviter.email }}）</div>
@@ -702,17 +702,38 @@
                         </form>
                     </div>
                 </div>
-                <div id="edit-purchased-product-modal" class="ui modal">
+                <div id="edit-purchase-modal" class="ui modal">
                     <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑研修产品</div>
+                    <div class="header"><i class="edit icon"></i>编辑研修产品（总计：{{ user.purchases_total }}元）</div>
                     <div class="content">
-                        <form id="edit-purchased-product" method="POST" class="ui form">
-                            {{ edit_purchased_products_form.hidden_tag() }}
-                            <div class="required field">
-                                {{ edit_purchased_products_form.products.label() }}
-                                {{ edit_purchased_products_form.products(class='ui dropdown') }}
+                        {% if user.purchases.count() %}
+                        <div class="ui relaxed divided list">
+                            {% for purchase in user.purchases %}
+                            <div class="item">
+                                <div class="right floated content">
+                                    <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_purchase', id=purchase.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                                </div>
+                                <div class="content">
+                                    <div class="header">{{ purchase.alias }}</div>
+                                    <div class="description">购买时间：{{ moment(purchase.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
+                                </div>
                             </div>
-                            {{ edit_purchased_products_form.submit(class='ui primary button') }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <form id="new-purchase" method="POST" class="ui form">
+                            {{ new_purchase_form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="twelve wide required field">
+                                    {{ new_purchase_form.product.label() }}
+                                    {{ new_purchase_form.product(class='ui dropdown') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ new_purchase_form.quantity.label() }}
+                                    {{ new_purchase_form.quantity(placeholder='0') }}
+                                </div>
+                            </div>
+                            {{ new_purchase_form.submit(class='ui primary button') }}
                         </form>
                     </div>
                 </div>
@@ -773,20 +794,10 @@ $('#edit-name-trigger')
         $('#edit-name-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-name-hide-trigger')
-    .on('click', function() {
-        $('#edit-name-modal').modal('hide');
-    })
-;
 
 $('#edit-id-number-trigger')
     .on('click', function() {
         $('#edit-id-number-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-id-number-hide-trigger')
-    .on('click', function() {
-        $('#edit-id-number-modal').modal('hide');
     })
 ;
 
@@ -795,20 +806,10 @@ $('#edit-role-trigger')
         $('#edit-role-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-role-hide-trigger')
-    .on('click', function() {
-        $('#edit-role-modal').modal('hide');
-    })
-;
 
 $('#edit-vb-course-trigger')
     .on('click', function() {
         $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-vb-course-hide-trigger')
-    .on('click', function() {
-        $('#edit-vb-course-modal').modal('hide');
     })
 ;
 
@@ -817,20 +818,10 @@ $('#edit-y-gre-course-trigger')
         $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-y-gre-course-hide-trigger')
-    .on('click', function() {
-        $('#edit-y-gre-course-modal').modal('hide');
-    })
-;
 
 $('#edit-email-trigger')
     .on('click', function() {
         $('#edit-email-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-email-hide-trigger')
-    .on('click', function() {
-        $('#edit-email-modal').modal('hide');
     })
 ;
 
@@ -839,20 +830,10 @@ $('#edit-mobile-trigger')
         $('#edit-mobile-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-mobile-hide-trigger')
-    .on('click', function() {
-        $('#edit-mobile-modal').modal('hide');
-    })
-;
 
 $('#edit-address-trigger')
     .on('click', function() {
         $('#edit-address-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-address-hide-trigger')
-    .on('click', function() {
-        $('#edit-address-modal').modal('hide');
     })
 ;
 
@@ -861,20 +842,10 @@ $('#edit-qq-trigger')
         $('#edit-qq-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-qq-hide-trigger')
-    .on('click', function() {
-        $('#edit-qq-modal').modal('hide');
-    })
-;
 
 $('#edit-wechat-trigger')
     .on('click', function() {
         $('#edit-wechat-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-wechat-hide-trigger')
-    .on('click', function() {
-        $('#edit-wechat-modal').modal('hide');
     })
 ;
 
@@ -883,20 +854,10 @@ $('#edit-emergency-contact-name-trigger')
         $('#edit-emergency-contact-name-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-emergency-contact-name-hide-trigger')
-    .on('click', function() {
-        $('#edit-emergency-contact-name-modal').modal('hide');
-    })
-;
 
 $('#edit-emergency-contact-relationship-trigger')
     .on('click', function() {
         $('#edit-emergency-contact-relationship-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-emergency-contact-relationship-hide-trigger')
-    .on('click', function() {
-        $('#edit-emergency-contact-relationship-modal').modal('hide');
     })
 ;
 
@@ -905,20 +866,10 @@ $('#edit-emergency-contact-mobile-trigger')
         $('#edit-emergency-contact-mobile-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-emergency-contact-mobile-hide-trigger')
-    .on('click', function() {
-        $('#edit-emergency-contact-mobile-modal').modal('hide');
-    })
-;
 
 $('#edit-purpose-trigger')
     .on('click', function() {
         $('#edit-purpose-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-purpose-hide-trigger')
-    .on('click', function() {
-        $('#edit-purpose-modal').modal('hide');
     })
 ;
 
@@ -927,20 +878,10 @@ $('#edit-application-aim-trigger')
         $('#edit-application-aim-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-application-aim-hide-trigger')
-    .on('click', function() {
-        $('#edit-application-aim-modal').modal('hide');
-    })
-;
 
 $('#edit-referrer-trigger')
     .on('click', function() {
         $('#edit-referrer-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-referrer-hide-trigger')
-    .on('click', function() {
-        $('#edit-referrer-modal').modal('hide');
     })
 ;
 
@@ -949,20 +890,10 @@ $('#edit-inviter-trigger')
         $('#edit-inviter-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-$('#edit-inviter-hide-trigger')
-    .on('click', function() {
-        $('#edit-inviter-modal').modal('hide');
-    })
-;
 
-$('#edit-purchased-product-trigger')
+$('#edit-purchase-trigger')
     .on('click', function() {
-        $('#edit-purchased-product-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-$('#edit-purchased-product-hide-trigger')
-    .on('click', function() {
-        $('#edit-purchased-product-modal').modal('hide');
+        $('#edit-purchase-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
@@ -1233,7 +1164,11 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.exceptEducationType = function(value) {
-            return ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1);
+            if ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1) {
+                return true;
+            } else {
+                return ($('#new_education_record-major').val() !== '');
+            };
         };
         $.fn.form.settings.rules.GPAwithinLimit = function(value) {
             if ($('#new_education_record-full_gpa').val() === '') {
@@ -1510,18 +1445,31 @@ $(document)
                 }
             })
         ;
-        $('#edit-purchased-product')
+        $('#new-purchase')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    products: {
-                        identifier: 'edit_purchased_product-products',
+                    product: {
+                        identifier: 'new_purchase-product',
                         rules: [
                             {
                                 type: 'empty',
                                 prompt: '请选择研修产品'
+                            }
+                        ]
+                    },
+                    quantity: {
+                        identifier: 'new_purchase-quantity',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入购买数量'
+                            },
+                            {
+                                type: 'integer[1..]',
+                                prompt: '请输入一个大于0的整数'
                             }
                         ]
                     }

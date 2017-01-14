@@ -312,6 +312,10 @@ class Purchase(db.Model):
     quantity = db.Column(db.Integer, default=1)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    @property
+    def alias(self):
+        return u'%s×%s' % (self.product.alias, self.quantity)
+
 
 class SuspensionRecord(db.Model):
     __tablename__ = 'suspension_records'
@@ -1194,6 +1198,10 @@ class User(UserMixin, db.Model):
         return User.query.get(data['id'])
 
     @property
+    def name_alias(self):
+        return u'%s（%s）' % (self.name, self.email)
+
+    @property
     def birthdate_alias(self):
         if self.birthdate:
             return u'%s年%s月%s日' % (self.birthdate.year, self.birthdate.month, self.birthdate.day)
@@ -1291,15 +1299,27 @@ class User(UserMixin, db.Model):
         purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
         db.session.add(purchase)
 
+    def update_group_registration_purchase(self, quantity):
+        purchase = Purchase.query.filter_by(user_id=self.id, product_id=Product.query.filter_by(name=u'团报优惠').first().id).first()
+        if purchase is not None:
+            if quantity > 0:
+                purchase.quantity = quantity
+                purchase.timestamp = datetime.utcnow()
+                db.session.add(purchase)
+            else:
+                db.session.delete(purchase)
+        else:
+            self.add_purchase(product=Product.query.filter_by(name=u'团报优惠').first(), quantity=quantity)
+
     @property
     def purchases_alias(self):
         if self.purchases.count() == 0:
             return u'无'
-        return u' · '.join([u'%s[%g元]×%s' % (purchase.product.name, purchase.product.price, purchase.quantity) for purchase in self.purchases])
+        return u' · '.join([purchase.alias for purchase in self.purchases])
 
     @property
     def purchases_total(self):
-        return sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
+        return u'%g' % sum([purchase.product.price * purchase.quantity for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -1367,10 +1387,18 @@ class User(UserMixin, db.Model):
             group_registration = self.registered_groups.filter_by(organizer_id=organizer.id).first()
             group_registration.timestamp = datetime.utcnow()
         db.session.add(group_registration)
+        db.session.commit()
+        for g_registration in organizer.organized_groups:
+            g_registration.member.update_group_registration_purchase(quantity=organizer.organized_groups.count())
 
     def unregister_group(self, organizer):
         group_registration = self.registered_groups.filter_by(organizer_id=organizer.id).first()
         if group_registration:
+            for g_registration in organizer.organized_groups:
+                if g_registration.member_id != self.id:
+                    g_registration.member.update_group_registration_purchase(quantity=organizer.organized_groups.count()-1)
+                else:
+                    g_registration.member.update_group_registration_purchase(quantity=0)
             db.session.delete(group_registration)
 
     def is_registering_group(self, organizer):
@@ -1854,6 +1882,10 @@ class Product(db.Model):
         self.available = not self.available
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s[%g]' % (self.name, self.price)
 
     @property
     def price_alias(self):

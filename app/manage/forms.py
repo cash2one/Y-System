@@ -86,7 +86,7 @@ class EditPunchLessonForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditPunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
 
 
 class EditPunchSectionForm(FlaskForm):
@@ -95,7 +95,7 @@ class EditPunchSectionForm(FlaskForm):
 
     def __init__(self, lesson, *args, **kwargs):
         super(EditPunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
+        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
 
 
 class BookingCodeForm(FlaskForm):
@@ -130,7 +130,7 @@ class SelectLessonForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(SelectLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
 
 
 class RentiPadByLessonForm(FlaskForm):
@@ -155,7 +155,7 @@ class PunchLessonForm(FlaskForm):
 
     def __init__(self, user, *args, **kwargs):
         super(PunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), u'%s：%s' % (lesson.type.name, lesson.name)) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
+        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
 
 
 class PunchSectionForm(FlaskForm):
@@ -164,7 +164,7 @@ class PunchSectionForm(FlaskForm):
 
     def __init__(self, user, lesson, *args, **kwargs):
         super(PunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), u'%s：%s' % (section.lesson.name, section.name)) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
+        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
 
 
 class ConfirmPunchForm(FlaskForm):
@@ -443,13 +443,14 @@ class NewInviterForm(FlaskForm):
         self.invitation_type.choices = [(u'', u'选择推荐类型')] + [(unicode(invitation_type.id), invitation_type.name) for invitation_type in InvitationType.query.order_by(InvitationType.id.asc()).all()]
 
 
-class EditPurchasedProductForm(FlaskForm):
-    products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'更新')
+class NewPurchaseForm(FlaskForm):
+    product = SelectField(u'研修产品', coerce=unicode, validators=[Required()])
+    quantity = IntegerField(u'数量', validators=[Required(), NumberRange(min=1)])
+    submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
-        super(EditPurchasedProductForm, self).__init__(*args, **kwargs)
-        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        super(NewPurchaseForm, self).__init__(*args, **kwargs)
+        self.product.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), product.alias) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
 
 
 class EditStudentRoleForm(FlaskForm):
@@ -570,11 +571,11 @@ class NewGroupMemberForm(FlaskForm):
             if user is None:
                 raise ValidationError(u'团报成员邮箱不存在：%s' % field.data)
             elif user.organized_groups.count():
-                raise ValidationError(u'%s（%s）已经发起过团报' % (user.name, user.email))
+                raise ValidationError(u'%s已经发起过团报' % (user.name_alias))
             elif user.registered_groups.count():
-                raise ValidationError(u'%s（%s）已经参加过%s（%s）发起的团报' % (user.name, user.email, user.registered_groups.first().organizer.name, user.registered_groups.first().organizer.email))
+                raise ValidationError(u'%s已经参加过%s发起的团报' % (user.name_alias, user.registered_groups.first().organizer.name_alias))
             elif self.organizer.organized_groups.count() > 5:
-                raise ValidationError(u'%s（%s）发起的团报人数已达到上限（5人）' % (self.organizer.name, self.organizer.email))
+                raise ValidationError(u'%s发起的团报人数已达到上限（5人）' % (self.organizer.name_alias))
 
 
 class NewiPadForm(FlaskForm):

@@ -3,7 +3,7 @@
 权限：{{ user.role.name }}
 VB班：{{ user.vb_course.name }}
 Y-GRE班：{{ user.y_gre_course.name }}
-初始进度：{{ user.last_punch.section.lesson.name }} - {{ user.last_punch.section.name }}
-创建人：{{ user.received_user_creations.first().creator.name }}（{{ user.received_user_creations.first().creator.email }}）
+初始进度：{{ user.last_punch.section.alias2 }}
+创建人：{{ user.received_user_creations.first().creator.name_alias }}
 
 温馨提示：请不要回复本邮件。
