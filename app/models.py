@@ -1848,8 +1848,12 @@ class EducationRecord(db.Model):
     full_gpa = db.Column(db.Float)
     year = db.Column(db.Unicode(16))
 
+    @property
+    def alias(self):
+        return u'%s %s %s %s' % (self.user.name, self.type.name, self.school, self.year)
+
     def __repr__(self):
-        return '<Education Record %r, %r, %r, %r>' % (self.user.name, self.type.name, self.school, self.year)
+        return '<Education Record %r>' % self.alias
 
 
 class EmploymentRecord(db.Model):
@@ -1860,8 +1864,12 @@ class EmploymentRecord(db.Model):
     position = db.Column(db.Unicode(64))
     year = db.Column(db.Unicode(16))
 
+    @property
+    def alias(self):
+        return u'%s %s %s %s' % (self.user.name, self.employer, self.position, self.year)
+
     def __repr__(self):
-        return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
+        return '<Education Record %r>' % self.alias
 
 
 class PreviousAchievementType(db.Model):
@@ -1903,8 +1911,12 @@ class PreviousAchievement(db.Model):
     score = db.Column(db.Integer)
     remark = db.Column(db.UnicodeText)
 
+    @property
+    self.alias():
+    return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.remark)
+
     def __repr__(self):
-        return '<Previous Achievement %r, %r, %r, %r>' % (self.user.name, self.type.name, self.score)
+        return '<Previous Achievement %r>' % self.alias
 
 
 class Product(db.Model):
