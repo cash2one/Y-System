@@ -33,6 +33,8 @@ from ..models import Rental
 from ..models import Punch
 from ..models import Period, Schedule
 from ..models import Lesson, Section
+from ..models import Assignment
+from ..models import Test
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
@@ -1524,6 +1526,56 @@ def edit_section_hour(id):
         return redirect(request.args.get('next') or url_for('manage.lesson'))
     form.hour.data = u'%g' % (section.hour.total_seconds() / 3600)
     return render_template('manage/edit_section_hour.html', form=form, section=section)
+
+
+# @manage.route('/assignment')
+# @login_required
+# @permission_required(u'管理作业')
+# def assignment():
+#     page = request.args.get('page', 1, type=int)
+#     show_vb_assignments = True
+#     show_y_gre_assignments = False
+#     if current_user.is_authenticated:
+#         show_vb_assignments = bool(request.cookies.get('show_vb_assignments', '1'))
+#         show_y_gre_assignments = bool(request.cookies.get('show_y_gre_assignments', ''))
+#     if show_vb_assignments:
+#         query = Assignment.query\
+#             .join(CourseType, CourseType.id == Assignment.type_id)\
+#             .filter(CourseType.name == u'VB')\
+#             .order_by(Assignment.id.asc())
+#     if show_y_gre_assignments:
+#         query = Assignment.query\
+#             .join(CourseType, CourseType.id == Assignment.type_id)\
+#             .filter(CourseType.name == u'Y-GRE')\
+#             .order_by(Assignment.id.asc())
+#     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+#     lessons = pagination.items
+#     return render_template('manage/assignment.html',
+#         lessons=lessons,
+#         show_vb_assignments=show_vb_assignments,
+#         show_y_gre_assignments=show_y_gre_assignments,
+#         pagination=pagination
+#     )
+
+
+# @manage.route('/assignment/vb')
+# @login_required
+# @permission_required(u'管理作业')
+# def vb_lessons():
+#     resp = make_response(redirect(url_for('manage.assignment')))
+#     resp.set_cookie('show_vb_assignments', '1', max_age=30*24*60*60)
+#     resp.set_cookie('show_y_gre_assignments', '', max_age=30*24*60*60)
+#     return resp
+
+
+# @manage.route('/assignment/y-gre')
+# @login_required
+# @permission_required(u'管理作业')
+# def y_gre_lessons():
+#     resp = make_response(redirect(url_for('manage.assignment')))
+#     resp.set_cookie('show_vb_assignments', '', max_age=30*24*60*60)
+#     resp.set_cookie('show_y_gre_assignments', '1', max_age=30*24*60*60)
+#     return resp
 
 
 @manage.route('/user', methods=['GET', 'POST'])

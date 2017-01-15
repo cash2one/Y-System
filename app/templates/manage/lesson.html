@@ -107,6 +107,8 @@
                             <th>学习时间</th>
                             <th>占用iPad</th>
                             <th>阶段分级</th>
+                            <th>作业</th>
+                            <th>考试</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,6 +120,8 @@
                             <td>{{ lesson.hour }}</td>
                             <td><a class="ipad loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="查看含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.occupied_ipads_alias.count() }}台</a></td>
                             {% if lesson.advanced %}<td class="active">高阶</td>{% else %}<td>普通</td>{% endif %}
+                            <td>{% for assignment in lesson.assignments %}<a class="ui teal circular label loading-trigger" href="#" data-content="{{ assignment.name }}" data-position="top center" data-variation="inverted">{{ assignment.name }}</a>{% endfor %}</td>
+                            <td>{% for test in lesson.tests %}<a class="ui teal circular label loading-trigger" href="#" data-content="{{ test.name }}" data-position="top center" data-variation="inverted">{{ test.name }}</a>{% endfor %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

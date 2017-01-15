@@ -2688,6 +2688,8 @@ class Lesson(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
+    assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
+    tests = db.relationship('Test', backref='test', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
