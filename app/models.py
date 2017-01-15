@@ -2689,7 +2689,7 @@ class Lesson(db.Model):
     advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
-    tests = db.relationship('Test', backref='test', lazy='dynamic')
+    tests = db.relationship('Test', backref='lesson', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
@@ -3044,6 +3044,23 @@ class Test(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    @property
+    def finished_by_alias(self):
+        if self.lesson.type.name == u'VB':
+            return VBTestScore.query\
+                .join(User, User.id == VBTestScore.user_id)\
+                .filter(VBTestScore.test_id == self.id)\
+                .filter(User.created == True)\
+                .filter(User.activated == True)\
+                .filter(User.deleted == False)
+        if self.lesson.type.name == u'Y-GRE':
+            return YGRETestScore.query\
+                .join(User, User.id == YGRETestScore.user_id)\
+                .filter(YGRETestScore.test_id == self.id)\
+                .filter(User.created == True)\
+                .filter(User.activated == True)\
+                .filter(User.deleted == False)
 
     @staticmethod
     def insert_tests():
