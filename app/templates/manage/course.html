@@ -144,7 +144,7 @@
                         <tr>
                             <td>{{ course.name }}</td>
                             <td>{{ course.type.name }}</td>
-                            <td>{% if course.valid_registrations.count() %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=course.id, next=url_for('manage.course', page=pagination.page)) }}">{{ course.valid_registrations.count() }}</a>{% else %}0{% endif %}</td>
+                            <td>{% if course.valid_registrations.count() %}<a class="user loading-trigger" href="{{ url_for('manage.course_user', id=course.id, next=url_for('manage.course', page=pagination.page)) }}" data-content="查看班级用户" data-position="top center" data-variation="inverted">{{ course.valid_registrations.count() }} 人</a>{% else %}0 人{% endif %}</td>
                             {% if course.show %}<td class="active">可选</td>{% else %}<td>不可选</td>{% endif %}
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(course.modified_at).fromNow() }}</div>
@@ -196,6 +196,8 @@ $('.message .close')
 $('.ui.checkbox').checkbox();
 
 $('table').tablesort();
+
+$('td a.user.loading-trigger').popup();
 
 {% for course in courses %}
 $('#delete-trigger-{{ course.id }}')

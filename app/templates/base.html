@@ -84,7 +84,7 @@
                     <a class="item loading-trigger" href="{{ url_for('manage.lesson') }}"><i class="book icon"></i>课程管理</a>
                     {% endif %}
                     {% if current_user.can('管理作业') %}
-                    <a class="item loading-trigger" href="#"><i class="file text outline icon"></i>作业管理</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.assignment') }}"><i class="file text outline icon"></i>作业管理</a>
                     {% endif %}
                     {% if current_user.can('管理考试') %}
                     <a class="item loading-trigger" href="#"><i class="pencil icon"></i>考试管理</a>
@@ -206,7 +206,7 @@
                 <a class="item loading-trigger" href="{{ url_for('manage.lesson') }}"><i class="book icon"></i>课程管理</a>
                 {% endif %}
                 {% if current_user.can('管理作业') %}
-                <a class="item loading-trigger" href="#"><i class="file text outline icon"></i>作业管理</a>
+                <a class="item loading-trigger" href="{{ url_for('manage.assignment') }}"><i class="file text outline icon"></i>作业管理</a>
                 {% endif %}
                 {% if current_user.can('管理考试') %}
                 <a class="item loading-trigger" href="#"><i class="pencil icon"></i>考试管理</a>
@@ -327,7 +327,7 @@
                             <a class="item loading-trigger" href="{{ url_for('manage.lesson') }}"><i class="book icon"></i>课程管理</a>
                             {% endif %}
                             {% if current_user.can('管理作业') %}
-                            <a class="item loading-trigger" href="#"><i class="file text outline icon"></i>作业管理</a>
+                            <a class="item loading-trigger" href="{{ url_for('manage.assignment') }}"><i class="file text outline icon"></i>作业管理</a>
                             {% endif %}
                             {% if current_user.can('管理考试') %}
                             <a class="item loading-trigger" href="#"><i class="pencil icon"></i>考试管理</a>

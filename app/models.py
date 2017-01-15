@@ -2570,7 +2570,7 @@ class iPad(db.Model):
 
     @property
     def video_playback_alias(self):
-        return u'%g小时' % (self.video_playback.total_seconds() / 3600)
+        return u'%g 小时' % (self.video_playback.total_seconds() / 3600)
 
     @property
     def current_battery_life(self):
@@ -2983,6 +2983,15 @@ class Assignment(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    @property
+    def finished_by_alias(self):
+        return AssignmentScore.query\
+            .join(User, User.id == AssignmentScore.user_id)\
+            .filter(AssignmentScore.assignment_id == self.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)
 
     @staticmethod
     def insert_assignments():

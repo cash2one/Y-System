@@ -181,8 +181,8 @@
                             <td>{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i></td>
                             <td>{{ user.role.name }}</td>
                             {% if not (show_moderators or show_administrators or show_developers) %}
-                            <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
-                            <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_users', id=user.y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
                             {% if user.activated %}
                             <td>{{ user.last_punch.alias2 }}{% if current_user.can('管理学习进度') %}<a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>{% endif %}</td>
                             {% else %}
