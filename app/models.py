@@ -719,6 +719,15 @@ class TOEFLTestScoreType(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     toefl_test_scores = db.relationship('TOEFLTestScore', backref='type', lazy='dynamic')
 
+    @property
+    def finished_by_alias(self):
+        return TOEFLTestScore.query\
+            .join(User, User.id == TOEFLTestScore.user_id)\
+            .filter(TOEFLTestScore.type_id == self.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)
+
     @staticmethod
     def insert_toefl_test_score_types():
         toefl_test_score_types = [

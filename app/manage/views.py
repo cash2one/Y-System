@@ -1651,9 +1651,11 @@ def test():
     page = request.args.get('page', 1, type=int)
     show_vb_tests = True
     show_y_gre_tests = False
+    show_toefl_tests = False
     if current_user.is_authenticated:
         show_vb_tests = bool(request.cookies.get('show_vb_tests', '1'))
         show_y_gre_tests = bool(request.cookies.get('show_y_gre_tests', ''))
+        show_toefl_tests = bool(request.cookies.get('show_toefl_tests', ''))
     if show_vb_tests:
         query = Test.query\
             .join(Lesson, Lesson.id == Test.lesson_id)\
@@ -1666,12 +1668,15 @@ def test():
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
             .order_by(Test.id.asc())
+    if show_toefl_tests:
+        query = TOEFLTestScoreType.query
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     tests = pagination.items
     return render_template('manage/test.html',
         tests=tests,
         show_vb_tests=show_vb_tests,
         show_y_gre_tests=show_y_gre_tests,
+        show_toefl_tests=show_toefl_tests,
         pagination=pagination
     )
 
@@ -1683,6 +1688,7 @@ def vb_tests():
     resp = make_response(redirect(url_for('manage.test')))
     resp.set_cookie('show_vb_tests', '1', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_toefl_tests', '', max_age=30*24*60*60)
     return resp
 
 
@@ -1693,6 +1699,18 @@ def y_gre_tests():
     resp = make_response(redirect(url_for('manage.test')))
     resp.set_cookie('show_vb_tests', '', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_tests', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_toefl_tests', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/test/toefl')
+@login_required
+@permission_required(u'管理考试')
+def toefl_tests():
+    resp = make_response(redirect(url_for('manage.test')))
+    resp.set_cookie('show_vb_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_toefl_tests', '1', max_age=30*24*60*60)
     return resp
 
 
