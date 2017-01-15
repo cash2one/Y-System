@@ -1580,6 +1580,58 @@ def y_gre_assignments():
     return resp
 
 
+@manage.route('/test')
+@login_required
+@permission_required(u'管理作业')
+def test():
+    page = request.args.get('page', 1, type=int)
+    show_vb_tests = True
+    show_y_gre_tests = False
+    if current_user.is_authenticated:
+        show_vb_tests = bool(request.cookies.get('show_vb_tests', '1'))
+        show_y_gre_tests = bool(request.cookies.get('show_y_gre_tests', ''))
+    if show_vb_tests:
+        query = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .order_by(Test.id.asc())
+    if show_y_gre_tests:
+        query = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .order_by(Test.id.asc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    tests = pagination.items
+    return render_template('manage/test.html',
+        tests=tests,
+        show_vb_tests=show_vb_tests,
+        show_y_gre_tests=show_y_gre_tests,
+        pagination=pagination
+    )
+
+
+@manage.route('/test/vb')
+@login_required
+@permission_required(u'管理作业')
+def vb_tests():
+    resp = make_response(redirect(url_for('manage.test')))
+    resp.set_cookie('show_vb_tests', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_tests', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/test/y-gre')
+@login_required
+@permission_required(u'管理作业')
+def y_gre_tests():
+    resp = make_response(redirect(url_for('manage.test')))
+    resp.set_cookie('show_vb_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_tests', '1', max_age=30*24*60*60)
+    return resp
+
+
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}考试管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.table .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="pencil icon"></i>考试管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="book icon"></i>考试列表</h3>
+                <div class="ui secondary stackable menu">
+                    <a class="item {% if show_vb_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_tests') }}">VB考试</a>
+                    <a class="item {% if show_y_gre_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_tests') }}">Y-GRE考试</a>
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>考试名称</th>
+                            <th>类型</th>
+                            <th>从属课程</th>
+                            <th>完成记录</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in tests %}
+                        <tr>
+                            <td>{{ test.name }}</td>
+                            <td>{{ test.lesson.type.name }}</td>
+                            <td>{{ test.lesson.name }}</td>
+                            <td>{% if test.finished_by_alias.count() %}<a class="score loading-trigger" href="#" data-content="查看考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.test') }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('table').tablesort();
+
+$('td a.score.loading-trigger').popup();
+</script>
+{% endblock %}
