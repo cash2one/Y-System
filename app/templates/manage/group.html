@@ -136,6 +136,7 @@
                                 {% if group_registration.member.id != group_registration.organizer.id %}
                                 <div class="ui label">{{ macros.user_popup(group_registration.member) }}<i id="remove-member-trigger-{{ group_registration.member.id }}" class="delete icon"></i></div>
                                 <div id="remove-member-modal-{{ group_registration.member.id }}" class="ui modal">
+                                    <i class="close icon"></i>
                                     <div class="header"><i class="warning sign icon"></i>确定要删除{{ group.organizer.name }}（{{ group.organizer.email }}）的团报成员{{ group_registration.member.name }}（{{ group_registration.member.email }}）么？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.remove_group_member', organizer_id=group.organizer.id, member_id=group_registration.member.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="remove user icon"></i>删除</a>
@@ -156,6 +157,7 @@
                                     <div id="delete-trigger-{{ group.organizer.id }}" class="ui negative button" href=""><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ group.organizer.id }}" class="ui modal">
+                                    <i class="close icon"></i>
                                     <div class="header"><i class="warning sign icon"></i>确定要删除{{ group.organizer.name }}（{{ group.organizer.email }}）发起的团报么？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_group', id=group.organizer.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>

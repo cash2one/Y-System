@@ -3041,7 +3041,7 @@ class Test(db.Model):
         tests = [
             (u'L1-5', u'L5', ),
             (u'L6-9', u'L9', ),
-            (u'初始成绩', u'Y-GRE总论', ),
+            (u'初始', u'Y-GRE总论', ),
             (u'Unit 1', u'1st', ),
             (u'Unit 2', u'2nd', ),
             (u'Unit 3', u'3rd', ),
