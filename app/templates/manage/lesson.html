@@ -116,12 +116,12 @@
                         <tr>
                             <td>{{ lesson.name }}</td>
                             <td>{{ lesson.type.name }}</td>
-                            <td>{% for section in lesson.sections %}<a class="ui {% if show_vb_lessons %}blue {% else %}teal {% endif%}circular label loading-trigger" href="{{ url_for('manage.edit_section_hour', id=section.id, next=url_for('manage.lesson', page=pagination.page)) }}" data-content="编辑“{{ section.name }}”的学习时间" data-position="top center" data-variation="inverted">{{ section.abbr }}</a>{% endfor %}</td>
+                            <td>{% if lesson.sections.count() %}<div class="ui blue labels">{% for section in lesson.sections %}<a class="ui label loading-trigger" href="{{ url_for('manage.edit_section_hour', id=section.id, next=url_for('manage.lesson', page=pagination.page)) }}" data-content="编辑“{{ section.name }}”的学习时间" data-position="top center" data-variation="inverted">{{ section.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}</td>
                             <td>{{ lesson.hour }}</td>
                             <td><a class="ipad loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="查看含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.occupied_ipads_alias.count() }}台</a></td>
                             {% if lesson.advanced %}<td class="active">高阶</td>{% else %}<td>普通</td>{% endif %}
-                            <td>{% for assignment in lesson.assignments %}<a class="ui teal circular label loading-trigger" href="#" data-content="{{ assignment.name }}" data-position="top center" data-variation="inverted">{{ assignment.name }}</a>{% endfor %}</td>
-                            <td>{% for test in lesson.tests %}<a class="ui teal circular label loading-trigger" href="#" data-content="{{ test.name }}" data-position="top center" data-variation="inverted">{{ test.name }}</a>{% endfor %}</td>
+                            <td>{% if lesson.assignments.count() %}{% for assignment in lesson.assignments %}<a class="ui teal label loading-trigger" href="#" data-content="{{ assignment.name }}" data-position="top center" data-variation="inverted">{{ assignment.name }}</a>{% endfor %}{% else %}无{% endif %}</td>
+                            <td>{% if lesson.tests.count() %}{% for test in lesson.tests %}<a class="ui orange label loading-trigger" href="#" data-content="{{ test.name }}" data-position="top center" data-variation="inverted">{{ test.name }}</a>{% endfor %}{% else %}无{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
