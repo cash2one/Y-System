@@ -11,6 +11,7 @@ from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadFo
 from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import EditSectionHourForm
+from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
@@ -33,8 +34,8 @@ from ..models import Rental
 from ..models import Punch
 from ..models import Period, Schedule
 from ..models import Lesson, Section
-from ..models import Assignment
-from ..models import Test
+from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
+from ..models import Test, VBTestScore, YGRETestScore, GREAWScore
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
@@ -1580,9 +1581,39 @@ def y_gre_assignments():
     return resp
 
 
-@manage.route('/test')
+@manage.route('/assignment/score/<int:id>')
 @login_required
 @permission_required(u'管理作业')
+def assignment_score(id):
+    assignment = Assignment.query.get_or_404(id)
+    form = NewAssignmentScoreForm()
+    if form.validate_on_submit():
+        score = AssignmentScore(
+            user_id=User.query.filter_by(email=form.student_email.data, created=True, activated=True, deleted=False).first().id,
+            assignment_id=int(form.assignment.data),
+            grade_id=int(form.grade.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(score)
+        db.session.commit()
+        flash(u'已添加作业记录：%s' % score.alias, category='success')
+        return redirect(request.args.get('next') or url_for('manage.assignment_score', id=assignment.id))
+    page = request.args.get('page', 1, type=int)
+    query = AssignmentScore.query\
+        .join(User, User.id == AssignmentScore.user_id)\
+        .filter(AssignmentScore.assignment_id == assignment.id)\
+        .filter(User.created == True)\
+        .filter(User.activated == True)\
+        .filter(User.deleted == False)\
+        .order_by(AssignmentScore.modified_at.desc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    scores = pagination.items
+    return render_template('manage/assignment_score.html', form=form, assignment=assignment, scores=scores, pagination=pagination)
+
+
+@manage.route('/test')
+@login_required
+@permission_required(u'管理考试')
 def test():
     page = request.args.get('page', 1, type=int)
     show_vb_tests = True
@@ -1614,7 +1645,7 @@ def test():
 
 @manage.route('/test/vb')
 @login_required
-@permission_required(u'管理作业')
+@permission_required(u'管理考试')
 def vb_tests():
     resp = make_response(redirect(url_for('manage.test')))
     resp.set_cookie('show_vb_tests', '1', max_age=30*24*60*60)
@@ -1624,7 +1655,7 @@ def vb_tests():
 
 @manage.route('/test/y-gre')
 @login_required
-@permission_required(u'管理作业')
+@permission_required(u'管理考试')
 def y_gre_tests():
     resp = make_response(redirect(url_for('manage.test')))
     resp.set_cookie('show_vb_tests', '', max_age=30*24*60*60)

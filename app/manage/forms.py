@@ -9,6 +9,8 @@ from ..models import Permission, Role, User
 from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType, TOEFLTestScoreType
 from ..models import Period
 from ..models import Lesson, Section
+from ..models import Assignment, AssignmentScoreGrade
+from ..models import Test, GREAWScore
 from ..models import iPad, iPadCapacity, iPadState, Room
 from ..models import Course, CourseType
 from ..models import Announcement, AnnouncementType
@@ -174,6 +176,38 @@ class ConfirmPunchForm(FlaskForm):
 class EditSectionHourForm(FlaskForm):
     hour = StringField('学习时间', validators=[Required()])
     submit = SubmitField(u'提交')
+
+
+class NewAssignmentScoreForm(FlaskForm):
+    student_email = StringField(u'学生（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    assignment = SelectField(u'作业', coerce=unicode, validators=[Required()])
+    grade = SelectField(u'成绩', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewAssignmentScoreForm, self).__init__(*args, **kwargs)
+        self.assignment.choices = [(u'', u'选择作业')] + [(unicode(assignment.id), assignment.alias) for assignment in Assignment.query.order_by(Assignment.id.asc()).all()]
+        self.grade.choices = [(u'', u'选择成绩')] + [(unicode(grade.id), grade.alias) for grade in AssignmentScoreGrade.query.order_by(AssignmentScoreGrade.id.asc()).all()]
+
+    def validate_student_email(self, field):
+        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
+            raise ValidationError(u'学生邮箱不存在：%s' % field.data)
+
+
+class EditAssignmentScoreForm(FlaskForm):
+    student_email = StringField(u'学生（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    assignment = SelectField(u'作业', coerce=unicode, validators=[Required()])
+    grade = SelectField(u'成绩', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditAssignmentScoreForm, self).__init__(*args, **kwargs)
+        self.assignment.choices = [(u'', u'选择作业')] + [(unicode(assignment.id), assignment.alias) for assignment in Assignment.query.order_by(Assignment.id.asc()).all()]
+        self.grade.choices = [(u'', u'选择成绩')] + [(unicode(grade.id), grade.alias) for grade in AssignmentScoreGrade.query.order_by(AssignmentScoreGrade.id.asc()).all()]
+
+    def validate_student_email(self, field):
+        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
+            raise ValidationError(u'学生邮箱不存在：%s' % field.data)
 
 
 class NewUserForm(FlaskForm):
