@@ -325,7 +325,7 @@ class Purchase(db.Model):
         return u'%g' % self.total
 
     def __repr__(self):
-        return '<Purchase %r, %r, %r>' % (self.user.name, self.product.name, self.quantity)
+        return '<Purchase %r, %r>' % (self.user.name, self.alias)
 
 
 class SuspensionRecord(db.Model):
@@ -628,8 +628,17 @@ class AssignmentScore(db.Model):
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s %s %s' % (self.user.name_alias, self.assignment.name, self.grade.name)
+
     def __repr__(self):
-        return '<Assignment Score %r, %r>' % (self.user.name, self.assignment.name)
+        return '<Assignment Score %r>' % self.alias
 
 
 class VBTestScore(db.Model):
@@ -638,12 +647,22 @@ class VBTestScore(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
     score = db.Column(db.Float)
+    # retrieved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s %s %g' % (self.user.name_alias, self.test.name, self.score)
+
     def __repr__(self):
-        return '<VB Test Score %r, %r>' % (self.user.name, self.test.name)
+        return '<VB Test Score %r>' % self.alias
 
 
 class GREAWScore(db.Model):
@@ -676,12 +695,22 @@ class YGRETestScore(db.Model):
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
+    # retrieved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.name, self.v_score, self.q_score, self.aw_score.name)
+
     def __repr__(self):
-        return '<Y-GRE Test Score %r, %r>' % (self.user.name, self.test.name)
+        return '<Y-GRE Test Score %r>' % self.alias
 
 
 class TOEFLTestScoreType(db.Model):
@@ -689,6 +718,15 @@ class TOEFLTestScoreType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     toefl_test_scores = db.relationship('TOEFLTestScore', backref='type', lazy='dynamic')
+
+    @property
+    def finished_by_alias(self):
+        return TOEFLTestScore.query\
+            .join(User, User.id == TOEFLTestScore.user_id)\
+            .filter(TOEFLTestScore.type_id == self.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)
 
     @staticmethod
     def insert_toefl_test_score_types():
@@ -736,8 +774,16 @@ class TOEFLTestScore(db.Model):
         self.modified_by_id = modified_by.id
         db.session.add(self)
 
+    @property
+    def alias(self):
+        return u'%s %s %g R%g L%g S%g W%g' % (self.user.name_alias, self.type.name, self.total_score, self.reading_score, self.listening_score, self.speaking_score, self.writing_score)
+
+    @property
+    def alias2(self):
+        return u'总分：%g分（阅读：%g分 · 听力：%g分 · 口语：%g分 · 写作：%g分）' % (self.total_score, self.reading_score, self.listening_score, self.speaking_score, self.writing_score)
+
     def __repr__(self):
-        return '<TOEFL Test Score %r, %r>' % (self.user.name, self.test.name)
+        return '<TOEFL Test Score %r>' % self.alias
 
 
 class UserAnnouncement(db.Model):
@@ -1661,6 +1707,15 @@ class User(UserMixin, db.Model):
         )
         db.session.add(toefl_test_score)
 
+    def add_assignment_score(self, assignment, grade, modified_by):
+        assignment_score = AssignmentScore(
+            user_id=self.id,
+            assignment_id=assignment.id,
+            grade_id=grade.id,
+            modified_by_id=modified_by.id
+        )
+        db.session.add(assignment_score)
+
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
@@ -1802,8 +1857,12 @@ class EducationRecord(db.Model):
     full_gpa = db.Column(db.Float)
     year = db.Column(db.Unicode(16))
 
+    @property
+    def alias(self):
+        return u'%s %s %s %s' % (self.user.name, self.type.name, self.school, self.year)
+
     def __repr__(self):
-        return '<Education Record %r, %r, %r, %r>' % (self.user.name, self.type.name, self.school, self.year)
+        return '<Education Record %r>' % self.alias
 
 
 class EmploymentRecord(db.Model):
@@ -1814,8 +1873,12 @@ class EmploymentRecord(db.Model):
     position = db.Column(db.Unicode(64))
     year = db.Column(db.Unicode(16))
 
+    @property
+    def alias(self):
+        return u'%s %s %s %s' % (self.user.name, self.employer, self.position, self.year)
+
     def __repr__(self):
-        return '<Education Record %r, %r, %r>' % (self.user.name, self.employer, self.position)
+        return '<Education Record %r>' % self.alias
 
 
 class PreviousAchievementType(db.Model):
@@ -1857,8 +1920,12 @@ class PreviousAchievement(db.Model):
     score = db.Column(db.Integer)
     remark = db.Column(db.UnicodeText)
 
+    @property
+    def alias():
+        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.remark)
+
     def __repr__(self):
-        return '<Previous Achievement %r, %r, %r, %r>' % (self.user.name, self.type.name, self.score)
+        return '<Previous Achievement %r>' % self.alias
 
 
 class Product(db.Model):
@@ -1935,7 +2002,7 @@ class Product(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Product %r>' % self.name
+        return '<Product %r>' % self.alias
 
 
 class CourseType(db.Model):
@@ -2140,7 +2207,7 @@ class Period(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Period %r>' % self.name
+        return '<Period %r>' % self.alias
 
 
 class Schedule(db.Model):
@@ -2805,7 +2872,7 @@ class Lesson(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Lesson %r>' % self.name
+        return '<Lesson %r>' % self.alias
 
 
 class Section(db.Model):
@@ -2968,7 +3035,7 @@ class Section(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Section %r>' % self.name
+        return '<Section %r>' % self.alias
 
 
 class Assignment(db.Model):
@@ -2983,6 +3050,10 @@ class Assignment(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.lesson.alias, self.name)
 
     @property
     def finished_by_alias(self):
@@ -3022,7 +3093,7 @@ class Assignment(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Assignment %r>' % self.name
+        return '<Assignment %r>' % self.alias
 
 
 class Test(db.Model):
@@ -3044,6 +3115,10 @@ class Test(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.lesson.alias, self.name)
 
     @property
     def finished_by_alias(self):
@@ -3092,7 +3167,7 @@ class Test(db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<Test %r>' % self.name
+        return '<Test %r>' % self.alias
 
 
 class AnnouncementType(db.Model):

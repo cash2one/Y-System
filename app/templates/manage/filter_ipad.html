@@ -134,8 +134,8 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
-                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id, next=request.args.get('next')) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id, next=request.args.get('next')) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
                             <td>{{ ipad.room.name }}</td>
                             <td>
                                 {% if ipad.state.name == '借出' %}
@@ -167,19 +167,19 @@
                                     {{ ipad.state.name }}
                                     <div class="menu">
                                         {% if ipad.state.name != '待机' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword)) }}"><i class="wait icon"></i>待机</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword, next=request.args.get('next'))) }}"><i class="wait icon"></i>待机</a>
                                         {% endif %}
                                         {% if ipad.state.name != '候补' and current_user.can('管理iPad设备') %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword)) }}"><i class="cube icon"></i>候补</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword, next=request.args.get('next'))) }}"><i class="cube icon"></i>候补</a>
                                         {% endif %}
                                         {% if ipad.state.name != '维护' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_maintain', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword)) }}"><i class="configure icon"></i>维护</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_maintain', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword, next=request.args.get('next'))) }}"><i class="configure icon"></i>维护</a>
                                         {% endif %}
                                         {% if ipad.state.name != '充电' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_charge', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword)) }}"><i class="plug icon"></i>充电</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_charge', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword, next=request.args.get('next'))) }}"><i class="plug icon"></i>充电</a>
                                         {% endif %}
                                         {% if ipad.state.name != '退役' and current_user.can('管理iPad设备') %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_obsolete', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword)) }}"><i class="recycle icon"></i>退役</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_obsolete', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword, next=request.args.get('next'))) }}"><i class="recycle icon"></i>退役</a>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -193,13 +193,13 @@
                             {% if current_user.can('管理iPad设备') %}
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_ipad', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword)) }}"><i class="edit icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_ipad', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword, next=request.args.get('next'))) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ ipad.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ ipad.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除序列号为<code>{{ ipad.serial }}</code>的iPad？</div>
                                     <div class="actions">
-                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_ipad', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_ipad', id=ipad.id, next=url_for('manage.filter_ipad', keyword=keyword, next=request.args.get('next'))) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ ipad.id }}" class="ui black button">保留</div>
                                     </div>
                                 </div>

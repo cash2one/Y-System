@@ -476,7 +476,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ toefl_test_score.type.name }}成绩</div>
-                            <div class="description">总分：{{ toefl_test_score.total_score }}分（阅读：{{ toefl_test_score.reading_score }}分 &middot; 听力：{{ toefl_test_score.listening_score }}分 &middot; 口语：{{ toefl_test_score.speaking_score }}分 &middot; 写作：{{ toefl_test_score.writing_score }}分）</div>
+                            <div class="description">{{ toefl_test_score.alias2 }}</div>
                         </div>
                     </div>
                     {% endfor %}
