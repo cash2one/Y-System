@@ -94,6 +94,34 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="file text outline icon"></i>作业列表</h3>
+                <div id="new-score-trigger" class="ui right floated positive circular icon button" data-content="新建作业记录" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-score-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建作业记录</div>
+                    <div class="content">
+                        <form id="new-score" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="required field">
+                                {{ form.email.label() }}
+                                <div class="ui fluid search">
+                                    {{ form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ form.assignment.label() }}
+                                    {{ form.assignment(class='ui dropdown') }}
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ form.grade.label() }}
+                                    {{ form.grade(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_vb_assignments %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_assignments') }}">VB作业</a>
                     <a class="item {% if show_y_gre_assignments %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_assignments') }}">Y-GRE作业</a>
@@ -113,7 +141,7 @@
                             <td>{{ assignment.name }}</td>
                             <td>{{ assignment.lesson.type.name }}</td>
                             <td>{{ assignment.lesson.name }}</td>
-                            <td>{% if assignment.finished_by_alias.count() >= 0 %}<a class="score loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, next=url_for('manage.assignment', page=pagination.page)) }}" data-content="查看作业记录" data-position="top center" data-variation="inverted">{{ assignment.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
+                            <td>{% if assignment.finished_by_alias.count() %}<a class="score loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, next=url_for('manage.assignment', page=pagination.page)) }}" data-content="查看作业记录" data-position="top center" data-variation="inverted">{{ assignment.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -141,5 +169,65 @@ $('.message .close')
 $('table').tablesort();
 
 $('td a.score.loading-trigger').popup();
+$('#new-score-trigger').popup();
+$('#new-score-trigger')
+    .on('click', function() {
+        $('#new-score-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$(document)
+    .ready(function() {
+        $('#new-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入有效的用户邮箱'
+                            }
+                        ]
+                    },
+                    assignment: {
+                        identifier: 'assignment',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择作业'
+                            }
+                        ]
+                    },
+                    grade: {
+                        identifier: 'grade',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择作业分数'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
+        },
+        showNoResults: false
+    })
+;
 </script>
 {% endblock %}

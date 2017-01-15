@@ -34,7 +34,6 @@ def vb():
         if not current_user.notified_by(announcement=announcement):
             flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
             announcement.notify(user=current_user._get_current_object())
-    page = request.args.get('page', 1, type=int)
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\
         .join(CourseType, CourseType.id == Period.type_id)\
@@ -43,6 +42,7 @@ def vb():
         .filter(Schedule.date >= date.today())\
         .order_by(Schedule.date.asc())\
         .order_by(Period.id.asc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     return render_template('book/vb.html', schedules=schedules, pagination=pagination, announcements=announcements)
@@ -180,7 +180,6 @@ def y_gre():
         if not current_user.notified_by(announcement=announcement):
             flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
             announcement.notify(user=current_user._get_current_object())
-    page = request.args.get('page', 1, type=int)
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\
         .join(CourseType, CourseType.id == Period.type_id)\
@@ -189,6 +188,7 @@ def y_gre():
         .filter(Schedule.date >= date.today())\
         .order_by(Schedule.date.asc())\
         .order_by(Period.id.asc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     return render_template('book/y_gre.html', schedules=schedules, pagination=pagination, announcements=announcements)

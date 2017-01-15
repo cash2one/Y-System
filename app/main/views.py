@@ -52,8 +52,8 @@ def profile():
         if not current_user.notified_by(announcement=announcement):
             flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
             announcement.notify(user=current_user._get_current_object())
-    page = request.args.get('page', 1, type=int)
     punches = current_user.punches.order_by(Punch.timestamp.desc()).limit(10)
+    page = request.args.get('page', 1, type=int)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == current_user.id)\
@@ -71,8 +71,8 @@ def profile_user(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    page = request.args.get('page', 1, type=int)
     punches = user.punches.order_by(Punch.timestamp.desc()).limit(10)
+    page = request.args.get('page', 1, type=int)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
         .filter(Booking.user_id == user.id)\

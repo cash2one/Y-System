@@ -131,7 +131,8 @@
                             <th>学生</th>
                             <th>作业</th>
                             <th>分数</th>
-                            <th>上次操作</th>
+                            <th>创建时间</th>
+                            <th>更新时间</th>
                             <th>操作人</th>
                             <th>操作</th>
                         </tr>
@@ -143,6 +144,10 @@
                             <td>{{ score.assignment.name }}</td>
                             <td>{{ score.grade.name }}</td>
                             <td>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(score.created_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(score.created_at).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(score.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(score.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
@@ -150,13 +155,8 @@
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_assignment_score', id=score.id, next=url_for('manage.assignment_score', id=assignment.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    {% if score.users.count() %}
-                                    <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
-                                    {% else %}
                                     <div id="delete-trigger-{{ score.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
-                                    {% endif %}
                                 </div>
-                                {% if score.users.count() == 0 %}
                                 <div id="delete-modal-{{ score.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除作业记录“{{ score.alias }}”？</div>
                                     <div class="actions">
@@ -164,13 +164,13 @@
                                         <div id="delete-hide-trigger-{{ score.id }}" class="ui black button">保留</div>
                                     </div>
                                 </div>
-                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.assignment_score', id=assignment.id) }}{% endif %}
+                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
             </div>
         </div>
     </div>
@@ -195,7 +195,6 @@ $('.ui.checkbox').checkbox();
 $('table').tablesort();
 
 {% for score in scores %}
-{% if score.users.count() == 0 %}
 $('#delete-trigger-{{ score.id }}')
     .on('click', function() {
         $('#delete-modal-{{ score.id }}').modal({ autofocus: false }).modal('show');
@@ -206,7 +205,6 @@ $('#delete-hide-trigger-{{ score.id }}')
         $('#delete-modal-{{ score.id }}').modal('hide');
     })
 ;
-{% endif %}
 {% endfor %}
 
 $('#new-score-trigger').popup();

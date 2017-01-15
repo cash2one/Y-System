@@ -217,7 +217,6 @@ def summary_statistics():
 @login_required
 @permission_required(u'管理课程预约')
 def booking():
-    page = request.args.get('page', 1, type=int)
     show_today_booking = True
     show_future_booking = False
     show_history_booking = False
@@ -245,6 +244,7 @@ def booking():
             .order_by(Schedule.date.asc())\
             .order_by(Schedule.period_id.asc())\
             .order_by(Booking.timestamp.desc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     bookings = pagination.items
     return render_template('manage/booking.html',
@@ -450,7 +450,6 @@ def set_booking_state_missed_all():
 @login_required
 @permission_required(u'管理iPad借阅')
 def rental():
-    page = request.args.get('page', 1, type=int)
     show_today_rental = True
     show_today_rental_1103 = False
     show_today_rental_1707 = False
@@ -487,6 +486,7 @@ def rental():
             .filter(Schedule.date < date.today())\
             .order_by(Schedule.date.desc())\
             .order_by(Rental.return_time.desc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     rentals = pagination.items
     return render_template('manage/rental.html',
@@ -1224,8 +1224,8 @@ def period():
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
         return redirect(url_for('manage.period'))
-    page = request.args.get('page', 1, type=int)
     query = Period.query.filter_by(deleted=False)
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     periods = pagination.items
     return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
@@ -1313,7 +1313,6 @@ def schedule():
                     db.session.commit()
                     flash(u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category='success')
         return redirect(url_for('manage.schedule'))
-    page = request.args.get('page', 1, type=int)
     show_today_schedule = True
     show_future_schedule = False
     show_history_schedule = False
@@ -1335,6 +1334,7 @@ def schedule():
             .filter(Schedule.date < date.today())\
             .order_by(Schedule.date.desc())\
             .order_by(Schedule.period_id.asc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     return render_template('manage/schedule.html',
@@ -1465,7 +1465,6 @@ def decrease_schedule_quota(id):
 @login_required
 @permission_required(u'管理课程')
 def lesson():
-    page = request.args.get('page', 1, type=int)
     show_vb_lessons = True
     show_y_gre_lessons = False
     if current_user.is_authenticated:
@@ -1481,6 +1480,7 @@ def lesson():
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
             .order_by(Lesson.id.asc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     lessons = pagination.items
     return render_template('manage/lesson.html',
@@ -1529,11 +1529,26 @@ def edit_section_hour(id):
     return render_template('manage/edit_section_hour.html', form=form, section=section)
 
 
-@manage.route('/assignment')
+@manage.route('/assignment', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理作业')
 def assignment():
-    page = request.args.get('page', 1, type=int)
+    form = NewAssignmentScoreForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+            return redirect(url_for('manage.assignment', page=request.args.get('page', 1, type=int)))
+        score = AssignmentScore(
+            user_id=user.id,
+            assignment_id=int(form.assignment.data),
+            grade_id=int(form.grade.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(score)
+        db.session.commit()
+        flash(u'已添加作业记录：%s' % score.alias, category='success')
+        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data), next=url_for('manage.assignment', page=request.args.get('page', 1, type=int))))
     show_vb_assignments = True
     show_y_gre_assignments = False
     if current_user.is_authenticated:
@@ -1551,9 +1566,11 @@ def assignment():
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
             .order_by(Assignment.id.asc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     assignments = pagination.items
     return render_template('manage/assignment.html',
+        form=form,
         assignments=assignments,
         show_vb_assignments=show_vb_assignments,
         show_y_gre_assignments=show_y_gre_assignments,
@@ -1591,17 +1608,18 @@ def assignment_score(id):
         user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
-            return redirect(url_for('manage.assignment_score', id=assignment.id))
-        user.add_assignment_score(
-            user=user,
-            assignment=Assignment.query.get(int(form.assignment.data)),
-            grade=AssignmentScoreGrade.query.get(int(form.grade.data)),
-            modified_by=current_user._get_current_object()
+            return redirect(url_for('manage.assignment_score', id=assignment.id, next=request.args.get('next')))
+        score = AssignmentScore(
+            user_id=user.id,
+            assignment_id=int(form.assignment.data),
+            grade_id=int(form.grade.data),
+            modified_by_id=current_user.id
         )
+        db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
-        return redirect(url_for('manage.assignment_score', id=assignment.id))
-    page = request.args.get('page', 1, type=int)
+        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data), next=request.args.get('next')))
+    form.assignment.data = unicode(assignment.id)
     query = AssignmentScore.query\
         .join(User, User.id == AssignmentScore.user_id)\
         .filter(AssignmentScore.assignment_id == assignment.id)\
@@ -1609,6 +1627,7 @@ def assignment_score(id):
         .filter(User.activated == True)\
         .filter(User.deleted == False)\
         .order_by(AssignmentScore.modified_at.desc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     scores = pagination.items
     return render_template('manage/assignment_score.html', form=form, assignment=assignment, scores=scores, pagination=pagination)
@@ -1648,7 +1667,6 @@ def delete_assignment_score(id):
 @login_required
 @permission_required(u'管理考试')
 def test():
-    page = request.args.get('page', 1, type=int)
     show_vb_tests = True
     show_y_gre_tests = False
     show_toefl_tests = False
@@ -1670,6 +1688,7 @@ def test():
             .order_by(Test.id.asc())
     if show_toefl_tests:
         query = TOEFLTestScoreType.query
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     tests = pagination.items
     return render_template('manage/test.html',
@@ -1737,7 +1756,6 @@ def user():
         current_user.create_user(user=admin)
         flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
         return redirect(url_for('manage.user'))
-    page = request.args.get('page', 1, type=int)
     show_activated_users = True
     show_unactivated_users = False
     show_suspended_users = False
@@ -1891,6 +1909,7 @@ def user():
         .filter(User.deleted == False)\
         .filter(Role.name == u'开发人员')\
         .count()
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
     return render_template('manage/user.html',
@@ -2973,7 +2992,6 @@ def course():
         db.session.add(course)
         flash(u'新建班级：%s' % form.name.data, category='success')
         return redirect(url_for('manage.course'))
-    page = request.args.get('page', 1, type=int)
     show_vb_courses = True
     show_y_gre_courses = False
     if current_user.is_authenticated:
@@ -2991,6 +3009,7 @@ def course():
             .filter(CourseType.name == u'Y-GRE')\
             .filter(Course.deleted == False)\
             .order_by(Course.id.desc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     courses = pagination.items
     return render_template('manage/course.html',
@@ -3029,12 +3048,12 @@ def course_user(id):
     course = Course.query.get_or_404(id)
     if course.deleted or course.valid_registrations.count() == 0:
         abort(404)
-    page = request.args.get('page', 1, type=int)
     query = User.query\
         .join(CourseRegistration, CourseRegistration.user_id == User.id)\
         .filter(CourseRegistration.course_id == course.id)\
         .filter(User.created == True)\
         .filter(User.deleted == False)
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
     return render_template('manage/course_user.html', course=course, users=users, pagination=pagination)
@@ -3109,10 +3128,10 @@ def group():
         user.register_group(organizer=user)
         flash(u'%s已成功发起团报' % user.name_alias, category='success')
         return redirect(url_for('manage.group'))
-    page = request.args.get('page', 1, type=int)
     query = GroupRegistration.query\
         .filter(GroupRegistration.organizer_id == GroupRegistration.member_id)\
         .order_by(GroupRegistration.timestamp.desc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     groups = pagination.items
     return render_template('manage/group.html', form=form, groups=groups, pagination=pagination)
@@ -3216,7 +3235,6 @@ def ipad():
         iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad'))
-    page = request.args.get('page', 1, type=int)
     show_ipad_all = True
     show_ipad_maintain = False
     show_ipad_charge = False
@@ -3266,6 +3284,7 @@ def ipad():
     if show_ipad_others:
         query = iPad.query\
             .filter_by(room_id=None, deleted=False)
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     ipads = pagination.items
     return render_template('manage/ipad.html',
@@ -3549,8 +3568,8 @@ def announcement():
             announcement.clean_up()
         flash(u'已添加通知：“%s”' % form.title.data, category='success')
         return redirect(url_for('manage.announcement'))
-    page = request.args.get('page', 1, type=int)
     query = Announcement.query.filter_by(deleted=False)
+    page = request.args.get('page', 1, type=int)
     pagination = query\
         .order_by(Announcement.modified_at.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -3644,8 +3663,8 @@ def product():
         db.session.add(product)
         flash(u'已添加研修产品：%s' % form.name.data, category='success')
         return redirect(url_for('manage.product'))
-    page = request.args.get('page', 1, type=int)
     query = Product.query.filter_by(deleted=False)
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     products = pagination.items
     return render_template('manage/product.html', form=form, products=products, pagination=pagination)
@@ -3708,7 +3727,6 @@ def product_purchase(id):
     product = Product.query.get_or_404(id)
     if product.deleted or product.sales_volume == 0:
         abort(404)
-    page = request.args.get('page', 1, type=int)
     query = Purchase.query\
         .join(User, User.id == Purchase.user_id)\
         .filter(Purchase.product_id == product.id)\
@@ -3716,6 +3734,7 @@ def product_purchase(id):
         .filter(User.activated == True)\
         .filter(User.deleted == False)\
         .order_by(Purchase.timestamp.desc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     purchases = pagination.items
     return render_template('manage/product_purchase.html', product=product, purchases=purchases, pagination=pagination)
@@ -3739,8 +3758,8 @@ def role():
             role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
         flash(u'已添加角色：%s' % form.name.data, category='success')
         return redirect(url_for('manage.role'))
-    page = request.args.get('page', 1, type=int)
     query = Role.query
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     roles = pagination.items
     return render_template('manage/role.html', form=form, roles=roles, pagination=pagination)
@@ -3797,7 +3816,6 @@ def permission():
         db.session.add(permission)
         flash(u'已添加权限：%s' % form.name.data, category='success')
         return redirect(url_for('manage.permission'))
-    page = request.args.get('page', 1, type=int)
     show_booking_permissions = True
     show_manage_permissions = False
     show_develop_permissions = False
@@ -3827,6 +3845,7 @@ def permission():
                 Permission.name.notlike(u'开发%'),
             ))\
             .order_by(Permission.id.asc())
+    page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     permissions = pagination.items
     return render_template('manage/permission.html',
