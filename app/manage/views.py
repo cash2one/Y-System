@@ -33,6 +33,8 @@ from ..models import Rental
 from ..models import Punch
 from ..models import Period, Schedule
 from ..models import Lesson, Section
+from ..models import Assignment
+from ..models import Test
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
@@ -1526,6 +1528,58 @@ def edit_section_hour(id):
     return render_template('manage/edit_section_hour.html', form=form, section=section)
 
 
+@manage.route('/assignment')
+@login_required
+@permission_required(u'管理作业')
+def assignment():
+    page = request.args.get('page', 1, type=int)
+    show_vb_assignments = True
+    show_y_gre_assignments = False
+    if current_user.is_authenticated:
+        show_vb_assignments = bool(request.cookies.get('show_vb_assignments', '1'))
+        show_y_gre_assignments = bool(request.cookies.get('show_y_gre_assignments', ''))
+    if show_vb_assignments:
+        query = Assignment.query\
+            .join(Lesson, Lesson.id == Assignment.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .order_by(Assignment.id.asc())
+    if show_y_gre_assignments:
+        query = Assignment.query\
+            .join(Lesson, Lesson.id == Assignment.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .order_by(Assignment.id.asc())
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    assignments = pagination.items
+    return render_template('manage/assignment.html',
+        assignments=assignments,
+        show_vb_assignments=show_vb_assignments,
+        show_y_gre_assignments=show_y_gre_assignments,
+        pagination=pagination
+    )
+
+
+@manage.route('/assignment/vb')
+@login_required
+@permission_required(u'管理作业')
+def vb_assignments():
+    resp = make_response(redirect(url_for('manage.assignment')))
+    resp.set_cookie('show_vb_assignments', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_assignments', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/assignment/y-gre')
+@login_required
+@permission_required(u'管理作业')
+def y_gre_assignments():
+    resp = make_response(redirect(url_for('manage.assignment')))
+    resp.set_cookie('show_vb_assignments', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_assignments', '1', max_age=30*24*60*60)
+    return resp
+
+
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
@@ -2834,7 +2888,7 @@ def y_gre_courses():
 @manage.route('/course/<int:id>')
 @login_required
 @permission_required(u'管理')
-def course_users(id):
+def course_user(id):
     course = Course.query.get_or_404(id)
     if course.deleted or course.valid_registrations.count() == 0:
         abort(404)
@@ -2846,7 +2900,7 @@ def course_users(id):
         .filter(User.deleted == False)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/course_users.html', course=course, users=users, pagination=pagination)
+    return render_template('manage/course_user.html', course=course, users=users, pagination=pagination)
 
 
 @manage.route('/course/toggle-show/<int:id>')

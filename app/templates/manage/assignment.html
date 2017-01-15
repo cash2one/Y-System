@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}产品购买记录{% endblock %}
+{% block title %}作业管理{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="tag icon"></i>{{ product.name }}</h1>
+    <h1 class="ui inverted header"><i class="file text outline icon"></i>作业管理</h1>
 </div>
 {% endblock %}
 
@@ -93,37 +93,32 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="shop icon"></i>产品购买记录</h3>
+                <h3 class="ui header"><i class="book icon"></i>作业列表</h3>
                 <div class="ui secondary stackable menu">
-                    <a class="item active loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id, page=pagination.page) }}">全部</a>
+                    <a class="item {% if show_vb_assignments %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_assignments') }}">VB作业</a>
+                    <a class="item {% if show_y_gre_assignments %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_assignments') }}">Y-GRE作业</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
-                            <th>购买用户</th>
-                            <th>单价</th>
-                            <th>购买数量</th>
-                            <th>总价</th>
-                            <th>购买时间</th>
+                            <th>作业名称</th>
+                            <th>类型</th>
+                            <th>从属课程</th>
+                            <th>完成记录</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for purchase in purchases %}
+                        {% for assignment in assignments %}
                         <tr>
-                            <td>{{ macros.user_popup(purchase.user) }}</td>
-                            <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
-                            <td>{{ purchase.quantity }}</td>
-                            <td><i class="fitted yen icon"></i> {{ purchase.total_alias }}</td>
-                            <td>
-                                <div class="popup-trigger" data-variation="inverted">{{ moment(purchase.timestamp).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(purchase.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
+                            <td>{{ assignment.name }}</td>
+                            <td>{{ assignment.lesson.type.name }}</td>
+                            <td>{{ assignment.lesson.name }}</td>
+                            <td>{% if assignment.finished_by_alias.count() %}<a class="score loading-trigger" href="#" data-content="查看作业记录" data-position="top center" data-variation="inverted">{{ assignment.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.product_purchase', id=product.id) }}{% endif %}
-                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.assignment') }}{% endif %}
             </div>
         </div>
     </div>
@@ -144,5 +139,7 @@ $('.message .close')
 ;
 
 $('table').tablesort();
+
+$('td a.score.loading-trigger').popup();
 </script>
 {% endblock %}

@@ -211,6 +211,7 @@
                     </tbody>
                 </table>
                 {% endif %}
+                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
             </div>
         </div>
     </div>

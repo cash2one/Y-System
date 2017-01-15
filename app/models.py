@@ -2570,7 +2570,7 @@ class iPad(db.Model):
 
     @property
     def video_playback_alias(self):
-        return u'%g小时' % (self.video_playback.total_seconds() / 3600)
+        return u'%g 小时' % (self.video_playback.total_seconds() / 3600)
 
     @property
     def current_battery_life(self):
@@ -2688,6 +2688,8 @@ class Lesson(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
+    assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
+    tests = db.relationship('Test', backref='test', lazy='dynamic')
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
@@ -2838,6 +2840,10 @@ class Section(db.Model):
             return u'0.%s%s' % (self.name[4], self.name[6])
         return self.name
 
+    @property
+    def hour_alias(self):
+        return u'%g' % (self.hour.total_seconds() / 3600)
+
     @staticmethod
     def insert_sections():
         sections = [
@@ -2978,6 +2984,15 @@ class Assignment(db.Model):
         cascade='all, delete-orphan'
     )
 
+    @property
+    def finished_by_alias(self):
+        return AssignmentScore.query\
+            .join(User, User.id == AssignmentScore.user_id)\
+            .filter(AssignmentScore.assignment_id == self.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)
+
     @staticmethod
     def insert_assignments():
         assignments = [
@@ -3035,7 +3050,7 @@ class Test(db.Model):
         tests = [
             (u'L1-5', u'L5', ),
             (u'L6-9', u'L9', ),
-            (u'初始成绩', u'Y-GRE总论', ),
+            (u'初始', u'Y-GRE总论', ),
             (u'Unit 1', u'1st', ),
             (u'Unit 2', u'2nd', ),
             (u'Unit 3', u'3rd', ),
