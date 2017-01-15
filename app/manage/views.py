@@ -1647,7 +1647,7 @@ def edit_assignment_score(id):
         db.session.add(score)
         db.session.commit()
         flash(u'已更新作业记录：%s' % score.alias, category='success')
-        return redirect(request.args.get('next') or url_for('manage.assignment_score', id=score.assignment_id))
+        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data), next=request.args.get('next')))
     form.assignment.data = unicode(score.assignment_id)
     form.grade.data = unicode(score.grade_id)
     return render_template('manage/edit_assignment_score.html', form=form, score=score)

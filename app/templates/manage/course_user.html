@@ -99,6 +99,7 @@
                 <h3 class="ui header"><i class="user icon"></i>用户列表</h3>
                 <div class="ui secondary stackable menu">
                     <a class="item active loading-trigger" href="{{ url_for('manage.course_user', id=course.id, page=pagination.page) }}">全部</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.course') }}">返回班级列表</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -122,8 +123,8 @@
                             <td>{{ macros.user_url(user) }}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}</td>
                             <td>{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i></td>
                             <td>{{ user.role.name }}</td>
-                            <td>{% if course.type.name == 'VB' %}{{ course.name }}{% else %}{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.vb_course.id, next=request.args.get('next')) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
-                            <td>{% if course.type.name == 'Y-GRE' %}{{ course.name }}{% else %}{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.y_gre_course.id, next=request.args.get('next')) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
+                            <td>{% if course.type.name == 'VB' %}{{ course.name }}{% else %}{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.vb_course.id) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
+                            <td>{% if course.type.name == 'Y-GRE' %}{{ course.name }}{% else %}{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.y_gre_course.id) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
                             <td>
                                 {% if user.activated %}
                                 {{ user.last_punch.alias2 }}
@@ -168,8 +169,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.course_user', id=course.id, next=request.args.get('next')) }}{% endif %}
-                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.course_user', id=course.id) }}{% endif %}
             </div>
         </div>
     </div>
