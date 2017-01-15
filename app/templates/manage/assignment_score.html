@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}作业记录{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<style type="text/css">
+.masthead.segment {
+    min-height: 300px;
+    padding: 1em 0em;
+}
+.masthead h1.ui.header {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    font-size: 3em;
+    font-weight: normal;
+}
+
+.ui.vertical.stripe {
+    padding: 8em 0em;
+}
+.ui.vertical.stripe h3 {
+    font-size: 2em;
+}
+.ui.vertical.stripe .ui.table .ui.button {
+    margin: auto;
+}
+.ui.vertical.stripe .button + h3,
+.ui.vertical.stripe p + h3,
+.ui.vertical.stripe .ui.list + h3 {
+    margin-top: 3em;
+}
+.ui.vertical.stripe .floated.image {
+    clear: both;
+}
+.ui.vertical.stripe .ui.tabular.menu,
+.ui.vertical.stripe .ui.statistic .label,
+.ui.vertical.stripe p,
+.ui.vertical.stripe .ui.table {
+    /*font-size: 1.2em;*/
+}
+.ui.vertical.stripe .horizontal.divider {
+    margin: 3em 0em;
+}
+.ui.vertical.stripe .ui.form .ui.flask.message {
+    display: block;
+}
+
+.stats.stripe.segment,
+.quote.stripe.segment {
+    padding: 0em;
+}
+.stats.stripe.segment .grid .column,
+.quote.stripe.segment .grid .column {
+    padding-top: 5em;
+    padding-bottom: 5em;
+}
+.quote.stripe.segment p span {
+    font-size: 0.85em;
+}
+
+.masthead.segment #message-container {
+    margin-top: 70px;
+}
+
+
+@media only screen and (max-width: 767px) {
+    .masthead.segment {
+        min-height: 160px;
+    }
+    .masthead h1.ui.header {
+        margin-top: 1em;
+        margin-bottom: 1em;
+        font-size: 1.8em;
+    }
+    .masthead.segment #message-container {
+        margin-top: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="file text outline icon"></i>{{ assignment.alias }}</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="file text outline icon"></i>作业记录</h3>
+                <div id="new-score-trigger" class="ui right floated positive circular icon button" data-content="新建作业记录" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-score-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建作业记录</div>
+                    <div class="content">
+                        <form id="new-score" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="required field">
+                                {{ form.email.label() }}
+                                <div class="ui fluid search">
+                                    {{ form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ form.assignment.label() }}
+                                    {{ form.assignment(class='ui dropdown') }}
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ form.grade.label() }}
+                                    {{ form.grade(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, page=pagination.page) }}">全部</a>
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>学生</th>
+                            <th>作业</th>
+                            <th>分数</th>
+                            <th>上次操作</th>
+                            <th>操作人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for score in scores %}
+                        <tr>
+                            <td>{{ macros.user_popup(score.user) }}</td>
+                            <td>{{ score.assignment.name }}</td>
+                            <td>{{ score.grade.name }}</td>
+                            <td>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(score.modified_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(score.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>{{ macros.user_popup(score.modified_by) }}</td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_assignment_score', id=score.id, next=url_for('manage.assignment_score', id=assignment.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    {% if score.users.count() %}
+                                    <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
+                                    {% else %}
+                                    <div id="delete-trigger-{{ score.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                    {% endif %}
+                                </div>
+                                {% if score.users.count() == 0 %}
+                                <div id="delete-modal-{{ score.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除作业记录“{{ score.alias }}”？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_assignment_score', id=score.id, next=url_for('manage.assignment_score', id=assignment.id, page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ score.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.assignment_score', id=assignment.id) }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.checkbox').checkbox();
+
+$('table').tablesort();
+
+{% for score in scores %}
+{% if score.users.count() == 0 %}
+$('#delete-trigger-{{ score.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ score.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger-{{ score.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ score.id }}').modal('hide');
+    })
+;
+{% endif %}
+{% endfor %}
+
+$('#new-score-trigger').popup();
+$('#new-score-trigger')
+    .on('click', function() {
+        $('#new-score-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$(document)
+    .ready(function() {
+        $('#new-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入有效的用户邮箱'
+                            }
+                        ]
+                    },
+                    assignment: {
+                        identifier: 'assignment',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择作业'
+                            }
+                        ]
+                    },
+                    grade: {
+                        identifier: 'grade',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择作业分数'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
+        },
+        showNoResults: false
+    })
+;
+</script>
+{% endblock %}

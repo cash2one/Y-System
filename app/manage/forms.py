@@ -179,7 +179,7 @@ class EditSectionHourForm(FlaskForm):
 
 
 class NewAssignmentScoreForm(FlaskForm):
-    student_email = StringField(u'学生（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     assignment = SelectField(u'作业', coerce=unicode, validators=[Required()])
     grade = SelectField(u'成绩', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'提交')
@@ -187,11 +187,7 @@ class NewAssignmentScoreForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewAssignmentScoreForm, self).__init__(*args, **kwargs)
         self.assignment.choices = [(u'', u'选择作业')] + [(unicode(assignment.id), assignment.alias) for assignment in Assignment.query.order_by(Assignment.id.asc()).all()]
-        self.grade.choices = [(u'', u'选择成绩')] + [(unicode(grade.id), grade.alias) for grade in AssignmentScoreGrade.query.order_by(AssignmentScoreGrade.id.asc()).all()]
-
-    def validate_student_email(self, field):
-        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
-            raise ValidationError(u'学生邮箱不存在：%s' % field.data)
+        self.grade.choices = [(u'', u'选择成绩')] + [(unicode(grade.id), grade.name) for grade in AssignmentScoreGrade.query.order_by(AssignmentScoreGrade.id.asc()).all()]
 
 
 class EditAssignmentScoreForm(FlaskForm):
@@ -202,7 +198,7 @@ class EditAssignmentScoreForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditAssignmentScoreForm, self).__init__(*args, **kwargs)
         self.assignment.choices = [(u'', u'选择作业')] + [(unicode(assignment.id), assignment.alias) for assignment in Assignment.query.order_by(Assignment.id.asc()).all()]
-        self.grade.choices = [(u'', u'选择成绩')] + [(unicode(grade.id), grade.alias) for grade in AssignmentScoreGrade.query.order_by(AssignmentScoreGrade.id.asc()).all()]
+        self.grade.choices = [(u'', u'选择成绩')] + [(unicode(grade.id), grade.name) for grade in AssignmentScoreGrade.query.order_by(AssignmentScoreGrade.id.asc()).all()]
 
 
 class NewUserForm(FlaskForm):
@@ -377,10 +373,6 @@ class NewAdminForm(FlaskForm):
             self.role.choices = [(u'', u'选择权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
         else:
             self.role.choices = [(u'', u'选择权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员']]
-
-    def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
-            raise ValidationError(u'%s已经被注册' % field.data)
 
 
 class EditNameForm(FlaskForm):

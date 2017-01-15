@@ -1588,10 +1588,10 @@ def assignment_score(id):
     assignment = Assignment.query.get_or_404(id)
     form = NewAssignmentScoreForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.student_email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'学生邮箱不存在：%s' % form.student_email.data, category='error')
-            return redirect(request.args.get('next') or url_for('manage.assignment_score', id=assignment.id))
+            flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+            return redirect(url_for('manage.assignment_score', id=assignment.id))
         user.add_assignment_score(
             user=user,
             assignment=Assignment.query.get(int(form.assignment.data)),
@@ -1600,7 +1600,7 @@ def assignment_score(id):
         )
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
-        return redirect(request.args.get('next') or url_for('manage.assignment_score', id=assignment.id))
+        return redirect(url_for('manage.assignment_score', id=assignment.id))
     page = request.args.get('page', 1, type=int)
     query = AssignmentScore.query\
         .join(User, User.id == AssignmentScore.user_id)\
@@ -1720,6 +1720,9 @@ def toefl_tests():
 def user():
     form = NewAdminForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
+        if User.query.filter_by(email=form.email.data).first():
+            flash(u'%s已经被注册' % form.email.data, category='error')
+            return redirect(url_for('manage.user'))
         admin = User(
             email=form.email.data,
             role_id=int(form.role.data),
@@ -1733,7 +1736,7 @@ def user():
         db.session.commit()
         current_user.create_user(user=admin)
         flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
-        return redirect(request.args.get('next') or url_for('manage.user'))
+        return redirect(url_for('manage.user'))
     page = request.args.get('page', 1, type=int)
     show_activated_users = True
     show_unactivated_users = False
