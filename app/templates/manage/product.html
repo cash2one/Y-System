@@ -164,7 +164,6 @@
                                     <div id="delete-trigger-{{ product.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ product.id }}" class="ui modal">
-                                    <i class="close icon"></i>
                                     <div class="header"><i class="warning sign icon"></i>确定要删除产品“{{ product.name }}”？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
