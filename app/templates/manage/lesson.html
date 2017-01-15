@@ -120,8 +120,8 @@
                             <td class="single line">{{ lesson.hour }}</td>
                             <td class="single line">{% if lesson.occupied_ipads_alias.count() %}<a class="ipad loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id, next=url_for('manage.lesson', page=pagination.page)) }}" data-content="查看含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.occupied_ipads_alias.count() }} 台</a>{% else %}0 台{% endif %}</td>
                             {% if lesson.advanced %}<td class="active">高阶</td>{% else %}<td>普通</td>{% endif %}
-                            <td class="single line">{% if lesson.assignments.count() %}{% if lesson.assignments.count() > 1 %}<div class="ui labels">{% endif %}{% for assignment in lesson.assignments %}<a class="ui teal label loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id) }}" data-content="查看作业记录" data-position="top center" data-variation="inverted">{{ assignment.name }}</a>{% endfor %}{% if lesson.assignments.count() > 1 %}</div>{% endif %}{% else %}无{% endif %}</td>
-                            <td class="single line">{% if lesson.tests.count() %}{% if lesson.tests.count() > 1 %}<div class="ui labels">{% endif %}{% for test in lesson.tests %}<a class="ui orange label loading-trigger" href="#" data-content="查看考试记录" data-position="top center" data-variation="inverted">{{ test.name }}</a>{% endfor %}{% if lesson.tests.count() > 1 %}</div>{% endif %}{% else %}无{% endif %}</td>
+                            <td class="single line">{% if lesson.assignments.count() %}{% if lesson.assignments.count() > 1 %}<div class="ui labels">{% endif %}{% for assignment in lesson.assignments %}{% if assignment.finished_by_alias.count() %}<a class="ui teal label loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id) }}" data-content="查看{{ assignment.finished_by_alias.count() }}条作业记录" data-position="top center" data-variation="inverted">{{ assignment.name }}</a>{% else %}<div class="ui teal label" data-content="无作业记录" data-position="top center" data-variation="inverted">{{ assignment.name }}</div>{% endif %}{% endfor %}{% if lesson.assignments.count() > 1 %}</div>{% endif %}{% else %}无{% endif %}</td>
+                            <td class="single line">{% if lesson.tests.count() %}{% if lesson.tests.count() > 1 %}<div class="ui labels">{% endif %}{% for test in lesson.tests %}<a class="ui orange label loading-trigger" href="#" data-content="查看{{ test.finished_by_alias.count() }}条考试记录" data-position="top center" data-variation="inverted">{{ test.name }}</a>{% endfor %}{% if lesson.tests.count() > 1 %}</div>{% endif %}{% else %}无{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -149,6 +149,7 @@ $('.message .close')
 $('table').tablesort();
 
 $('td a.ui.label').popup();
+$('td div.ui.label').popup();
 $('td div.ui.label a.loading-trigger').popup();
 $('td .ipad.loading-trigger').popup();
 </script>
