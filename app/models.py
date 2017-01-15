@@ -2840,6 +2840,10 @@ class Section(db.Model):
             return u'0.%s%s' % (self.name[4], self.name[6])
         return self.name
 
+    @property
+    def hour_alias(self):
+        return u'%g' % (self.hour.total_seconds() / 3600)
+
     @staticmethod
     def insert_sections():
         sections = [
