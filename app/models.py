@@ -1912,8 +1912,8 @@ class PreviousAchievement(db.Model):
     remark = db.Column(db.UnicodeText)
 
     @property
-    self.alias():
-    return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.remark)
+    def alias():
+        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.remark)
 
     def __repr__(self):
         return '<Previous Achievement %r>' % self.alias
