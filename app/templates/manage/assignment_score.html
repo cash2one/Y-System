@@ -123,7 +123,8 @@
                     </div>
                 </div>
                 <div class="ui secondary stackable menu">
-                    <a class="item active loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, page=pagination.page, next=request.args.get('next') or url_for('manage.assignment')) }}">全部</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, page=pagination.page) }}">全部</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.assignment') }}">返回作业列表</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -154,13 +155,13 @@
                             <td>{{ macros.user_popup(score.modified_by) }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_assignment_score', id=score.id, next=url_for('manage.assignment_score', id=assignment.id, page=pagination.page, next=request.args.get('next') or url_for('manage.assignment'))) }}"><i class="edit icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_assignment_score', id=score.id, next=url_for('manage.assignment_score', id=assignment.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ score.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ score.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除作业记录“{{ score.alias }}”？</div>
                                     <div class="actions">
-                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_assignment_score', id=score.id, next=url_for('manage.assignment_score', id=assignment.id, page=pagination.page, next=request.args.get('next') or url_for('manage.assignment'))) }}"><i class="trash outline icon"></i>删除</a>
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_assignment_score', id=score.id, next=url_for('manage.assignment_score', id=assignment.id, page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ score.id }}" class="ui black button">保留</div>
                                     </div>
                                 </div>
@@ -170,7 +171,6 @@
                     </tbody>
                 </table>
                 {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.assignment_score', id=assignment.id) }}{% endif %}
-                {% if request.args.get('next') %}<a class="ui left labeled icon button loading-trigger" href="{{ request.args.get('next') }}"><i class="left arrow icon"></i>返回</a>{% endif %}
             </div>
         </div>
     </div>

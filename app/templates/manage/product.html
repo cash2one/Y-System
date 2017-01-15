@@ -146,7 +146,7 @@
                         <tr>
                             <td>{{ product.name }}</td>
                             <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
-                            <td>{% if product.sales_volume %}<a class="purchase loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id, next=url_for('manage.product', page=pagination.page)) }}" data-content="查看购买记录" data-position="top center" data-variation="inverted">{{ product.sales_volume }}</a>{% else %}0{% endif %}</td>
+                            <td>{% if product.sales_volume %}<a class="purchase loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id) }}" data-content="查看购买记录" data-position="top center" data-variation="inverted">{{ product.sales_volume }}</a>{% else %}0{% endif %}</td>
                             <td{% if product.available %} class="active"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(product.modified_at).fromNow() }}</div>

@@ -1548,7 +1548,7 @@ def assignment():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
-        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data), next=url_for('manage.assignment', page=request.args.get('page', 1, type=int))))
+        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     show_vb_assignments = True
     show_y_gre_assignments = False
     if current_user.is_authenticated:
@@ -1608,7 +1608,7 @@ def assignment_score(id):
         user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
-            return redirect(url_for('manage.assignment_score', id=assignment.id, next=request.args.get('next')))
+            return redirect(url_for('manage.assignment_score', id=assignment.id))
         score = AssignmentScore(
             user_id=user.id,
             assignment_id=int(form.assignment.data),
@@ -1618,7 +1618,7 @@ def assignment_score(id):
         db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
-        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data), next=request.args.get('next')))
+        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     form.assignment.data = unicode(assignment.id)
     query = AssignmentScore.query\
         .join(User, User.id == AssignmentScore.user_id)\
@@ -1647,7 +1647,7 @@ def edit_assignment_score(id):
         db.session.add(score)
         db.session.commit()
         flash(u'已更新作业记录：%s' % score.alias, category='success')
-        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data), next=request.args.get('next')))
+        return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     form.assignment.data = unicode(score.assignment_id)
     form.grade.data = unicode(score.grade_id)
     return render_template('manage/edit_assignment_score.html', form=form, score=score)
