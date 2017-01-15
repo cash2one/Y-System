@@ -647,7 +647,7 @@ class VBTestScore(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
     score = db.Column(db.Float)
-    retrieved = db.Column(db.Boolean, default=False)
+    # retrieved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -695,7 +695,7 @@ class YGRETestScore(db.Model):
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
-    retrieved = db.Column(db.Boolean, default=False)
+    # retrieved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -1698,14 +1698,14 @@ class User(UserMixin, db.Model):
         )
         db.session.add(toefl_test_score)
 
-    # def add_assignment_score(self, assignment, grade, modified_by):
-    #     assignment_score = AssignmentScore(
-    #         user_id=self.id,
-    #         assignment_id=assignment.id,
-    #         grade_id=grade.id,
-    #         modified_by_id=modified_by.id
-    #     )
-    #     db.session.add(assignment_score)
+    def add_assignment_score(self, assignment, grade, modified_by):
+        assignment_score = AssignmentScore(
+            user_id=self.id,
+            assignment_id=assignment.id,
+            grade_id=grade.id,
+            modified_by_id=modified_by.id
+        )
+        db.session.add(assignment_score)
 
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None

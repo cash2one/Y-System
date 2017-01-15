@@ -1581,20 +1581,23 @@ def y_gre_assignments():
     return resp
 
 
-@manage.route('/assignment/score/<int:id>')
+@manage.route('/assignment/score/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理作业')
 def assignment_score(id):
     assignment = Assignment.query.get_or_404(id)
     form = NewAssignmentScoreForm()
     if form.validate_on_submit():
-        score = AssignmentScore(
-            user_id=User.query.filter_by(email=form.student_email.data, created=True, activated=True, deleted=False).first().id,
-            assignment_id=int(form.assignment.data),
-            grade_id=int(form.grade.data),
-            modified_by_id=current_user.id
+        user = User.query.filter_by(email=form.student_email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'学生邮箱不存在：%s' % form.student_email.data, category='error')
+            return redirect(request.args.get('next') or url_for('manage.assignment_score', id=assignment.id))
+        user.add_assignment_score(
+            user=user,
+            assignment=Assignment.query.get(int(form.assignment.data)),
+            grade=AssignmentScoreGrade.query.get(int(form.grade.data)),
+            modified_by=current_user._get_current_object()
         )
-        db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
         return redirect(request.args.get('next') or url_for('manage.assignment_score', id=assignment.id))
@@ -1609,6 +1612,36 @@ def assignment_score(id):
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     scores = pagination.items
     return render_template('manage/assignment_score.html', form=form, assignment=assignment, scores=scores, pagination=pagination)
+
+
+@manage.route('/assignment/score/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理作业')
+def edit_assignment_score(id):
+    score = AssignmentScore.query.get_or_404(id)
+    form = EditAssignmentScoreForm()
+    if form.validate_on_submit():
+        score.assignment_id = int(form.assignment.data)
+        score.grade_id = int(form.grade.data)
+        score.modified_at = datetime.utcnow()
+        score.modified_by_id = current_user.id
+        db.session.add(score)
+        db.session.commit()
+        flash(u'已更新作业记录：%s' % score.alias, category='success')
+        return redirect(request.args.get('next') or url_for('manage.assignment_score', id=score.assignment_id))
+    form.assignment.data = unicode(score.assignment_id)
+    form.grade.data = unicode(score.grade_id)
+    return render_template('manage/edit_assignment_score.html', form=form, score=score)
+
+
+@manage.route('/assignment/score/delete/<int:id>')
+@login_required
+@permission_required(u'管理作业')
+def delete_assignment_score(id):
+    score = AssignmentScore.query.get_or_404(id)
+    db.session.delete(score)
+    flash(u'已删除作业记录：%s' % score.alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.assignment_score', id=score.assignment_id))
 
 
 @manage.route('/test')
