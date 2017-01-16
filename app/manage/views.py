@@ -27,7 +27,7 @@ from .forms import NewRoleForm, EditRoleForm
 from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
 from ..models import Permission, Role, User, Gender
-from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
+from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import GroupRegistration
 from ..models import Booking, BookingState
@@ -36,7 +36,7 @@ from ..models import Punch
 from ..models import Period, Schedule
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
-from ..models import Test, VBTestScore, YGRETestScore, GREAWScore
+from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
@@ -1732,11 +1732,13 @@ def test():
             .filter(CourseType.name == u'Y-GRE')\
             .order_by(Test.id.asc())
     if show_toefl_tests:
-        query = TOEFLTestScoreType.query
+        query = TOEFLTest.query
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     tests = pagination.items
     return render_template('manage/test.html',
+        vb_form=vb_form,
+        y_gre_form=y_gre_form,
         tests=tests,
         show_vb_tests=show_vb_tests,
         show_y_gre_tests=show_y_gre_tests,
@@ -1786,6 +1788,7 @@ def test_score(id):
     if test.finished_by_alias.count() == 0:
         return redirect(url_for('manage.test'))
     if test.lesson.type.name == u'VB':
+        test_type = u'vb'
         form = NewVBTestScoreForm()
         if form.validate_on_submit():
             user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
@@ -1812,6 +1815,7 @@ def test_score(id):
             .filter(User.deleted == False)\
             .order_by(VBTestScore.modified_at.desc())
     if test.lesson.type.name == u'Y-GRE':
+        test_type = u'y_gre'
         form = NewYGRETestScoreForm()
         if form.validate_on_submit():
             user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
@@ -1848,7 +1852,7 @@ def test_score(id):
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     scores = pagination.items
-    return render_template('manage/test_score.html', form=form, test=test, scores=scores, pagination=pagination)
+    return render_template('manage/test_score.html', test_type=test_type, form=form, test=test, scores=scores, pagination=pagination)
 
 
 @manage.route('/test/score/edit/<test_type>/<int:id>', methods=['GET', 'POST'])
@@ -2385,7 +2389,7 @@ def create_user():
             )
         if form.toefl_total.data:
             user.add_toefl_test_score(
-                test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
+                test=TOEFLTest.query.filter_by(name=u'初始').first(),
                 total_score=int(form.toefl_total.data),
                 reading_score=int(form.toefl_reading.data),
                 listening_score=int(form.toefl_listening.data),
@@ -2573,9 +2577,9 @@ def create_user_confirm(id):
     # TOEFL
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.validate_on_submit():
-        test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
+        test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
-            test_score_type=test_score_type,
+            test=test,
             total_score=int(new_toefl_test_score_form.total.data),
             reading_score=int(new_toefl_test_score_form.reading.data),
             listening_score=int(new_toefl_test_score_form.listening.data),
@@ -2583,7 +2587,7 @@ def create_user_confirm(id):
             writing_score=int(new_toefl_test_score_form.writing.data),
             modified_by=current_user._get_current_object()
         )
-        flash(u'已添加TOEFL成绩：%s' % test_score_type.name, category='success')
+        flash(u'已添加TOEFL成绩：%s' % test.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
@@ -2893,9 +2897,9 @@ def edit_user(id):
     # TOEFL
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.validate_on_submit():
-        test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
+        test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
-            test_score_type=test_score_type,
+            test=test,
             total_score=int(new_toefl_test_score_form.total.data),
             reading_score=int(new_toefl_test_score_form.reading.data),
             listening_score=int(new_toefl_test_score_form.listening.data),
@@ -2903,7 +2907,7 @@ def edit_user(id):
             writing_score=int(new_toefl_test_score_form.writing.data),
             modified_by=current_user._get_current_object()
         )
-        flash(u'已添加TOEFL%s成绩' % test_score_type.name, category='success')
+        flash(u'已添加TOEFL%s成绩' % test.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')

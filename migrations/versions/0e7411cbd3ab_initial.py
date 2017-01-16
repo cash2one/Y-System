@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 4dc6a8fd61a0
+Revision ID: 0e7411cbd3ab
 Revises: 
-Create Date: 2017-01-16 02:26:44.193985
+Create Date: 2017-01-16 06:31:02.752323
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4dc6a8fd61a0'
+revision = '0e7411cbd3ab'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -127,12 +127,12 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_rooms_name'), 'rooms', ['name'], unique=True)
-    op.create_table('toefl_test_score_types',
+    op.create_table('toefl_tests',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_toefl_test_score_types_name'), 'toefl_test_score_types', ['name'], unique=True)
+    op.create_index(op.f('ix_toefl_tests_name'), 'toefl_tests', ['name'], unique=True)
     op.create_table('lessons',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -380,7 +380,7 @@ def upgrade():
     op.create_table('toefl_test_score',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('type_id', sa.Integer(), nullable=True),
+    sa.Column('test_id', sa.Integer(), nullable=True),
     sa.Column('total_score', sa.Integer(), nullable=True),
     sa.Column('reading_score', sa.Integer(), nullable=True),
     sa.Column('listening_score', sa.Integer(), nullable=True),
@@ -390,7 +390,7 @@ def upgrade():
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['type_id'], ['toefl_test_score_types.id'], ),
+    sa.ForeignKeyConstraint(['test_id'], ['toefl_tests.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -586,8 +586,8 @@ def downgrade():
     op.drop_table('role_permissions')
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')
-    op.drop_index(op.f('ix_toefl_test_score_types_name'), table_name='toefl_test_score_types')
-    op.drop_table('toefl_test_score_types')
+    op.drop_index(op.f('ix_toefl_tests_name'), table_name='toefl_tests')
+    op.drop_table('toefl_tests')
     op.drop_index(op.f('ix_rooms_name'), table_name='rooms')
     op.drop_table('rooms')
     op.drop_index(op.f('ix_roles_name'), table_name='roles')
