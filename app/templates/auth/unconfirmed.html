@@ -48,7 +48,10 @@
 <div class="ui text container">
     <h1 class="ui inverted header">确认邮箱</h1>
     <h2>请点击确认邮件中的链接以确认邮箱，或者</h2>
-    <a class="ui huge inverted yellow basic button loading-trigger" href="{{ url_for('auth.resend_confirmation') }}"><i class="send icon"></i>重发确认邮件</a>
+    <div class="ui buttons">
+        <a class="ui inverted yellow basic button loading-trigger" href="{{ url_for('auth.resend_confirmation') }}"><i class="send icon"></i>重发邮件</a>
+        <a class="ui inverted yellow basic button loading-trigger" href="{{ url_for('auth.change_email_request') }}"><i class="edit icon"></i>修改邮箱</a>
+    </div>
     {{ macros.message_widget() }}
 </div>
 {% endblock %}

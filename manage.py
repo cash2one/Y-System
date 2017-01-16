@@ -46,19 +46,19 @@ def deploy():
     from app.models import GREAWScore
     from app.models import TOEFLTestScoreType
     from app.models import InvitationType
+    from app.models import CourseType
+    from app.models import Lesson
+    from app.models import Section
     from app.models import User
     from app.models import EducationType
     from app.models import PreviousAchievementType
     from app.models import Product
-    from app.models import CourseType
     from app.models import Course
     from app.models import Period
     from app.models import iPadCapacity
     from app.models import iPadState
     from app.models import Room
     from app.models import iPad
-    from app.models import Lesson
-    from app.models import Section
     from app.models import iPadContent
     from app.models import Assignment
     from app.models import Test
@@ -79,19 +79,19 @@ def deploy():
     GREAWScore.insert_gre_aw_scores()
     TOEFLTestScoreType.insert_toefl_test_score_types()
     InvitationType.insert_invitation_types()
+    CourseType.insert_course_types()
+    Lesson.insert_lessons()
+    Section.insert_sections()
     User.insert_admin()
     EducationType.insert_education_types()
     PreviousAchievementType.insert_previous_achievement_types()
     Product.insert_products()
-    CourseType.insert_course_types()
     Course.insert_courses()
     Period.insert_periods()
     iPadCapacity.insert_ipad_capacities()
     iPadState.insert_ipad_states()
     Room.insert_rooms()
     iPad.insert_ipads()
-    Lesson.insert_lessons()
-    Section.insert_sections()
     iPadContent.insert_ipad_contents()
     Assignment.insert_assignments()
     Test.insert_tests()

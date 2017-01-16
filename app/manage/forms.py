@@ -6,11 +6,11 @@ from wtforms import StringField, TextAreaField, BooleanField, IntegerField, Floa
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
 from ..models import Permission, Role, User
-from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType, TOEFLTestScoreType
+from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
-from ..models import Test, GREAWScore
+from ..models import Test, GREAWScore, TOEFLTestScoreType
 from ..models import iPad, iPadCapacity, iPadState, Room
 from ..models import Course, CourseType
 from ..models import Announcement, AnnouncementType
@@ -199,6 +199,17 @@ class EditAssignmentScoreForm(FlaskForm):
         super(EditAssignmentScoreForm, self).__init__(*args, **kwargs)
         self.assignment.choices = [(u'', u'选择作业')] + [(unicode(assignment.id), assignment.alias) for assignment in Assignment.query.order_by(Assignment.id.asc()).all()]
         self.grade.choices = [(u'', u'选择成绩')] + [(unicode(grade.id), grade.name) for grade in AssignmentScoreGrade.query.order_by(AssignmentScoreGrade.id.asc()).all()]
+
+
+class NewVBTestScoreForm(FlaskForm):
+    email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    test = SelectField(u'VB考试', coerce=unicode, validators=[Required()])
+    score = SelectField(u'成绩', validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewVBTestScoreForm, self).__init__(*args, **kwargs)
+        self.test.choices = [(u'', u'选择VB考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'VB']
 
 
 class NewUserForm(FlaskForm):

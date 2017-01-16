@@ -80,7 +80,8 @@ def activate():
             new_user.activate(new_password=form.password.data)
             token = new_user.generate_confirmation_token()
             send_email(new_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=new_user, token=token)
-            flash(u'激活成功，请登录！', category='success')
+            login_user(new_user, remember=False)
+            flash(u'激活成功！', category='success')
             flash(u'一封确认邮件已经发送至您的邮箱', category='info')
             for user in User.users_can(u'管理用户'):
                 send_email(user.email, u'新用户：%s' % (new_user.name_alias), 'auth/mail/new_user', user=new_user)
