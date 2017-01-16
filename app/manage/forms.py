@@ -204,12 +204,53 @@ class EditAssignmentScoreForm(FlaskForm):
 class NewVBTestScoreForm(FlaskForm):
     email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     test = SelectField(u'VB考试', coerce=unicode, validators=[Required()])
-    score = SelectField(u'成绩', validators=[Required()])
+    score = StringField(u'成绩', validators=[Required()])
+    retrieved = BooleanField(u'已回收试卷')
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(NewVBTestScoreForm, self).__init__(*args, **kwargs)
         self.test.choices = [(u'', u'选择VB考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'VB']
+
+
+class EditVBTestScoreForm(FlaskForm):
+    test = SelectField(u'VB考试', coerce=unicode, validators=[Required()])
+    score = StringField(u'成绩', validators=[Required()])
+    retrieved = BooleanField(u'已回收试卷')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditVBTestScoreForm, self).__init__(*args, **kwargs)
+        self.test.choices = [(u'', u'选择VB考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'VB']
+
+
+class NewYGRETestScoreForm(FlaskForm):
+    email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    test = SelectField(u'Y-GRE考试', coerce=unicode, validators=[Required()])
+    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    q_score = StringField(u'Quantitative Reasoning')
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode)
+    retrieved = BooleanField(u'已回收试卷')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewYGRETestScoreForm, self).__init__(*args, **kwargs)
+        self.test.choices = [(u'', u'选择Y-GRE考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'Y-GRE']
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+
+
+class EditYGRETestScoreForm(FlaskForm):
+    test = SelectField(u'Y-GRE考试', coerce=unicode, validators=[Required()])
+    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    q_score = StringField(u'Quantitative Reasoning')
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode)
+    retrieved = BooleanField(u'已回收试卷')
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditYGRETestScoreForm, self).__init__(*args, **kwargs)
+        self.test.choices = [(u'', u'选择Y-GRE考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'Y-GRE']
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
 
 
 class NewUserForm(FlaskForm):

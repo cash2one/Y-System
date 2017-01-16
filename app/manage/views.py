@@ -12,6 +12,7 @@ from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunc
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import EditSectionHourForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
+from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
@@ -1735,6 +1736,138 @@ def toefl_tests():
     return resp
 
 
+@manage.route('/test/score/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理考试')
+def test_score(id):
+    test = Test.query.get_or_404(id)
+    if test.finished_by_alias.count() == 0:
+        return redirect(url_for('manage.test'))
+    if test.lesson.type.name == u'VB':
+        form = NewVBTestScoreForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            if user is None:
+                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                return redirect(url_for('manage.test_score', id=test.id))
+            score = VBTestScore(
+                user_id=user.id,
+                test_id=int(form.test.data),
+                score=float(form.score.data),
+                retrieved=form.retrieved.data,
+                modified_by_id=current_user.id
+            )
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已添加VB考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', id=int(form.test.data)))
+        form.test.data = unicode(test.id)
+        query = VBTestScore.query\
+            .join(User, User.id == VBTestScore.user_id)\
+            .filter(VBTestScore.test_id == test.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .order_by(VBTestScore.modified_at.desc())
+    if test.lesson.type.name == u'Y-GRE':
+        form = NewYGRETestScoreForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            if user is None:
+                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                return redirect(url_for('manage.test_score', id=test.id))
+            q_score = None
+            if form.q_score.data:
+                q_score = int(form.q_score.data)
+            aw_score = None
+            if form.aw_score.data:
+                aw_score = int(form.aw_score.data)
+            score = YGRETestScore(
+                user_id=user.id,
+                test_id=int(form.test.data),
+                v_score=int(form.v_score.data),
+                q_score=q_score,
+                aw_score_id=aw_score,
+                retrieved=form.retrieved.data,
+                modified_by_id=current_user.id
+            )
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', id=int(form.test.data)))
+        form.test.data = unicode(test.id)
+        query = YGRETestScore.query\
+            .join(User, User.id == YGRETestScore.user_id)\
+            .filter(YGRETestScore.test_id == test.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .order_by(YGRETestScore.modified_at.desc())
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    scores = pagination.items
+    return render_template('manage/test_score.html', form=form, test=test, scores=scores, pagination=pagination)
+
+
+@manage.route('/test/score/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理考试')
+def edit_test_score(id):
+    score = VBTestScore.query.get_or_404(id)
+    if score.test.lesson.type.name == u'VB':
+        form = EditVBTestScoreForm()
+        if form.validate_on_submit():
+            score.test_id = int(form.test.data)
+            score.score = float(form.score.data)
+            score.retrieved = form.retrieved.data
+            score.modified_at = datetime.utcnow()
+            score.modified_by_id = current_user.id
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已更新VB考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', id=int(form.test.data)))
+        form.test.data = unicode(score.test_id)
+        form.score.data = u'%g' % score.score
+        form.retrieved.data = score.retrieved
+    if score.test.lesson.type.name == u'Y-GRE':
+        form = EditYGRETestScoreForm()
+        if form.validate_on_submit():
+            score.test_id = int(form.test.data)
+            score.v_score = int(form.v_score.data)
+            if q_score:
+                score.q_score = int(form.q_score.data)
+            if aw_score:
+                score.aw_score_id = int(form.aw_score.data)
+            score.retrieved = form.retrieved.data
+            score.modified_at = datetime.utcnow()
+            score.modified_by_id = current_user.id
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已更新Y-GRE考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', id=int(form.test.data)))
+        form.test.data = unicode(score.test_id)
+        form.v_score.data = u'%g' % score.v_score
+        form.q_score.data = u'%g' % score.q_score
+        form.aw_score.data = unicode(score.aw_score_id)
+        form.retrieved.data = score.retrieved
+    return render_template('manage/edit_test_score.html', form=form, score=score)
+
+
+@manage.route('/test/score/delete/<test_type>/<int:id>')
+@login_required
+@permission_required(u'管理考试')
+def delete_test_score(test_type, id):
+    if test_type == u'vb':
+        score = VBTestScore.query.get_or_404(id)
+        db.session.delete(score)
+        flash(u'已删除VB考试记录：%s' % score.alias, category='success')
+    if test_type == u'y_gre':
+        score = YGRETestScore.query.get_or_404(id)
+        db.session.delete(score)
+        flash(u'已删除Y-GRE考试记录：%s' % score.alias, category='success')
+    return redirect(url_for('manage.test_score', id=score.test_id))
+
+
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
@@ -3070,9 +3203,9 @@ def toggle_course_show(id):
         abort(404)
     course.toggle_show(modified_by=current_user._get_current_object())
     if course.show:
-        flash(u'班级：%s的可选状态改为：可选' % course.name, category='success')
+        flash(u'班级“%s”的可选状态改为：可选' % course.name, category='success')
     else:
-        flash(u'班级：%s的可选状态改为：不可选' % course.name, category='success')
+        flash(u'班级“%s”的可选状态改为：不可选' % course.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.course'))
 
 
