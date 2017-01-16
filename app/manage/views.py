@@ -2029,23 +2029,29 @@ def user():
         .filter(User.created == False)\
         .count()
     if show_deleted_users:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == True)\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == True)\
+                .order_by(User.last_seen_at.desc())
+        else:
+            abort(403)
     deleted_users_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
         .filter(User.deleted == True)\
         .count()
     if show_volunteers:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'志愿者')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_moderator or current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'志愿者')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            abort(403)
     volunteers_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2053,12 +2059,15 @@ def user():
         .filter(Role.name == u'志愿者')\
         .count()
     if show_moderators:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'协管员')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_moderator or current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'协管员')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            abort(403)
     moderators_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2066,12 +2075,15 @@ def user():
         .filter(Role.name == u'协管员')\
         .count()
     if show_administrators:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'管理员')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'管理员')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            abort(403)
     administrators_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2079,12 +2091,15 @@ def user():
         .filter(Role.name == u'管理员')\
         .count()
     if show_developers:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'开发人员')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'开发人员')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            abort(403)
     developers_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
