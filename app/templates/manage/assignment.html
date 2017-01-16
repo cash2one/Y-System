@@ -141,7 +141,7 @@
                             <td>{{ assignment.name }}</td>
                             <td>{{ assignment.lesson.type.name }}</td>
                             <td>{{ assignment.lesson.name }}</td>
-                            <td>{% if assignment.finished_by_alias.count() %}<a class="score loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, next=url_for('manage.assignment', page=pagination.page)) }}" data-content="查看作业记录" data-position="top center" data-variation="inverted">{{ assignment.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
+                            <td>{% if assignment.finished_by_alias.count() %}<a class="score loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, next=url_for('manage.assignment', page=pagination.page)) }}" data-content="查看{{ assignment.finished_by_alias.count() }}条作业记录" data-position="top center" data-variation="inverted">{{ assignment.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -169,6 +169,7 @@ $('.message .close')
 $('table').tablesort();
 
 $('td a.score.loading-trigger').popup();
+
 $('#new-score-trigger').popup();
 $('#new-score-trigger')
     .on('click', function() {
@@ -211,7 +212,7 @@ $(document)
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择作业分数'
+                                prompt: '请选择作业成绩'
                             }
                         ]
                     }

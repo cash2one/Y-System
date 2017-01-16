@@ -84,7 +84,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="add user icon"></i>添加{{ organizer.name }}的团报成员</h1>
+    <h1 class="ui inverted header"><i class="add user icon"></i>添加团报成员</h1>
 </div>
 {% endblock %}
 
@@ -93,6 +93,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <h3 class="ui header"><i class="add user icon"></i>添加成员：{{ organizer.name_alias }}所发起的团报</h3>
                 <form id="add-group-member" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="required field">

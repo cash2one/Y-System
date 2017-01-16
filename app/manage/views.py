@@ -12,6 +12,7 @@ from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunc
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import EditSectionHourForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
+from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
@@ -26,7 +27,7 @@ from .forms import NewRoleForm, EditRoleForm
 from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
 from ..models import Permission, Role, User, Gender
-from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, TOEFLTestScore, TOEFLTestScoreType, InvitationType
+from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import GroupRegistration
 from ..models import Booking, BookingState
@@ -35,7 +36,7 @@ from ..models import Punch
 from ..models import Period, Schedule
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
-from ..models import Test, VBTestScore, YGRETestScore, GREAWScore
+from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
@@ -736,7 +737,7 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
-        return redirect(url_for('manage.rental'))
+        return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3_alt.html', user=user, ipad=ipad, form=form)
 
 
@@ -948,7 +949,7 @@ def rental_exchange_step_1(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if rental.returned:
         flash(u'iPad已处于归还状态', category='error')
-        return redirect(url_for('manage.rental'))
+        return redirect(request.args.get('next') or url_for('manage.rental'))
     form = iPadSerialForm()
     if form.validate_on_submit():
         serial = form.serial.data
@@ -1212,7 +1213,7 @@ def period():
         end_time = time(*[int(x) for x in form.end_time.data.split(':')])
         if start_time >= end_time:
             flash(u'无法添加时段模板：%s，时间设置有误' % form.name.data, category='error')
-            return redirect(url_for('manage.period'))
+            return redirect(url_for('manage.period', page=request.args.get('page', 1, type=int)))
         period = Period(
             name=form.name.data,
             start_time=start_time,
@@ -1223,7 +1224,7 @@ def period():
         )
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
-        return redirect(url_for('manage.period'))
+        return redirect(url_for('manage.period', page=request.args.get('page', 1, type=int)))
     query = Period.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -1312,7 +1313,7 @@ def schedule():
                     db.session.add(schedule)
                     db.session.commit()
                     flash(u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category='success')
-        return redirect(url_for('manage.schedule'))
+        return redirect(url_for('manage.schedule', page=request.args.get('page', 1, type=int)))
     show_today_schedule = True
     show_future_schedule = False
     show_history_schedule = False
@@ -1603,6 +1604,8 @@ def y_gre_assignments():
 @permission_required(u'管理作业')
 def assignment_score(id):
     assignment = Assignment.query.get_or_404(id)
+    if assignment.finished_by_alias.count() == 0:
+        return redirect(url_for('manage.assignment'))
     form = NewAssignmentScoreForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
@@ -1660,13 +1663,55 @@ def delete_assignment_score(id):
     score = AssignmentScore.query.get_or_404(id)
     db.session.delete(score)
     flash(u'已删除作业记录：%s' % score.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.assignment_score', id=score.assignment_id))
+    return redirect(url_for('manage.assignment_score', id=score.assignment_id))
 
 
-@manage.route('/test')
+@manage.route('/test', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理考试')
 def test():
+    vb_form = NewVBTestScoreForm(prefix='vb')
+    if vb_form.submit.data and vb_form.validate_on_submit():
+        user = User.query.filter_by(email=vb_form.email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'用户邮箱不存在：%s' % vb_form.email.data, category='error')
+            return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
+        score = VBTestScore(
+            user_id=user.id,
+            test_id=int(vb_form.test.data),
+            score=float(vb_form.score.data),
+            retrieved=vb_form.retrieved.data,
+            modified_by_id=current_user.id
+        )
+        db.session.add(score)
+        db.session.commit()
+        flash(u'已添加VB考试记录：%s' % score.alias, category='success')
+        return redirect(url_for('manage.test_score', test_type=u'vb', id=int(vb_form.test.data)))
+    y_gre_form = NewYGRETestScoreForm(prefix='y_gre')
+    if y_gre_form.submit.data and y_gre_form.validate_on_submit():
+        user = User.query.filter_by(email=y_gre_form.email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'用户邮箱不存在：%s' % y_gre_form.email.data, category='error')
+            return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
+        q_score = None
+        if y_gre_form.q_score.data:
+            q_score = int(y_gre_form.q_score.data)
+        aw_score = None
+        if y_gre_form.aw_score.data:
+            aw_score = int(y_gre_form.aw_score.data)
+        score = YGRETestScore(
+            user_id=user.id,
+            test_id=int(y_gre_form.test.data),
+            v_score=int(y_gre_form.v_score.data),
+            q_score=q_score,
+            aw_score_id=aw_score,
+            retrieved=y_gre_form.retrieved.data,
+            modified_by_id=current_user.id
+        )
+        db.session.add(score)
+        db.session.commit()
+        flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
+        return redirect(url_for('manage.test_score', test_type=u'y_gre', id=int(y_gre_form.test.data)))
     show_vb_tests = True
     show_y_gre_tests = False
     show_toefl_tests = False
@@ -1675,27 +1720,33 @@ def test():
         show_y_gre_tests = bool(request.cookies.get('show_y_gre_tests', ''))
         show_toefl_tests = bool(request.cookies.get('show_toefl_tests', ''))
     if show_vb_tests:
+        test_type = u'vb'
         query = Test.query\
             .join(Lesson, Lesson.id == Test.lesson_id)\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'VB')\
             .order_by(Test.id.asc())
     if show_y_gre_tests:
+        test_type = u'y_gre'
         query = Test.query\
             .join(Lesson, Lesson.id == Test.lesson_id)\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
             .order_by(Test.id.asc())
     if show_toefl_tests:
-        query = TOEFLTestScoreType.query
+        test_type = u'toefl'
+        query = TOEFLTest.query
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     tests = pagination.items
     return render_template('manage/test.html',
+        vb_form=vb_form,
+        y_gre_form=y_gre_form,
         tests=tests,
         show_vb_tests=show_vb_tests,
         show_y_gre_tests=show_y_gre_tests,
         show_toefl_tests=show_toefl_tests,
+        test_type=test_type,
         pagination=pagination
     )
 
@@ -1733,6 +1784,158 @@ def toefl_tests():
     return resp
 
 
+@manage.route('/test/score/<test_type>/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理考试')
+def test_score(test_type, id):
+    if test_type == u'vb':
+        test = Test.query.get_or_404(id)
+        if test.finished_by_alias.count() == 0:
+            return redirect(url_for('manage.test'))
+        form = NewVBTestScoreForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            if user is None:
+                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+            score = VBTestScore(
+                user_id=user.id,
+                test_id=int(form.test.data),
+                score=float(form.score.data),
+                retrieved=form.retrieved.data,
+                modified_by_id=current_user.id
+            )
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已添加VB考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+        form.test.data = unicode(test.id)
+        query = VBTestScore.query\
+            .join(User, User.id == VBTestScore.user_id)\
+            .filter(VBTestScore.test_id == test.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .order_by(VBTestScore.modified_at.desc())
+    if test_type == u'y_gre':
+        test = Test.query.get_or_404(id)
+        if test.finished_by_alias.count() == 0:
+            return redirect(url_for('manage.test'))
+        form = NewYGRETestScoreForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            if user is None:
+                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+            q_score = None
+            if form.q_score.data:
+                q_score = int(form.q_score.data)
+            aw_score = None
+            if form.aw_score.data:
+                aw_score = int(form.aw_score.data)
+            score = YGRETestScore(
+                user_id=user.id,
+                test_id=int(form.test.data),
+                v_score=int(form.v_score.data),
+                q_score=q_score,
+                aw_score_id=aw_score,
+                retrieved=form.retrieved.data,
+                modified_by_id=current_user.id
+            )
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+        form.test.data = unicode(test.id)
+        query = YGRETestScore.query\
+            .join(User, User.id == YGRETestScore.user_id)\
+            .filter(YGRETestScore.test_id == test.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .order_by(YGRETestScore.modified_at.desc())
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    scores = pagination.items
+    return render_template('manage/test_score.html', test_type=test_type, form=form, test=test, scores=scores, pagination=pagination)
+
+
+@manage.route('/test/paper/toggle-retrieve/<test_type>/<int:id>')
+@login_required
+@permission_required(u'管理考试')
+def toggle_test_paper_retrieve(test_type, id):
+    if test_type == u'vb':
+        score = VBTestScore.query.get_or_404(id)
+    if test_type == u'y_gre':
+        score = YGRETestScore.query.get_or_404(id)
+    score.toggle_retrieve(modified_by=current_user._get_current_object())
+    if score.retrieved:
+        flash(u'已回收试卷：%s' % score.alias, category='success')
+    else:
+        flash(u'已发放试卷：%s' % score.alias, category='success')
+    return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
+
+
+@manage.route('/test/score/edit/<test_type>/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理考试')
+def edit_test_score(test_type, id):
+    if test_type == u'vb':
+        score = VBTestScore.query.get_or_404(id)
+        form = EditVBTestScoreForm()
+        if form.validate_on_submit():
+            score.test_id = int(form.test.data)
+            score.score = float(form.score.data)
+            score.retrieved = form.retrieved.data
+            score.modified_at = datetime.utcnow()
+            score.modified_by_id = current_user.id
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已更新VB考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+        form.test.data = unicode(score.test_id)
+        form.score.data = u'%g' % score.score
+        form.retrieved.data = score.retrieved
+    if test_type == u'y_gre':
+        score = YGRETestScore.query.get_or_404(id)
+        form = EditYGRETestScoreForm()
+        if form.validate_on_submit():
+            score.test_id = int(form.test.data)
+            score.v_score = int(form.v_score.data)
+            if form.q_score.data:
+                score.q_score = int(form.q_score.data)
+            if form.aw_score.data:
+                score.aw_score_id = int(form.aw_score.data)
+            score.retrieved = form.retrieved.data
+            score.modified_at = datetime.utcnow()
+            score.modified_by_id = current_user.id
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已更新Y-GRE考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+        form.test.data = unicode(score.test_id)
+        form.v_score.data = u'%g' % score.v_score
+        form.q_score.data = u'%g' % score.q_score
+        form.aw_score.data = unicode(score.aw_score_id)
+        form.retrieved.data = score.retrieved
+    return render_template('manage/edit_test_score.html', test_type=test_type, form=form, score=score)
+
+
+@manage.route('/test/score/delete/<test_type>/<int:id>')
+@login_required
+@permission_required(u'管理考试')
+def delete_test_score(test_type, id):
+    if test_type == u'vb':
+        score = VBTestScore.query.get_or_404(id)
+        db.session.delete(score)
+        flash(u'已删除VB考试记录：%s' % score.alias, category='success')
+    if test_type == u'y_gre':
+        score = YGRETestScore.query.get_or_404(id)
+        db.session.delete(score)
+        flash(u'已删除Y-GRE考试记录：%s' % score.alias, category='success')
+    return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
+
+
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理用户')
@@ -1741,7 +1944,7 @@ def user():
     if form.validate_on_submit():
         if User.query.filter_by(email=form.email.data).first():
             flash(u'%s已经被注册' % form.email.data, category='error')
-            return redirect(url_for('manage.user'))
+            return redirect(url_for('manage.user', page=request.args.get('page', 1, type=int)))
         admin = User(
             email=form.email.data,
             role_id=int(form.role.data),
@@ -1755,7 +1958,7 @@ def user():
         db.session.commit()
         current_user.create_user(user=admin)
         flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
-        return redirect(url_for('manage.user'))
+        return redirect(url_for('manage.user', page=request.args.get('page', 1, type=int)))
     show_activated_users = True
     show_unactivated_users = False
     show_suspended_users = False
@@ -1847,23 +2050,29 @@ def user():
         .filter(User.created == False)\
         .count()
     if show_deleted_users:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == True)\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == True)\
+                .order_by(User.last_seen_at.desc())
+        else:
+            return redirect(url_for('manage.activated_users'))
     deleted_users_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
         .filter(User.deleted == True)\
         .count()
     if show_volunteers:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'志愿者')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_moderator or current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'志愿者')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            return redirect(url_for('manage.activated_users'))
     volunteers_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -1871,12 +2080,15 @@ def user():
         .filter(Role.name == u'志愿者')\
         .count()
     if show_moderators:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'协管员')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_moderator or current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'协管员')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            return redirect(url_for('manage.activated_users'))
     moderators_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -1884,12 +2096,15 @@ def user():
         .filter(Role.name == u'协管员')\
         .count()
     if show_administrators:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'管理员')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_administrator or current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'管理员')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            return redirect(url_for('manage.activated_users'))
     administrators_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -1897,12 +2112,15 @@ def user():
         .filter(Role.name == u'管理员')\
         .count()
     if show_developers:
-        query = User.query\
-            .join(Role, Role.id == User.role_id)\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(Role.name == u'开发人员')\
-            .order_by(User.last_seen_at.desc())
+        if current_user.is_developer:
+            query = User.query\
+                .join(Role, Role.id == User.role_id)\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(Role.name == u'开发人员')\
+                .order_by(User.last_seen_at.desc())
+        else:
+            return redirect(url_for('manage.activated_users'))
     developers_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2207,7 +2425,7 @@ def create_user():
             )
         if form.toefl_total.data:
             user.add_toefl_test_score(
-                test_score_type=TOEFLTestScoreType.query.filter_by(name=u'初始').first(),
+                test=TOEFLTest.query.filter_by(name=u'初始').first(),
                 total_score=int(form.toefl_total.data),
                 reading_score=int(form.toefl_reading.data),
                 listening_score=int(form.toefl_listening.data),
@@ -2276,7 +2494,7 @@ def create_user_confirm(id):
     edit_name_form.name.data = user.name
     # ID number
     edit_id_number_form = EditIDNumberForm(prefix='edit_id_number')
-    if edit_id_number_form.validate_on_submit():
+    if edit_id_number_form.submit.data and edit_id_number_form.validate_on_submit():
         user.id_number = edit_id_number_form.id_number.data
         user.gender_id = get_gender_id(edit_id_number_form.id_number.data)
         user.birthdate = date(year=int(edit_id_number_form.id_number.data[6:10]), month=int(edit_id_number_form.id_number.data[10:12]), day=int(edit_id_number_form.id_number.data[12:14]))
@@ -2286,7 +2504,7 @@ def create_user_confirm(id):
     edit_id_number_form.id_number.data = user.id_number
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
-    if edit_email_form.validate_on_submit():
+    if edit_email_form.submit.data and edit_email_form.validate_on_submit():
         if User.query.filter_by(email=edit_email_form.email.data).first() and edit_email_form.email.data != user.email:
             flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
             return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
@@ -2298,7 +2516,7 @@ def create_user_confirm(id):
     edit_email_form.email.data = user.email
     # mobile
     edit_mobile_form = EditMobileForm(prefix='edit_mobile')
-    if edit_mobile_form.validate_on_submit():
+    if edit_mobile_form.submit.data and edit_mobile_form.validate_on_submit():
         user.mobile = edit_mobile_form.mobile.data
         db.session.add(user)
         flash(u'已更新移动电话', category='success')
@@ -2306,7 +2524,7 @@ def create_user_confirm(id):
     edit_mobile_form.mobile.data = user.mobile
     # address
     edit_address_form = EditAddressForm(prefix='edit_address')
-    if edit_address_form.validate_on_submit():
+    if edit_address_form.submit.data and edit_address_form.validate_on_submit():
         user.address = edit_address_form.address.data
         db.session.add(user)
         flash(u'已更新联系地址', category='success')
@@ -2314,7 +2532,7 @@ def create_user_confirm(id):
     edit_address_form.address.data = user.address
     # QQ
     edit_qq_form = EditQQForm(prefix='edit_qq')
-    if edit_qq_form.validate_on_submit():
+    if edit_qq_form.submit.data and edit_qq_form.validate_on_submit():
         user.qq = edit_qq_form.qq.data
         db.session.add(user)
         flash(u'已更新QQ号', category='success')
@@ -2322,7 +2540,7 @@ def create_user_confirm(id):
     edit_qq_form.qq.data = user.qq
     # WeChat
     edit_wechat_form = EditWeChatForm(prefix='edit_wechat')
-    if edit_wechat_form.validate_on_submit():
+    if edit_wechat_form.submit.data and edit_wechat_form.validate_on_submit():
         user.wechat = edit_wechat_form.wechat.data
         db.session.add(user)
         flash(u'已更新微信账号', category='success')
@@ -2330,7 +2548,7 @@ def create_user_confirm(id):
     edit_wechat_form.wechat.data = user.wechat
     # emergency contact name
     edit_emergency_contact_name_form = EditEmergencyContactNameForm(prefix='edit_emergency_contact_name')
-    if edit_emergency_contact_name_form.validate_on_submit():
+    if edit_emergency_contact_name_form.submit.data and edit_emergency_contact_name_form.validate_on_submit():
         user.emergency_contact_name = edit_emergency_contact_name_form.emergency_contact_name.data
         db.session.add(user)
         flash(u'已更新紧急联系人姓名', category='success')
@@ -2338,7 +2556,7 @@ def create_user_confirm(id):
     edit_emergency_contact_name_form.emergency_contact_name.data = user.emergency_contact_name
     # emergency contact relationship
     edit_emergency_contact_relationship_form = EditEmergencyContactRelationshipForm(prefix='edit_emergency_contact_relationship')
-    if edit_emergency_contact_relationship_form.validate_on_submit():
+    if edit_emergency_contact_relationship_form.submit.data and edit_emergency_contact_relationship_form.validate_on_submit():
         user.emergency_contact_relationship_id = int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)
         db.session.add(user)
         flash(u'已更新紧急联系人关系', category='success')
@@ -2346,7 +2564,7 @@ def create_user_confirm(id):
     edit_emergency_contact_relationship_form.emergency_contact_relationship.data = unicode(user.emergency_contact_relationship_id)
     # emergency contact mobile
     edit_emergency_contact_mobile_form = EditEmergencyContactMobileForm(prefix='edit_emergency_contact_mobile')
-    if edit_emergency_contact_mobile_form.validate_on_submit():
+    if edit_emergency_contact_mobile_form.submit.data and edit_emergency_contact_mobile_form.validate_on_submit():
         user.emergency_contact_mobile = edit_emergency_contact_mobile_form.emergency_contact_mobile.data
         db.session.add(user)
         flash(u'已更新紧急联系人移动电话', category='success')
@@ -2354,7 +2572,7 @@ def create_user_confirm(id):
     edit_emergency_contact_mobile_form.emergency_contact_mobile.data = user.emergency_contact_mobile
     # education
     new_education_record_form = NewEducationRecordForm(prefix='new_education_record')
-    if new_education_record_form.validate_on_submit():
+    if new_education_record_form.submit.data and new_education_record_form.validate_on_submit():
         education_type = EducationType.query.get(int(new_education_record_form.education_type.data))
         user.add_education_record(
             education_type=education_type,
@@ -2368,7 +2586,7 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # employment
     new_employment_record_form = NewEmploymentRecordForm(prefix='new_employment_record')
-    if new_employment_record_form.validate_on_submit():
+    if new_employment_record_form.submit.data and new_employment_record_form.validate_on_submit():
         user.add_employment_record(
             employer=new_employment_record_form.employer.data,
             position=new_employment_record_form.position.data,
@@ -2378,7 +2596,7 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # scores
     new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
-    if new_previous_achievement_form.validate_on_submit():
+    if new_previous_achievement_form.submit.data and new_previous_achievement_form.validate_on_submit():
         previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
         if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
             user.add_previous_achievement(
@@ -2394,10 +2612,10 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # TOEFL
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
-    if new_toefl_test_score_form.validate_on_submit():
-        test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
+    if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
+        test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
-            test_score_type=test_score_type,
+            test=test,
             total_score=int(new_toefl_test_score_form.total.data),
             reading_score=int(new_toefl_test_score_form.reading.data),
             listening_score=int(new_toefl_test_score_form.listening.data),
@@ -2405,11 +2623,11 @@ def create_user_confirm(id):
             writing_score=int(new_toefl_test_score_form.writing.data),
             modified_by=current_user._get_current_object()
         )
-        flash(u'已添加TOEFL成绩：%s' % test_score_type.name, category='success')
+        flash(u'已添加TOEFL成绩：%s' % test.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
-    if edit_purpose_form.validate_on_submit():
+    if edit_purpose_form.submit.data and edit_purpose_form.validate_on_submit():
         for purpose in user.purposes:
             if purpose.type.name != u'其它':
                 user.remove_purpose(purpose_type=purpose.type)
@@ -2427,7 +2645,7 @@ def create_user_confirm(id):
             edit_purpose_form.other_purpose.data = purpose.remark
     # application aim
     edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
-    if edit_application_aim_form.validate_on_submit():
+    if edit_application_aim_form.submit.data and edit_application_aim_form.validate_on_submit():
         user.application_aim = edit_application_aim_form.application_aim.data
         db.session.add(user)
         flash(u'已更新申请方向', category='success')
@@ -2435,7 +2653,7 @@ def create_user_confirm(id):
     edit_application_aim_form.application_aim.data = user.application_aim
     # referrer
     edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
-    if edit_referrer_form.validate_on_submit():
+    if edit_referrer_form.submit.data and edit_referrer_form.validate_on_submit():
         for referrer in user.referrers:
             if referrer.type.name != u'其它':
                 user.remove_referrer(referrer_type=referrer.type)
@@ -2453,7 +2671,7 @@ def create_user_confirm(id):
             edit_referrer_form.other_referrer.data = referrer.remark
     # inviter
     new_inviter_form = NewInviterForm(prefix='new_inviter')
-    if new_inviter_form.validate_on_submit():
+    if new_inviter_form.submit.data and new_inviter_form.validate_on_submit():
         inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data, created=True, activated=True, deleted=False).first()
         if inviter is None:
             flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
@@ -2466,14 +2684,14 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purchase
     new_purchase_form = NewPurchaseForm(prefix='new_purchase')
-    if new_purchase_form.validate_on_submit():
+    if new_purchase_form.submit.data and new_purchase_form.validate_on_submit():
         product = Product.query.get_or_404(int(new_purchase_form.product.data))
         user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
         flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # role
     edit_role_form = EditStudentRoleForm(prefix='edit_role')
-    if edit_role_form.validate_on_submit():
+    if edit_role_form.submit.data and edit_role_form.validate_on_submit():
         user.role_id = int(edit_role_form.role.data)
         db.session.add(user)
         flash(u'已更新用户权限', category='success')
@@ -2481,7 +2699,7 @@ def create_user_confirm(id):
     edit_role_form.role.data = unicode(user.role_id)
     # VB course
     edit_vb_course_form = EditVBCourseForm(prefix='edit_vb_course')
-    if edit_vb_course_form.validate_on_submit():
+    if edit_vb_course_form.submit.data and edit_vb_course_form.validate_on_submit():
         if user.vb_course:
             user.unregister_course(user.vb_course)
         if int(edit_vb_course_form.vb_course.data):
@@ -2492,7 +2710,7 @@ def create_user_confirm(id):
         edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
     # Y-GRE course
     edit_y_gre_course_form = EditYGRECourseForm(prefix='edit_y_gre_course')
-    if edit_y_gre_course_form.validate_on_submit():
+    if edit_y_gre_course_form.submit.data and edit_y_gre_course_form.validate_on_submit():
         if user.y_gre_course:
             user.unregister_course(user.y_gre_course)
         if int(edit_y_gre_course_form.y_gre_course.data):
@@ -2503,7 +2721,7 @@ def create_user_confirm(id):
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
     # confirm
     confirm_user_form = ConfirmUserForm(prefix='confirm_user')
-    if confirm_user_form.validate_on_submit():
+    if confirm_user_form.submit.data and confirm_user_form.validate_on_submit():
         user.worked_in_same_field = confirm_user_form.worked_in_same_field.data
         user.deformity = confirm_user_form.deformity.data
         db.session.add(user)
@@ -2575,7 +2793,7 @@ def edit_user(id):
         abort(403)
     # name
     edit_name_form = EditNameForm(prefix='edit_name')
-    if edit_name_form.validate_on_submit():
+    if edit_name_form.submit.data and edit_name_form.validate_on_submit():
         user.name = edit_name_form.name.data
         db.session.add(user)
         flash(u'已更新用户姓名', category='success')
@@ -2583,7 +2801,7 @@ def edit_user(id):
     edit_name_form.name.data = user.name
     # ID number
     edit_id_number_form = EditIDNumberForm(prefix='edit_id_number')
-    if edit_id_number_form.validate_on_submit():
+    if edit_id_number_form.submit.data and edit_id_number_form.validate_on_submit():
         user.id_number = edit_id_number_form.id_number.data
         user.gender_id = get_gender_id(edit_id_number_form.id_number.data)
         user.birthdate = date(year=int(edit_id_number_form.id_number.data[6:10]), month=int(edit_id_number_form.id_number.data[10:12]), day=int(edit_id_number_form.id_number.data[12:14]))
@@ -2593,7 +2811,7 @@ def edit_user(id):
     edit_id_number_form.id_number.data = user.id_number
     # role
     edit_role_form = EditUserRoleForm(prefix='edit_role', editor=current_user._get_current_object(), is_self=(user.id == current_user.id))
-    if edit_role_form.validate_on_submit():
+    if edit_role_form.submit.data and edit_role_form.validate_on_submit():
         user.role_id = int(edit_role_form.role.data)
         db.session.add(user)
         flash(u'已更新用户权限', category='success')
@@ -2601,7 +2819,7 @@ def edit_user(id):
     edit_role_form.role.data = unicode(user.role_id)
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
-    if edit_email_form.validate_on_submit():
+    if edit_email_form.submit.data and edit_email_form.validate_on_submit():
         if User.query.filter_by(email=edit_email_form.email.data).first() and edit_email_form.email.data != user.email:
             flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
@@ -2618,7 +2836,7 @@ def edit_user(id):
     edit_email_form.email.data = user.email
     # mobile
     edit_mobile_form = EditMobileForm(prefix='edit_mobile')
-    if edit_mobile_form.validate_on_submit():
+    if edit_mobile_form.submit.data and edit_mobile_form.validate_on_submit():
         user.mobile = edit_mobile_form.mobile.data
         db.session.add(user)
         flash(u'已更新移动电话', category='success')
@@ -2626,7 +2844,7 @@ def edit_user(id):
     edit_mobile_form.mobile.data = user.mobile
     # address
     edit_address_form = EditAddressForm(prefix='edit_address')
-    if edit_address_form.validate_on_submit():
+    if edit_address_form.submit.data and edit_address_form.validate_on_submit():
         user.address = edit_address_form.address.data
         db.session.add(user)
         flash(u'已更新联系地址', category='success')
@@ -2634,7 +2852,7 @@ def edit_user(id):
     edit_address_form.address.data = user.address
     # QQ
     edit_qq_form = EditQQForm(prefix='edit_qq')
-    if edit_qq_form.validate_on_submit():
+    if edit_qq_form.submit.data and edit_qq_form.validate_on_submit():
         user.qq = edit_qq_form.qq.data
         db.session.add(user)
         flash(u'已更新QQ号', category='success')
@@ -2642,7 +2860,7 @@ def edit_user(id):
     edit_qq_form.qq.data = user.qq
     # WeChat
     edit_wechat_form = EditWeChatForm(prefix='edit_wechat')
-    if edit_wechat_form.validate_on_submit():
+    if edit_wechat_form.submit.data and edit_wechat_form.validate_on_submit():
         user.wechat = edit_wechat_form.wechat.data
         db.session.add(user)
         flash(u'已更新微信账号', category='success')
@@ -2650,7 +2868,7 @@ def edit_user(id):
     edit_wechat_form.wechat.data = user.wechat
     # emergency contact name
     edit_emergency_contact_name_form = EditEmergencyContactNameForm(prefix='edit_emergency_contact_name')
-    if edit_emergency_contact_name_form.validate_on_submit():
+    if edit_emergency_contact_name_form.submit.data and edit_emergency_contact_name_form.validate_on_submit():
         user.emergency_contact_name = edit_emergency_contact_name_form.emergency_contact_name.data
         db.session.add(user)
         flash(u'已更新紧急联系人姓名', category='success')
@@ -2658,7 +2876,7 @@ def edit_user(id):
     edit_emergency_contact_name_form.emergency_contact_name.data = user.emergency_contact_name
     # emergency contact relationship
     edit_emergency_contact_relationship_form = EditEmergencyContactRelationshipForm(prefix='edit_emergency_contact_relationship')
-    if edit_emergency_contact_relationship_form.validate_on_submit():
+    if edit_emergency_contact_relationship_form.submit.data and edit_emergency_contact_relationship_form.validate_on_submit():
         user.emergency_contact_relationship_id = int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)
         db.session.add(user)
         flash(u'已更新紧急联系人关系', category='success')
@@ -2666,7 +2884,7 @@ def edit_user(id):
     edit_emergency_contact_relationship_form.emergency_contact_relationship.data = unicode(user.emergency_contact_relationship_id)
     # emergency contact mobile
     edit_emergency_contact_mobile_form = EditEmergencyContactMobileForm(prefix='edit_emergency_contact_mobile')
-    if edit_emergency_contact_mobile_form.validate_on_submit():
+    if edit_emergency_contact_mobile_form.submit.data and edit_emergency_contact_mobile_form.validate_on_submit():
         user.emergency_contact_mobile = edit_emergency_contact_mobile_form.emergency_contact_mobile.data
         db.session.add(user)
         flash(u'已更新紧急联系人移动电话', category='success')
@@ -2674,7 +2892,7 @@ def edit_user(id):
     edit_emergency_contact_mobile_form.emergency_contact_mobile.data = user.emergency_contact_mobile
     # education
     new_education_record_form = NewEducationRecordForm(prefix='new_education_record')
-    if new_education_record_form.validate_on_submit():
+    if new_education_record_form.submit.data and new_education_record_form.validate_on_submit():
         education_type = EducationType.query.get(int(new_education_record_form.education_type.data))
         user.add_education_record(
             education_type=education_type,
@@ -2688,7 +2906,7 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # employment
     new_employment_record_form = NewEmploymentRecordForm(prefix='new_employment_record')
-    if new_employment_record_form.validate_on_submit():
+    if new_employment_record_form.submit.data and new_employment_record_form.validate_on_submit():
         user.add_employment_record(
             employer=new_employment_record_form.employer.data,
             position=new_employment_record_form.position.data,
@@ -2698,7 +2916,7 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # scores
     new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
-    if new_previous_achievement_form.validate_on_submit():
+    if new_previous_achievement_form.submit.data and new_previous_achievement_form.validate_on_submit():
         previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
         if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
             user.add_previous_achievement(
@@ -2714,10 +2932,10 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # TOEFL
     new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
-    if new_toefl_test_score_form.validate_on_submit():
-        test_score_type = TOEFLTestScoreType.query.get(int(new_toefl_test_score_form.test_score_type.data))
+    if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
+        test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
-            test_score_type=test_score_type,
+            test=test,
             total_score=int(new_toefl_test_score_form.total.data),
             reading_score=int(new_toefl_test_score_form.reading.data),
             listening_score=int(new_toefl_test_score_form.listening.data),
@@ -2725,11 +2943,11 @@ def edit_user(id):
             writing_score=int(new_toefl_test_score_form.writing.data),
             modified_by=current_user._get_current_object()
         )
-        flash(u'已添加TOEFL%s成绩' % test_score_type.name, category='success')
+        flash(u'已添加TOEFL%s成绩' % test.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
-    if edit_purpose_form.validate_on_submit():
+    if edit_purpose_form.submit.data and edit_purpose_form.validate_on_submit():
         for purpose in user.purposes:
             if purpose.type.name != u'其它':
                 user.remove_purpose(purpose_type=purpose.type)
@@ -2747,7 +2965,7 @@ def edit_user(id):
             edit_purpose_form.other_purpose.data = purpose.remark
     # application aim
     edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
-    if edit_application_aim_form.validate_on_submit():
+    if edit_application_aim_form.submit.data and edit_application_aim_form.validate_on_submit():
         user.application_aim = edit_application_aim_form.application_aim.data
         db.session.add(user)
         flash(u'已更新申请方向', category='success')
@@ -2755,7 +2973,7 @@ def edit_user(id):
     edit_application_aim_form.application_aim.data = user.application_aim
     # referrer
     edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
-    if edit_referrer_form.validate_on_submit():
+    if edit_referrer_form.submit.data and edit_referrer_form.validate_on_submit():
         for referrer in user.referrers:
             if referrer.type.name != u'其它':
                 user.remove_referrer(referrer_type=referrer.type)
@@ -2773,7 +2991,7 @@ def edit_user(id):
             edit_referrer_form.other_referrer.data = referrer.remark
     # inviter
     new_inviter_form = NewInviterForm(prefix='new_inviter')
-    if new_inviter_form.validate_on_submit():
+    if new_inviter_form.submit.data and new_inviter_form.validate_on_submit():
         inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data, created=True, activated=True, deleted=False).first()
         if inviter is None:
             flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
@@ -2789,14 +3007,14 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purchase
     new_purchase_form = NewPurchaseForm(prefix='new_purchase')
-    if new_purchase_form.validate_on_submit():
+    if new_purchase_form.submit.data and new_purchase_form.validate_on_submit():
         product = Product.query.get_or_404(int(new_purchase_form.product.data))
         user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
         flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # VB course
     edit_vb_course_form = EditVBCourseForm(prefix='edit_vb_course')
-    if edit_vb_course_form.validate_on_submit():
+    if edit_vb_course_form.submit.data and edit_vb_course_form.validate_on_submit():
         if user.vb_course:
             user.unregister_course(user.vb_course)
         if int(edit_vb_course_form.vb_course.data):
@@ -2807,7 +3025,7 @@ def edit_user(id):
         edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
     # Y-GRE course
     edit_y_gre_course_form = EditYGRECourseForm(prefix='edit_y_gre_course')
-    if edit_y_gre_course_form.validate_on_submit():
+    if edit_y_gre_course_form.submit.data and edit_y_gre_course_form.validate_on_submit():
         if user.y_gre_course:
             user.unregister_course(user.y_gre_course)
         if int(edit_y_gre_course_form.y_gre_course.data):
@@ -2818,7 +3036,7 @@ def edit_user(id):
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
     # worked_in_same_field
     edit_worked_in_same_field_form = EditWorkInSameFieldForm(prefix='edit_worked_in_same_field')
-    if edit_worked_in_same_field_form.validate_on_submit():
+    if edit_worked_in_same_field_form.submit.data and edit_worked_in_same_field_form.validate_on_submit():
         user.worked_in_same_field = edit_worked_in_same_field_form.worked_in_same_field.data
         db.session.add(user)
         flash(u'已更新"（曾）在培训/留学机构任职"状态', category='success')
@@ -2826,7 +3044,7 @@ def edit_user(id):
     edit_worked_in_same_field_form.worked_in_same_field.data = user.worked_in_same_field
     # deformity
     edit_deformity_form = EditDeformityForm(prefix='edit_deformity')
-    if edit_deformity_form.validate_on_submit():
+    if edit_deformity_form.submit.data and edit_deformity_form.validate_on_submit():
         user.deformity = edit_deformity_form.deformity.data
         db.session.add(user)
         flash(u'已更新"有严重心理或身体疾病"状态', category='success')
@@ -2991,7 +3209,7 @@ def course():
         course = Course(name=form.name.data, type_id=int(form.course_type.data), show=form.show.data, modified_by_id=current_user.id)
         db.session.add(course)
         flash(u'新建班级：%s' % form.name.data, category='success')
-        return redirect(url_for('manage.course'))
+        return redirect(url_for('manage.course', page=request.args.get('page', 1, type=int)))
     show_vb_courses = True
     show_y_gre_courses = False
     if current_user.is_authenticated:
@@ -3046,8 +3264,10 @@ def y_gre_courses():
 @permission_required(u'管理')
 def course_user(id):
     course = Course.query.get_or_404(id)
-    if course.deleted or course.valid_registrations.count() == 0:
+    if course.deleted:
         abort(404)
+    if course.valid_registrations.count() == 0:
+        return redirect(url_for('manage.course'))
     query = User.query\
         .join(CourseRegistration, CourseRegistration.user_id == User.id)\
         .filter(CourseRegistration.course_id == course.id)\
@@ -3068,9 +3288,9 @@ def toggle_course_show(id):
         abort(404)
     course.toggle_show(modified_by=current_user._get_current_object())
     if course.show:
-        flash(u'班级：%s的可选状态改为：可选' % course.name, category='success')
+        flash(u'班级“%s”的可选状态改为：可选' % course.name, category='success')
     else:
-        flash(u'班级：%s的可选状态改为：不可选' % course.name, category='success')
+        flash(u'班级“%s”的可选状态改为：不可选' % course.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.course'))
 
 
@@ -3118,16 +3338,16 @@ def group():
         user = User.query.filter_by(email=form.organizer_email.data, created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'团报发起人邮箱不存在：%s' % form.organizer_email.data, category='error')
-            return redirect(url_for('manage.group'))
+            return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
         if user.organized_groups.count():
             flash(u'%s已经发起过团报' % user.name_alias, category='error')
-            return redirect(url_for('manage.group'))
+            return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
         if user.registered_groups.count():
             flash(u'%s已经参加过%s发起的团报' % (user.name_alias, user.registered_groups.first().organizer.name_alias), category='error')
-            return redirect(url_for('manage.group'))
+            return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
         user.register_group(organizer=user)
         flash(u'%s已成功发起团报' % user.name_alias, category='success')
-        return redirect(url_for('manage.group'))
+        return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
     query = GroupRegistration.query\
         .filter(GroupRegistration.organizer_id == GroupRegistration.member_id)\
         .order_by(GroupRegistration.timestamp.desc())
@@ -3218,7 +3438,7 @@ def ipad():
         ipad = iPad.query.filter_by(serial=serial).first()
         if ipad:
             flash(u'序列号为%s的iPad已存在' % serial, category='error')
-            return redirect(url_for('manage.ipad'))
+            return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
         ipad = iPad(
             serial=serial,
             alias=form.alias.data,
@@ -3234,7 +3454,7 @@ def ipad():
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
         iPadContentJSON.mark_out_of_date()
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
-        return redirect(url_for('manage.ipad'))
+        return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
     show_ipad_all = True
     show_ipad_maintain = False
     show_ipad_charge = False
@@ -3567,7 +3787,7 @@ def announcement():
         else:
             announcement.clean_up()
         flash(u'已添加通知：“%s”' % form.title.data, category='success')
-        return redirect(url_for('manage.announcement'))
+        return redirect(url_for('manage.announcement', page=request.args.get('page', 1, type=int)))
     query = Announcement.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
     pagination = query\
@@ -3662,7 +3882,7 @@ def product():
         )
         db.session.add(product)
         flash(u'已添加研修产品：%s' % form.name.data, category='success')
-        return redirect(url_for('manage.product'))
+        return redirect(url_for('manage.product', page=request.args.get('page', 1, type=int)))
     query = Product.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -3725,8 +3945,10 @@ def delete_product(id):
 @permission_required(u'管理产品')
 def product_purchase(id):
     product = Product.query.get_or_404(id)
-    if product.deleted or product.sales_volume == 0:
+    if product.deleted:
         abort(404)
+    if product.sales_volume == 0:
+        return redirect(url_for('manage.product'))
     query = Purchase.query\
         .join(User, User.id == Purchase.user_id)\
         .filter(Purchase.product_id == product.id)\
@@ -3748,7 +3970,7 @@ def role():
     if form.validate_on_submit():
         if Role.query.filter_by(name=form.name.data).first() is not None:
             flash(u'“%s”角色已存在' % form.name.data, category='error')
-            return redirect(url_for('manage.role'))
+            return redirect(url_for('manage.role', page=request.args.get('page', 1, type=int)))
         role = Role(name=form.name.data)
         db.session.add(role)
         db.session.commit()
@@ -3757,7 +3979,7 @@ def role():
         if form.is_developer.data:
             role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
         flash(u'已添加角色：%s' % form.name.data, category='success')
-        return redirect(url_for('manage.role'))
+        return redirect(url_for('manage.role', page=request.args.get('page', 1, type=int)))
     query = Role.query
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
@@ -3811,11 +4033,11 @@ def permission():
     if form.validate_on_submit():
         if Permission.query.filter_by(name=form.name.data).first() is not None:
             flash(u'“%s”权限已存在' % form.name.data, category='error')
-            return redirect(url_for('manage.permission'))
+            return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
         permission = Permission(name=form.name.data)
         db.session.add(permission)
         flash(u'已添加权限：%s' % form.name.data, category='success')
-        return redirect(url_for('manage.permission'))
+        return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
     show_booking_permissions = True
     show_manage_permissions = False
     show_develop_permissions = False

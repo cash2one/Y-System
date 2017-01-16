@@ -94,6 +94,92 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="pencil icon"></i>考试列表</h3>
+                <div class="ui right floated positive circular pointing dropdown icon button">
+                    <i class="add icon"></i>
+                    <div class="menu">
+                        <div id="new-vb-score-trigger" class="item"><i class="blue add circle icon"></i>新建VB考试记录</div>
+                        <div id="new-y-gre-score-trigger" class="item"><i class="teal add circle icon"></i>新建Y-GRE考试记录</div>
+                        <div id="new-toefl-score-trigger" class="item"><i class="orange add circle icon"></i>新建TOEFL考试记录</div>
+                    </div>
+                </div>
+                <div id="new-vb-score-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建VB考试记录</div>
+                    <div class="content">
+                        <form id="new-vb-score" method="POST" class="ui form">
+                            {{ vb_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ vb_form.email.label() }}
+                                <div class="ui fluid search">
+                                    {{ vb_form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ vb_form.test.label() }}
+                                    {{ vb_form.test(class='ui dropdown') }}
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ vb_form.score.label() }}
+                                    {{ vb_form.score(placeholder='成绩') }}
+                                </div>
+                            </div>
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ vb_form.retrieved() }}
+                                        {{ vb_form.retrieved.label() }}
+                                    </div>
+                                </div>
+                            </div>
+                            {{ vb_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div id="new-y-gre-score-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建Y-GRE考试记录</div>
+                    <div class="content">
+                        <form id="new-y-gre-score" method="POST" class="ui form">
+                            {{ y_gre_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ y_gre_form.email.label() }}
+                                <div class="ui fluid search">
+                                    {{ y_gre_form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                            <div class="fields">
+                                <div class="four wide required field">
+                                    {{ y_gre_form.test.label() }}
+                                    {{ y_gre_form.test(class='ui dropdown') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ y_gre_form.v_score.label() }}
+                                    {{ y_gre_form.v_score(placeholder='V成绩') }}
+                                </div>
+                                <div class="four wide field">
+                                    {{ y_gre_form.q_score.label() }}
+                                    {{ y_gre_form.q_score(placeholder='Q成绩') }}
+                                </div>
+                                <div class="four wide field">
+                                    {{ y_gre_form.aw_score.label() }}
+                                    {{ y_gre_form.aw_score(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ y_gre_form.retrieved() }}
+                                        {{ y_gre_form.retrieved.label() }}
+                                    </div>
+                                </div>
+                            </div>
+                            {{ y_gre_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_vb_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_tests') }}">VB考试</a>
                     <a class="item {% if show_y_gre_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_tests') }}">Y-GRE考试</a>
@@ -112,9 +198,9 @@
                         {% for test in tests %}
                         <tr>
                             <td>{{ test.name }}</td>
-                            <td>{% if show_toefl_tests %}N/A{% else %}{{ test.lesson.type.name }}{% endif %}</td>
-                            <td>{% if show_toefl_tests %}N/A{% else %}{{ test.lesson.name }}{% endif %}</td>
-                            <td>{% if test.finished_by_alias.count() %}<a class="score loading-trigger" href="#" data-content="查看考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
+                            <td>{% if test_type == 'toefl' %}TOEFL{% else %}{{ test.lesson.type.name }}{% endif %}</td>
+                            <td>{% if test_type == 'toefl' %}N/A{% else %}{{ test.lesson.name }}{% endif %}</td>
+                            <td>{% if test.finished_by_alias.count() %}<a class="score loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=test.id) }}" data-content="查看{{ test.finished_by_alias.count() }}条考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -139,8 +225,136 @@ $('.message .close')
     })
 ;
 
+$('.ui.checkbox').checkbox();
+
 $('table').tablesort();
 
 $('td a.score.loading-trigger').popup();
+
+$('#new-vb-score-trigger').popup();
+$('#new-vb-score-trigger')
+    .on('click', function() {
+        $('#new-vb-score-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$('#new-y-gre-score-trigger').popup();
+$('#new-y-gre-score-trigger')
+    .on('click', function() {
+        $('#new-y-gre-score-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$(document)
+    .ready(function() {
+        $('#new-vb-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'vb-email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入有效的用户邮箱'
+                            }
+                        ]
+                    },
+                    test: {
+                        identifier: 'vb-test',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择VB考试'
+                            }
+                        ]
+                    },
+                    score: {
+                        identifier: 'vb-score',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选填写考试成绩'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写有效的考试成绩'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#new-y-gre-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'y_gre-email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入有效的用户邮箱'
+                            }
+                        ]
+                    },
+                    test: {
+                        identifier: 'y_gre-test',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Y-GRE考试'
+                            }
+                        ]
+                    },
+                    v_score: {
+                        identifier: 'y_gre-v_score',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选填写考试成绩'
+                            },
+                            {
+                                type: 'integer[130..170]',
+                                prompt: '请填写有效的Verbal Reasoning成绩'
+                            }
+                        ]
+                    },
+                    q_score: {
+                        identifier: 'y_gre-q_score',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[130..170]',
+                                prompt: '请填写有效的Quantitative Reasoning成绩'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
+        },
+        showNoResults: false
+    })
+;
 </script>
 {% endblock %}

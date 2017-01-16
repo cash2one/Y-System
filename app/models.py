@@ -647,7 +647,7 @@ class VBTestScore(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.id'))
     score = db.Column(db.Float)
-    # retrieved = db.Column(db.Boolean, default=False)
+    retrieved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -660,6 +660,15 @@ class VBTestScore(db.Model):
     @property
     def alias(self):
         return u'%s %s %g' % (self.user.name_alias, self.test.name, self.score)
+
+    @property
+    def score_alias(self):
+        return u'%g' % self.score
+
+    def toggle_retrieve(self, modified_by):
+        self.retrieved = not self.retrieved
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
 
     def __repr__(self):
         return '<VB Test Score %r>' % self.alias
@@ -695,7 +704,7 @@ class YGRETestScore(db.Model):
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
-    # retrieved = db.Column(db.Boolean, default=False)
+    retrieved = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -709,28 +718,33 @@ class YGRETestScore(db.Model):
     def alias(self):
         return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.name, self.v_score, self.q_score, self.aw_score.name)
 
+    def toggle_retrieve(self, modified_by):
+        self.retrieved = not self.retrieved
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
     def __repr__(self):
         return '<Y-GRE Test Score %r>' % self.alias
 
 
-class TOEFLTestScoreType(db.Model):
-    __tablename__ = 'toefl_test_score_types'
+class TOEFLTest(db.Model):
+    __tablename__ = 'toefl_tests'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    toefl_test_scores = db.relationship('TOEFLTestScore', backref='type', lazy='dynamic')
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='test', lazy='dynamic')
 
     @property
     def finished_by_alias(self):
         return TOEFLTestScore.query\
             .join(User, User.id == TOEFLTestScore.user_id)\
-            .filter(TOEFLTestScore.type_id == self.id)\
+            .filter(TOEFLTestScore.test_id == self.id)\
             .filter(User.created == True)\
             .filter(User.activated == True)\
             .filter(User.deleted == False)
 
     @staticmethod
-    def insert_toefl_test_score_types():
-        toefl_test_score_types = [
+    def insert_toefl_tests():
+        toefl_tests = [
             (u'初始', ),
             (u'目标', ),
             (u'第1次', ),
@@ -743,23 +757,23 @@ class TOEFLTestScoreType(db.Model):
             (u'第8次', ),
             (u'第9次', ),
         ]
-        for TTST in toefl_test_score_types:
-            toefl_test_score_type = TOEFLTestScoreType.query.filter_by(name=TTST[0]).first()
-            if toefl_test_score_type is None:
-                toefl_test_score_type = TOEFLTestScoreType(name=TTST[0])
-                db.session.add(toefl_test_score_type)
-                print u'导入TOEFL考试成绩类型信息', TTST[0]
+        for TT in toefl_tests:
+            toefl_test = TOEFLTest.query.filter_by(name=TT[0]).first()
+            if toefl_test is None:
+                toefl_test = TOEFLTest(name=TT[0])
+                db.session.add(toefl_test)
+                print u'导入TOEFL考试信息', TT[0]
         db.session.commit()
 
     def __repr__(self):
-        return '<TOEFL Test Score Type %r>' % self.name
+        return '<TOEFL Test %r>' % self.name
 
 
 class TOEFLTestScore(db.Model):
     __tablename__ = 'toefl_test_score'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    type_id = db.Column(db.Integer, db.ForeignKey('toefl_test_score_types.id'))
+    test_id = db.Column(db.Integer, db.ForeignKey('toefl_tests.id'))
     total_score = db.Column(db.Integer)
     reading_score = db.Column(db.Integer)
     listening_score = db.Column(db.Integer)
@@ -776,7 +790,7 @@ class TOEFLTestScore(db.Model):
 
     @property
     def alias(self):
-        return u'%s %s %g R%g L%g S%g W%g' % (self.user.name_alias, self.type.name, self.total_score, self.reading_score, self.listening_score, self.speaking_score, self.writing_score)
+        return u'%s %s %g R%g L%g S%g W%g' % (self.user.name_alias, self.test.name, self.total_score, self.reading_score, self.listening_score, self.speaking_score, self.writing_score)
 
     @property
     def alias2(self):
@@ -1694,10 +1708,10 @@ class User(UserMixin, db.Model):
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
-    def add_toefl_test_score(self, test_score_type, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
+    def add_toefl_test_score(self, test, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         toefl_test_score = TOEFLTestScore(
             user_id=self.id,
-            type_id=test_score_type.id,
+            test_id=test.id,
             total_score=total_score,
             reading_score=reading_score,
             listening_score=listening_score,
@@ -3121,6 +3135,10 @@ class Test(db.Model):
         return u'%s - %s' % (self.lesson.alias, self.name)
 
     @property
+    def alias2(self):
+        return u'%s - %s' % (self.lesson.name, self.name)
+
+    @property
     def finished_by_alias(self):
         if self.lesson.type.name == u'VB':
             return VBTestScore.query\
@@ -3153,7 +3171,15 @@ class Test(db.Model):
             (u'模考2', u'Y-GRE总论', ),
             (u'PPII-1', u'Y-GRE总论', ),
             (u'PPII-2', u'Y-GRE总论', ),
-            (u'GRE', u'Y-GRE总论', ),
+            (u'GRE-1', u'Y-GRE总论', ),
+            (u'GRE-2', u'Y-GRE总论', ),
+            (u'GRE-3', u'Y-GRE总论', ),
+            (u'GRE-4', u'Y-GRE总论', ),
+            (u'GRE-5', u'Y-GRE总论', ),
+            (u'GRE-6', u'Y-GRE总论', ),
+            (u'GRE-7', u'Y-GRE总论', ),
+            (u'GRE-8', u'Y-GRE总论', ),
+            (u'GRE-9', u'Y-GRE总论', ),
         ]
         for T in tests:
             test = Test.query.filter_by(name=T[0]).first()

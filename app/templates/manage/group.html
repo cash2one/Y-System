@@ -134,7 +134,7 @@
                                 {% if group.organizer.organized_groups.count() > 1 %}
                                 {% for group_registration in group.organizer.organized_groups %}
                                 {% if group_registration.member.id != group_registration.organizer.id %}
-                                <div class="ui label">{{ macros.user_popup(group_registration.member) }}<i id="remove-member-trigger-{{ group_registration.member.id }}" class="delete icon"></i></div>
+                                <div class="ui orange label">{{ macros.user_popup(group_registration.member) }}<i id="remove-member-trigger-{{ group_registration.member.id }}" class="delete icon"></i></div>
                                 <div id="remove-member-modal-{{ group_registration.member.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除{{ group.organizer.name_alias }}的团报成员{{ group_registration.member.name_alias }}么？</div>
                                     <div class="actions">

@@ -107,7 +107,7 @@
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
-                    <a class="ui button loading-trigger" href="{{ url_for('manage.assignment_score', id=score.assignment.id)) }}">取消</a>
+                    <a class="ui button loading-trigger" href="{{ url_for('manage.assignment_score', id=score.assignment.id) }}">取消</a>
                     {{ macros.form_validation_error_widget(form) }}
                 </form>
             </div>
@@ -150,7 +150,7 @@ $(document)
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择作业分数'
+                                prompt: '请选择作业成绩'
                             }
                         ]
                     }

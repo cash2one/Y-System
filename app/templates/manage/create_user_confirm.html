@@ -475,7 +475,7 @@
                             <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
-                            <div class="header">{{ toefl_test_score.type.name }}成绩</div>
+                            <div class="header">{{ toefl_test_score.test.name }}成绩</div>
                             <div class="description">{{ toefl_test_score.alias2 }}</div>
                         </div>
                     </div>
@@ -486,7 +486,7 @@
                     {{ new_toefl_test_score_form.hidden_tag() }}
                     <div class="fields">
                         <div class="three wide field">
-                            {{ new_toefl_test_score_form.test_score_type(class='ui dropdown') }}
+                            {{ new_toefl_test_score_form.test(class='ui dropdown') }}
                         </div>
                         <div class="four wide field">
                             {{ new_toefl_test_score_form.total(placeholder='TOEFL总分') }}
@@ -1320,12 +1320,12 @@ $(document)
                 inline: true,
                 on: 'blur',
                 fields: {
-                    test_score_type: {
-                        identifier: 'new_toefl_test_score-test_score_type',
+                    test: {
+                        identifier: 'new_toefl_test_score-test',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择TOEFL成绩类型'
+                                prompt: '请选择TOEFL考试'
                             }
                         ]
                     },
