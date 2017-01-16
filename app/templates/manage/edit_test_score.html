@@ -144,6 +144,34 @@
                         </div>
                     </div>
                     {% endif %}
+                    {% if test_type == 'toefl' %}
+                    <div class="required field">
+                        {{ form.test.label() }}
+                        {{ form.test(class='ui dropdown') }}
+                    </div>
+                    <div class="fields">
+                        <div class="four wide required field">
+                            {{ form.total.label() }}
+                            {{ form.total(placeholder='TOEFL总分') }}
+                        </div>
+                        <div class="three wide required field">
+                            {{ form.reading.label() }}
+                            {{ form.reading(placeholder='TOEFL阅读') }}
+                        </div>
+                        <div class="three wide required field">
+                            {{ form.listening.label() }}
+                            {{ form.listening(placeholder='TOEFL听力') }}
+                        </div>
+                        <div class="three wide required field">
+                            {{ form.speaking.label() }}
+                            {{ form.speaking(placeholder='TOEFL口语') }}
+                        </div>
+                        <div class="three wide required field">
+                            {{ form.writing.label() }}
+                            {{ form.writing(placeholder='TOEFL写作') }}
+                        </div>
+                    </div>
+                    {% endif %}
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=score.test.id) }}">取消</a>
                     {{ macros.form_validation_error_widget(form) }}
@@ -170,6 +198,15 @@ $('.ui.checkbox').checkbox();
 
 $(document)
     .ready(function() {
+        {% if test_type == 'toefl' %}
+        $.fn.form.settings.rules.toefl = function(value) {
+            if (($('#reading').val() === '') || ($('#listening').val() === '') || ($('#speaking').val() === '') || ($('#writing').val() === '')) {
+                return true;
+            } else {
+                return (Number(value) === Number($('#reading').val()) + Number($('#listening').val()) + Number($('#speaking').val()) + Number($('#writing').val()));
+            };
+        };
+        {% endif %}
         $('#edit-score')
             .form({
                 onSuccess: submitForm,
@@ -230,6 +267,82 @@ $(document)
                             {
                                 type: 'integer[130..170]',
                                 prompt: '请填写有效的Quantitative Reasoning成绩'
+                            }
+                        ]
+                    }
+                    {% endif %}
+                    {% if test_type == 'toefl' %}
+                    test: {
+                        identifier: 'test',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择TOEFL考试'
+                            }
+                        ]
+                    },
+                    total: {
+                        identifier: 'total',
+                        rules: [
+                            {
+                                type: 'integer[0..120]',
+                                prompt: '请填写一个有效的TOEFL成绩'
+                            },
+                            {
+                                type: 'toefl',
+                                prompt: 'TOEFL成绩有误'
+                            }
+                        ]
+                    },
+                    reading: {
+                        identifier: 'reading',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL阅读成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL阅读成绩'
+                            }
+                        ]
+                    },
+                    listening: {
+                        identifier: 'listening',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL听力成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL听力成绩'
+                            }
+                        ]
+                    },
+                    speaking: {
+                        identifier: 'speaking',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL口语成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL口语成绩'
+                            }
+                        ]
+                    },
+                    writing: {
+                        identifier: 'writing',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL写作成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL写作成绩'
                             }
                         ]
                     }

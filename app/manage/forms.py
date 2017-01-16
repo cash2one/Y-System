@@ -253,6 +253,35 @@ class EditYGRETestScoreForm(FlaskForm):
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
 
 
+class NewTOEFLTestScoreForm(FlaskForm):
+    email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    test = SelectField(u'TOEFL考试', coerce=unicode, validators=[Required()])
+    total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
+    reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
+    listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
+    speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
+    writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
+        self.test.choices = [(u'', u'选择TOEFL考试')] + [(unicode(toefl_test.id), toefl_test.name) for toefl_test in TOEFLTest.query.order_by(TOEFLTest.id.asc()).all()]
+
+
+class EditTOEFLTestScoreForm(FlaskForm):
+    test = SelectField(u'TOEFL考试', coerce=unicode, validators=[Required()])
+    total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
+    reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
+    listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
+    speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
+    writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(EditTOEFLTestScoreForm, self).__init__(*args, **kwargs)
+        self.test.choices = [(u'', u'选择TOEFL考试')] + [(unicode(toefl_test.id), toefl_test.name) for toefl_test in TOEFLTest.query.order_by(TOEFLTest.id.asc()).all()]
+
+
 class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
@@ -396,20 +425,6 @@ class NewPreviousAchievementForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewPreviousAchievementForm, self).__init__(*args, **kwargs)
         self.previous_achievement_type.choices = [(u'', u'选择成绩类型')] + [(unicode(previous_achievement_type.id), previous_achievement_type.name) for previous_achievement_type in PreviousAchievementType.query.order_by(PreviousAchievementType.id.asc()).all()]
-
-
-class NewTOEFLTestScoreForm(FlaskForm):
-    test = SelectField(u'TOEFL考试', coerce=unicode, validators=[Required()])
-    total = IntegerField(u'TOEFL', validators=[Required(), NumberRange(min=0, max=120)])
-    reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
-    listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
-    speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
-    writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
-    submit = SubmitField(u'添加')
-
-    def __init__(self, *args, **kwargs):
-        super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择TOEFL考试')] + [(unicode(toefl_test.id), toefl_test.name) for toefl_test in TOEFLTest.query.order_by(TOEFLTest.id.asc()).all()]
 
 
 class NewAdminForm(FlaskForm):

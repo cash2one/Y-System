@@ -734,6 +734,10 @@ class TOEFLTest(db.Model):
     toefl_test_scores = db.relationship('TOEFLTestScore', backref='test', lazy='dynamic')
 
     @property
+    def alias(self):
+        return u'TOEFL - %s' % self.name
+
+    @property
     def finished_by_alias(self):
         return TOEFLTestScore.query\
             .join(User, User.id == TOEFLTestScore.user_id)\
@@ -3161,6 +3165,7 @@ class Test(db.Model):
             (u'L1-5', u'L5', ),
             (u'L6-9', u'L9', ),
             (u'初始', u'Y-GRE总论', ),
+            (u'目标', u'Y-GRE总论', ),
             (u'Unit 1', u'1st', ),
             (u'Unit 2', u'2nd', ),
             (u'Unit 3', u'3rd', ),

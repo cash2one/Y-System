@@ -180,6 +180,49 @@
                         </form>
                     </div>
                 </div>
+                <div id="new-toefl-score-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建TOEFL考试记录</div>
+                    <div class="content">
+                        <form id="new-toefl-score" method="POST" class="ui form">
+                            {{ toefl_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ toefl_form.email.label() }}
+                                <div class="ui fluid search">
+                                    {{ toefl_form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                            <div class="required field">
+                                {{ toefl_form.test.label() }}
+                                {{ toefl_form.test(class='ui dropdown') }}
+                            </div>
+                            <div class="fields">
+                                <div class="four wide required field">
+                                    {{ toefl_form.total.label() }}
+                                    {{ toefl_form.total(placeholder='TOEFL总分') }}
+                                </div>
+                                <div class="three wide required field">
+                                    {{ toefl_form.reading.label() }}
+                                    {{ toefl_form.reading(placeholder='TOEFL阅读') }}
+                                </div>
+                                <div class="three wide required field">
+                                    {{ toefl_form.listening.label() }}
+                                    {{ toefl_form.listening(placeholder='TOEFL听力') }}
+                                </div>
+                                <div class="three wide required field">
+                                    {{ toefl_form.speaking.label() }}
+                                    {{ toefl_form.speaking(placeholder='TOEFL口语') }}
+                                </div>
+                                <div class="three wide required field">
+                                    {{ toefl_form.writing.label() }}
+                                    {{ toefl_form.writing(placeholder='TOEFL写作') }}
+                                </div>
+                            </div>
+                            {{ toefl_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_vb_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_tests') }}">VB考试</a>
                     <a class="item {% if show_y_gre_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_tests') }}">Y-GRE考试</a>
@@ -242,6 +285,13 @@ $('#new-y-gre-score-trigger').popup();
 $('#new-y-gre-score-trigger')
     .on('click', function() {
         $('#new-y-gre-score-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$('#new-toefl-score-trigger').popup();
+$('#new-toefl-score-trigger')
+    .on('click', function() {
+        $('#new-toefl-score-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
@@ -339,6 +389,109 @@ $(document)
                             {
                                 type: 'integer[130..170]',
                                 prompt: '请填写有效的Quantitative Reasoning成绩'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $.fn.form.settings.rules.toefl = function(value) {
+            if (($('#toefl-reading').val() === '') || ($('#toefl-listening').val() === '') || ($('#toefl-speaking').val() === '') || ($('#toefl-writing').val() === '')) {
+                return true;
+            } else {
+                return (Number(value) === Number($('#toefl-reading').val()) + Number($('#toefl-listening').val()) + Number($('#toefl-speaking').val()) + Number($('#toefl-writing').val()));
+            };
+        };
+        $('#new-toefl-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'toefl-email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入有效的用户邮箱'
+                            }
+                        ]
+                    },
+                    test: {
+                        identifier: 'toefl-test',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择TOEFL考试'
+                            }
+                        ]
+                    },
+                    total: {
+                        identifier: 'toefl-total',
+                        rules: [
+                            {
+                                type: 'integer[0..120]',
+                                prompt: '请填写一个有效的TOEFL成绩'
+                            },
+                            {
+                                type: 'toefl',
+                                prompt: 'TOEFL成绩有误'
+                            }
+                        ]
+                    },
+                    reading: {
+                        identifier: 'toefl-reading',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL阅读成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL阅读成绩'
+                            }
+                        ]
+                    },
+                    listening: {
+                        identifier: 'toefl-listening',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL听力成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL听力成绩'
+                            }
+                        ]
+                    },
+                    speaking: {
+                        identifier: 'toefl-speaking',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL口语成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL口语成绩'
+                            }
+                        ]
+                    },
+                    writing: {
+                        identifier: 'toefl-writing',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL写作成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL写作成绩'
                             }
                         ]
                     }

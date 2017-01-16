@@ -12,9 +12,9 @@ from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunc
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import EditSectionHourForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
-from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm
+from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm, NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
-from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewTOEFLTestScoreForm, NewInviterForm, NewPurchaseForm
+from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
@@ -1712,6 +1712,26 @@ def test():
         db.session.commit()
         flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
         return redirect(url_for('manage.test_score', test_type=u'y_gre', id=int(y_gre_form.test.data)))
+    toefl_form = NewTOEFLTestScoreForm(prefix='toefl')
+    if toefl_form.submit.data and toefl_form.validate_on_submit():
+        user = User.query.filter_by(email=toefl_form.email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'用户邮箱不存在：%s' % toefl_form.email.data, category='error')
+            return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
+        score = TOEFLTestScore(
+            user_id=user.id,
+            test_id=int(toefl_form.test.data),
+            total_score=int(toefl_form.total.data),
+            reading_score=int(toefl_form.reading.data),
+            listening_score=int(toefl_form.listening.data),
+            speaking_score=int(toefl_form.speaking.data),
+            writing_score=int(toefl_form.writing.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(score)
+        db.session.commit()
+        flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
+        return redirect(url_for('manage.test_score', test_type=u'toefl', id=int(toefl_form.test.data)))
     show_vb_tests = True
     show_y_gre_tests = False
     show_toefl_tests = False
@@ -1742,6 +1762,7 @@ def test():
     return render_template('manage/test.html',
         vb_form=vb_form,
         y_gre_form=y_gre_form,
+        toefl_form=toefl_form,
         tests=tests,
         show_vb_tests=show_vb_tests,
         show_y_gre_tests=show_y_gre_tests,
@@ -1854,6 +1875,38 @@ def test_score(test_type, id):
             .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .order_by(YGRETestScore.modified_at.desc())
+    if test_type == u'toefl':
+        test = TOEFLTest.query.get_or_404(id)
+        if test.finished_by_alias.count() == 0:
+            return redirect(url_for('manage.test'))
+        form = NewTOEFLTestScoreForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            if user is None:
+                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+            score = TOEFLTestScore(
+                user_id=user.id,
+                test_id=int(form.test.data),
+                total_score=int(form.total.data),
+                reading_score=int(form.reading.data),
+                listening_score=int(form.listening.data),
+                speaking_score=int(form.speaking.data),
+                writing_score=int(form.writing.data),
+                modified_by_id=current_user.id
+            )
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+        form.test.data = unicode(test.id)
+        query = TOEFLTestScore.query\
+            .join(User, User.id == TOEFLTestScore.user_id)\
+            .filter(TOEFLTestScore.test_id == test.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .order_by(TOEFLTestScore.modified_at.desc())
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     scores = pagination.items
@@ -1918,6 +1971,28 @@ def edit_test_score(test_type, id):
         form.q_score.data = u'%g' % score.q_score
         form.aw_score.data = unicode(score.aw_score_id)
         form.retrieved.data = score.retrieved
+    if test_type == u'toefl':
+        score = TOEFLTestScore.query.get_or_404(id)
+        form = EditTOEFLTestScoreForm()
+        if form.validate_on_submit():
+            score.test_id = int(form.test.data)
+            score.total_score = int(form.total.data)
+            score.reading_score = int(form.reading.data)
+            score.listening_score = int(form.listening.data)
+            score.speaking_score = int(form.speaking.data)
+            score.writing_score = int(form.writing.data)
+            score.modified_at = datetime.utcnow()
+            score.modified_by_id = current_user.id
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已更新TOEFL考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+        form.test.data = unicode(score.test_id)
+        form.total.data = u'%g' % score.total_score
+        form.reading.data = u'%g' % score.reading_score
+        form.listening.data = u'%g' % score.listening_score
+        form.speaking.data = u'%g' % score.speaking_score
+        form.writing.data = u'%g' % score.writing_score
     return render_template('manage/edit_test_score.html', test_type=test_type, form=form, score=score)
 
 
@@ -1933,6 +2008,10 @@ def delete_test_score(test_type, id):
         score = YGRETestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除Y-GRE考试记录：%s' % score.alias, category='success')
+    if test_type == u'toefl':
+        score = TOEFLTestScore.query.get_or_404(id)
+        db.session.delete(score)
+        flash(u'已删除TOEFL考试记录：%s' % score.alias, category='success')
     return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
 
 
@@ -2611,7 +2690,7 @@ def create_user_confirm(id):
         flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # TOEFL
-    new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
+    new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
         test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
@@ -2931,7 +3010,7 @@ def edit_user(id):
         flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # TOEFL
-    new_toefl_test_score_form = NewTOEFLTestScoreForm(prefix='new_toefl_test_score')
+    new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
         test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
