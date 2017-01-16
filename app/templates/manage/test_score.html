@@ -169,6 +169,7 @@
                             <th>Verbal Reasoning</th>
                             <th>Quantitative Reasoning</th>
                             <th>Analytical Writing</th>
+                            <th>试卷情况</th>
                             {% endif %}
                             {% if test_type == 'toefl' %}
                             <th>总分</th>
@@ -195,6 +196,7 @@
                             <td>{{ score.v_score }}</td>
                             <td>{{ score.q_score }}</td>
                             <td>{{ score.aw_score.name }}</td>
+                            {% if score.retrieved %}<td>已收回</td>{% else %}<td class="active">未收回</td>{% endif %}
                             {% endif %}
                             {% if test_type == 'toefl' %}
                             <td>{{ score.total_score }}</td>

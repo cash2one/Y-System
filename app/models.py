@@ -3161,7 +3161,15 @@ class Test(db.Model):
             (u'模考2', u'Y-GRE总论', ),
             (u'PPII-1', u'Y-GRE总论', ),
             (u'PPII-2', u'Y-GRE总论', ),
-            (u'GRE', u'Y-GRE总论', ),
+            (u'GRE-1', u'Y-GRE总论', ),
+            (u'GRE-2', u'Y-GRE总论', ),
+            (u'GRE-3', u'Y-GRE总论', ),
+            (u'GRE-4', u'Y-GRE总论', ),
+            (u'GRE-5', u'Y-GRE总论', ),
+            (u'GRE-6', u'Y-GRE总论', ),
+            (u'GRE-7', u'Y-GRE总论', ),
+            (u'GRE-8', u'Y-GRE总论', ),
+            (u'GRE-9', u'Y-GRE总论', ),
         ]
         for T in tests:
             test = Test.query.filter_by(name=T[0]).first()
