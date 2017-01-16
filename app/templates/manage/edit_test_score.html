@@ -107,6 +107,14 @@
                             {{ form.score(placeholder='成绩') }}
                         </div>
                     </div>
+                    <div class="ui segment">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ form.retrieved() }}
+                                {{ form.retrieved.label() }}
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
                     {% if test_type == 'y_gre' %}
                     <div class="fields">
@@ -127,7 +135,6 @@
                             {{ form.aw_score(class='ui dropdown') }}
                         </div>
                     </div>
-                    {% endif %}
                     <div class="ui segment">
                         <div class="inline field">
                             <div class="ui toggle checkbox">
@@ -136,6 +143,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=score.test.id) }}">取消</a>
                     {{ macros.form_validation_error_widget(form) }}
