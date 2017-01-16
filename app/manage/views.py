@@ -1860,6 +1860,22 @@ def test_score(test_type, id):
     return render_template('manage/test_score.html', test_type=test_type, form=form, test=test, scores=scores, pagination=pagination)
 
 
+@manage.route('/test/paper/toggle-retrieve/<test_type>/<int:id>')
+@login_required
+@permission_required(u'管理考试')
+def toggle_test_paper_retrieve(test_type, id):
+    if test_type == u'vb':
+        score = VBTestScore.query.get_or_404(id)
+    if test_type == u'y_gre':
+        score = YGRETestScore.query.get_or_404(id)
+    score.toggle_retrieve(modified_by=current_user._get_current_object())
+    if score.retrieved:
+        flash(u'已回收试卷：%s' % score.alias, category='success')
+    else:
+        flash(u'已发放试卷：%s' % score.alias, category='success')
+    return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
+
+
 @manage.route('/test/score/edit/<test_type>/<int:id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理考试')

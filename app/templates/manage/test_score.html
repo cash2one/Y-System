@@ -119,6 +119,14 @@
                                     {{ form.score(placeholder='成绩') }}
                                 </div>
                             </div>
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.retrieved() }}
+                                        {{ form.retrieved.label() }}
+                                    </div>
+                                </div>
+                            </div>
                             {% endif %}
                             {% if test_type == 'y_gre' %}
                             <div class="fields">
@@ -139,7 +147,6 @@
                                     {{ form.aw_score(class='ui dropdown') }}
                                 </div>
                             </div>
-                            {% endif %}
                             <div class="ui segment">
                                 <div class="inline field">
                                     <div class="ui toggle checkbox">
@@ -148,6 +155,7 @@
                                     </div>
                                 </div>
                             </div>
+                            {% endif %}
                             {{ form.submit(class='ui primary button') }}
                         </form>
                     </div>
@@ -164,6 +172,7 @@
                             <th>考试</th>
                             {% if test_type == 'vb' %}
                             <th>成绩</th>
+                            <th>试卷情况</th>
                             {% endif %}
                             {% if test_type == 'y_gre' %}
                             <th>Verbal Reasoning</th>
@@ -191,12 +200,13 @@
                             <td>{{ score.test.name }}</td>
                             {% if test_type == 'vb' %}
                             <td>{{ score.score_alias }}</td>
+                            {% if score.retrieved %}<td>已回收</td>{% else %}<td class="active">发出</td>{% endif %}
                             {% endif %}
                             {% if test_type == 'y_gre' %}
                             <td>{{ score.v_score }}</td>
                             <td>{{ score.q_score }}</td>
                             <td>{{ score.aw_score.name }}</td>
-                            {% if score.retrieved %}<td>已收回</td>{% else %}<td class="active">未收回</td>{% endif %}
+                            {% if score.retrieved %}<td>已回收</td>{% else %}<td class="active">发出</td>{% endif %}
                             {% endif %}
                             {% if test_type == 'toefl' %}
                             <td>{{ score.total_score }}</td>
@@ -216,6 +226,7 @@
                             <td>{{ macros.user_popup(score.modified_by) }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
+                                    {% if test_type == 'vb' or test_type == 'y_gre' %}{% if score.retrieved %}<a class="ui button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="send icon"></i></a>{% else %}<a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="undo icon"></i></a>{% endif %}{% endif %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_test_score', test_type=test_type, id=score.id) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ score.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>

@@ -665,6 +665,11 @@ class VBTestScore(db.Model):
     def score_alias(self):
         return u'%g' % self.score
 
+    def toggle_retrieve(self, modified_by):
+        self.retrieved = not self.retrieved
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
     def __repr__(self):
         return '<VB Test Score %r>' % self.alias
 
@@ -712,6 +717,11 @@ class YGRETestScore(db.Model):
     @property
     def alias(self):
         return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.name, self.v_score, self.q_score, self.aw_score.name)
+
+    def toggle_retrieve(self, modified_by):
+        self.retrieved = not self.retrieved
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
 
     def __repr__(self):
         return '<Y-GRE Test Score %r>' % self.alias
