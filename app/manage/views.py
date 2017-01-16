@@ -2036,7 +2036,7 @@ def user():
                 .filter(User.deleted == True)\
                 .order_by(User.last_seen_at.desc())
         else:
-            abort(403)
+            return redirect(url_for('manage.activated_users'))
     deleted_users_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2051,7 +2051,7 @@ def user():
                 .filter(Role.name == u'志愿者')\
                 .order_by(User.last_seen_at.desc())
         else:
-            abort(403)
+            return redirect(url_for('manage.activated_users'))
     volunteers_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2067,7 +2067,7 @@ def user():
                 .filter(Role.name == u'协管员')\
                 .order_by(User.last_seen_at.desc())
         else:
-            abort(403)
+            return redirect(url_for('manage.activated_users'))
     moderators_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2083,7 +2083,7 @@ def user():
                 .filter(Role.name == u'管理员')\
                 .order_by(User.last_seen_at.desc())
         else:
-            abort(403)
+            return redirect(url_for('manage.activated_users'))
     administrators_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
@@ -2099,7 +2099,7 @@ def user():
                 .filter(Role.name == u'开发人员')\
                 .order_by(User.last_seen_at.desc())
         else:
-            abort(403)
+            return redirect(url_for('manage.activated_users'))
     developers_num = User.query\
         .join(Role, Role.id == User.role_id)\
         .filter(User.created == True)\
