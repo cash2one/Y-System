@@ -189,19 +189,19 @@
                             <td>{{ macros.user_popup(score.user) }}</td>
                             <td>{{ score.test.name }}</td>
                             {% if test_type == 'vb' %}
-                            <td>成绩</td>
+                            <td>{{ score.score_alias }}</td>
                             {% endif %}
                             {% if test_type == 'y_gre' %}
-                            <td>Verbal Reasoning</td>
-                            <td>Quantitative Reasoning</td>
-                            <td>Analytical Writing</td>
+                            <td>{{ score.v_score }}</td>
+                            <td>{{ score.q_score }}</td>
+                            <td>{{ score.aw_score.name }}</td>
                             {% endif %}
                             {% if test_type == 'toefl' %}
-                            <td>总分</td>
-                            <td>阅读</td>
-                            <td>听力</td>
-                            <td>口语</td>
-                            <td>阅读</td>
+                            <td>{{ score.total_score }}</td>
+                            <td>{{ score.reading_score }}</td>
+                            <td>{{ score.listening_score }}</td>
+                            <td>{{ score.speaking_score }}</td>
+                            <td>{{ score.writing_score }}</td>
                             {% endif %}
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(score.created_at).fromNow() }}</div>

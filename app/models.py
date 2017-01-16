@@ -661,6 +661,10 @@ class VBTestScore(db.Model):
     def alias(self):
         return u'%s %s %g' % (self.user.name_alias, self.test.name, self.score)
 
+    @property
+    def score_alias(self):
+        return u'%g' % self.score
+
     def __repr__(self):
         return '<VB Test Score %r>' % self.alias
 

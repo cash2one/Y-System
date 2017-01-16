@@ -1886,9 +1886,9 @@ def edit_test_score(test_type, id):
         if form.validate_on_submit():
             score.test_id = int(form.test.data)
             score.v_score = int(form.v_score.data)
-            if q_score:
+            if form.q_score.data:
                 score.q_score = int(form.q_score.data)
-            if aw_score:
+            if form.aw_score.data:
                 score.aw_score_id = int(form.aw_score.data)
             score.retrieved = form.retrieved.data
             score.modified_at = datetime.utcnow()
