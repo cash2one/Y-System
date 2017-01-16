@@ -198,9 +198,9 @@
                         {% for test in tests %}
                         <tr>
                             <td>{{ test.name }}</td>
-                            <td>{% if show_toefl_tests %}N/A{% else %}{{ test.lesson.type.name }}{% endif %}</td>
-                            <td>{% if show_toefl_tests %}N/A{% else %}{{ test.lesson.name }}{% endif %}</td>
-                            <td>{% if test.finished_by_alias.count() %}<a class="score loading-trigger" href="#" data-content="查看{{ test.finished_by_alias.count() }}条考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
+                            <td>{% if test_type == 'toefl' %}TOEFL{% else %}{{ test.lesson.type.name }}{% endif %}</td>
+                            <td>{% if test_type == 'toefl' %}N/A{% else %}{{ test.lesson.name }}{% endif %}</td>
+                            <td>{% if test.finished_by_alias.count() %}<a class="score loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=test.id) }}" data-content="查看{{ test.finished_by_alias.count() }}条考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

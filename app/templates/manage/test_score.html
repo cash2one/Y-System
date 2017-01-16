@@ -153,7 +153,7 @@
                     </div>
                 </div>
                 <div class="ui secondary stackable menu">
-                    <a class="item active loading-trigger" href="{{ url_for('manage.test_score', id=test.id, page=pagination.page) }}">全部</a>
+                    <a class="item active loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=test.id, page=pagination.page) }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.test') }}">考试列表</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.lesson') }}">课程列表</a>
                 </div>
@@ -162,7 +162,21 @@
                         <tr>
                             <th>学生</th>
                             <th>考试</th>
+                            {% if test_type == 'vb' %}
                             <th>成绩</th>
+                            {% endif %}
+                            {% if test_type == 'y_gre' %}
+                            <th>Verbal Reasoning</th>
+                            <th>Quantitative Reasoning</th>
+                            <th>Analytical Writing</th>
+                            {% endif %}
+                            {% if test_type == 'toefl' %}
+                            <th>总分</th>
+                            <th>阅读</th>
+                            <th>听力</th>
+                            <th>口语</th>
+                            <th>阅读</th>
+                            {% endif %}
                             <th>创建时间</th>
                             <th>更新时间</th>
                             <th>操作人</th>
@@ -174,7 +188,21 @@
                         <tr>
                             <td>{{ macros.user_popup(score.user) }}</td>
                             <td>{{ score.test.name }}</td>
-                            <td>{{ score.grade.name }}</td>
+                            {% if test_type == 'vb' %}
+                            <td>成绩</td>
+                            {% endif %}
+                            {% if test_type == 'y_gre' %}
+                            <td>Verbal Reasoning</td>
+                            <td>Quantitative Reasoning</td>
+                            <td>Analytical Writing</td>
+                            {% endif %}
+                            {% if test_type == 'toefl' %}
+                            <td>总分</td>
+                            <td>阅读</td>
+                            <td>听力</td>
+                            <td>口语</td>
+                            <td>阅读</td>
+                            {% endif %}
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(score.created_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(score.created_at).format('YYYY-M-D H:mm:ss') }}</div>
@@ -186,13 +214,13 @@
                             <td>{{ macros.user_popup(score.modified_by) }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_test_score', id=score.id) }}"><i class="edit icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_test_score', test_type=test_type, id=score.id) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ score.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ score.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除考试记录“{{ score.alias }}”？</div>
                                     <div class="actions">
-                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_test_score', id=score.id) }}"><i class="trash outline icon"></i>删除</a>
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_test_score', test_type=test_type, id=score.id) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ score.id }}" class="ui black button">保留</div>
                                     </div>
                                 </div>
@@ -201,7 +229,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.test_score', id=test.id) }}{% endif %}
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.test_score', test_type=test_type, id=test.id) }}{% endif %}
             </div>
         </div>
     </div>
