@@ -1603,6 +1603,8 @@ def y_gre_assignments():
 @permission_required(u'管理作业')
 def assignment_score(id):
     assignment = Assignment.query.get_or_404(id)
+    if assignment.finished_by_alias.count() == 0:
+        return redirect(url_for('manage.assignment'))
     form = NewAssignmentScoreForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
@@ -1660,7 +1662,7 @@ def delete_assignment_score(id):
     score = AssignmentScore.query.get_or_404(id)
     db.session.delete(score)
     flash(u'已删除作业记录：%s' % score.alias, category='success')
-    return redirect(request.args.get('next') or url_for('manage.assignment_score', id=score.assignment_id))
+    return redirect(url_for('manage.assignment_score', id=score.assignment_id))
 
 
 @manage.route('/test')
