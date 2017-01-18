@@ -13,7 +13,7 @@ from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
 from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm, NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
-from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewInviterForm, NewPurchaseForm
+from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
@@ -26,7 +26,7 @@ from .forms import NewRoleForm, EditRoleForm
 from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
 from ..models import Permission, Role, User, Gender
-from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, InvitationType
+from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, ScoreRecord, ScoreType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import GroupRegistration
 from ..models import Booking, BookingState
@@ -2449,38 +2449,38 @@ def create_user():
             )
         # scores
         if form.cee_total.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考总分').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'高考总分').first(),
                 score=form.cee_total.data
             )
         if form.cee_math.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考数学').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'高考数学').first(),
                 score=form.cee_math.data
             )
         if form.cee_english.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考英语').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'高考英语').first(),
                 score=form.cee_english.data
             )
         if form.cet_4.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语四级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'大学英语四级').first(),
                 score=form.cet_4.data
             )
         if form.cet_6.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语六级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'大学英语六级').first(),
                 score=form.cet_6.data
             )
         if form.tem_4.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语四级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'专业英语四级').first(),
                 score=form.tem_4.data
             )
         if form.tem_8.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语八级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'专业英语八级').first(),
                 score=form.tem_8.data
             )
         if form.toefl_total.data:
@@ -2494,13 +2494,13 @@ def create_user():
                 modified_by=current_user._get_current_object()
             )
         if form.competition.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'竞赛').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'竞赛').first(),
                 remark=form.competition.data
             )
         if form.other_score.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'其它').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'其它').first(),
                 remark=form.other_score.data
             )
         # registration
@@ -2655,20 +2655,20 @@ def create_user_confirm(id):
         flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # scores
-    new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
-    if new_previous_achievement_form.submit.data and new_previous_achievement_form.validate_on_submit():
-        previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
-        if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                score=new_previous_achievement_form.achievement.data
+    new_score_record_form = NewScoreRecordForm(prefix='new_score_record')
+    if new_score_record_form.submit.data and new_score_record_form.validate_on_submit():
+        score_type = ScoreType.query.get(int(new_score_record_form.score_type.data))
+        if score_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
+            user.add_score_record(
+                score_type=score_type,
+                score=new_score_record_form.score.data
             )
-        if previous_achievement_type.name in [u'竞赛', u'其它']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                remark=new_previous_achievement_form.achievement.data
+        if score_type.name in [u'竞赛', u'其它']:
+            user.add_score_record(
+                score_type=score_type,
+                remark=new_score_record_form.score.data
             )
-        flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
+        flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # TOEFL
     new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
@@ -2807,7 +2807,7 @@ def create_user_confirm(id):
         edit_emergency_contact_mobile_form=edit_emergency_contact_mobile_form,
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
-        new_previous_achievement_form=new_previous_achievement_form,
+        new_score_record_form=new_score_record_form,
         new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
         edit_application_aim_form=edit_application_aim_form,
@@ -2975,20 +2975,20 @@ def edit_user(id):
         flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # scores
-    new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
-    if new_previous_achievement_form.submit.data and new_previous_achievement_form.validate_on_submit():
-        previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
-        if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                score=new_previous_achievement_form.achievement.data
+    new_score_record_form = NewScoreRecordForm(prefix='new_score_record')
+    if new_score_record_form.submit.data and new_score_record_form.validate_on_submit():
+        score_type = ScoreType.query.get(int(new_score_record_form.score_type.data))
+        if score_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
+            user.add_score_record(
+                score_type=score_type,
+                score=new_score_record_form.score.data
             )
-        if previous_achievement_type.name in [u'竞赛', u'其它']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                remark=new_previous_achievement_form.achievement.data
+        if score_type.name in [u'竞赛', u'其它']:
+            user.add_score_record(
+                score_type=score_type,
+                remark=new_score_record_form.score.data
             )
-        flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
+        flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # TOEFL
     new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
@@ -3125,7 +3125,7 @@ def edit_user(id):
         edit_emergency_contact_mobile_form=edit_emergency_contact_mobile_form,
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
-        new_previous_achievement_form=new_previous_achievement_form,
+        new_score_record_form=new_score_record_form,
         new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
         edit_application_aim_form=edit_application_aim_form,
@@ -3160,13 +3160,13 @@ def remove_employment_record(id):
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
-@manage.route('/user/previous-achievement/remove/<int:id>')
+@manage.route('/user/score-record/remove/<int:id>')
 @login_required
 @permission_required(u'管理用户')
-def remove_previous_achievement(id):
-    previous_achievement = PreviousAchievement.query.get_or_404(id)
-    db.session.delete(previous_achievement)
-    flash(u'已删除既往成绩：%s' % previous_achievement.type.name, category='success')
+def remove_score_record(id):
+    score_record = ScoreRecord.query.get_or_404(id)
+    db.session.delete(score_record)
+    flash(u'已删除既往成绩：%s' % score_record.type.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
