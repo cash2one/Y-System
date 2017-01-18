@@ -268,17 +268,29 @@
                     </div>
                     <h4 class="ui blue dividing header">既往成绩</h4>
                     <div class="fields">
-                        <div class="eight wide field">
+                        <div class="four wide field">
                             {{ form.cee_total.label() }}
                             {{ form.cee_total(placeholder='高考总分') }}
                         </div>
                         <div class="four wide field">
+                            {{ form.cee_total_full.label() }}
+                            {{ form.cee_total_full(placeholder='高考总分满分') }}
+                        </div>
+                        <div class="two wide field">
                             {{ form.cee_math.label() }}
                             {{ form.cee_math(placeholder='高考数学') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="two wide field">
+                            {{ form.cee_math_full.label() }}
+                            {{ form.cee_math_full(placeholder='高考数学满分') }}
+                        </div>
+                        <div class="two wide field">
                             {{ form.cee_english.label() }}
                             {{ form.cee_english(placeholder='高考英语') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_english_full.label() }}
+                            {{ form.cee_english_full(placeholder='高考英语满分') }}
                         </div>
                     </div>
                     <div class="fields">
@@ -432,6 +444,27 @@ $(document)
                 return true
             } else {
                 return (Number(value) <= Number($('#doctor_full_gpa').val()));
+            };
+        };
+        $.fn.form.settings.rules.ceeTotalWithinLimit = function(value) {
+            if ($('#cee_total_full').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#cee_total_full').val()));
+            };
+        };
+        $.fn.form.settings.rules.ceeMathWithinLimit = function(value) {
+            if ($('#cee_math_full').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#cee_math_full').val()));
+            };
+        };
+        $.fn.form.settings.rules.ceeEnglishWithinLimit = function(value) {
+            if ($('#cee_english_full').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#cee_english_full').val()));
             };
         };
         $.fn.form.settings.rules.toefl = function(value) {
@@ -767,6 +800,21 @@ $(document)
                             {
                                 type: 'number',
                                 prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeTotalWithinLimit',
+                                prompt: '分数值超过满分'
+                            }
+                        ]
+                    },
+                    cee_total_full: {
+                        identifier: 'cee_total_full',
+                        depends: 'cee_total',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
                             }
                         ]
                     },
@@ -780,6 +828,21 @@ $(document)
                             }
                         ]
                     },
+                    cee_math_full: {
+                        identifier: 'cee_math_full',
+                        depends: 'cee_math',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeMathWithinLimit',
+                                prompt: '分数值超过满分'
+                            }
+                        ]
+                    },
                     cee_english: {
                         identifier: 'cee_english',
                         optional: true,
@@ -787,6 +850,21 @@ $(document)
                             {
                                 type: 'number',
                                 prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cee_english_full: {
+                        identifier: 'cee_english_full',
+                        depends: 'cee_english',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeEnglishWithinLimit',
+                                prompt: '分数值超过满分'
                             }
                         ]
                     },
