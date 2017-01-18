@@ -173,6 +173,11 @@ class ConfirmPunchForm(FlaskForm):
     submit = SubmitField(u'确认并提交')
 
 
+class EditSectionHourForm(FlaskForm):
+    hour = StringField('学习时间', validators=[Required()])
+    submit = SubmitField(u'提交')
+
+
 class NewAssignmentScoreForm(FlaskForm):
     email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     assignment = SelectField(u'作业', coerce=unicode, validators=[Required()])
