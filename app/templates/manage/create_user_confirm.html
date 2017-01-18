@@ -446,7 +446,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ score_record.type.name }}</div>
-                            <div class="description">{% if score_record.score %}{{ score_record.score }}分{% elif score_record.remark %}{{ score_record.remark }}{% else %}无{% endif %}</div>
+                            <div class="description">{{ score_record.alias2 }}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -554,7 +554,7 @@
                             <div id="edit-purchase-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
-                            <div class="header">研修产品（总计：{{ user.purchases_total }}元）</div>
+                            <div class="header">研修产品（总计：{{ user.purchases_total }}）</div>
                             <div class="description">{{ user.purchases_alias }}</div>
                         </div>
                     </div>
@@ -676,7 +676,7 @@
                 </div>
                 <div id="edit-purchase-modal" class="ui modal">
                     <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑研修产品（总计：{{ user.purchases_total }}元）</div>
+                    <div class="header"><i class="edit icon"></i>编辑研修产品（总计：{{ user.purchases_total }}）</div>
                     <div class="content">
                         {% if user.purchases.count() %}
                         <div class="ui relaxed divided list">

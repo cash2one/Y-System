@@ -2664,7 +2664,8 @@ def create_user_confirm(id):
         if score_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
             user.add_score_record(
                 score_type=score_type,
-                score=new_score_record_form.score.data
+                score=new_score_record_form.score.data,
+                full_score=new_score_record_form.full_score.data
             )
         if score_type.name in [u'竞赛', u'其它']:
             user.add_score_record(
@@ -2984,7 +2985,8 @@ def edit_user(id):
         if score_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
             user.add_score_record(
                 score_type=score_type,
-                score=new_score_record_form.score.data
+                score=new_score_record_form.score.data,
+                full_score=new_score_record_form.full_score.data
             )
         if score_type.name in [u'竞赛', u'其它']:
             user.add_score_record(

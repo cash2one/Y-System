@@ -1399,7 +1399,7 @@ class User(UserMixin, db.Model):
 
     @property
     def purchases_total(self):
-        return u'%g' % sum([purchase.total for purchase in self.purchases])
+        return u'%g 元' % sum([purchase.total for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -1946,7 +1946,18 @@ class ScoreRecord(db.Model):
 
     @property
     def alias(self):
-        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.remark)
+        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.full_score, self.remark)
+
+    @property
+    def alias2(self):
+        if self.score:
+            if self.full_score:
+                return u'%g/%g 分' % (self.score, self.full_score)
+            return u'%g 分' % self.score
+        elif self.remark:
+            return u'%s' % self.remark
+        else:
+            return u'N/A'
 
     @property
     def percentage(self):
