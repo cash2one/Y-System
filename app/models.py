@@ -1951,7 +1951,13 @@ class ScoreRecord(db.Model):
     @property
     def percentage(self):
         if self.full_score:
-            return u'%g%%' % (self.score / self.full_score * 100)
+            return self.score / self.full_score
+        return None
+
+    @property
+    def percentage_alias(self):
+        if self.percentage:
+            return u'%g%%' % (self.percentage * 100)
         return u'N/A'
 
     def __repr__(self):
