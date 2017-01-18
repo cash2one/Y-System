@@ -281,6 +281,9 @@ class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    gender = StringField(u'性别')
+    birthdate = StringField(u'出生日期')
+    residence = StringField(u'归属地')
     # contact
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
@@ -429,6 +432,9 @@ class NewScoreRecordForm(FlaskForm):
 class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    gender = StringField(u'性别')
+    birthdate = StringField(u'出生日期')
+    residence = StringField(u'归属地')
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'新建管理用户')

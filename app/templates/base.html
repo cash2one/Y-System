@@ -137,9 +137,9 @@
             {% block following_menu_auth %}
             <div class="right menu">
                 {% if current_user.is_authenticated %}
-                <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="inbox icon"></i>100</a>
+                <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="inbox icon"></i>0</a>
                 <div class="ui dropdown item menu-popup-trigger" data-content="个人档案与设置" data-position="bottom center" data-variation="inverted">
-                    <i class="user circle icon"></i>
+                    <i class="user icon"></i>{{ current_user.name }}
                     <div class="menu">
                         <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
                         <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i>个人档案</a>
@@ -399,9 +399,9 @@
                     {% block menu_auth %}
                     <div class="right menu">
                         {% if current_user.is_authenticated %}
-                        <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="inbox icon"></i>100</a>
+                        <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="inbox icon"></i>0</a>
                         <div class="ui dropdown item menu-popup-trigger" data-content="个人档案与设置" data-position="bottom center" data-variation="inverted">
-                            <i class="user circle icon"></i>
+                            <i class="user icon"></i>{{ current_user.name }}
                             <div class="menu">
                                 <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
                                 <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i>个人档案</a>

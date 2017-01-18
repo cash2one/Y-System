@@ -119,6 +119,20 @@
                                 </div>
                             </div>
                             <div class="fields">
+                                <div class="four wide field">
+                                    {{ form.gender.label() }}
+                                    {{ form.gender(placeholder='性别（自动生成）', readonly='') }}
+                                </div>
+                                <div class="four wide field">
+                                    {{ form.birthdate.label() }}
+                                    {{ form.birthdate(placeholder='出生日期（自动生成）', readonly='') }}
+                                </div>
+                                <div class="eight wide field">
+                                    {{ form.residence.label() }}
+                                    {{ form.residence(placeholder='归属地（自动生成）', readonly='') }}
+                                </div>
+                            </div>
+                            <div class="fields">
                                 <div class="eight wide required field">
                                     {{ form.email.label() }}
                                     {{ form.email(placeholder='用于登录系统、接收通知') }}
@@ -279,7 +293,23 @@ var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
         $.fn.form.settings.rules.idNumber = function(value) {
-            return (Validator.isValid(value, 18));
+            if (Validator.isValid(value, 18)) {
+                var idInfo = Validator.getInfo(value, 18);
+                $('#create-admin').form('set values', {
+                    gender: function() {
+                        if (idInfo.sex === 1) {
+                            return '男';
+                        } else {
+                            return '女';
+                        };
+                    },
+                    birthdate: idInfo.birth,
+                    residence: idInfo.addr
+                });
+                return true;
+            } else {
+                return false;
+            };
         };
         $('#create-admin')
             .form({

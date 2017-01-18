@@ -2451,17 +2451,20 @@ def create_user():
         if form.cee_total.data:
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'高考总分').first(),
-                score=form.cee_total.data
+                score=form.cee_total.data,
+                full_score=form.cee_total_full.data
             )
         if form.cee_math.data:
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'高考数学').first(),
-                score=form.cee_math.data
+                score=form.cee_math.data,
+                full_score=form.cee_math_full.data
             )
         if form.cee_english.data:
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'高考英语').first(),
-                score=form.cee_english.data
+                score=form.cee_english.data,
+                full_score=form.cee_english_full.data
             )
         if form.cet_4.data:
             user.add_score_record(
