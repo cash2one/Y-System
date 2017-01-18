@@ -2844,7 +2844,9 @@ class Lesson(db.Model):
 
     @property
     def hour_alias(self):
-        return u'%g 小时' % (self.hour.total_seconds() / 3600)
+        if self.hour.total_seconds():
+            return u'%g 小时' % (self.hour.total_seconds() / 3600)
+        return u'N/A'
 
     @property
     def first_section(self):
