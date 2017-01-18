@@ -495,32 +495,35 @@
                     </div>
                 </form>
                 <h4 class="ui blue dividing header">既往成绩</h4>
-                {% if user.previous_achievements.count() %}
+                {% if user.score_records.count() %}
                 <div class="ui relaxed divided list">
-                    {% for previous_achievement in user.previous_achievements %}
+                    {% for score_record in user.score_records %}
                     <div class="item">
                         <div class="right floated content">
-                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_previous_achievement', id=previous_achievement.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
+                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_score_record', id=score_record.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
-                            <div class="header">{{ previous_achievement.type.name }}</div>
-                            <div class="description">{% if previous_achievement.score %}{{ previous_achievement.score }}分{% elif previous_achievement.remark %}{{ previous_achievement.remark }}{% else %}无{% endif %}</div>
+                            <div class="header">{{ score_record.type.name }}</div>
+                            <div class="description">{% if score_record.score %}{{ score_record.score }}分{% elif score_record.remark %}{{ score_record.remark }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% endif %}
-                <form id="new-previous-achievement" method="POST" class="ui mini form">
-                    {{ new_previous_achievement_form.hidden_tag() }}
+                <form id="new-score-record" method="POST" class="ui mini form">
+                    {{ new_score_record_form.hidden_tag() }}
                     <div class="fields">
                         <div class="three wide field">
-                            {{ new_previous_achievement_form.previous_achievement_type(class='ui dropdown') }}
+                            {{ new_score_record_form.score_type(class='ui dropdown') }}
                         </div>
-                        <div class="twelve wide field">
-                            {{ new_previous_achievement_form.achievement(placeholder='成绩') }}
+                        <div class="six wide field">
+                            {{ new_score_record_form.score(placeholder='成绩') }}
+                        </div>
+                        <div class="six wide field">
+                            {{ new_score_record_form.full_score(placeholder='成绩满分') }}
                         </div>
                         <div class="one wide field">
-                            {{ new_previous_achievement_form.submit(class='ui primary mini button') }}
+                            {{ new_score_record_form.submit(class='ui primary mini button') }}
                         </div>
                     </div>
                 </form>
@@ -1286,21 +1289,32 @@ $(document)
                 }
             })
         ;
-        $.fn.form.settings.rules.previousAchievement = function(value) {
+        $.fn.form.settings.rules.score = function(value) {
             if (/^[0-9]*$/.test(value)) {
                 return true;
             } else {
-                return ($.inArray($('#new_previous_achievement-previous_achievement_type').dropdown('get text')[0], ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
+                return ($.inArray($('#new_score_record-score_type').dropdown('get text')[0], ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
             };
         };
-        $('#new-previous-achievement')
+        $.fn.form.settings.rules.scoreWithinLimit = function(value) {
+            if (/^[0-9]*$/.test(value)) {
+                if ($('#new_score_record-full_score').val() === '') {
+                    return true;
+                } else {
+                    return (Number(value) <= Number($('#new_score_record-full_score').val()));
+                };
+            } else {
+                return true;
+            };
+        };
+        $('#new-score-record')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    previous_achievement_type: {
-                        identifier: 'new_previous_achievement-previous_achievement_type',
+                    score_type: {
+                        identifier: 'new_score_record-score_type',
                         rules: [
                             {
                                 type: 'empty',
@@ -1308,17 +1322,31 @@ $(document)
                             }
                         ]
                     },
-                    achievement: {
-                        identifier: 'new_previous_achievement-achievement',
+                    score: {
+                        identifier: 'new_score_record-score',
                         rules: [
                             {
                                 type: 'empty',
                                 prompt: '请填写成绩'
                             },
                             {
-                                type: 'previousAchievement',
+                                type: 'score',
                                 prompt: '成绩格式有误'
+                            },
+                            {
+                                type: 'scoreWithinLimit',
+                                prompt: '分数值超过满分'
                             }
+                        ]
+                    },
+                    full_score: {
+                        identifier: 'new_score_record-full_score',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的成绩'
+                            },
                         ]
                     }
                 }
