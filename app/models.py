@@ -2766,6 +2766,12 @@ class iPad(db.Model):
         return '<iPad %r, %r>' % (self.alias, self.serial)
 
 
+class LessonDependency(db.Model):
+    __tablename__ = 'lesson_dependencies'
+    depenedent_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+    follow_up_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+
+
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True)
@@ -2775,6 +2781,20 @@ class Lesson(db.Model):
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
     tests = db.relationship('Test', backref='lesson', lazy='dynamic')
+    depenedents = db.relationship(
+        'LessonDependency',
+        foreign_keys=[LessonDependency.follow_up_id],
+        backref=db.backref('follow_up', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    follow_ups = db.relationship(
+        'LessonDependency',
+        foreign_keys=[LessonDependency.depenedent_id],
+        backref=db.backref('depenedent', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
@@ -2830,6 +2850,19 @@ class Lesson(db.Model):
             .order_by(Section.id.asc())\
             .first()
 
+    def add_dependent(self, depenedent):
+        if not self.has_dependent(depenedent):
+            lesson_dependency = LessonDependency(depenedent_id=depenedent.id, follow_up_id=self.id)
+            db.session.add(lesson_dependency)
+
+    def remove_dependent(self, depenedent):
+        lesson_dependency = self.depenedents.filter_by(depenedent_id=depenedent.id).first()
+        if lesson_dependency:
+            db.session.delete(lesson_dependency)
+
+    def has_dependent(self, depenedent):
+        return self.depenedents.filter_by(depenedent_id=depenedent.id).first() is not None
+
     @property
     def occupied_ipads_alias(self):
         return iPadContent.query\
@@ -2849,33 +2882,33 @@ class Lesson(db.Model):
     @staticmethod
     def insert_lessons():
         lessons = [
-            (u'VB总论', u'VB', False, ),
-            (u'L1', u'VB', False, ),
-            (u'L2', u'VB', False, ),
-            (u'L3', u'VB', False, ),
-            (u'L4', u'VB', False, ),
-            (u'L5', u'VB', False, ),
-            (u'L6', u'VB', False, ),
-            (u'L7', u'VB', False, ),
-            (u'L8', u'VB', False, ),
-            (u'L9', u'VB', False, ),
-            (u'L10', u'VB', False, ),
-            (u'L11', u'VB', True, ),
-            (u'L12', u'VB', True, ),
-            (u'L13', u'VB', True, ),
-            (u'L14', u'VB', True, ),
-            (u'Y-GRE总论', u'Y-GRE', False, ),
-            (u'1st', u'Y-GRE', False, ),
-            (u'2nd', u'Y-GRE', False, ),
-            (u'3rd', u'Y-GRE', False, ),
-            (u'4th', u'Y-GRE', False, ),
-            (u'5th', u'Y-GRE', False, ),
-            (u'6th', u'Y-GRE', False, ),
-            (u'7th', u'Y-GRE', False, ),
-            (u'8th', u'Y-GRE', False, ),
-            (u'9th', u'Y-GRE', False, ),
-            (u'Test', u'Y-GRE', False, ),
-            (u'AW总论', u'Y-GRE', False, ),
+            (u'VB总论', u'VB', False, [], ),
+            (u'L1', u'VB', False, [u'VB总论'], ),
+            (u'L2', u'VB', False, [u'L1'], ),
+            (u'L3', u'VB', False, [u'L2'], ),
+            (u'L4', u'VB', False, [u'L3'], ),
+            (u'L5', u'VB', False, [u'L4'], ),
+            (u'L6', u'VB', False, [u'L5'], ),
+            (u'L7', u'VB', False, [u'L6'], ),
+            (u'L8', u'VB', False, [u'L7'], ),
+            (u'L9', u'VB', False, [u'L8'], ),
+            (u'L10', u'VB', False, [u'L9'], ),
+            (u'L11', u'VB', True, [u'L10'], ),
+            (u'L12', u'VB', True, [u'L11'], ),
+            (u'L13', u'VB', True, [u'L12'], ),
+            (u'L14', u'VB', True, [u'L13'], ),
+            (u'Y-GRE总论', u'Y-GRE', False, [], ),
+            (u'1st', u'Y-GRE', False, [u'Y-GRE总论'], ),
+            (u'2nd', u'Y-GRE', False, [u'1st'], ),
+            (u'3rd', u'Y-GRE', False, [u'2nd'], ),
+            (u'4th', u'Y-GRE', False, [u'3rd'], ),
+            (u'5th', u'Y-GRE', False, [u'4th'], ),
+            (u'6th', u'Y-GRE', False, [u'5th'], ),
+            (u'7th', u'Y-GRE', False, [u'6th'], ),
+            (u'8th', u'Y-GRE', False, [u'7th'], ),
+            (u'9th', u'Y-GRE', False, [u'8th'], ),
+            (u'Test', u'Y-GRE', False, [u'Y-GRE总论'], ),
+            (u'AW总论', u'Y-GRE', False, [u'Y-GRE总论'], ),
         ]
         for L in lessons:
             lesson = Lesson.query.filter_by(name=L[0]).first()
@@ -2886,7 +2919,13 @@ class Lesson(db.Model):
                     advanced=L[2]
                 )
                 db.session.add(lesson)
+                db.session.commit()
                 print u'导入课程信息', L[0], L[1]
+            for D in L[3]:
+                depenedent = Lesson.query.filter_by(name=D).first()
+                if not lesson.has_dependent(depenedent=depenedent):
+                    lesson.add_dependent(depenedent=depenedent)
+                    print u'添加依赖课程：%s <- %s' % (L[0], D)
         db.session.commit()
 
     def __repr__(self):
