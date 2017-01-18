@@ -1911,7 +1911,7 @@ class ScoreType(db.Model):
     score_records = db.relationship('ScoreRecord', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_score_record_types():
+    def insert_score_types():
         score_types = [
             (u'高考总分', ),
             (u'高考数学', ),

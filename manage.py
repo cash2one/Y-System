@@ -51,7 +51,7 @@ def deploy():
     from app.models import Section
     from app.models import User
     from app.models import EducationType
-    from app.models import PreviousAchievementType
+    from app.models import ScoreType
     from app.models import Product
     from app.models import Course
     from app.models import Period
@@ -84,7 +84,7 @@ def deploy():
     Section.insert_sections()
     User.insert_admin()
     EducationType.insert_education_types()
-    PreviousAchievementType.insert_previous_achievement_types()
+    ScoreType.insert_score_types()
     Product.insert_products()
     Course.insert_courses()
     Period.insert_periods()
