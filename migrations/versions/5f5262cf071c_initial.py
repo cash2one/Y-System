@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 16e06cb4cb2d
+Revision ID: 5f5262cf071c
 Revises: 
-Create Date: 2017-01-18 11:46:19.650496
+Create Date: 2017-01-18 17:05:10.446852
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '16e06cb4cb2d'
+revision = '5f5262cf071c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -91,12 +91,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_permissions_name'), 'permissions', ['name'], unique=True)
-    op.create_table('previous_achievement_types',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_previous_achievement_types_name'), 'previous_achievement_types', ['name'], unique=True)
     op.create_table('purpose_types',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -127,6 +121,12 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_rooms_name'), 'rooms', ['name'], unique=True)
+    op.create_table('score_types',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_score_types_name'), 'score_types', ['name'], unique=True)
     op.create_table('toefl_tests',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -307,16 +307,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('previous_achievements',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('type_id', sa.Integer(), nullable=True),
-    sa.Column('score', sa.Integer(), nullable=True),
-    sa.Column('remark', sa.UnicodeText(), nullable=True),
-    sa.ForeignKeyConstraint(['type_id'], ['previous_achievement_types.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('products',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -355,6 +345,17 @@ def upgrade():
     sa.ForeignKeyConstraint(['type_id'], ['referrer_types.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('user_id', 'type_id')
+    )
+    op.create_table('score_records',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('type_id', sa.Integer(), nullable=True),
+    sa.Column('score', sa.Integer(), nullable=True),
+    sa.Column('full_score', sa.Integer(), nullable=True),
+    sa.Column('remark', sa.UnicodeText(), nullable=True),
+    sa.ForeignKeyConstraint(['type_id'], ['score_types.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('sections',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -568,12 +569,12 @@ def downgrade():
     op.drop_table('suspension_records')
     op.drop_index(op.f('ix_sections_name'), table_name='sections')
     op.drop_table('sections')
+    op.drop_table('score_records')
     op.drop_table('referrers')
     op.drop_table('receptions')
     op.drop_table('purposes')
     op.drop_index(op.f('ix_products_name'), table_name='products')
     op.drop_table('products')
-    op.drop_table('previous_achievements')
     op.drop_table('periods')
     op.drop_table('lesson_dependencies')
     op.drop_index(op.f('ix_ipads_serial'), table_name='ipads')
@@ -597,6 +598,8 @@ def downgrade():
     op.drop_table('lessons')
     op.drop_index(op.f('ix_toefl_tests_name'), table_name='toefl_tests')
     op.drop_table('toefl_tests')
+    op.drop_index(op.f('ix_score_types_name'), table_name='score_types')
+    op.drop_table('score_types')
     op.drop_index(op.f('ix_rooms_name'), table_name='rooms')
     op.drop_table('rooms')
     op.drop_index(op.f('ix_roles_name'), table_name='roles')
@@ -607,8 +610,6 @@ def downgrade():
     op.drop_table('referrer_types')
     op.drop_index(op.f('ix_purpose_types_name'), table_name='purpose_types')
     op.drop_table('purpose_types')
-    op.drop_index(op.f('ix_previous_achievement_types_name'), table_name='previous_achievement_types')
-    op.drop_table('previous_achievement_types')
     op.drop_index(op.f('ix_permissions_name'), table_name='permissions')
     op.drop_table('permissions')
     op.drop_index(op.f('ix_ipad_states_name'), table_name='ipad_states')

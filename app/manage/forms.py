@@ -6,7 +6,7 @@ from wtforms import StringField, TextAreaField, BooleanField, IntegerField, Floa
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
 from ..models import Permission, Role, User
-from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, PreviousAchievementType
+from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
@@ -281,6 +281,9 @@ class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    gender = StringField(u'性别')
+    birthdate = StringField(u'出生日期')
+    residence = StringField(u'归属地')
     # contact
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     mobile = StringField(u'移动电话', validators=[Required(), Length(1, 64)])
@@ -322,8 +325,11 @@ class NewUserForm(FlaskForm):
     job_year_2 = SelectField(u'入职年份', coerce=unicode)
     # scores
     cee_total = StringField(u'高考总分', validators=[Length(0, 64)])
+    cee_total_full = StringField(u'高考总分满分', validators=[Length(0, 64)])
     cee_math = StringField(u'高考数学', validators=[Length(0, 64)])
+    cee_math_full = StringField(u'高考数学满分', validators=[Length(0, 64)])
     cee_english = StringField(u'高考英语', validators=[Length(0, 64)])
+    cee_english_full = StringField(u'高考英语满分', validators=[Length(0, 64)])
     cet_4 = StringField(u'CET-4', validators=[Length(0, 64)])
     cet_6 = StringField(u'CET-6', validators=[Length(0, 64)])
     tem_4 = StringField(u'TEM-4', validators=[Length(0, 64)])
@@ -412,19 +418,23 @@ class NewEmploymentRecordForm(FlaskForm):
         self.year.choices = [(u'', u'选择入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
 
 
-class NewPreviousAchievementForm(FlaskForm):
-    previous_achievement_type = SelectField(u'成绩类型', coerce=unicode, validators=[Required()])
-    achievement = StringField(u'成绩', validators=[Length(0, 128)])
+class NewScoreRecordForm(FlaskForm):
+    score_type = SelectField(u'成绩类型', coerce=unicode, validators=[Required()])
+    score = StringField(u'成绩', validators=[Length(0, 128)])
+    full_score = StringField(u'满分', validators=[Length(0, 128)])
     submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
-        super(NewPreviousAchievementForm, self).__init__(*args, **kwargs)
-        self.previous_achievement_type.choices = [(u'', u'选择成绩类型')] + [(unicode(previous_achievement_type.id), previous_achievement_type.name) for previous_achievement_type in PreviousAchievementType.query.order_by(PreviousAchievementType.id.asc()).all()]
+        super(NewScoreRecordForm, self).__init__(*args, **kwargs)
+        self.score_type.choices = [(u'', u'选择成绩类型')] + [(unicode(score_type.id), score_type.name) for score_type in ScoreType.query.order_by(ScoreType.id.asc()).all()]
 
 
 class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+    gender = StringField(u'性别')
+    birthdate = StringField(u'出生日期')
+    residence = StringField(u'归属地')
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'新建管理用户')
