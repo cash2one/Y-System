@@ -2777,6 +2777,8 @@ class Lesson(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
+    hour = db.Column(db.Interval, default=timedelta(hours=0))
+    priority = db.Column(db.Integer, default=0)
     advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
@@ -2840,9 +2842,13 @@ class Lesson(db.Model):
         }
         return abbreviations[self.name]
 
+    # @property
+    # def hour(self):
+    #     return u'%g 小时' % (sum([section.hour.total_seconds() for section in self.sections]) / 3600)
+
     @property
-    def hour(self):
-        return u'%g 小时' % (sum([section.hour.total_seconds() for section in self.sections]) / 3600)
+    def hour_alias(self):
+        return u'%g' % (self.hour.total_seconds() / 3600)
 
     @property
     def first_section(self):
@@ -2882,33 +2888,33 @@ class Lesson(db.Model):
     @staticmethod
     def insert_lessons():
         lessons = [
-            (u'VB总论', u'VB', False, [], ),
-            (u'L1', u'VB', False, [u'VB总论'], ),
-            (u'L2', u'VB', False, [u'L1'], ),
-            (u'L3', u'VB', False, [u'L2'], ),
-            (u'L4', u'VB', False, [u'L3'], ),
-            (u'L5', u'VB', False, [u'L4'], ),
-            (u'L6', u'VB', False, [u'L5'], ),
-            (u'L7', u'VB', False, [u'L6'], ),
-            (u'L8', u'VB', False, [u'L7'], ),
-            (u'L9', u'VB', False, [u'L8'], ),
-            (u'L10', u'VB', False, [u'L9'], ),
-            (u'L11', u'VB', True, [u'L10'], ),
-            (u'L12', u'VB', True, [u'L11'], ),
-            (u'L13', u'VB', True, [u'L12'], ),
-            (u'L14', u'VB', True, [u'L13'], ),
-            (u'Y-GRE总论', u'Y-GRE', False, [], ),
-            (u'1st', u'Y-GRE', False, [u'Y-GRE总论'], ),
-            (u'2nd', u'Y-GRE', False, [u'1st'], ),
-            (u'3rd', u'Y-GRE', False, [u'2nd'], ),
-            (u'4th', u'Y-GRE', False, [u'3rd'], ),
-            (u'5th', u'Y-GRE', False, [u'4th'], ),
-            (u'6th', u'Y-GRE', False, [u'5th'], ),
-            (u'7th', u'Y-GRE', False, [u'6th'], ),
-            (u'8th', u'Y-GRE', False, [u'7th'], ),
-            (u'9th', u'Y-GRE', False, [u'8th'], ),
-            (u'Test', u'Y-GRE', False, [u'Y-GRE总论'], ),
-            (u'AW总论', u'Y-GRE', False, [u'Y-GRE总论'], ),
+            (u'VB总论', u'VB', 20, 1, False, [], ),
+            (u'L1', u'VB', 8, 1, False, [u'VB总论'], ),
+            (u'L2', u'VB', 8, 1, False, [u'L1'], ),
+            (u'L3', u'VB', 8, 1, False, [u'L2'], ),
+            (u'L4', u'VB', 8, 1, False, [u'L3'], ),
+            (u'L5', u'VB', 8, 1, False, [u'L4'], ),
+            (u'L6', u'VB', 10, 1, False, [u'L5'], ),
+            (u'L7', u'VB', 10, 1, False, [u'L6'], ),
+            (u'L8', u'VB', 10, 1, False, [u'L7'], ),
+            (u'L9', u'VB', 10, 1, False, [u'L8'], ),
+            (u'L10', u'VB', 10, 0, False, [u'L9'], ),
+            (u'L11', u'VB', 10, 0, True, [u'L10'], ),
+            (u'L12', u'VB', 10, 0, True, [u'L11'], ),
+            (u'L13', u'VB', 10, 0, True, [u'L12'], ),
+            (u'L14', u'VB', 10, 0, True, [u'L13'], ),
+            (u'Y-GRE总论', u'Y-GRE', 10, 1, False, [], ),
+            (u'1st', u'Y-GRE', 30, 1, False, [u'Y-GRE总论'], ),
+            (u'2nd', u'Y-GRE', 30, 1, False, [u'1st'], ),
+            (u'3rd', u'Y-GRE', 50, 1, False, [u'2nd'], ),
+            (u'4th', u'Y-GRE', 30, 1, False, [u'3rd'], ),
+            (u'5th', u'Y-GRE', 40, 1, False, [u'4th'], ),
+            (u'6th', u'Y-GRE', 40, 1, False, [u'5th'], ),
+            (u'7th', u'Y-GRE', 30, 0, False, [u'6th'], ),
+            (u'8th', u'Y-GRE', 30, 0, False, [u'7th'], ),
+            (u'9th', u'Y-GRE', 30, 0, False, [u'8th'], ),
+            (u'Test', u'Y-GRE', 0, 0, False, [u'Y-GRE总论'], ),
+            (u'AW总论', u'Y-GRE', 2.5, 1, False, [u'Y-GRE总论'], ),
         ]
         for L in lessons:
             lesson = Lesson.query.filter_by(name=L[0]).first()
@@ -2916,12 +2922,13 @@ class Lesson(db.Model):
                 lesson = Lesson(
                     name=L[0],
                     type_id=CourseType.query.filter_by(name=L[1]).first().id,
-                    advanced=L[2]
+                    hour=timedelta(hours=L[2]),
+                    advanced=L[3]
                 )
                 db.session.add(lesson)
                 db.session.commit()
                 print u'导入课程信息', L[0], L[1]
-            for D in L[3]:
+            for D in L[4]:
                 depenedent = Lesson.query.filter_by(name=D).first()
                 if not lesson.has_dependent(depenedent=depenedent):
                     lesson.add_dependent(depenedent=depenedent)
@@ -2936,9 +2943,9 @@ class Section(db.Model):
     __tablename__ = 'sections'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    hour = db.Column(db.Interval, default=timedelta(hours=0))
-    hour_min = db.Column(db.Interval, default=timedelta(hours=0))
-    priority = db.Column(db.Integer, default=0)
+    # hour = db.Column(db.Interval, default=timedelta(hours=0))
+    # hour_min = db.Column(db.Interval, default=timedelta(hours=0))
+    # priority = db.Column(db.Integer, default=0)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     punches = db.relationship(
         'Punch',
@@ -2966,9 +2973,9 @@ class Section(db.Model):
             return u'0.%s%s' % (self.name[4], self.name[6])
         return self.name
 
-    @property
-    def hour_alias(self):
-        return u'%g' % (self.hour.total_seconds() / 3600)
+    # @property
+    # def hour_alias(self):
+    #     return u'%g' % (self.hour.total_seconds() / 3600)
 
     @staticmethod
     def insert_sections():
