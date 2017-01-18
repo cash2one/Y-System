@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 0e7411cbd3ab
+Revision ID: 16e06cb4cb2d
 Revises: 
-Create Date: 2017-01-16 06:31:02.752323
+Create Date: 2017-01-18 11:46:19.650496
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0e7411cbd3ab'
+revision = '16e06cb4cb2d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -137,6 +137,8 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('type_id', sa.Integer(), nullable=True),
+    sa.Column('hour', sa.Interval(), nullable=True),
+    sa.Column('priority', sa.Integer(), nullable=True),
     sa.Column('advanced', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -283,6 +285,13 @@ def upgrade():
     )
     op.create_index(op.f('ix_ipads_alias'), 'ipads', ['alias'], unique=False)
     op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=False)
+    op.create_table('lesson_dependencies',
+    sa.Column('depenedent_id', sa.Integer(), nullable=False),
+    sa.Column('follow_up_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['depenedent_id'], ['lessons.id'], ),
+    sa.ForeignKeyConstraint(['follow_up_id'], ['lessons.id'], ),
+    sa.PrimaryKeyConstraint('depenedent_id', 'follow_up_id')
+    )
     op.create_table('periods',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -350,7 +359,6 @@ def upgrade():
     op.create_table('sections',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('hour', sa.Interval(), nullable=True),
     sa.Column('lesson_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -567,6 +575,7 @@ def downgrade():
     op.drop_table('products')
     op.drop_table('previous_achievements')
     op.drop_table('periods')
+    op.drop_table('lesson_dependencies')
     op.drop_index(op.f('ix_ipads_serial'), table_name='ipads')
     op.drop_index(op.f('ix_ipads_alias'), table_name='ipads')
     op.drop_table('ipads')
