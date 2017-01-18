@@ -2821,8 +2821,10 @@ class Lesson(db.Model):
         return abbreviations[self.name]
 
     @property
-    def hour(self):
-        return u'%g 小时' % (sum([section.hour.total_seconds() for section in self.sections]) / 3600)
+    def hour_alias(self):
+        if self.hour.total_seconds():
+            return u'%g 小时' % (self.hour.total_seconds() / 3600)
+        return u'N/A'
 
     @property
     def first_section(self):
