@@ -1951,7 +1951,7 @@ class ScoreRecord(db.Model):
     @property
     def percentage(self):
         if self.full_score:
-            return self.score / self.full_score
+            return float(self.score) / float(self.full_score)
         return None
 
     @property

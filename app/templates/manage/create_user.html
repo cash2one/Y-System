@@ -828,7 +828,7 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
                             },
                             {
@@ -843,7 +843,7 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
                             }
                         ]
@@ -853,8 +853,12 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeMathWithinLimit',
+                                prompt: '分数值超过满分'
                             }
                         ]
                     },
@@ -864,12 +868,8 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
-                            },
-                            {
-                                type: 'ceeMathWithinLimit',
-                                prompt: '分数值超过满分'
                             }
                         ]
                     },
@@ -878,8 +878,12 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeEnglishWithinLimit',
+                                prompt: '分数值超过满分'
                             }
                         ]
                     },
@@ -889,12 +893,8 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
-                            },
-                            {
-                                type: 'ceeEnglishWithinLimit',
-                                prompt: '分数值超过满分'
                             }
                         ]
                     },
@@ -903,7 +903,7 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
                             }
                         ]
@@ -913,7 +913,7 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
                             }
                         ]
@@ -923,7 +923,7 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
                             }
                         ]
@@ -933,7 +933,7 @@ $(document)
                         optional: true,
                         rules: [
                             {
-                                type: 'number',
+                                type: 'integer[0..]',
                                 prompt: '请填写一个有效的分数'
                             }
                         ]
