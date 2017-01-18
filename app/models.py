@@ -2844,7 +2844,7 @@ class Lesson(db.Model):
 
     @property
     def hour_alias(self):
-        return u'%g' % (self.hour.total_seconds() / 3600)
+        return u'%g 小时' % (self.hour.total_seconds() / 3600)
 
     @property
     def first_section(self):
@@ -2910,7 +2910,7 @@ class Lesson(db.Model):
             (u'8th', u'Y-GRE', 30, 0, False, [u'7th'], ),
             (u'9th', u'Y-GRE', 30, 0, False, [u'8th'], ),
             (u'Test', u'Y-GRE', 0, 0, False, [u'Y-GRE总论'], ),
-            (u'AW总论', u'Y-GRE', 2.5, 9, False, [u'Y-GRE总论'], ),
+            (u'AW总论', u'Y-GRE', 3, 9, False, [u'Y-GRE总论'], ),
         ]
         for L in lessons:
             lesson = Lesson.query.filter_by(name=L[0]).first()
