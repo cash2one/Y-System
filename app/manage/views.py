@@ -10,7 +10,6 @@ from . import manage
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
 from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
-from .forms import EditSectionHourForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
 from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm, NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
@@ -1510,24 +1509,6 @@ def y_gre_lessons():
     resp.set_cookie('show_vb_lessons', '', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_lessons', '1', max_age=30*24*60*60)
     return resp
-
-
-@manage.route('/section/hour/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理课程')
-def edit_section_hour(id):
-    section = Section.query.get_or_404(id)
-    form = EditSectionHourForm()
-    if form.validate_on_submit():
-        if float(form.hour.data) < 0:
-            flash(u'输入的学习时间有误：%s' % form.hour.data, category='error')
-            return redirect(url_for('manage.edit_section_hour', id=section.id))
-        section.hour = timedelta(hours=float(form.hour.data))
-        db.session.add(section)
-        flash(u'已更新“%s”的学习时间为：%s小时' % (section.name, form.hour.data), category='success')
-        return redirect(request.args.get('next') or url_for('manage.lesson'))
-    form.hour.data = u'%g' % (section.hour.total_seconds() / 3600)
-    return render_template('manage/edit_section_hour.html', form=form, section=section)
 
 
 @manage.route('/assignment', methods=['GET', 'POST'])
