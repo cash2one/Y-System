@@ -25,8 +25,8 @@ def send_email(to, subject, template, **kwargs):
     send_async_email(app, msg)
 
 
-def send_email(to_users, subject, template, **kwargs):
-    for user in to_users:
+def send_emails(users, subject, template, **kwargs):
+    for user in users:
         app = current_app._get_current_object()
         msg = Message(
             app.config['YSYS_MAIL_SUBJECT_PREFIX'] + ' ' + subject,
