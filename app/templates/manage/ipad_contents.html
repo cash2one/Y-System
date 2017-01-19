@@ -95,15 +95,15 @@
             <div class="column">
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
-                        <tr class="center aligned">
+                        <tr>
                             <th><i class="tablet icon"></i></th>
                             {% for lesson in ipad_contents.lessons %}<th>{{ lesson }}</th>{% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for ipad in ipad_contents.contents %}
-                        <tr class="center aligned">
-                            <td class="center aligned">{{ ipad['alias'] }}</td>
+                        <tr>
+                            <td>{{ ipad['alias'] }}</td>
                             {% for lesson in ipad['lessons'] %}{% if lesson['exist'] %}<td class="active">{{ lesson['name'] }}</td>{% else %}<td></td>{% endif %}{% endfor %}
                         </tr>
                         {% endfor %}
