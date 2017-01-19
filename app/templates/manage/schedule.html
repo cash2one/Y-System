@@ -94,13 +94,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="clock icon"></i>时段信息列表</h3>
-                <div class="ui right floated positive circular pointing dropdown icon button">
-                    <i class="add icon"></i>
-                    <div class="menu">
-                        <div id="new-schedule-trigger" class="item"><i class="green add circle icon"></i>新建预约时段</div>
-                        <a class="item loading-trigger" href="{{ url_for('manage.period') }}"><i class="tasks icon"></i>管理时段模板</a>
-                    </div>
-                </div>
+                <div id="new-schedule-trigger" class="ui right floated positive circular icon button" data-content="新建预约时段" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-schedule-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建预约时段</div>
@@ -241,6 +235,7 @@ $('.ui.checkbox').checkbox();
 
 $('table').tablesort();
 
+$('#new-schedule-trigger').popup();
 $('#new-schedule-trigger')
     .on('click', function() {
         $('#new-schedule-modal').modal({ autofocus: false }).modal('show');

@@ -91,13 +91,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="tasks icon"></i>时段模板列表</h3>
-                <div class="ui right floated positive circular pointing dropdown icon button">
-                    <i class="add icon"></i>
-                    <div class="menu">
-                        <div id="new-period-trigger" class="item"><i class="green add circle icon"></i>新建时段模板</div>
-                        <a class="item loading-trigger" href="{{ url_for('manage.schedule') }}"><i class="clock icon"></i>管理时段信息</a>
-                    </div>
-                </div>
+                <div id="new-period-trigger" class="ui right floated positive circular icon button" data-content="新建时段模板" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-period-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建时段模板</div>
@@ -223,6 +217,7 @@ $('#delete-hide-trigger-{{ period.id }}')
 ;
 {% endfor %}
 
+$('#new-period-trigger').popup()
 $('#new-period-trigger')
     .on('click', function() {
         $('#new-period-modal').modal({ autofocus: false }).modal('show');
