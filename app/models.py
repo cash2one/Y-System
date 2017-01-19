@@ -2537,33 +2537,10 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def update():
-        critical_lessons = [
-            u'VB总论',
-            u'L1',
-            u'L2',
-            u'L3',
-            u'L4',
-            u'L5',
-            u'L6',
-            u'L7',
-            u'L8',
-            u'L9',
-            u'Y-GRE总论',
-            u'1st',
-            u'2nd',
-            u'3rd',
-            u'4th',
-            u'5th',
-            u'6th',
-            u'7th',
-            u'8th',
-            u'9th',
-            u'Test',
-            u'AW总论',
-        ]
+        critical_lessons = Lesson.query.filter(Lesson.priority >= 0).order_by(Lesson.id.asc()).all()
         json_string = unicode(json.dumps({
-            'lessons': critical_lessons,
-            'contents': [{'alias': ipad.alias, 'lessons': [{'name': lesson, 'exist': ipad.has_lesson(lesson=Lesson.query.filter_by(name=lesson).first())} for lesson in critical_lessons]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()],
+            'lessons': [lesson.name for lesson in critical_lessons],
+            'contents': [{'alias': ipad.alias, 'lessons': [{'name': lesson.name, 'exist': ipad.has_lesson(lesson=lesson)} for lesson in critical_lessons]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()],
         }))
         ipad_content_json = iPadContentJSON.query.get(1)
         if ipad_content_json is not None:
@@ -2929,11 +2906,11 @@ class Lesson(db.Model):
             (u'L7', u'VB', 10, 6, False, [u'L6'], ),
             (u'L8', u'VB', 10, 5, False, [u'L7'], ),
             (u'L9', u'VB', 10, 4, False, [u'L8'], ),
-            (u'L10', u'VB', 10, 0, False, [u'L9'], ),
-            (u'L11', u'VB', 10, 0, True, [u'L9'], ),
-            (u'L12', u'VB', 10, 0, True, [u'L11'], ),
-            (u'L13', u'VB', 10, 0, True, [u'L12'], ),
-            (u'L14', u'VB', 10, 0, True, [u'L13'], ),
+            (u'L10', u'VB', 10, -1, False, [u'L9'], ),
+            (u'L11', u'VB', 10, -1, True, [u'L9'], ),
+            (u'L12', u'VB', 10, -1, True, [u'L11'], ),
+            (u'L13', u'VB', 10, -1, True, [u'L12'], ),
+            (u'L14', u'VB', 10, -1, True, [u'L13'], ),
             (u'Y-GRE总论', u'Y-GRE', 10, 17, False, [], ),
             (u'1st', u'Y-GRE', 30, 17, False, [u'Y-GRE总论'], ),
             (u'2nd', u'Y-GRE', 30, 17, False, [u'1st'], ),
