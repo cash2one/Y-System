@@ -23,3 +23,16 @@ def send_email(to, subject, template, **kwargs):
     msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template + '.html', **kwargs)
     send_async_email(app, msg)
+
+
+def send_email(to_users, subject, template, **kwargs):
+    for user in to_users:
+        app = current_app._get_current_object()
+        msg = Message(
+            app.config['YSYS_MAIL_SUBJECT_PREFIX'] + ' ' + subject,
+            sender=app.config['YSYS_MAIL_SENDER'],
+            recipients=[user.email]
+        )
+        msg.body = render_template(template + '.txt', **kwargs)
+        msg.html = render_template(template + '.html', **kwargs)
+        send_async_email(app, msg)
