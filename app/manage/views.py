@@ -8,12 +8,12 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
-from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
+from .forms import PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
 from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm, NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
-from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewPreviousAchievementForm, NewInviterForm, NewPurchaseForm
+from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
@@ -26,7 +26,7 @@ from .forms import NewRoleForm, EditRoleForm
 from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
 from ..models import Permission, Role, User, Gender
-from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, PreviousAchievement, PreviousAchievementType, InvitationType
+from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, ScoreRecord, ScoreType, InvitationType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import GroupRegistration
 from ..models import Booking, BookingState
@@ -462,7 +462,7 @@ def rental():
     if show_today_rental:
         query = Rental.query\
             .join(Schedule, Schedule.id == Rental.schedule_id)\
-            .filter(Schedule.date == date.today())\
+            .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
     if show_today_rental_1103:
         query = Rental.query\
@@ -470,7 +470,7 @@ def rental():
             .join(iPad, iPad.id == Rental.ipad_id)\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1103')\
-            .filter(Schedule.date == date.today())\
+            .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
     if show_today_rental_1707:
         query = Rental.query\
@@ -478,7 +478,7 @@ def rental():
             .join(iPad, iPad.id == Rental.ipad_id)\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')\
-            .filter(Schedule.date == date.today())\
+            .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
     if show_history_rental:
         query = Rental.query\
@@ -848,30 +848,16 @@ def rental_return_step_2(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = PunchLessonForm(user=user)
+    form = PunchSectionForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_3', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+        return redirect(url_for('manage.rental_return_step_3', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/rental_return_step_2.html', user=user, form=form)
 
 
-@manage.route('/rental/return/step-3/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('/rental/return/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_return_step_3(user_id, lesson_id):
-    user = User.query.get_or_404(user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
-    form = PunchSectionForm(user=user, lesson=lesson)
-    if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
-    return render_template('manage/rental_return_step_3.html', user=user, lesson=lesson, form=form)
-
-
-@manage.route('/rental/return/step-4/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad借阅')
-def rental_return_step_4(user_id, section_id):
+def rental_return_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
@@ -881,7 +867,7 @@ def rental_return_step_4(user_id, section_id):
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_return_step_4.html', user=user, section=section, form=form)
+    return render_template('manage/rental_return_step_3.html', user=user, section=section, form=form)
 
 
 @manage.route('/rental/return/step-1-alt', methods=['GET', 'POST'])
@@ -905,30 +891,16 @@ def rental_return_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = PunchLessonForm(user=user)
+    form = PunchSectionForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+        return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/rental_return_step_2_alt.html', user=user, form=form)
 
 
-@manage.route('/rental/return/step-3-alt/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('/rental/return/step-3-alt/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_return_step_3_alt(user_id, lesson_id):
-    user = User.query.get_or_404(user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
-    form = PunchSectionForm(user=user, lesson=lesson)
-    if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4_alt', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
-    return render_template('manage/rental_return_step_3_alt.html', user=user, lesson=lesson, form=form)
-
-
-@manage.route('/rental/return/step-4-alt/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad借阅')
-def rental_return_step_4_alt(user_id, section_id):
+def rental_return_step_3_alt(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
@@ -938,7 +910,7 @@ def rental_return_step_4_alt(user_id, section_id):
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_return_step_4_alt.html', user=user, section=section, form=form)
+    return render_template('manage/rental_return_step_3_alt.html', user=user, section=section, form=form)
 
 
 @manage.route('/rental/exchange/step-1/<int:rental_id>', methods=['GET', 'POST'])
@@ -991,34 +963,16 @@ def rental_exchange_step_2(rental_id):
     user = User.query.get_or_404(rental.user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = PunchLessonForm(user=user)
+    form = PunchSectionForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_3', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_3', rental_id=rental_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_2.html', rental=rental, form=form)
 
 
-@manage.route('/rental/exchange/step-3/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-3/<int:rental_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_3(rental_id, lesson_id):
-    rental = Rental.query.get_or_404(rental_id)
-    if not rental.returned:
-        flash(u'iPad尚未归还', category='error')
-        return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
-    user = User.query.get_or_404(rental.user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
-    form = PunchSectionForm(user=user, lesson=lesson)
-    if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, section_id=int(form.section.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_3.html', rental=rental, lesson=lesson, form=form)
-
-
-@manage.route('/rental/exchange/step-4/<int:rental_id>/<int:section_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad借阅')
-def rental_exchange_step_4(rental_id, section_id):
+def rental_exchange_step_3(rental_id, section_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1031,14 +985,14 @@ def rental_exchange_step_4(rental_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_4.html', rental=rental, section=section, form=form)
+        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_3.html', rental=rental, section=section, form=form)
 
 
-@manage.route('/rental/exchange/step-5/<int:rental_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-4/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_5(rental_id):
+def rental_exchange_step_4(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1048,14 +1002,14 @@ def rental_exchange_step_5(rental_id):
         abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_5.html', rental=rental, form=form)
+        return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_4.html', rental=rental, form=form)
 
 
-@manage.route('/rental/exchange/step-6/<int:rental_id>/<int:ipad_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-5/<int:rental_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_6(rental_id, ipad_id):
+def rental_exchange_step_5(rental_id, ipad_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1072,25 +1026,25 @@ def rental_exchange_step_6(rental_id, ipad_id):
         serial = form.serial.data
         if serial != ipad.serial:
             flash(u'iPad序列号信息有误', category='error')
-            return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
         if ipad.state.name not in [u'待机', u'候补']:
             flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
-            return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
-            return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
         new_rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, walk_in=rental.walk_in, rent_agent_id=current_user.id)
         db.session.add(new_rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_exchange_step_6.html', rental=rental, ipad=ipad, form=form)
+    return render_template('manage/rental_exchange_step_5.html', rental=rental, ipad=ipad, form=form)
 
 
-@manage.route('/rental/exchange/step-5-lesson/<int:rental_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-4-lesson/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_5_lesson(rental_id):
+def rental_exchange_step_4_lesson(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1100,14 +1054,14 @@ def rental_exchange_step_5_lesson(rental_id):
         abort(404)
     form = SelectLessonForm()
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_5_lesson.html', rental=rental, form=form)
+        return redirect(url_for('manage.rental_exchange_step_5_lesson', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_4_lesson.html', rental=rental, form=form)
 
 
-@manage.route('rental/exchange/step-6-lesson/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('rental/exchange/step-5-lesson/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_6_lesson(rental_id, lesson_id):
+def rental_exchange_step_5_lesson(rental_id, lesson_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1118,14 +1072,14 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = RentiPadByLessonForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_6_lesson.html', rental=rental, lesson=lesson, form=form)
+        return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_5_lesson.html', rental=rental, lesson=lesson, form=form)
 
 
-@manage.route('rental/exchange/step-7-lesson/<int:rental_id>/<int:lesson_id>/<int:ipad_id>', methods=['GET', 'POST'])
+@manage.route('rental/exchange/step-6-lesson/<int:rental_id>/<int:lesson_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
+def rental_exchange_step_6_lesson(rental_id, lesson_id, ipad_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1143,19 +1097,19 @@ def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
         serial = form.serial.data
         if serial != ipad.serial:
             flash(u'iPad序列号信息有误', category='error')
-            return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         if ipad.state.name not in [u'待机', u'候补']:
             flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
-            return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
-            return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         new_rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, walk_in=rental.walk_in, rent_agent_id=current_user.id)
         db.session.add(new_rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_exchange_step_7_lesson.html', rental=rental, lesson=lesson, ipad=ipad, form=form)
+    return render_template('manage/rental_exchange_step_6_lesson.html', rental=rental, lesson=lesson, ipad=ipad, form=form)
 
 
 @manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
@@ -2449,38 +2403,41 @@ def create_user():
             )
         # scores
         if form.cee_total.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考总分').first(),
-                score=form.cee_total.data
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'高考总分').first(),
+                score=form.cee_total.data,
+                full_score=form.cee_total_full.data
             )
         if form.cee_math.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考数学').first(),
-                score=form.cee_math.data
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'高考数学').first(),
+                score=form.cee_math.data,
+                full_score=form.cee_math_full.data
             )
         if form.cee_english.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'高考英语').first(),
-                score=form.cee_english.data
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'高考英语').first(),
+                score=form.cee_english.data,
+                full_score=form.cee_english_full.data
             )
         if form.cet_4.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语四级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'大学英语四级').first(),
                 score=form.cet_4.data
             )
         if form.cet_6.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'大学英语六级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'大学英语六级').first(),
                 score=form.cet_6.data
             )
         if form.tem_4.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语四级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'专业英语四级').first(),
                 score=form.tem_4.data
             )
         if form.tem_8.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'专业英语八级').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'专业英语八级').first(),
                 score=form.tem_8.data
             )
         if form.toefl_total.data:
@@ -2494,13 +2451,13 @@ def create_user():
                 modified_by=current_user._get_current_object()
             )
         if form.competition.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'竞赛').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'竞赛').first(),
                 remark=form.competition.data
             )
         if form.other_score.data:
-            user.add_previous_achievement(
-                previous_achievement_type=PreviousAchievementType.query.filter_by(name=u'其它').first(),
+            user.add_score_record(
+                score_type=ScoreType.query.filter_by(name=u'其它').first(),
                 remark=form.other_score.data
             )
         # registration
@@ -2655,20 +2612,21 @@ def create_user_confirm(id):
         flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # scores
-    new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
-    if new_previous_achievement_form.submit.data and new_previous_achievement_form.validate_on_submit():
-        previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
-        if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                score=new_previous_achievement_form.achievement.data
+    new_score_record_form = NewScoreRecordForm(prefix='new_score_record')
+    if new_score_record_form.submit.data and new_score_record_form.validate_on_submit():
+        score_type = ScoreType.query.get(int(new_score_record_form.score_type.data))
+        if score_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
+            user.add_score_record(
+                score_type=score_type,
+                score=new_score_record_form.score.data,
+                full_score=new_score_record_form.full_score.data
             )
-        if previous_achievement_type.name in [u'竞赛', u'其它']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                remark=new_previous_achievement_form.achievement.data
+        if score_type.name in [u'竞赛', u'其它']:
+            user.add_score_record(
+                score_type=score_type,
+                remark=new_score_record_form.score.data
             )
-        flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
+        flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # TOEFL
     new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
@@ -2807,7 +2765,7 @@ def create_user_confirm(id):
         edit_emergency_contact_mobile_form=edit_emergency_contact_mobile_form,
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
-        new_previous_achievement_form=new_previous_achievement_form,
+        new_score_record_form=new_score_record_form,
         new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
         edit_application_aim_form=edit_application_aim_form,
@@ -2975,20 +2933,21 @@ def edit_user(id):
         flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # scores
-    new_previous_achievement_form = NewPreviousAchievementForm(prefix='new_previous_achievement')
-    if new_previous_achievement_form.submit.data and new_previous_achievement_form.validate_on_submit():
-        previous_achievement_type = PreviousAchievementType.query.get(int(new_previous_achievement_form.previous_achievement_type.data))
-        if previous_achievement_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                score=new_previous_achievement_form.achievement.data
+    new_score_record_form = NewScoreRecordForm(prefix='new_score_record')
+    if new_score_record_form.submit.data and new_score_record_form.validate_on_submit():
+        score_type = ScoreType.query.get(int(new_score_record_form.score_type.data))
+        if score_type.name in [u'高考总分', u'高考数学', u'高考英语', u'大学英语四级', u'大学英语六级', u'专业英语四级', u'专业英语八级']:
+            user.add_score_record(
+                score_type=score_type,
+                score=new_score_record_form.score.data,
+                full_score=new_score_record_form.full_score.data
             )
-        if previous_achievement_type.name in [u'竞赛', u'其它']:
-            user.add_previous_achievement(
-                previous_achievement_type=previous_achievement_type,
-                remark=new_previous_achievement_form.achievement.data
+        if score_type.name in [u'竞赛', u'其它']:
+            user.add_score_record(
+                score_type=score_type,
+                remark=new_score_record_form.score.data
             )
-        flash(u'已添加既往成绩：%s' % previous_achievement_type.name, category='success')
+        flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # TOEFL
     new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
@@ -3125,7 +3084,7 @@ def edit_user(id):
         edit_emergency_contact_mobile_form=edit_emergency_contact_mobile_form,
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
-        new_previous_achievement_form=new_previous_achievement_form,
+        new_score_record_form=new_score_record_form,
         new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
         edit_application_aim_form=edit_application_aim_form,
@@ -3160,13 +3119,13 @@ def remove_employment_record(id):
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
-@manage.route('/user/previous-achievement/remove/<int:id>')
+@manage.route('/user/score-record/remove/<int:id>')
 @login_required
 @permission_required(u'管理用户')
-def remove_previous_achievement(id):
-    previous_achievement = PreviousAchievement.query.get_or_404(id)
-    db.session.delete(previous_achievement)
-    flash(u'已删除既往成绩：%s' % previous_achievement.type.name, category='success')
+def remove_score_record(id):
+    score_record = ScoreRecord.query.get_or_404(id)
+    db.session.delete(score_record)
+    flash(u'已删除既往成绩：%s' % score_record.type.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 

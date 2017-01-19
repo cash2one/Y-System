@@ -473,7 +473,11 @@ class Booking(db.Model):
         for schedule in Schedule.query\
             .join(Period, Period.id == Schedule.period_id)\
             .join(CourseType, CourseType.id == Period.type_id)\
-            .filter(Schedule.date == date.today())\
+            .filter(or_(
+                Schedule.date == date.today() - timedelta(days=1),
+                Schedule.date == date.today(),
+                Schedule.date == date.today() + timedelta(days=1),
+            ))\
             .filter(CourseType.name == u'VB')\
             .all():
             if schedule.started:
@@ -485,7 +489,11 @@ class Booking(db.Model):
         for schedule in Schedule.query\
             .join(Period, Period.id == Schedule.period_id)\
             .join(CourseType, CourseType.id == Period.type_id)\
-            .filter(Schedule.date == date.today())\
+            .filter(or_(
+                Schedule.date == date.today() - timedelta(days=1),
+                Schedule.date == date.today(),
+                Schedule.date == date.today() + timedelta(days=1),
+            ))\
             .filter(CourseType.name == u'Y-GRE')\
             .all():
             if schedule.started:
@@ -553,27 +561,15 @@ class Punch(db.Model):
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    @property
-    def alias(self):
-        return u'%s - %s' % (self.section.lesson.name, self.section.name)
-
-    @property
-    def alias2(self):
-        return u'%s - %s - %s' % (self.section.lesson.type.name, self.section.lesson.name, self.section.name)
-
-    @property
-    def alias3(self):
-        return u'%s - %s' % (self.section.lesson.type.name, self.section.lesson.name)
-
     def to_json(self):
         punch_json = {
             'user': self.user.name,
             'course_type': self.section.lesson.type.name,
             'lesson': self.section.lesson.name,
             'section': self.section.name,
-            'alias': self.alias,
-            'alias2': self.alias2,
-            'alias3': self.alias3,
+            'alias': self.section.alias,
+            'alias2': self.section.alias2,
+            'alias3': self.section.alias3,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json
@@ -892,7 +888,7 @@ class User(UserMixin, db.Model):
     emergency_contact_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
-    previous_achievements = db.relationship('PreviousAchievement', backref='user', lazy='dynamic')
+    score_records = db.relationship('ScoreRecord', backref='user', lazy='dynamic')
     worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
     # application properties
@@ -1112,8 +1108,8 @@ class User(UserMixin, db.Model):
             db.session.delete(education_record)
         for employment_record in self.employment_records:
             db.session.delete(employment_record)
-        for previous_achievement in self.previous_achievements:
-            db.session.delete(previous_achievement)
+        for score_record in self.score_records:
+            db.session.delete(score_record)
         for toefl_test_score in self.toefl_test_scores:
             db.session.delete(toefl_test_score)
         for purchase in self.purchases:
@@ -1311,18 +1307,23 @@ class User(UserMixin, db.Model):
         )
         db.session.add(employment_record)
 
-    def add_previous_achievement(self, previous_achievement_type, score=None, remark=None):
+    def add_score_record(self, score_type, score=None, full_score=None, remark=None):
         if score and (not isinstance(score, int)):
             score = int(score)
         else:
             score = None
-        previous_achievement = PreviousAchievement(
+        if full_score and (not isinstance(full_score, int)):
+            full_score = int(full_score)
+        else:
+            full_score = None
+        score_record = ScoreRecord(
             user_id=self.id,
-            type_id=previous_achievement_type.id,
+            type_id=score_type.id,
             score=score,
+            full_score=full_score,
             remark=remark
         )
-        db.session.add(previous_achievement)
+        db.session.add(score_record)
 
     def add_purpose(self, purpose_type, remark=None):
         if not self.has_purpose(purpose_type):
@@ -1394,7 +1395,7 @@ class User(UserMixin, db.Model):
 
     @property
     def purchases_total(self):
-        return u'%g' % sum([purchase.total for purchase in self.purchases])
+        return u'%g 元' % sum([purchase.total for purchase in self.purchases])
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -1712,6 +1713,10 @@ class User(UserMixin, db.Model):
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
+    @property
+    def next_punch(self):
+        return [section for section in self.last_punch.section.lesson.sections.all() if section.id >= self.last_punch.section_id] + self.last_punch.section.lesson.follow_ups.first().follow_up.sections.all()
+
     def add_toefl_test_score(self, test, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         toefl_test_score = TOEFLTestScore(
             user_id=self.id,
@@ -1899,15 +1904,15 @@ class EmploymentRecord(db.Model):
         return '<Education Record %r>' % self.alias
 
 
-class PreviousAchievementType(db.Model):
-    __tablename__ = 'previous_achievement_types'
+class ScoreType(db.Model):
+    __tablename__ = 'score_types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    previous_achievements = db.relationship('PreviousAchievement', backref='type', lazy='dynamic')
+    score_records = db.relationship('ScoreRecord', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_previous_achievement_types():
-        previous_achievement_types = [
+    def insert_score_types():
+        score_types = [
             (u'高考总分', ),
             (u'高考数学', ),
             (u'高考英语', ),
@@ -1918,32 +1923,56 @@ class PreviousAchievementType(db.Model):
             (u'竞赛', ),
             (u'其它', ),
         ]
-        for PAT in previous_achievement_types:
-            previous_achievement_type = PreviousAchievementType.query.filter_by(name=PAT[0]).first()
-            if previous_achievement_type is None:
-                previous_achievement_type = PreviousAchievementType(name=PAT[0])
-                db.session.add(previous_achievement_type)
-                print u'导入既往成绩类型信息', PAT[0]
+        for ST in score_types:
+            score_type = ScoreType.query.filter_by(name=ST[0]).first()
+            if score_type is None:
+                score_type = ScoreType(name=ST[0])
+                db.session.add(score_type)
+                print u'导入既往成绩类型信息', ST[0]
         db.session.commit()
 
     def __repr__(self):
-        return '<Previous Achievement Type %r>' % self.name
+        return '<Score Record Type %r>' % self.name
 
 
-class PreviousAchievement(db.Model):
-    __tablename__ = 'previous_achievements'
+class ScoreRecord(db.Model):
+    __tablename__ = 'score_records'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    type_id = db.Column(db.Integer, db.ForeignKey('previous_achievement_types.id'))
+    type_id = db.Column(db.Integer, db.ForeignKey('score_types.id'))
     score = db.Column(db.Integer)
+    full_score = db.Column(db.Integer)
     remark = db.Column(db.UnicodeText)
 
     @property
-    def alias():
-        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.remark)
+    def alias(self):
+        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.full_score, self.remark)
+
+    @property
+    def alias2(self):
+        if self.score:
+            if self.full_score:
+                return u'%g/%g 分' % (self.score, self.full_score)
+            return u'%g 分' % self.score
+        elif self.remark:
+            return u'%s' % self.remark
+        else:
+            return u'N/A'
+
+    @property
+    def percentage(self):
+        if self.full_score:
+            return float(self.score) / float(self.full_score)
+        return None
+
+    @property
+    def percentage_alias(self):
+        if self.percentage:
+            return u'%g%%' % (self.percentage * 100)
+        return u'N/A'
 
     def __repr__(self):
-        return '<Previous Achievement %r>' % self.alias
+        return '<Score Record %r>' % self.alias
 
 
 class Product(db.Model):
@@ -2351,7 +2380,11 @@ class Schedule(db.Model):
             .join(Period, Period.id == Schedule.period_id)\
             .join(CourseType, CourseType.id == Period.type_id)\
             .filter(CourseType.name == type_name)\
-            .filter(Schedule.date == date.today())\
+            .filter(or_(
+                Schedule.date == date.today() - timedelta(days=1),
+                Schedule.date == date.today(),
+                Schedule.date == date.today() + timedelta(days=1),
+            ))\
             .all():
             if schedule.started:
                 return schedule

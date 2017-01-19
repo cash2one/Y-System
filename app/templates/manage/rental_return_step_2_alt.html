@@ -103,15 +103,9 @@
                                 </div>
                             </div>
                             <div class="active step">
-                                <i class="book icon"></i>
+                                <i class="red flag icon"></i>
                                 <div class="content">
-                                    <div class="title">选择课程进度信息</div>
-                                </div>
-                            </div>
-                            <div class="disabled step">
-                                <i class="record icon"></i>
-                                <div class="content">
-                                    <div class="title">选择视频进度信息</div>
+                                    <div class="title">选择进度信息</div>
                                 </div>
                             </div>
                             <div class="disabled step">
@@ -125,13 +119,13 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">原先进度：{{ user.last_punch.alias2 }}</div>
+                            <div class="item">原先进度：{{ user.last_punch.section.alias2 }}</div>
                         </div>
-                        <form id="punch-lesson" method="POST" class="ui form">
+                        <form id="punch-section" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
-                                {{ form.lesson.label() }}
-                                {{ form.lesson(class='ui dropdown') }}
+                                {{ form.section.label() }}
+                                {{ form.section(class='ui dropdown') }}
                             </div>
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental_return_step_1_alt', next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
@@ -160,18 +154,18 @@ $('.message .close')
 
 $(document)
     .ready(function() {
-        $('#punch-lesson')
+        $('#punch-section')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    lesson: {
-                        identifier: 'lesson',
+                    section: {
+                        identifier: 'section',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选择课程进度'
+                                prompt: '请选择学习进度'
                             }
                         ]
                     }
