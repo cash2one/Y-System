@@ -253,10 +253,10 @@
                             </td>
                             <td>{{ macros.user_popup(score.modified_by) }}</td>
                             <td>
-                                <div class="ui mini icon buttons">
-                                    {% if test_type == 'vb' or test_type == 'y_gre' %}{% if score.retrieved %}<a class="ui button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="send icon"></i></a>{% else %}<a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="undo icon"></i></a>{% endif %}{% endif %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_test_score', test_type=test_type, id=score.id) }}"><i class="edit icon"></i></a>
-                                    <div id="delete-trigger-{{ score.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                <div class="ui mini buttons">
+                                    {% if test_type == 'vb' or test_type == 'y_gre' %}{% if score.retrieved %}<a class="ui icon button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="send icon"></i></a>{% else %}<a class="ui grey icon button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="undo icon"></i></a>{% endif %}{% endif %}
+                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.edit_test_score', test_type=test_type, id=score.id) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ score.id }}" class="ui negative icon button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ score.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除考试记录“{{ score.alias }}”？</div>

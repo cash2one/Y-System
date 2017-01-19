@@ -111,10 +111,10 @@
 {% endmacro %}
 
 {% macro user_url(user) %}
-<a href="{{ url_for('main.profile_user', id=user.id) }}" target="_blank">{{ user.name }}</a>
+<a href="{{ url_for('main.user', id=user.id) }}" target="_blank">{{ user.name }}</a>
 {% endmacro %}
 
 {% macro user_popup(user) %}
-<a class="popup-trigger" href="{{ url_for('main.profile_user', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>
+<a class="popup-trigger" href="{{ url_for('main.user', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>
 <div class="ui flowing popup popup-content">{{ user.name_alias }}</div>
 {% endmacro %}
