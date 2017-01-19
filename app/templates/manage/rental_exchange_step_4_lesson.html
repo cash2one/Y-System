@@ -102,13 +102,19 @@
                                     <div class="title">已归还iPad：{{ rental.ipad.alias }}</div>
                                 </div>
                             </div>
-                            <div class="completed step">
-                                <i class="tablet icon"></i>
+                            <div class="active step">
+                                <i class="book icon"></i>
                                 <div class="content">
-                                    <div class="title">已选取iPad：{{ ipad.alias }}</div>
+                                    <div class="title">选择课程</div>
                                 </div>
                             </div>
-                            <div class="active step">
+                            <div class="disabled step">
+                                <i class="tablet icon"></i>
+                                <div class="content">
+                                    <div class="title">选取iPad</div>
+                                </div>
+                            </div>
+                            <div class="disabled step">
                                 <i class="barcode icon"></i>
                                 <div class="content">
                                     <div class="title">扫码确认</div>
@@ -117,32 +123,19 @@
                         </div>
                     </div>
                     <div class="column">
-                        <form id="confirm-ipad" method="POST" class="ui form">
+                        <div class="ui big list">
+                            <div class="item">{{ rental.user.name }}（{{ rental.user.email }}）</div>
+                            <div class="item">进度：{{ rental.user.last_punch.section.alias2 }}</div>
+                        </div>
+                        <form id="select-lesson" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <div class="fields">
-                                <div class="ten wide required field">
-                                    {{ form.serial.label() }}
-                                    {{ form.serial(placeholder='iPad序列号') }}
-                                </div>
-                                <div class="six wide required field">
-                                    {{ form.battery_life.label() }}
-                                    <div class="ui right labeled input">
-                                        {{ form.battery_life(placeholder='0 ~ 100') }}
-                                        <div class="ui basic label">%</div>
-                                    </div>
-                                </div>
+                            <div class="required field">
+                                {{ form.lesson.label() }}
+                                {{ form.lesson(class='ui dropdown') }}
                             </div>
-                            <div class="ui segment">
-                                <div class="inline required field">
-                                    <div class="ui toggle checkbox">
-                                        {{ form.root() }}
-                                        {{ form.root.label() }}
-                                    </div>
-                                </div>
-                            </div>
-                            <a class="ui button loading-trigger" href="{{ url_for('manage.rental_exchange_step_5', rental_id=rental.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
+                            <a class="loading-trigger" href="{{ url_for('manage.rental_exchange_step_4', rental_id=rental.id, next=request.args.get('next')) }}">按进度选iPad？</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>
@@ -165,44 +158,20 @@ $('.message .close')
     })
 ;
 
-$('.ui.checkbox').checkbox();
-
 $(document)
     .ready(function() {
-        $('#confirm-ipad')
+        $('#select-lesson')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    serial: {
-                        identifier: 'serial',
+                    lesson: {
+                        identifier: 'lesson',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请输入iPad序列号'
-                            }
-                        ]
-                    },
-                    battery_life: {
-                        identifier: 'battery_life',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请输入iPad剩余电量'
-                            },
-                            {
-                                type: 'integer[0..100]',
-                                prompt: '电量数值超出范围（0 ~ 100）'
-                            }
-                        ]
-                    },
-                    root: {
-                        identifier: 'root',
-                        rules: [
-                            {
-                                type: 'checked',
-                                prompt: '请确认引导式访问状态正常'
+                                prompt: '请选择课程进度'
                             }
                         ]
                     }
