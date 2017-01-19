@@ -97,13 +97,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="retweet icon"></i>iPad借阅记录</h3>
-                <div class="ui right floated positive circular pointing dropdown icon button">
-                    <i class="retweet icon"></i>
-                    <div class="menu">
-                        <a class="item loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.rental', page=pagination.page)) }}"><i class="blue upload icon"></i>借出iPad</a>
-                        <a class="item loading-trigger" href="{{ url_for('manage.rental_return_step_1', next=url_for('manage.rental', page=pagination.page)) }}"><i class="green download icon"></i>回收iPad</a>
-                    </div>
-                </div>
+                <a id="rental-rent-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.rental', page=pagination.page)) }}" data-content="借出iPad" data-position="top center" data-variation="inverted"><i class="upload icon"></i></a>
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_today_rental %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
                     <a class="item {% if show_today_rental_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
@@ -151,7 +145,12 @@
                             <td>无</td>
                             <td>无</td>
                             <td class="negative">借出</td>
-                            <td><a class="ui orange mini button loading-trigger" href="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="retweet icon"></i>调换</a></td>
+                            <td>
+                                <div class="ui mini buttons">
+                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.rental_return_step_1', next=url_for('manage.rental', page=pagination.page)) }}"><i class="download icon"></i></a>
+                                    <a class="ui orange icon button loading-trigger" href="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id, next=url_for('manage.rental', page=pagination.page)) }}"><i class="retweet icon"></i></a>
+                                </div>
+                            </td>
                             {% endif %}
                         </tr>
                         {% endfor %}
@@ -178,5 +177,7 @@ $('.message .close')
 ;
 
 $('table').tablesort();
+
+$('#rental-rent-trigger').popup();
 </script>
 {% endblock %}
