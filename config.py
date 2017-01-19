@@ -15,6 +15,7 @@ class Config:
     MAIL_USE_SSL = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_MAX_EMAILS = 500
     YSYS_MAIL_SUBJECT_PREFIX = os.environ.get('YSYS_MAIL_SUBJECT_PREFIX')
     YSYS_MAIL_SENDER = os.environ.get('YSYS_MAIL_SENDER')
     YSYS_ADMIN = unicode(os.environ.get('YSYS_ADMIN'))
