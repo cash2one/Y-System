@@ -151,15 +151,6 @@ class iPadSerialForm(FlaskForm):
     submit = SubmitField(u'下一步')
 
 
-class PunchLessonForm(FlaskForm):
-    lesson = SelectField(u'课程进度', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'下一步')
-
-    def __init__(self, user, *args, **kwargs):
-        super(PunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.id >= user.last_punch.section.lesson_id]
-
-
 class PunchSectionForm(FlaskForm):
     section = SelectField(u'学习进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')

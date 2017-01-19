@@ -473,7 +473,11 @@ class Booking(db.Model):
         for schedule in Schedule.query\
             .join(Period, Period.id == Schedule.period_id)\
             .join(CourseType, CourseType.id == Period.type_id)\
-            .filter(Schedule.date == date.today())\
+            .filter(or_(
+                Schedule.date == date.today() - timedelta(days=1),
+                Schedule.date == date.today(),
+                Schedule.date == date.today() + timedelta(days=1),
+            ))\
             .filter(CourseType.name == u'VB')\
             .all():
             if schedule.started:
@@ -485,7 +489,11 @@ class Booking(db.Model):
         for schedule in Schedule.query\
             .join(Period, Period.id == Schedule.period_id)\
             .join(CourseType, CourseType.id == Period.type_id)\
-            .filter(Schedule.date == date.today())\
+            .filter(or_(
+                Schedule.date == date.today() - timedelta(days=1),
+                Schedule.date == date.today(),
+                Schedule.date == date.today() + timedelta(days=1),
+            ))\
             .filter(CourseType.name == u'Y-GRE')\
             .all():
             if schedule.started:
@@ -2372,7 +2380,11 @@ class Schedule(db.Model):
             .join(Period, Period.id == Schedule.period_id)\
             .join(CourseType, CourseType.id == Period.type_id)\
             .filter(CourseType.name == type_name)\
-            .filter(Schedule.date == date.today())\
+            .filter(or_(
+                Schedule.date == date.today() - timedelta(days=1),
+                Schedule.date == date.today(),
+                Schedule.date == date.today() + timedelta(days=1),
+            ))\
             .all():
             if schedule.started:
                 return schedule

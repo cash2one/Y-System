@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
-from .forms import PunchLessonForm, PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
+from .forms import PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
 from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm, NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
@@ -462,7 +462,7 @@ def rental():
     if show_today_rental:
         query = Rental.query\
             .join(Schedule, Schedule.id == Rental.schedule_id)\
-            .filter(Schedule.date == date.today())\
+            .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
     if show_today_rental_1103:
         query = Rental.query\
@@ -470,7 +470,7 @@ def rental():
             .join(iPad, iPad.id == Rental.ipad_id)\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1103')\
-            .filter(Schedule.date == date.today())\
+            .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
     if show_today_rental_1707:
         query = Rental.query\
@@ -478,7 +478,7 @@ def rental():
             .join(iPad, iPad.id == Rental.ipad_id)\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')\
-            .filter(Schedule.date == date.today())\
+            .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
     if show_history_rental:
         query = Rental.query\
@@ -963,34 +963,16 @@ def rental_exchange_step_2(rental_id):
     user = User.query.get_or_404(rental.user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = PunchLessonForm(user=user)
+    form = PunchSectionForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_3', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+        return redirect(url_for('manage.rental_exchange_step_3', rental_id=rental_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_2.html', rental=rental, form=form)
 
 
-@manage.route('/rental/exchange/step-3/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-3/<int:rental_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_3(rental_id, lesson_id):
-    rental = Rental.query.get_or_404(rental_id)
-    if not rental.returned:
-        flash(u'iPad尚未归还', category='error')
-        return redirect(url_for('manage.rental_exchange_step_1', rental_id=rental_id, next=request.args.get('next')))
-    user = User.query.get_or_404(rental.user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
-    form = PunchSectionForm(user=user, lesson=lesson)
-    if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, section_id=int(form.section.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_3.html', rental=rental, lesson=lesson, form=form)
-
-
-@manage.route('/rental/exchange/step-4/<int:rental_id>/<int:section_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad借阅')
-def rental_exchange_step_4(rental_id, section_id):
+def rental_exchange_step_3(rental_id, section_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1003,14 +985,14 @@ def rental_exchange_step_4(rental_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_4.html', rental=rental, section=section, form=form)
+        return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_3.html', rental=rental, section=section, form=form)
 
 
-@manage.route('/rental/exchange/step-5/<int:rental_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-4/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_5(rental_id):
+def rental_exchange_step_4(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1020,14 +1002,14 @@ def rental_exchange_step_5(rental_id):
         abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_5.html', rental=rental, form=form)
+        return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_4.html', rental=rental, form=form)
 
 
-@manage.route('/rental/exchange/step-6/<int:rental_id>/<int:ipad_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-5/<int:rental_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_6(rental_id, ipad_id):
+def rental_exchange_step_5(rental_id, ipad_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1044,25 +1026,25 @@ def rental_exchange_step_6(rental_id, ipad_id):
         serial = form.serial.data
         if serial != ipad.serial:
             flash(u'iPad序列号信息有误', category='error')
-            return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
         if ipad.state.name not in [u'待机', u'候补']:
             flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
-            return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
-            return redirect(url_for('manage.rental_exchange_step_6', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_5', rental_id=rental_id, ipad_id=ipad_id, next=request.args.get('next')))
         new_rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, walk_in=rental.walk_in, rent_agent_id=current_user.id)
         db.session.add(new_rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_exchange_step_6.html', rental=rental, ipad=ipad, form=form)
+    return render_template('manage/rental_exchange_step_5.html', rental=rental, ipad=ipad, form=form)
 
 
-@manage.route('/rental/exchange/step-5-lesson/<int:rental_id>', methods=['GET', 'POST'])
+@manage.route('/rental/exchange/step-4-lesson/<int:rental_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_5_lesson(rental_id):
+def rental_exchange_step_4_lesson(rental_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1072,14 +1054,14 @@ def rental_exchange_step_5_lesson(rental_id):
         abort(404)
     form = SelectLessonForm()
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_5_lesson.html', rental=rental, form=form)
+        return redirect(url_for('manage.rental_exchange_step_5_lesson', rental_id=rental_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_4_lesson.html', rental=rental, form=form)
 
 
-@manage.route('rental/exchange/step-6-lesson/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('rental/exchange/step-5-lesson/<int:rental_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_6_lesson(rental_id, lesson_id):
+def rental_exchange_step_5_lesson(rental_id, lesson_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1090,14 +1072,14 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = RentiPadByLessonForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
-    return render_template('manage/rental_exchange_step_6_lesson.html', rental=rental, lesson=lesson, form=form)
+        return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
+    return render_template('manage/rental_exchange_step_5_lesson.html', rental=rental, lesson=lesson, form=form)
 
 
-@manage.route('rental/exchange/step-7-lesson/<int:rental_id>/<int:lesson_id>/<int:ipad_id>', methods=['GET', 'POST'])
+@manage.route('rental/exchange/step-6-lesson/<int:rental_id>/<int:lesson_id>/<int:ipad_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
+def rental_exchange_step_6_lesson(rental_id, lesson_id, ipad_id):
     rental = Rental.query.get_or_404(rental_id)
     if not rental.returned:
         flash(u'iPad尚未归还', category='error')
@@ -1115,19 +1097,19 @@ def rental_exchange_step_7_lesson(rental_id, lesson_id, ipad_id):
         serial = form.serial.data
         if serial != ipad.serial:
             flash(u'iPad序列号信息有误', category='error')
-            return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         if ipad.state.name not in [u'待机', u'候补']:
             flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
-            return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
-            return redirect(url_for('manage.rental_exchange_step_7_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
+            return redirect(url_for('manage.rental_exchange_step_6_lesson', rental_id=rental_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         new_rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, walk_in=rental.walk_in, rent_agent_id=current_user.id)
         db.session.add(new_rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_exchange_step_7_lesson.html', rental=rental, lesson=lesson, ipad=ipad, form=form)
+    return render_template('manage/rental_exchange_step_6_lesson.html', rental=rental, lesson=lesson, ipad=ipad, form=form)
 
 
 @manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
