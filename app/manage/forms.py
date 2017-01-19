@@ -161,12 +161,12 @@ class PunchLessonForm(FlaskForm):
 
 
 class PunchSectionForm(FlaskForm):
-    section = SelectField(u'视频进度', coerce=unicode, validators=[Required()])
+    section = SelectField(u'学习进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
-    def __init__(self, user, lesson, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(PunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all() if section.id >= user.last_punch.section_id]
+        self.section.choices = [(u'', u'选择学习进度')] + [(unicode(section.id), section.alias2) for section in user.next_punch]
 
 
 class ConfirmPunchForm(FlaskForm):

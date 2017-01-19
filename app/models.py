@@ -553,27 +553,15 @@ class Punch(db.Model):
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    @property
-    def alias(self):
-        return u'%s - %s' % (self.section.lesson.name, self.section.name)
-
-    @property
-    def alias2(self):
-        return u'%s - %s - %s' % (self.section.lesson.type.name, self.section.lesson.name, self.section.name)
-
-    @property
-    def alias3(self):
-        return u'%s - %s' % (self.section.lesson.type.name, self.section.lesson.name)
-
     def to_json(self):
         punch_json = {
             'user': self.user.name,
             'course_type': self.section.lesson.type.name,
             'lesson': self.section.lesson.name,
             'section': self.section.name,
-            'alias': self.alias,
-            'alias2': self.alias2,
-            'alias3': self.alias3,
+            'alias': self.section.alias,
+            'alias2': self.section.alias2,
+            'alias3': self.section.alias3,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json
@@ -1716,6 +1704,10 @@ class User(UserMixin, db.Model):
     @property
     def last_punch(self):
         return self.punches.order_by(Punch.timestamp.desc()).first()
+
+    @property
+    def next_punch(self):
+        return [section for section in self.last_punch.section.lesson.sections.all() if section.id >= self.last_punch.section_id] + self.last_punch.section.lesson.follow_ups.first().follow_up.sections.all()
 
     def add_toefl_test_score(self, test, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         toefl_test_score = TOEFLTestScore(

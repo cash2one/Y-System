@@ -848,30 +848,16 @@ def rental_return_step_2(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = PunchLessonForm(user=user)
+    form = PunchSectionForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_3', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+        return redirect(url_for('manage.rental_return_step_3', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/rental_return_step_2.html', user=user, form=form)
 
 
-@manage.route('/rental/return/step-3/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('/rental/return/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_return_step_3(user_id, lesson_id):
-    user = User.query.get_or_404(user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
-    form = PunchSectionForm(user=user, lesson=lesson)
-    if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
-    return render_template('manage/rental_return_step_3.html', user=user, lesson=lesson, form=form)
-
-
-@manage.route('/rental/return/step-4/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad借阅')
-def rental_return_step_4(user_id, section_id):
+def rental_return_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
@@ -881,7 +867,7 @@ def rental_return_step_4(user_id, section_id):
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_return_step_4.html', user=user, section=section, form=form)
+    return render_template('manage/rental_return_step_3.html', user=user, section=section, form=form)
 
 
 @manage.route('/rental/return/step-1-alt', methods=['GET', 'POST'])
@@ -905,30 +891,16 @@ def rental_return_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = PunchLessonForm(user=user)
+    form = PunchSectionForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
+        return redirect(url_for('manage.rental_return_step_3_alt', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
     return render_template('manage/rental_return_step_2_alt.html', user=user, form=form)
 
 
-@manage.route('/rental/return/step-3-alt/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
+@manage.route('/rental/return/step-3-alt/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_return_step_3_alt(user_id, lesson_id):
-    user = User.query.get_or_404(user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    lesson = Lesson.query.get_or_404(lesson_id)
-    form = PunchSectionForm(user=user, lesson=lesson)
-    if form.validate_on_submit():
-        return redirect(url_for('manage.rental_return_step_4_alt', user_id=user_id, section_id=int(form.section.data), next=request.args.get('next')))
-    return render_template('manage/rental_return_step_3_alt.html', user=user, lesson=lesson, form=form)
-
-
-@manage.route('/rental/return/step-4-alt/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理iPad借阅')
-def rental_return_step_4_alt(user_id, section_id):
+def rental_return_step_3_alt(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
@@ -938,7 +910,7 @@ def rental_return_step_4_alt(user_id, section_id):
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.rental'))
-    return render_template('manage/rental_return_step_4_alt.html', user=user, section=section, form=form)
+    return render_template('manage/rental_return_step_3_alt.html', user=user, section=section, form=form)
 
 
 @manage.route('/rental/exchange/step-1/<int:rental_id>', methods=['GET', 'POST'])
