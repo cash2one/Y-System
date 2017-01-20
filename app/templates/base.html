@@ -499,13 +499,12 @@
     {% block scripts %}
     <!-- jQuery -->
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.0.0/jquery-migrate.min.js"></script>
 
     <!-- Semantic UI JS -->
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.js"></script>
 
     <!-- Moment.js -->
-    {{ moment.include_moment() }}
+    {{ moment.include_moment(version='2.17.1') }}
     {{ moment.locale('zh-CN') }}
 
     <!-- Customized JS -->

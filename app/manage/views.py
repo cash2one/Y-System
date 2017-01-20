@@ -16,7 +16,7 @@ from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, 
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
-from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
+from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditOriginTypeForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
@@ -2345,6 +2345,7 @@ def create_user():
             emergency_contact_name=form.emergency_contact_name.data,
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
             emergency_contact_mobile=form.emergency_contact_mobile.data,
+            origin_type_id=int(form.origin_type.data),
             application_aim=form.application_aim.data
         )
         db.session.add(user)
@@ -2732,6 +2733,18 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
+    # origin type
+    edit_origin_type_form = EditOriginTypeForm(prefix='edit_origin_type')
+    if edit_origin_type_form.submit.data and edit_origin_type_form.validate_on_submit():
+        if int(edit_origin_type_form.origin_type.data):
+            user.origin_type_id = int(edit_origin_type_form.origin_type.data)
+        else:
+            user.origin_type_id = None
+        db.session.add(user)
+        flash(u'已更新生源类型', category='success')
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    if user.origin_type:
+        edit_origin_type_form.origin_type.data = unicode(user.origin_type_id)
     # confirm
     confirm_user_form = ConfirmUserForm(prefix='confirm_user')
     if confirm_user_form.submit.data and confirm_user_form.validate_on_submit():
@@ -2770,6 +2783,7 @@ def create_user_confirm(id):
         edit_role_form=edit_role_form,
         edit_vb_course_form=edit_vb_course_form,
         edit_y_gre_course_form=edit_y_gre_course_form,
+        edit_origin_type_form=edit_origin_type_form,
         confirm_user_form=confirm_user_form,
         user=user
     )
@@ -2830,6 +2844,40 @@ def edit_user(id):
         flash(u'已更新用户权限', category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_role_form.role.data = unicode(user.role_id)
+    # VB course
+    edit_vb_course_form = EditVBCourseForm(prefix='edit_vb_course')
+    if edit_vb_course_form.submit.data and edit_vb_course_form.validate_on_submit():
+        if user.vb_course:
+            user.unregister_course(user.vb_course)
+        if int(edit_vb_course_form.vb_course.data):
+            user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
+        flash(u'已更新VB班级', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    if user.vb_course:
+        edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
+    # Y-GRE course
+    edit_y_gre_course_form = EditYGRECourseForm(prefix='edit_y_gre_course')
+    if edit_y_gre_course_form.submit.data and edit_y_gre_course_form.validate_on_submit():
+        if user.y_gre_course:
+            user.unregister_course(user.y_gre_course)
+        if int(edit_y_gre_course_form.y_gre_course.data):
+            user.register_course(Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)))
+        flash(u'已更新Y-GRE班', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    if user.y_gre_course:
+        edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
+    # origin type
+    edit_origin_type_form = EditOriginTypeForm(prefix='edit_origin_type')
+    if edit_origin_type_form.submit.data and edit_origin_type_form.validate_on_submit():
+        if int(edit_origin_type_form.origin_type.data):
+            user.origin_type_id = int(edit_origin_type_form.origin_type.data)
+        else:
+            user.origin_type_id = None
+        db.session.add(user)
+        flash(u'已更新生源类型', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    if user.origin_type:
+        edit_origin_type_form.origin_type.data = unicode(user.origin_type_id)
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
     if edit_email_form.submit.data and edit_email_form.validate_on_submit():
@@ -3026,28 +3074,6 @@ def edit_user(id):
         user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
         flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    # VB course
-    edit_vb_course_form = EditVBCourseForm(prefix='edit_vb_course')
-    if edit_vb_course_form.submit.data and edit_vb_course_form.validate_on_submit():
-        if user.vb_course:
-            user.unregister_course(user.vb_course)
-        if int(edit_vb_course_form.vb_course.data):
-            user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
-        flash(u'已更新VB班级', category='success')
-        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    if user.vb_course:
-        edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
-    # Y-GRE course
-    edit_y_gre_course_form = EditYGRECourseForm(prefix='edit_y_gre_course')
-    if edit_y_gre_course_form.submit.data and edit_y_gre_course_form.validate_on_submit():
-        if user.y_gre_course:
-            user.unregister_course(user.y_gre_course)
-        if int(edit_y_gre_course_form.y_gre_course.data):
-            user.register_course(Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)))
-        flash(u'已更新Y-GRE班', category='success')
-        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    if user.y_gre_course:
-        edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
     # worked_in_same_field
     edit_worked_in_same_field_form = EditWorkInSameFieldForm(prefix='edit_worked_in_same_field')
     if edit_worked_in_same_field_form.submit.data and edit_worked_in_same_field_form.validate_on_submit():
@@ -3069,6 +3095,9 @@ def edit_user(id):
         edit_name_form=edit_name_form,
         edit_id_number_form=edit_id_number_form,
         edit_role_form=edit_role_form,
+        edit_vb_course_form=edit_vb_course_form,
+        edit_y_gre_course_form=edit_y_gre_course_form,
+        edit_origin_type_form=edit_origin_type_form,
         edit_email_form=edit_email_form,
         edit_mobile_form=edit_mobile_form,
         edit_address_form=edit_address_form,
@@ -3086,8 +3115,6 @@ def edit_user(id):
         edit_referrer_form=edit_referrer_form,
         new_inviter_form=new_inviter_form,
         new_purchase_form=new_purchase_form,
-        edit_vb_course_form=edit_vb_course_form,
-        edit_y_gre_course_form=edit_y_gre_course_form,
         edit_worked_in_same_field_form=edit_worked_in_same_field_form,
         edit_deformity_form=edit_deformity_form,
         user=user
