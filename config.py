@@ -5,6 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
+    VERSION = 'v1.0.0-alpha'
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SSL_DISABLE = False
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True

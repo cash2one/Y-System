@@ -141,6 +141,10 @@
                 <div class="ui dropdown item menu-popup-trigger" data-content="个人档案与设置" data-position="bottom center" data-variation="inverted">
                     <i class="user icon"></i>{{ current_user.name }}
                     <div class="menu">
+                        {% if current_user.is_developer %}
+                        <div class="header" style="text-transform: none;">{{ Version }}</div>
+                        <div class="divider"></div>
+                        {% endif %}
                         <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
                         <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i>个人档案</a>
                         {% if current_user.can('预约') and current_user.can('管理') %}
@@ -174,6 +178,9 @@
             </h2>
         </div>
         {% if current_user.is_authenticated %}
+        {% if current_user.is_developer %}
+        <div class="disabled item">{{ Version }}</div>
+        {% endif %}
         <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="user icon"></i>{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</a>
         <a class="item loading-trigger" href="#"><i class="inbox icon"></i>无未读消息</a>
         {% if current_user.can('管理') %}
@@ -284,7 +291,6 @@
                 <a class="item loading-trigger" href="{{ url_for('auth.change_password') }}"><i class="lock icon"></i>修改密码</a>
             </div>
         </div>
-        <div class="divider"></div>
         <a class="item loading-trigger" href="{{ url_for('auth.logout') }}"><i class="sign out icon"></i>退出</a>
         {% else %}
         <a class="item loading-trigger" href="{{ url_for('auth.login') }}"><i class="sign in icon"></i>登录</a>
@@ -403,6 +409,10 @@
                         <div class="ui dropdown item menu-popup-trigger" data-content="个人档案与设置" data-position="bottom center" data-variation="inverted">
                             <i class="user icon"></i>{{ current_user.name }}
                             <div class="menu">
+                                {% if current_user.is_developer %}
+                                <div class="header" style="text-transform: none;">{{ Version }}</div>
+                                <div class="divider"></div>
+                                {% endif %}
                                 <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
                                 <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="archive icon"></i>个人档案</a>
                                 {% if current_user.can('预约') and current_user.can('管理') %}
@@ -453,7 +463,7 @@
                                     <div class="ui center list">
                                         <div class="item"><i class="fa fa-phone fa-fw"></i> 400-876-3898</div>
                                         <div class="item">
-                                            <i class="fa fa-at fa-fw"></i>
+                                            <i class="fa fa-send fa-fw"></i>
                                             <a href="mailto:service@y-english.org?subject=Mail From Y-System Website">service@y-english.org</a>
                                         </div>
                                         <div class="item">
