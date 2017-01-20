@@ -1779,6 +1779,10 @@ class User(UserMixin, db.Model):
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
+    @property
+    def gre_score_prediction(self):
+        pass
+
     def activate(self, new_password=None):
         self.activated = True
         self.activated_at = datetime.utcnow()
