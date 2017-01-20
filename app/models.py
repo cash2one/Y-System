@@ -611,7 +611,7 @@ class Punch(db.Model):
         return punch_json
 
     def __repr__(self):
-        return '<Punch %r, %r>' % (self.user.name, self.alias)
+        return '<Punch %r, %r>' % (self.user.name, self.section.alias)
 
 
 class AssignmentScoreGrade(db.Model):
@@ -1781,46 +1781,51 @@ class User(UserMixin, db.Model):
 
     @property
     def gre_score_prediction(self):
-        if self.origin_type.name == u'一本（北清）':
+        if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（北清）'):
             if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'竞赛').first().id) is not None) or\
                 (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
                 (self.education_records.filter_by(type_id=EducationType.query.filter_by(name='本科').first().id).first().gpa_percentage >= 0.9):
-                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
                     return u'160+'
-                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
                     return u'160-'
+                return u'N/A'
             else:
-                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
                     return u'155+'
-                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
                     return u'155-'
-        if self.origin_type.name == u'一本（非北清）':
+                return u'N/A'
+        if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（非北清）'):
             if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
                 (self.education_records.filter_by(type_id=ScoreType.query.filter_by(name='高考数学').first().id).first().score >= 135):
-                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
                     return u'155+'
-                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
                     return u'155-'
+                return u'N/A'
             else:
-                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
                     return u'150+'
-                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
                     return u'150-'
-        if self.origin_type.name == u'非一本':
-            if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                return u'N/A'
+        if (self.origin_type_id is not None) and (self.origin_type.name == u'非一本'):
+            if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
                 return u'145+'
-            if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+            if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
                 return u'145-'
+            return u'N/A'
         return u'N/A'
 
     def activate(self, new_password=None):
