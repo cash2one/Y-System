@@ -2529,7 +2529,7 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def initialize():
-        json_string = unicode(json.dumps({ipad.id: {lesson.id: ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
+        json_string = unicode(json.dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
         ipad_content_json = iPadContentJSON.query.get(1)
         if ipad_content_json is not None:
             ipad_content_json.json_string = json_string
@@ -2545,7 +2545,7 @@ class iPadContentJSON(db.Model):
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
         ipad_contents = json.loads(ipad_content_json.json_string)
-        ipad_contents[ipad.id] = {lesson.id: ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()}
+        ipad_contents[unicode(ipad.id)] = {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()}
         ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
         db.session.add(ipad_content_json)
         db.session.commit()
@@ -2557,8 +2557,8 @@ class iPadContentJSON(db.Model):
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
         ipad_contents = json.loads(ipad_content_json.json_string)
-        if ipad.id in ipad_contents:
-            del ipad_contents[ipad.id]
+        if unicode(ipad.id) in ipad_contents:
+            del ipad_contents[unicode(ipad.id)]
             ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
             db.session.add(ipad_content_json)
             db.session.commit()
@@ -2570,8 +2570,8 @@ class iPadContentJSON(db.Model):
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
         ipad_contents = json.loads(ipad_content_json.json_string)
-        if ipad.id in ipad_contents:
-            ipad_contents[ipad.id][lesson.id] = exist
+        if unicode(ipad.id) in ipad_contents:
+            ipad_contents[unicode(ipad.id)][unicode(lesson.id)] = exist
             ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
             db.session.add(ipad_content_json)
             db.session.commit()
