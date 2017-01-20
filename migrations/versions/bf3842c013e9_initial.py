@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: bd41a75438fa
+Revision ID: bf3842c013e9
 Revises: 
-Create Date: 2017-01-20 03:37:21.621792
+Create Date: 2017-01-20 19:20:52.627723
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bd41a75438fa'
+revision = 'bf3842c013e9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -84,6 +84,12 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_ipad_states_name'), 'ipad_states', ['name'], unique=True)
+    op.create_table('origin_types',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_origin_types_name'), 'origin_types', ['name'], unique=True)
     op.create_table('permissions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -173,11 +179,13 @@ def upgrade():
     sa.Column('emergency_contact_name', sa.Unicode(length=64), nullable=True),
     sa.Column('emergency_contact_mobile', sa.Unicode(length=64), nullable=True),
     sa.Column('emergency_contact_relationship_id', sa.Integer(), nullable=True),
+    sa.Column('origin_type_id', sa.Integer(), nullable=True),
     sa.Column('worked_in_same_field', sa.Boolean(), nullable=True),
     sa.Column('deformity', sa.Boolean(), nullable=True),
     sa.Column('application_aim', sa.Unicode(length=64), nullable=True),
     sa.ForeignKeyConstraint(['emergency_contact_relationship_id'], ['relationships.id'], ),
     sa.ForeignKeyConstraint(['gender_id'], ['genders.id'], ),
+    sa.ForeignKeyConstraint(['origin_type_id'], ['origin_types.id'], ),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -611,6 +619,8 @@ def downgrade():
     op.drop_table('purpose_types')
     op.drop_index(op.f('ix_permissions_name'), table_name='permissions')
     op.drop_table('permissions')
+    op.drop_index(op.f('ix_origin_types_name'), table_name='origin_types')
+    op.drop_table('origin_types')
     op.drop_index(op.f('ix_ipad_states_name'), table_name='ipad_states')
     op.drop_table('ipad_states')
     op.drop_table('ipad_contents_json')

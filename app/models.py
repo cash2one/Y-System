@@ -217,6 +217,32 @@ class Relationship(db.Model):
         return '<Relationship %r>' % self.name
 
 
+class OriginType(db.Model):
+    __tablename__ = 'origin_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    users = db.relationship('User', backref='origin_type', lazy='dynamic')
+
+    @staticmethod
+    def insert_origin_types():
+        origin_types = [
+            (u'一本（北清）', ),
+            (u'一本（非北清）', ),
+            (u'非一本', ),
+            (u'高中（及以下）', ),
+        ]
+        for OT in origin_types:
+            origin_type = OriginType.query.filter_by(name=OT[0]).first()
+            if origin_type is None:
+                origin_type = OriginType(name=OT[0])
+                db.session.add(origin_type)
+                print u'导入生源类型信息', OT[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Origin Type %r>' % self.name
+
+
 class Purpose(db.Model):
     __tablename__ = 'purposes'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -886,6 +912,7 @@ class User(UserMixin, db.Model):
     emergency_contact_name = db.Column(db.Unicode(64))
     emergency_contact_mobile = db.Column(db.Unicode(64))
     emergency_contact_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
+    origin_type_id = db.Column(db.Integer, db.ForeignKey('origin_types.id'))
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
     score_records = db.relationship('ScoreRecord', backref='user', lazy='dynamic')
