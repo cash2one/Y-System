@@ -217,6 +217,32 @@ class Relationship(db.Model):
         return '<Relationship %r>' % self.name
 
 
+class EducationBackground(db.Model):
+    __tablename__ = 'education_backgrounds'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    users = db.relationship('User', backref='education_background', lazy='dynamic')
+
+    @staticmethod
+    def insert_education_backgrounds():
+        education_backgrounds = [
+            (u'一本（北清）', ),
+            (u'一本（非北清）', ),
+            (u'非一本', ),
+            (u'其它', ),
+        ]
+        for EB in education_backgrounds:
+            education_background = EducationBackground.query.filter_by(name=EB[0]).first()
+            if education_background is None:
+                education_background = EducationBackground(name=EB[0])
+                db.session.add(education_background)
+                print u'导入教育背景信息', EB[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Education Background %r>' % self.name
+
+
 class Purpose(db.Model):
     __tablename__ = 'purposes'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -886,6 +912,7 @@ class User(UserMixin, db.Model):
     emergency_contact_name = db.Column(db.Unicode(64))
     emergency_contact_mobile = db.Column(db.Unicode(64))
     emergency_contact_relationship_id = db.Column(db.Integer, db.ForeignKey('relationships.id'))
+    education_background_id = db.Column(db.Integer, db.ForeignKey('education_backgrounds.id'))
     education_records = db.relationship('EducationRecord', backref='user', lazy='dynamic')
     employment_records = db.relationship('EmploymentRecord', backref='user', lazy='dynamic')
     score_records = db.relationship('ScoreRecord', backref='user', lazy='dynamic')

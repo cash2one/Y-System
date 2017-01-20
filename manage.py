@@ -39,6 +39,7 @@ def deploy():
     from app.models import Role
     from app.models import Gender
     from app.models import Relationship
+    from app.models import EducationBackground
     from app.models import PurposeType
     from app.models import ReferrerType
     from app.models import BookingState
@@ -72,6 +73,7 @@ def deploy():
     Role.insert_roles()
     Gender.insert_genders()
     Relationship.insert_relationships()
+    EducationBackground.insert_education_backgrounds()
     PurposeType.insert_purpose_types()
     ReferrerType.insert_referrer_types()
     BookingState.insert_booking_states()
