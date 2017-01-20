@@ -588,7 +588,7 @@ class EditOriginTypeForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditOriginTypeForm, self).__init__(*args, **kwargs)
-        self.origin_type.choices = [(u'', u'选择生源类型')] + [(unicode(origin_type.id), origin_type.name) for origin_type in OriginType.query.order_by(OriginType.id.asc()).all()]
+        self.origin_type.choices = [(u'', u'选择生源类型')] + [(u'0', u'无')] + [(unicode(origin_type.id), origin_type.name) for origin_type in OriginType.query.order_by(OriginType.id.asc()).all()]
 
 
 class EditWorkInSameFieldForm(FlaskForm):
