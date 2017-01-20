@@ -1781,7 +1781,47 @@ class User(UserMixin, db.Model):
 
     @property
     def gre_score_prediction(self):
-        pass
+        if self.origin_type.name == u'一本（北清）':
+            if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'竞赛').first().id) is not None) or\
+                (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
+                (self.education_records.filter_by(type_id=EducationType.query.filter_by(name='本科').first().id).first().gpa_percentage >= 0.9):
+                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                    return u'160+'
+                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                    return u'160-'
+            else:
+                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                    return u'155+'
+                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                    return u'155-'
+        if self.origin_type.name == u'一本（非北清）':
+            if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
+                (self.education_records.filter_by(type_id=ScoreType.query.filter_by(name='高考数学').first().id).first().score >= 135):
+                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                    return u'155+'
+                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                    return u'155-'
+            else:
+                if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                    return u'150+'
+                if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                    return u'150-'
+        if self.origin_type.name == u'非一本':
+            if (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id)) is not None:
+                return u'145+'
+            if (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id)) is not None:
+                return u'145-'
+        return u'N/A'
 
     def activate(self, new_password=None):
         self.activated = True
@@ -1924,6 +1964,18 @@ class EducationRecord(db.Model):
     @property
     def alias(self):
         return u'%s %s %s %s' % (self.user.name, self.type.name, self.school, self.year)
+
+    @property
+    def gpa_percentage(self):
+        if self.full_gpa:
+            return float(self.gpa) / float(self.full_gpa)
+        return None
+
+    @property
+    def gpa_percentage_alias(self):
+        if self.percentage:
+            return u'%g%%' % (self.percentage * 100)
+        return u'N/A'
 
     def __repr__(self):
         return '<Education Record %r>' % self.alias
@@ -2951,6 +3003,12 @@ class Lesson(db.Model):
 
     def has_dependent(self, depenedent):
         return self.depenedents.filter_by(depenedent_id=depenedent.id).first() is not None
+
+    @property
+    def all_dependents(self):
+        if self.depenedents.count() == 0:
+            return []
+        return self.depenedents.first().depenedent.all_dependents + [self.depenedents.first().depenedent.name]
 
     @property
     def occupied_ipads_alias(self):
