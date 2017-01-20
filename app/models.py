@@ -2610,6 +2610,9 @@ class iPad(db.Model):
         db.session.add(self)
 
     def safe_delete(self, modified_by):
+        self.serial = u'%s_%s_deleted' % (self.serial, self.id)
+        self.alias = u'%s_%s_deleted' % (self.alias, self.id)
+        self.state_id = iPadState.query.filter_by(name=u'退役').first().id
         self.deleted = True
         self.ping(modified_by=modified_by)
         db.session.add(self)
