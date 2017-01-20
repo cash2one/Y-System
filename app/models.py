@@ -2613,6 +2613,8 @@ class iPad(db.Model):
         self.serial = u'%s_%s_deleted' % (self.serial, self.id)
         self.alias = u'%s_%s_deleted' % (self.alias, self.id)
         self.state_id = iPadState.query.filter_by(name=u'退役').first().id
+        for content in self.contents:
+            self.remove_lesson(lesson=content.lesson)
         self.deleted = True
         self.ping(modified_by=modified_by)
         db.session.add(self)
