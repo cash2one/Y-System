@@ -187,10 +187,7 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>
-                                {% if user.created %}{{ macros.user_url(user) }}{% else %}{{ user.name }}{% endif %}
-                                {% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
-                            </td>
+                            <td>{% if user.created %}{{ macros.user_url(user) }}{% else %}{{ user.name }}{% endif %}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}</td>
                             <td>{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i></td>
                             <td>{{ user.role.name }}</td>
                             {% if not (show_moderators or show_administrators or show_developers) %}
