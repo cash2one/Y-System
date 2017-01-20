@@ -190,7 +190,7 @@
                                 {% else %}
                                     {% if ipad.state.name == '待机' %}
                                 <div class="ui simple dropdown mini button">
-                                    <i class="wait icon"></i>
+                                    <i class="clock icon"></i>
                                     {% endif %}
                                     {% if ipad.state.name == '候补' %}
                                 <div class="ui grey simple dropdown mini button">
@@ -211,7 +211,7 @@
                                     {{ ipad.state.name }}
                                     <div class="menu">
                                         {% if ipad.state.name != '待机' %}
-                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="wait icon"></i>待机</a>
+                                        <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_standby', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="clock icon"></i>待机</a>
                                         {% endif %}
                                         {% if ipad.state.name != '候补' and current_user.can('管理iPad设备') %}
                                         <a class="item loading-trigger" href="{{ url_for('manage.set_ipad_state_candidate', id=ipad.id, next=url_for('manage.ipad', page=pagination.page)) }}"><i class="cube icon"></i>候补</a>

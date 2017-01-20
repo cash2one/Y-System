@@ -2518,14 +2518,7 @@ class iPadContent(db.Model):
                         db.session.add(ipad_content)
                         print u'导入iPad内容信息', PC[0], Lesson.query.get(L_id).name
         db.session.commit()
-        ipad_contents = iPadContentJSON.query.get(1)
-        if ipad_contents is not None:
-            if ipad_contents.out_of_date:
-                iPadContentJSON.update()
-                db.session.commit()
-        else:
-            iPadContentJSON.update()
-            db.session.commit()
+        iPadContentJSON.initialize()
         print u'将iPad内容信息转换成JSON格式'
 
 
@@ -2533,31 +2526,55 @@ class iPadContentJSON(db.Model):
     __tablename__ = 'ipad_contents_json'
     id = db.Column(db.Integer, primary_key=True)
     json_string = db.Column(db.UnicodeText)
-    out_of_date = db.Column(db.Boolean, default=True)
 
     @staticmethod
-    def update():
-        critical_lessons = Lesson.query.filter(Lesson.priority >= 0).order_by(Lesson.id.asc()).all()
-        json_string = unicode(json.dumps({
-            'lessons': [lesson.name for lesson in critical_lessons],
-            'contents': [{'alias': ipad.alias, 'lessons': [{'name': lesson.name, 'exist': ipad.has_lesson(lesson=lesson)} for lesson in critical_lessons]} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()],
-        }))
+    def initialize():
+        json_string = unicode(json.dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
         ipad_content_json = iPadContentJSON.query.get(1)
         if ipad_content_json is not None:
             ipad_content_json.json_string = json_string
-            ipad_content_json.out_of_date = False
         else:
-            ipad_content_json = iPadContentJSON(json_string=json_string, out_of_date=False)
+            ipad_content_json = iPadContentJSON(json_string=json_string)
         db.session.add(ipad_content_json)
+        db.session.commit()
 
     @staticmethod
-    def mark_out_of_date():
+    def insert_ipad(ipad):
         ipad_content_json = iPadContentJSON.query.get(1)
-        if ipad_content_json is not None:
-            ipad_content_json.out_of_date = True
-        else:
-            ipad_content_json = iPadContentJSON(out_of_date=True)
+        if ipad_content_json is None:
+            iPadContentJSON.initialize()
+            ipad_content_json = iPadContentJSON.query.get(1)
+        ipad_contents = json.loads(ipad_content_json.json_string)
+        ipad_contents[unicode(ipad.id)] = {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()}
+        ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
         db.session.add(ipad_content_json)
+        db.session.commit()
+
+    @staticmethod
+    def remove_ipad(ipad):
+        ipad_content_json = iPadContentJSON.query.get(1)
+        if ipad_content_json is None:
+            iPadContentJSON.initialize()
+            ipad_content_json = iPadContentJSON.query.get(1)
+        ipad_contents = json.loads(ipad_content_json.json_string)
+        if unicode(ipad.id) in ipad_contents:
+            del ipad_contents[unicode(ipad.id)]
+            ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
+            db.session.add(ipad_content_json)
+            db.session.commit()
+
+    @staticmethod
+    def update(ipad, lesson, exist):
+        ipad_content_json = iPadContentJSON.query.get(1)
+        if ipad_content_json is None:
+            iPadContentJSON.initialize()
+            ipad_content_json = iPadContentJSON.query.get(1)
+        ipad_contents = json.loads(ipad_content_json.json_string)
+        if unicode(ipad.id) in ipad_contents:
+            ipad_contents[unicode(ipad.id)][unicode(lesson.id)] = exist
+            ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
+            db.session.add(ipad_content_json)
+            db.session.commit()
 
     def __repr__(self):
         return '<iPadContentJSON %r>' % self.json_string
@@ -2593,9 +2610,19 @@ class iPad(db.Model):
         db.session.add(self)
 
     def safe_delete(self, modified_by):
+        self.serial = u'%s_%s_deleted' % (self.serial, self.id)
+        self.alias = u'%s_%s_deleted' % (self.alias, self.id)
+        self.state_id = iPadState.query.filter_by(name=u'退役').first().id
+        for content in self.contents:
+            self.remove_lesson(lesson=content.lesson)
         self.deleted = True
         self.ping(modified_by=modified_by)
         db.session.add(self)
+        iPadContentJSON.remove_ipad(ipad=self)
+
+    @property
+    def id_str(self):
+        return u'%s' % self.id
 
     def set_state(self, state_name, modified_by, battery_life=-1):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
@@ -2609,11 +2636,13 @@ class iPad(db.Model):
         if not self.has_lesson(lesson):
             ipad_content = iPadContent(ipad_id=self.id, lesson_id=lesson.id)
             db.session.add(ipad_content)
+            iPadContentJSON.update(ipad=self, lesson=lesson, exist=True)
 
     def remove_lesson(self, lesson):
         ipad_content = self.contents.filter_by(lesson_id=lesson.id).first()
         if ipad_content:
             db.session.delete(ipad_content)
+            iPadContentJSON.update(ipad=self, lesson=lesson, exist=False)
 
     def has_lesson(self, lesson):
         return self.contents.filter_by(lesson_id=lesson.id).first() is not None
@@ -2814,6 +2843,11 @@ class Lesson(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+
+
+    @property
+    def id_str(self):
+        return u'%s' % self.id
 
     @property
     def alias(self):
