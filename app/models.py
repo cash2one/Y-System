@@ -16,6 +16,16 @@ from . import db, login_manager
 from .email import send_emails
 
 
+class Version:
+    System = 'v1.0.0-alpha'
+    jQuery = '3.1.1'
+    SemanticUI = '2.2.7'
+    FontAwesome = '4.7.0'
+    MomentJS = '2.17.1'
+    CountUp = '1.8.1'
+    ECharts = '3.3.1'
+
+
 class RolePermission(db.Model):
     __tablename__ = 'role_permissions'
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), primary_key=True)
@@ -595,13 +605,12 @@ class Punch(db.Model):
             'section': self.section.name,
             'alias': self.section.alias,
             'alias2': self.section.alias2,
-            'alias3': self.section.alias3,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json
 
     def __repr__(self):
-        return '<Punch %r, %r>' % (self.user.name, self.alias)
+        return '<Punch %r, %r>' % (self.user.name, self.section.alias)
 
 
 class AssignmentScoreGrade(db.Model):
@@ -1769,6 +1778,55 @@ class User(UserMixin, db.Model):
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
+    @property
+    def gre_score_prediction(self):
+        if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（北清）'):
+            if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'竞赛').first().id) is not None) or\
+                (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
+                (self.education_records.filter_by(type_id=EducationType.query.filter_by(name='本科').first().id).first().gpa_percentage >= 0.9):
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+                    return u'160+'
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+                    return u'160-'
+                return u'N/A'
+            else:
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+                    return u'155+'
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+                    return u'155-'
+                return u'N/A'
+        if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（非北清）'):
+            if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
+                (self.education_records.filter_by(type_id=ScoreType.query.filter_by(name='高考数学').first().id).first().score >= 135):
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+                    return u'155+'
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+                    return u'155-'
+                return u'N/A'
+            else:
+                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+                    return u'150+'
+                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+                    return u'150-'
+                return u'N/A'
+        if (self.origin_type_id is not None) and (self.origin_type.name == u'非一本'):
+            if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
+                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+                return u'145+'
+            if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
+                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+                return u'145-'
+            return u'N/A'
+        return u'N/A'
+
     def activate(self, new_password=None):
         self.activated = True
         self.activated_at = datetime.utcnow()
@@ -1910,6 +1968,18 @@ class EducationRecord(db.Model):
     @property
     def alias(self):
         return u'%s %s %s %s' % (self.user.name, self.type.name, self.school, self.year)
+
+    @property
+    def gpa_percentage(self):
+        if self.full_gpa:
+            return float(self.gpa) / float(self.full_gpa)
+        return None
+
+    @property
+    def gpa_percentage_alias(self):
+        if self.percentage:
+            return u'%g%%' % (self.percentage * 100)
+        return u'N/A'
 
     def __repr__(self):
         return '<Education Record %r>' % self.alias
@@ -2939,6 +3009,12 @@ class Lesson(db.Model):
         return self.depenedents.filter_by(depenedent_id=depenedent.id).first() is not None
 
     @property
+    def all_dependents(self):
+        if self.depenedents.count() == 0:
+            return []
+        return self.depenedents.first().depenedent.all_dependents + [self.depenedents.first().depenedent.name]
+
+    @property
     def occupied_ipads_alias(self):
         return iPadContent.query\
             .join(iPad, iPad.id == iPadContent.ipad_id)\
@@ -3028,11 +3104,9 @@ class Section(db.Model):
 
     @property
     def alias2(self):
+        if self.lesson.type.name == u'Y-GRE':
+            return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
         return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.name)
-
-    @property
-    def alias3(self):
-        return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
 
     @property
     def abbr(self):
