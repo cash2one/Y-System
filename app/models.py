@@ -16,6 +16,16 @@ from . import db, login_manager
 from .email import send_emails
 
 
+class Version:
+    System = 'v1.0.0-alpha'
+    jQuery = '3.1.1'
+    SemanticUI = '2.2.7'
+    FontAwesome = '4.7.0'
+    MomentJS = '2.17.1'
+    CountUp = '1.8.1'
+    ECharts = '3.3.1'
+
+
 class RolePermission(db.Model):
     __tablename__ = 'role_permissions'
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), primary_key=True)
