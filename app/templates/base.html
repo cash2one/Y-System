@@ -177,10 +177,10 @@
                 <div class="content">云英语</div>
             </h2>
         </div>
+        {% if current_user.is_authenticated %}
         {% if current_user.is_developer %}
         <div class="disabled item">{{ Version }}</div>
         {% endif %}
-        {% if current_user.is_authenticated %}
         <a class="item loading-trigger" href="{{ url_for('main.profile') }}"><i class="user icon"></i>{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</a>
         <a class="item loading-trigger" href="#"><i class="inbox icon"></i>无未读消息</a>
         {% if current_user.can('管理') %}
