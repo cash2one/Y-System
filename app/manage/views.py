@@ -16,7 +16,7 @@ from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, 
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
-from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditWorkInSameFieldForm, EditDeformityForm
+from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditOriginTypeForm, EditWorkInSameFieldForm, EditDeformityForm
 from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
@@ -2733,6 +2733,14 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
+    # origin type
+    edit_origin_type_form = EditOriginTypeForm(prefix='edit_origin_type')
+    if edit_origin_type_form.submit.data and edit_origin_type_form.validate_on_submit():
+        user.origin_type_id = int(edit_origin_type_form.origin_type.data)
+        db.session.add(user)
+        flash(u'已更新生源类型', category='success')
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_origin_type_form.origin_type.data = unicode(user.origin_type_id)
     # confirm
     confirm_user_form = ConfirmUserForm(prefix='confirm_user')
     if confirm_user_form.submit.data and confirm_user_form.validate_on_submit():
@@ -2771,6 +2779,7 @@ def create_user_confirm(id):
         edit_role_form=edit_role_form,
         edit_vb_course_form=edit_vb_course_form,
         edit_y_gre_course_form=edit_y_gre_course_form,
+        edit_origin_type_form=edit_origin_type_form,
         confirm_user_form=confirm_user_form,
         user=user
     )

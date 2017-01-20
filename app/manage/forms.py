@@ -582,6 +582,15 @@ class EditYGRECourseForm(FlaskForm):
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
+class EditOriginTypeForm(FlaskForm):
+    origin_type = SelectField(u'生源类型', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditOriginTypeForm, self).__init__(*args, **kwargs)
+        self.origin_type.choices = [(u'', u'选择生源类型')] + [(unicode(origin_type.id), origin_type.name) for origin_type in OriginType.query.order_by(OriginType.id.asc()).all()]
+
+
 class EditWorkInSameFieldForm(FlaskForm):
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     submit = SubmitField(u'更新')
