@@ -605,7 +605,6 @@ class Punch(db.Model):
             'section': self.section.name,
             'alias': self.section.alias,
             'alias2': self.section.alias2,
-            'alias3': self.section.alias3,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json
@@ -3105,11 +3104,9 @@ class Section(db.Model):
 
     @property
     def alias2(self):
+        if self.lesson.type.name == u'Y-GRE':
+            return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
         return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.name)
-
-    @property
-    def alias3(self):
-        return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
 
     @property
     def abbr(self):
