@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 5f5262cf071c
+Revision ID: bd41a75438fa
 Revises: 
-Create Date: 2017-01-18 17:05:10.446852
+Create Date: 2017-01-20 03:37:21.621792
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5f5262cf071c'
+revision = 'bd41a75438fa'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -76,7 +76,6 @@ def upgrade():
     op.create_table('ipad_contents_json',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('json_string', sa.UnicodeText(), nullable=True),
-    sa.Column('out_of_date', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('ipad_states',

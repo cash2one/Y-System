@@ -3466,7 +3466,7 @@ def ipad():
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
-        iPadContentJSON.mark_out_of_date()
+        iPadContentJSON.insert_ipad(ipad=ipad)
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
     show_ipad_all = True
@@ -3717,7 +3717,6 @@ def edit_ipad(id):
             ipad.remove_lesson(lesson=ipad_content.lesson)
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
-        iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新', category='success')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
@@ -3739,7 +3738,6 @@ def delete_ipad(id):
     if ipad.deleted:
         abort(404)
     ipad.safe_delete(modified_by=current_user._get_current_object())
-    iPadContentJSON.mark_out_of_date()
     flash(u'已删除序列号为“%s”的iPad' % ipad.serial, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
@@ -3776,9 +3774,17 @@ def filter_ipad():
 @permission_required(u'管理')
 def ipad_contents():
     ipad_contents = iPadContentJSON.query.get_or_404(1)
-    if ipad_contents.out_of_date:
-        iPadContentJSON.update()
-    return render_template('manage/ipad_contents.html', ipad_contents=json.loads(ipad_contents.json_string))
+    ipads = iPad.query\
+        .filter_by(deleted=False)\
+        .order_by(iPad.alias.asc())
+    lessons = Lesson.query\
+        .filter(Lesson.priority >= 0)\
+        .order_by(Lesson.id.asc())
+    return render_template('manage/ipad_contents.html',
+        ipads=ipads,
+        lessons=lessons,
+        ipad_contents=json.loads(ipad_contents.json_string)
+    )
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])
