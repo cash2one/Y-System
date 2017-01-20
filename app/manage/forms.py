@@ -6,7 +6,7 @@ from wtforms import StringField, TextAreaField, BooleanField, IntegerField, Floa
 from wtforms.validators import Required, NumberRange, Length, Email
 from wtforms import ValidationError
 from ..models import Permission, Role, User
-from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
+from ..models import Relationship, OriginType, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
@@ -343,6 +343,7 @@ class NewUserForm(FlaskForm):
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
     y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
+    origin_type = SelectField(u'生源类型', coerce=unicode, validators=[Required()])
     # submit
     submit = SubmitField(u'下一步')
 
@@ -361,6 +362,7 @@ class NewUserForm(FlaskForm):
         self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
         self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
+        self.origin_type.choices = [(u'', u'选择生源类型')] + [(unicode(origin_type.id), origin_type.name) for origin_type in OriginType.query.order_by(OriginType.id.asc()).all()]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():

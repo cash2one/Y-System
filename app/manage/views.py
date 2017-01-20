@@ -2345,6 +2345,7 @@ def create_user():
             emergency_contact_name=form.emergency_contact_name.data,
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
             emergency_contact_mobile=form.emergency_contact_mobile.data,
+            origin_type_id=int(form.origin_type.data),
             application_aim=form.application_aim.data
         )
         db.session.add(user)
