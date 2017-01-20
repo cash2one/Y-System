@@ -97,7 +97,7 @@ class EditPunchSectionForm(FlaskForm):
 
     def __init__(self, lesson, *args, **kwargs):
         super(EditPunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
+        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias2) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
 
 
 class BookingCodeForm(FlaskForm):
