@@ -538,9 +538,9 @@ function updateCards(updateProgressBar) {
                 );
             if (data.ipads[i].state == '待机') {
                 // $('#ipad-' + i).addClass('grey');
-                $('#ipad-state-' + i).html('<i class="wait icon"></i>' + data.ipads[i].state);
+                $('#ipad-state-' + i).html('<i class="clock icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('grey');
-                $('#ipad-content-' + i + ' .value').html('<i class="wait icon"></i>');
+                $('#ipad-content-' + i + ' .value').html('<i class="clock icon"></i>');
                 $('#ipad-extra-' + i)
                     .append(
                         $('<div>')
@@ -681,7 +681,7 @@ function updateCards(updateProgressBar) {
                                         $('<a>')
                                             .addClass('item')
                                             .attr('href', data.ipads[i].standby_url)
-                                            .html('<i class="grey wait icon"></i>待机')
+                                            .html('<i class="grey clock icon"></i>待机')
                                             .on('click', function () {
                                                 $('#loading-dimmer').dimmer('show');
                                             })
@@ -714,7 +714,7 @@ function updateCards(updateProgressBar) {
                                         $('<a>')
                                             .addClass('item')
                                             .attr('href', data.ipads[i].standby_url)
-                                            .html('<i class="grey wait icon"></i>待机')
+                                            .html('<i class="grey clock icon"></i>待机')
                                             .on('click', function () {
                                                 $('#loading-dimmer').dimmer('show');
                                             })

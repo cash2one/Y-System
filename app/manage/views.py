@@ -39,7 +39,7 @@ from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, TOEFLTest, TO
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
-from ..email import send_email
+from ..email import send_email, send_emails
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -311,13 +311,12 @@ def set_booking_state_valid(user_id, schedule_id):
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=user.last_punch.section.lesson)
     available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
-        for manager in User.users_can(u'管理iPad设备'):
-            send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-                schedule=schedule,
-                lesson=user.last_punch.section.lesson,
-                booked_ipads_quantity=booked_ipads_quantity,
-                available_ipads_quantity=available_ipads_quantity
-            )
+        send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+            schedule=schedule,
+            lesson=user.last_punch.section.lesson,
+            booked_ipads_quantity=booked_ipads_quantity,
+            available_ipads_quantity=available_ipads_quantity
+        )
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -386,13 +385,12 @@ def set_booking_state_canceled(user_id, schedule_id):
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            for manager in User.users_can(u'管理iPad设备'):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-                    schedule=schedule,
-                    lesson=candidate.last_punch.section.lesson,
-                    booked_ipads_quantity=booked_ipads_quantity,
-                    available_ipads_quantity=available_ipads_quantity
-                )
+            send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                schedule=schedule,
+                lesson=candidate.last_punch.section.lesson,
+                booked_ipads_quantity=booked_ipads_quantity,
+                available_ipads_quantity=available_ipads_quantity
+            )
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -823,12 +821,11 @@ def rental_return_step_1():
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            for user in User.users_can(u'管理iPad设备'):
-                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
-                    ipad=ipad,
-                    time=datetime.utcnow(),
-                    manager=current_user
-                )
+            send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+                ipad=ipad,
+                time=datetime.utcnow(),
+                manager=current_user
+            )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id, next=request.args.get('next')))
         if not form.battery.data:
@@ -934,12 +931,11 @@ def rental_exchange_step_1(rental_id):
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            for user in User.users_can(u'管理iPad设备'):
-                send_email(user.email, u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
-                    ipad=ipad,
-                    time=datetime.utcnow(),
-                    manager=current_user
-                )
+            send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+                ipad=ipad,
+                time=datetime.utcnow(),
+                manager=current_user
+            )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
         if not form.battery.data:
@@ -1385,13 +1381,12 @@ def increase_schedule_quota(id):
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            for manager in User.users_can(u'管理iPad设备'):
-                send_email(manager.email, u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-                    schedule=schedule,
-                    lesson=candidate.last_punch.section.lesson,
-                    booked_ipads_quantity=booked_ipads_quantity,
-                    available_ipads_quantity=available_ipads_quantity
-                )
+            send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                schedule=schedule,
+                lesson=candidate.last_punch.section.lesson,
+                booked_ipads_quantity=booked_ipads_quantity,
+                available_ipads_quantity=available_ipads_quantity
+            )
     flash(u'所选时段名额+1', category='success')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
@@ -3471,7 +3466,7 @@ def ipad():
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
-        iPadContentJSON.mark_out_of_date()
+        iPadContentJSON.insert_ipad(ipad=ipad)
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
     show_ipad_all = True
@@ -3661,12 +3656,11 @@ def set_ipad_state_maintain(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
-    for user in User.users_can(u'管理iPad设备'):
-        send_email(user.email, u'序列号为“%s”的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
-            ipad=ipad,
-            time=datetime.utcnow(),
-            manager=current_user
-        )
+    send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为“%s”的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
+        ipad=ipad,
+        time=datetime.utcnow(),
+        manager=current_user
+    )
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
@@ -3723,7 +3717,6 @@ def edit_ipad(id):
             ipad.remove_lesson(lesson=ipad_content.lesson)
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
-        iPadContentJSON.mark_out_of_date()
         flash(u'iPad信息已更新', category='success')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
@@ -3745,7 +3738,6 @@ def delete_ipad(id):
     if ipad.deleted:
         abort(404)
     ipad.safe_delete(modified_by=current_user._get_current_object())
-    iPadContentJSON.mark_out_of_date()
     flash(u'已删除序列号为“%s”的iPad' % ipad.serial, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
@@ -3782,9 +3774,17 @@ def filter_ipad():
 @permission_required(u'管理')
 def ipad_contents():
     ipad_contents = iPadContentJSON.query.get_or_404(1)
-    if ipad_contents.out_of_date:
-        iPadContentJSON.update()
-    return render_template('manage/ipad_contents.html', ipad_contents=json.loads(ipad_contents.json_string))
+    ipads = iPad.query\
+        .filter_by(deleted=False)\
+        .order_by(iPad.alias.asc())
+    lessons = Lesson.query\
+        .filter(Lesson.priority >= 0)\
+        .order_by(Lesson.id.asc())
+    return render_template('manage/ipad_contents.html',
+        ipads=ipads,
+        lessons=lessons,
+        ipad_contents=json.loads(ipad_contents.json_string)
+    )
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])

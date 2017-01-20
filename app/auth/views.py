@@ -6,7 +6,7 @@ from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
 from ..models import User, Role, Announcement, AnnouncementType
-from ..email import send_email
+from ..email import send_email, send_emails
 
 
 @auth.before_app_request
@@ -83,8 +83,7 @@ def activate():
             login_user(new_user, remember=False)
             flash(u'激活成功！', category='success')
             flash(u'一封确认邮件已经发送至您的邮箱', category='info')
-            for user in User.users_can(u'管理用户'):
-                send_email(user.email, u'新用户：%s' % (new_user.name_alias), 'auth/mail/new_user', user=new_user)
+            send_emails(User.users_can(u'管理用户').all(), u'新用户：%s' % (new_user.name_alias), 'auth/mail/new_user', user=new_user)
             return redirect(url_for('auth.unconfirmed'))
         flash(u'激活信息有误，或账户已处于激活状态', category='error')
     return render_template('auth/activate.html', form=form)
