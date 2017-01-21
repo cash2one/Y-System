@@ -100,6 +100,7 @@
                         <div class="sub header">{% if show_activated_users %}共 {{ activated_users_num }} 位已激活用户{% endif %}{% if show_unactivated_users %}共 {{ unactivated_users_num }} 位未激活用户{% endif %}{% if show_suspended_users %}共 {{ suspended_users_num }} 位挂起用户{% endif %}{% if show_draft_users %}共 {{ draft_users_num }} 位创建中用户{% endif %}{% if show_deleted_users %}共 {{ deleted_users_num }} 位已注销用户{% endif %}{% if show_volunteers %}共 {{ volunteers_num }} 位志愿者{% endif %}{% if show_moderators %}共 {{ moderators_num }} 位协管员{% endif %}{% if show_administrators %}共 {{ administrators_num }} 位管理员{% endif %}{% if show_developers %}共 {{ developers_num }} 位开发人员{% endif %}{% if show_search_users %}查询“{{ request.args.get('keyword') }}”得到 {{ search_results_num }} 个结果{% endif %}</div>
                     </div>
                 </h3>
+                {% if current_user.can('管理用户') %}
                 {% if current_user.can('管理权限') %}
                 <div class="ui right floated positive circular pointing dropdown icon button">
                     <i class="add user icon"></i>
@@ -155,6 +156,7 @@
                 {% else %}
                 <a id="create-user-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}" data-content="新建学生用户" data-position="top center" data-variation="inverted"><i class="add user icon"></i></a>
                 {% endif %}
+                {% endif %}
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_activated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.activated_users') }}">已激活</a>
                     <a class="item {% if show_unactivated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活</a>
@@ -163,8 +165,10 @@
                     {% if current_user.is_administrator or current_user.is_developer %}
                     <a class="item {% if show_deleted_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.deleted_users') }}">已注销</a>
                     {% endif %}
-                    {% if current_user.is_moderator or current_user.is_administrator or current_user.is_developer %}
+                    {% if current_user.is_volunteer or current_user.is_moderator or current_user.is_administrator or current_user.is_developer %}
                     <a class="item {% if show_volunteers %}active {% endif %}loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
+                    {% endif %}
+                    {% if current_user.is_moderator or current_user.is_administrator or current_user.is_developer %}
                     <a class="item {% if show_moderators %}active {% endif %}loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
                     {% endif %}
                     {% if current_user.is_administrator or current_user.is_developer %}
@@ -199,7 +203,7 @@
                             <th>进度</th>
                             <th>激活时间</th>
                             <th>上次登录</th>
-                            <th>操作</th>
+                            {% if current_user.can('管理用户') %}<th>操作</th>{% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -228,10 +232,11 @@
                             <td class="negative">未激活</td>
                             <td>N/A</td>
                             {% endif %}
+                            {% if current_user.can('管理用户') %}
                             <td>
                                 {% if user.deleted %}
                                 <a class="ui mini button loading-trigger" href="{{ url_for('manage.restore_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="undo icon"></i>恢复</a>
-                                {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
+                                {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) or (current_user.is_moderator and user.id != current_user.id and not user.is_superior_than(user=current_user)) %}
                                 <div class="ui mini buttons">
                                     <a class="ui icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative icon button"><i class="remove user icon"></i></div>
@@ -250,6 +255,7 @@
                                 </div>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -278,8 +284,8 @@ $('.message .close')
 
 $('table').tablesort();
 
+{% if current_user.can('管理用户') %}
 $('#create-user-trigger').popup();
-
 {% for user in users %}
 {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
 $('#delete-trigger-{{ user.id }}')
@@ -294,14 +300,12 @@ $('#delete-hide-trigger-{{ user.id }}')
 ;
 {% endif %}
 {% endfor %}
-
 {% if current_user.can('管理权限') %}
 $('#create-admin-trigger')
     .on('click', function() {
         $('#create-admin-modal').modal({ autofocus: false }).modal('show');
     })
 ;
-
 var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
@@ -377,10 +381,16 @@ $(document)
                 }
             })
         ;
+    })
+;
+{% endif %}
+{% endif %}
+
+$(document)
+    .ready(function() {
         $('#search-user').form({ onSuccess: submitForm });
     })
 ;
-
 $('.ui.search')
     .search({
         apiSettings: {
@@ -389,6 +399,5 @@ $('.ui.search')
         showNoResults: false
     })
 ;
-{% endif %}
 </script>
 {% endblock %}

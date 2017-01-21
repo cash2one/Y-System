@@ -1950,7 +1950,7 @@ def delete_test_score(test_type, id):
 
 @manage.route('/user', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理用户')
+@permission_required(u'管理')
 def user():
     # create admin form
     form = NewAdminForm(creator=current_user._get_current_object())
@@ -2086,7 +2086,7 @@ def user():
         .filter(User.deleted == True)\
         .count()
     if show_volunteers:
-        if current_user.is_moderator or current_user.is_administrator or current_user.is_developer:
+        if current_user.is_volunteer or current_user.is_moderator or current_user.is_administrator or current_user.is_developer:
             query = User.query\
                 .join(Role, Role.id == User.role_id)\
                 .filter(User.created == True)\
@@ -2162,6 +2162,8 @@ def user():
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
+        else:
+            return redirect(url_for('manage.activated_users'))
         users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
         search_results_num = len(users)
         pagination = False
@@ -2200,7 +2202,7 @@ def user():
 
 @manage.route('/user/activated')
 @login_required
-@permission_required(u'管理用户')
+@permission_required(u'管理')
 def activated_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated_users', '1', max_age=30*24*60*60)
@@ -2218,7 +2220,7 @@ def activated_users():
 
 @manage.route('/user/unactivated')
 @login_required
-@permission_required(u'管理用户')
+@permission_required(u'管理')
 def unactivated_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
@@ -2236,7 +2238,7 @@ def unactivated_users():
 
 @manage.route('/user/suspended')
 @login_required
-@permission_required(u'管理用户')
+@permission_required(u'管理')
 def suspended_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
@@ -2254,7 +2256,7 @@ def suspended_users():
 
 @manage.route('/user/draft')
 @login_required
-@permission_required(u'管理用户')
+@permission_required(u'管理')
 def draft_users():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
@@ -2290,7 +2292,7 @@ def deleted_users():
 
 @manage.route('/user/volunteers')
 @login_required
-@permission_required(u'管理用户')
+@permission_required(u'管理')
 def volunteers():
     resp = make_response(redirect(url_for('manage.user')))
     resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
@@ -2362,7 +2364,7 @@ def developers():
 
 @manage.route('/user/search/results')
 @login_required
-@permission_required(u'管理用户')
+@permission_required(u'管理')
 def search_user_results():
     resp = make_response(redirect(url_for('manage.user', keyword=request.args.get('keyword'))))
     resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
