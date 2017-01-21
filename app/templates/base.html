@@ -67,9 +67,7 @@
             {% endif %}
             {% if current_user.can('管理') %}
             <div class="ui dropdown item">
-                <i class="student icon"></i>
-                教学管理
-                <i class="dropdown icon"></i>
+                <i class="student icon"></i>教学管理<i class="dropdown icon"></i>
                 <div class="menu">
                     {% if current_user.can('管理iPad借阅') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="retweet icon"></i>iPad借阅管理</a>
@@ -92,9 +90,7 @@
                 </div>
             </div>
             <div class="ui dropdown item">
-                <i class="settings icon"></i>
-                系统管理
-                <i class="dropdown icon"></i>
+                <i class="settings icon"></i>系统管理<i class="dropdown icon"></i>
                 <div class="menu">
                     <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i>用户管理</a>
                     {% if current_user.can('管理团报') %}
@@ -119,9 +115,7 @@
                 </div>
             </div>
             <div class="ui dropdown item">
-                <i class="search icon"></i>
-                查询功能
-                <i class="dropdown icon"></i>
+                <i class="search icon"></i>综合查询<i class="dropdown icon"></i>
                 <div class="menu">
                     <a class="item loading-trigger" href="{{ url_for('manage.filter_ipad') }}"><i class="filter icon"></i>筛选iPad</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.ipad_contents') }}"><i class="table icon"></i>iPad内容排布表</a>
@@ -253,7 +247,7 @@
         </div>
         {% endif %}
         <div class="item">
-            <div class="header">查询功能</div>
+            <div class="header">综合查询</div>
             <div class="menu">
                 <a class="item loading-trigger" href="{{ url_for('manage.filter_ipad') }}"><i class="filter icon"></i>筛选iPad</a>
                 <a class="item loading-trigger" href="{{ url_for('manage.ipad_contents') }}"><i class="table icon"></i>iPad内容排布表</a>
@@ -314,9 +308,7 @@
                     {% endif %}
                     {% if current_user.can('预约') and not current_user.can('管理') %}
                     <div class="ui dropdown item">
-                        <i class="calendar icon"></i>
-                        课程预约
-                        <i class="dropdown icon"></i>
+                        <i class="calendar icon"></i>课程预约<i class="dropdown icon"></i>
                         <div class="menu">
                             {% if current_user.can('预约VB课程') %}
                             <a class="item loading-trigger" href="{{ url_for('book.vb') }}"><i class="add to calendar icon"></i>预约VB课程</a>
@@ -329,9 +321,7 @@
                     {% endif %}
                     {% if current_user.can('管理') %}
                     <div class="ui dropdown item">
-                        <i class="student icon"></i>
-                        教学管理
-                        <i class="dropdown icon"></i>
+                        <i class="student icon"></i>教学管理<i class="dropdown icon"></i>
                         <div class="menu">
                             {% if current_user.can('管理iPad借阅') %}
                             <a class="item loading-trigger" href="{{ url_for('manage.rental') }}"><i class="retweet icon"></i>iPad借阅管理</a>
@@ -354,9 +344,7 @@
                         </div>
                     </div>
                     <div class="ui dropdown item">
-                        <i class="settings icon"></i>
-                        系统管理
-                        <i class="dropdown icon"></i>
+                        <i class="settings icon"></i>系统管理<i class="dropdown icon"></i>
                         <div class="menu">
                             <a class="item loading-trigger" href="{{ url_for('manage.user') }}"><i class="user icon"></i>用户管理</a>
                             {% if current_user.can('管理团报') %}
@@ -381,9 +369,7 @@
                         </div>
                     </div>
                     <div class="ui dropdown item">
-                        <i class="search icon"></i>
-                        查询功能
-                        <i class="dropdown icon"></i>
+                        <i class="search icon"></i>综合查询<i class="dropdown icon"></i>
                         <div class="menu">
                             <a class="item loading-trigger" href="{{ url_for('manage.filter_ipad') }}"><i class="filter icon"></i>筛选iPad</a>
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad_contents') }}"><i class="table icon"></i>iPad内容排布表</a>
