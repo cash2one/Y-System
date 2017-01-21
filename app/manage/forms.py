@@ -40,6 +40,11 @@ def NextHalfHourString(halfHours, startHour=6):
     return t.strftime(u'%H:%M')
 
 
+class SearchForm(FlaskForm):
+    keyword = StringField(u'关键字', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'搜索')
+
+
 class NewScheduleForm(FlaskForm):
     date = SelectField(u'日期', coerce=unicode, validators=[Required()])
     period = SelectMultipleField(u'时段', coerce=unicode, validators=[Required()])
@@ -618,11 +623,6 @@ class RestoreUserForm(FlaskForm):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError(u'%s已经被注册' % field.data)
-
-
-class FindUserForm(FlaskForm):
-    name_or_email = StringField(u'用户姓名/邮箱', validators=[Required(), Length(1, 64)])
-    submit = SubmitField(u'检索')
 
 
 class NewCourseForm(FlaskForm):

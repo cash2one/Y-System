@@ -71,6 +71,8 @@ def user(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
+    if user.id == current_user.id:
+        return redirect(url_for('main.profile'))
     punches = user.punches.order_by(Punch.timestamp.desc()).limit(10)
     page = request.args.get('page', 1, type=int)
     pagination = Booking.query\
