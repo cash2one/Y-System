@@ -100,6 +100,7 @@
                 <div class="ui secondary stackable menu">
                     <a class="item active loading-trigger" href="{{ url_for('manage.course_user', id=course.id, page=pagination.page) }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.course') }}">班级列表</a>
+                    {% if request.args.get('next') %}<a class="item loading-trigger" href="{{ request.args.get('next') }}">返回</a>{% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -112,16 +113,14 @@
                             <th>进度</th>
                             <th>激活时间</th>
                             <th>上次登录</th>
-                            {% if current_user.can('管理用户') %}
-                            <th>操作</th>
-                            {% endif %}
+                            {% if current_user.can('管理用户') %}<th>操作</th>{% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>{% if user.id == current_user.id %}<i class="yellow star icon"></i>{% endif %}{{ macros.user_url(user) }}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}</td>
-                            <td>{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i></td>
+                            <td>{{ macros.user_url_gender(user, user.id == current_user.id) }}</td>
+                            <td>{{ macros.user_email(user) }}</td>
                             <td>{{ user.role.name }}</td>
                             <td>{% if course.type.name == 'VB' %}{{ course.name }}{% else %}{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.vb_course.id) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>
                             <td>{% if course.type.name == 'Y-GRE' %}{{ course.name }}{% else %}{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.y_gre_course.id) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}{% endif %}</td>

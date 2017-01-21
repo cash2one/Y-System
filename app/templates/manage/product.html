@@ -152,7 +152,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(product.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(product.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(product.modified_by) }}</td>
+                            <td>{{ macros.user_popup(product.modified_by, product.modified_by.id == current_user.id) }}</td>
                             <td>
                                 <div class="ui mini buttons">
                                     {% if product.available %}

@@ -110,11 +110,28 @@
 {% endif %}
 {% endmacro %}
 
-{% macro user_url(user) %}
-<a href="{{ url_for('main.user', id=user.id) }}" target="_blank">{{ user.name }}</a>
+{% macro user_gender(user, is_current_user=False) %}
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}{{ user.name }}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
 {% endmacro %}
 
-{% macro user_popup(user) %}
-<a class="popup-trigger" href="{{ url_for('main.user', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>
+{% macro user_url(user, is_current_user=False) %}
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.user', id=user.id) }}" target="_blank">{{ user.name }}</a>
+{% endmacro %}
+
+{% macro user_url_gender(user, is_current_user=False) %}
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.user', id=user.id) }}" target="_blank">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
+{% endmacro %}
+
+{% macro user_popup(user, is_current_user=False) %}
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.user', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>
 <div class="ui flowing popup popup-content">{{ user.name_alias }}</div>
+{% endmacro %}
+
+{% macro user_popup_gender(user, is_current_user=False) %}
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.user', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
+<div class="ui flowing popup popup-content">{{ user.name_alias }}</div>
+{% endmacro %}
+
+{% macro user_email(user) %}
+{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
 {% endmacro %}

@@ -185,7 +185,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(schedule.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(schedule.modified_by) }}</td>
+                            <td>{{ macros.user_popup(schedule.modified_by, schedule.modified_by.id == current_user.id) }}</td>
                             <td><div class="ui disabled mini button"><i class="setting icon"></i>操作</div></td>
                             {% else %}
                             {% if schedule.available %}
@@ -194,7 +194,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(schedule.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ schedule.modified_by.name }}</td>
+                            <td>{{ macros.user_popup(schedule.modified_by, schedule.modified_by.id == current_user.id) }}</td>
                             <td><a class="ui negative mini button loading-trigger" href="{{ url_for('manage.retract_schedule', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="undo icon"></i>撤销</a>
                             </td>
                             {% else %}
@@ -203,7 +203,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(schedule.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(schedule.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ schedule.modified_by.name }}</td>
+                            <td>{{ macros.user_popup(schedule.modified_by, schedule.modified_by.id == current_user.id) }}</td>
                             <td><a class="ui primary mini button loading-trigger" href="{{ url_for('manage.publish_schedule', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="send icon"></i>发布</a></td>
                             {% endif %}
                             {% endif %}
