@@ -13,7 +13,7 @@ from .forms import PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, Edit
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
 from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm, NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
-from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm, FindUserForm
+from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
@@ -3277,31 +3277,6 @@ def restore_user(id):
     form.email.data = user.email[:-len(u'_%s_deleted' % user.id)]
     form.role.data = unicode(user.role_id)
     return render_template('manage/restore_user.html', form=form, user=user)
-
-
-@manage.route('/user/find', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理')
-def find_user():
-    users = []
-    name_or_email = request.args.get('keyword')
-    form = FindUserForm()
-    if form.validate_on_submit():
-        name_or_email = form.name_or_email.data
-        return redirect(url_for('manage.find_user', keyword=name_or_email))
-    if name_or_email:
-        users = User.query\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(or_(
-                User.name.like('%' + name_or_email + '%'),
-                User.email.like('%' + name_or_email + '%')
-            ))\
-            .order_by(User.last_seen_at.desc())\
-            .limit(current_app.config['RECORD_PER_QUERY'])
-    form.name_or_email.data = name_or_email
-    users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
-    return render_template('manage/find_user.html', form=form, users=users, users_num=len(users), keyword=name_or_email)
 
 
 @manage.route('/course', methods=['GET', 'POST'])

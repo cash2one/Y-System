@@ -625,11 +625,6 @@ class RestoreUserForm(FlaskForm):
             raise ValidationError(u'%s已经被注册' % field.data)
 
 
-class FindUserForm(FlaskForm):
-    name_or_email = StringField(u'用户姓名/邮箱', validators=[Required(), Length(1, 64)])
-    submit = SubmitField(u'检索')
-
-
 class NewCourseForm(FlaskForm):
     name = StringField(u'班级名称', validators=[Required(), Length(1, 64)])
     course_type = SelectField(u'班级类型', coerce=unicode, validators=[Required()])
