@@ -150,7 +150,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(course.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(course.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(course.modified_by) }}</td>
+                            <td>{{ macros.user_popup(course.modified_by, course.modified_by.id == current_user.id) }}</td>
                             <td>
                                 <div class="ui mini buttons">
                                     {% if course.show %}

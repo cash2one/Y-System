@@ -119,7 +119,7 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">原先进度：{{ user.last_punch.alias2 }}</div>
+                            <div class="item">原先进度：{{ user.last_punch.section.alias2 }}</div>
                         </div>
                         <form id="punch-lesson" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
@@ -127,8 +127,8 @@
                                 {{ form.lesson.label() }}
                                 {{ form.lesson(class='ui dropdown') }}
                             </div>
-                            <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.find_user') }}">取消</a>
                             {{ form.submit(class='ui primary button') }}
+                            <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                             <div class="ui error message"></div>
                         </form>
                     </div>

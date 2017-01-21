@@ -224,7 +224,7 @@
                     <tbody>
                         {% for score in scores %}
                         <tr>
-                            <td>{{ macros.user_popup(score.user) }}</td>
+                            <td>{{ macros.user_popup_gender(score.user, score.user.id == current_user.id) }}</td>
                             <td>{{ score.test.name }}</td>
                             {% if test_type == 'vb' %}
                             <td>{{ score.score_alias }}</td>
@@ -251,7 +251,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(score.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(score.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(score.modified_by) }}</td>
+                            <td>{{ macros.user_popup(score.modified_by, score.modified_by.id == current_user.id) }}</td>
                             <td>
                                 <div class="ui mini buttons">
                                     {% if test_type == 'vb' or test_type == 'y_gre' %}{% if score.retrieved %}<a class="ui icon button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="send icon"></i></a>{% else %}<a class="ui grey icon button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="undo icon"></i></a>{% endif %}{% endif %}

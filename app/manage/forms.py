@@ -40,6 +40,11 @@ def NextHalfHourString(halfHours, startHour=6):
     return t.strftime(u'%H:%M')
 
 
+class SearchForm(FlaskForm):
+    keyword = StringField(u'关键字', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'搜索')
+
+
 class NewScheduleForm(FlaskForm):
     date = SelectField(u'日期', coerce=unicode, validators=[Required()])
     period = SelectMultipleField(u'时段', coerce=unicode, validators=[Required()])
@@ -97,7 +102,7 @@ class EditPunchSectionForm(FlaskForm):
 
     def __init__(self, lesson, *args, **kwargs):
         super(EditPunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
+        self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias2) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
 
 
 class BookingCodeForm(FlaskForm):
@@ -618,11 +623,6 @@ class RestoreUserForm(FlaskForm):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError(u'%s已经被注册' % field.data)
-
-
-class FindUserForm(FlaskForm):
-    name_or_email = StringField(u'用户姓名/邮箱', validators=[Required(), Length(1, 64)])
-    submit = SubmitField(u'检索')
 
 
 class NewCourseForm(FlaskForm):

@@ -125,7 +125,7 @@
                                     {{ form.video_playback.label() }}
                                     <div class="ui right labeled input">
                                         {{ form.video_playback(placeholder='0') }}
-                                        <div class="ui basic label">小时</div>
+                                        <div class="ui label">小时</div>
                                     </div>
                                 </div>
                                 <div class="four wide required field">
@@ -233,7 +233,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(ipad.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(ipad.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(ipad.modified_by) }}</td>
+                            <td>{{ macros.user_popup(ipad.modified_by, ipad.modified_by.id == current_user.id) }}</td>
                             {% if current_user.can('管理iPad设备') %}
                             <td>
                                 <div class="ui mini buttons">

@@ -107,7 +107,7 @@
                     </div>
                     {{ form.submit(class='ui primary button') }}
                 </form>
-                <h3 class="ui header">{% if users_num %}<i class="find icon"></i>检索“{{ keyword }}”得到{{ users_num }}个结果{% else %}<i class="ban icon"></i>无检索结果{% endif %}</h3>
+                <h3 class="ui header">{% if users_num %}<i class="find icon"></i>检索“{{ keyword }}”得到 {{ users_num }} 个结果{% else %}<i class="ban icon"></i>无检索结果{% endif %}</h3>
                 {% if users %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>

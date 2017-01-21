@@ -17,7 +17,7 @@ from .email import send_emails
 
 
 class Version:
-    System = 'v1.0.0-alpha'
+    System = 'v1.0.0-dev'
     jQuery = '3.1.1'
     SemanticUI = '2.2.7'
     FontAwesome = '4.7.0'
@@ -1852,7 +1852,7 @@ class User(UserMixin, db.Model):
                 'title': self.email,
             }
             if include_role:
-                user_json_suggestion['description'] = '%s [%s]' % (self.name, self.role.name)
+                user_json_suggestion['description'] = u'%s [%s]' % (self.name, self.role.name)
             else:
                 user_json_suggestion['description'] = self.name
         else:
@@ -1860,7 +1860,7 @@ class User(UserMixin, db.Model):
                 'title': self.name,
             }
             if include_role:
-                user_json_suggestion['description'] = '%s [%s]' % (self.email, self.role.name)
+                user_json_suggestion['description'] = u'%s [%s]' % (self.email, self.role.name)
             else:
                 user_json_suggestion['description'] = self.email
         if include_url:
