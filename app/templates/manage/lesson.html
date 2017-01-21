@@ -116,7 +116,7 @@
                         <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
                             <td class="single line">{{ lesson.name }}</td>
                             <td class="single line">{{ lesson.type.name }}</td>
-                            <td{% if lesson.sections.count() < 4 %} class="single line"{% endif %}>{% if lesson.sections.count() %}{% if lesson.sections.count() > 1 %}<div class="ui labels">{% endif %}{% for section in lesson.sections %}<div class="ui blue label">{{ section.abbr }}</div>{% endfor %}{% if lesson.sections.count() > 1 %}</div>{% endif %}{% else %}无{% endif %}</td>
+                            <td{% if lesson.sections.count() < 4 %} class="single line"{% endif %}>{% if lesson.sections.count() %}{% if lesson.sections.count() > 1 %}<div class="ui labels">{% endif %}{% for section in lesson.sections %}<div class="ui {% if lesson.occupied_ipads_alias.count() %}blue {% endif %}label">{{ section.abbr }}</div>{% endfor %}{% if lesson.sections.count() > 1 %}</div>{% endif %}{% else %}无{% endif %}</td>
                             <td class="single line">{{ lesson.hour_alias }}</td>
                             <td class="single line">{% if lesson.occupied_ipads_alias.count() %}<a class="ipad loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id, next=url_for('manage.lesson', page=pagination.page)) }}" data-content="查看含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.occupied_ipads_alias.count() }} 台</a>{% else %}0 台{% endif %}</td>
                             {% if lesson.advanced %}<td class="active">高阶</td>{% else %}<td>普通</td>{% endif %}

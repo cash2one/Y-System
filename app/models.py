@@ -1846,7 +1846,7 @@ class User(UserMixin, db.Model):
         }
         return user_json
 
-    def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False):
+    def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False, search_users=False, search_keyword=None):
         if suggest_email:
             user_json_suggestion = {
                 'title': self.email,
@@ -1865,6 +1865,8 @@ class User(UserMixin, db.Model):
                 user_json_suggestion['description'] = self.email
         if include_url:
             user_json_suggestion['url'] = url_for('main.user', id=self.id)
+        if search_users:
+            user_json_suggestion['url'] = url_for('manage.search_user_results', keyword=search_keyword)
         return user_json_suggestion
 
     @staticmethod

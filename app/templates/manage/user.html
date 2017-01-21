@@ -93,7 +93,13 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="user icon"></i>用户列表</h3>
+                <h3 class="ui header">
+                    <i class="user icon"></i>
+                    <div class="content">
+                        用户列表
+                        <div class="sub header">{% if show_activated_users %}共 {{ activated_users_num }} 位已激活用户{% endif %}{% if show_unactivated_users %}共 {{ unactivated_users_num }} 位未激活用户{% endif %}{% if show_suspended_users %}共 {{ suspended_users_num }} 位挂起用户{% endif %}{% if show_draft_users %}共 {{ draft_users_num }} 位创建中用户{% endif %}{% if show_deleted_users %}共 {{ deleted_users_num }} 位已注销用户{% endif %}{% if show_volunteers %}共 {{ volunteers_num }} 位志愿者{% endif %}{% if show_moderators %}共 {{ moderators_num }} 位协管员{% endif %}{% if show_administrators %}共 {{ administrators_num }} 位管理员{% endif %}{% if show_developers %}共 {{ developers_num }} 位开发人员{% endif %}{% if show_search_users %}查询“{{ request.args.get('keyword') }}”得到 {{ search_results_num }} 个结果{% endif %}</div>
+                    </div>
+                </h3>
                 {% if current_user.can('管理权限') %}
                 <div class="ui right floated positive circular pointing dropdown icon button">
                     <i class="add user icon"></i>
@@ -150,23 +156,30 @@
                 <a id="create-user-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}" data-content="新建学生用户" data-position="top center" data-variation="inverted"><i class="add user icon"></i></a>
                 {% endif %}
                 <div class="ui secondary stackable menu">
-                    <a class="item {% if show_activated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.activated_users') }}">已激活 [{{ activated_users_num }}]</a>
-                    <a class="item {% if show_unactivated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活 [{{ unactivated_users_num }}]</a>
-                    <a class="item {% if show_suspended_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起 [{{ suspended_users_num }}]</a>
-                    <a class="item {% if show_draft_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.draft_users') }}">创建中 [{{ draft_users_num }}]</a>
+                    <a class="item {% if show_activated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.activated_users') }}">已激活</a>
+                    <a class="item {% if show_unactivated_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.unactivated_users') }}">未激活</a>
+                    <a class="item {% if show_suspended_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.suspended_users') }}">挂起</a>
+                    <a class="item {% if show_draft_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.draft_users') }}">创建中</a>
                     {% if current_user.is_administrator or current_user.is_developer %}
-                    <a class="item {% if show_deleted_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.deleted_users') }}">已注销 [{{ deleted_users_num }}]</a>
+                    <a class="item {% if show_deleted_users %}active {% endif %}loading-trigger" href="{{ url_for('manage.deleted_users') }}">已注销</a>
                     {% endif %}
                     {% if current_user.is_moderator or current_user.is_administrator or current_user.is_developer %}
-                    <a class="item {% if show_volunteers %}active {% endif %}loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者 [{{ volunteers_num }}]</a>
-                    <a class="item {% if show_moderators %}active {% endif %}loading-trigger" href="{{ url_for('manage.moderators') }}">协管员 [{{ moderators_num }}]</a>
+                    <a class="item {% if show_volunteers %}active {% endif %}loading-trigger" href="{{ url_for('manage.volunteers') }}">志愿者</a>
+                    <a class="item {% if show_moderators %}active {% endif %}loading-trigger" href="{{ url_for('manage.moderators') }}">协管员</a>
                     {% endif %}
                     {% if current_user.is_administrator or current_user.is_developer %}
-                    <a class="item {% if show_administrators %}active {% endif %}loading-trigger" href="{{ url_for('manage.administrators') }}">管理员 [{{ administrators_num }}]</a>
+                    <a class="item {% if show_administrators %}active {% endif %}loading-trigger" href="{{ url_for('manage.administrators') }}">管理员</a>
                     {% endif %}
                     {% if current_user.is_developer %}
-                    <a class="item {% if show_developers %}active {% endif %}loading-trigger" href="{{ url_for('manage.developers') }}">开发人员 [{{ developers_num }}]</a>
+                    <a class="item {% if show_developers %}active {% endif %}loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
                     {% endif %}
+                    <div class="ui search item">
+                        <div class="ui transparent left icon input">
+                            <input class="prompt" type="text" placeholder="输入姓名/邮箱查询">
+                            <i class="search icon"></i>
+                        </div>
+                        <div class="results"></div>
+                    </div>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -174,11 +187,9 @@
                             <th>姓名</th>
                             <th>邮箱</th>
                             <th>用户组</th>
-                            {% if not (show_moderators or show_administrators or show_developers) %}
                             <th>VB班</th>
                             <th>Y-GRE班</th>
                             <th>进度</th>
-                            {% endif %}
                             <th>激活时间</th>
                             <th>上次登录</th>
                             <th>操作</th>
@@ -190,14 +201,12 @@
                             <td>{% if user.created %}{{ macros.user_url(user) }}{% else %}{{ user.name }}{% endif %}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}</td>
                             <td>{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i></td>
                             <td>{{ user.role.name }}</td>
-                            {% if not (show_moderators or show_administrators or show_developers) %}
                             <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
                             <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
                             {% if user.activated %}
-                            <td>{{ user.last_punch.section.alias2 }}{% if current_user.can('管理学习进度') %}<a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="refresh icon"></i></a>{% endif %}</td>
+                            <td>{{ user.last_punch.section.alias2 }}{% if current_user.can('管理学习进度') %}<a class="ui mini icon button loading-trigger" href="{% if show_search_users %}{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', keyword=request.args.get('keyword'))) }}{% else %}{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="refresh icon"></i></a>{% endif %}</td>
                             {% else %}
                             <td>N/A</td>
-                            {% endif %}
                             {% endif %}
                             {% if user.activated %}
                             <td>
@@ -361,6 +370,15 @@ $(document)
                 }
             })
         ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/user/search?keyword={query}'
+        },
+        showNoResults: false
     })
 ;
 {% endif %}

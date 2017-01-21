@@ -122,6 +122,7 @@ def summary_other_ipads():
 
 
 @manage.route('/summary/ipad/room/<int:room_id>')
+@login_required
 @permission_required(u'管理')
 def summary_room(room_id):
     ipads = []
@@ -138,6 +139,7 @@ def summary_room(room_id):
 
 
 @manage.route('/summary/statistics')
+@login_required
 @permission_required(u'管理')
 def summary_statistics():
     statistics = {
@@ -1977,6 +1979,7 @@ def user():
     show_moderators = False
     show_administrators = False
     show_developers = False
+    show_search_users = False
     if current_user.is_authenticated:
         show_activated_users = bool(request.cookies.get('show_activated_users', '1'))
         show_unactivated_users = bool(request.cookies.get('show_unactivated_users', ''))
@@ -1987,6 +1990,7 @@ def user():
         show_moderators = bool(request.cookies.get('show_moderators', ''))
         show_administrators = bool(request.cookies.get('show_administrators', ''))
         show_developers = bool(request.cookies.get('show_developers', ''))
+        show_search_users = bool(request.cookies.get('show_search_users', ''))
     if show_activated_users:
         query = User.query\
             .join(Role, Role.id == User.role_id)\
@@ -2136,9 +2140,27 @@ def user():
         .filter(User.deleted == False)\
         .filter(Role.name == u'开发人员')\
         .count()
-    page = request.args.get('page', 1, type=int)
-    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    users = pagination.items
+    if show_search_users:
+        users = []
+        name_or_email = request.args.get('keyword')
+        if name_or_email:
+            users = User.query\
+                .filter(User.created == True)\
+                .filter(User.deleted == False)\
+                .filter(or_(
+                    User.name.like('%' + name_or_email + '%'),
+                    User.email.like('%' + name_or_email + '%')
+                ))\
+                .order_by(User.last_seen_at.desc())\
+                .limit(current_app.config['RECORD_PER_QUERY'])
+        users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
+        search_results_num = len(users)
+        pagination = False
+    if not show_search_users:
+        search_results_num = 0
+        page = request.args.get('page', 1, type=int)
+        pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+        users = pagination.items
     return render_template('manage/user.html',
         form=form,
         users=users,
@@ -2160,6 +2182,8 @@ def user():
         administrators_num=administrators_num,
         show_developers=show_developers,
         developers_num=developers_num,
+        show_search_users=show_search_users,
+        search_results_num=search_results_num,
         pagination=pagination
     )
 
@@ -2178,6 +2202,7 @@ def activated_users():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2195,6 +2220,7 @@ def unactivated_users():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2212,6 +2238,7 @@ def suspended_users():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2229,6 +2256,7 @@ def draft_users():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2246,6 +2274,7 @@ def deleted_users():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2263,6 +2292,7 @@ def volunteers():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2280,6 +2310,7 @@ def moderators():
     resp.set_cookie('show_moderators', '1', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2297,6 +2328,7 @@ def administrators():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '1', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
 
 
@@ -2314,7 +2346,45 @@ def developers():
     resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
     resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
     resp.set_cookie('show_developers', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '', max_age=30*24*60*60)
     return resp
+
+
+@manage.route('/user/search/results')
+@login_required
+@permission_required(u'管理用户')
+def search_user_results():
+    resp = make_response(redirect(url_for('manage.user', keyword=request.args.get('keyword'))))
+    resp.set_cookie('show_activated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_unactivated_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_suspended_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_draft_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_deleted_users', '', max_age=30*24*60*60)
+    resp.set_cookie('show_volunteers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_moderators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_administrators', '', max_age=30*24*60*60)
+    resp.set_cookie('show_developers', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_users', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/user/search')
+@login_required
+@permission_required(u'管理用户')
+def search_users():
+    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        users = User.query\
+            .filter(User.created == True)\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                User.name.like('%' + name_or_email + '%'),
+                User.email.like('%' + name_or_email + '%')
+            ))\
+            .order_by(User.last_seen_at.desc())\
+            .limit(current_app.config['RECORD_PER_QUERY'])
+    return jsonify({'results': [user.to_json_suggestion(search_users=True, search_keyword=name_or_email) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
 def get_gender_id(id_number):
@@ -4211,6 +4281,7 @@ def analytics():
 
 
 @manage.route('/suggest/user/')
+@login_required
 @permission_required(u'管理')
 def suggest_user():
     users = []
@@ -4229,6 +4300,7 @@ def suggest_user():
 
 
 @manage.route('/suggest/email')
+@login_required
 @permission_required(u'管理')
 def suggest_email():
     users = []
@@ -4247,6 +4319,7 @@ def suggest_email():
 
 
 @manage.route('/suggest/email/all')
+@login_required
 @permission_required(u'管理')
 def suggest_referrer():
     users = []
@@ -4266,6 +4339,7 @@ def suggest_referrer():
 
 
 @manage.route('/search/user')
+@login_required
 @permission_required(u'管理')
 def search_user():
     users = []
