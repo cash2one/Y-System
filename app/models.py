@@ -17,7 +17,7 @@ from .email import send_emails
 
 
 class Version:
-    System = 'v1.0.0-alpha'
+    System = 'v1.0.0-dev'
     jQuery = '3.1.1'
     SemanticUI = '2.2.7'
     FontAwesome = '4.7.0'
