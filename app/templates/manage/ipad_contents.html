@@ -102,7 +102,7 @@
                     </thead>
                     <tbody>
                         {% for ipad in ipads %}
-                        <tr{% if not ipad.state.name == '待机' %} class="disabled"{% endif %}>
+                        <tr{% if ipad.now_rented_by %} class="warning rented-ipad" data-content="{{ ipad.now_rented_by.name_alias }}" data-position="top left" data-variation="inverted"{% else %}{% if ipad.state.name != '待机' %} class="disabled"{% endif %}{% endif %}>
                             <td>{% if ipad.state.name == '待机' %}<i class="clock icon"></i>{% endif %}{% if ipad.state.name == '借出' %}<i class="orange upload icon"></i>{% endif %}{% if ipad.state.name == '候补' %}<i class="grey cube icon"></i>{% endif %}{% if ipad.state.name == '维护' %}<i class="red configure icon"></i>{% endif %}{% if ipad.state.name == '充电' %}<i class="green plug icon"></i>{% endif %}{% if ipad.state.name == '退役' %}<i class="olive recycle icon"></i>{% endif %}{{ ipad.alias }}</td>
                             {% for lesson in lessons %}{% if ipad_contents[ipad.id_str][lesson.id_str] %}<td>{{ lesson.name }}</td>{% else %}<td></td>{% endif %}{% endfor %}
                         </tr>
@@ -129,5 +129,7 @@ $('.message .close')
 ;
 
 $('table').tablesort();
+
+$('tr.rented-ipad').popup();
 </script>
 {% endblock %}

@@ -128,7 +128,7 @@
                     <tbody>
                         {% for group in groups %}
                         <tr>
-                            <td>{{ macros.user_popup(group.organizer) }}</td>
+                            <td>{{ macros.user_popup_gender(group.organizer, group.organizer.id == current_user.id) }}</td>
                             <td>{{ group.organizer.organized_groups.count() }}</td>
                             <td>
                                 {% if group.organizer.organized_groups.count() > 1 %}
