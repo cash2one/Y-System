@@ -7,6 +7,7 @@ from flask import render_template, redirect, url_for, abort, flash, current_app,
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
+from .forms import SearchForm
 from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
 from .forms import PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
@@ -1951,6 +1952,7 @@ def delete_test_score(test_type, id):
 @login_required
 @permission_required(u'管理用户')
 def user():
+    # create admin form
     form = NewAdminForm(creator=current_user._get_current_object())
     if form.validate_on_submit():
         if User.query.filter_by(email=form.email.data).first():
@@ -1970,6 +1972,13 @@ def user():
         current_user.create_user(user=admin)
         flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
         return redirect(url_for('manage.user', page=request.args.get('page', 1, type=int)))
+    # search user form
+    search_form = SearchForm(prefix='search')
+    if search_form.validate_on_submit():
+        keyword = search_form.keyword.data
+        return redirect(url_for('manage.search_user_results', keyword=keyword))
+    search_form.keyword.data = request.args.get('keyword')
+    # tabs
     show_activated_users = True
     show_unactivated_users = False
     show_suspended_users = False
@@ -2142,14 +2151,14 @@ def user():
         .count()
     if show_search_users:
         users = []
-        name_or_email = request.args.get('keyword')
-        if name_or_email:
+        keyword = request.args.get('keyword')
+        if keyword:
             users = User.query\
                 .filter(User.created == True)\
                 .filter(User.deleted == False)\
                 .filter(or_(
-                    User.name.like('%' + name_or_email + '%'),
-                    User.email.like('%' + name_or_email + '%')
+                    User.name.like('%' + keyword + '%'),
+                    User.email.like('%' + keyword + '%')
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
@@ -2163,6 +2172,7 @@ def user():
         users = pagination.items
     return render_template('manage/user.html',
         form=form,
+        search_form=search_form,
         users=users,
         show_activated_users=show_activated_users,
         activated_users_num=activated_users_num,
@@ -2366,32 +2376,6 @@ def search_user_results():
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
     resp.set_cookie('show_search_users', '1', max_age=30*24*60*60)
     return resp
-
-
-@manage.route('/user/search')
-@login_required
-@permission_required(u'管理用户')
-def search_users():
-    users = []
-    name_or_email = request.args.get('keyword')
-    if name_or_email:
-        users = User.query\
-            .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(or_(
-                User.name.like('%' + name_or_email + '%'),
-                User.email.like('%' + name_or_email + '%')
-            ))\
-            .order_by(User.last_seen_at.desc())\
-            .limit(current_app.config['RECORD_PER_QUERY'])
-    results = [user.to_json_suggestion(keyword=name_or_email) for user in users if not user.is_superior_than(user=current_user._get_current_object())]
-    return jsonify({
-        'results': results,
-        'action': {
-            'url': url_for('manage.search_user_results', keyword=name_or_email),
-            'text': u'查看全部 %g 条结果' % len(results),
-        },
-    })
 
 
 def get_gender_id(id_number):

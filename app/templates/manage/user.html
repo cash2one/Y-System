@@ -173,12 +173,19 @@
                     {% if current_user.is_developer %}
                     <a class="item {% if show_developers %}active {% endif %}loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
                     {% endif %}
-                    <div class="ui search item">
-                        <div class="ui transparent left icon input">
-                            <input class="prompt" type="text" placeholder="输入姓名/邮箱查询">
-                            <i class="search icon"></i>
-                        </div>
-                        <div class="results"></div>
+                    <div class="item">
+                        <form id="search-user" method="POST" class="ui form">
+                            {{ search_form.hidden_tag() }}
+                            <div class="field">
+                                <div class="ui search">
+                                    <div class="ui transparent icon input">
+                                        {{ search_form.keyword(placeholder='输入姓名/邮箱查询用户', class='prompt') }}
+                                        <i class="search icon"></i>
+                                    </div>
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
@@ -370,13 +377,14 @@ $(document)
                 }
             })
         ;
+        $('#search-user').form({ onSuccess: submitForm });
     })
 ;
 
 $('.ui.search')
     .search({
         apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/user/search?keyword={query}'
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/user?keyword={query}'
         },
         showNoResults: false
     })
