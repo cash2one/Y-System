@@ -154,6 +154,19 @@
                     <a class="item {% if show_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
                     <a class="item {% if show_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item {% if show_ipad_others %}active {% endif %}loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
+                    <div class="item">
+                        <form id="filter-ipad" method="POST" class="ui form">
+                            {{ filter_form.hidden_tag() }}
+                            <div class="two fields">
+                            <div class="field">
+                                {{ filter_form.vb_lessons(class='ui dropdown') }}
+                            </div>
+                            <div class="field">
+                                {{ filter_form.y_gre_lessons(class='ui dropdown') }}
+                            </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>

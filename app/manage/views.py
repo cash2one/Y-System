@@ -3534,6 +3534,7 @@ def ipad():
         iPadContentJSON.insert_ipad(ipad=ipad)
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
+    filter_form = FilteriPadForm()
     show_ipad_all = True
     show_ipad_maintain = False
     show_ipad_charge = False
@@ -3588,6 +3589,7 @@ def ipad():
     ipads = pagination.items
     return render_template('manage/ipad.html',
         form=form,
+        filter_form=filter_form,
         ipads=ipads,
         show_ipad_all=show_ipad_all,
         show_ipad_maintain=show_ipad_maintain,
