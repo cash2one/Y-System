@@ -2384,7 +2384,7 @@ def search_users():
             ))\
             .order_by(User.last_seen_at.desc())\
             .limit(current_app.config['RECORD_PER_QUERY'])
-    results = [user.to_json_search(keyword=name_or_email) for user in users if not user.is_superior_than(user=current_user._get_current_object())]
+    results = [user.to_json_suggestion(keyword=name_or_email) for user in users if not user.is_superior_than(user=current_user._get_current_object())]
     return jsonify({
         'results': results,
         'action': {
