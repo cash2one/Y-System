@@ -1852,7 +1852,7 @@ class User(UserMixin, db.Model):
                 'title': self.email,
             }
             if include_role:
-                user_json_suggestion['description'] = '%s [%s]' % (self.name, self.role.name)
+                user_json_suggestion['description'] = u'%s [%s]' % (self.name, self.role.name)
             else:
                 user_json_suggestion['description'] = self.name
         else:
@@ -1860,7 +1860,7 @@ class User(UserMixin, db.Model):
                 'title': self.name,
             }
             if include_role:
-                user_json_suggestion['description'] = '%s [%s]' % (self.email, self.role.name)
+                user_json_suggestion['description'] = u'%s [%s]' % (self.email, self.role.name)
             else:
                 user_json_suggestion['description'] = self.email
         if include_url:
@@ -1869,8 +1869,8 @@ class User(UserMixin, db.Model):
 
     def to_json_search(self, keyword):
         user_json_suggestion = {
-            'title': u'查询“%s”' % keyword,
-            'description': self.name_alias,
+            'title': self.name,
+            'description': u'%s [%s]' % (self.email, self.role.name),
             'url': url_for('manage.search_user_results', keyword=keyword),
         }
         return user_json_suggestion

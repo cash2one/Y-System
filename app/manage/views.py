@@ -2384,11 +2384,12 @@ def search_users():
             ))\
             .order_by(User.last_seen_at.desc())\
             .limit(current_app.config['RECORD_PER_QUERY'])
+    results = [user.to_json_search(keyword=name_or_email) for user in users if not user.is_superior_than(user=current_user._get_current_object())]
     return jsonify({
-        'results': [user.to_json_search(keyword=name_or_email) for user in users if not user.is_superior_than(user=current_user._get_current_object())],
+        'results': results,
         'action': {
             'url': url_for('manage.search_user_results', keyword=name_or_email),
-            'text': u'查看全部结果',
+            'text': u'查看全部 %g 条结果' % len(results),
         },
     })
 
