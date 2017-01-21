@@ -138,7 +138,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(rental.return_time).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(rental.return_time).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(rental.return_agent, rental.return_agent == current_user.id) }}</td>
+                            <td>{{ macros.user_popup(rental.return_agent, rental.return_agent.id == current_user.id) }}</td>
                             <td class="positive">归还</td>
                             <td><div class="ui mini button disabled"><i class="ban icon"></i>无</a></td>
                             {% else %}
