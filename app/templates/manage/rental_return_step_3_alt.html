@@ -122,7 +122,7 @@
                             <div class="item">原先进度：{{ user.last_punch.section.alias2 }}</div>
                             <div class="item">更新进度：{{ section.alias2 }}</div>
                         </div>
-                        <form id="confirm-punch" method="POST" class="ui form">
+                        <form id="confirm-punch" action="{{ url_for('manage.rental_return_step_3_alt', user_id=user.id, section_id=section.id) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <a class="ui button loading-trigger" href="{{ url_for('manage.rental_return_step_2_alt', user_id=user.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}

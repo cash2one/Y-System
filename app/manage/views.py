@@ -1151,7 +1151,7 @@ def edit_punch_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        return redirect(request.args.get('next') or url_for('manage.find_user'))
+        return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
 
 
@@ -1954,7 +1954,7 @@ def delete_test_score(test_type, id):
 def user():
     # create admin form
     form = NewAdminForm(creator=current_user._get_current_object())
-    if form.validate_on_submit():
+    if form.submit.data and form.validate_on_submit():
         if User.query.filter_by(email=form.email.data).first():
             flash(u'%s已经被注册' % form.email.data, category='error')
             return redirect(url_for('manage.user', page=request.args.get('page', 1, type=int)))
@@ -1977,7 +1977,6 @@ def user():
     if search_form.validate_on_submit():
         keyword = search_form.keyword.data
         return redirect(url_for('manage.search_user_results', keyword=keyword))
-    search_form.keyword.data = request.args.get('keyword')
     # tabs
     show_activated_users = True
     show_unactivated_users = False
@@ -2162,6 +2161,7 @@ def user():
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
+            search_form.keyword.data = keyword
         else:
             return redirect(url_for('manage.activated_users'))
         users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
@@ -3509,7 +3509,7 @@ def remove_group_member(organizer_id, member_id):
 @permission_required(u'管理')
 def ipad():
     form = NewiPadForm()
-    if form.validate_on_submit() and current_user.can(u'管理iPad设备'):
+    if form.submit.data and form.validate_on_submit() and current_user.can(u'管理iPad设备'):
         serial = form.serial.data.upper()
         room_id = int(form.room.data)
         if room_id == 0:
@@ -3534,12 +3534,17 @@ def ipad():
         iPadContentJSON.insert_ipad(ipad=ipad)
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
+    filter_form = FilteriPadForm(prefix='filter')
+    if filter_form.submit.data and filter_form.validate_on_submit():
+        lesson_ids = filter_form.vb_lessons.data + filter_form.y_gre_lessons.data
+        return redirect(url_for('manage.filter_ipad_results', keyword=u'_'.join(lesson_ids)))
     show_ipad_all = True
     show_ipad_maintain = False
     show_ipad_charge = False
     show_ipad_1103 = False
     show_ipad_1707 = False
     show_ipad_others = False
+    show_ipad_filter = False
     if current_user.is_authenticated:
         show_ipad_all = bool(request.cookies.get('show_ipad_all', '1'))
         show_ipad_maintain = bool(request.cookies.get('show_ipad_maintain', ''))
@@ -3547,9 +3552,13 @@ def ipad():
         show_ipad_1103 = bool(request.cookies.get('show_ipad_1103', ''))
         show_ipad_1707 = bool(request.cookies.get('show_ipad_1707', ''))
         show_ipad_others = bool(request.cookies.get('show_ipad_others', ''))
+        show_ipad_filter = bool(request.cookies.get('show_ipad_filter', ''))
     if show_ipad_all:
         query = iPad.query\
             .filter_by(deleted=False)
+    all_num = iPad.query\
+        .filter(iPad.deleted == False)\
+        .count()
     if show_ipad_maintain:
         query = iPad.query\
             .join(iPadState, iPadState.id == iPad.state_id)\
@@ -3575,28 +3584,66 @@ def ipad():
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1103')\
             .filter(iPad.deleted == False)
+    room_1103_num = iPad.query\
+        .join(Room, Room.id == iPad.room_id)\
+        .filter(Room.name == u'1103')\
+        .filter(iPad.deleted == False)\
+        .count()
     if show_ipad_1707:
         query = iPad.query\
             .join(Room, Room.id == iPad.room_id)\
             .filter(Room.name == u'1707')\
             .filter(iPad.deleted == False)
+    room_1707_num = iPad.query\
+        .join(Room, Room.id == iPad.room_id)\
+        .filter(Room.name == u'1707')\
+        .filter(iPad.deleted == False)\
+        .count()
     if show_ipad_others:
         query = iPad.query\
             .filter_by(room_id=None, deleted=False)
-    page = request.args.get('page', 1, type=int)
-    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
-    ipads = pagination.items
+    others_num = iPad.query\
+        .filter_by(room_id=None, deleted=False)\
+        .count()
+    if show_ipad_filter:
+        ipads = []
+        vb_lesson_ids = []
+        y_gre_lesson_ids = []
+        keyword = request.args.get('keyword')
+        if keyword:
+            vb_lesson_ids = [unicode(lesson_id) for lesson_id in keyword.split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'VB']
+            y_gre_lesson_ids = [unicode(lesson_id) for lesson_id in keyword.split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'Y-GRE']
+            filter_form.vb_lessons.data = vb_lesson_ids
+            filter_form.y_gre_lessons.data = y_gre_lesson_ids
+        lesson_ids = vb_lesson_ids + y_gre_lesson_ids
+        if len(lesson_ids):
+            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
+            ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if ipad is not None and not ipad.deleted]
+        filter_results_num = len(ipads)
+        pagination = False
+    if not show_ipad_filter:
+        filter_results_num = 0
+        page = request.args.get('page', 1, type=int)
+        pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+        ipads = pagination.items
     return render_template('manage/ipad.html',
         form=form,
+        filter_form=filter_form,
         ipads=ipads,
         show_ipad_all=show_ipad_all,
+        all_num=all_num,
         show_ipad_maintain=show_ipad_maintain,
         maintain_num=maintain_num,
         show_ipad_charge=show_ipad_charge,
         charge_num=charge_num,
         show_ipad_1103=show_ipad_1103,
+        room_1103_num=room_1103_num,
         show_ipad_1707=show_ipad_1707,
+        room_1707_num=room_1707_num,
         show_ipad_others=show_ipad_others,
+        others_num=others_num,
+        show_ipad_filter=show_ipad_filter,
+        filter_results_num=filter_results_num,
         pagination=pagination
     )
 
@@ -3612,6 +3659,7 @@ def all_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3626,6 +3674,7 @@ def maintain_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3640,6 +3689,7 @@ def charge_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3654,6 +3704,7 @@ def room_1103_ipads():
     resp.set_cookie('show_ipad_1103', '1', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3668,6 +3719,7 @@ def room_1707_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '1', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3682,6 +3734,22 @@ def other_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/ipad/filter/results')
+@login_required
+@permission_required(u'管理')
+def filter_ipad_results():
+    resp = make_response(redirect(url_for('manage.ipad', keyword=request.args.get('keyword'))))
+    resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -3805,33 +3873,6 @@ def delete_ipad(id):
     ipad.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除序列号为“%s”的iPad' % ipad.serial, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
-
-
-@manage.route('/ipad/filter', methods=['GET', 'POST'])
-@login_required
-@permission_required(u'管理')
-def filter_ipad():
-    ipads = []
-    vb_lesson_ids = []
-    y_gre_lesson_ids = []
-    lesson_keyword = request.args.get('keyword')
-    if lesson_keyword:
-        vb_lesson_ids = [unicode(lesson_id) for lesson_id in request.args.get('keyword').split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'VB']
-        y_gre_lesson_ids = [unicode(lesson_id) for lesson_id in request.args.get('keyword').split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'Y-GRE']
-    lesson_ids = vb_lesson_ids + y_gre_lesson_ids
-    form = FilteriPadForm()
-    if form.validate_on_submit():
-        lesson_ids = form.vb_lessons.data + form.y_gre_lessons.data
-        lesson_keyword = u'_'.join(lesson_ids)
-        return redirect(url_for('manage.filter_ipad', keyword=lesson_keyword))
-    if len(lesson_ids):
-        ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
-        ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if ipad is not None and not ipad.deleted]
-    else:
-        ipads = [ipad for ipad in iPad.query.filter_by(deleted=False).all() if ipad.contents.count() == 0]
-    form.vb_lessons.data = vb_lesson_ids
-    form.y_gre_lessons.data = y_gre_lesson_ids
-    return render_template('manage/filter_ipad.html', form=form, ipads=ipads, ipads_num=len(ipads), keyword=lesson_keyword)
 
 
 @manage.route('/ipad/contents')

@@ -99,7 +99,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建考试记录</div>
                     <div class="content">
-                        <form id="new-score" method="POST" class="ui form">
+                        <form id="new-score" action="{{ url_for('manage.test_score', test_type=test_type, id=test.id) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.email.label() }}

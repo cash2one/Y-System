@@ -99,7 +99,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>发起团报</div>
                     <div class="content">
-                        <form id="new-group" method="POST" class="ui form">
+                        <form id="new-group" action="{{ url_for('manage.group') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.organizer_email.label() }}

@@ -99,7 +99,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建班级</div>
                     <div class="content">
-                        <form id="new-course" method="POST" class="ui form">
+                        <form id="new-course" action="{{ url_for('manage.course') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="eight wide required field">

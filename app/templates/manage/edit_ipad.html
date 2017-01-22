@@ -93,7 +93,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="edit-ipad" method="POST" class="ui form">
+                <form id="edit-ipad" action="{{ url_for('manage.edit_ipad', id=ipad.id) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="four wide required field">
