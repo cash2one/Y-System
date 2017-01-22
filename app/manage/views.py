@@ -3534,17 +3534,17 @@ def ipad():
         iPadContentJSON.insert_ipad(ipad=ipad)
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
-    search_form = FilteriPadForm(prefix='search')
-    if search_form.submit.data and search_form.validate_on_submit():
-        lesson_ids = search_form.vb_lessons.data + search_form.y_gre_lessons.data
-        return redirect(url_for('manage.search_ipad_results', keyword=u'_'.join(lesson_ids)))
+    filter_form = FilteriPadForm(prefix='filter')
+    if filter_form.submit.data and filter_form.validate_on_submit():
+        lesson_ids = filter_form.vb_lessons.data + filter_form.y_gre_lessons.data
+        return redirect(url_for('manage.filter_ipad_results', keyword=u'_'.join(lesson_ids)))
     show_ipad_all = True
     show_ipad_maintain = False
     show_ipad_charge = False
     show_ipad_1103 = False
     show_ipad_1707 = False
     show_ipad_others = False
-    show_ipad_search = False
+    show_ipad_filter = False
     if current_user.is_authenticated:
         show_ipad_all = bool(request.cookies.get('show_ipad_all', '1'))
         show_ipad_maintain = bool(request.cookies.get('show_ipad_maintain', ''))
@@ -3552,7 +3552,7 @@ def ipad():
         show_ipad_1103 = bool(request.cookies.get('show_ipad_1103', ''))
         show_ipad_1707 = bool(request.cookies.get('show_ipad_1707', ''))
         show_ipad_others = bool(request.cookies.get('show_ipad_others', ''))
-        show_ipad_search = bool(request.cookies.get('show_ipad_search', ''))
+        show_ipad_filter = bool(request.cookies.get('show_ipad_filter', ''))
     if show_ipad_all:
         query = iPad.query\
             .filter_by(deleted=False)
@@ -3605,7 +3605,7 @@ def ipad():
     others_num = iPad.query\
         .filter_by(room_id=None, deleted=False)\
         .count()
-    if show_ipad_search:
+    if show_ipad_filter:
         ipads = []
         vb_lesson_ids = []
         y_gre_lesson_ids = []
@@ -3613,24 +3613,22 @@ def ipad():
         if keyword:
             vb_lesson_ids = [unicode(lesson_id) for lesson_id in keyword.split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'VB']
             y_gre_lesson_ids = [unicode(lesson_id) for lesson_id in keyword.split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'Y-GRE']
-            search_form.vb_lessons.data = vb_lesson_ids
-            search_form.y_gre_lessons.data = y_gre_lesson_ids
+            filter_form.vb_lessons.data = vb_lesson_ids
+            filter_form.y_gre_lessons.data = y_gre_lesson_ids
         lesson_ids = vb_lesson_ids + y_gre_lesson_ids
         if len(lesson_ids):
             ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
             ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if ipad is not None and not ipad.deleted]
-        else:
-            return redirect(url_for('manage.all_ipads'))
-        search_results_num = len(ipads)
+        filter_results_num = len(ipads)
         pagination = False
-    if not show_ipad_search:
-        search_results_num = 0
+    if not show_ipad_filter:
+        filter_results_num = 0
         page = request.args.get('page', 1, type=int)
         pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
         ipads = pagination.items
     return render_template('manage/ipad.html',
         form=form,
-        search_form=search_form,
+        filter_form=filter_form,
         ipads=ipads,
         show_ipad_all=show_ipad_all,
         all_num=all_num,
@@ -3644,8 +3642,8 @@ def ipad():
         room_1707_num=room_1707_num,
         show_ipad_others=show_ipad_others,
         others_num=others_num,
-        show_ipad_search=show_ipad_search,
-        search_results_num=search_results_num,
+        show_ipad_filter=show_ipad_filter,
+        filter_results_num=filter_results_num,
         pagination=pagination
     )
 
@@ -3661,7 +3659,7 @@ def all_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_search', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3676,7 +3674,7 @@ def maintain_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_search', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3691,7 +3689,7 @@ def charge_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_search', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3706,7 +3704,7 @@ def room_1103_ipads():
     resp.set_cookie('show_ipad_1103', '1', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_search', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3721,7 +3719,7 @@ def room_1707_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '1', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_search', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
@@ -3736,14 +3734,14 @@ def other_ipads():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_search', '', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '', max_age=30*24*60*60)
     return resp
 
 
-@manage.route('/ipad/search/results')
+@manage.route('/ipad/filter/results')
 @login_required
 @permission_required(u'管理')
-def search_ipad_results():
+def filter_ipad_results():
     resp = make_response(redirect(url_for('manage.ipad', keyword=request.args.get('keyword'))))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
@@ -3751,7 +3749,7 @@ def search_ipad_results():
     resp.set_cookie('show_ipad_1103', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_1707', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_others', '', max_age=30*24*60*60)
-    resp.set_cookie('show_ipad_search', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_ipad_filter', '1', max_age=30*24*60*60)
     return resp
 
 
