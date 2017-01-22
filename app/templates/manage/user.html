@@ -97,7 +97,7 @@
                     <i class="user icon"></i>
                     <div class="content">
                         用户列表
-                        <div class="sub header">{% if show_activated_users %}共 {{ activated_users_num }} 位已激活用户{% endif %}{% if show_unactivated_users %}共 {{ unactivated_users_num }} 位未激活用户{% endif %}{% if show_suspended_users %}共 {{ suspended_users_num }} 位挂起用户{% endif %}{% if show_draft_users %}共 {{ draft_users_num }} 位创建中用户{% endif %}{% if show_deleted_users %}共 {{ deleted_users_num }} 位已注销用户{% endif %}{% if show_volunteers %}共 {{ volunteers_num }} 位志愿者{% endif %}{% if show_moderators %}共 {{ moderators_num }} 位协管员{% endif %}{% if show_administrators %}共 {{ administrators_num }} 位管理员{% endif %}{% if show_developers %}共 {{ developers_num }} 位开发人员{% endif %}{% if show_search_users %}查询“{{ request.args.get('keyword') }}”得到 {{ search_results_num }} 个结果{% endif %}</div>
+                        <div class="sub header">{% if show_activated_users %}共 {{ activated_users_num }} 位已激活用户{% endif %}{% if show_unactivated_users %}共 {{ unactivated_users_num }} 位未激活用户{% endif %}{% if show_suspended_users %}共 {{ suspended_users_num }} 位挂起用户{% endif %}{% if show_draft_users %}共 {{ draft_users_num }} 位创建中用户{% endif %}{% if show_deleted_users %}共 {{ deleted_users_num }} 位已注销用户{% endif %}{% if show_volunteers %}共 {{ volunteers_num }} 位志愿者{% endif %}{% if show_moderators %}共 {{ moderators_num }} 位协管员{% endif %}{% if show_administrators %}共 {{ administrators_num }} 位管理员{% endif %}{% if show_developers %}共 {{ developers_num }} 位开发人员{% endif %}{% if show_search_users %}查询“{{ request.args.get('keyword') }}”得到 {{ search_results_num }} 个用户{% endif %}</div>
                     </div>
                 </h3>
                 {% if current_user.can('管理用户') %}
@@ -236,7 +236,7 @@
                             <td>
                                 {% if user.deleted %}
                                 <a class="ui mini button loading-trigger" href="{{ url_for('manage.restore_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="undo icon"></i>恢复</a>
-                                {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) or (current_user.is_moderator and user.id != current_user.id and current_user.is_superior_than(user=user)) %}
+                                {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
                                 <div class="ui mini buttons">
                                     <a class="ui icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative icon button"><i class="remove user icon"></i></div>

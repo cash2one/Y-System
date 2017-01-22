@@ -97,7 +97,7 @@
                     <i class="tablet icon"></i>
                     <div class="content">
                         iPad列表
-                        <div class="sub header">{% if show_ipad_all %}全部 {{ all_num }} 台iPad{% endif %}{% if show_ipad_maintain %}{{ maintain_num }} 台iPad处于“维修”状态{% endif %}{% if show_ipad_charge %}{{ charge_num }} 台iPad处于“充电”状态{% endif %}{% if show_ipad_1103 %}{{ room_1103_num }} 台iPad位于1103室{% endif %}{% if show_ipad_1707 %}{{ room_1707_num }} 台iPad位于1707室{% endif %}{% if show_ipad_others %}有 {{ others_num }} 台iPad未分配房间{% endif %}{% if show_ipad_filter %}筛选得到 {{ filter_results_num }} 个结果{% endif %}</div>
+                        <div class="sub header">{% if show_ipad_all %}全部 {{ all_num }} 台iPad{% endif %}{% if show_ipad_maintain %}{{ maintain_num }} 台iPad处于“维修”状态{% endif %}{% if show_ipad_charge %}{{ charge_num }} 台iPad处于“充电”状态{% endif %}{% if show_ipad_1103 %}{{ room_1103_num }} 台iPad位于1103室{% endif %}{% if show_ipad_1707 %}{{ room_1707_num }} 台iPad位于1707室{% endif %}{% if show_ipad_others %}有 {{ others_num }} 台iPad未分配房间{% endif %}{% if show_ipad_filter %}筛选得到 {{ filter_results_num }} 个iPad{% endif %}</div>
                     </div>
                 </h3>
                 {% if current_user.can('管理iPad设备') %}
