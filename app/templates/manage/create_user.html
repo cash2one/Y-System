@@ -107,7 +107,7 @@
                         </div>
                     </div>
                 </div>
-                <form id="create-user" method="POST" class="ui form">
+                <form id="create-user" action="{{ url_for('manage.create_user') }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <h4 class="ui blue dividing header">基本信息</h4>
                     <div class="fields">

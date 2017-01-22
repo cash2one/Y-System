@@ -94,7 +94,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="header"><i class="undo icon"></i>恢复用户：{{ user.name }}</h3>
-                <form id="restore-user" method="POST" class="ui form">
+                <form id="restore-user" action="{{ url_for('manage.restore_user', id=user.id) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="eight wide required field">

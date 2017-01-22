@@ -93,14 +93,20 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="tablet icon"></i>iPad列表</h3>
+                <h3 class="ui header">
+                    <i class="tablet icon"></i>
+                    <div class="content">
+                        iPad列表
+                        <div class="sub header">{% if show_ipad_all %}全部 {{ all_num }} 台iPad{% endif %}{% if show_ipad_maintain %}{{ maintain_num }} 台iPad处于“维修”状态{% endif %}{% if show_ipad_charge %}{{ charge_num }} 台iPad处于“充电”状态{% endif %}{% if show_ipad_1103 %}{{ room_1103_num }} 台iPad位于1103室{% endif %}{% if show_ipad_1707 %}{{ room_1707_num }} 台iPad位于1707室{% endif %}{% if show_ipad_others %}有 {{ others_num }} 台iPad未分配房间{% endif %}{% if show_ipad_filter %}筛选得到 {{ filter_results_num }} 个结果{% endif %}</div>
+                    </div>
+                </h3>
                 {% if current_user.can('管理iPad设备') %}
                 <div id="new-ipad-trigger" class="ui right floated positive circular icon button" data-content="新建iPad" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-ipad-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建iPad</div>
                     <div class="content">
-                        <form id="new-ipad" method="POST" class="ui form">
+                        <form id="new-ipad" action="{{ url_for('manage.ipad') }}" action="{{ url_for('manage.ipad') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="eight wide required field">
@@ -149,12 +155,31 @@
                 {% endif %}
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_ipad_all %}active {% endif %}loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item {% if show_ipad_maintain %}active {% endif %}loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">维护 {% if maintain_num %}[{{ maintain_num }}]{% endif %}</a>
-                    <a class="item {% if show_ipad_charge %}active {% endif %}loading-trigger" href="{{ url_for('manage.charge_ipads') }}">充电 {% if charge_num %}[{{ charge_num }}]{% endif %}</a>
+                    <a class="item {% if show_ipad_maintain %}active {% endif %}loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">维护{% if maintain_num %} [{{ maintain_num }}]{% endif %}</a>
+                    <a class="item {% if show_ipad_charge %}active {% endif %}loading-trigger" href="{{ url_for('manage.charge_ipads') }}">充电{% if charge_num %} [{{ charge_num }}]{% endif %}</a>
                     <a class="item {% if show_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
                     <a class="item {% if show_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item {% if show_ipad_others %}active {% endif %}loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
+                    <a class="item {% if show_ipad_filter %}active {% endif %}loading-trigger" href="{{ url_for('manage.filter_ipad_results') }}">筛选</a>
+                    {% if request.args.get('next') %}<a class="item loading-trigger" href="{{ request.args.get('next') }}">返回</a>{% endif %}
                 </div>
+                {% if show_ipad_filter %}
+                <form id="filter-ipad" action="{{ url_for('manage.ipad') }}" action="{{ url_for('manage.ipad') }}" method="POST" class="ui form">
+                    {{ filter_form.hidden_tag() }}
+                    <div class="fields" style="margin: 0;">
+                        <div class="seven wide field">
+                            {{ filter_form.vb_lessons(class='ui dropdown') }}
+                        </div>
+                        <div class="seven wide field">
+                            {{ filter_form.y_gre_lessons(class='ui dropdown') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ filter_form.submit(class='ui primary button') }}
+                            <a class="ui icon button loading-trigger" href="{{ url_for('manage.all_ipads') }}"><i class="undo icon"></i></a>
+                        </div>
+                    </div>
+                </form>
+                {% endif %}
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -179,8 +204,8 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
-                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.filter_ipad', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
                             <td>
                                 {% if ipad.state.name == '借出' %}
                                 <div class="ui orange mini button" style="cursor: not-allowed;">
@@ -374,5 +399,11 @@ $(document)
     })
 ;
 {% endif %}
+
+$(document)
+    .ready(function() {
+        $('#filter-ipad').form({ onSuccess: submitForm });
+    })
+;
 </script>
 {% endblock %}

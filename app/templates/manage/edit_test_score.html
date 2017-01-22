@@ -94,7 +94,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="edit icon"></i>编辑{{ score.user.name_alias }}的考试记录</h3>
-                <form id="edit-score" method="POST" class="ui form">
+                <form id="edit-score" action="{{ url_for('manage.edit_test_score', test_type=test_type, id=score.id) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     {% if test_type == 'vb' %}
                     <div class="fields">

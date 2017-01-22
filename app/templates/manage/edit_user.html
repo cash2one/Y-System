@@ -133,7 +133,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑用户姓名</div>
                     <div class="content">
-                        <form id="edit-name" method="POST" class="ui form">
+                        <form id="edit-name" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_name_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_name_form.name.label() }}
@@ -147,7 +147,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑身份证号</div>
                     <div class="content">
-                        <form id="edit-id-number" method="POST" class="ui form">
+                        <form id="edit-id-number" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_id_number_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_id_number_form.id_number.label() }}
@@ -200,7 +200,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑用户权限</div>
                     <div class="content">
-                        <form id="edit-role" method="POST" class="ui form">
+                        <form id="edit-role" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_role_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_role_form.role.label() }}
@@ -214,7 +214,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑VB班</div>
                     <div class="content">
-                        <form id="edit-vb-course" method="POST" class="ui form">
+                        <form id="edit-vb-course" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_vb_course_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_vb_course_form.vb_course.label() }}
@@ -228,7 +228,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑Y-GRE班</div>
                     <div class="content">
-                        <form id="edit-y-gre-course" method="POST" class="ui form">
+                        <form id="edit-y-gre-course" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_y_gre_course_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_y_gre_course_form.y_gre_course.label() }}
@@ -242,7 +242,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑生源类型</div>
                     <div class="content">
-                        <form id="edit-origin-type" method="POST" class="ui form">
+                        <form id="edit-origin-type" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_origin_type_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_origin_type_form.origin_type.label() }}
@@ -304,7 +304,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑电子邮箱</div>
                     <div class="content">
-                        <form id="edit-email" method="POST" class="ui form">
+                        <form id="edit-email" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_email_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_email_form.email.label() }}
@@ -318,7 +318,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑移动电话</div>
                     <div class="content">
-                        <form id="edit-mobile" method="POST" class="ui form">
+                        <form id="edit-mobile" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_mobile_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_mobile_form.mobile.label() }}
@@ -332,7 +332,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑联系地址</div>
                     <div class="content">
-                        <form id="edit-address" method="POST" class="ui form">
+                        <form id="edit-address" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_address_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_address_form.address.label() }}
@@ -346,7 +346,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑QQ</div>
                     <div class="content">
-                        <form id="edit-qq" method="POST" class="ui form">
+                        <form id="edit-qq" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_qq_form.hidden_tag() }}
                             <div class="field">
                                 {{ edit_qq_form.qq.label() }}
@@ -360,7 +360,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑微信</div>
                     <div class="content">
-                        <form id="edit-wechat" method="POST" class="ui form">
+                        <form id="edit-wechat" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_wechat_form.hidden_tag() }}
                             <div class="field">
                                 {{ edit_wechat_form.wechat.label() }}
@@ -404,7 +404,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑紧急联系人姓名</div>
                     <div class="content">
-                        <form id="edit-emergency-contact-name" method="POST" class="ui form">
+                        <form id="edit-emergency-contact-name" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_emergency_contact_name_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_emergency_contact_name_form.emergency_contact_name.label() }}
@@ -418,7 +418,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑紧急联系人关系</div>
                     <div class="content">
-                        <form id="edit-emergency-contact-relationship" method="POST" class="ui form">
+                        <form id="edit-emergency-contact-relationship" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_emergency_contact_relationship_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_emergency_contact_relationship_form.emergency_contact_relationship.label() }}
@@ -432,7 +432,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑紧急联系人移动电话</div>
                     <div class="content">
-                        <form id="edit-emergency-contact-mobile" method="POST" class="ui form">
+                        <form id="edit-emergency-contact-mobile" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_emergency_contact_mobile_form.hidden_tag() }}
                             <div class="required field">
                                 {{ edit_emergency_contact_mobile_form.emergency_contact_mobile.label() }}
@@ -458,7 +458,7 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <form id="new-education-record" method="POST" class="ui mini form">
+                <form id="new-education-record" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ new_education_record_form.hidden_tag() }}
                     <div class="fields">
                         <div class="two wide field">
@@ -500,7 +500,7 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <form id="new-employment-record" method="POST" class="ui mini form">
+                <form id="new-employment-record" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ new_employment_record_form.hidden_tag() }}
                     <div class="fields">
                         <div class="eight wide field">
@@ -533,7 +533,7 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <form id="new-score-record" method="POST" class="ui mini form">
+                <form id="new-score-record" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ new_score_record_form.hidden_tag() }}
                     <div class="fields">
                         <div class="three wide field">
@@ -566,7 +566,7 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                <form id="new-toefl-test-score" method="POST" class="ui mini form">
+                <form id="new-toefl-test-score" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ new_toefl_test_score_form.hidden_tag() }}
                     <div class="fields">
                         <div class="three wide field">
@@ -644,7 +644,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑研修目的</div>
                     <div class="content">
-                        <form id="edit-purpose" method="POST" class="ui form">
+                        <form id="edit-purpose" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_purpose_form.hidden_tag() }}
                             <div class="field">
                                 {{ edit_purpose_form.purposes.label() }}
@@ -662,7 +662,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑申请方向</div>
                     <div class="content">
-                        <form id="edit-application-aim" method="POST" class="ui form">
+                        <form id="edit-application-aim" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_application_aim_form.hidden_tag() }}
                             <div class="field">
                                 {{ edit_application_aim_form.application_aim.label() }}
@@ -676,7 +676,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑了解渠道</div>
                     <div class="content">
-                        <form id="edit-referrer" method="POST" class="ui form">
+                        <form id="edit-referrer" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ edit_referrer_form.hidden_tag() }}
                             <div class="field">
                                 {{ edit_referrer_form.referrers.label() }}
@@ -709,7 +709,7 @@
                             {% endfor %}
                         </div>
                         {% endif %}
-                        <form id="new-inviter" method="POST" class="ui form">
+                        <form id="new-inviter" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ new_inviter_form.hidden_tag() }}
                             <div class="fields">
                                 <div class="twelve wide required field">
@@ -747,7 +747,7 @@
                             {% endfor %}
                         </div>
                         {% endif %}
-                        <form id="new-purchase" method="POST" class="ui form">
+                        <form id="new-purchase" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
                             {{ new_purchase_form.hidden_tag() }}
                             <div class="fields">
                                 <div class="twelve wide required field">
@@ -764,7 +764,7 @@
                     </div>
                 </div>
                 <h4 class="ui blue dividing header">其它信息</h4>
-                <form id="edit-worked-in-same-field" method="POST" class="ui mini form">
+                <form id="edit-worked-in-same-field" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ edit_worked_in_same_field_form.hidden_tag() }}
                     <div class="fields">
                         <div class="fifteen wide field">
@@ -778,7 +778,7 @@
                         </div>
                     </div>
                 </form>
-                <form id="edit-deformity" method="POST" class="ui mini form">
+                <form id="edit-deformity" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ edit_deformity_form.hidden_tag() }}
                     <div class="fields">
                         <div class="fifteen wide field">

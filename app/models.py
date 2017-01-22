@@ -3043,7 +3043,7 @@ class Lesson(db.Model):
             (u'L7', u'VB', 10, 6, False, [u'L6'], ),
             (u'L8', u'VB', 10, 5, False, [u'L7'], ),
             (u'L9', u'VB', 10, 4, False, [u'L8'], ),
-            (u'L10', u'VB', 10, -1, False, [u'L9'], ),
+            (u'L10', u'VB', 10, -2, False, [u'L9'], ),
             (u'L11', u'VB', 10, -1, True, [u'L9'], ),
             (u'L12', u'VB', 10, -1, True, [u'L11'], ),
             (u'L13', u'VB', 10, -1, True, [u'L12'], ),

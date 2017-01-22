@@ -121,7 +121,7 @@
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
                             <div class="item">原先进度：{{ user.last_punch.section.alias2 }}</div>
                         </div>
-                        <form id="punch-section" method="POST" class="ui form">
+                        <form id="punch-section" action="{{ url_for('manage.edit_punch_step_2', user_id=user.id, lesson_id=lesson.id) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.section.label() }}

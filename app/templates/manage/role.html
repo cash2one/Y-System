@@ -99,7 +99,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建角色</div>
                     <div class="content">
-                        <form id="new-role" method="POST" class="ui form">
+                        <form id="new-role" action="{{ url_for('manage.role') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.name.label() }}

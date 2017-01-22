@@ -117,7 +117,7 @@
                         </div>
                     </div>
                     <div class="column">
-                        <form id="booking-code" method="POST" class="ui form">
+                        <form id="booking-code" action="{{ url_for('manage.rental_rent_step_1') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.booking_code.label() }}

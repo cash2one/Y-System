@@ -106,7 +106,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建VB考试记录</div>
                     <div class="content">
-                        <form id="new-vb-score" method="POST" class="ui form">
+                        <form id="new-vb-score" action="{{ url_for('manage.test') }}" method="POST" class="ui form">
                             {{ vb_form.hidden_tag() }}
                             <div class="required field">
                                 {{ vb_form.email.label() }}
@@ -141,7 +141,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建Y-GRE考试记录</div>
                     <div class="content">
-                        <form id="new-y-gre-score" method="POST" class="ui form">
+                        <form id="new-y-gre-score" action="{{ url_for('manage.test') }}" method="POST" class="ui form">
                             {{ y_gre_form.hidden_tag() }}
                             <div class="required field">
                                 {{ y_gre_form.email.label() }}
@@ -184,7 +184,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建TOEFL考试记录</div>
                     <div class="content">
-                        <form id="new-toefl-score" method="POST" class="ui form">
+                        <form id="new-toefl-score" action="{{ url_for('manage.test') }}" method="POST" class="ui form">
                             {{ toefl_form.hidden_tag() }}
                             <div class="required field">
                                 {{ toefl_form.email.label() }}

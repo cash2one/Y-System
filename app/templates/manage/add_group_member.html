@@ -94,7 +94,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="add user icon"></i>添加成员：{{ organizer.name_alias }}所发起的团报</h3>
-                <form id="add-group-member" method="POST" class="ui form">
+                <form id="add-group-member" action="{{ url_for('manage.add_group_member', id=organizer.id) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="required field">
                         {{ form.member_email.label() }}
