@@ -133,7 +133,7 @@
                             <div class="item">{{ rental.user.name }}（{{ rental.user.email }}）</div>
                             <div class="item">原先进度：{{ rental.user.last_punch.section.alias2 }}</div>
                         </div>
-                        <form id="punch-section" action="{{ url_for('manage.rental_exchange_step_2') }}" method="POST" class="ui form">
+                        <form id="punch-section" action="{{ url_for('manage.rental_exchange_step_2', rental_id=rental.id) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.section.label() }}

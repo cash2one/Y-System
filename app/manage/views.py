@@ -1151,7 +1151,7 @@ def edit_punch_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        return redirect(request.args.get('next') or url_for('manage.find_user'))
+        return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
 
 

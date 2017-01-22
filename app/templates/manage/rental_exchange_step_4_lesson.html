@@ -127,7 +127,7 @@
                             <div class="item">{{ rental.user.name }}（{{ rental.user.email }}）</div>
                             <div class="item">进度：{{ rental.user.last_punch.section.alias2 }}</div>
                         </div>
-                        <form id="select-lesson" action="{{ url_for('manage.rental_exchange_step_4_lesson') }}" method="POST" class="ui form">
+                        <form id="select-lesson" action="{{ url_for('manage.rental_exchange_step_4_lesson', rental_id=rental.id) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.lesson.label() }}

@@ -128,7 +128,7 @@
                             <div class="item">进度：{{ rental.user.last_punch.section.alias2 }}</div>
                             <div class="item">已选课程：{{ lesson.alias }}</div>
                         </div>
-                        <form id="select-ipad" action="{{ url_for('manage.rental_exchange_step_5_lesson') }}" method="POST" class="ui form">
+                        <form id="select-ipad" action="{{ url_for('manage.rental_exchange_step_5_lesson', rental_id=rental.id, lesson_id=lesson.id) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.ipad.label() }}

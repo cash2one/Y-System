@@ -123,7 +123,7 @@
                         </div>
                     </div>
                     <div class="column">
-                        <form id="confirm-ipad" action="{{ url_for('manage.rental_rent_step_4_lesson_alt') }}" method="POST" class="ui form">
+                        <form id="confirm-ipad" action="{{ url_for('manage.rental_rent_step_4_lesson_alt', user_id=user.id, lesson_id=lesson.id, ipad_id=ipad.id) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="ten wide required field">

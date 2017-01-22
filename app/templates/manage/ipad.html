@@ -155,11 +155,12 @@
                 {% endif %}
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_ipad_all %}active {% endif %}loading-trigger" href="{{ url_for('manage.all_ipads') }}">全部</a>
-                    <a class="item {% if show_ipad_maintain %}active {% endif %}loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">维护{% if maintain_num %}<div class="ui red empty circular label"></div>{% endif %}</a>
-                    <a class="item {% if show_ipad_charge %}active {% endif %}loading-trigger" href="{{ url_for('manage.charge_ipads') }}">充电{% if charge_num %}<div class="ui green empty circular label"></div>{% endif %}</a>
+                    <a class="item {% if show_ipad_maintain %}active {% endif %}loading-trigger" href="{{ url_for('manage.maintain_ipads') }}">维护{% if maintain_num %} [{{ maintain_num }}]{% endif %}</a>
+                    <a class="item {% if show_ipad_charge %}active {% endif %}loading-trigger" href="{{ url_for('manage.charge_ipads') }}">充电{% if charge_num %} [{{ charge_num }}]{% endif %}</a>
                     <a class="item {% if show_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1103_ipads') }}">1103</a>
                     <a class="item {% if show_ipad_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.room_1707_ipads') }}">1707</a>
                     <a class="item {% if show_ipad_others %}active {% endif %}loading-trigger" href="{{ url_for('manage.other_ipads') }}">其它</a>
+                    {% if request.args.get('next') %}<a class="item loading-trigger" href="{{ request.args.get('next') }}">返回</a>{% endif %}
                 </div>
                 <form id="search-ipad" action="{{ url_for('manage.ipad') }}" action="{{ url_for('manage.ipad') }}" method="POST" class="ui small form">
                     {{ search_form.hidden_tag() }}

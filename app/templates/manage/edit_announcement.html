@@ -94,7 +94,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="edit-announcement" action="{{ url_for('manage.edit_announcement') }}" method="POST" class="ui form">
+                <form id="edit-announcement" action="{{ url_for('manage.edit_announcement', id=announcement.id) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="twelve wide required field">
