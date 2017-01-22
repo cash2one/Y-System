@@ -144,7 +144,7 @@
                             </td>
                             {% if current_user.can('管理用户') %}
                             <td>
-                                {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
+                                {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
                                 <div class="ui mini buttons">
                                     <a class="ui icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.course_user', id=course.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     <div id="delete-trigger-{{ user.id }}" class="ui negative icon button"><i class="remove user icon"></i></div>
