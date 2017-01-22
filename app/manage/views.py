@@ -1977,7 +1977,6 @@ def user():
     if search_form.validate_on_submit():
         keyword = search_form.keyword.data
         return redirect(url_for('manage.search_user_results', keyword=keyword))
-    search_form.keyword.data = request.args.get('keyword')
     # tabs
     show_activated_users = True
     show_unactivated_users = False
@@ -2162,6 +2161,7 @@ def user():
                 ))\
                 .order_by(User.last_seen_at.desc())\
                 .limit(current_app.config['RECORD_PER_QUERY'])
+            search_form.keyword.data = keyword
         else:
             return redirect(url_for('manage.activated_users'))
         users = [user for user in users if not user.is_superior_than(user=current_user._get_current_object())]
@@ -3534,11 +3534,10 @@ def ipad():
         iPadContentJSON.insert_ipad(ipad=ipad)
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
-    search_form = SearchForm(prefix='search')
-    if search_form.validate_on_submit():
-        keyword = search_form.keyword.data
-        return redirect(url_for('manage.search_ipad_results', keyword=keyword))
-    search_form.keyword.data = request.args.get('keyword')
+    search_form = FilteriPadForm(prefix='search')
+    if search_form.submit.data and search_form.validate_on_submit():
+        lesson_ids = search_form.vb_lessons.data + search_form.y_gre_lessons.data
+        return redirect(url_for('manage.search_ipad_results', keyword=u'_'.join(lesson_ids)))
     show_ipad_all = True
     show_ipad_maintain = False
     show_ipad_charge = False
@@ -3608,17 +3607,20 @@ def ipad():
         .count()
     if show_ipad_search:
         ipads = []
-        ipad_ids = []
+        vb_lesson_ids = []
+        y_gre_lesson_ids = []
         keyword = request.args.get('keyword')
-        if not keyword:
+        if keyword:
+            vb_lesson_ids = [unicode(lesson_id) for lesson_id in keyword.split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'VB']
+            y_gre_lesson_ids = [unicode(lesson_id) for lesson_id in keyword.split('_') if Lesson.query.get(lesson_id) is not None and Lesson.query.get(int(lesson_id)).type.name == u'Y-GRE']
+            search_form.vb_lessons.data = vb_lesson_ids
+            search_form.y_gre_lessons.data = y_gre_lesson_ids
+        lesson_ids = vb_lesson_ids + y_gre_lesson_ids
+        if len(lesson_ids):
+            ipad_ids = reduce(lambda x, y: x & y, [set([query.ipad_id for query in iPadContent.query.filter_by(lesson_id=int(lesson_id)).all()]) for lesson_id in lesson_ids])
+            ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if ipad is not None and not ipad.deleted]
+        else:
             return redirect(url_for('manage.all_ipads'))
-        for lesson_keyword in keyword.strip().split(u' '):
-            for lesson in Lesson.query.filter(Lesson.priority >= 0).filter(Lesson.name.ilike('%' + lesson_keyword.strip() + '%')).all():
-                for ipad_content in iPadContent.query.filter_by(lesson_id=lesson.id).all():
-                    if ipad_content.ipad_id not in ipad_ids:
-                        ipad_ids.append(ipad_content.ipad_id)
-        ipad_ids.sort()
-        ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if ipad is not None and not ipad.deleted]
         search_results_num = len(ipads)
         pagination = False
     if not show_ipad_search:
