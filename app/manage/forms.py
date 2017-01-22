@@ -41,7 +41,7 @@ def NextHalfHourString(halfHours, startHour=6):
 
 
 class SearchForm(FlaskForm):
-    keyword = StringField(u'关键字', validators=[Required(), Length(1, 64)])
+    keyword = StringField(u'关键字')
     submit = SubmitField(u'搜索')
 
 

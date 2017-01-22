@@ -165,7 +165,7 @@
                             {{ search_form.hidden_tag() }}
                             <div class="field">
                                 <div class="ui search">
-                                    <div class="ui transparent icon input">
+                                    <div class="ui transparent left icon input">
                                         {{ search_form.keyword(placeholder='输入课程查询iPad', class='prompt') }}
                                         <i class="search icon"></i>
                                     </div>
@@ -199,8 +199,8 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.search_ipad_results', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
-                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.search_ipad_results', keyword=lesson.id) }}" data-content="筛选含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.search_ipad_results', keyword=lesson.name) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.search_ipad_results', keyword=lesson.name) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
                             <td>
                                 {% if ipad.state.name == '借出' %}
                                 <div class="ui orange mini button" style="cursor: not-allowed;">
@@ -394,5 +394,11 @@ $(document)
     })
 ;
 {% endif %}
+
+$(document)
+    .ready(function() {
+        $('#search-ipad').form({ onSuccess: submitForm });
+    })
+;
 </script>
 {% endblock %}

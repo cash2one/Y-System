@@ -3608,12 +3608,17 @@ def ipad():
         .count()
     if show_ipad_search:
         ipads = []
+        ipad_ids = []
         keyword = request.args.get('keyword')
-        if keyword:
-            pass
-            # ipads = iPad.query
-        else:
+        if not keyword:
             return redirect(url_for('manage.all_ipads'))
+        for lesson_keyword in keyword.strip().split(u' '):
+            for lesson in Lesson.query.filter(Lesson.priority >= 0).filter(Lesson.name.ilike('%' + lesson_keyword.strip() + '%')).all():
+                for ipad_content in iPadContent.query.filter_by(lesson_id=lesson.id).all():
+                    if ipad_content.ipad_id not in ipad_ids:
+                        ipad_ids.append(ipad_content.ipad_id)
+        ipad_ids.sort()
+        ipads = [ipad for ipad in [iPad.query.get(ipad_id) for ipad_id in ipad_ids] if ipad is not None and not ipad.deleted]
         search_results_num = len(ipads)
         pagination = False
     if not show_ipad_search:
