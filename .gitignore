@@ -49,8 +49,16 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff
+# Django stuff:
 *.log
+local_settings.py
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -58,11 +66,27 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+# IPython Notebook
 .ipynb_checkpoints
 
-# Virtual environment
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# dotenv
+.env
+
+# virtualenv
 venv/
+ENV/
+
+# Spyder project settings
+.spyderproject
+
+# Rope project settings
+.ropeproject
 
 # SQLite database
 *.sqlite
@@ -75,17 +99,14 @@ uwsgi-conf.ini
 # Supervisor log
 uwsgi.log
 
-# Environment variable
-.env
-
 # macOS
 .DS_Store
 
 # Windows
 Thumbs.db
 
-# Initial data files
-*initial-*.xlsx
-
 # Analytics
 _analytics.html
+
+# Initial data files
+*initial-*.xlsx
