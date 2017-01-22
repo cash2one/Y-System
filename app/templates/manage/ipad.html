@@ -106,7 +106,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建iPad</div>
                     <div class="content">
-                        <form id="new-ipad" action="{{ url_for('manage.ipad') }}" action="{{ url_for('manage.ipad') }}" method="POST" class="ui form">
+                        <form id="new-ipad" action="{{ url_for('manage.ipad') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="eight wide required field">
@@ -164,7 +164,7 @@
                     {% if request.args.get('next') %}<a class="item loading-trigger" href="{{ request.args.get('next') }}">返回</a>{% endif %}
                 </div>
                 {% if show_ipad_filter %}
-                <form id="filter-ipad" action="{{ url_for('manage.ipad') }}" action="{{ url_for('manage.ipad') }}" method="POST" class="ui form">
+                <form id="filter-ipad" action="{{ url_for('manage.ipad') }}" method="POST" class="ui form">
                     {{ filter_form.hidden_tag() }}
                     <div class="fields" style="margin: 0;">
                         <div class="seven wide field">
@@ -175,7 +175,7 @@
                         </div>
                         <div class="two wide field">
                             {{ filter_form.submit(class='ui primary button') }}
-                            <a class="ui icon button loading-trigger" href="{{ url_for('manage.all_ipads') }}"><i class="undo icon"></i></a>
+                            <a class="ui icon button loading-trigger" href="{{ url_for('manage.filter_ipad_results') }}"><i class="undo icon"></i></a>
                         </div>
                     </div>
                 </form>
