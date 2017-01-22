@@ -99,7 +99,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建预约时段</div>
                     <div class="content">
-                        <form id="new-schedule" method="POST" class="ui form">
+                        <form id="new-schedule" action="{{ url_for('manage.schedule') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="four wide required field">

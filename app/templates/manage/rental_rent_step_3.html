@@ -117,7 +117,7 @@
                         </div>
                     </div>
                     <div class="column">
-                        <form id="confirm-ipad" method="POST" class="ui form">
+                        <form id="confirm-ipad" action="{{ url_for('manage.rental_rent_step_3') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="ten wide required field">

@@ -97,7 +97,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建通知</div>
                     <div class="content">
-                        <form id="new-announcement" method="POST" class="ui form">
+                        <form id="new-announcement" action="{{ url_for('manage.announcement') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="twelve wide required field">

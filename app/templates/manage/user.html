@@ -113,7 +113,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add user icon"></i>新建管理用户</div>
                     <div class="content">
-                        <form id="create-admin" method="POST" class="ui form">
+                        <form id="create-admin" action="{{ url_for('manage.user') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="eight wide required field">
@@ -178,7 +178,7 @@
                     <a class="item {% if show_developers %}active {% endif %}loading-trigger" href="{{ url_for('manage.developers') }}">开发人员</a>
                     {% endif %}
                     <div class="item">
-                        <form id="search-user" method="POST" class="ui form">
+                        <form id="search-user" action="{{ url_for('manage.user') }}" method="POST" class="ui form">
                             {{ search_form.hidden_tag() }}
                             <div class="field">
                                 <div class="ui search">

@@ -122,7 +122,7 @@
                             <div class="item">原先进度：{{ user.last_punch.section.alias2 }}</div>
                             <div class="item">更新进度：{{ section.alias2 }}</div>
                         </div>
-                        <form id="confirm-punch" method="POST" class="ui form">
+                        <form id="confirm-punch" action="{{ url_for('manage.edit_punch_step_3') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <a class="ui button loading-trigger" href="{{ url_for('manage.edit_punch_step_2', user_id=user.id, lesson_id=section.lesson.id, next=request.args.get('next')) }}">上一步</a>
                             {{ form.submit(class='ui primary button') }}

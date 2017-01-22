@@ -93,7 +93,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="edit-product" method="POST" class="ui form">
+                <form id="edit-product" action="{{ url_for('manage.edit_product') }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="eight wide required field">

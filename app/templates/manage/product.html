@@ -99,7 +99,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建产品</div>
                     <div class="content">
-                        <form id="new-product" method="POST" class="ui form">
+                        <form id="new-product" action="{{ url_for('manage.product') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="fields">
                                 <div class="eight wide required field">

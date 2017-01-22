@@ -99,7 +99,7 @@
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建权限</div>
                     <div class="content">
-                        <form id="new-permission" method="POST" class="ui form">
+                        <form id="new-permission" action="{{ url_for('manage.permission') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.name.label() }}
