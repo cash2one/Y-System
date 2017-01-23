@@ -29,7 +29,7 @@ def server_shutdown():
     return 'Shutting down...'
 
 
-@main.route('/', methods=['GET', 'POST'])
+@main.route('/')
 def index():
     if current_user.is_authenticated:
         if current_user.can(u'管理'):
