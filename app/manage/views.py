@@ -4285,8 +4285,7 @@ def delete_permission(id):
 @login_required
 @permission_required(u'管理')
 def analytics():
-    analytics_token = current_app.config['ANALYTICS_TOKEN']
-    return render_template('manage/analytics.html', analytics_token=analytics_token)
+    return render_template('manage/analytics.html', analytics_token=current_app.config['ANALYTICS_TOKEN'])
 
 
 @manage.route('/suggest/user/')
