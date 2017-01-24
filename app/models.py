@@ -23,7 +23,7 @@ class Version:
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
     CountUp = '1.8.1'
-    ECharts = '3.3.1'
+    ECharts = '3.4.0'
 
 
 class RolePermission(db.Model):
