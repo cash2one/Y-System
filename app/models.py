@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from os import urandom
 from datetime import datetime, date, time, timedelta
+from random import choice
+from string import ascii_letters, digits
+from hashlib import sha512
 from sqlalchemy import or_
-from base64 import urlsafe_b64encode
-import hashlib
 import json
 from bs4 import BeautifulSoup
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -17,13 +17,13 @@ from .email import send_emails
 
 
 class Version:
-    System = 'v1.0.0-dev'
+    Application = 'v1.0.0-dev'
     jQuery = '3.1.1'
     SemanticUI = '2.2.7'
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
     CountUp = '1.8.1'
-    ECharts = '3.3.1'
+    ECharts = '3.4.0'
 
 
 class RolePermission(db.Model):
@@ -435,8 +435,9 @@ class Booking(db.Model):
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
-        booking_hash = generate_password_hash(str(datetime.utcnow()))
-        self.booking_code = urlsafe_b64encode(booking_hash[-40:] + urandom(56))
+        nonce_str = ''.join(choice(ascii_letters + digits) for _ in range(24))
+        string = 'user_id=%s&schedule_id=%s&timestamp=%s&nonce_str=%s' % (self.user_id, self.schedule_id, self.timestamp, nonce_str)
+        self.booking_code = sha512(string).hexdigest()
 
     def ping(self):
         self.timestamp = datetime.utcnow()

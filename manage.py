@@ -65,9 +65,6 @@ def deploy():
     from app.models import Test
     from app.models import AnnouncementType
 
-    # migrate database to latest revision
-    upgrade()
-
     # insert initial data
     Permission.insert_permissions()
     Role.insert_roles()

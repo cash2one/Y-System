@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = os.getenv('SECRET_KEY')
     SSL_DISABLE = False
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_RECORD_QUERIES = True
@@ -13,15 +13,15 @@ class Config:
     MAIL_SERVER = 'smtp.exmail.qq.com'
     MAIL_PORT = 465
     MAIL_USE_SSL = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_MAX_EMAILS = 500
-    YSYS_MAIL_SUBJECT_PREFIX = os.environ.get('YSYS_MAIL_SUBJECT_PREFIX')
-    YSYS_MAIL_SENDER = os.environ.get('YSYS_MAIL_SENDER')
-    YSYS_ADMIN = unicode(os.environ.get('YSYS_ADMIN'))
-    YSYS_ADMIN_PASSWORD = os.environ.get('YSYS_ADMIN_PASSWORD')
-    ANALYTICS_TOKEN = os.environ.get('ANALYTICS_TOKEN')
+    YSYS_MAIL_SUBJECT_PREFIX = os.getenv('YSYS_MAIL_SUBJECT_PREFIX')
+    YSYS_MAIL_SENDER = os.getenv('YSYS_MAIL_SENDER')
     YSYS_SLOW_DB_QUERY_TIME = 0.5
+    YSYS_ADMIN = unicode(os.getenv('YSYS_ADMIN'))
+    YSYS_ADMIN_PASSWORD = os.getenv('YSYS_ADMIN_PASSWORD')
+    ANALYTICS_TOKEN = os.getenv('ANALYTICS_TOKEN')
     UTC_OFFSET = 8
     RECORD_PER_PAGE = 20
     RECORD_PER_QUERY = 50
@@ -35,12 +35,12 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'ysys-dev.sqlite')
 
 
 class BetaConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'ysys-beta.sqlite')
 
     @classmethod
@@ -67,7 +67,7 @@ class BetaConfig(Config):
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'ysys_prod.sqlite')
 
     @classmethod
