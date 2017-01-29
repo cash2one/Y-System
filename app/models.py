@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
@@ -24,6 +25,11 @@ class Version:
     MomentJS = '2.17.1'
     CountUp = '1.8.1'
     ECharts = '3.4.0'
+
+
+class Analytics:
+    PiwikSiteID = os.getenv('PIWIK_SITE_ID')
+    GATrackID = os.getenv('GA_TRACK_ID')
 
 
 class RolePermission(db.Model):
@@ -1876,7 +1882,7 @@ class User(UserMixin, db.Model):
                 email=current_app.config['YSYS_ADMIN'],
                 confirmed=True,
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
-                password=current_app.config['YSYS_ADMIN_PASSWORD'],
+                password=os.getenv('YSYS_ADMIN_PASSWORD'),
                 activated=True,
                 activated_at=datetime.utcnow(),
                 last_seen_at=datetime.utcnow(),

@@ -238,7 +238,7 @@ var todayActionsCountUp = new CountUp('today-actions-stat', 0, 0, 0, 2.5, countU
 $.getJSON(analyticsAPIurl, {
     'module': 'API',
     'method': 'VisitsSummary.getUniqueVisitors',
-    'idSite': '1',
+    'idSite': '{{ Analytics.PiwikSiteID }}',
     'period': 'day',
     'date': 'yesterday',
     'format': 'JSON',
@@ -250,7 +250,7 @@ $.getJSON(analyticsAPIurl, {
 $.getJSON(analyticsAPIurl, {
     'module': 'API',
     'method': 'VisitsSummary.getVisits',
-    'idSite': '1',
+    'idSite': '{{ Analytics.PiwikSiteID }}',
     'period': 'day',
     'date': 'yesterday',
     'format': 'JSON',
@@ -262,7 +262,7 @@ $.getJSON(analyticsAPIurl, {
 $.getJSON(analyticsAPIurl, {
     'module': 'API',
     'method': 'VisitsSummary.getActions',
-    'idSite': '1',
+    'idSite': '{{ Analytics.PiwikSiteID }}',
     'period': 'day',
     'date': 'yesterday',
     'format': 'JSON',
@@ -275,7 +275,7 @@ function updateVisit(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getUniqueVisitors',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'day',
         'date': 'today',
         'format': 'JSON',
@@ -289,7 +289,7 @@ function updateVisit(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getVisits',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'day',
         'date': 'today',
         'format': 'JSON',
@@ -303,7 +303,7 @@ function updateVisit(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getActions',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'day',
         'date': 'today',
         'format': 'JSON',
@@ -422,7 +422,7 @@ function updateVisitSummaryChart(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getUniqueVisitors',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'day',
         'date': 'last90',
         'format': 'JSON',
@@ -450,7 +450,7 @@ function updateVisitSummaryChart(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getVisits',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'day',
         'date': 'last90',
         'format': 'JSON',
@@ -473,7 +473,7 @@ function updateVisitSummaryChart(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitsSummary.getActions',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'day',
         'date': 'last90',
         'format': 'JSON',
@@ -622,7 +622,7 @@ function updateVisitHourlyChart(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'VisitTime.getVisitInformationPerServerTime',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'day',
         'date': 'last7',
         'format': 'JSON',
@@ -809,7 +809,7 @@ function updateVisitMapChart(updateProgressBar) {
     $.getJSON(analyticsAPIurl, {
         'module': 'API',
         'method': 'UserCountry.getCountry',
-        'idSite': '1',
+        'idSite': '{{ Analytics.PiwikSiteID }}',
         'period': 'month',
         'date': 'today',
         'format': 'JSON',
