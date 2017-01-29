@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
@@ -24,6 +25,11 @@ class Version:
     MomentJS = '2.17.1'
     CountUp = '1.8.1'
     ECharts = '3.4.0'
+
+
+class Analytics:
+    PiwikSiteID = os.getenv('PIWIK_SITE_ID')
+    GATrackID = os.getenv('GA_TRACK_ID')
 
 
 class RolePermission(db.Model):
@@ -443,10 +449,18 @@ class Booking(db.Model):
         self.timestamp = datetime.utcnow()
         db.session.add(self)
 
+    def update_booking_code(self):
+        nonce_str = ''.join(choice(ascii_letters + digits) for _ in range(24))
+        string = 'user_id=%s&schedule_id=%s&timestamp=%s&nonce_str=%s' % (self.user_id, self.schedule_id, self.timestamp, nonce_str)
+        self.booking_code = sha512(string).hexdigest()
+        db.session.add(self)
+
     def set_state(self, state_name):
         self.state_id = BookingState.query.filter_by(name=state_name).first().id
         self.ping()
         db.session.add(self)
+        if state_name == u'预约':
+            self.update_booking_code()
         if state_name == u'取消' and self.schedule.unstarted:
             waited_booking = Booking.query\
                 .join(BookingState, BookingState.id == Booking.state_id)\
@@ -1876,7 +1890,7 @@ class User(UserMixin, db.Model):
                 email=current_app.config['YSYS_ADMIN'],
                 confirmed=True,
                 role_id=Role.query.filter_by(name=u'开发人员').first().id,
-                password=current_app.config['YSYS_ADMIN_PASSWORD'],
+                password=os.getenv('YSYS_ADMIN_PASSWORD'),
                 activated=True,
                 activated_at=datetime.utcnow(),
                 last_seen_at=datetime.utcnow(),

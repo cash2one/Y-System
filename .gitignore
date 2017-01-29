@@ -105,8 +105,5 @@ uwsgi.log
 # Windows
 Thumbs.db
 
-# Analytics
-_analytics.html
-
 # Initial data files
 *initial-*.xlsx
