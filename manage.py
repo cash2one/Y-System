@@ -39,7 +39,6 @@ manager.add_command('db', MigrateCommand)
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
-
     from app.models import Permission
     from app.models import Role
     from app.models import Gender
@@ -69,6 +68,9 @@ def deploy():
     from app.models import Assignment
     from app.models import Test
     from app.models import AnnouncementType
+
+    # migrate database to latest revision
+    upgrade()
 
     # insert initial data
     Permission.insert_permissions()
