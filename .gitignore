@@ -75,6 +75,10 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
+# celery log files
+celery-beat.log
+celery-worker.log
+
 # dotenv
 .env
 
