@@ -6,12 +6,16 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_qrcode import QRcode
-from config import config
+from celery import Celery
+from config import config, Config
+
 
 mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
 qr = QRcode()
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
+
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -29,6 +33,7 @@ def create_app(config_name):
     db.init_app(app)
     qr.init_app(app)
     login_manager.init_app(app)
+    celery.conf.update(app.config)
 
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         from flask_sslify import SSLify
