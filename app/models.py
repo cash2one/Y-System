@@ -1625,6 +1625,15 @@ class User(UserMixin, db.Model):
             .filter(BookingState.name == u'预约')\
             .first() is not None
 
+    def booking_wait(self, schedule):
+        return BookingState.query\
+            .join(Booking, Booking.state_id == BookingState.id)\
+            .join(Schedule, Schedule.id == Booking.schedule_id)\
+            .filter(Schedule.id == schedule.id)\
+            .filter(Booking.user_id == self.id)\
+            .filter(BookingState.name == u'排队')\
+            .first() is not None
+
     def booking_vb_same_day(self, schedule):
         valid_bookings = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
