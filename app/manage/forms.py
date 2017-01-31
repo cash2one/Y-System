@@ -105,8 +105,8 @@ class EditPunchSectionForm(FlaskForm):
         self.section.choices = [(u'', u'选择视频进度')] + [(unicode(section.id), section.alias2) for section in Section.query.filter_by(lesson_id=lesson.id).order_by(Section.id.asc()).all()]
 
 
-class BookingCodeForm(FlaskForm):
-    booking_code = StringField(u'预约码', validators=[Required()])
+class BookingTokenForm(FlaskForm):
+    token = StringField(u'预约码', validators=[Required()])
     submit = SubmitField(u'下一步')
 
 

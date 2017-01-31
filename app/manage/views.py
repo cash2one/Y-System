@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import manage
 from .forms import SearchForm
-from .forms import BookingCodeForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
+from .forms import BookingTokenForm, RentiPadForm, RentalEmailForm, ConfirmiPadForm, SelectLessonForm, RentiPadByLessonForm, iPadSerialForm
 from .forms import PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
@@ -552,9 +552,9 @@ def rental_history():
 @login_required
 @permission_required(u'管理iPad借阅')
 def rental_rent_step_1():
-    form = BookingCodeForm()
+    form = BookingTokenForm()
     if form.validate_on_submit():
-        booking = Booking.query.filter_by(booking_code=form.booking_code.data).first()
+        booking = Booking.query.filter_by(token=form.token.data).first()
         if not booking:
             flash(u'预约码无效', category='error')
             return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))

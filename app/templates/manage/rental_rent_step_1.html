@@ -120,8 +120,8 @@
                         <form id="booking-code" action="{{ url_for('manage.rental_rent_step_1') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
-                                {{ form.booking_code.label() }}
-                                {{ form.booking_code(placeholder='预约码') }}
+                                {{ form.token.label() }}
+                                {{ form.token(placeholder='预约码') }}
                             </div>
                             {{ form.submit(class='ui primary button') }}
                             <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.rental') }}">取消</a>
@@ -156,8 +156,8 @@ $(document)
                 inline: true,
                 on: 'blur',
                 fields: {
-                    booking_code: {
-                        identifier: 'booking_code',
+                    token: {
+                        identifier: 'token',
                         rules: [
                             {
                                 type: 'empty',

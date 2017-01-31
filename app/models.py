@@ -437,22 +437,23 @@ class Booking(db.Model):
     schedule_id = db.Column(db.Integer, db.ForeignKey('schedules.id'), primary_key=True)
     state_id = db.Column(db.Integer, db.ForeignKey('booking_states.id'))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    booking_code = db.Column(db.String(128), unique=True, index=True)
+    token = db.Column(db.String(128), unique=True, index=True)
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
-        nonce_str = ''.join(choice(ascii_letters + digits) for _ in range(24))
-        string = 'user_id=%s&schedule_id=%s&timestamp=%s&nonce_str=%s' % (self.user_id, self.schedule_id, self.timestamp, nonce_str)
-        self.booking_code = sha512(string).hexdigest()
+        self.token = self.create_token()
 
     def ping(self):
         self.timestamp = datetime.utcnow()
         db.session.add(self)
 
-    def update_booking_code(self):
+    def create_token(self):
         nonce_str = ''.join(choice(ascii_letters + digits) for _ in range(24))
         string = 'user_id=%s&schedule_id=%s&timestamp=%s&nonce_str=%s' % (self.user_id, self.schedule_id, self.timestamp, nonce_str)
-        self.booking_code = sha512(string).hexdigest()
+        return sha512(string).hexdigest()
+
+    def update_token(self):
+        self.token = self.create_token()
         db.session.add(self)
 
     def set_state(self, state_name):
@@ -460,7 +461,7 @@ class Booking(db.Model):
         self.ping()
         db.session.add(self)
         if state_name == u'预约':
-            self.update_booking_code()
+            self.update_token()
         if state_name == u'取消' and self.schedule.unstarted:
             waited_booking = Booking.query\
                 .join(BookingState, BookingState.id == Booking.state_id)\
@@ -555,7 +556,7 @@ class Booking(db.Model):
         booking_json = {
             'user': self.user.to_json(),
             'schedule': self.schedule.to_json(),
-            'code': self.booking_code,
+            'token': self.token,
         }
         return booking_json
 
