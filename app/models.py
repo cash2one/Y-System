@@ -727,6 +727,7 @@ class GREAWScore(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     value = db.Column(db.Float)
     y_gre_test_scores = db.relationship('YGRETestScore', backref='aw_score', lazy='dynamic')
+    gre_test_scores = db.relationship('GRETestScore', backref='aw_score', lazy='dynamic')
 
     @staticmethod
     def insert_gre_aw_scores():
@@ -774,15 +775,63 @@ class YGRETestScore(db.Model):
         return '<Y-GRE Test Score %r>' % self.alias
 
 
-class TOEFLTest(db.Model):
-    __tablename__ = 'toefl_tests'
+class GRETest(db.Model):
+    __tablename__ = 'gre_tests'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Unicode(64), unique=True, index=True)
-    toefl_test_scores = db.relationship('TOEFLTestScore', backref='test', lazy='dynamic')
+    date = db.Column(db.Date)
+    scores = db.relationship('GRETestScore', backref='test', lazy='dynamic')
 
     @property
     def alias(self):
-        return u'TOEFL - %s' % self.name
+        return u'GRE - %s' % self.date
+
+    @property
+    def finished_by_alias(self):
+        return GRETestScore.query\
+            .join(User, User.id == GRETestScore.user_id)\
+            .filter(GRETestScore.test_id == self.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)
+
+    def __repr__(self):
+        return '<GRE Test %r>' % self.date
+
+
+class GRETestScore(db.Model):
+    __tablename__ = 'gre_test_scores'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    test_id = db.Column(db.Integer, db.ForeignKey('gre_tests.id'))
+    v_score = db.Column(db.Integer)
+    q_score = db.Column(db.Integer)
+    aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.date, self.v_score, self.q_score, self.aw_score.name)
+
+    def __repr__(self):
+        return '<GRE Test Score %r>' % self.alias
+
+
+class TOEFLTest(db.Model):
+    __tablename__ = 'toefl_tests'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.Date)
+    scores = db.relationship('TOEFLTestScore', backref='test', lazy='dynamic')
+
+    @property
+    def alias(self):
+        return u'TOEFL - %s' % self.date
 
     @property
     def finished_by_alias(self):
@@ -793,31 +842,8 @@ class TOEFLTest(db.Model):
             .filter(User.activated == True)\
             .filter(User.deleted == False)
 
-    @staticmethod
-    def insert_toefl_tests():
-        toefl_tests = [
-            (u'初始', ),
-            (u'目标', ),
-            (u'第1次', ),
-            (u'第2次', ),
-            (u'第3次', ),
-            (u'第4次', ),
-            (u'第5次', ),
-            (u'第6次', ),
-            (u'第7次', ),
-            (u'第8次', ),
-            (u'第9次', ),
-        ]
-        for TT in toefl_tests:
-            toefl_test = TOEFLTest.query.filter_by(name=TT[0]).first()
-            if toefl_test is None:
-                toefl_test = TOEFLTest(name=TT[0])
-                db.session.add(toefl_test)
-                print u'导入TOEFL考试信息', TT[0]
-        db.session.commit()
-
     def __repr__(self):
-        return '<TOEFL Test %r>' % self.name
+        return '<TOEFL Test %r>' % self.date
 
 
 class TOEFLTestScore(db.Model):
@@ -841,7 +867,7 @@ class TOEFLTestScore(db.Model):
 
     @property
     def alias(self):
-        return u'%s %s %g R%g L%g S%g W%g' % (self.user.name_alias, self.test.name, self.total_score, self.reading_score, self.listening_score, self.speaking_score, self.writing_score)
+        return u'%s %s %g R%g L%g S%g W%g' % (self.user.name_alias, self.test.date, self.total_score, self.reading_score, self.listening_score, self.speaking_score, self.writing_score)
 
     @property
     def alias2(self):
@@ -1081,6 +1107,13 @@ class User(UserMixin, db.Model):
     modified_y_gre_test_scores = db.relationship(
         'YGRETestScore',
         foreign_keys=[YGRETestScore.modified_by_id],
+        backref=db.backref('modified_by', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    modified_gre_test_scores = db.relationship(
+        'GRETestScore',
+        foreign_keys=[GRETestScore.modified_by_id],
         backref=db.backref('modified_by', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -3428,7 +3461,6 @@ class Test(db.Model):
             (u'模考2', u'6th', ),
             (u'PPII-1', u'Y-GRE总论', ),
             (u'PPII-2', u'Y-GRE总论', ),
-            (u'GRE', u'Y-GRE总论', ),
         ]
         for T in tests:
             test = Test.query.filter_by(name=T[0]).first()
