@@ -2501,7 +2501,7 @@ def create_user():
             )
         if form.toefl_total.data:
             user.add_toefl_test_score(
-                test=TOEFLTest.query.filter_by(name=u'初始').first(),
+                test_date=form.toefl_test_date.data,
                 total_score=int(form.toefl_total.data),
                 reading_score=int(form.toefl_reading.data),
                 listening_score=int(form.toefl_listening.data),

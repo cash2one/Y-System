@@ -2,8 +2,8 @@
 
 from datetime import date, time, timedelta
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
-from wtforms.validators import Required, NumberRange, Length, Email
+from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, DateField, SelectField, SelectMultipleField, SubmitField
+from wtforms.validators import Required, NumberRange, Length, Email, Optional
 from wtforms import ValidationError
 from ..models import Permission, Role, User
 from ..models import Relationship, OriginType, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
@@ -335,6 +335,7 @@ class NewUserForm(FlaskForm):
     toefl_listening = StringField(u'Listening', validators=[Length(0, 64)])
     toefl_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
     toefl_writing = StringField(u'Writing', validators=[Length(0, 64)])
+    toefl_test_date = DateField(u'考试日期', validators=[Optional()])
     competition = StringField(u'竞赛成绩', validators=[Length(0, 128)])
     other_score = StringField(u'其它成绩', validators=[Length(0, 128)])
     # registration
