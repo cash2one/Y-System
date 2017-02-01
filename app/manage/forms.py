@@ -10,7 +10,7 @@ from ..models import Relationship, OriginType, PurposeType, ReferrerType, Invita
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
-from ..models import Test, GREAWScore, TOEFLTest
+from ..models import Test, GREAWScore
 from ..models import iPad, iPadCapacity, iPadState, Room
 from ..models import Course, CourseType
 from ..models import Announcement, AnnouncementType
@@ -241,6 +241,31 @@ class EditYGRETestScoreForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditYGRETestScoreForm, self).__init__(*args, **kwargs)
         self.test.choices = [(u'', u'选择Y-GRE考试')] + [(unicode(test.id), test.alias2) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'Y-GRE']
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+
+
+class NewGRETestScoreForm(FlaskForm):
+    email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    test_date = DateField(u'考试日期', validators=[Required()])
+    submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(NewGRETestScoreForm, self).__init__(*args, **kwargs)
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+
+
+class EditGRETestScoreForm(FlaskForm):
+    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    test_date = DateField(u'考试日期', validators=[Required()])
+    submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(EditGRETestScoreForm, self).__init__(*args, **kwargs)
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
 
 
