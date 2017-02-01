@@ -21,6 +21,7 @@ class Version:
     Application = 'v1.0.0-dev'
     jQuery = '3.1.1'
     SemanticUI = '2.2.7'
+    SemanticUICalendar = '0.0.6'
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
     CountUp = '1.8.1'
@@ -778,12 +779,12 @@ class YGRETestScore(db.Model):
 class GRETest(db.Model):
     __tablename__ = 'gre_tests'
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date)
+    date = db.Column(db.Date, unique=True, index=True)
     scores = db.relationship('GRETestScore', backref='test', lazy='dynamic')
 
     @property
     def alias(self):
-        return u'GRE - %s' % self.date
+        return u'GRE %s' % self.date
 
     @property
     def finished_by_alias(self):
@@ -826,12 +827,12 @@ class GRETestScore(db.Model):
 class TOEFLTest(db.Model):
     __tablename__ = 'toefl_tests'
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date)
+    date = db.Column(db.Date, unique=True, index=True)
     scores = db.relationship('TOEFLTestScore', backref='test', lazy='dynamic')
 
     @property
     def alias(self):
-        return u'TOEFL - %s' % self.date
+        return u'TOEFL %s' % self.date
 
     @property
     def finished_by_alias(self):
@@ -1811,7 +1812,12 @@ class User(UserMixin, db.Model):
     def next_punch(self):
         return [section for section in self.last_punch.section.lesson.sections.all() if section.id >= self.last_punch.section_id] + self.last_punch.section.lesson.follow_ups.first().follow_up.sections.all()
 
-    def add_toefl_test_score(self, test, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
+    def add_toefl_test_score(self, test_date, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
+        test = TOEFLTest.query.filter_by(date=test_date).first()
+        if test is None:
+            test = TOEFLTest(date=test_date)
+            db.session.add(test)
+            db.session.commit()
         toefl_test_score = TOEFLTestScore(
             user_id=self.id,
             test_id=test.id,

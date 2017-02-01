@@ -5,6 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.css" />
 <style type="text/css">
 .masthead.segment {
     min-height: 300px;
@@ -145,10 +146,6 @@
                     </div>
                     {% endif %}
                     {% if test_type == 'toefl' %}
-                    <div class="required field">
-                        {{ form.test.label() }}
-                        {{ form.test(class='ui dropdown') }}
-                    </div>
                     <div class="fields">
                         <div class="four wide required field">
                             {{ form.total.label() }}
@@ -171,6 +168,15 @@
                             {{ form.writing(placeholder='TOEFL写作') }}
                         </div>
                     </div>
+                    <div class="required field">
+                        {{ form.test_date.label() }}
+                        <div class="ui date calendar">
+                            <div class="ui input left icon">
+                                <i class="calendar icon"></i>
+                                {{ form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=score.test.id) }}">取消</a>
@@ -184,6 +190,7 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.js"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -193,6 +200,8 @@ $('.message .close')
         ;
     })
 ;
+
+{% if test_type == 'toefl' %}{{ macros.date_js_snippet() }}{% endif %}
 
 $('.ui.checkbox').checkbox();
 
@@ -272,15 +281,6 @@ $(document)
                     }
                     {% endif %}
                     {% if test_type == 'toefl' %}
-                    test: {
-                        identifier: 'test',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试'
-                            }
-                        ]
-                    },
                     total: {
                         identifier: 'total',
                         rules: [
@@ -343,6 +343,19 @@ $(document)
                             {
                                 type: 'integer[0..30]',
                                 prompt: '请填写一个有效的TOEFL写作成绩'
+                            }
+                        ]
+                    },
+                    test_date: {
+                        identifier: 'test_date',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择TOEFL考试日期'
+                            },
+                            {
+                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                prompt: '请填写一个有效的TOEFL考试日期'
                             }
                         ]
                     }
