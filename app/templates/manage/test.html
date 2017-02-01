@@ -432,7 +432,7 @@ $(document)
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选填写考试成绩'
+                                prompt: '请选填写Verbal Reasoning成绩'
                             },
                             {
                                 type: 'integer[130..170]',
@@ -477,7 +477,7 @@ $(document)
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选填写考试成绩'
+                                prompt: '请选填写Verbal Reasoning成绩'
                             },
                             {
                                 type: 'integer[130..170]',
@@ -488,6 +488,10 @@ $(document)
                     q_score: {
                         identifier: 'gre-q_score',
                         rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选填写Quantitative Reasoning成绩'
+                            },
                             {
                                 type: 'integer[130..170]',
                                 prompt: '请填写有效的Quantitative Reasoning成绩'

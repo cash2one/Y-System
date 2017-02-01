@@ -1874,7 +1874,7 @@ def test_score(test_type, id):
                 flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             test = GRETest.query.filter_by(date=form.test_date.data).first()
-            if test in None:
+            if test is None:
                 test = GRETest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
@@ -1909,7 +1909,7 @@ def test_score(test_type, id):
                 flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
-            if test in None:
+            if test is None:
                 test = TOEFLTest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
@@ -2017,7 +2017,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新GRE考试记录：%s' % score.alias, category='success')
-            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+            return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
         form.v_score.data = u'%g' % score.v_score
         form.q_score.data = u'%g' % score.q_score
@@ -2042,7 +2042,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新TOEFL考试记录：%s' % score.alias, category='success')
-            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+            return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
         form.total.data = u'%g' % score.total_score
         form.reading.data = u'%g' % score.reading_score
