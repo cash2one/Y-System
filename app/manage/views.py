@@ -1832,7 +1832,7 @@ def test_score(test_type, id):
             db.session.commit()
             flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
-        form.test.data = unicode(test.id)
+        form.test_date.data = test.date
         query = TOEFLTestScore.query\
             .join(User, User.id == TOEFLTestScore.user_id)\
             .filter(TOEFLTestScore.test_id == test.id)\
@@ -1908,7 +1908,12 @@ def edit_test_score(test_type, id):
         score = TOEFLTestScore.query.get_or_404(id)
         form = EditTOEFLTestScoreForm()
         if form.validate_on_submit():
-            score.test_id = int(form.test.data)
+            test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
+            if test is None:
+                test = TOEFLTest(date=form.test_date.data)
+                db.session.add(test)
+                db.session.commit()
+            score.test_id = test.id
             score.total_score = int(form.total.data)
             score.reading_score = int(form.reading.data)
             score.listening_score = int(form.listening.data)
@@ -1920,7 +1925,7 @@ def edit_test_score(test_type, id):
             db.session.commit()
             flash(u'已更新TOEFL考试记录：%s' % score.alias, category='success')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
-        form.test.data = unicode(score.test_id)
+        form.test_date.data = score.test.date
         form.total.data = u'%g' % score.total_score
         form.reading.data = u'%g' % score.reading_score
         form.listening.data = u'%g' % score.listening_score
