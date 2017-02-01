@@ -12,7 +12,10 @@ from .forms import BookingTokenForm, RentiPadForm, RentalEmailForm, ConfirmiPadF
 from .forms import PunchSectionForm, ConfirmPunchForm, EditPunchLessonForm, EditPunchSectionForm
 from .forms import NewScheduleForm, NewPeriodForm, EditPeriodForm
 from .forms import NewAssignmentScoreForm, EditAssignmentScoreForm
-from .forms import NewVBTestScoreForm, EditVBTestScoreForm, NewYGRETestScoreForm, EditYGRETestScoreForm, NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
+from .forms import NewVBTestScoreForm, EditVBTestScoreForm
+from .forms import NewYGRETestScoreForm, EditYGRETestScoreForm
+from .forms import NewGRETestScoreForm, EditGRETestScoreForm
+from .forms import NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
 from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
@@ -36,7 +39,7 @@ from ..models import Punch
 from ..models import Period, Schedule
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
-from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, TOEFLTest, TOEFLTestScore
+from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
@@ -1645,15 +1648,43 @@ def test():
         db.session.commit()
         flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
         return redirect(url_for('manage.test_score', test_type=u'y_gre', id=int(y_gre_form.test.data)))
+    gre_form = NewGRETestScoreForm(prefix='gre')
+    if gre_form.submit.data and gre_form.validate_on_submit():
+        user = User.query.filter_by(email=gre_form.email.data, created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'用户邮箱不存在：%s' % gre_form.email.data, category='error')
+            return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
+        test = GRETest.query.filter_by(date=gre_form.test_date.data).first()
+        if test is None:
+            test = GRETest(date=gre_form.test_date.data)
+            db.session.add(test)
+            db.session.commit()
+        score = GRETestScore(
+            user_id=user.id,
+            test_id=test.id,
+            v_score=int(gre_form.v_score.data),
+            q_score=int(gre_form.q_score.data),
+            aw_score=int(gre_form.aw_score.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(score)
+        db.session.commit()
+        flash(u'已添加GRE考试记录：%s' % score.alias, category='success')
+        return redirect(url_for('manage.test_score', test_type=u'gre', id=test.id))
     toefl_form = NewTOEFLTestScoreForm(prefix='toefl')
     if toefl_form.submit.data and toefl_form.validate_on_submit():
         user = User.query.filter_by(email=toefl_form.email.data, created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'用户邮箱不存在：%s' % toefl_form.email.data, category='error')
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
+        test = TOEFLTest.query.filter_by(date=toefl_form.test_date.data).first()
+        if test is None:
+            test = TOEFLTest(date=toefl_form.test_date.data)
+            db.session.add(test)
+            db.session.commit()
         score = TOEFLTestScore(
             user_id=user.id,
-            test_date=toefl_form.test_date.data,
+            test_id=test.id,
             total_score=int(toefl_form.total.data),
             reading_score=int(toefl_form.reading.data),
             listening_score=int(toefl_form.listening.data),
@@ -1664,13 +1695,15 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
-        return redirect(url_for('manage.test_score', test_type=u'toefl', id=int(toefl_form.test.data)))
+        return redirect(url_for('manage.test_score', test_type=u'toefl', id=test.id))
     show_vb_tests = True
     show_y_gre_tests = False
+    show_gre_tests = False
     show_toefl_tests = False
     if current_user.is_authenticated:
         show_vb_tests = bool(request.cookies.get('show_vb_tests', '1'))
         show_y_gre_tests = bool(request.cookies.get('show_y_gre_tests', ''))
+        show_gre_tests = bool(request.cookies.get('show_gre_tests', ''))
         show_toefl_tests = bool(request.cookies.get('show_toefl_tests', ''))
     if show_vb_tests:
         test_type = u'vb'
@@ -1686,19 +1719,26 @@ def test():
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(CourseType.name == u'Y-GRE')\
             .order_by(Test.id.asc())
+    if show_gre_tests:
+        test_type = u'gre'
+        query = GRETest.query\
+            .order_by(GRETest.date.desc())
     if show_toefl_tests:
         test_type = u'toefl'
-        query = TOEFLTest.query
+        query = TOEFLTest.query\
+            .order_by(TOEFLTest.date.desc())
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     tests = pagination.items
     return render_template('manage/test.html',
         vb_form=vb_form,
         y_gre_form=y_gre_form,
+        gre_form=gre_form,
         toefl_form=toefl_form,
         tests=tests,
         show_vb_tests=show_vb_tests,
         show_y_gre_tests=show_y_gre_tests,
+        show_gre_tests=show_gre_tests,
         show_toefl_tests=show_toefl_tests,
         test_type=test_type,
         pagination=pagination
@@ -1712,6 +1752,7 @@ def vb_tests():
     resp = make_response(redirect(url_for('manage.test')))
     resp.set_cookie('show_vb_tests', '1', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_gre_tests', '', max_age=30*24*60*60)
     resp.set_cookie('show_toefl_tests', '', max_age=30*24*60*60)
     return resp
 
@@ -1723,6 +1764,19 @@ def y_gre_tests():
     resp = make_response(redirect(url_for('manage.test')))
     resp.set_cookie('show_vb_tests', '', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_tests', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_gre_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_toefl_tests', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/test/gre')
+@login_required
+@permission_required(u'管理考试')
+def gre_tests():
+    resp = make_response(redirect(url_for('manage.test')))
+    resp.set_cookie('show_vb_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_gre_tests', '1', max_age=30*24*60*60)
     resp.set_cookie('show_toefl_tests', '', max_age=30*24*60*60)
     return resp
 
@@ -1734,6 +1788,7 @@ def toefl_tests():
     resp = make_response(redirect(url_for('manage.test')))
     resp.set_cookie('show_vb_tests', '', max_age=30*24*60*60)
     resp.set_cookie('show_y_gre_tests', '', max_age=30*24*60*60)
+    resp.set_cookie('show_gre_tests', '', max_age=30*24*60*60)
     resp.set_cookie('show_toefl_tests', '1', max_age=30*24*60*60)
     return resp
 
@@ -1808,6 +1863,41 @@ def test_score(test_type, id):
             .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .order_by(YGRETestScore.modified_at.desc())
+    if test_type == u'gre':
+        test = GRETest.query.get_or_404(id)
+        if test.finished_by_alias.count() == 0:
+            return redirect(url_for('manage.test'))
+        form = NewGRETestScoreForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            if user is None:
+                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+            test = GRETest.query.filter_by(date=form.test_date.data).first()
+            if test in None:
+                test = GRETest(date=form.test_date.data)
+                db.session.add(test)
+                db.session.commit()
+            score = GRETestScore(
+                user_id=user.id,
+                test_id=test.id,
+                v_score=int(form.v_score.data),
+                q_score=int(form.q_score.data),
+                aw_score_id=int(form.aw_score.data),
+                modified_by_id=current_user.id
+            )
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已添加GRE考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+        form.test_date.data = test.date
+        query = GRETestScore.query\
+            .join(User, User.id == GRETestScore.user_id)\
+            .filter(GRETestScore.test_id == test.id)\
+            .filter(User.created == True)\
+            .filter(User.activated == True)\
+            .filter(User.deleted == False)\
+            .order_by(GRETestScore.modified_at.desc())
     if test_type == u'toefl':
         test = TOEFLTest.query.get_or_404(id)
         if test.finished_by_alias.count() == 0:
@@ -1818,9 +1908,14 @@ def test_score(test_type, id):
             if user is None:
                 flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+            test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
+            if test in None:
+                test = TOEFLTest(date=form.test_date.data)
+                db.session.add(test)
+                db.session.commit()
             score = TOEFLTestScore(
                 user_id=user.id,
-                test_date=form.test_date.data,
+                test_id=test.id,
                 total_score=int(form.total.data),
                 reading_score=int(form.reading.data),
                 listening_score=int(form.listening.data),
@@ -1831,7 +1926,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
-            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+            return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = test.date
         query = TOEFLTestScore.query\
             .join(User, User.id == TOEFLTestScore.user_id)\
@@ -1904,6 +1999,29 @@ def edit_test_score(test_type, id):
         form.q_score.data = u'%g' % score.q_score
         form.aw_score.data = unicode(score.aw_score_id)
         form.retrieved.data = score.retrieved
+    if test_type == u'gre':
+        score = GRETestScore.query.get_or_404(id)
+        form = EditGRETestScoreForm()
+        if form.validate_on_submit():
+            test = GRETest.query.filter_by(date=form.test_date.data).first()
+            if test is None:
+                test = GRETest(date=form.test_date.data)
+                db.session.add(test)
+                db.session.commit()
+            score.test_id = test.id
+            score.v_score = int(form.v_score.data)
+            score.q_score = int(form.q_score.data)
+            score.aw_score_id = int(form.aw_score.data)
+            score.modified_at = datetime.utcnow()
+            score.modified_by_id = current_user.id
+            db.session.add(score)
+            db.session.commit()
+            flash(u'已更新GRE考试记录：%s' % score.alias, category='success')
+            return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
+        form.test_date.data = score.test.date
+        form.v_score.data = u'%g' % score.v_score
+        form.q_score.data = u'%g' % score.q_score
+        form.aw_score.data = unicode(score.aw_score_id)
     if test_type == u'toefl':
         score = TOEFLTestScore.query.get_or_404(id)
         form = EditTOEFLTestScoreForm()
@@ -1946,6 +2064,10 @@ def delete_test_score(test_type, id):
         score = YGRETestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除Y-GRE考试记录：%s' % score.alias, category='success')
+    if test_type == u'gre':
+        score = GRETestScore.query.get_or_404(id)
+        db.session.delete(score)
+        flash(u'已删除TOEFL考试记录：%s' % score.alias, category='success')
     if test_type == u'toefl':
         score = TOEFLTestScore.query.get_or_404(id)
         db.session.delete(score)
