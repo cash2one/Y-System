@@ -277,8 +277,6 @@ $('.message .close')
 
 $('.ui.checkbox').checkbox();
 
-{% if test_type == 'toefl' %}{{ macros.date_js_snippet() }}{% endif %}
-
 $('table').tablesort();
 
 $('td a.score.loading-trigger').popup();
@@ -301,6 +299,7 @@ $('#new-toefl-score-trigger').popup();
 $('#new-toefl-score-trigger')
     .on('click', function() {
         $('#new-toefl-score-modal').modal({ autofocus: false }).modal('show');
+        {{ macros.date_js_snippet() }}
     })
 ;
 
