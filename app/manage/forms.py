@@ -2,15 +2,15 @@
 
 from datetime import date, time, timedelta
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, SelectField, SelectMultipleField, SubmitField
-from wtforms.validators import Required, NumberRange, Length, Email
+from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, DateField, SelectField, SelectMultipleField, SubmitField
+from wtforms.validators import Required, NumberRange, Length, Email, Optional
 from wtforms import ValidationError
 from ..models import Permission, Role, User
 from ..models import Relationship, OriginType, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
-from ..models import Test, GREAWScore, TOEFLTest
+from ..models import Test, GREAWScore
 from ..models import iPad, iPadCapacity, iPadState, Room
 from ..models import Course, CourseType
 from ..models import Announcement, AnnouncementType
@@ -244,33 +244,50 @@ class EditYGRETestScoreForm(FlaskForm):
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
 
 
+class NewGRETestScoreForm(FlaskForm):
+    email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    test_date = DateField(u'考试日期', validators=[Required()])
+    submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(NewGRETestScoreForm, self).__init__(*args, **kwargs)
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+
+
+class EditGRETestScoreForm(FlaskForm):
+    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    test_date = DateField(u'考试日期', validators=[Required()])
+    submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(EditGRETestScoreForm, self).__init__(*args, **kwargs)
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+
+
 class NewTOEFLTestScoreForm(FlaskForm):
     email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    test = SelectField(u'TOEFL考试', coerce=unicode, validators=[Required()])
     total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
     reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
     listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    test_date = DateField(u'考试日期', validators=[Required()])
     submit = SubmitField(u'添加')
-
-    def __init__(self, *args, **kwargs):
-        super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择TOEFL考试')] + [(unicode(toefl_test.id), toefl_test.name) for toefl_test in TOEFLTest.query.order_by(TOEFLTest.id.asc()).all()]
 
 
 class EditTOEFLTestScoreForm(FlaskForm):
-    test = SelectField(u'TOEFL考试', coerce=unicode, validators=[Required()])
     total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
     reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
     listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    test_date = DateField(u'考试日期', validators=[Required()])
     submit = SubmitField(u'添加')
-
-    def __init__(self, *args, **kwargs):
-        super(EditTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择TOEFL考试')] + [(unicode(toefl_test.id), toefl_test.name) for toefl_test in TOEFLTest.query.order_by(TOEFLTest.id.asc()).all()]
 
 
 class NewUserForm(FlaskForm):
@@ -335,6 +352,7 @@ class NewUserForm(FlaskForm):
     toefl_listening = StringField(u'Listening', validators=[Length(0, 64)])
     toefl_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
     toefl_writing = StringField(u'Writing', validators=[Length(0, 64)])
+    toefl_test_date = DateField(u'考试日期', validators=[Optional()])
     competition = StringField(u'竞赛成绩', validators=[Length(0, 128)])
     other_score = StringField(u'其它成绩', validators=[Length(0, 128)])
     # registration

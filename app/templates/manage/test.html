@@ -5,6 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.css" />
 <style type="text/css">
 .masthead.segment {
     min-height: 300px;
@@ -99,6 +100,7 @@
                     <div class="menu">
                         <div id="new-vb-score-trigger" class="item"><i class="blue add circle icon"></i>新建VB考试记录</div>
                         <div id="new-y-gre-score-trigger" class="item"><i class="teal add circle icon"></i>新建Y-GRE考试记录</div>
+                        <div id="new-gre-score-trigger" class="item"><i class="red add circle icon"></i>新建GRE考试记录</div>
                         <div id="new-toefl-score-trigger" class="item"><i class="orange add circle icon"></i>新建TOEFL考试记录</div>
                     </div>
                 </div>
@@ -180,6 +182,46 @@
                         </form>
                     </div>
                 </div>
+                <div id="new-gre-score-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建GRE考试记录</div>
+                    <div class="content">
+                        <form id="new-gre-score" action="{{ url_for('manage.test') }}" method="POST" class="ui form">
+                            {{ gre_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ gre_form.email.label() }}
+                                <div class="ui fluid search">
+                                    {{ gre_form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                            <div class="fields">
+                                <div class="four wide required field">
+                                    {{ gre_form.v_score.label() }}
+                                    {{ gre_form.v_score(placeholder='V成绩') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ gre_form.q_score.label() }}
+                                    {{ gre_form.q_score(placeholder='Q成绩') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ gre_form.aw_score.label() }}
+                                    {{ gre_form.aw_score(class='ui dropdown') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ gre_form.test_date.label() }}
+                                    <div class="ui date calendar">
+                                        <div class="ui input left icon">
+                                            <i class="calendar icon"></i>
+                                            {{ gre_form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ gre_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
                 <div id="new-toefl-score-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建TOEFL考试记录</div>
@@ -192,10 +234,6 @@
                                     {{ toefl_form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
                                     <div class="results"></div>
                                 </div>
-                            </div>
-                            <div class="required field">
-                                {{ toefl_form.test.label() }}
-                                {{ toefl_form.test(class='ui dropdown') }}
                             </div>
                             <div class="fields">
                                 <div class="four wide required field">
@@ -219,6 +257,15 @@
                                     {{ toefl_form.writing(placeholder='TOEFL写作') }}
                                 </div>
                             </div>
+                            <div class="required field">
+                                {{ toefl_form.test_date.label() }}
+                                <div class="ui date calendar">
+                                    <div class="ui input left icon">
+                                        <i class="calendar icon"></i>
+                                        {{ toefl_form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
                             {{ toefl_form.submit(class='ui primary button') }}
                         </form>
                     </div>
@@ -226,12 +273,13 @@
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_vb_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.vb_tests') }}">VB考试</a>
                     <a class="item {% if show_y_gre_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.y_gre_tests') }}">Y-GRE考试</a>
+                    <a class="item {% if show_gre_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.gre_tests') }}">GRE考试</a>
                     <a class="item {% if show_toefl_tests %}active {% endif %}loading-trigger" href="{{ url_for('manage.toefl_tests') }}">TOEFL考试</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
-                            <th>考试名称</th>
+                            <th>考试{% if show_gre_tests or show_toefl_tests %}日期{% else %}名称{% endif %}</th>
                             <th>类型</th>
                             <th>从属课程</th>
                             <th>完成记录</th>
@@ -240,9 +288,9 @@
                     <tbody>
                         {% for test in tests %}
                         <tr>
-                            <td>{{ test.name }}</td>
-                            <td>{% if test_type == 'toefl' %}TOEFL{% else %}{{ test.lesson.type.name }}{% endif %}</td>
-                            <td>{% if test_type == 'toefl' %}N/A{% else %}{{ test.lesson.name }}{% endif %}</td>
+                            <td>{% if show_gre_tests or show_toefl_tests %}{{ test.date }}{% else %}{{ test.name }}{% endif %}</td>
+                            <td>{% if test_type == 'gre' %}GRE{% elif test_type == 'toefl' %}TOEFL{% else %}{{ test.lesson.type.name }}{% endif %}</td>
+                            <td>{% if test_type in ['gre', 'toefl'] %}N/A{% else %}{{ test.lesson.name }}{% endif %}</td>
                             <td>{% if test.finished_by_alias.count() %}<a class="score loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=test.id) }}" data-content="查看{{ test.finished_by_alias.count() }}条考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
                         </tr>
                         {% endfor %}
@@ -257,6 +305,7 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
@@ -288,10 +337,19 @@ $('#new-y-gre-score-trigger')
     })
 ;
 
+$('#new-gre-score-trigger').popup();
+$('#new-gre-score-trigger')
+    .on('click', function() {
+        $('#new-gre-score-modal').modal({ autofocus: false }).modal('show');
+        {{ macros.date_js_snippet() }}
+    })
+;
+
 $('#new-toefl-score-trigger').popup();
 $('#new-toefl-score-trigger')
     .on('click', function() {
         $('#new-toefl-score-modal').modal({ autofocus: false }).modal('show');
+        {{ macros.date_js_snippet() }}
     })
 ;
 
@@ -374,7 +432,7 @@ $(document)
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请选填写考试成绩'
+                                prompt: '请选填写Verbal Reasoning成绩'
                             },
                             {
                                 type: 'integer[130..170]',
@@ -389,6 +447,76 @@ $(document)
                             {
                                 type: 'integer[130..170]',
                                 prompt: '请填写有效的Quantitative Reasoning成绩'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#new-gre-score')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'gre-email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入有效的用户邮箱'
+                            }
+                        ]
+                    },
+                    v_score: {
+                        identifier: 'gre-v_score',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选填写Verbal Reasoning成绩'
+                            },
+                            {
+                                type: 'integer[130..170]',
+                                prompt: '请填写有效的Verbal Reasoning成绩'
+                            }
+                        ]
+                    },
+                    q_score: {
+                        identifier: 'gre-q_score',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选填写Quantitative Reasoning成绩'
+                            },
+                            {
+                                type: 'integer[130..170]',
+                                prompt: '请填写有效的Quantitative Reasoning成绩'
+                            }
+                        ]
+                    },
+                    aw_score: {
+                        identifier: 'gre-aw_score',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Analytical Writing成绩'
+                            }
+                        ]
+                    },
+                    test_date: {
+                        identifier: 'gre-test_date',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择GRE考试日期'
+                            },
+                            {
+                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                prompt: '请填写一个有效的GRE考试日期'
                             }
                         ]
                     }
@@ -418,15 +546,6 @@ $(document)
                             {
                                 type: 'email',
                                 prompt: '请输入有效的用户邮箱'
-                            }
-                        ]
-                    },
-                    test: {
-                        identifier: 'toefl-test',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试'
                             }
                         ]
                     },
@@ -492,6 +611,19 @@ $(document)
                             {
                                 type: 'integer[0..30]',
                                 prompt: '请填写一个有效的TOEFL写作成绩'
+                            }
+                        ]
+                    },
+                    test_date: {
+                        identifier: 'toefl-test_date',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择TOEFL考试日期'
+                            },
+                            {
+                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                prompt: '请填写一个有效的TOEFL考试日期'
                             }
                         ]
                     }

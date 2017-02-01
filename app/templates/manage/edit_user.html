@@ -5,6 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.css" />
 <style type="text/css">
 .masthead.segment {
     min-height: 300px;
@@ -559,7 +560,7 @@
                             <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.edit_user', id=user.id, next=request.args.get('next'))) }}">删除</a>
                         </div>
                         <div class="content">
-                            <div class="header">{{ toefl_test_score.test.name }}成绩</div>
+                            <div class="header">日期：{{ toefl_test_score.test.date }}</div>
                             <div class="description">{{ toefl_test_score.alias2 }}</div>
                         </div>
                     </div>
@@ -569,9 +570,6 @@
                 <form id="new-toefl-test-score" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ new_toefl_test_score_form.hidden_tag() }}
                     <div class="fields">
-                        <div class="three wide field">
-                            {{ new_toefl_test_score_form.test(class='ui dropdown') }}
-                        </div>
                         <div class="four wide field">
                             {{ new_toefl_test_score_form.total(placeholder='TOEFL总分') }}
                         </div>
@@ -586,6 +584,14 @@
                         </div>
                         <div class="two wide field">
                             {{ new_toefl_test_score_form.writing(placeholder='TOEFL写作') }}
+                        </div>
+                        <div class="three wide field">
+                            <div class="ui date calendar">
+                                <div class="ui input left icon">
+                                    <i class="calendar icon"></i>
+                                    {{ new_toefl_test_score_form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                                </div>
+                            </div>
                         </div>
                         <div class="one wide field">
                             {{ new_toefl_test_score_form.submit(class='ui primary mini button') }}
@@ -801,6 +807,7 @@
 
 {% block customized_scripts %}
 {{ super() }}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/IDValidator.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
@@ -814,6 +821,8 @@ $('.message .close')
 ;
 
 $('.ui.checkbox').checkbox();
+
+{{ macros.date_js_snippet() }}
 
 $('#edit-name-trigger')
     .on('click', function() {
@@ -1412,15 +1421,6 @@ $(document)
                 inline: true,
                 on: 'blur',
                 fields: {
-                    test: {
-                        identifier: 'new_toefl_test_score-test',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试'
-                            }
-                        ]
-                    },
                     total: {
                         identifier: 'new_toefl_test_score-total',
                         rules: [
@@ -1483,6 +1483,19 @@ $(document)
                             {
                                 type: 'integer[0..30]',
                                 prompt: '请填写一个有效的TOEFL写作分数'
+                            }
+                        ]
+                    },
+                    test_date: {
+                        identifier: 'new_toefl_test_score-test_date',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择TOEFL考试日期'
+                            },
+                            {
+                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                prompt: '请填写一个有效的TOEFL考试日期'
                             }
                         ]
                     }
