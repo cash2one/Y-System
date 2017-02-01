@@ -1664,7 +1664,7 @@ def test():
             test_id=test.id,
             v_score=int(gre_form.v_score.data),
             q_score=int(gre_form.q_score.data),
-            aw_score=int(gre_form.aw_score.data),
+            aw_score_id=int(gre_form.aw_score.data),
             modified_by_id=current_user.id
         )
         db.session.add(score)

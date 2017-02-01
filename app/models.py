@@ -1050,6 +1050,13 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    gre_test_scores = db.relationship(
+        'GRETestScore',
+        foreign_keys=[GRETestScore.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     toefl_test_scores = db.relationship(
         'TOEFLTestScore',
         foreign_keys=[TOEFLTestScore.user_id],

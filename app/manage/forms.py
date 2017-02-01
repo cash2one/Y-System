@@ -252,6 +252,10 @@ class NewGRETestScoreForm(FlaskForm):
     test_date = DateField(u'考试日期', validators=[Required()])
     submit = SubmitField(u'添加')
 
+    def __init__(self, *args, **kwargs):
+        super(NewGRETestScoreForm, self).__init__(*args, **kwargs)
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+
 
 class EditGRETestScoreForm(FlaskForm):
     v_score = StringField(u'Verbal Reasoning', validators=[Required()])
@@ -259,6 +263,10 @@ class EditGRETestScoreForm(FlaskForm):
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
     submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(EditGRETestScoreForm, self).__init__(*args, **kwargs)
+        self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
 
 
 class NewTOEFLTestScoreForm(FlaskForm):
