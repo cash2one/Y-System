@@ -51,7 +51,6 @@ def deploy():
     from app.models import BookingState
     from app.models import AssignmentScoreGrade
     from app.models import GREAWScore
-    from app.models import TOEFLTest
     from app.models import InvitationType
     from app.models import CourseType
     from app.models import Lesson
@@ -85,7 +84,6 @@ def deploy():
     BookingState.insert_booking_states()
     AssignmentScoreGrade.insert_assignment_score_grades()
     GREAWScore.insert_gre_aw_scores()
-    TOEFLTest.insert_toefl_tests()
     InvitationType.insert_invitation_types()
     CourseType.insert_course_types()
     Lesson.insert_lessons()
