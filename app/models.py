@@ -784,7 +784,7 @@ class GRETest(db.Model):
 
     @property
     def alias(self):
-        return u'GRE - %s' % self.date
+        return u'GRE %s' % self.date
 
     @property
     def finished_by_alias(self):
@@ -832,7 +832,7 @@ class TOEFLTest(db.Model):
 
     @property
     def alias(self):
-        return u'TOEFL - %s' % self.date
+        return u'TOEFL %s' % self.date
 
     @property
     def finished_by_alias(self):
