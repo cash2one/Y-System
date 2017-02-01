@@ -6,6 +6,7 @@ from ..models import User, AnonymousUser
 from . import api
 from .errors import unauthorized, forbidden
 
+
 auth = HTTPBasicAuth()
 
 

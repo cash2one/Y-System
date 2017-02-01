@@ -173,7 +173,7 @@
                                 {% if booking.valid %}
                                 <a id="booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}"><i class="large qrcode icon"></i></a>
                                 <div id="booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}" class="ui flowing popup top left transition hidden">
-                                    <img class="ui small image" src="{{ qrcode(booking.booking_code) }}">
+                                    <img class="ui small image" src="{{ qrcode(booking.token) }}">
                                 </div>
                                 {% endif %}
                             </td>

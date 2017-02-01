@@ -95,6 +95,44 @@
     color: #FFF;
 }
 
+/* text colors inverted */
+.text-red-inverted {
+    color: #FF695E;
+}
+.text-orange-inverted {
+    color: #FF851B;
+}
+.text-yellow-inverted {
+    color: #FFE21F;
+}
+.text-olive-inverted {
+    color: #D9E778;
+}
+.text-green-inverted {
+    color: #2ECC40;
+}
+.text-teal-inverted {
+    color: #6DFFFF;
+}
+.text-blue-inverted {
+    color: #54C8FF;
+}
+.text-violet-inverted {
+    color: #A291FB;
+}
+.text-purple-inverted {
+    color: #DC73FF;
+}
+.text-pink-inverted {
+    color: #FF8EDF;
+}
+.text-brown-inverted {
+    color: #D67C1C;
+}
+.text-grey-inverted {
+    color: #DCDDDE;
+}
+
 /* background colors */
 .background-red {
     background-color: #DB2828;

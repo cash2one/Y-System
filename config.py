@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -16,11 +18,12 @@ class Config:
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_MAX_EMAILS = 500
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+    CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
     YSYS_MAIL_SUBJECT_PREFIX = os.getenv('YSYS_MAIL_SUBJECT_PREFIX')
     YSYS_MAIL_SENDER = os.getenv('YSYS_MAIL_SENDER')
     YSYS_SLOW_DB_QUERY_TIME = 0.5
     YSYS_ADMIN = unicode(os.getenv('YSYS_ADMIN'))
-    YSYS_ADMIN_PASSWORD = os.getenv('YSYS_ADMIN_PASSWORD')
     ANALYTICS_TOKEN = os.getenv('ANALYTICS_TOKEN')
     UTC_OFFSET = 8
     RECORD_PER_PAGE = 20

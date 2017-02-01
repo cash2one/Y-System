@@ -4,6 +4,7 @@
 
 {% block customized_styles %}
 {{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize-masthead-background.css') }}">
 <style type="text/css">
 .masthead.segment {
     min-height: 700px;
@@ -93,7 +94,7 @@
     </h1>
     <h1 class="ui inverted header">云英语</h1>
     <h2>不背单词的GRE工程化解决方案</h2>
-    <a class="ui huge inverted yellow basic button" href="{{ url_for('main.index') }}#products">开始了解 <i class="right arrow icon"></i></a>
+    <a class="ui huge inverted basic button" href="{{ url_for('main.index') }}#products">开始了解 <i class="right arrow icon"></i></a>
 </div>
 {% endblock %}
 
@@ -197,5 +198,8 @@ $('#contacts-button')
         ;
     })
 ;
+
+// masthead background
+$('.ui.inverted.masthead.segment').addClass('bg' + Math.ceil(Math.random() * 14)).removeClass('zoomed');
 </script>
 {% endblock %}

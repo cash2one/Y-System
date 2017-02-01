@@ -2,36 +2,24 @@
 
 from flask import current_app, render_template
 from flask_mail import Message
-from . import mail
-from .decorators import async
+from .tasks import send_async_email, send_async_emails
 
 
-@async
-def send_async_email(app, msg):
-    with app.app_context():
-        mail.send(msg)
-
-
-def send_email(to, subject, template, **kwargs):
+def msg_to_dict(to, subject, template, **kwargs):
     app = current_app._get_current_object()
     msg = Message(
-        app.config['YSYS_MAIL_SUBJECT_PREFIX'] + ' ' + subject,
+        subject=app.config['YSYS_MAIL_SUBJECT_PREFIX'] + ' ' + subject,
         sender=app.config['YSYS_MAIL_SENDER'],
         recipients=[to]
     )
     msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template + '.html', **kwargs)
-    send_async_email(app, msg)
+    return msg.__dict__
+
+
+def send_email(to, subject, template, **kwargs):
+    send_async_email.delay(msg_to_dict(to, subject, template, **kwargs))
 
 
 def send_emails(users, subject, template, **kwargs):
-    for user in users:
-        app = current_app._get_current_object()
-        msg = Message(
-            app.config['YSYS_MAIL_SUBJECT_PREFIX'] + ' ' + subject,
-            sender=app.config['YSYS_MAIL_SENDER'],
-            recipients=[user.email]
-        )
-        msg.body = render_template(template + '.txt', **kwargs)
-        msg.html = render_template(template + '.html', **kwargs)
-        send_async_email(app, msg)
+    send_async_emails.delay([msg_to_dict(to=user.email, subject=subject, template=template, **kwargs) for user in users])

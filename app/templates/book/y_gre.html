@@ -103,66 +103,10 @@
                         {% for schedule in schedules %}
                         <tr>
                             <td>{{ moment(schedule.date).format('YYYY-M-D ddd') }}</td>
-                            <td>
-                                {% if schedule.unstarted %}
-                                <div class="ui teal label">{{ schedule.time_state }}</div>
-                                {% endif %}
-                                {% if schedule.started %}
-                                <div class="ui red label">{{ schedule.time_state }}</div>
-                                {% endif %}
-                                {% if schedule.ended %}
-                                <div class="ui label">{{ schedule.time_state }}</div>
-                                {% endif %}
-                                {{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}
-                            </td>
-                            {% if schedule.full %}
-                            <td class="negative">{{ schedule.occupied_quota }} / {{ schedule.quota }}</td>
-                            {% else %}
-                            <td>{{ schedule.occupied_quota }} / {{ schedule.quota }}</td>
-                            {% endif %}
-                            {% if schedule.unstarted %}
-                            {% if schedule.is_booked_by(current_user) %}
-                            {% if current_user.booking_success(schedule) %}
-                            <td class="positive">
-                                {{ current_user.booking_state(schedule).name }}
-                                <a id="booking-qr-code-click-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}"><i class="large qrcode icon"></i></a>
-                                <div id="booking-qr-code-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}" class="ui flowing popup top left transition hidden">
-                                    <img class="ui small image" src="{{ qrcode(current_user.booking(schedule).booking_code) }}">
-                                </div>
-                            </td>
-                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.unbook_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a></td>
-                            {% else %}
-                            <td class="warning">{{ current_user.booking_state(schedule).name }}</td>
-                            <td><div class="ui disabled mini button"><i class="ban icon"></i>无</div></td>
-                            {% endif %}
-                            {% else %}
-                            {% if schedule.full %}
-                            <td>未预约</td>
-                            <td><a class="ui teal mini button loading-trigger" href="{{ url_for('book.wait_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="wait icon"></i>排队</a></td>
-                            {% else %}
-                            <td>未预约</td>
-                            <td><a class="ui primary mini button loading-trigger" href="{{ url_for('book.book_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="add to calendar icon"></i>预约</a></td>
-                            {% endif %}
-                            {% endif %}
-                            {% endif %}
-                            {% if schedule.started %}
-                            {% if schedule.is_booked_by(current_user) %}
-                            <td>{{ current_user.booking_state(schedule).name }}</td>
-                            <td><a class="ui negative mini button loading-trigger" href="{{ url_for('book.miss_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a></td>
-                            {% else %}
-                            <td>未预约</td>
-                            <td><div class="ui disabled mini button"><i class="ban icon"></i>无</div></td>
-                            {% endif %}
-                            {% endif %}
-                            {% if schedule.ended %}
-                            {% if schedule.is_booked_by(current_user) %}
-                            <td>{{ current_user.booking_state(schedule).name }}</td>
-                            <td><div class="ui disabled mini button"><i class="ban icon"></i>无</div></td>
-                            {% else %}
-                            <td>未预约</td>
-                            <td><div class="ui disabled mini button"><i class="ban icon"></i>无</div></td>
-                            {% endif %}
-                            {% endif %}
+                            <td>{% if schedule.unstarted %}<div class="ui teal label">{{ schedule.time_state }}</div>{% endif %}{% if schedule.started %}<div class="ui red label">{{ schedule.time_state }}</div>{% endif %}{% if schedule.ended %}<div class="ui label">{{ schedule.time_state }}</div>{% endif %}{{ moment(schedule.period.start_time_utc).format('H:mm') }} - {{ moment(schedule.period.end_time_utc).format('H:mm') }}</td>
+                            <td{% if schedule.full %} class="negative"{% endif %}>{{ schedule.occupied_quota }} / {{ schedule.quota }}</td>
+                            <td>{% if schedule.is_booked_by(current_user) %}{{ current_user.booking_state(schedule).name }}{% if (not schedule.ended) and current_user.booking_success(schedule) %}<i id="booking-qr-code-click-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}" class="large blue qrcode link icon"></i><div id="booking-qr-code-{{ current_user.booking(schedule).user_id }}-{{ current_user.booking(schedule).schedule_id }}" class="ui flowing popup top left transition hidden"><img class="ui small image" src="{{ qrcode(current_user.booking(schedule).token) }}"></div>{% endif %}{% else %}未预约{% endif %}</td>
+                            <td>{% if schedule.unstarted %}{% if schedule.is_booked_by(current_user) %}{% if current_user.booking_success(schedule) or current_user.booking_wait(schedule) %}<a class="ui negative mini button loading-trigger" href="{{ url_for('book.unbook_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a>{% else %}<div class="ui disabled mini button"><i class="ban icon"></i>无</div>{% endif %}{% else %}{% if schedule.full %}<a class="ui teal mini button loading-trigger" href="{{ url_for('book.wait_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="wait icon"></i>排队</a>{% else %}<a class="ui primary mini button loading-trigger" href="{{ url_for('book.book_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="add to calendar icon"></i>预约</a>{% endif %}{% endif %}{% endif %}{% if schedule.started %}{% if schedule.is_booked_by(current_user) and (current_user.booking_success(schedule) or current_user.booking_wait(schedule)) %}<a class="ui negative mini button loading-trigger" href="{{ url_for('book.miss_y_gre', id=schedule.id, next=url_for('book.y_gre', page=pagination.page)) }}"><i class="remove from calendar icon"></i>取消</a>{% else %}<div class="ui disabled mini button"><i class="ban icon"></i>无</div>{% endif %}{% endif %}{% if schedule.ended %}<div class="ui disabled mini button"><i class="ban icon"></i>无</div>{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

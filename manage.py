@@ -2,10 +2,13 @@
 
 import sys
 
+
 reload(sys)
 sys.setdefaultencoding('utf-8');
 
+
 import os
+
 
 if os.path.exists('.env'):
     print('Importing environment from .env...')
@@ -14,10 +17,12 @@ if os.path.exists('.env'):
         if len(var) == 2:
             os.environ[var[0]] = var[1]
 
+
 from app import create_app, db
 from app.models import User, Role
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
+
 
 app = create_app(os.getenv('YSYS_CONFIG') or 'default')
 manager = Manager(app)
@@ -26,6 +31,8 @@ migrate = Migrate(app, db)
 
 def make_shell_context():
     return dict(app=app, db=db)
+
+
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
@@ -34,7 +41,6 @@ manager.add_command('db', MigrateCommand)
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
-
     from app.models import Permission
     from app.models import Role
     from app.models import Gender
@@ -45,7 +51,6 @@ def deploy():
     from app.models import BookingState
     from app.models import AssignmentScoreGrade
     from app.models import GREAWScore
-    from app.models import TOEFLTest
     from app.models import InvitationType
     from app.models import CourseType
     from app.models import Lesson
@@ -65,6 +70,9 @@ def deploy():
     from app.models import Test
     from app.models import AnnouncementType
 
+    # migrate database to latest revision
+    upgrade()
+
     # insert initial data
     Permission.insert_permissions()
     Role.insert_roles()
@@ -76,7 +84,6 @@ def deploy():
     BookingState.insert_booking_states()
     AssignmentScoreGrade.insert_assignment_score_grades()
     GREAWScore.insert_gre_aw_scores()
-    TOEFLTest.insert_toefl_tests()
     InvitationType.insert_invitation_types()
     CourseType.insert_course_types()
     Lesson.insert_lessons()

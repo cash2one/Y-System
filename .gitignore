@@ -75,6 +75,10 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
+# celery log files
+celery-beat.log
+celery-worker.log
+
 # dotenv
 .env
 
@@ -104,9 +108,6 @@ uwsgi.log
 
 # Windows
 Thumbs.db
-
-# Analytics
-_analytics.html
 
 # Initial data files
 *initial-*.xlsx
