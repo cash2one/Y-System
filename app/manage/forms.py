@@ -246,31 +246,23 @@ class EditYGRETestScoreForm(FlaskForm):
 
 class NewTOEFLTestScoreForm(FlaskForm):
     email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    test = SelectField(u'TOEFL考试', coerce=unicode, validators=[Required()])
     total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
     reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
     listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    test_date = DateField(u'考试日期', validators=[Required()])
     submit = SubmitField(u'添加')
-
-    def __init__(self, *args, **kwargs):
-        super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择TOEFL考试')] + [(unicode(toefl_test.id), toefl_test.name) for toefl_test in TOEFLTest.query.order_by(TOEFLTest.id.asc()).all()]
 
 
 class EditTOEFLTestScoreForm(FlaskForm):
-    test = SelectField(u'TOEFL考试', coerce=unicode, validators=[Required()])
     total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
     reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
     listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    test_date = DateField(u'考试日期', validators=[Required()])
     submit = SubmitField(u'添加')
-
-    def __init__(self, *args, **kwargs):
-        super(EditTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择TOEFL考试')] + [(unicode(toefl_test.id), toefl_test.name) for toefl_test in TOEFLTest.query.order_by(TOEFLTest.id.asc()).all()]
 
 
 class NewUserForm(FlaskForm):

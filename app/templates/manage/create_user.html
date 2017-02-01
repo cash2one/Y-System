@@ -351,7 +351,7 @@
                         </div>
                         <div class="four wide field">
                             {{ form.toefl_test_date.label() }}
-                            <div class="ui calendar" id="toefl-test-date">
+                            <div class="ui date calendar">
                                 <div class="ui input left icon">
                                     <i class="calendar icon"></i>
                                     {{ form.toefl_test_date(placeholder='格式：YYYY-MM-DD') }}
@@ -448,7 +448,7 @@ $('.message .close')
 
 $('.ui.checkbox').checkbox();
 
-$('#toefl-test-date').calendar({
+$('.ui.date.calendar').calendar({
     type: 'date',
     ampm: false,
     text: {

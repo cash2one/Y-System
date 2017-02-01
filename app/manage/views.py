@@ -1653,7 +1653,7 @@ def test():
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
         score = TOEFLTestScore(
             user_id=user.id,
-            test_id=int(toefl_form.test.data),
+            test_date=toefl_form.test_date.data,
             total_score=int(toefl_form.total.data),
             reading_score=int(toefl_form.reading.data),
             listening_score=int(toefl_form.listening.data),
@@ -1820,7 +1820,7 @@ def test_score(test_type, id):
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             score = TOEFLTestScore(
                 user_id=user.id,
-                test_id=int(form.test.data),
+                test_date=form.test_date.data,
                 total_score=int(form.total.data),
                 reading_score=int(form.reading.data),
                 listening_score=int(form.listening.data),
@@ -2690,9 +2690,8 @@ def create_user_confirm(id):
     # TOEFL
     new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
-        test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
-            test=test,
+            test_date=new_toefl_test_score_form.test_date.data,
             total_score=int(new_toefl_test_score_form.total.data),
             reading_score=int(new_toefl_test_score_form.reading.data),
             listening_score=int(new_toefl_test_score_form.listening.data),
@@ -2700,7 +2699,7 @@ def create_user_confirm(id):
             writing_score=int(new_toefl_test_score_form.writing.data),
             modified_by=current_user._get_current_object()
         )
-        flash(u'已添加TOEFL成绩：%s' % test.name, category='success')
+        flash(u'已添加TOEFL成绩', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
@@ -3058,9 +3057,8 @@ def edit_user(id):
     # TOEFL
     new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
     if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
-        test = TOEFLTest.query.get(int(new_toefl_test_score_form.test.data))
         user.add_toefl_test_score(
-            test=test,
+            test_date=new_toefl_test_score_form.test_date.data,
             total_score=int(new_toefl_test_score_form.total.data),
             reading_score=int(new_toefl_test_score_form.reading.data),
             listening_score=int(new_toefl_test_score_form.listening.data),
@@ -3068,7 +3066,7 @@ def edit_user(id):
             writing_score=int(new_toefl_test_score_form.writing.data),
             modified_by=current_user._get_current_object()
         )
-        flash(u'已添加TOEFL%s成绩' % test.name, category='success')
+        flash(u'已添加TOEFL成绩', category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
