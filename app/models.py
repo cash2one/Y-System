@@ -5,9 +5,9 @@ from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
 from hashlib import sha512
-from sqlalchemy import or_
-import json
+from json import loads, dumps
 from bs4 import BeautifulSoup
+from sqlalchemy import or_
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
@@ -2697,7 +2697,7 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def initialize():
-        json_string = unicode(json.dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
+        json_string = unicode(dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
         ipad_content_json = iPadContentJSON.query.get(1)
         if ipad_content_json is not None:
             ipad_content_json.json_string = json_string
@@ -2712,9 +2712,9 @@ class iPadContentJSON(db.Model):
         if ipad_content_json is None:
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
-        ipad_contents = json.loads(ipad_content_json.json_string)
+        ipad_contents = loads(ipad_content_json.json_string)
         ipad_contents[unicode(ipad.id)] = {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()}
-        ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
+        ipad_content_json.json_string = unicode(dumps(ipad_contents))
         db.session.add(ipad_content_json)
         db.session.commit()
 
@@ -2724,10 +2724,10 @@ class iPadContentJSON(db.Model):
         if ipad_content_json is None:
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
-        ipad_contents = json.loads(ipad_content_json.json_string)
+        ipad_contents = loads(ipad_content_json.json_string)
         if unicode(ipad.id) in ipad_contents:
             del ipad_contents[unicode(ipad.id)]
-            ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
+            ipad_content_json.json_string = unicode(dumps(ipad_contents))
             db.session.add(ipad_content_json)
             db.session.commit()
 
@@ -2737,10 +2737,10 @@ class iPadContentJSON(db.Model):
         if ipad_content_json is None:
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
-        ipad_contents = json.loads(ipad_content_json.json_string)
+        ipad_contents = loads(ipad_content_json.json_string)
         if unicode(ipad.id) in ipad_contents:
             ipad_contents[unicode(ipad.id)][unicode(lesson.id)] = exist
-            ipad_content_json.json_string = unicode(json.dumps(ipad_contents))
+            ipad_content_json.json_string = unicode(dumps(ipad_contents))
             db.session.add(ipad_content_json)
             db.session.commit()
 
