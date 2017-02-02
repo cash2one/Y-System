@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, date, time, timedelta
+from json import loads
 from sqlalchemy import or_, and_
-import json
 from flask import render_template, redirect, url_for, abort, flash, current_app, make_response, request, jsonify
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
@@ -4014,7 +4014,7 @@ def ipad_contents():
     return render_template('manage/ipad_contents.html',
         ipads=ipads,
         lessons=lessons,
-        ipad_contents=json.loads(ipad_contents.json_string)
+        ipad_contents=loads(ipad_contents.json_string)
     )
 
 
