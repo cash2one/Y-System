@@ -136,7 +136,7 @@
 {{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
 {% endmacro %}
 
-{% macro date_js_snippet() %}
+{% macro date_picker_js_snippet() %}
 $('.ui.date.calendar').calendar({
     type: 'date',
     ampm: false,
