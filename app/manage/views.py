@@ -18,9 +18,13 @@ from .forms import NewGRETestScoreForm, EditGRETestScoreForm
 from .forms import NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
-from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm, EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
+from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm
+from .forms import EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
-from .forms import EditPurposeForm, EditApplicationAimForm, EditReferrerForm, EditVBCourseForm, EditYGRECourseForm, EditOriginTypeForm, EditWorkInSameFieldForm, EditDeformityForm
+from .forms import EditPurposeForm, EditReferrerForm
+from .forms import EditOriginTypeForm, EditApplicationAimForm
+from .forms import EditWorkInSameFieldForm, EditDeformityForm
+from .forms import EditVBCourseForm, EditYGRECourseForm
 from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
@@ -30,7 +34,8 @@ from .forms import NewRoleForm, EditRoleForm
 from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
 from ..models import Permission, Role, User, Gender
-from ..models import PurposeType, ReferrerType, EducationRecord, EducationType, EmploymentRecord, ScoreRecord, ScoreType, InvitationType
+from ..models import PurposeType, ReferrerType, InvitationType
+from ..models import EducationRecord, EducationType, EmploymentRecord, ScoreRecord, ScoreType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import GroupRegistration
 from ..models import Booking, BookingState

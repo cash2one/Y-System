@@ -172,3 +172,9 @@ $('.ui.date.calendar').calendar({
     },
 });
 {% endmacro %}
+
+{% macro year_picker_js_snippet() %}
+$('.ui.date.calendar').calendar({
+    type: 'year'
+});
+{% endmacro %}
