@@ -183,7 +183,12 @@
                         </div>
                         <div class="two wide field">
                             {{ form.high_school_year.label() }}
-                            {{ form.high_school_year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.high_school_year(placeholder='YYYY') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="fields">
@@ -205,7 +210,12 @@
                         </div>
                         <div class="two wide field">
                             {{ form.bachelor_year.label() }}
-                            {{ form.bachelor_year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.bachelor_year(placeholder='YYYY') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="fields">
@@ -227,7 +237,12 @@
                         </div>
                         <div class="two wide field">
                             {{ form.master_year.label() }}
-                            {{ form.master_year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.master_year(placeholder='YYYY') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="fields">
@@ -249,7 +264,12 @@
                         </div>
                         <div class="two wide field">
                             {{ form.doctor_year.label() }}
-                            {{ form.doctor_year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.doctor_year(placeholder='YYYY') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <h4 class="ui blue dividing header">工作经历</h4>
@@ -264,7 +284,12 @@
                         </div>
                         <div class="two wide field">
                             {{ form.job_year_1.label() }}
-                            {{ form.job_year_1(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.job_year_1(placeholder='YYYY') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="fields">
@@ -278,7 +303,12 @@
                         </div>
                         <div class="two wide field">
                             {{ form.job_year_2.label() }}
-                            {{ form.job_year_2(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.job_year_2(placeholder='YYYY') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <h4 class="ui blue dividing header">既往成绩</h4>
@@ -352,9 +382,9 @@
                         <div class="four wide field">
                             {{ form.toefl_test_date.label() }}
                             <div class="ui date calendar">
-                                <div class="ui input left icon">
+                                <div class="ui left icon input">
                                     <i class="calendar icon"></i>
-                                    {{ form.toefl_test_date(placeholder='格式：YYYY-MM-DD') }}
+                                    {{ form.toefl_test_date(placeholder='YYYY-MM-DD') }}
                                 </div>
                             </div>
                         </div>
@@ -449,6 +479,8 @@ $('.message .close')
 $('.ui.checkbox').checkbox();
 
 {{ macros.date_picker_js_snippet() }}
+
+{{ macros.year_picker_js_snippet() }}
 
 var Validator = new IDValidator(GB2260);
 $(document)
