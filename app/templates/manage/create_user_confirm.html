@@ -397,7 +397,12 @@
                             {{ new_education_record_form.full_gpa(placeholder='GPA满分') }}
                         </div>
                         <div class="two wide field">
-                            {{ new_education_record_form.year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ new_education_record_form.year(placeholder='入学年份') }}
+                                </div>
+                            </div>
                         </div>
                         <div class="one wide field">
                             {{ new_education_record_form.submit(class='ui primary mini button') }}
@@ -430,7 +435,12 @@
                             {{ new_employment_record_form.position(placeholder='职务') }}
                         </div>
                         <div class="two wide field">
-                            {{ new_employment_record_form.year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ new_employment_record_form.year(placeholder='入职年份') }}
+                                </div>
+                            </div>
                         </div>
                         <div class="one wide field">
                             {{ new_employment_record_form.submit(class='ui primary mini button') }}
@@ -506,9 +516,9 @@
                         </div>
                         <div class="three wide field">
                             <div class="ui date calendar">
-                                <div class="ui input left icon">
+                                <div class="ui left icon input">
                                     <i class="calendar icon"></i>
-                                    {{ new_toefl_test_score_form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                                    {{ new_toefl_test_score_form.test_date(placeholder='考试日期') }}
                                 </div>
                             </div>
                         </div>
@@ -849,6 +859,8 @@ $('.message .close')
 $('.ui.checkbox').checkbox();
 
 {{ macros.date_picker_js_snippet() }}
+
+{{ macros.year_picker_js_snippet() }}
 
 $('#edit-name-trigger')
     .on('click', function() {
