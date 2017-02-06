@@ -133,7 +133,7 @@
 {% endmacro %}
 
 {% macro user_email(user) %}
-{{ user.email }}<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>
+<i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>{{ user.email }}
 {% endmacro %}
 
 {% macro date_picker_js_snippet() %}

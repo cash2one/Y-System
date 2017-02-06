@@ -58,7 +58,6 @@ def profile(id):
             if not user.notified_by(announcement=announcement):
                 flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
                 announcement.notify(user=user._get_current_object())
-    punches = user.punches.order_by(Punch.timestamp.desc()).limit(10)
     page = request.args.get('page', 1, type=int)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
@@ -67,4 +66,4 @@ def profile(id):
         .order_by(Schedule.period_id.asc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     bookings = pagination.items
-    return render_template('profile.html', user=user, punches=punches, bookings=bookings, pagination=pagination, announcements=announcements)
+    return render_template('profile.html', user=user, bookings=bookings, pagination=pagination, announcements=announcements)

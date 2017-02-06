@@ -89,7 +89,7 @@
     <div class="ui inverted divided horizontal list">
         <div class="item">
             <div class="content">
-                <div class="header">用户组</div>
+                <div class="header">用户权限</div>
                 <div class="description">{{ user.role.name }}</div>
             </div>
         </div>
@@ -122,57 +122,11 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="ui vertical stripe stats segment">
-    <div class="ui equal width stackable internally celled grid">
-        <div class="center aligned row">
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
             <div class="column">
-                <div class="ui statistic">
-                    <div class="label">即将开始</div>
-                    <div class="value">{{ user.valid_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">排队中</div>
-                    <div class="value">{{ user.wait_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">赴约</div>
-                    <div class="value">{{ user.keep_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">爽约</div>
-                    <div class="value">{{ user.miss_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">取消</div>
-                    <div class="value">{{ user.cancel_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">迟到</div>
-                    <div class="value">{{ user.late_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">未预约到场</div>
-                    <div class="value">{{ user.walk_in_rentals.count() }}</div>
-                    <div class="label">次</div>
-                </div>
+                <h3 class="ui header"><i class="flag icon"></i>研修进度</h3>
             </div>
         </div>
     </div>
@@ -206,39 +160,6 @@
                     </tbody>
                 </table>
                 {% if pagination %}{{ macros.pagination_widget(pagination, 'main.profile', id=user.id) }}{% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="ui header"><i class="flag icon"></i>里程碑</h3>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>时间</th>
-                            <th>课程类型</th>
-                            <th>课程进度</th>
-                            <th>视频进度</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for punch in punches %}
-                        <tr>
-                            <td>
-                                <div class="popup-trigger" data-variation="inverted">{{ moment(punch.timestamp).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ punch.section.lesson.type.name }}</td>
-                            <td>{{ punch.section.lesson.name }}</td>
-                            <td>{{ punch.section.name }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>

@@ -3350,7 +3350,7 @@ def remove_score_record(id):
 def remove_toefl_test_score(id):
     toefl_test_score = TOEFLTestScore.query.get_or_404(id)
     db.session.delete(toefl_test_score)
-    flash(u'已删除TOEFL成绩：%s' % toefl_test_score.type.name, category='success')
+    flash(u'已删除TOEFL成绩', category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
