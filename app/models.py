@@ -1817,8 +1817,27 @@ class User(UserMixin, db.Model):
         return self.punches.order_by(Punch.timestamp.desc()).first()
 
     @property
+    def last_vb_punch(self):
+        return self.punches.order_by(Punch.timestamp.desc()).first()
+
+    @property
+    def last_y_gre_punch(self):
+        return self.punches.order_by(Punch.timestamp.desc()).first()
+
+    @property
     def next_punch(self):
-        return [self.last_punch.section] + self.last_punch.section.all_follow_ups + self.last_punch.section.lesson.follow_ups.first().follow_up.sections.all()
+        if self.last_punch.section.lesson.type.name == u'VB':
+            return [self.last_punch.section] + \
+                self.last_punch.section.all_follow_ups + \
+                self.last_punch.section.lesson.follow_ups.first().follow_up.sections.all() + \
+                [Section.query.filter_by(name=u'Y-GRE总论').first()]
+        if self.last_punch.section.lesson.type.name == u'Y-GRE':
+            return Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .join(CourseType, CourseType.id = Lesson.type_id)\
+                .filter(CourseType.name == u'Y-GRE')\
+                .filter(Lesson.priority >= 1)\
+                .order_by(Section.id.asc())
 
     def add_toefl_test_score(self, test_date, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         test = TOEFLTest.query.filter_by(date=test_date).first()
