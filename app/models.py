@@ -1818,11 +1818,25 @@ class User(UserMixin, db.Model):
 
     @property
     def last_vb_punch(self):
-        return self.punches.order_by(Punch.timestamp.desc()).first()
+        return Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id = Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'VB')\
+            .order_by(Punch.timestamp.desc())\
+            .first()
 
     @property
     def last_y_gre_punch(self):
-        return self.punches.order_by(Punch.timestamp.desc()).first()
+        return Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id = Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .order_by(Punch.timestamp.desc())\
+            .first()
 
     @property
     def next_punch(self):
