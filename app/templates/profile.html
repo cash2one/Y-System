@@ -96,25 +96,13 @@
         <div class="item">
             <div class="content">
                 <div class="header">VB班</div>
-                <div class="description">
-                    {% if user.vb_course %}
-                    {{ user.vb_course.name }}
-                    {% else %}
-                    无
-                    {% endif %}
-                </div>
+                <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
             </div>
         </div>
         <div class="item">
             <div class="content">
                 <div class="header">Y-GRE班</div>
-                <div class="description">
-                    {% if user.y_gre_course %}
-                    {{ user.y_gre_course.name }}
-                    {% else %}
-                    无
-                    {% endif %}
-                </div>
+                <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
             </div>
         </div>
     </div>
@@ -127,6 +115,16 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="flag icon"></i>研修进度</h3>
+                <h4 class="ui header">VB研修进度</h4>
+                <div class="ui blue vb progress">
+                    <div class="bar"></div>
+                    <div class="label">{{ user.last_punch.section.alias }}</div>
+                </div>
+                <h4 class="ui header">Y-GRE研修进度</h4>
+                <div class="ui teal y-gre progress">
+                    <div class="bar"></div>
+                    <div class="label">Y-GRE</div>
+                </div>
             </div>
         </div>
     </div>
@@ -229,6 +227,10 @@ $('.message .close')
 ;
 
 $('table').tablesort();
+
+// progress bars
+$('.ui.vb.progress').progress();
+$('.ui.y-gre.progress').progress();
 
 {% if announcements and current_user.can('管理通知') %}
 $('.right.floated .ui.circular.icon.button').popup();
