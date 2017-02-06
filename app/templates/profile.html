@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}{% if current_user.id == user.id %}个人档案{% else %}{{ user.name }}的档案{% endif %}{% endblock %}
+{% block title %}{% if current_user.id == user.id %}研修档案{% else %}{{ user.name }}的档案{% endif %}{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
