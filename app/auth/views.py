@@ -27,7 +27,7 @@ def unconfirmed():
     if current_user.confirmed:
         if current_user.can(u'管理'):
             return redirect(url_for('manage.summary'))
-        return redirect(url_for('main.profile'))
+        return redirect(url_for('main.profile', id=current_user.id))
     return render_template('auth/unconfirmed.html')
 
 
@@ -37,7 +37,7 @@ def login():
         flash(u'您已经登录', 'info')
         if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
-        return redirect(request.args.get('next') or url_for('main.profile'))
+        return redirect(request.args.get('next') or url_for('main.profile', id=current_user.id))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data, created=True, deleted=False).first()
@@ -54,7 +54,7 @@ def login():
                 flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
             if user.can(u'管理'):
                 return redirect(request.args.get('next') or url_for('manage.summary'))
-            return redirect(request.args.get('next') or url_for('main.profile'))
+            return redirect(request.args.get('next') or url_for('main.profile', id=user.id))
         flash(u'无效的用户名或密码', category='error')
     return render_template('auth/login.html', form=form)
 
@@ -72,7 +72,7 @@ def activate():
         flash(u'您已经登录', category='info')
         if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
-        return redirect(request.args.get('next') or url_for('main.profile'))
+        return redirect(request.args.get('next') or url_for('main.profile', id=current_user.id))
     form = ActivationForm()
     if form.validate_on_submit():
         new_user = User.query.filter_by(email=form.email.data, created=True, activated=False, deleted=False).first()
@@ -95,7 +95,7 @@ def confirm(token):
     if current_user.confirmed:
         if current_user.can(u'管理'):
             return redirect(url_for('manage.summary'))
-        return redirect(url_for('main.profile'))
+        return redirect(url_for('main.profile', id=current_user.id))
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！', category='success')
     else:
@@ -103,7 +103,7 @@ def confirm(token):
         return redirect(url_for('auth.unconfirmed'))
     if current_user.can(u'管理'):
         return redirect(url_for('manage.summary'))
-    return redirect(url_for('main.profile'))
+    return redirect(url_for('main.profile', id=current_user.id))
 
 
 @auth.route('/confirm')
@@ -126,7 +126,7 @@ def change_password():
             flash(u'修改密码成功', category='success')
             if current_user.can(u'管理'):
                 return redirect(url_for('manage.summary'))
-            return redirect(url_for('main.profile'))
+            return redirect(url_for('main.profile', id=current_user.id))
         else:
             flash(u'密码有误', category='error')
     return render_template("auth/change_password.html", form=form)
@@ -138,7 +138,7 @@ def reset_password_request():
         flash(u'您已经登录', category='info')
         if current_user.can(u'管理'):
             return redirect(request.args.get('next') or url_for('manage.summary'))
-        return redirect(request.args.get('next') or url_for('main.profile'))
+        return redirect(request.args.get('next') or url_for('main.profile', id=current_user.id))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -156,7 +156,7 @@ def reset_password(token):
         flash(u'您已经登录', category='info')
         if current_user.can(u'管理'):
             return redirect(url_for('manage.summary'))
-        return redirect(url_for('main.profile'))
+        return redirect(url_for('main.profile', id=current_user.id))
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -197,4 +197,4 @@ def change_email(token):
         flash(u'请求无效', category='error')
     if current_user.can(u'管理'):
         return redirect(url_for('manage.summary'))
-    return redirect(url_for('main.profile'))
+    return redirect(url_for('main.profile', id=current_user.id))
