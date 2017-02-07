@@ -1799,7 +1799,7 @@ class User(UserMixin, db.Model):
 
     def punch(self, section):
         timestamp = datetime.utcnow()
-        if section.name in [u'词典使用', u'AW总论']:
+        if self.last_punch is None or section.name in [u'词典使用', u'AW总论']:
             self.__punch(section=section, milestone=True)
             return
         if section.lesson.type_id == self.last_punch.section.lesson.type_id:
@@ -1828,7 +1828,7 @@ class User(UserMixin, db.Model):
                     self.unpunch(section=uncovered_section)
             self.__punch(section=section, milestone=True, timestamp=timestamp)
             return
-        if self.last_punch.section.lesson.name == u'VB' and section.lesson.name == u'Y-GRE':
+        if self.last_punch.section.lesson.type.name == u'VB' and section.lesson.type.name == u'Y-GRE':
             covered_sections = Section.query\
                 .filter(Section.lesson_id == self.last_punch.section.lesson_id)\
                 .filter(Section.order > self.last_punch.section.order)\
@@ -1847,7 +1847,7 @@ class User(UserMixin, db.Model):
                 self.__punch(section=covered_section, timestamp=timestamp)
             self.__punch(section=section, milestone=True, timestamp=timestamp)
             return
-        if self.last_punch.section.lesson.name == u'Y-GRE' and section.lesson.name == u'VB':
+        if self.last_punch.section.lesson.type.name == u'Y-GRE' and section.lesson.type.name == u'VB':
             uncovered_sections = Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
                 .filter(Lesson.type_id == self.last_punch.section.lesson.type_id)\
@@ -1855,11 +1855,11 @@ class User(UserMixin, db.Model):
                 .all() + \
                 Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
-                .filter(Lesson.type_id == self.section.lesson.type_id)\
+                .filter(Lesson.type_id == section.lesson.type_id)\
                 .filter(Section.order > section.order)\
                 .all()
-                for uncovered_section in uncovered_sections:
-                    self.unpunch(section=uncovered_section)
+            for uncovered_section in uncovered_sections:
+                self.unpunch(section=uncovered_section)
             self.__punch(section=section, milestone=True, timestamp=timestamp)
             return
 
@@ -1882,21 +1882,19 @@ class User(UserMixin, db.Model):
 
     @property
     def last_punch(self):
-        return Punch.query\
-            .join(Section, Section.id == Punch.section_id)\
-            .filter(Punch.user_id == self.id)\
-            .filter(Section.order >= 1)\
-            .order_by(Punch.timestamp.desc())\
-            .first()
+        if self.last_y_gre_punch is not None:
+            return self.last_y_gre_punch
+        return self.last_vb_punch
 
     @property
     def last_vb_punch(self):
         return Punch.query\
             .join(Section, Section.id == Punch.section_id)\
             .join(Lesson, Lesson.id == Section.lesson_id)\
-            .join(CourseType, CourseType.id = Lesson.type_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(Punch.user_id == self.id)\
             .filter(CourseType.name == u'VB')\
+            .filter(Section.order >= 1)\
             .order_by(Section.order.desc())\
             .first()
 
@@ -1905,9 +1903,10 @@ class User(UserMixin, db.Model):
         return Punch.query\
             .join(Section, Section.id == Punch.section_id)\
             .join(Lesson, Lesson.id == Section.lesson_id)\
-            .join(CourseType, CourseType.id = Lesson.type_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(Punch.user_id == self.id)\
             .filter(CourseType.name == u'Y-GRE')\
+            .filter(Section.order >= 1)\
             .order_by(Section.order.desc())\
             .first()
 
@@ -1926,7 +1925,7 @@ class User(UserMixin, db.Model):
         if self.last_punch.section.lesson.type.name == u'Y-GRE':
             return Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
-                .join(CourseType, CourseType.id = Lesson.type_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
                 .filter(CourseType.name == u'Y-GRE')\
                 .filter(Section.order >= self.last_punch.section.order)\
                 .order_by(Section.order.asc())\
@@ -2816,7 +2815,7 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def initialize():
-        json_string = unicode(dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
+        json_string = unicode(dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.filter_by(include_video=True).order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
         ipad_content_json = iPadContentJSON.query.get(1)
         if ipad_content_json is not None:
             ipad_content_json.json_string = json_string
@@ -2832,7 +2831,7 @@ class iPadContentJSON(db.Model):
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
         ipad_contents = loads(ipad_content_json.json_string)
-        ipad_contents[unicode(ipad.id)] = {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()}
+        ipad_contents[unicode(ipad.id)] = {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.filter_by(include_video=True).order_by(Lesson.id.asc()).all()}
         ipad_content_json.json_string = unicode(dumps(ipad_contents))
         db.session.add(ipad_content_json)
         db.session.commit()
@@ -3100,6 +3099,7 @@ class Lesson(db.Model):
     hour = db.Column(db.Interval, default=timedelta(hours=0))
     priority = db.Column(db.Integer, default=0)
     order = db.Column(db.Integer, default=0)
+    include_video = db.Column(db.Integer, default=False)
     advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
@@ -3134,6 +3134,7 @@ class Lesson(db.Model):
             u'L7': u'7',
             u'L8': u'8',
             u'L9': u'9',
+            u'L10': u'10',
             u'L11': u'11',
             u'L12': u'12',
             u'L13': u'13',
@@ -3178,33 +3179,34 @@ class Lesson(db.Model):
     @staticmethod
     def insert_lessons():
         lessons = [
-            (u'VB总论', u'VB', 20, 16, 1, False, ),
-            (u'L1', u'VB', 8, 15, 2, False, ),
-            (u'L2', u'VB', 8, 14, 3, False, ),
-            (u'L3', u'VB', 8, 13, 4, False, ),
-            (u'L4', u'VB', 8, 12, 5, False, ),
-            (u'L5', u'VB', 8, 11, 6, False, ),
-            (u'L6', u'VB', 10, 7, 7, False, ),
-            (u'L7', u'VB', 10, 6, 8, False, ),
-            (u'L8', u'VB', 10, 5, 9, False, ),
-            (u'L9', u'VB', 10, 4, 10, False, ),
-            (u'L11', u'VB', 10, -1, 11, True, ),
-            (u'L12', u'VB', 10, -1, 12, True, ),
-            (u'L13', u'VB', 10, -1, 13, True, ),
-            (u'L14', u'VB', 10, -1, 14, True, ),
-            (u'词典使用', u'VB', 0, 0, 0, True, ),
-            (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, False, ),
-            (u'1st', u'Y-GRE', 30, 17, 2, False, ),
-            (u'2nd', u'Y-GRE', 30, 17, 3, False, ),
-            (u'3rd', u'Y-GRE', 50, 17, 4, False, ),
-            (u'4th', u'Y-GRE', 30, 10, 5, False, ),
-            (u'5th', u'Y-GRE', 40, 9, 6, False, ),
-            (u'6th', u'Y-GRE', 40, 8, 7, False, ),
-            (u'7th', u'Y-GRE', 30, 3, 8, False, ),
-            (u'8th', u'Y-GRE', 30, 2, 9, False, ),
-            (u'9th', u'Y-GRE', 30, 1, 10, False, ),
-            (u'Test', u'Y-GRE', 0, 0, -1, False, ),
-            (u'AW总论', u'Y-GRE', 3, 17, 0, False, ),
+            (u'VB总论', u'VB', 20, 16, 1, True, False, ),
+            (u'L1', u'VB', 8, 15, 2, True, False, ),
+            (u'L2', u'VB', 8, 14, 3, True, False, ),
+            (u'L3', u'VB', 8, 13, 4, True, False, ),
+            (u'L4', u'VB', 8, 12, 5, True, False, ),
+            (u'L5', u'VB', 8, 11, 6, True, False, ),
+            (u'L6', u'VB', 10, 7, 7, True, False, ),
+            (u'L7', u'VB', 10, 6, 8, True, False, ),
+            (u'L8', u'VB', 10, 5, 9, True, False, ),
+            (u'L9', u'VB', 10, 4, 10, True, False, ),
+            (u'L10', u'VB', 10, 0, 11, False, False, ),
+            (u'L11', u'VB', 10, -1, 12, True, True, ),
+            (u'L12', u'VB', 10, -1, 13, True, True, ),
+            (u'L13', u'VB', 10, -1, 14, True, True, ),
+            (u'L14', u'VB', 10, -1, 15, True, True, ),
+            (u'词典使用方法', u'VB', 0, 0, 0, False, True, ),
+            (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, True, False, ),
+            (u'1st', u'Y-GRE', 30, 17, 2, True, False, ),
+            (u'2nd', u'Y-GRE', 30, 17, 3, True, False, ),
+            (u'3rd', u'Y-GRE', 50, 17, 4, True, False, ),
+            (u'4th', u'Y-GRE', 30, 10, 5, True, False, ),
+            (u'5th', u'Y-GRE', 40, 9, 6, True, False, ),
+            (u'6th', u'Y-GRE', 40, 8, 7, True, False, ),
+            (u'7th', u'Y-GRE', 30, 3, 8, True, False, ),
+            (u'8th', u'Y-GRE', 30, 2, 9, True, False, ),
+            (u'9th', u'Y-GRE', 30, 1, 10, True, False, ),
+            (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
+            (u'AW总论', u'Y-GRE', 3, 17, 0, True, False, ),
         ]
         for L in lessons:
             lesson = Lesson.query.filter_by(name=L[0]).first()
@@ -3215,7 +3217,8 @@ class Lesson(db.Model):
                     hour=timedelta(hours=L[2]),
                     priority=L[3],
                     order=L[4],
-                    advanced=L[5]
+                    include_video=L[5],
+                    advanced=L[6]
                 )
                 db.session.add(lesson)
                 print u'导入课程信息', L[0], L[1]
@@ -3348,55 +3351,56 @@ class Section(db.Model):
             (u'9.7', u'L9', 88, ),
             (u'9.8', u'L9', 89, ),
             (u'9.9', u'L9', 90, ),
-            (u'11.1', u'L11', 91, ),
-            (u'11.2', u'L11', 92, ),
-            (u'11.3', u'L11', 93, ),
-            (u'11.4', u'L11', 94, ),
-            (u'11.5', u'L11', 95, ),
-            (u'11.6', u'L11', 96, ),
-            (u'11.7', u'L11', 97, ),
-            (u'11.8', u'L11', 98, ),
-            (u'11.9', u'L11', 99, ),
-            (u'11.10', u'L11', 100, ),
-            (u'11.11', u'L11', 101, ),
-            (u'11.12', u'L11', 102, ),
-            (u'12.1', u'L12', 103, ),
-            (u'12.2', u'L12', 104, ),
-            (u'12.3', u'L12', 105, ),
-            (u'12.4', u'L12', 106, ),
-            (u'12.5', u'L12', 107, ),
-            (u'12.6', u'L12', 108, ),
-            (u'12.7', u'L12', 109, ),
-            (u'12.8', u'L12', 110, ),
-            (u'12.9', u'L12', 111, ),
-            (u'12.10', u'L12', 112, ),
-            (u'12.11', u'L12', 113, ),
-            (u'12.12', u'L12', 114, ),
-            (u'13.1', u'L13', 115, ),
-            (u'13.2', u'L13', 116, ),
-            (u'13.3', u'L13', 117, ),
-            (u'13.4', u'L13', 118, ),
-            (u'13.5', u'L13', 119, ),
-            (u'13.6', u'L13', 120, ),
-            (u'13.7', u'L13', 121, ),
-            (u'13.8', u'L13', 122, ),
-            (u'13.9', u'L13', 123, ),
-            (u'13.10', u'L13', 124, ),
-            (u'13.11', u'L13', 125, ),
-            (u'13.12', u'L13', 126, ),
-            (u'14.1', u'L14', 127, ),
-            (u'14.2', u'L14', 128, ),
-            (u'14.3', u'L14', 129, ),
-            (u'14.4', u'L14', 130, ),
-            (u'14.5', u'L14', 131, ),
-            (u'14.6', u'L14', 132, ),
-            (u'14.7', u'L14', 133, ),
-            (u'14.8', u'L14', 134, ),
-            (u'14.9', u'L14', 135, ),
-            (u'14.10', u'L14', 136, ),
-            (u'14.11', u'L14', 137, ),
-            (u'14.12', u'L14', 138, ),
-            (u'词典使用', u'词典使用', 0, )
+            (u'L10', u'L10', 91, ),
+            (u'11.1', u'L11', 92, ),
+            (u'11.2', u'L11', 93, ),
+            (u'11.3', u'L11', 94, ),
+            (u'11.4', u'L11', 95, ),
+            (u'11.5', u'L11', 96, ),
+            (u'11.6', u'L11', 97, ),
+            (u'11.7', u'L11', 98, ),
+            (u'11.8', u'L11', 99, ),
+            (u'11.9', u'L11', 100, ),
+            (u'11.10', u'L11', 101, ),
+            (u'11.11', u'L11', 102, ),
+            (u'11.12', u'L11', 103, ),
+            (u'12.1', u'L12', 104, ),
+            (u'12.2', u'L12', 105, ),
+            (u'12.3', u'L12', 106, ),
+            (u'12.4', u'L12', 107, ),
+            (u'12.5', u'L12', 108, ),
+            (u'12.6', u'L12', 109, ),
+            (u'12.7', u'L12', 110, ),
+            (u'12.8', u'L12', 111, ),
+            (u'12.9', u'L12', 112, ),
+            (u'12.10', u'L12', 113, ),
+            (u'12.11', u'L12', 114, ),
+            (u'12.12', u'L12', 115, ),
+            (u'13.1', u'L13', 116, ),
+            (u'13.2', u'L13', 117, ),
+            (u'13.3', u'L13', 118, ),
+            (u'13.4', u'L13', 119, ),
+            (u'13.5', u'L13', 120, ),
+            (u'13.6', u'L13', 121, ),
+            (u'13.7', u'L13', 122, ),
+            (u'13.8', u'L13', 123, ),
+            (u'13.9', u'L13', 124, ),
+            (u'13.10', u'L13', 125, ),
+            (u'13.11', u'L13', 126, ),
+            (u'13.12', u'L13', 127, ),
+            (u'14.1', u'L14', 128, ),
+            (u'14.2', u'L14', 129, ),
+            (u'14.3', u'L14', 130, ),
+            (u'14.4', u'L14', 131, ),
+            (u'14.5', u'L14', 132, ),
+            (u'14.6', u'L14', 133, ),
+            (u'14.7', u'L14', 134, ),
+            (u'14.8', u'L14', 135, ),
+            (u'14.9', u'L14', 136, ),
+            (u'14.10', u'L14', 137, ),
+            (u'14.11', u'L14', 138, ),
+            (u'14.12', u'L14', 139, ),
+            (u'词典使用方法', u'词典使用方法', 0, ),
             (u'Y-GRE总论', u'Y-GRE总论', 1, ),
             (u'1st', u'1st', 2, ),
             (u'2nd', u'2nd', 3, ),

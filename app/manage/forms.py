@@ -696,8 +696,8 @@ class NewiPadForm(FlaskForm):
         self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB' and lesson.priority >= -1]
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE' and lesson.priority >= -1]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
 
     def validate_serial(self, field):
         if iPad.query.filter_by(serial=field.data).first():
@@ -720,8 +720,8 @@ class EditiPadForm(FlaskForm):
         self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB' and lesson.priority >= -1]
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE' and lesson.priority >= -1]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
         self.ipad = ipad
 
     def validate_serial(self, field):
@@ -736,8 +736,8 @@ class FilteriPadForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(FilteriPadForm, self).__init__(*args, **kwargs)
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB' and lesson.priority >= -1]
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE' and lesson.priority >= -1]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
 
 
 class NewAnnouncementForm(FlaskForm):

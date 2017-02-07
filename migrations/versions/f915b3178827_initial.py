@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: f7f4ec74f24e
+Revision ID: f915b3178827
 Revises: 
-Create Date: 2017-02-01 07:07:17.978637
+Create Date: 2017-02-07 17:24:15.308358
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f7f4ec74f24e'
+revision = 'f915b3178827'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -66,6 +66,7 @@ def upgrade():
     sa.Column('date', sa.Date(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_gre_tests_date'), 'gre_tests', ['date'], unique=True)
     op.create_table('invitation_types',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -142,12 +143,15 @@ def upgrade():
     sa.Column('date', sa.Date(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_toefl_tests_date'), 'toefl_tests', ['date'], unique=True)
     op.create_table('lessons',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('type_id', sa.Integer(), nullable=True),
     sa.Column('hour', sa.Interval(), nullable=True),
     sa.Column('priority', sa.Integer(), nullable=True),
+    sa.Column('order', sa.Integer(), nullable=True),
+    sa.Column('include_video', sa.Integer(), nullable=True),
     sa.Column('advanced', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -312,13 +316,6 @@ def upgrade():
     )
     op.create_index(op.f('ix_ipads_alias'), 'ipads', ['alias'], unique=False)
     op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=False)
-    op.create_table('lesson_dependencies',
-    sa.Column('depenedent_id', sa.Integer(), nullable=False),
-    sa.Column('follow_up_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['depenedent_id'], ['lessons.id'], ),
-    sa.ForeignKeyConstraint(['follow_up_id'], ['lessons.id'], ),
-    sa.PrimaryKeyConstraint('depenedent_id', 'follow_up_id')
-    )
     op.create_table('periods',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -388,6 +385,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('lesson_id', sa.Integer(), nullable=True),
+    sa.Column('order', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -472,6 +470,7 @@ def upgrade():
     op.create_table('punches',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('section_id', sa.Integer(), nullable=False),
+    sa.Column('milestone', sa.Boolean(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['section_id'], ['sections.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -603,7 +602,6 @@ def downgrade():
     op.drop_index(op.f('ix_products_name'), table_name='products')
     op.drop_table('products')
     op.drop_table('periods')
-    op.drop_table('lesson_dependencies')
     op.drop_index(op.f('ix_ipads_serial'), table_name='ipads')
     op.drop_index(op.f('ix_ipads_alias'), table_name='ipads')
     op.drop_table('ipads')
@@ -624,6 +622,7 @@ def downgrade():
     op.drop_table('role_permissions')
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')
+    op.drop_index(op.f('ix_toefl_tests_date'), table_name='toefl_tests')
     op.drop_table('toefl_tests')
     op.drop_index(op.f('ix_score_types_name'), table_name='score_types')
     op.drop_table('score_types')
@@ -648,6 +647,7 @@ def downgrade():
     op.drop_table('ipad_capacities')
     op.drop_index(op.f('ix_invitation_types_name'), table_name='invitation_types')
     op.drop_table('invitation_types')
+    op.drop_index(op.f('ix_gre_tests_date'), table_name='gre_tests')
     op.drop_table('gre_tests')
     op.drop_index(op.f('ix_gre_aw_scores_name'), table_name='gre_aw_scores')
     op.drop_table('gre_aw_scores')
