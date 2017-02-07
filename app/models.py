@@ -613,6 +613,7 @@ class Punch(db.Model):
     __tablename__ = 'punches'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
+    milestone = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_json(self):
@@ -1798,9 +1799,10 @@ class User(UserMixin, db.Model):
 
     def punch(self, section):
         if not self.punched(section):
-            punch = Punch(user_id=self.id, section_id=section.id)
+            punch = Punch(user_id=self.id, section_id=section.id, milestone=True)
         else:
             punch = self.punches.filter_by(section_id=section.id).first()
+            punch.milestone = True
             punch.timestamp = datetime.utcnow()
         db.session.add(punch)
 
