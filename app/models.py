@@ -2896,7 +2896,7 @@ class iPadContentJSON(db.Model):
 class iPad(db.Model):
     __tablename__ = 'ipads'
     id = db.Column(db.Integer, primary_key=True)
-    serial = db.Column(db.Unicode(12), index=True)
+    serial = db.Column(db.Unicode(64), index=True)
     alias = db.Column(db.Unicode(64), index=True)
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
@@ -3221,7 +3221,7 @@ class Lesson(db.Model):
             (u'L12', u'VB', 10, -1, 13, True, True, ),
             (u'L13', u'VB', 10, -1, 14, True, True, ),
             (u'L14', u'VB', 10, -1, 15, True, True, ),
-            (u'词典使用', u'VB', 0, 0, 0, False, True, ),
+            (u'词典使用', u'VB', 0, 0, 0, False, False, ),
             (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, True, False, ),
             (u'1st', u'Y-GRE', 30, 17, 2, True, False, ),
             (u'2nd', u'Y-GRE', 30, 17, 3, True, False, ),

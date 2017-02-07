@@ -4014,6 +4014,7 @@ def ipad_contents():
         .filter_by(deleted=False)\
         .order_by(iPad.alias.asc())
     lessons = Lesson.query\
+        .filter(Lesson.include_video == True)\
         .filter(Lesson.advanced == False)\
         .order_by(Lesson.id.asc())
     return render_template('manage/ipad_contents.html',
