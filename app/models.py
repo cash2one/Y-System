@@ -1802,35 +1802,66 @@ class User(UserMixin, db.Model):
         if section.name in [u'词典使用', u'AW总论']:
             self.__punch(section=section, milestone=True)
             return
-        if section.lesson.type_id == last_punch.section.lesson.type_id:
-            if section.order > last_punch.section.order + 1:
+        if section.lesson.type_id == self.last_punch.section.lesson.type_id:
+            if section.order > self.last_punch.section.order + 1:
                 covered_sections = Section.query\
                     .join(Lesson, Lesson.id == Section.lesson_id)\
-                    .join(CourseType, CourseType.id == Lesson.type_id)\
-                    .filter(CourseType.name == section.lesson.type.name)\
+                    .filter(Lesson.type_id == section.lesson.type_id)\
                     .filter(and_(
-                        Section.order > last_punch.section.order,
+                        Section.order > self.last_punch.section.order,
                         Section.order < section.order
                     ))\
+                    .order_by(Section.order.asc())\
                     .all()
                 for covered_section in covered_sections:
                     self.__punch(section=covered_section, timestamp=timestamp)
-            if section.order < last_punch.section.order:
+            if section.order < self.last_punch.section.order:
                 uncovered_sections = Section.query\
                     .join(Lesson, Lesson.id == Section.lesson_id)\
-                    .join(CourseType, CourseType.id == Lesson.type_id)\
-                    .filter(CourseType.name == section.lesson.type.name)\
+                    .filter(Lesson.type_id == section.lesson.type_id)\
                     .filter(and_(
                         Section.order > section.order,
-                        Section.order <= last_punch.section.order
+                        Section.order <= self.last_punch.section.order
                     ))\
                     .all()
                 for uncovered_section in uncovered_sections:
-                    self.__punch(section=uncovered_section, timestamp=timestamp)
+                    self.unpunch(section=uncovered_section)
             self.__punch(section=section, milestone=True, timestamp=timestamp)
             return
-        else:
-            pass
+        if self.last_punch.section.lesson.name == u'VB' and section.lesson.name == u'Y-GRE':
+            covered_sections = Section.query\
+                .filter(Section.lesson_id == self.last_punch.section.lesson_id)\
+                .filter(Section.order > self.last_punch.section.order)\
+                .order_by(Section.order.asc())\
+                .all() + \
+                Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == section.lesson.type_id)\
+                .filter(and_(
+                    Section.order >= 1,
+                    Section.order < section.order
+                ))\
+                .order_by(Section.order.asc())\
+                .all()
+            for covered_section in covered_sections:
+                self.__punch(section=covered_section, timestamp=timestamp)
+            self.__punch(section=section, milestone=True, timestamp=timestamp)
+            return
+        if self.last_punch.section.lesson.name == u'Y-GRE' and section.lesson.name == u'VB':
+            uncovered_sections = Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == self.last_punch.section.lesson.type_id)\
+                .filter(Section.order >= 1)\
+                .all() + \
+                Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == self.section.lesson.type_id)\
+                .filter(Section.order > section.order)\
+                .all()
+                for uncovered_section in uncovered_sections:
+                    self.unpunch(section=uncovered_section)
+            self.__punch(section=section, milestone=True, timestamp=timestamp)
+            return
 
     def __punch(self, section, milestone=False, timestamp=datetime.utcnow()):
         if not self.punched(section):
