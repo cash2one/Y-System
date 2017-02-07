@@ -115,14 +115,14 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="flag icon"></i>研修进度</h3>
-                <h4 class="ui header">VB完成：{{ user.vb_progress }}%</h4>
+                <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB完成：{{ user.vb_progress }}%</h4>
                 <div class="ui blue vb progress{% if not user.last_vb_punch %} disabled{% endif %}" data-percent="{{ user.vb_progress }}">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
                     <div class="label">{% if user.last_vb_punch %}抵达进度：{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</div>
                 </div>
-                <h4 class="ui header">Y-GRE完成：{{ user.y_gre_progress }}%</h4>
+                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE完成：{{ user.y_gre_progress }}%</h4>
                 <div class="ui teal y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}" data-percent="{{ user.y_gre_progress }}">
                     <div class="bar">
                         <div class="progress"></div>
