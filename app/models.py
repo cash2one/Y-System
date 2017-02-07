@@ -1799,24 +1799,47 @@ class User(UserMixin, db.Model):
 
     def punch(self, section):
         timestamp = datetime.utcnow()
-        if not self.punched(section):
-            covered_sections = Section.query\
-                .filter(and_(Section.order > last_punch.section.order, Section.order < section.order))\
-                .all()
-            for covered_section in covered_sections:
-                punch = Punch(user_id=self.id, section_id=covered_section.id, timestamp=timestamp)
-                db.session.add(punch)
-            punch = Punch(user_id=self.id, section_id=section.id, milestone=True, timestamp=timestamp)
-            db.session.add(punch)
+        if section.name in [u'词典使用', u'AW总论']:
+            self.__punch(section=section, milestone=True)
+            return
+        if section.lesson.type_id == last_punch.section.lesson.type_id:
+            if section.order > last_punch.section.order:
+                covered_sections = Section.query\
+                    .join(Lesson, Lesson.id == Section.lesson_id)\
+                    .join(CourseType, CourseType.id == Lesson.type_id)\
+                    .filter(CourseType.name == section.lesson.type.name)\
+                    .filter(and_(
+                        Section.order > last_punch.section.order,
+                        Section.order < section.order
+                    ))\
+                    .all()
+                for covered_section in covered_sections:
+                    self.__punch(section=covered_section, timestamp=timestamp)
+            if section.order < last_punch.section.order:
+                uncovered_sections = Section.query\
+                    .join(Lesson, Lesson.id == Section.lesson_id)\
+                    .join(CourseType, CourseType.id == Lesson.type_id)\
+                    .filter(CourseType.name == section.lesson.type.name)\
+                    .filter(and_(
+                        Section.order > section.order,
+                        Section.order <= last_punch.section.order
+                    ))\
+                    .all()
+                for uncovered_section in uncovered_sections:
+                    self.__punch(section=uncovered_section, timestamp=timestamp)
+            self.__punch(section=section, milestone=True, timestamp=timestamp)
+            return
         else:
-            uncovered_sections = Section.query\
-                .all()
-            for uncovered_section in uncovered_sections:
-                self.unpunch(uncovered_section)
+            pass
+
+    def __punch(self, section, milestone=False, timestamp=datetime.utcnow()):
+        if not self.punched(section):
+            punch = Punch(user_id=self.id, section_id=section.id, milestone=milestone, timestamp=timestamp)
+        else:
             punch = self.punches.filter_by(section_id=section.id).first()
-            punch.milestone = True
+            punch.milestone = milestone
             punch.timestamp = timestamp
-            db.session.add(punch)
+        db.session.add(punch)
 
     def unpunch(self, section):
         punch = self.punches.filter_by(section_id=section.id).first()
@@ -3080,7 +3103,6 @@ class Lesson(db.Model):
             u'L7': u'7',
             u'L8': u'8',
             u'L9': u'9',
-            u'L10': u'10',
             u'L11': u'11',
             u'L12': u'12',
             u'L13': u'13',
@@ -3135,11 +3157,10 @@ class Lesson(db.Model):
             (u'L7', u'VB', 10, 6, 8, False, ),
             (u'L8', u'VB', 10, 5, 9, False, ),
             (u'L9', u'VB', 10, 4, 10, False, ),
-            (u'L10', u'VB', 10, -2, 11, False, ),
-            (u'L11', u'VB', 10, -1, 12, True, ),
-            (u'L12', u'VB', 10, -1, 13, True, ),
-            (u'L13', u'VB', 10, -1, 14, True, ),
-            (u'L14', u'VB', 10, -1, 15, True, ),
+            (u'L11', u'VB', 10, -1, 11, True, ),
+            (u'L12', u'VB', 10, -1, 12, True, ),
+            (u'L13', u'VB', 10, -1, 13, True, ),
+            (u'L14', u'VB', 10, -1, 14, True, ),
             (u'词典使用', u'VB', 0, 0, 0, True, ),
             (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, False, ),
             (u'1st', u'Y-GRE', 30, 17, 2, False, ),
@@ -3151,7 +3172,7 @@ class Lesson(db.Model):
             (u'7th', u'Y-GRE', 30, 3, 8, False, ),
             (u'8th', u'Y-GRE', 30, 2, 9, False, ),
             (u'9th', u'Y-GRE', 30, 1, 10, False, ),
-            (u'Test', u'Y-GRE', 0, 0, 0, False, ),
+            (u'Test', u'Y-GRE', 0, 0, -1, False, ),
             (u'AW总论', u'Y-GRE', 3, 17, 0, False, ),
         ]
         for L in lessons:
@@ -3296,55 +3317,54 @@ class Section(db.Model):
             (u'9.7', u'L9', 88, ),
             (u'9.8', u'L9', 89, ),
             (u'9.9', u'L9', 90, ),
-            (u'L10', u'L10', 91, ),
-            (u'11.1', u'L11', 92, ),
-            (u'11.2', u'L11', 93, ),
-            (u'11.3', u'L11', 94, ),
-            (u'11.4', u'L11', 95, ),
-            (u'11.5', u'L11', 96, ),
-            (u'11.6', u'L11', 97, ),
-            (u'11.7', u'L11', 98, ),
-            (u'11.8', u'L11', 99, ),
-            (u'11.9', u'L11', 100, ),
-            (u'11.10', u'L11', 101, ),
-            (u'11.11', u'L11', 102, ),
-            (u'11.12', u'L11', 103, ),
-            (u'12.1', u'L12', 104, ),
-            (u'12.2', u'L12', 105, ),
-            (u'12.3', u'L12', 106, ),
-            (u'12.4', u'L12', 107, ),
-            (u'12.5', u'L12', 108, ),
-            (u'12.6', u'L12', 109, ),
-            (u'12.7', u'L12', 110, ),
-            (u'12.8', u'L12', 111, ),
-            (u'12.9', u'L12', 112, ),
-            (u'12.10', u'L12', 113, ),
-            (u'12.11', u'L12', 114, ),
-            (u'12.12', u'L12', 115, ),
-            (u'13.1', u'L13', 116, ),
-            (u'13.2', u'L13', 117, ),
-            (u'13.3', u'L13', 118, ),
-            (u'13.4', u'L13', 119, ),
-            (u'13.5', u'L13', 120, ),
-            (u'13.6', u'L13', 121, ),
-            (u'13.7', u'L13', 122, ),
-            (u'13.8', u'L13', 123, ),
-            (u'13.9', u'L13', 124, ),
-            (u'13.10', u'L13', 125, ),
-            (u'13.11', u'L13', 126, ),
-            (u'13.12', u'L13', 127, ),
-            (u'14.1', u'L14', 128, ),
-            (u'14.2', u'L14', 129, ),
-            (u'14.3', u'L14', 130, ),
-            (u'14.4', u'L14', 131, ),
-            (u'14.5', u'L14', 132, ),
-            (u'14.6', u'L14', 133, ),
-            (u'14.7', u'L14', 134, ),
-            (u'14.8', u'L14', 135, ),
-            (u'14.9', u'L14', 136, ),
-            (u'14.10', u'L14', 137, ),
-            (u'14.11', u'L14', 138, ),
-            (u'14.12', u'L14', 139, ),
+            (u'11.1', u'L11', 91, ),
+            (u'11.2', u'L11', 92, ),
+            (u'11.3', u'L11', 93, ),
+            (u'11.4', u'L11', 94, ),
+            (u'11.5', u'L11', 95, ),
+            (u'11.6', u'L11', 96, ),
+            (u'11.7', u'L11', 97, ),
+            (u'11.8', u'L11', 98, ),
+            (u'11.9', u'L11', 99, ),
+            (u'11.10', u'L11', 100, ),
+            (u'11.11', u'L11', 101, ),
+            (u'11.12', u'L11', 102, ),
+            (u'12.1', u'L12', 103, ),
+            (u'12.2', u'L12', 104, ),
+            (u'12.3', u'L12', 105, ),
+            (u'12.4', u'L12', 106, ),
+            (u'12.5', u'L12', 107, ),
+            (u'12.6', u'L12', 108, ),
+            (u'12.7', u'L12', 109, ),
+            (u'12.8', u'L12', 110, ),
+            (u'12.9', u'L12', 111, ),
+            (u'12.10', u'L12', 112, ),
+            (u'12.11', u'L12', 113, ),
+            (u'12.12', u'L12', 114, ),
+            (u'13.1', u'L13', 115, ),
+            (u'13.2', u'L13', 116, ),
+            (u'13.3', u'L13', 117, ),
+            (u'13.4', u'L13', 118, ),
+            (u'13.5', u'L13', 119, ),
+            (u'13.6', u'L13', 120, ),
+            (u'13.7', u'L13', 121, ),
+            (u'13.8', u'L13', 122, ),
+            (u'13.9', u'L13', 123, ),
+            (u'13.10', u'L13', 124, ),
+            (u'13.11', u'L13', 125, ),
+            (u'13.12', u'L13', 126, ),
+            (u'14.1', u'L14', 127, ),
+            (u'14.2', u'L14', 128, ),
+            (u'14.3', u'L14', 129, ),
+            (u'14.4', u'L14', 130, ),
+            (u'14.5', u'L14', 131, ),
+            (u'14.6', u'L14', 132, ),
+            (u'14.7', u'L14', 133, ),
+            (u'14.8', u'L14', 134, ),
+            (u'14.9', u'L14', 135, ),
+            (u'14.10', u'L14', 136, ),
+            (u'14.11', u'L14', 137, ),
+            (u'14.12', u'L14', 138, ),
             (u'词典使用', u'词典使用', 0, )
             (u'Y-GRE总论', u'Y-GRE总论', 1, ),
             (u'1st', u'1st', 2, ),
@@ -3356,7 +3376,7 @@ class Section(db.Model):
             (u'7th', u'7th', 8, ),
             (u'8th', u'8th', 9, ),
             (u'9th', u'9th', 10, ),
-            (u'Test', u'Test', 0, ),
+            (u'Test', u'Test', -1, ),
             (u'AW总论', u'AW总论', 0, ),
         ]
         for S in sections:
