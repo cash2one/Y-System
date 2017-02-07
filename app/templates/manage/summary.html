@@ -188,10 +188,10 @@
             </div>
             <div class="column">
                 <div class="ui blue statistic">
-                    <div class="label">VB L4-10</div>
+                    <div class="label">VB L4-9</div>
                     <div class="label">到场/预约人数</div>
                     <div class="value">
-                        <span id="stat-vb-l4-10">0</span>/<span id="stat-vb-l4-10-total">0</span>
+                        <span id="stat-vb-l4-9">0</span>/<span id="stat-vb-l4-9-total">0</span>
                     </div>
                 </div>
             </div>
@@ -408,8 +408,8 @@ var AWIntroCountUp = new CountUp('stat-aw-intro', 0, 0, 0, 2.5, countUpOptions);
 var AWIntroTotalCountUp = new CountUp('stat-aw-intro-total', 0, 0, 0, 2.5, countUpOptions);
 var VBL1_3CountUp = new CountUp('stat-vb-l1-3', 0, 0, 0, 2.5, countUpOptions);
 var VBL1_3TotalCountUp = new CountUp('stat-vb-l1-3-total', 0, 0, 0, 2.5, countUpOptions);
-var VBL4_10CountUp = new CountUp('stat-vb-l4-10', 0, 0, 0, 2.5, countUpOptions);
-var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-10-total', 0, 0, 0, 2.5, countUpOptions);
+var VBL4_10CountUp = new CountUp('stat-vb-l4-9', 0, 0, 0, 2.5, countUpOptions);
+var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-9-total', 0, 0, 0, 2.5, countUpOptions);
 var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
 var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
 function updateStats(updateProgressBar) {
@@ -431,8 +431,8 @@ function updateStats(updateProgressBar) {
         AWIntroTotalCountUp.update(data.booking.y_gre.aw_intro.total);
         VBL1_3CountUp.update(data.booking.vb.l1_3.show_up);
         VBL1_3TotalCountUp.update(data.booking.vb.l1_3.total);
-        VBL4_10CountUp.update(data.booking.vb.l4_10.show_up);
-        VBL4_10TotalCountUp.update(data.booking.vb.l4_10.total);
+        VBL4_10CountUp.update(data.booking.vb.l4_9.show_up);
+        VBL4_10TotalCountUp.update(data.booking.vb.l4_9.total);
         YGRECountUp.update(data.booking.y_gre.y_gre.show_up);
         YGRETotalCountUp.update(data.booking.y_gre.y_gre.total);
         if (updateProgressBar) {

@@ -162,9 +162,9 @@ def summary_statistics():
                     'total': Booking.of_current_vb_schedule([u'L1', u'L2', u'L3']),
                     'show_up': Booking.show_ups([u'L1', u'L2', u'L3']),
                 },
-                'l4_10': {
-                    'total': Booking.of_current_vb_schedule([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9', u'L10']),
-                    'show_up': Booking.show_ups([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9', u'L10']),
+                'l4_9': {
+                    'total': Booking.of_current_vb_schedule([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9']),
+                    'show_up': Booking.show_ups([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9']),
                 },
                 'l11_14': {
                     'total': Booking.of_current_vb_schedule([u'L11', u'L12', u'L13', u'L14']),
