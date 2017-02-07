@@ -93,7 +93,7 @@ class EditPunchLessonForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditPunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.order >= 1).order_by(Lesson.id.asc()).all()]
 
 
 class EditPunchSectionForm(FlaskForm):
