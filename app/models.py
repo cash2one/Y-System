@@ -1911,6 +1911,33 @@ class User(UserMixin, db.Model):
             .first()
 
     @property
+    def vb_progress(self):
+        if self.last_vb_punch is not None:
+            query = Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'VB')\
+                .filter(Section.order >= 1)
+            if self.can_access_advanced_vb:
+                total_sections = query.count()
+            else:
+                total_sections = query.filter(Lesson.advanced == False).count()
+            return int(float(self.last_vb_punch.section.order) / total_sections * 100)
+        return 0
+
+    @property
+    def y_gre_progress(self):
+        if self.last_y_gre_punch is not None:
+            total_sections = Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'Y-GRE')\
+                .filter(Section.order >= 1)\
+                .count()
+            return int(float(self.last_y_gre_punch.section.order) / total_sections * 100)
+        return 0
+
+    @property
     def next_punch(self):
         if self.last_punch.section.lesson.type.name == u'VB':
             return Section.query\
