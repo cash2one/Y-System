@@ -1886,7 +1886,7 @@ class User(UserMixin, db.Model):
             .join(Section, Section.id == Punch.section_id)\
             .filter(Punch.user_id == self.id)\
             .filter(Section.order >= 1)\
-            .order_by(Section.order.desc())\
+            .order_by(Punch.timestamp.desc())\
             .first()
 
     @property
