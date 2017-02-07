@@ -7,7 +7,7 @@ from string import ascii_letters, digits
 from hashlib import sha512
 from json import loads, dumps
 from bs4 import BeautifulSoup
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
@@ -1798,13 +1798,25 @@ class User(UserMixin, db.Model):
         return Rental.query.filter_by(user_id=self.id, returned=False).count() > 0
 
     def punch(self, section):
+        timestamp = datetime.utcnow()
         if not self.punched(section):
-            punch = Punch(user_id=self.id, section_id=section.id, milestone=True)
+            covered_sections = Section.query\
+                .filter(and_(Section.order > last_punch.section.order, Section.order < section.order))\
+                .all()
+            for covered_section in covered_sections:
+                punch = Punch(user_id=self.id, section_id=covered_section.id, timestamp=timestamp)
+                db.session.add(punch)
+            punch = Punch(user_id=self.id, section_id=section.id, milestone=True, timestamp=timestamp)
+            db.session.add(punch)
         else:
+            uncovered_sections = Section.query\
+                .all()
+            for uncovered_section in uncovered_sections:
+                self.unpunch(uncovered_section)
             punch = self.punches.filter_by(section_id=section.id).first()
             punch.milestone = True
-            punch.timestamp = datetime.utcnow()
-        db.session.add(punch)
+            punch.timestamp = timestamp
+            db.session.add(punch)
 
     def unpunch(self, section):
         punch = self.punches.filter_by(section_id=section.id).first()
@@ -1816,7 +1828,12 @@ class User(UserMixin, db.Model):
 
     @property
     def last_punch(self):
-        return self.punches.filter_by(order>=1).order_by(Punch.timestamp.desc()).first()
+        return Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(Section.order >= 1)\
+            .order_by(Section.order.desc())\
+            .first()
 
     @property
     def last_vb_punch(self):
@@ -1888,6 +1905,11 @@ class User(UserMixin, db.Model):
             modified_by_id=modified_by.id
         )
         db.session.add(assignment_score)
+
+    @property
+    def can_access_advanced_vb(self):
+        vb_test_score = self.vb_test_scores.filter_by(test_id=Test.query.filter_by(name=u'L6-9').first().id).first()
+        return vb_test_score is not None and vb_test_score.score >= 90.0
 
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
