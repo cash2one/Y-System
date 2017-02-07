@@ -3125,19 +3125,19 @@ class Lesson(db.Model):
     def all_dependent_names(self):
         if self.dependents.count() == 0:
             return []
-        return self.dependents.first().dependent.all_dependents + [self.dependents.first().dependent.name]
+        return self.dependents.first().dependent.all_dependent_names + [self.dependents.first().dependent.name]
 
     @property
     def all_follow_ups(self):
         if self.follow_ups.count() == 0:
             return []
-        return self.follow_ups.first().follow_up.all_follow_ups + [self.follow_ups.first().follow_up]
+        return [self.follow_ups.first().follow_up] + self.follow_ups.first().follow_up.all_follow_ups
 
     @property
     def all_follow_up_names(self):
         if self.follow_ups.count() == 0:
             return []
-        return self.follow_ups.first().follow_up.all_follow_ups + [self.follow_ups.first().follow_up.name]
+        return [self.follow_ups.first().follow_up.name] + self.follow_ups.first().follow_up.all_follow_up_names
 
     @property
     def occupied_ipads_alias(self):
@@ -3282,19 +3282,19 @@ class Section(db.Model):
     def all_dependent_names(self):
         if self.dependents.count() == 0:
             return []
-        return self.dependents.first().dependent.all_dependents + [self.dependents.first().dependent.name]
+        return self.dependents.first().dependent.all_dependent_names + [self.dependents.first().dependent.name]
 
     @property
     def all_follow_ups(self):
         if self.follow_ups.count() == 0:
             return []
-        return self.follow_ups.first().follow_up.all_follow_ups + [self.follow_ups.first().follow_up]
+        return [self.follow_ups.first().follow_up] + self.follow_ups.first().follow_up.all_follow_ups
 
     @property
     def all_follow_up_names(self):
         if self.follow_ups.count() == 0:
             return []
-        return self.follow_ups.first().follow_up.all_follow_ups + [self.follow_ups.first().follow_up.name]
+        return [self.follow_ups.first().follow_up.name] + self.follow_ups.first().follow_up.all_follow_up_names
 
     @staticmethod
     def insert_sections():
