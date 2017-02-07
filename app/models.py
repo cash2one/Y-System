@@ -1803,7 +1803,7 @@ class User(UserMixin, db.Model):
             self.__punch(section=section, milestone=True)
             return
         if section.lesson.type_id == last_punch.section.lesson.type_id:
-            if section.order > last_punch.section.order:
+            if section.order > last_punch.section.order + 1:
                 covered_sections = Section.query\
                     .join(Lesson, Lesson.id == Section.lesson_id)\
                     .join(CourseType, CourseType.id == Lesson.type_id)\
