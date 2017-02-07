@@ -1826,7 +1826,7 @@ class User(UserMixin, db.Model):
             .join(CourseType, CourseType.id = Lesson.type_id)\
             .filter(Punch.user_id == self.id)\
             .filter(CourseType.name == u'VB')\
-            .order_by(Punch.timestamp.desc())\
+            .order_by(Section.order.desc())\
             .first()
 
     @property
@@ -1837,7 +1837,7 @@ class User(UserMixin, db.Model):
             .join(CourseType, CourseType.id = Lesson.type_id)\
             .filter(Punch.user_id == self.id)\
             .filter(CourseType.name == u'Y-GRE')\
-            .order_by(Punch.timestamp.desc())\
+            .order_by(Section.order.desc())\
             .first()
 
     @property
@@ -1859,7 +1859,8 @@ class User(UserMixin, db.Model):
                 .filter(CourseType.name == u'Y-GRE')\
                 .filter(Section.order >= self.last_punch.section.order)\
                 .order_by(Section.order.asc())\
-                .all()
+                .all() + \
+                [Section.query.filter_by(name=u'AW总论').first()]
 
     def add_toefl_test_score(self, test_date, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         test = TOEFLTest.query.filter_by(date=test_date).first()
