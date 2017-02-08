@@ -1,26 +1,8 @@
 {% macro pagination_widget(pagination, endpoint, fragment='') %}
-<div class="ui mini secondary stackable menu">
-    {% if not pagination.has_prev %}
-    <div class="disabled item"><i class="fa fa-chevron-left"></i></div>
-    {% else %}
-    <a class="item loading-trigger" href="{% if pagination.has_prev %}{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}{{ fragment }}{% else %}#{% endif %}"><i class="fa fa-chevron-left"></i></a>
-    {% endif %}
-    {% for p in pagination.iter_pages() %}
-    {% if p %}
-    {% if p == pagination.page %}
-    <a class="active item loading-trigger" href="{{ url_for(endpoint, page=p, **kwargs) }}{{ fragment }}">{{ p }}</a>
-    {% else %}
-    <a class="item loading-trigger" href="{{ url_for(endpoint, page=p, **kwargs) }}{{ fragment }}">{{ p }}</a>
-    {% endif %}
-    {% else %}
-    <a class="disabled item" href="#"><i class="ellipsis horizontal icon"></i></a>
-    {% endif %}
-    {% endfor %}
-    {% if not pagination.has_next %}
-    <div class="disabled item"><i class="fa fa-chevron-right"></i></div>
-    {% else %}
-    <a class="item loading-trigger" href="{% if pagination.has_next %}{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}{{ fragment }}{% else %}#{% endif %}"><i class="fa fa-chevron-right"></i></a>
-    {% endif %}
+<div class="ui mini secondary paginate menu">
+    {% if pagination.has_prev %}<a class="item loading-trigger" href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}{{ fragment }}"><i class="fa fa-chevron-left"></i></a>{% else %}<div class="disabled item"><i class="fa fa-chevron-left"></i></div>{% endif %}
+    {% for p in pagination.iter_pages(left_edge=2, left_current=2, right_current=5, right_edge=2) %}{% if p %}<a class="{% if p == pagination.page %}active {% endif %}item loading-trigger" href="{{ url_for(endpoint, page=p, **kwargs) }}{{ fragment }}">{{ p }}</a>{% else %}<div class="disabled item"><i class="fa fa-ellipsis-h"></i></div>{% endif %}{% endfor %}
+    {% if pagination.has_next %}<a class="item loading-trigger" href="{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}{{ fragment }}"><i class="fa fa-chevron-right"></i></a>{% else %}<div class="disabled item"><i class="fa fa-chevron-right"></i></div>{% endif %}
 </div>
 {% endmacro %}
 
@@ -96,6 +78,7 @@
 {% endwith %}
 {% endmacro %}
 
+
 {% macro form_validation_error_widget(form) %}
 {% if form.errors %}
 <div class="ui flask negative message">
@@ -110,31 +93,38 @@
 {% endif %}
 {% endmacro %}
 
+
 {% macro user_gender(user, is_current_user=False) %}
 {% if is_current_user %}<i class="yellow star icon"></i>{% endif %}{{ user.name }}{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
 {% endmacro %}
+
 
 {% macro user_url(user, is_current_user=False) %}
 {% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.profile', id=user.id) }}" target="_blank">{{ user.name }}</a>
 {% endmacro %}
 
+
 {% macro user_url_gender(user, is_current_user=False) %}
 {% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.profile', id=user.id) }}" target="_blank">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
 {% endmacro %}
+
 
 {% macro user_popup(user, is_current_user=False) %}
 {% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.profile', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>
 <div class="ui flowing popup popup-content">{{ user.name_alias }}</div>
 {% endmacro %}
 
+
 {% macro user_popup_gender(user, is_current_user=False) %}
 {% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.profile', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
 <div class="ui flowing popup popup-content">{{ user.name_alias }}</div>
 {% endmacro %}
 
+
 {% macro user_email(user) %}
 <i class="{% if user.confirmed %}green check{% else %}red remove{% endif %} icon"></i>{{ user.email }}
 {% endmacro %}
+
 
 {% macro date_picker_js_snippet() %}
 $('.ui.date.calendar').calendar({
@@ -172,6 +162,7 @@ $('.ui.date.calendar').calendar({
     },
 });
 {% endmacro %}
+
 
 {% macro year_picker_js_snippet() %}
 $('.ui.year.calendar').calendar({
