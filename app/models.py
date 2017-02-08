@@ -1934,7 +1934,9 @@ class User(UserMixin, db.Model):
                 .filter(CourseType.name == u'Y-GRE')\
                 .filter(Section.order >= 1)\
                 .count()
-            return int(float(self.last_y_gre_punch.section.order) / total_sections * 100)
+            if self.punched(section=Section.query.filter_by(name=u'AW总论').first()):
+                return int(float(self.last_y_gre_punch.section.order + 1) / (total_sections + 1) * 100)
+            return int(float(self.last_y_gre_punch.section.order) / (total_sections + 1) * 100)
         return 0
 
     @property
