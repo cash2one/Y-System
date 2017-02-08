@@ -92,7 +92,7 @@ $('.message .close')
     })
 ;
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
 
 {% if announcements and current_user.can('管理通知') %}
 $('.right.floated .ui.circular.icon.button').popup();

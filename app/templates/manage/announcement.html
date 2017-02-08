@@ -127,7 +127,7 @@ $('.message .close')
 
 $('.ui.checkbox').checkbox();
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
 
 {% for announcement in announcements %}
 $('#delete-trigger-{{ announcement.id }}')

@@ -57,7 +57,7 @@
                     <thead>
                         <tr>
                             <th>课程</th>
-                            <th>视频内容</th>
+                            <th>内容</th>
                             <th>作业</th>
                             <th>考试</th>
                         </tr>
@@ -66,19 +66,26 @@
                         {% for lesson in vb_lessons %}
                         <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
                             <td class="single line">{{ lesson.name }}</td>
-{% if lesson.include_video %}
 {% with sections = lesson.sections %}
-<td{% if sections.count() < 4 %} class="single line"{% endif %}>
+<td{% if sections.count() < 3 %} class="single line"{% endif %}>
 {% if sections.count() %}
 <div class="ui labels">
-{% for section in sections %}<div class="ui {% if user.punched(section) %}green {% endif %}label">{% if user.punched(section) %}<i class="check icon"></i>{% endif %}{{ section.name }}</div>{% endfor %}
+{% for section in sections %}
+{% if user.punched(section) %}
+<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ section.name }}<div class="detail">{{ moment(user.punched_at(section)).fromNow() }}</div></div>
+<div class="ui popup popup-content">
+{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}
+</div>
+{% else %}
+<div class="ui label">{{ section.name }}</div>
+{% endif %}
+{% endfor %}
 </div>
 {% else %}无{% endif %}
-{% endwith %}
 </td>
-{% else %}<td>无</td>{% endif %}
+{% endwith %}
                             {% with assignments = lesson.assignments %}
-<td{% if assignments.count() < 4 %} class="single line"{% endif %}>
+<td{% if assignments.count() < 3 %} class="single line"{% endif %}>
 {% if assignments.count() %}
 <div class="ui labels">
 {% for assignment in assignments %}
@@ -91,7 +98,7 @@
 </td>
 {% endwith %}
                             {% with tests = lesson.tests %}
-<td{% if tests.count() < 4 %} class="single line"{% endif %}>
+<td{% if tests.count() < 3 %} class="single line"{% endif %}>
 {% if tests.count() %}
 <div class="ui labels">
 {% for test in tests %}
@@ -115,7 +122,7 @@
                     <thead>
                         <tr>
                             <th>课程</th>
-                            <th>视频内容</th>
+                            <th>内容</th>
                             <th>考试</th>
                         </tr>
                     </thead>
@@ -123,19 +130,26 @@
                         {% for lesson in y_gre_lessons %}
                         <tr>
                             <td class="single line">{{ lesson.name }}</td>
-{% if lesson.include_video %}
 {% with sections = lesson.sections %}
-<td{% if sections.count() < 4 %} class="single line"{% endif %}>
+<td{% if sections.count() < 3 %} class="single line"{% endif %}>
 {% if sections.count() %}
 <div class="ui labels">
-{% for section in sections %}<div class="ui {% if user.punched(section) %}green {% endif %}label">{% if user.punched(section) %}<i class="check icon"></i>{% endif %}{{ section.name }}</div>{% endfor %}
+{% for section in sections %}
+{% if user.punched(section) %}
+<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ section.name }}<div class="detail">{{ moment(user.punched_at(section)).fromNow() }}</div></div>
+<div class="ui popup popup-content">
+{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}
+</div>
+{% else %}
+<div class="ui label">{{ section.name }}</div>
+{% endif %}
+{% endfor %}
 </div>
 {% else %}无{% endif %}
-{% endwith %}
 </td>
-{% else %}<td>无</td>{% endif %}
+{% endwith %}
                             {% with tests = lesson.tests %}
-<td{% if tests.count() < 4 %} class="single line"{% endif %}>
+<td{% if tests.count() < 3 %} class="single line"{% endif %}>
 {% if tests.count() %}
 <div class="ui labels">
 {% for test in tests %}
@@ -256,7 +270,7 @@ $('.message .close')
     })
 ;
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
 
 // progress bars
 $('.ui.vb.progress').progress();

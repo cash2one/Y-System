@@ -1880,6 +1880,10 @@ class User(UserMixin, db.Model):
     def punched(self, section):
         return self.punches.filter_by(section_id=section.id).first() is not None
 
+    def punched_at(self, section):
+        if self.punched(section):
+            return self.punches.filter_by(section_id=section.id).first().timestamp
+
     @property
     def last_punch(self):
         if self.last_y_gre_punch is not None:
@@ -1922,7 +1926,9 @@ class User(UserMixin, db.Model):
                 total_sections = query.count()
             else:
                 total_sections = query.filter(Lesson.advanced == False).count()
-            return int(float(self.last_vb_punch.section.order) / total_sections * 100)
+            if self.punched(section=Section.query.filter_by(name=u'词典使用').first()):
+                return int(float(self.last_y_gre_punch.section.order + 1) / (total_sections + 1) * 100)
+            return int(float(self.last_vb_punch.section.order) / (total_sections + 1) * 100)
         return 0
 
     @property

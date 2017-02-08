@@ -112,7 +112,7 @@ $('.message .close')
     })
 ;
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
 
 {% for user in users %}
 {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}

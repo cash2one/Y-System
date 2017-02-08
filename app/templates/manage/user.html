@@ -209,7 +209,7 @@ $('.message .close')
     })
 ;
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
 
 {% if current_user.can('管理用户') %}
 $('#create-user-trigger').popup();
