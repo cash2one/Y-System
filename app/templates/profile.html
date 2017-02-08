@@ -96,7 +96,11 @@
 {% if assignments.count() %}
 <div class="ui labels">
 {% for assignment in assignments %}
+{% if user.submitted(assignment) %}
+<div class="ui green label"><i class="check icon"></i>{{ assignment.name }}</div>
+{% else %}
 <div class="ui label">{{ assignment.name }}</div>
+{% endif %}
 {% endfor %}
 </div>
 {% else %}
@@ -109,7 +113,11 @@
 {% if tests.count() %}
 <div class="ui labels">
 {% for test in tests %}
+{% if user.taken_vb(test) %}
+<div class="ui green label"><i class="check icon"></i>{{ test.name }}</div>
+{% else %}
 <div class="ui label">{{ test.name }}</div>
+{% endif %}
 {% endfor %}
 </div>
 {% else %}无{% endif %}
@@ -161,7 +169,11 @@
 {% if tests.count() %}
 <div class="ui labels">
 {% for test in tests %}
+{% if user.taken_y_gre(test) %}
+<div class="ui green label"><i class="check icon"></i>{{ test.name }}</div>
+{% else %}
 <div class="ui label">{{ test.name }}</div>
+{% endif %}
 {% endfor %}
 </div>
 {% else %}无{% endif %}

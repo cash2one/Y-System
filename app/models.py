@@ -1985,14 +1985,23 @@ class User(UserMixin, db.Model):
         )
         db.session.add(toefl_test_score)
 
-    def add_assignment_score(self, assignment, grade, modified_by):
-        assignment_score = AssignmentScore(
-            user_id=self.id,
-            assignment_id=assignment.id,
-            grade_id=grade.id,
-            modified_by_id=modified_by.id
-        )
-        db.session.add(assignment_score)
+    # def add_assignment_score(self, assignment, grade, modified_by):
+    #     assignment_score = AssignmentScore(
+    #         user_id=self.id,
+    #         assignment_id=assignment.id,
+    #         grade_id=grade.id,
+    #         modified_by_id=modified_by.id
+    #     )
+    #     db.session.add(assignment_score)
+
+    def submitted(self, assignment):
+        return self.assignment_scores.filter_by(assignment_id=assignment.id).first() is not None
+
+    def taken_vb(self, test):
+        return self.vb_test_scores.filter_by(test_id=test.id).first() is not None
+
+    def taken_y_gre(self, test):
+        return self.y_gre_test_scores.filter_by(test_id=test.id).first() is not None
 
     @property
     def can_access_advanced_vb(self):
