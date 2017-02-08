@@ -57,7 +57,7 @@ def profile(id):
         for announcement in announcements:
             if not user.notified_by(announcement=announcement):
                 flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
-                announcement.notify(user=user._get_current_object())
+                announcement.notify(user=current_user._get_current_object())
     page = request.args.get('page', 1, type=int)
     pagination = Booking.query\
         .join(Schedule, Schedule.id == Booking.schedule_id)\
