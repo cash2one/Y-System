@@ -25,12 +25,14 @@
                 <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
             </div>
         </div>
+        {% if user.can('预约Y-GRE课程') %}
         <div class="item">
             <div class="content">
                 <div class="header">Y-GRE班</div>
                 <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -40,11 +42,16 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <div class="ui two item massive labeled icon pointing stackable menu">
+                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="flag icon"></i>研修进度</a>
+                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约记录</a>
+                </div>
+                {% if show_profile_progress %}
                 <h3 class="ui header">
                     <i class="flag icon"></i>
                     <div class="content">
                         研修进度
-                        <div class="sub header">VB完成 {{ user.vb_progress }}% &middot; Y-GRE完成 {{ user.y_gre_progress }}%</div>
+                        <div class="sub header">VB完成 {{ user.vb_progress }}%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 {{ user.y_gre_progress }}%{% endif %}</div>
                     </div>
                 </h3>
                 <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB进度：{% if user.last_vb_punch %}{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
@@ -112,7 +119,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE进度：{% if user.last_y_gre_punch %}{{ user.last_y_gre_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
+                {% if user.can('预约Y-GRE课程') %}
+                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE进度：{% if user.last_y_gre_punch %}{{ user.last_y_gre_punch.section.name }}{% else %}尚未开始{% endif %}</h4>
                 <div class="ui {% if user.last_y_gre_punch %}teal{% else %}grey{% endif %} y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}" data-percent="{{ user.y_gre_progress }}">
                     <div class="bar">
                         <div class="progress"></div>
@@ -163,15 +171,9 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
+                {% endif %}
+                {% endif %}
+                {% if show_profile_bookings %}
                 <h3 class="ui header">
                     <i class="checked calendar icon"></i>
                     <div class="content">
@@ -202,6 +204,7 @@
                     </tbody>
                 </table>
                 {% if pagination %}{{ macros.pagination_widget(pagination, 'main.profile', id=user.id) }}{% endif %}
+                {% endif %}
             </div>
         </div>
     </div>
