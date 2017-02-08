@@ -57,18 +57,50 @@
                     <thead>
                         <tr>
                             <th>课程</th>
-                            <th>视频</th>
+                            <th>视频内容</th>
                             <th>作业</th>
                             <th>考试</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for lesson in vb_lessons %}
-                        <tr>
-                            <td>{{ lesson.name }}</td>
-                            <td>{% if lesson.include_video %}{% else %}无{% endif %}</td>
-                            <td></td>
-                            <td></td>
+                        <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
+                            <td class="single line">{{ lesson.name }}</td>
+                            <td{% if lesson.sections.count() < 4 %} class="single line"{% endif %}>
+{% if lesson.include_video %}
+{% if lesson.sections.count() %}
+{% with sections = lesson.sections %}
+<div class="ui labels">
+{% for section in sections %}<div class="ui label">{{ section.abbr }}</div>{% endfor %}
+</div>
+{% endwith %}
+{% else %}无{% endif %}
+{% else %}无{% endif %}
+                            </td>
+                            <td{% if lesson.assignments.count() < 4 %} class="single line"{% endif %}>
+{% if lesson.assignments.count() %}
+{% with assignments = lesson.assignments %}
+        <div class="ui labels">
+    {% for assignment in assignments %}
+        <div class="ui label">{{ assignment.name }}</div>
+    {% endfor %}
+        </div>
+{% endwith %}
+{% else %}
+    无
+{% endif %}
+                            </td>
+                            <td{% if lesson.tests.count() < 4 %} class="single line"{% endif %}>
+{% if lesson.tests.count() %}
+{% with tests = lesson.tests %}
+<div class="ui labels">
+    {% for test in tests %}
+        <div class="ui label">{{ test.name }}</div>
+    {% endfor %}
+</div>
+{% endwith %}
+{% else %}无{% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -83,7 +115,7 @@
                     <thead>
                         <tr>
                             <th>课程</th>
-                            <th>视频</th>
+                            <th>视频内容</th>
                             <th>考试</th>
                         </tr>
                     </thead>
@@ -91,8 +123,28 @@
                         {% for lesson in y_gre_lessons %}
                         <tr>
                             <td>{{ lesson.name }}</td>
-                            <td></td>
-                            <td></td>
+                            <td{% if lesson.sections.count() < 4 %} class="single line"{% endif %}>
+{% if lesson.include_video %}
+{% if lesson.sections.count() %}
+{% with sections = lesson.sections %}
+<div class="ui labels">
+{% for section in sections %}<div class="ui label">{{ section.abbr }}</div>{% endfor %}
+</div>
+{% endwith %}
+{% else %}无{% endif %}
+{% else %}无{% endif %}
+                            </td>
+                            <td{% if lesson.tests.count() < 4 %} class="single line"{% endif %}>
+{% if lesson.tests.count() %}
+{% with tests = lesson.tests %}
+<div class="ui labels">
+    {% for test in tests %}
+        <div class="ui label">{{ test.name }}</div>
+    {% endfor %}
+</div>
+{% endwith %}
+{% else %}无{% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -106,7 +158,13 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="checked calendar icon"></i>预约记录</h3>
+                <h3 class="ui header">
+                    <i class="checked calendar icon"></i>
+                    <div class="content">
+                        预约记录
+                        <div class="sub header">{{ user.valid_bookings.count() }} 个即将开始 &middot; {{ user.wait_bookings.count() }} 个排队中 &middot; 赴约 {{ user.keep_bookings.count() }} 次 &middot; 爽约 {{ user.miss_bookings.count() }} 次 &middot; 取消 {{ user.cancel_bookings.count() }} 次 &middot; 迟到 {{ user.late_bookings.count() }} 次 &middot; 未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
+                    </div>
+                </h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>

@@ -3218,7 +3218,7 @@ class Lesson(db.Model):
             (u'L7', u'VB', 10, 6, 8, True, False, ),
             (u'L8', u'VB', 10, 5, 9, True, False, ),
             (u'L9', u'VB', 10, 4, 10, True, False, ),
-            (u'L10', u'VB', 10, 0, 11, False, False, ),
+            (u'L10', u'VB', 0, 0, 11, False, False, ),
             (u'L11', u'VB', 10, -1, 12, True, True, ),
             (u'L12', u'VB', 10, -1, 13, True, True, ),
             (u'L13', u'VB', 10, -1, 14, True, True, ),
