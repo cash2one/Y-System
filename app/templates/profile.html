@@ -40,21 +40,63 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="flag icon"></i>研修进度</h3>
-                <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB完成：{{ user.vb_progress }}%</h4>
+                <h3 class="ui header">
+                    <i class="flag icon"></i>
+                    <div class="content">
+                        研修进度
+                        <div class="sub header">VB完成 {{ user.vb_progress }}% &middot; Y-GRE完成 {{ user.y_gre_progress }}%</div>
+                    </div>
+                </h3>
+                <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB进度：{% if user.last_vb_punch %}{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
                 <div class="ui {% if user.last_vb_punch %}blue{% else %}grey{% endif %} vb progress{% if not user.last_vb_punch %} disabled{% endif %}" data-percent="{{ user.vb_progress }}">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
-                    <div class="label">{% if user.last_vb_punch %}抵达进度：{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</div>
                 </div>
-                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE完成：{{ user.y_gre_progress }}%</h4>
+                <table class="ui very basic selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>课程</th>
+                            <th>视频</th>
+                            <th>作业</th>
+                            <th>考试</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in vb_lessons %}
+                        <tr>
+                            <td>{{ lesson.name }}</td>
+                            <td>{% if lesson.include_video %}{% else %}无{% endif %}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE进度：{% if user.last_y_gre_punch %}{{ user.last_y_gre_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
                 <div class="ui {% if user.last_y_gre_punch %}teal{% else %}grey{% endif %} y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}" data-percent="{{ user.y_gre_progress }}">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
-                    <div class="label">{% if user.last_y_gre_punch %}抵达进度：{{ user.last_y_gre_punch.section.alias }}{% else %}尚未开始{% endif %}</div>
                 </div>
+                <table class="ui very basic selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>课程</th>
+                            <th>视频</th>
+                            <th>考试</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in y_gre_lessons %}
+                        <tr>
+                            <td>{{ lesson.name }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
