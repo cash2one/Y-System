@@ -136,7 +136,7 @@
                     <tbody>
                         {% for user in users %}
                         <tr>
-                            <td>{% if user.created %}{{ macros.user_url_gender(user, user.id == current_user.id) }}{% else %}{{ macros.user_gender(user, user.id == current_user.id) }}{% endif %}</td>
+                            <td class="single line">{% if user.created %}{{ macros.user_url_gender(user, user.id == current_user.id) }}{% else %}{{ macros.user_gender(user, user.id == current_user.id) }}{% endif %}</td>
                             <td>{{ macros.user_email(user) }}</td>
                             <td>{{ user.role.name }}</td>
                             <td>{% if user.vb_course %}<a class="loading-trigger" href="{% if show_search_users %}{{ url_for('manage.course_user', id=user.vb_course.id, next=url_for('manage.user', keyword=request.args.get('keyword'))) }}{% else %}{{ url_for('manage.course_user', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>

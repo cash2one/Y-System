@@ -69,7 +69,7 @@
                     <tbody>
                         {% for score in scores %}
                         <tr>
-                            <td>{{ macros.user_popup_gender(score.user, score.user.id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup_gender(score.user, score.user.id == current_user.id) }}</td>
                             <td>{{ score.assignment.name }}</td>
                             <td>{{ score.grade.name }}</td>
                             <td>
@@ -80,7 +80,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(score.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(score.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(score.modified_by, score.modified_by.id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup(score.modified_by, score.modified_by.id == current_user.id) }}</td>
                             <td>
                                 <div class="ui mini buttons">
                                     <a class="ui icon button loading-trigger" href="{{ url_for('manage.edit_assignment_score', id=score.id) }}"><i class="edit icon"></i></a>

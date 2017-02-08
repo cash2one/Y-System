@@ -38,7 +38,7 @@
                     <tbody>
                         {% for purchase in purchases %}
                         <tr>
-                            <td>{{ macros.user_popup_gender(purchase.user, purchase.user.id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup_gender(purchase.user, purchase.user.id == current_user.id) }}</td>
                             <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
                             <td>{{ purchase.quantity }}</td>
                             <td><i class="fitted yen icon"></i> {{ purchase.total_alias }}</td>

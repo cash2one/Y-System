@@ -47,7 +47,7 @@
                         {% for booking in bookings %}
                         <tr>
                             <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
-                            <td>{{ macros.user_popup(booking.user, booking.user.id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup(booking.user, booking.user.id == current_user.id) }}</td>
                             <td>{{ booking.schedule.period.type.name }}</td>
                             {% if show_history_booking %}
                             {% else %}
