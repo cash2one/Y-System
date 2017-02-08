@@ -42,7 +42,7 @@
             <div class="column">
                 <h3 class="ui header"><i class="flag icon"></i>研修进度</h3>
                 <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB完成：{{ user.vb_progress }}%</h4>
-                <div class="ui blue vb progress{% if not user.last_vb_punch %} disabled{% endif %}" data-percent="{{ user.vb_progress }}">
+                <div class="ui {% if user.last_vb_punch %}blue{% else %}grey{% endif %} vb progress{% if not user.last_vb_punch %} disabled{% endif %}" data-percent="{{ user.vb_progress }}">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
