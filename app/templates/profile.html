@@ -66,41 +66,41 @@
                         {% for lesson in vb_lessons %}
                         <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
                             <td class="single line">{{ lesson.name }}</td>
-                            <td{% if lesson.sections.count() < 4 %} class="single line"{% endif %}>
 {% if lesson.include_video %}
-{% if lesson.sections.count() %}
 {% with sections = lesson.sections %}
+<td{% if sections.count() < 4 %} class="single line"{% endif %}>
+{% if sections.count() %}
 <div class="ui labels">
-{% for section in sections %}<div class="ui label">{{ section.abbr }}</div>{% endfor %}
+{% for section in sections %}<div class="ui {% if user.punched(section) %}green {% endif %}label">{% if user.punched(section) %}<i class="check icon"></i>{% endif %}{{ section.name }}</div>{% endfor %}
 </div>
-{% endwith %}
 {% else %}无{% endif %}
-{% else %}无{% endif %}
-                            </td>
-                            <td{% if lesson.assignments.count() < 4 %} class="single line"{% endif %}>
-{% if lesson.assignments.count() %}
-{% with assignments = lesson.assignments %}
-        <div class="ui labels">
-    {% for assignment in assignments %}
-        <div class="ui label">{{ assignment.name }}</div>
-    {% endfor %}
-        </div>
 {% endwith %}
+</td>
+{% else %}<td>无</td>{% endif %}
+                            {% with assignments = lesson.assignments %}
+<td{% if assignments.count() < 4 %} class="single line"{% endif %}>
+{% if assignments.count() %}
+<div class="ui labels">
+{% for assignment in assignments %}
+<div class="ui label">{{ assignment.name }}</div>
+{% endfor %}
+</div>
 {% else %}
-    无
+无
 {% endif %}
-                            </td>
-                            <td{% if lesson.tests.count() < 4 %} class="single line"{% endif %}>
-{% if lesson.tests.count() %}
-{% with tests = lesson.tests %}
-<div class="ui labels">
-    {% for test in tests %}
-        <div class="ui label">{{ test.name }}</div>
-    {% endfor %}
-</div>
+</td>
 {% endwith %}
+                            {% with tests = lesson.tests %}
+<td{% if tests.count() < 4 %} class="single line"{% endif %}>
+{% if tests.count() %}
+<div class="ui labels">
+{% for test in tests %}
+<div class="ui label">{{ test.name }}</div>
+{% endfor %}
+</div>
 {% else %}无{% endif %}
-                            </td>
+</td>
+{% endwith %}
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -122,29 +122,29 @@
                     <tbody>
                         {% for lesson in y_gre_lessons %}
                         <tr>
-                            <td>{{ lesson.name }}</td>
-                            <td{% if lesson.sections.count() < 4 %} class="single line"{% endif %}>
+                            <td class="single line">{{ lesson.name }}</td>
 {% if lesson.include_video %}
-{% if lesson.sections.count() %}
 {% with sections = lesson.sections %}
+<td{% if sections.count() < 4 %} class="single line"{% endif %}>
+{% if sections.count() %}
 <div class="ui labels">
-{% for section in sections %}<div class="ui label">{{ section.abbr }}</div>{% endfor %}
+{% for section in sections %}<div class="ui {% if user.punched(section) %}green {% endif %}label">{% if user.punched(section) %}<i class="check icon"></i>{% endif %}{{ section.name }}</div>{% endfor %}
 </div>
+{% else %}无{% endif %}
 {% endwith %}
-{% else %}无{% endif %}
-{% else %}无{% endif %}
-                            </td>
-                            <td{% if lesson.tests.count() < 4 %} class="single line"{% endif %}>
-{% if lesson.tests.count() %}
-{% with tests = lesson.tests %}
+</td>
+{% else %}<td>无</td>{% endif %}
+                            {% with tests = lesson.tests %}
+<td{% if tests.count() < 4 %} class="single line"{% endif %}>
+{% if tests.count() %}
 <div class="ui labels">
-    {% for test in tests %}
-        <div class="ui label">{{ test.name }}</div>
-    {% endfor %}
+{% for test in tests %}
+<div class="ui label">{{ test.name }}</div>
+{% endfor %}
 </div>
-{% endwith %}
 {% else %}无{% endif %}
-                            </td>
+</td>
+{% endwith %}
                         </tr>
                         {% endfor %}
                     </tbody>
