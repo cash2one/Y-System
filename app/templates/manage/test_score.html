@@ -195,8 +195,8 @@
                             {% endif %}
                             {% if test_type == 'y_gre' %}
                             <td>{{ score.v_score }}</td>
-                            <td>{{ score.q_score }}</td>
-                            <td>{{ score.aw_score.name }}</td>
+                            <td>{% if score.q_score %}{{ score.q_score }}{% else %}N/A{% endif %}</td>
+                            <td>{% if score.aw_score %}{{ score.aw_score.name }}{% else %}N/A{% endif %}</td>
                             {% if score.retrieved %}<td>已回收</td>{% else %}<td class="active">发出</td>{% endif %}
                             {% endif %}
                             {% if test_type == 'gre' %}

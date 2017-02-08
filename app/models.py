@@ -767,7 +767,27 @@ class YGRETestScore(db.Model):
 
     @property
     def alias(self):
-        return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.name, self.v_score, self.q_score, self.aw_score.name)
+        if self.q_score is None:
+            q_score = '-'
+        if self.aw_score is None:
+            aw_score = '-'
+        else:
+            aw_score = self.aw_score.name
+        return u'%s %s V%s Q%s AW%s' % (self.user.name_alias, self.test.name, self.v_score, q_score, aw_score)
+
+    @property
+    def score_alias(self):
+        if self.q_score is None:
+            q_score = '-'
+        if self.aw_score is None:
+            aw_score = '-'
+        else:
+            aw_score = self.aw_score.name
+        return u'V%s Q%s AW%s' % (self.v_score, q_score, aw_score)
+
+    @property
+    def v_score_alias(self):
+        return u'V%s' % self.v_score
 
     def toggle_retrieve(self, modified_by):
         self.retrieved = not self.retrieved
@@ -1995,13 +2015,13 @@ class User(UserMixin, db.Model):
     #     db.session.add(assignment_score)
 
     def submitted(self, assignment):
-        return self.assignment_scores.filter_by(assignment_id=assignment.id).first() is not None
+        return self.assignment_scores.filter_by(assignment_id=assignment.id).order_by(AssignmentScore.modified_at.desc()).first()
 
     def taken_vb(self, test):
-        return self.vb_test_scores.filter_by(test_id=test.id).first() is not None
+        return self.vb_test_scores.filter_by(test_id=test.id).order_by(VBTestScore.modified_at.desc()).first()
 
     def taken_y_gre(self, test):
-        return self.y_gre_test_scores.filter_by(test_id=test.id).first() is not None
+        return self.y_gre_test_scores.filter_by(test_id=test.id).order_by(YGRETestScore.modified_at.desc()).first()
 
     @property
     def can_access_advanced_vb(self):
