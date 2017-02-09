@@ -60,8 +60,8 @@
                         <div class="sub header">VB完成 <span id="vb-progress">0</span>%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 <span id="y-gre-progress">0</span>%{% endif %}</div>
                     </div>
                 </h3>
-                <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB进度：{% if user.last_vb_punch %}{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
-                <div class="ui {% if user.last_vb_punch %}blue{% else %}grey{% endif %} vb progress{% if not user.last_vb_punch %} disabled{% endif %}">
+                <h4 id="last-vb-punch" class="ui header disabled">VB进度：<span>尚未开始</span></h4>
+                <div class="ui vb progress disabled">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
@@ -91,8 +91,8 @@
                     </tbody> #}
                 </table>
                 {% if user.can('预约Y-GRE课程') %}
-                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE进度：{% if user.last_y_gre_punch %}{{ user.last_y_gre_punch.section.name }}{% else %}尚未开始{% endif %}</h4>
-                <div class="ui {% if user.last_y_gre_punch %}teal{% else %}grey{% endif %} y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}">
+                <h4 id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>尚未开始</span></h4>
+                <div class="ui y-gre progress disabled">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
@@ -207,8 +207,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/{{ Version.CountUp }}/countUp.min.js"></script>
+{% if show_profile_progress %}<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/{{ Version.CountUp }}/countUp.min.js"></script>{% endif %}
+{% if show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -218,8 +218,6 @@ $('.message .close')
         ;
     })
 ;
-
-$('.ui.sortable.table').tablesort();
 
 {% if show_profile_progress %}
 // progress bar
@@ -246,8 +244,12 @@ var countUpOptions = {
 var VBProgressCountUp = new CountUp('vb-progress', 0, 0, 0, 2.5, countUpOptions);
 var progressVBurl = '//' + window.location.hostname + ':' + window.location.port + '/profile/{{ user.id }}/progress/vb';
 $.getJSON(progressVBurl, function(data) {
-    VBProgressCountUp.update(data.progress);
-    $('.ui.vb.progress').progress({ percent: data.progress });
+    if (data.progress > 0) {
+        VBProgressCountUp.update(data.progress);
+        $('#last-vb-punch').removeClass('disabled');
+        $('#last-vb-punch span').text(data.last_punch.alias);
+        $('.ui.vb.progress').removeClass('disabled').addClass('blue').progress({ percent: data.progress });
+    };
     for (var i in data.lessons) {
         $('#vb-lessons').append(
             $('<tr>')
@@ -330,7 +332,12 @@ $.getJSON(progressVBurl, function(data) {
 var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
 var progressYGREurl = '//' + window.location.hostname + ':' + window.location.port + '/profile/{{ user.id }}/progress/y-gre';
 $.getJSON(progressYGREurl, function(data) {
-    YGREProgressCountUp.update(data.progress);
+    if (data.progress > 0) {
+        YGREProgressCountUp.update(data.progress);
+        $('#last-y-gre-punch').removeClass('disabled');
+        $('#last-y-gre-punch span').text(data.last_punch.alias);
+        $('.ui.y-gre.progress').removeClass('disabled').addClass('teal').progress({ percent: data.progress });
+    };
     $('.ui.y-gre.progress').progress({ percent: data.progress });
     for (var i in data.lessons) {
         $('#y-gre-lessons').append(
@@ -392,6 +399,8 @@ $.getJSON(progressYGREurl, function(data) {
 {% endif %}
 
 {% if show_profile_bookings %}
+$('.ui.sortable.table').tablesort();
+
 {% for booking in bookings %}
 $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
     .popup({

@@ -147,6 +147,7 @@ def profile_progress_vb(id):
             .filter(Lesson.order >= 0)\
             .all()
     return jsonify({
+        'last_punch': user.last_vb_punch_json,
         'progress': user.vb_progress,
         'lessons': [lesson.to_json() for lesson in lessons]
     })
@@ -166,6 +167,7 @@ def profile_progress_y_gre(id):
         .filter(Lesson.order >= 0)\
         .all()
     return jsonify({
+        'last_punch': user.last_y_gre_punch_json,
         'progress': user.y_gre_progress,
         'lessons': [lesson.to_json() for lesson in lessons]
     })

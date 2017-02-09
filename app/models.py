@@ -558,6 +558,8 @@ class Booking(db.Model):
         booking_json = {
             'user': self.user.to_json(),
             'schedule': self.schedule.to_json(),
+            'state': self.state.name,
+            'timestamp': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'token': self.token,
         }
         return booking_json
@@ -1937,6 +1939,12 @@ class User(UserMixin, db.Model):
             .first()
 
     @property
+    def last_vb_punch_json(self):
+        if self.last_vb_punch:
+            return self.last_vb_punch.to_json()
+        return u'尚未开始'
+
+    @property
     def last_y_gre_punch(self):
         return Punch.query\
             .join(Section, Section.id == Punch.section_id)\
@@ -1947,6 +1955,12 @@ class User(UserMixin, db.Model):
             .filter(Section.order >= 1)\
             .order_by(Section.order.desc())\
             .first()
+
+    @property
+    def last_y_gre_punch_json(self):
+        if self.last_y_gre_punch:
+            return self.last_y_gre_punch.to_json()
+        return u'尚未开始'
 
     @property
     def vb_progress(self):
@@ -2613,7 +2627,7 @@ class Period(db.Model):
             'alias': self.alias,
             'alias2': self.alias2,
             'alias3': self.alias3,
-            'type': self.type.show,
+            'course_type': self.type.name,
             'show': self.show,
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
@@ -3291,7 +3305,7 @@ class Lesson(db.Model):
             'name': self.name,
             'alias': self.alias,
             'abbr': self.abbr,
-            'type': self.type.name,
+            'course_type': self.type.name,
             'hour': self.hour_alias,
             'priority': self.priority,
             'order': self.order,
@@ -3299,7 +3313,7 @@ class Lesson(db.Model):
             'advanced': self.advanced,
             'sections': [section.to_json() for section in self.sections],
             'assignments': [assignment.to_json() for assignment in self.assignments],
-            'tests': [test.to_json() for test in self.tests]
+            'tests': [test.to_json() for test in self.tests],
         }
         return lesson_json
 
@@ -3392,8 +3406,8 @@ class Section(db.Model):
             'alias2': self.alias2,
             'abbr': self.abbr,
             'lesson': self.lesson.name,
-            'type': self.lesson.type.name,
-            'order': self.order
+            'course_type': self.lesson.type.name,
+            'order': self.order,
         }
         return section_json
 
@@ -3600,7 +3614,7 @@ class Assignment(db.Model):
             'name': self.name,
             'alias': self.alias,
             'lesson': self.lesson.name,
-            'type': self.lesson.type.name
+            'course_type': self.lesson.type.name,
         }
         return assignment_json
 
@@ -3687,7 +3701,7 @@ class Test(db.Model):
             'alias': self.alias,
             'alias2': self.alias2,
             'lesson': self.lesson.name,
-            'type': self.lesson.type.name
+            'course_type': self.lesson.type.name,
         }
         return test_json
 
