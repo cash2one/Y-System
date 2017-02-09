@@ -1126,7 +1126,7 @@ def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = EditPunchLessonForm()
+    form = EditPunchLessonForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
     form.lesson.data = unicode(user.last_punch.section.lesson_id)

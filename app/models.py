@@ -1880,6 +1880,17 @@ class User(UserMixin, db.Model):
                 .all()
             for uncovered_section in uncovered_sections:
                 self.unpunch(section=uncovered_section)
+            covered_sections = Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == section.lesson.type_id)\
+                .filter(and_(
+                    Section.order > self.last_vb_punch.section.order,
+                    Section.order < section.order
+                ))\
+                .order_by(Section.order.asc())\
+                .all()
+            for covered_section in covered_sections:
+                self.__punch(section=covered_section, timestamp=timestamp)
             self.__punch(section=section, milestone=True, timestamp=timestamp)
             return
 
@@ -1940,6 +1951,13 @@ class User(UserMixin, db.Model):
     @property
     def vb_progress(self):
         if self.last_vb_punch is not None:
+            punched_sections = Punch.query\
+                .join(Section, Section.id == Punch.section_id)\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(Punch.user_id == self.id)\
+                .filter(CourseType.name == u'VB')\
+                .count()
             query = Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
                 .join(CourseType, CourseType.id == Lesson.type_id)\
@@ -1960,12 +1978,19 @@ class User(UserMixin, db.Model):
                 .filter(CourseType.name == u'VB')
             taken_tests = sum([self.taken_vb(test=test) is not None for test in tests])
             total_tests = tests.count()
-            return int(float(self.last_vb_punch.section.order + int(self.punched(section=Section.query.filter_by(name=u'词典使用').first()) is not None) + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
+            return int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
         return 0
 
     @property
     def y_gre_progress(self):
         if self.last_y_gre_punch is not None:
+            punched_sections = Punch.query\
+                .join(Section, Section.id == Punch.section_id)\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(Punch.user_id == self.id)\
+                .filter(CourseType.name == u'Y-GRE')\
+                .count()
             total_sections = Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
                 .join(CourseType, CourseType.id == Lesson.type_id)\
@@ -1984,7 +2009,7 @@ class User(UserMixin, db.Model):
                 .filter(CourseType.name == u'Y-GRE')
             taken_tests = sum([self.taken_y_gre(test=test) is not None for test in tests])
             total_tests = tests.count()
-            return int(float(self.last_y_gre_punch.section.order + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
+            return int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
         return 0
 
     @property

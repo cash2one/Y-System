@@ -91,9 +91,12 @@ class EditPunchLessonForm(FlaskForm):
     lesson = SelectField(u'课程进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(EditPunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.order >= 1).order_by(Lesson.id.asc()).all()]
+        if user.can_access_advanced_vb:
+            self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.order >= 1).order_by(Lesson.id.asc()).all()]
+        else:
+            self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.order >= 1).filter(Lesson.advanced == False).order_by(Lesson.id.asc()).all()]
 
 
 class EditPunchSectionForm(FlaskForm):
