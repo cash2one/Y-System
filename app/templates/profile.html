@@ -66,7 +66,7 @@
                         <div class="progress"></div>
                     </div>
                 </div>
-                <table id="vb-lessons" class="ui very basic selectable celled table">
+                <table class="ui very basic selectable celled table">
                     <thead>
                         <tr>
                             <th>课程</th>
@@ -75,12 +75,16 @@
                             <th>考试</th>
                         </tr>
                     </thead>
+                    <tbody id="vb-lessons"></tbody>
                     {# <tbody>
                         {% for lesson in vb_lessons %}
                         <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
                             <td class="single line">{{ lesson.name }}</td>
+
                             {% with sections = lesson.sections %}<td{% if sections.count() < 3 %} class="single line"{% endif %}>{% if sections.count() %}<div class="ui labels">{% for section in sections %}{% if user.punched(section) %}<div class="ui {% if section.id == user.last_punch.section.id %}orange{% else %}green{% endif %} label popup-trigger" data-variation="inverted"><i class="{% if section.id == user.last_punch.section.id %}play{% else %}check{% endif %} icon"></i>{{ section.name }}</div><div class="ui popup popup-content">{{ moment(user.punched_at(section)).fromNow() }}<br />{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ section.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
+
                             {% with assignments = lesson.assignments %}<td{% if assignments.count() < 3 %} class="single line"{% endif %}>{% if assignments.count() %}<div class="ui labels">{% for assignment in assignments %}{% if user.submitted(assignment) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ assignment.name }}<div class="detail">{{ user.submitted(assignment).grade.name }}</div></div><div class="ui popup popup-content">{{ moment(user.submitted(assignment).modified_at).fromNow() }}<br />{{ moment(user.submitted(assignment).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ assignment.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
+
                             {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_vb(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_vb(test).score_alias }}</div></div><div class="ui popup popup-content">{{ moment(user.taken_vb(test).modified_at).fromNow() }}<br />{{ moment(user.taken_vb(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
                         </tr>
                         {% endfor %}
@@ -93,7 +97,7 @@
                         <div class="progress"></div>
                     </div>
                 </div>
-                <table id="y-gre-lessons" class="ui very basic selectable celled table">
+                <table class="ui very basic selectable celled table">
                     <thead>
                         <tr>
                             <th>课程</th>
@@ -101,6 +105,7 @@
                             <th>考试</th>
                         </tr>
                     </thead>
+                    <tbody id="y-gre-lessons"></tbody>
                     {# <tbody>
                         {% for lesson in y_gre_lessons %}
                         <tr>
@@ -243,6 +248,80 @@ var progressVBurl = '//' + window.location.hostname + ':' + window.location.port
 $.getJSON(progressVBurl, function(data) {
     VBProgressCountUp.update(data.progress);
     $('.ui.vb.progress').progress({ percent: data.progress });
+    for (var i in data.lessons) {
+        $('#vb-lessons').append(
+            $('<tr>')
+                .attr('id', 'vb-lessons-' + i)
+                .append(
+                    $('<td>')
+                        .addClass('single line')
+                        .text(data.lessons[i].name)
+                )
+                .append(
+                    $('<td>').attr('id', 'vb-lessons-' + i + '-sections')
+                )
+                .append(
+                    $('<td>').attr('id', 'vb-lessons-' + i + '-assignments')
+                )
+                .append(
+                    $('<td>').attr('id', 'vb-lessons-' + i + '-tests')
+                )
+        );
+        if (data.lessons[i].sections.length > 1) {
+            $('#vb-lessons-' + i).addClass('top aligned');
+        };
+        if (data.lessons[i].sections.length < 3) {
+            $('#vb-lessons-' + i + '-sections').addClass('single line');
+        };
+        if (data.lessons[i].sections.length > 0) {
+            $('#vb-lessons-' + i + '-sections').append(
+                $('<div>').addClass('ui labels')
+            );
+        } else {
+            $('#vb-lessons-' + i + '-sections').text('无');
+        };
+        for (var x in data.lessons[i].sections) {
+            $('#vb-lessons-' + i + '-sections .ui.labels').append(
+                $('<div>')
+                    .addClass('ui label')
+                    .text(data.lessons[i].sections[x].name)
+            );
+        };
+        if (data.lessons[i].assignments.length < 3) {
+            $('#vb-lessons-' + i + '-assignments').addClass('single line');
+        };
+        if (data.lessons[i].assignments.length > 0) {
+            $('#vb-lessons-' + i + '-assignments').append(
+                $('<div>').addClass('ui labels')
+            );
+        } else {
+            $('#vb-lessons-' + i + '-assignments').text('无');
+        };
+        for (var y in data.lessons[i].assignments) {
+            $('#vb-lessons-' + i + '-assignments .ui.labels').append(
+                $('<div>')
+                    .addClass('ui label')
+                    .text(data.lessons[i].assignments[y].name)
+            );
+        };
+        if (data.lessons[i].tests.length < 3) {
+            $('#vb-lessons-' + i + '-tests').addClass('single line');
+        };
+        if (data.lessons[i].tests.length > 0) {
+            $('#vb-lessons-' + i + '-tests').append(
+                $('<div>').addClass('ui labels')
+            );
+        } else {
+            $('#vb-lessons-' + i + '-tests').text('无');
+        };
+        for (var z in data.lessons[i].tests) {
+            $('#vb-lessons-' + i + '-tests .ui.labels').append(
+                $('<div>')
+                    .addClass('ui label')
+                    .text(data.lessons[i].tests[z].name)
+            );
+        };
+    };
     $('#page-loading-progress').progress('increment');
 });
 
@@ -252,6 +331,60 @@ var progressYGREurl = '//' + window.location.hostname + ':' + window.location.po
 $.getJSON(progressYGREurl, function(data) {
     YGREProgressCountUp.update(data.progress);
     $('.ui.y-gre.progress').progress({ percent: data.progress });
+    for (var i in data.lessons) {
+        $('#y-gre-lessons').append(
+            $('<tr>')
+                .attr('id', 'y-gre-lessons-' + i)
+                .append(
+                    $('<td>')
+                        .addClass('single line')
+                        .text(data.lessons[i].name)
+                )
+                .append(
+                    $('<td>').attr('id', 'y-gre-lessons-' + i + '-sections')
+                )
+                .append(
+                    $('<td>').attr('id', 'y-gre-lessons-' + i + '-tests')
+                )
+        );
+        if (data.lessons[i].sections.length > 1) {
+            $('#y-gre-lessons-' + i).addClass('top aligned');
+        };
+        if (data.lessons[i].sections.length < 3) {
+            $('#y-gre-lessons-' + i + '-sections').addClass('single line');
+        };
+        if (data.lessons[i].sections.length > 0) {
+            $('#y-gre-lessons-' + i + '-sections').append(
+                $('<div>').addClass('ui labels')
+            );
+        } else {
+            $('#y-gre-lessons-' + i + '-sections').text('无');
+        };
+        for (var x in data.lessons[i].sections) {
+            $('#y-gre-lessons-' + i + '-sections .ui.labels').append(
+                $('<div>')
+                    .addClass('ui label')
+                    .text(data.lessons[i].sections[x].name)
+            );
+        };
+        if (data.lessons[i].tests.length < 3) {
+            $('#y-gre-lessons-' + i + '-tests').addClass('single line');
+        };
+        if (data.lessons[i].tests.length > 0) {
+            $('#y-gre-lessons-' + i + '-tests').append(
+                $('<div>').addClass('ui labels')
+            );
+        } else {
+            $('#y-gre-lessons-' + i + '-tests').text('无');
+        };
+        for (var z in data.lessons[i].tests) {
+            $('#y-gre-lessons-' + i + '-tests .ui.labels').append(
+                $('<div>')
+                    .addClass('ui label')
+                    .text(data.lessons[i].tests[z].name)
+            );
+        };
+    };
     $('#page-loading-progress').progress('increment');
 });
 {% endif %}
