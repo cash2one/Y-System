@@ -277,15 +277,15 @@ $.getJSON(progressVBurl, function(data) {
             $('#vb-lessons-' + i + '-sections').append(
                 $('<div>').addClass('ui labels')
             );
+            for (var x in data.lessons[i].sections) {
+                $('#vb-lessons-' + i + '-sections .ui.labels').append(
+                    $('<div>')
+                        .addClass('ui label')
+                        .text(data.lessons[i].sections[x].name)
+                );
+            };
         } else {
             $('#vb-lessons-' + i + '-sections').text('无');
-        };
-        for (var x in data.lessons[i].sections) {
-            $('#vb-lessons-' + i + '-sections .ui.labels').append(
-                $('<div>')
-                    .addClass('ui label')
-                    .text(data.lessons[i].sections[x].name)
-            );
         };
         if (data.lessons[i].assignments.length < 3) {
             $('#vb-lessons-' + i + '-assignments').addClass('single line');
@@ -294,15 +294,15 @@ $.getJSON(progressVBurl, function(data) {
             $('#vb-lessons-' + i + '-assignments').append(
                 $('<div>').addClass('ui labels')
             );
+            for (var y in data.lessons[i].assignments) {
+                $('#vb-lessons-' + i + '-assignments .ui.labels').append(
+                    $('<div>')
+                        .addClass('ui label')
+                        .text(data.lessons[i].assignments[y].name)
+                );
+            };
         } else {
             $('#vb-lessons-' + i + '-assignments').text('无');
-        };
-        for (var y in data.lessons[i].assignments) {
-            $('#vb-lessons-' + i + '-assignments .ui.labels').append(
-                $('<div>')
-                    .addClass('ui label')
-                    .text(data.lessons[i].assignments[y].name)
-            );
         };
         if (data.lessons[i].tests.length < 3) {
             $('#vb-lessons-' + i + '-tests').addClass('single line');
@@ -311,15 +311,15 @@ $.getJSON(progressVBurl, function(data) {
             $('#vb-lessons-' + i + '-tests').append(
                 $('<div>').addClass('ui labels')
             );
+            for (var z in data.lessons[i].tests) {
+                $('#vb-lessons-' + i + '-tests .ui.labels').append(
+                    $('<div>')
+                        .addClass('ui label')
+                        .text(data.lessons[i].tests[z].name)
+                );
+            };
         } else {
             $('#vb-lessons-' + i + '-tests').text('无');
-        };
-        for (var z in data.lessons[i].tests) {
-            $('#vb-lessons-' + i + '-tests .ui.labels').append(
-                $('<div>')
-                    .addClass('ui label')
-                    .text(data.lessons[i].tests[z].name)
-            );
         };
     };
     $('#page-loading-progress').progress('increment');
@@ -357,15 +357,15 @@ $.getJSON(progressYGREurl, function(data) {
             $('#y-gre-lessons-' + i + '-sections').append(
                 $('<div>').addClass('ui labels')
             );
+            for (var x in data.lessons[i].sections) {
+                $('#y-gre-lessons-' + i + '-sections .ui.labels').append(
+                    $('<div>')
+                        .addClass('ui label')
+                        .text(data.lessons[i].sections[x].name)
+                );
+            };
         } else {
             $('#y-gre-lessons-' + i + '-sections').text('无');
-        };
-        for (var x in data.lessons[i].sections) {
-            $('#y-gre-lessons-' + i + '-sections .ui.labels').append(
-                $('<div>')
-                    .addClass('ui label')
-                    .text(data.lessons[i].sections[x].name)
-            );
         };
         if (data.lessons[i].tests.length < 3) {
             $('#y-gre-lessons-' + i + '-tests').addClass('single line');
@@ -374,15 +374,15 @@ $.getJSON(progressYGREurl, function(data) {
             $('#y-gre-lessons-' + i + '-tests').append(
                 $('<div>').addClass('ui labels')
             );
+            for (var y in data.lessons[i].tests) {
+                $('#y-gre-lessons-' + i + '-tests .ui.labels').append(
+                    $('<div>')
+                        .addClass('ui label')
+                        .text(data.lessons[i].tests[y].name)
+                );
+            };
         } else {
             $('#y-gre-lessons-' + i + '-tests').text('无');
-        };
-        for (var z in data.lessons[i].tests) {
-            $('#y-gre-lessons-' + i + '-tests .ui.labels').append(
-                $('<div>')
-                    .addClass('ui label')
-                    .text(data.lessons[i].tests[z].name)
-            );
         };
     };
     $('#page-loading-progress').progress('increment');
