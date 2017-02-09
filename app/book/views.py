@@ -6,9 +6,10 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import book
 from .. import db
-from ..models import User, Schedule, Period, CourseType, Booking, Announcement, AnnouncementType
+from ..models import User, Schedule, Period, CourseType, Booking
 from ..email import send_email, send_emails
 from ..decorators import permission_required
+from ..notifications import get_announcements
 
 
 @book.after_app_request
@@ -23,17 +24,6 @@ def after_request(response):
 @login_required
 @permission_required(u'预约VB课程')
 def vb():
-    announcements = Announcement.query\
-        .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
-        .filter(AnnouncementType.name == u'预约VB通知')\
-        .filter(Announcement.show == True)\
-        .filter(Announcement.deleted == False)\
-        .order_by(Announcement.modified_at.desc())\
-        .all()
-    for announcement in announcements:
-        if not current_user.notified_by(announcement=announcement):
-            flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
-            announcement.notify(user=current_user._get_current_object())
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\
         .join(CourseType, CourseType.id == Period.type_id)\
@@ -45,6 +35,7 @@ def vb():
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
+    announcements = get_announcements(type_name=u'预约VB通知', user=current_user._get_current_object())
     return render_template('book/vb.html', schedules=schedules, pagination=pagination, announcements=announcements)
 
 
@@ -167,17 +158,6 @@ def miss_vb(id):
 @login_required
 @permission_required(u'预约Y-GRE课程')
 def y_gre():
-    announcements = Announcement.query\
-        .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
-        .filter(AnnouncementType.name == u'预约Y-GRE通知')\
-        .filter(Announcement.show == True)\
-        .filter(Announcement.deleted == False)\
-        .order_by(Announcement.modified_at.desc())\
-        .all()
-    for announcement in announcements:
-        if not current_user.notified_by(announcement=announcement):
-            flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
-            announcement.notify(user=current_user._get_current_object())
     query = Schedule.query\
         .join(Period, Period.id == Schedule.period_id)\
         .join(CourseType, CourseType.id == Period.type_id)\
@@ -189,6 +169,7 @@ def y_gre():
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
+    announcements = get_announcements(type_name=u'预约Y-GRE通知', user=current_user._get_current_object())
     return render_template('book/y_gre.html', schedules=schedules, pagination=pagination, announcements=announcements)
 
 
