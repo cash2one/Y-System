@@ -11,7 +11,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="archive icon"></i>{{ user.name }}的档案</h1>
+    <h1 class="ui inverted header"><i class="archive icon"></i>{% if current_user.id == user.id %}研修档案{% else %}{{ user.name }}的档案{% endif %}</h1>
     <div class="ui inverted divided horizontal list">
         <div class="item">
             <div class="content">
