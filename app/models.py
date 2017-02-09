@@ -1819,7 +1819,7 @@ class User(UserMixin, db.Model):
 
     def punch(self, section):
         timestamp = datetime.utcnow()
-        if self.last_punch is None or section.name in [u'词典使用', u'AW总论']:
+        if self.last_punch is None or section.name in [u'词典使用']:
             self.__punch(section=section, milestone=True)
             return
         if section.lesson.type_id == self.last_punch.section.lesson.type_id:
@@ -1883,6 +1883,9 @@ class User(UserMixin, db.Model):
             self.__punch(section=section, milestone=True, timestamp=timestamp)
             return
 
+    def __initial_punch(self):
+        self.__punch(section=Section.query.filter_by(name=u'Day 1-1').first(), milestone=True)
+
     def __punch(self, section, milestone=False, timestamp=datetime.utcnow()):
         if not self.punched(section):
             punch = Punch(user_id=self.id, section_id=section.id, milestone=milestone, timestamp=timestamp)
@@ -1940,15 +1943,24 @@ class User(UserMixin, db.Model):
             query = Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
                 .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(CourseType.name == u'VB')\
-                .filter(Section.order >= 1)
+                .filter(CourseType.name == u'VB')
             if self.can_access_advanced_vb:
                 total_sections = query.count()
             else:
                 total_sections = query.filter(Lesson.advanced == False).count()
-            if self.punched(section=Section.query.filter_by(name=u'词典使用').first()):
-                return int(float(self.last_y_gre_punch.section.order + 1) / (total_sections + 1) * 100)
-            return int(float(self.last_vb_punch.section.order) / (total_sections + 1) * 100)
+            assignments = Assignment.query\
+                .join(Lesson, Lesson.id == Assignment.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'VB')
+            submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
+            total_assignments = assignments.count()
+            tests = Test.query\
+                .join(Lesson, Lesson.id == Test.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'VB')
+            taken_tests = sum([self.taken_vb(test=test) is not None for test in tests])
+            total_tests = tests.count()
+            return int(float(self.last_vb_punch.section.order + int(self.punched(section=Section.query.filter_by(name=u'词典使用').first()) is not None) + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
         return 0
 
     @property
@@ -1960,9 +1972,19 @@ class User(UserMixin, db.Model):
                 .filter(CourseType.name == u'Y-GRE')\
                 .filter(Section.order >= 1)\
                 .count()
-            if self.punched(section=Section.query.filter_by(name=u'AW总论').first()):
-                return int(float(self.last_y_gre_punch.section.order + 1) / (total_sections + 1) * 100)
-            return int(float(self.last_y_gre_punch.section.order) / (total_sections + 1) * 100)
+            assignments = Assignment.query\
+                .join(Lesson, Lesson.id == Assignment.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'Y-GRE')
+            submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
+            total_assignments = assignments.count()
+            tests = Test.query\
+                .join(Lesson, Lesson.id == Test.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'Y-GRE')
+            taken_tests = sum([self.taken_y_gre(test=test) is not None for test in tests])
+            total_tests = tests.count()
+            return int(float(self.last_y_gre_punch.section.order + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
         return 0
 
     @property
@@ -1975,8 +1997,7 @@ class User(UserMixin, db.Model):
                 .filter(Section.order >= self.last_punch.section.order)\
                 .order_by(Section.order.asc())\
                 .limit(10) + \
-                [Section.query.filter_by(name=u'Y-GRE总论').first()] + \
-                [Section.query.filter_by(name=u'AW总论').first()]
+                [Section.query.filter_by(name=u'Y-GRE总论').first()]
         if self.last_punch.section.lesson.type.name == u'Y-GRE':
             return Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
@@ -1984,8 +2005,7 @@ class User(UserMixin, db.Model):
                 .filter(CourseType.name == u'Y-GRE')\
                 .filter(Section.order >= self.last_punch.section.order)\
                 .order_by(Section.order.asc())\
-                .all() + \
-                [Section.query.filter_by(name=u'AW总论').first()]
+                .all()
 
     def add_toefl_test_score(self, test_date, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         test = TOEFLTest.query.filter_by(date=test_date).first()
@@ -2086,7 +2106,7 @@ class User(UserMixin, db.Model):
         if new_password:
             self.password = new_password
         db.session.add(self)
-        self.punch(section=Section.query.get(1))
+        self.__initial_punch()
 
     def to_json(self):
         user_json = {
@@ -2137,7 +2157,7 @@ class User(UserMixin, db.Model):
             db.session.add(admin)
             db.session.commit()
             admin.create_user(user=admin)
-            admin.punch(section=Section.query.get(1))
+            admin.__initial_punch()
             db.session.commit()
             print u'初始化系统管理员信息'
 
@@ -3243,6 +3263,7 @@ class Lesson(db.Model):
     @staticmethod
     def insert_lessons():
         lessons = [
+            (u'词典使用', u'VB', 0, 0, 0, False, False, ),
             (u'VB总论', u'VB', 20, 16, 1, True, False, ),
             (u'L1', u'VB', 8, 15, 2, True, False, ),
             (u'L2', u'VB', 8, 14, 3, True, False, ),
@@ -3258,19 +3279,18 @@ class Lesson(db.Model):
             (u'L12', u'VB', 10, -1, 13, True, True, ),
             (u'L13', u'VB', 10, -1, 14, True, True, ),
             (u'L14', u'VB', 10, -1, 15, True, True, ),
-            (u'词典使用', u'VB', 0, 0, 0, False, False, ),
             (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, True, False, ),
             (u'1st', u'Y-GRE', 30, 17, 2, True, False, ),
             (u'2nd', u'Y-GRE', 30, 17, 3, True, False, ),
             (u'3rd', u'Y-GRE', 50, 17, 4, True, False, ),
-            (u'4th', u'Y-GRE', 30, 10, 5, True, False, ),
-            (u'5th', u'Y-GRE', 40, 9, 6, True, False, ),
-            (u'6th', u'Y-GRE', 40, 8, 7, True, False, ),
-            (u'7th', u'Y-GRE', 30, 3, 8, True, False, ),
-            (u'8th', u'Y-GRE', 30, 2, 9, True, False, ),
-            (u'9th', u'Y-GRE', 30, 1, 10, True, False, ),
+            (u'AW总论', u'Y-GRE', 3, 17, 5, True, False, ),
+            (u'4th', u'Y-GRE', 30, 10, 6, True, False, ),
+            (u'5th', u'Y-GRE', 40, 9, 7, True, False, ),
+            (u'6th', u'Y-GRE', 40, 8, 8, True, False, ),
+            (u'7th', u'Y-GRE', 30, 3, 9, True, False, ),
+            (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
+            (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
             (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
-            (u'AW总论', u'Y-GRE', 3, 17, 0, True, False, ),
         ]
         for L in lessons:
             lesson = Lesson.query.filter_by(name=L[0]).first()
@@ -3325,6 +3345,7 @@ class Section(db.Model):
     @staticmethod
     def insert_sections():
         sections = [
+            (u'词典使用', u'词典使用', 0, ),
             (u'Day 1-1', u'VB总论', 1, ),
             (u'Day 1-2', u'VB总论', 2, ),
             (u'Day 1-3', u'VB总论', 3, ),
@@ -3464,19 +3485,18 @@ class Section(db.Model):
             (u'14.10', u'L14', 137, ),
             (u'14.11', u'L14', 138, ),
             (u'14.12', u'L14', 139, ),
-            (u'词典使用', u'词典使用', 0, ),
             (u'Y-GRE总论', u'Y-GRE总论', 1, ),
             (u'1st', u'1st', 2, ),
             (u'2nd', u'2nd', 3, ),
             (u'3rd', u'3rd', 4, ),
-            (u'4th', u'4th', 5, ),
-            (u'5th', u'5th', 6, ),
-            (u'6th', u'6th', 7, ),
-            (u'7th', u'7th', 8, ),
-            (u'8th', u'8th', 9, ),
-            (u'9th', u'9th', 10, ),
+            (u'AW总论', u'AW总论', 5, ),
+            (u'4th', u'4th', 6, ),
+            (u'5th', u'5th', 7, ),
+            (u'6th', u'6th', 8, ),
+            (u'7th', u'7th', 9, ),
+            (u'8th', u'8th', 10, ),
+            (u'9th', u'9th', 11, ),
             (u'Test', u'Test', -1, ),
-            (u'AW总论', u'AW总论', 0, ),
         ]
         for S in sections:
             section = Section.query.filter_by(name=S[0]).first()
@@ -3607,12 +3627,12 @@ class Test(db.Model):
             (u'Unit 2', u'2nd', ),
             (u'Unit 3', u'3rd', ),
             (u'模考1', u'3rd', ),
+            (u'PPII-1', u'3rd', ),
             (u'Unit 4', u'4th', ),
             (u'Unit 5', u'5th', ),
             (u'Unit 6', u'6th', ),
             (u'模考2', u'6th', ),
-            (u'PPII-1', u'Y-GRE总论', ),
-            (u'PPII-2', u'Y-GRE总论', ),
+            (u'PPII-2', u'6th', ),
         ]
         for T in tests:
             test = Test.query.filter_by(name=T[0]).first()
