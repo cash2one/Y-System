@@ -46,7 +46,7 @@ from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
 from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
-from ..models import Announcement, AnnouncementType
+from ..models import Announcement
 from ..models import Product, Purchase
 from ..email import send_email, send_emails
 from ..notify import get_announcements
