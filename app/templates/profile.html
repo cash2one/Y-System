@@ -1,188 +1,121 @@
 {% extends "base.html" %}
 {% import "_macros.html" as macros %}
 
-{% block title %}个人档案{% endblock %}
+{% block title %}{% if current_user.id == user.id %}研修档案{% else %}{{ user.name }}的档案{% endif %}{% endblock %}
 
 {% block customized_styles %}
 {{ super() }}
-<style type="text/css">
-.masthead.segment {
-    /*min-height: 300px;*/
-    padding: 1em 0em;
-}
-.masthead h1.ui.header {
-    margin-top: 1.5em;
-    font-size: 3em;
-    font-weight: normal;
-}
-.masthead .ui.list {
-    margin-bottom: 90px;
-}
-
-.ui.vertical.stripe {
-    padding: 8em 0em;
-}
-.ui.vertical.stripe h3 {
-    font-size: 2em;
-}
-.ui.vertical.stripe .ui.table .ui.button {
-    margin: auto;
-}
-.ui.vertical.stripe .button + h3,
-.ui.vertical.stripe p + h3,
-.ui.vertical.stripe .ui.list + h3 {
-    margin-top: 3em;
-}
-.ui.vertical.stripe .floated.image {
-    clear: both;
-}
-.ui.vertical.stripe .ui.statistic .label,
-.ui.vertical.stripe p,
-.ui.vertical.stripe .ui.list {
-    font-size: 1.2em;
-}
-.ui.vertical.stripe .horizontal.divider {
-    margin: 3em 0em;
-}
-
-.stats.stripe.segment,
-.quote.stripe.segment {
-    padding: 0em;
-}
-.stats.stripe.segment .grid .column,
-.quote.stripe.segment .grid .column {
-    padding-top: 5em;
-    padding-bottom: 5em;
-}
-.quote.stripe.segment p span {
-    font-size: 0.85em;
-}
-
-.masthead.segment #message-container {
-    margin-top: 70px;
-}
-
-
-@media only screen and (max-width: 767px) {
-    .masthead.segment {
-        /*min-height: 160px;*/
-    }
-    .masthead h1.ui.header {
-        margin-top: 1em;
-        margin-bottom: 1em;
-        font-size: 1.8em;
-    }
-    .masthead .ui.list {
-        margin-bottom: 50px;
-    }
-    .masthead.segment #message-container {
-        margin-top: 20px;
-    }
-}
-</style>
+{% include '_style_profile.html' %}
 {% endblock %}
 
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="archive icon"></i>{{ user.name }}的档案</h1>
+    <h1 class="ui inverted header"><i class="archive icon"></i>{% if current_user.id == user.id %}研修档案{% else %}{{ user.name }}的档案{% endif %}</h1>
     <div class="ui inverted divided horizontal list">
         <div class="item">
             <div class="content">
-                <div class="header">用户组</div>
+                <div class="header">用户权限</div>
                 <div class="description">{{ user.role.name }}</div>
             </div>
         </div>
         <div class="item">
             <div class="content">
                 <div class="header">VB班</div>
-                <div class="description">
-                    {% if user.vb_course %}
-                    {{ user.vb_course.name }}
-                    {% else %}
-                    无
-                    {% endif %}
-                </div>
+                <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
             </div>
         </div>
+        {% if user.can('预约Y-GRE课程') %}
         <div class="item">
             <div class="content">
                 <div class="header">Y-GRE班</div>
-                <div class="description">
-                    {% if user.y_gre_course %}
-                    {{ user.y_gre_course.name }}
-                    {% else %}
-                    无
-                    {% endif %}
-                </div>
+                <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block page_content %}
-<div class="ui vertical stripe stats segment">
-    <div class="ui equal width stackable internally celled grid">
-        <div class="center aligned row">
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">即将开始</div>
-                    <div class="value">{{ user.valid_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">排队中</div>
-                    <div class="value">{{ user.wait_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">赴约</div>
-                    <div class="value">{{ user.keep_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">爽约</div>
-                    <div class="value">{{ user.miss_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">取消</div>
-                    <div class="value">{{ user.cancel_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">迟到</div>
-                    <div class="value">{{ user.late_bookings.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-            <div class="column">
-                <div class="ui statistic">
-                    <div class="label">未预约到场</div>
-                    <div class="value">{{ user.walk_in_rentals.count() }}</div>
-                    <div class="label">次</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="ui vertical stripe segment">
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="checked calendar icon"></i>预约记录</h3>
+                <div class="ui three item labeled icon pointing menu">
+                    <a class="item loading-trigger" href="#"><i class="user icon"></i>基本信息</a>
+                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="flag icon"></i>研修进度</a>
+                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约记录</a>
+                </div>
+                {% if show_profile_progress %}
+                <h3 class="ui header">
+                    <i class="flag icon"></i>
+                    <div class="content">
+                        研修进度
+                        <div class="sub header">VB完成 {{ user.vb_progress }}%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 {{ user.y_gre_progress }}%{% endif %}</div>
+                    </div>
+                </h3>
+                <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB进度：{% if user.last_vb_punch %}{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
+                <div class="ui {% if user.last_vb_punch %}blue{% else %}grey{% endif %} vb progress{% if not user.last_vb_punch %} disabled{% endif %}" data-percent="{{ user.vb_progress }}">
+                    <div class="bar">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+                <table class="ui very basic selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>课程</th>
+                            <th>内容</th>
+                            <th>作业</th>
+                            <th>考试</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in vb_lessons %}
+                        <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
+                            <td class="single line">{{ lesson.name }}</td>
+                            {% with sections = lesson.sections %}<td{% if sections.count() < 3 %} class="single line"{% endif %}>{% if sections.count() %}<div class="ui labels">{% for section in sections %}{% if user.punched(section) %}<div class="ui {% if section.id == user.last_punch.section.id %}orange{% else %}green{% endif %} label popup-trigger" data-variation="inverted"><i class="{% if section.id == user.last_punch.section.id %}play{% else %}check{% endif %} icon"></i>{{ section.name }}</div><div class="ui popup popup-content">{{ moment(user.punched_at(section)).fromNow() }}<br />{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ section.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
+                            {% with assignments = lesson.assignments %}<td{% if assignments.count() < 3 %} class="single line"{% endif %}>{% if assignments.count() %}<div class="ui labels">{% for assignment in assignments %}{% if user.submitted(assignment) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ assignment.name }}<div class="detail">{{ user.submitted(assignment).grade.name }}</div></div><div class="ui popup popup-content">{{ moment(user.submitted(assignment).modified_at).fromNow() }}<br />{{ moment(user.submitted(assignment).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ assignment.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
+                            {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_vb(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_vb(test).score_alias }}</div></div><div class="ui popup popup-content">{{ moment(user.taken_vb(test).modified_at).fromNow() }}<br />{{ moment(user.taken_vb(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if user.can('预约Y-GRE课程') %}
+                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE进度：{% if user.last_y_gre_punch %}{{ user.last_y_gre_punch.section.name }}{% else %}尚未开始{% endif %}</h4>
+                <div class="ui {% if user.last_y_gre_punch %}teal{% else %}grey{% endif %} y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}" data-percent="{{ user.y_gre_progress }}">
+                    <div class="bar">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+                <table class="ui very basic selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>课程</th>
+                            <th>内容</th>
+                            <th>考试</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in y_gre_lessons %}
+                        <tr>
+                            <td class="single line">{{ lesson.name }}</td>
+                            {% with sections = lesson.sections %}<td{% if sections.count() < 3 %} class="single line"{% endif %}>{% if sections.count() %}<div class="ui labels">{% for section in sections %}{% if user.punched(section) %}<div class="ui {% if section.id == user.last_punch.section.id and section.name != '9th' %}orange{% else %}green{% endif %} label popup-trigger" data-variation="inverted"><i class="{% if section.id == user.last_punch.section.id and section.name != '9th' %}play{% else %}check{% endif %} icon"></i>{{ section.name }}</div><div class="ui popup popup-content">{{ moment(user.punched_at(section)).fromNow() }}<br />{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ section.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
+                            {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_y_gre(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_y_gre(test).v_score_alias }}</div></div><div class="ui popup popup-content">{{ user.taken_y_gre(test).score_alias }}<br />{{ moment(user.taken_y_gre(test).modified_at).fromNow() }}<br />{{ moment(user.taken_y_gre(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+                {% endif %}
+                {% if show_profile_bookings %}
+                <h3 class="ui header">
+                    <i class="checked calendar icon"></i>
+                    <div class="content">
+                        预约记录
+                        <div class="sub header">{{ user.valid_bookings.count() }} 个即将开始 &middot; {{ user.wait_bookings.count() }} 个排队中 &middot; 赴约 {{ user.keep_bookings.count() }} 次 &middot; 爽约 {{ user.miss_bookings.count() }} 次 &middot; 取消 {{ user.cancel_bookings.count() }} 次 &middot; 迟到 {{ user.late_bookings.count() }} 次 &middot; 未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
+                    </div>
+                </h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -205,40 +138,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}{{ macros.pagination_widget(pagination, 'main.profile') }}{% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="ui header"><i class="flag icon"></i>里程碑</h3>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>时间</th>
-                            <th>课程类型</th>
-                            <th>课程进度</th>
-                            <th>视频进度</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for punch in punches %}
-                        <tr>
-                            <td>
-                                <div class="popup-trigger" data-variation="inverted">{{ moment(punch.timestamp).fromNow() }}</div>
-                                <div class="ui popup popup-content">{{ moment(punch.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
-                            </td>
-                            <td>{{ punch.section.lesson.type.name }}</td>
-                            <td>{{ punch.section.lesson.name }}</td>
-                            <td>{{ punch.section.name }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'main.profile', id=user.id) }}{% endif %}
+                {% endif %}
             </div>
         </div>
     </div>
@@ -257,8 +158,8 @@
                             <div class="header">{{ announcement.title }}</div>
                             {% if current_user.can('管理通知') %}
                             <div class="right floated">
-                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('main.profile', page=pagination.page)) }}" data-content="撤回" data-position="top center" data-variation="inverted"><i class="undo icon"></i></a>
-                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('main.profile', page=pagination.page)) }}" data-content="编辑" data-position="top center" data-variation="inverted"><i class="edit icon"></i></a>
+                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('main.profile', id=user.id, page=pagination.page)) }}" data-content="撤回" data-position="top center" data-variation="inverted"><i class="undo icon"></i></a>
+                                <a class="ui circular icon button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('main.profile', id=user.id, page=pagination.page)) }}" data-content="编辑" data-position="top center" data-variation="inverted"><i class="edit icon"></i></a>
                                 {% endif %}
                             </div>
                             <div class="meta"><i class="send outline icon"></i>{{ moment(announcement.modified_at).fromNow() }}</div>
@@ -307,7 +208,11 @@ $('.message .close')
     })
 ;
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
+
+// progress bars
+$('.ui.vb.progress').progress();
+$('.ui.y-gre.progress').progress();
 
 {% if announcements and current_user.can('管理通知') %}
 $('.right.floated .ui.circular.icon.button').popup();

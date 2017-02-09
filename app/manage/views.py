@@ -162,9 +162,9 @@ def summary_statistics():
                     'total': Booking.of_current_vb_schedule([u'L1', u'L2', u'L3']),
                     'show_up': Booking.show_ups([u'L1', u'L2', u'L3']),
                 },
-                'l4_10': {
-                    'total': Booking.of_current_vb_schedule([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9', u'L10']),
-                    'show_up': Booking.show_ups([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9', u'L10']),
+                'l4_9': {
+                    'total': Booking.of_current_vb_schedule([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9']),
+                    'show_up': Booking.show_ups([u'L4', u'L5', u'L6', u'L7', u'L8', u'L9']),
                 },
                 'l11_14': {
                     'total': Booking.of_current_vb_schedule([u'L11', u'L12', u'L13', u'L14']),
@@ -1126,7 +1126,7 @@ def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    form = EditPunchLessonForm()
+    form = EditPunchLessonForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.edit_punch_step_2', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
     form.lesson.data = unicode(user.last_punch.section.lesson_id)
@@ -3350,7 +3350,7 @@ def remove_score_record(id):
 def remove_toefl_test_score(id):
     toefl_test_score = TOEFLTestScore.query.get_or_404(id)
     db.session.delete(toefl_test_score)
-    flash(u'已删除TOEFL成绩：%s' % toefl_test_score.type.name, category='success')
+    flash(u'已删除TOEFL成绩', category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -4014,7 +4014,8 @@ def ipad_contents():
         .filter_by(deleted=False)\
         .order_by(iPad.alias.asc())
     lessons = Lesson.query\
-        .filter(Lesson.priority >= 0)\
+        .filter(Lesson.include_video == True)\
+        .filter(Lesson.advanced == False)\
         .order_by(Lesson.id.asc())
     return render_template('manage/ipad_contents.html',
         ipads=ipads,

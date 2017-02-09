@@ -6,80 +6,7 @@
 {% block customized_styles %}
 {{ super() }}
 <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.css" />
-<style type="text/css">
-.masthead.segment {
-    min-height: 300px;
-    padding: 1em 0em;
-}
-.masthead h1.ui.header {
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
-    font-size: 3em;
-    font-weight: normal;
-}
-
-.ui.vertical.stripe {
-    padding: 8em 0em;
-}
-.ui.vertical.stripe h3 {
-    font-size: 2em;
-}
-.ui.vertical.stripe .ui.table .ui.button {
-    margin: auto;
-}
-.ui.vertical.stripe .button + h3,
-.ui.vertical.stripe p + h3,
-.ui.vertical.stripe .ui.list + h3 {
-    margin-top: 3em;
-}
-.ui.vertical.stripe .floated.image {
-    clear: both;
-}
-.ui.vertical.stripe .ui.tabular.menu,
-.ui.vertical.stripe .ui.statistic .label,
-.ui.vertical.stripe p,
-.ui.vertical.stripe .ui.table {
-    /*font-size: 1.2em;*/
-}
-.ui.vertical.stripe .horizontal.divider {
-    margin: 3em 0em;
-}
-.ui.vertical.stripe .ui.form .ui.flask.message {
-    display: block;
-}
-
-.stats.stripe.segment,
-.quote.stripe.segment {
-    padding: 0em;
-}
-.stats.stripe.segment .grid .column,
-.quote.stripe.segment .grid .column {
-    padding-top: 5em;
-    padding-bottom: 5em;
-}
-.quote.stripe.segment p span {
-    font-size: 0.85em;
-}
-
-.masthead.segment #message-container {
-    margin-top: 70px;
-}
-
-
-@media only screen and (max-width: 767px) {
-    .masthead.segment {
-        min-height: 160px;
-    }
-    .masthead h1.ui.header {
-        margin-top: 1em;
-        margin-bottom: 1em;
-        font-size: 1.8em;
-    }
-    .masthead.segment #message-container {
-        margin-top: 20px;
-    }
-}
-</style>
+{% include '_style_common.html' %}
 {% endblock %}
 
 {% block page_masthead %}
@@ -260,7 +187,7 @@
                     <tbody>
                         {% for score in scores %}
                         <tr>
-                            <td>{{ macros.user_popup_gender(score.user, score.user.id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup_gender(score.user, score.user.id == current_user.id) }}</td>
                             <td>{% if test_type in ['gre', 'toefl'] %}{{ score.test.date }}{% else %}{{ score.test.name }}{% endif %}</td>
                             {% if test_type == 'vb' %}
                             <td>{{ score.score_alias }}</td>
@@ -268,8 +195,8 @@
                             {% endif %}
                             {% if test_type == 'y_gre' %}
                             <td>{{ score.v_score }}</td>
-                            <td>{{ score.q_score }}</td>
-                            <td>{{ score.aw_score.name }}</td>
+                            <td>{% if score.q_score %}{{ score.q_score }}{% else %}N/A{% endif %}</td>
+                            <td>{% if score.aw_score %}{{ score.aw_score.name }}{% else %}N/A{% endif %}</td>
                             {% if score.retrieved %}<td>已回收</td>{% else %}<td class="active">发出</td>{% endif %}
                             {% endif %}
                             {% if test_type == 'gre' %}
@@ -292,7 +219,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(score.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(score.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(score.modified_by, score.modified_by.id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup(score.modified_by, score.modified_by.id == current_user.id) }}</td>
                             <td>
                                 <div class="ui mini buttons">
                                     {% if test_type in ['vb', 'y_gre'] %}{% if score.retrieved %}<a class="ui icon button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="send icon"></i></a>{% else %}<a class="ui grey icon button loading-trigger" href="{{ url_for('manage.toggle_test_paper_retrieve', test_type=test_type, id=score.id) }}"><i class="undo icon"></i></a>{% endif %}{% endif %}
@@ -334,7 +261,7 @@ $('.message .close')
 
 $('.ui.checkbox').checkbox();
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
 
 {% for score in scores %}
 $('#delete-trigger-{{ score.id }}')

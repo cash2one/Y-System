@@ -5,80 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
-<style type="text/css">
-.masthead.segment {
-    min-height: 300px;
-    padding: 1em 0em;
-}
-.masthead h1.ui.header {
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
-    font-size: 3em;
-    font-weight: normal;
-}
-
-.ui.vertical.stripe {
-    padding: 8em 0em;
-}
-.ui.vertical.stripe h3 {
-    font-size: 2em;
-}
-.ui.vertical.stripe .ui.table .ui.button {
-    margin: auto;
-}
-.ui.vertical.stripe .button + h3,
-.ui.vertical.stripe p + h3,
-.ui.vertical.stripe .ui.list + h3 {
-    margin-top: 3em;
-}
-.ui.vertical.stripe .floated.image {
-    clear: both;
-}
-.ui.vertical.stripe .ui.tabular.menu,
-.ui.vertical.stripe .ui.statistic .label,
-.ui.vertical.stripe p,
-.ui.vertical.stripe .ui.table {
-    /*font-size: 1.2em;*/
-}
-.ui.vertical.stripe .horizontal.divider {
-    margin: 3em 0em;
-}
-.ui.vertical.stripe .ui.form .ui.flask.message {
-    display: block;
-}
-
-.stats.stripe.segment,
-.quote.stripe.segment {
-    padding: 0em;
-}
-.stats.stripe.segment .grid .column,
-.quote.stripe.segment .grid .column {
-    padding-top: 5em;
-    padding-bottom: 5em;
-}
-.quote.stripe.segment p span {
-    font-size: 0.85em;
-}
-
-.masthead.segment #message-container {
-    margin-top: 70px;
-}
-
-
-@media only screen and (max-width: 767px) {
-    .masthead.segment {
-        min-height: 160px;
-    }
-    .masthead h1.ui.header {
-        margin-top: 1em;
-        margin-bottom: 1em;
-        font-size: 1.8em;
-    }
-    .masthead.segment #message-container {
-        margin-top: 20px;
-    }
-}
-</style>
+{% include '_style_common.html' %}
 {% endblock %}
 
 {% block page_masthead %}
@@ -204,9 +131,9 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui blue circular label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
-                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}{% for lesson in lessons %}<a class="ui teal circular label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}{% else %}无{% endif %}{% endwith %}</td>
-                            <td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}<div class="ui circular labels">{% for lesson in lessons %}<a class="ui blue label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}<div class="ui circular labels">{% for lesson in lessons %}<a class="ui teal label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}{% endwith %}</td>
+                            <td class="single line">
                                 {% if ipad.state.name == '借出' %}
                                 <div class="ui orange mini button" style="cursor: not-allowed;">
                                     <i class="upload icon"></i>
@@ -258,7 +185,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(ipad.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(ipad.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td>{{ macros.user_popup(ipad.modified_by, ipad.modified_by.id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup(ipad.modified_by, ipad.modified_by.id == current_user.id) }}</td>
                             {% if current_user.can('管理iPad设备') %}
                             <td>
                                 <div class="ui mini buttons">
@@ -298,7 +225,7 @@ $('.message .close')
     })
 ;
 
-$('table').tablesort();
+$('.ui.sortable.table').tablesort();
 
 $('td .ui.circular.label').popup();
 
