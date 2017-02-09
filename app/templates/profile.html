@@ -224,7 +224,7 @@ $('.ui.sortable.table').tablesort();
 {% if show_profile_progress %}
 // progress bar
 $('#page-loading-progress').progress({
-    total: 2,
+    total: {% if user.can('预约Y-GRE课程') %}2{% else %}1{% endif %},
     onSuccess: function() {
         $('#page-loading-progress').fadeOut(1000, function() {
             $('#page-loading-progress').remove();
@@ -325,6 +325,7 @@ $.getJSON(progressVBurl, function(data) {
     $('#page-loading-progress').progress('increment');
 });
 
+{% if user.can('预约Y-GRE课程') %}
 // Y-GRE progress
 var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
 var progressYGREurl = '//' + window.location.hostname + ':' + window.location.port + '/profile/{{ user.id }}/progress/y-gre';
@@ -387,6 +388,7 @@ $.getJSON(progressYGREurl, function(data) {
     };
     $('#page-loading-progress').progress('increment');
 });
+{% endif %}
 {% endif %}
 
 {% if show_profile_bookings %}
