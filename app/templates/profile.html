@@ -39,6 +39,11 @@
 
 {% block page_content %}
 <div class="ui vertical stripe segment">
+    {% if show_profile_progress %}
+    <div id="page-loading-progress" class="ui top attached blue inverted progress">
+        <div class="bar"></div>
+    </div>
+    {% endif %}
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
@@ -52,16 +57,16 @@
                     <i class="flag icon"></i>
                     <div class="content">
                         研修进度
-                        <div class="sub header">VB完成 {{ user.vb_progress }}%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 {{ user.y_gre_progress }}%{% endif %}</div>
+                        <div class="sub header">VB完成 <span id="vb-progress">0</span>%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 <span id="y-gre-progress">0</span>%{% endif %}</div>
                     </div>
                 </h3>
                 <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB进度：{% if user.last_vb_punch %}{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
-                <div class="ui {% if user.last_vb_punch %}blue{% else %}grey{% endif %} vb progress{% if not user.last_vb_punch %} disabled{% endif %}" data-percent="{{ user.vb_progress }}">
+                <div class="ui {% if user.last_vb_punch %}blue{% else %}grey{% endif %} vb progress{% if not user.last_vb_punch %} disabled{% endif %}">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
                 </div>
-                <table class="ui very basic selectable celled table">
+                <table id="vb-lessons" class="ui very basic selectable celled table">
                     <thead>
                         <tr>
                             <th>课程</th>
@@ -70,7 +75,7 @@
                             <th>考试</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    {# <tbody>
                         {% for lesson in vb_lessons %}
                         <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
                             <td class="single line">{{ lesson.name }}</td>
@@ -79,16 +84,16 @@
                             {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_vb(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_vb(test).score_alias }}</div></div><div class="ui popup popup-content">{{ moment(user.taken_vb(test).modified_at).fromNow() }}<br />{{ moment(user.taken_vb(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
                         </tr>
                         {% endfor %}
-                    </tbody>
+                    </tbody> #}
                 </table>
                 {% if user.can('预约Y-GRE课程') %}
                 <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE进度：{% if user.last_y_gre_punch %}{{ user.last_y_gre_punch.section.name }}{% else %}尚未开始{% endif %}</h4>
-                <div class="ui {% if user.last_y_gre_punch %}teal{% else %}grey{% endif %} y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}" data-percent="{{ user.y_gre_progress }}">
+                <div class="ui {% if user.last_y_gre_punch %}teal{% else %}grey{% endif %} y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}">
                     <div class="bar">
                         <div class="progress"></div>
                     </div>
                 </div>
-                <table class="ui very basic selectable celled table">
+                <table id="y-gre-lessons" class="ui very basic selectable celled table">
                     <thead>
                         <tr>
                             <th>课程</th>
@@ -96,7 +101,7 @@
                             <th>考试</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    {# <tbody>
                         {% for lesson in y_gre_lessons %}
                         <tr>
                             <td class="single line">{{ lesson.name }}</td>
@@ -104,7 +109,7 @@
                             {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_y_gre(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_y_gre(test).v_score_alias }}</div></div><div class="ui popup popup-content">{{ user.taken_y_gre(test).score_alias }}<br />{{ moment(user.taken_y_gre(test).modified_at).fromNow() }}<br />{{ moment(user.taken_y_gre(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
                         </tr>
                         {% endfor %}
-                    </tbody>
+                    </tbody> #}
                 </table>
                 {% endif %}
                 {% endif %}
@@ -198,6 +203,7 @@
 {% block customized_scripts %}
 {{ super() }}
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/{{ Version.CountUp }}/countUp.min.js"></script>
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -210,23 +216,47 @@ $('.message .close')
 
 $('.ui.sortable.table').tablesort();
 
-// progress bars
-$('.ui.vb.progress').progress();
-$('.ui.y-gre.progress').progress();
+{% if show_profile_progress %}
+// progress bar
+$('#page-loading-progress').progress({
+    total: 2,
+    onSuccess: function() {
+        $('#page-loading-progress').fadeOut(1000, function() {
+            $('#page-loading-progress').remove();
+        });
+    }
+});
 
-{% if announcements and current_user.can('管理通知') %}
-$('.right.floated .ui.circular.icon.button').popup();
+// count up settings
+var countUpOptions = {
+    useEasing: true,
+    useGrouping: true,
+    separator: ',',
+    decimal: '.',
+    prefix: '',
+    suffix: ''
+};
+
+// VB progress
+var VBProgressCountUp = new CountUp('vb-progress', 0, 0, 0, 2.5, countUpOptions);
+var progressVBurl = '//' + window.location.hostname + ':' + window.location.port + '/profile/{{ user.id }}/progress/vb';
+$.getJSON(progressVBurl, function(data) {
+    VBProgressCountUp.update(data.progress);
+    $('.ui.vb.progress').progress({ percent: data.progress });
+    $('#page-loading-progress').progress('increment');
+});
+
+// Y-GRE progress
+var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
+var progressYGREurl = '//' + window.location.hostname + ':' + window.location.port + '/profile/{{ user.id }}/progress/y-gre';
+$.getJSON(progressYGREurl, function(data) {
+    YGREProgressCountUp.update(data.progress);
+    $('.ui.y-gre.progress').progress({ percent: data.progress });
+    $('#page-loading-progress').progress('increment');
+});
 {% endif %}
 
-$('.ui.search')
-    .search({
-        apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user?keyword={query}'
-        },
-        showNoResults: false
-    })
-;
-
+{% if show_profile_bookings %}
 {% for booking in bookings %}
 $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
     .popup({
@@ -235,5 +265,21 @@ $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
     })
 ;
 {% endfor %}
+{% endif %}
+
+{% if announcements and current_user.can('管理通知') %}
+$('.right.floated .ui.circular.icon.button').popup();
+{% endif %}
+
+{% if current_user.can('管理') %}
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user?keyword={query}'
+        },
+        showNoResults: false
+    })
+;
+{% endif %}
 </script>
 {% endblock %}

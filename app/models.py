@@ -3233,6 +3233,7 @@ class Lesson(db.Model):
     @property
     def abbr(self):
         abbreviations = {
+            u'词典使用': u'词',
             u'VB总论': u'总',
             u'L1': u'1',
             u'L2': u'2',
@@ -3284,6 +3285,23 @@ class Lesson(db.Model):
             .filter(iPad.deleted == False)\
             .filter(iPadState.name != u'退役')\
             .filter(iPadContent.lesson_id == self.id)
+
+    def to_json(self):
+        lesson_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'abbr': self.abbr,
+            'type': self.type.name,
+            'hour': self.hour_alias,
+            'priority': self.priority,
+            'order': self.order,
+            'include_video': self.include_video,
+            'advanced': self.advanced,
+            'sections': [section.to_json() for section in self.sections],
+            'assignments': [assignment.to_json() for assignment in self.assignments],
+            'tests': [test.to_json() for test in self.tests]
+        }
+        return lesson_json
 
     @staticmethod
     def insert_lessons():
@@ -3366,6 +3384,18 @@ class Section(db.Model):
         if self.name[:3] == u'Day':
             return u'0.%s%s' % (self.name[4], self.name[6])
         return self.name
+
+    def to_json(self):
+        section_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'abbr': self.abbr,
+            'lesson': self.lesson.name,
+            'type': self.lesson.type.name,
+            'order': self.order
+        }
+        return section_json
 
     @staticmethod
     def insert_sections():
@@ -3565,6 +3595,15 @@ class Assignment(db.Model):
             .filter(User.activated == True)\
             .filter(User.deleted == False)
 
+    def to_json(self):
+        assignment_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'lesson': self.lesson.name,
+            'type': self.lesson.type.name
+        }
+        return assignment_json
+
     @staticmethod
     def insert_assignments():
         assignments = [
@@ -3641,6 +3680,16 @@ class Test(db.Model):
                 .filter(User.created == True)\
                 .filter(User.activated == True)\
                 .filter(User.deleted == False)
+
+    def to_json(self):
+        test_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'lesson': self.lesson.name,
+            'type': self.lesson.type.name
+        }
+        return test_json
 
     @staticmethod
     def insert_tests():
