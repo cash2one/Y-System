@@ -9,8 +9,8 @@ from .. import db
 from ..models import User
 from ..models import Lesson, CourseType
 from ..models import Schedule, Booking
+from ..notify import get_announcements
 from ..decorators import permission_required
-from ..notifications import get_announcements
 
 
 @main.after_app_request

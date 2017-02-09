@@ -5,8 +5,9 @@ from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
-from ..models import User, Role, Announcement, AnnouncementType
+from ..models import User, Role
 from ..email import send_email, send_emails
+from ..notify import get_announcements
 
 
 @auth.before_app_request
@@ -44,14 +45,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             # flash(u'欢迎登录云英语教育服务支撑系统！', category='info')
-            announcement = Announcement.query\
-                .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
-                .filter(AnnouncementType.name == u'登录通知')\
-                .filter(Announcement.show == True)\
-                .filter(Announcement.deleted == False)\
-                .first()
-            if announcement is not None:
-                flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+            get_announcements(type_name=u'登录通知', flash_first=True)
             if user.can(u'管理'):
                 return redirect(request.args.get('next') or url_for('manage.summary'))
             return redirect(request.args.get('next') or url_for('main.profile', id=user.id))

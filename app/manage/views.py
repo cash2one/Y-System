@@ -49,8 +49,8 @@ from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
 from ..models import Announcement, AnnouncementType
 from ..models import Product, Purchase
 from ..email import send_email, send_emails
+from ..notify import get_announcements
 from ..decorators import permission_required, administrator_required, developer_required
-from ..notifications import get_announcements
 
 
 @manage.after_app_request

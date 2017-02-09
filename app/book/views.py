@@ -8,8 +8,8 @@ from . import book
 from .. import db
 from ..models import User, Schedule, Period, CourseType, Booking
 from ..email import send_email, send_emails
+from ..notify import get_announcements
 from ..decorators import permission_required
-from ..notifications import get_announcements
 
 
 @book.after_app_request
