@@ -2950,7 +2950,7 @@ class iPadContent(db.Model):
 
     def to_json(self):
         ipad_content_json = {
-            'ipad': self.ipad.to_json(),
+            'ipad': self.ipad.alias,
             'lesson': self.lesson.name,
             'element_id': 'ipad-%s-lesson-%s' % (self.ipad_id, self.lesson_id),
         }
