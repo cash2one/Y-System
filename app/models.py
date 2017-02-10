@@ -7,7 +7,7 @@ from string import ascii_letters, digits
 from hashlib import sha512
 from json import loads, dumps
 from bs4 import BeautifulSoup
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
@@ -462,6 +462,7 @@ class Booking(db.Model):
         self.ping()
         db.session.add(self)
         if state_name == u'预约':
+            db.session.commit()
             self.update_token()
         if state_name == u'取消' and self.schedule.unstarted:
             waited_booking = Booking.query\
@@ -557,6 +558,8 @@ class Booking(db.Model):
         booking_json = {
             'user': self.user.to_json(),
             'schedule': self.schedule.to_json(),
+            'state': self.state.name,
+            'timestamp': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'token': self.token,
         }
         return booking_json
@@ -612,6 +615,7 @@ class Punch(db.Model):
     __tablename__ = 'punches'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'), primary_key=True)
+    milestone = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_json(self):
@@ -685,6 +689,18 @@ class AssignmentScore(db.Model):
     def alias(self):
         return u'%s %s %s' % (self.user.name_alias, self.assignment.name, self.grade.name)
 
+    def to_json(self):
+        assignment_score_json = {
+            'user': self.user.name,
+            'assignment': self.assignment.to_json(),
+            'grade': self.grade.name,
+            'alias': self.alias,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return assignment_score_json
+
     def __repr__(self):
         return '<Assignment Score %r>' % self.alias
 
@@ -717,6 +733,20 @@ class VBTestScore(db.Model):
         self.retrieved = not self.retrieved
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    def to_json(self):
+        vb_test_score_json = {
+            'user': self.user.name,
+            'test': self.test.to_json(),
+            'score': self.score,
+            'retrieved': self.retrieved,
+            'alias': self.alias,
+            'score_alias': self.score_alias,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return vb_test_score_json
 
     def __repr__(self):
         return '<VB Test Score %r>' % self.alias
@@ -765,12 +795,55 @@ class YGRETestScore(db.Model):
 
     @property
     def alias(self):
-        return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.name, self.v_score, self.q_score, self.aw_score.name)
+        if self.q_score is None:
+            q_score = '-'
+        if self.aw_score is None:
+            aw_score = '-'
+        else:
+            aw_score = self.aw_score.name
+        return u'%s %s V%s Q%s AW%s' % (self.user.name_alias, self.test.name, self.v_score, q_score, aw_score)
+
+    @property
+    def score_alias(self):
+        if self.q_score is None:
+            q_score = '-'
+        if self.aw_score is None:
+            aw_score = '-'
+        else:
+            aw_score = self.aw_score.name
+        return u'V%s Q%s AW%s' % (self.v_score, q_score, aw_score)
+
+    @property
+    def v_score_alias(self):
+        return u'V%s' % self.v_score
+
+    @property
+    def aw_score_alias(self):
+        if self.aw_score:
+            return self.aw_score.name
+        return u''
 
     def toggle_retrieve(self, modified_by):
         self.retrieved = not self.retrieved
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    def to_json(self):
+        y_gre_test_score_json = {
+            'user': self.user.name,
+            'test': self.test.to_json(),
+            'v_score': self.v_score,
+            'q_score': self.q_score,
+            'aw_score': self.aw_score_alias,
+            'retrieved': self.retrieved,
+            'alias': self.alias,
+            'score_alias': self.score_alias,
+            'v_score_alias': self.v_score_alias,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return y_gre_test_score_json
 
     def __repr__(self):
         return '<Y-GRE Test Score %r>' % self.alias
@@ -1796,11 +1869,92 @@ class User(UserMixin, db.Model):
         return Rental.query.filter_by(user_id=self.id, returned=False).count() > 0
 
     def punch(self, section):
+        timestamp = datetime.utcnow()
+        if self.last_punch is None or section.name in [u'词典使用']:
+            self.__punch(section=section, milestone=True)
+            return
+        if section.lesson.type_id == self.last_punch.section.lesson.type_id:
+            if section.order > self.last_punch.section.order + 1:
+                covered_sections = Section.query\
+                    .join(Lesson, Lesson.id == Section.lesson_id)\
+                    .filter(Lesson.type_id == section.lesson.type_id)\
+                    .filter(and_(
+                        Section.order > self.last_punch.section.order,
+                        Section.order < section.order
+                    ))\
+                    .order_by(Section.order.asc())\
+                    .all()
+                for covered_section in covered_sections:
+                    self.__punch(section=covered_section, timestamp=timestamp)
+            if section.order < self.last_punch.section.order:
+                uncovered_sections = Section.query\
+                    .join(Lesson, Lesson.id == Section.lesson_id)\
+                    .filter(Lesson.type_id == section.lesson.type_id)\
+                    .filter(and_(
+                        Section.order > section.order,
+                        Section.order <= self.last_punch.section.order
+                    ))\
+                    .all()
+                for uncovered_section in uncovered_sections:
+                    self.unpunch(section=uncovered_section)
+            self.__punch(section=section, milestone=True, timestamp=timestamp)
+            return
+        if self.last_punch.section.lesson.type.name == u'VB' and section.lesson.type.name == u'Y-GRE':
+            covered_sections = Section.query\
+                .filter(Section.lesson_id == self.last_punch.section.lesson_id)\
+                .filter(Section.order > self.last_punch.section.order)\
+                .order_by(Section.order.asc())\
+                .all() + \
+                Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == section.lesson.type_id)\
+                .filter(and_(
+                    Section.order >= 1,
+                    Section.order < section.order
+                ))\
+                .order_by(Section.order.asc())\
+                .all()
+            for covered_section in covered_sections:
+                self.__punch(section=covered_section, timestamp=timestamp)
+            self.__punch(section=section, milestone=True, timestamp=timestamp)
+            return
+        if self.last_punch.section.lesson.type.name == u'Y-GRE' and section.lesson.type.name == u'VB':
+            uncovered_sections = Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == self.last_punch.section.lesson.type_id)\
+                .filter(Section.order >= 1)\
+                .all() + \
+                Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == section.lesson.type_id)\
+                .filter(Section.order > section.order)\
+                .all()
+            for uncovered_section in uncovered_sections:
+                self.unpunch(section=uncovered_section)
+            covered_sections = Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .filter(Lesson.type_id == section.lesson.type_id)\
+                .filter(and_(
+                    Section.order > self.last_vb_punch.section.order,
+                    Section.order < section.order
+                ))\
+                .order_by(Section.order.asc())\
+                .all()
+            for covered_section in covered_sections:
+                self.__punch(section=covered_section, timestamp=timestamp)
+            self.__punch(section=section, milestone=True, timestamp=timestamp)
+            return
+
+    def __initial_punch(self):
+        self.__punch(section=Section.query.filter_by(name=u'Day 1-1').first(), milestone=True)
+
+    def __punch(self, section, milestone=False, timestamp=datetime.utcnow()):
         if not self.punched(section):
-            punch = Punch(user_id=self.id, section_id=section.id)
+            punch = Punch(user_id=self.id, section_id=section.id, milestone=milestone, timestamp=timestamp)
         else:
             punch = self.punches.filter_by(section_id=section.id).first()
-            punch.timestamp = datetime.utcnow()
+            punch.milestone = milestone
+            punch.timestamp = timestamp
         db.session.add(punch)
 
     def unpunch(self, section):
@@ -1813,11 +1967,133 @@ class User(UserMixin, db.Model):
 
     @property
     def last_punch(self):
-        return self.punches.order_by(Punch.timestamp.desc()).first()
+        if self.last_y_gre_punch is not None:
+            return self.last_y_gre_punch
+        return self.last_vb_punch
+
+    @property
+    def last_vb_punch(self):
+        return Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'VB')\
+            .filter(Section.order >= 1)\
+            .order_by(Section.order.desc())\
+            .first()
+
+    @property
+    def last_vb_punch_json(self):
+        if self.last_vb_punch:
+            return self.last_vb_punch.to_json()
+        return u'N/A'
+
+    @property
+    def last_y_gre_punch(self):
+        return Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(Section.order >= 1)\
+            .order_by(Section.order.desc())\
+            .first()
+
+    @property
+    def last_y_gre_punch_json(self):
+        if self.last_y_gre_punch:
+            return self.last_y_gre_punch.to_json()
+        return u'N/A'
+
+    @property
+    def vb_progress_json(self):
+        punched_sections = Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'VB')\
+            .count()
+        query = Section.query\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')
+        if self.can_access_advanced_vb:
+            total_sections = query.count()
+        else:
+            total_sections = query.filter(Lesson.advanced == False).count()
+        assignments = Assignment.query\
+            .join(Lesson, Lesson.id == Assignment.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')
+        submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
+        total_assignments = assignments.count()
+        tests = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')
+        taken_tests = sum([self.taken_vb(test=test) is not None for test in tests])
+        total_tests = tests.count()
+        return {
+            'value': punched_sections + submitted_assignments + taken_tests,
+            'total': total_sections + total_assignments + total_tests,
+            'percent': int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100),
+        }
+
+    @property
+    def y_gre_progress_json(self):
+        punched_sections = Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .count()
+        total_sections = Section.query\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(Section.order >= 1)\
+            .count()
+        assignments = Assignment.query\
+            .join(Lesson, Lesson.id == Assignment.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')
+        submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
+        total_assignments = assignments.count()
+        tests = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')
+        taken_tests = sum([self.taken_y_gre(test=test) is not None for test in tests])
+        total_tests = tests.count()
+        return {
+            'value': punched_sections + submitted_assignments + taken_tests,
+            'total': total_sections + total_assignments + total_tests,
+            'percent': int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100),
+        }
 
     @property
     def next_punch(self):
-        return [section for section in self.last_punch.section.lesson.sections.all() if section.id >= self.last_punch.section_id] + self.last_punch.section.lesson.follow_ups.first().follow_up.sections.all()
+        if self.last_punch.section.lesson.type.name == u'VB':
+            return Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'VB')\
+                .filter(Section.order >= self.last_punch.section.order)\
+                .order_by(Section.order.asc())\
+                .limit(10) + \
+                [Section.query.filter_by(name=u'Y-GRE总论').first()]
+        if self.last_punch.section.lesson.type.name == u'Y-GRE':
+            return Section.query\
+                .join(Lesson, Lesson.id == Section.lesson_id)\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'Y-GRE')\
+                .filter(Section.order >= self.last_punch.section.order)\
+                .order_by(Section.order.asc())\
+                .all()
 
     def add_toefl_test_score(self, test_date, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
         test = TOEFLTest.query.filter_by(date=test_date).first()
@@ -1837,66 +2113,71 @@ class User(UserMixin, db.Model):
         )
         db.session.add(toefl_test_score)
 
-    def add_assignment_score(self, assignment, grade, modified_by):
-        assignment_score = AssignmentScore(
-            user_id=self.id,
-            assignment_id=assignment.id,
-            grade_id=grade.id,
-            modified_by_id=modified_by.id
-        )
-        db.session.add(assignment_score)
+    def submitted(self, assignment):
+        return self.assignment_scores.filter_by(assignment_id=assignment.id).order_by(AssignmentScore.modified_at.desc()).first()
+
+    def taken_vb(self, test):
+        return self.vb_test_scores.filter_by(test_id=test.id).order_by(VBTestScore.modified_at.desc()).first()
+
+    def taken_y_gre(self, test):
+        return self.y_gre_test_scores.filter_by(test_id=test.id).order_by(YGRETestScore.modified_at.desc()).first()
+
+    @property
+    def can_access_advanced_vb(self):
+        vb_test_score = self.vb_test_scores.filter_by(test_id=Test.query.filter_by(name=u'L6-9').first().id).first()
+        return vb_test_score is not None and vb_test_score.score >= 90.0
 
     def notified_by(self, announcement):
         return self.read_announcements.filter_by(announcement_id=announcement.id).first() is not None
 
-    @property
-    def gre_score_prediction(self):
-        if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（北清）'):
-            if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'竞赛').first().id) is not None) or\
-                (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
-                (self.education_records.filter_by(type_id=EducationType.query.filter_by(name='本科').first().id).first().gpa_percentage >= 0.9):
-                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
-                    return u'160+'
-                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
-                    return u'160-'
-                return u'N/A'
-            else:
-                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
-                    return u'155+'
-                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
-                    return u'155-'
-                return u'N/A'
-        if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（非北清）'):
-            if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
-                (self.education_records.filter_by(type_id=ScoreType.query.filter_by(name='高考数学').first().id).first().score >= 135):
-                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
-                    return u'155+'
-                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
-                    return u'155-'
-                return u'N/A'
-            else:
-                if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
-                    return u'150+'
-                if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                    (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
-                    return u'150-'
-                return u'N/A'
-        if (self.origin_type_id is not None) and (self.origin_type.name == u'非一本'):
-            if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependents) and\
-                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
-                return u'145+'
-            if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependents) and\
-                (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
-                return u'145-'
-            return u'N/A'
-        return u'N/A'
+    # @property
+    # def gre_score_prediction(self):
+    #     if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（北清）'):
+    #         if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'竞赛').first().id) is not None) or\
+    #             (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
+    #             (self.education_records.filter_by(type_id=EducationType.query.filter_by(name='本科').first().id).first().gpa_percentage >= 0.9):
+    #             if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+    #                 return u'160+'
+    #             if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+    #                 return u'160-'
+    #             return u'N/A'
+    #         else:
+    #             if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+    #                 return u'155+'
+    #             if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+    #                 return u'155-'
+    #             return u'N/A'
+    #     if (self.origin_type_id is not None) and (self.origin_type.name == u'一本（非北清）'):
+    #         if (self.score_records.filter_by(type_id=ScoreType.query.filter_by(name=u'大学英语六级').first().id).first().score >= 600) or\
+    #             (self.education_records.filter_by(type_id=ScoreType.query.filter_by(name='高考数学').first().id).first().score >= 135):
+    #             if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+    #                 return u'155+'
+    #             if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+    #                 return u'155-'
+    #             return u'N/A'
+    #         else:
+    #             if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+    #                 return u'150+'
+    #             if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependent_names) and\
+    #                 (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+    #                 return u'150-'
+    #             return u'N/A'
+    #     if (self.origin_type_id is not None) and (self.origin_type.name == u'非一本'):
+    #         if (self.last_punch is not None) and (u'6th' in self.last_punch.section.lesson.all_dependent_names) and\
+    #             (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考2').first().id) is not None):
+    #             return u'145+'
+    #         if (self.last_punch is not None) and (u'3rd' in self.last_punch.section.lesson.all_dependent_names) and\
+    #             (self.y_gre_test_scores.filter_by(type_id=Test.query.filter_by(name=u'模考1').first().id) is not None):
+    #             return u'145-'
+    #         return u'N/A'
+    #     return u'N/A'
 
     def activate(self, new_password=None):
         self.activated = True
@@ -1904,7 +2185,7 @@ class User(UserMixin, db.Model):
         if new_password:
             self.password = new_password
         db.session.add(self)
-        self.punch(section=Section.query.get(1))
+        self.__initial_punch()
 
     def to_json(self):
         user_json = {
@@ -1913,7 +2194,7 @@ class User(UserMixin, db.Model):
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'url': url_for('main.user', id=self.id),
+            'url': url_for('main.profile', id=self.id),
         }
         return user_json
 
@@ -1935,7 +2216,7 @@ class User(UserMixin, db.Model):
             else:
                 user_json_suggestion['description'] = self.email
         if include_url:
-            user_json_suggestion['url'] = url_for('main.user', id=self.id)
+            user_json_suggestion['url'] = url_for('main.profile', id=self.id)
         return user_json_suggestion
 
     @staticmethod
@@ -1955,7 +2236,7 @@ class User(UserMixin, db.Model):
             db.session.add(admin)
             db.session.commit()
             admin.create_user(user=admin)
-            admin.punch(section=Section.query.get(1))
+            admin.__initial_punch()
             db.session.commit()
             print u'初始化系统管理员信息'
 
@@ -2386,7 +2667,7 @@ class Period(db.Model):
             'alias': self.alias,
             'alias2': self.alias2,
             'alias3': self.alias3,
-            'type': self.type.show,
+            'course_type': self.type.name,
             'show': self.show,
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
@@ -2697,7 +2978,7 @@ class iPadContentJSON(db.Model):
 
     @staticmethod
     def initialize():
-        json_string = unicode(dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
+        json_string = unicode(dumps({unicode(ipad.id): {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.filter_by(include_video=True).order_by(Lesson.id.asc()).all()} for ipad in iPad.query.filter_by(deleted=False).order_by(iPad.alias.asc()).all()}))
         ipad_content_json = iPadContentJSON.query.get(1)
         if ipad_content_json is not None:
             ipad_content_json.json_string = json_string
@@ -2713,7 +2994,7 @@ class iPadContentJSON(db.Model):
             iPadContentJSON.initialize()
             ipad_content_json = iPadContentJSON.query.get(1)
         ipad_contents = loads(ipad_content_json.json_string)
-        ipad_contents[unicode(ipad.id)] = {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()}
+        ipad_contents[unicode(ipad.id)] = {unicode(lesson.id): ipad.has_lesson(lesson=lesson) for lesson in Lesson.query.filter_by(include_video=True).order_by(Lesson.id.asc()).all()}
         ipad_content_json.json_string = unicode(dumps(ipad_contents))
         db.session.add(ipad_content_json)
         db.session.commit()
@@ -2751,7 +3032,7 @@ class iPadContentJSON(db.Model):
 class iPad(db.Model):
     __tablename__ = 'ipads'
     id = db.Column(db.Integer, primary_key=True)
-    serial = db.Column(db.Unicode(12), index=True)
+    serial = db.Column(db.Unicode(64), index=True)
     alias = db.Column(db.Unicode(64), index=True)
     capacity_id = db.Column(db.Integer, db.ForeignKey('ipad_capacities.id'))
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'))
@@ -2973,12 +3254,6 @@ class iPad(db.Model):
         return '<iPad %r, %r>' % (self.alias, self.serial)
 
 
-class LessonDependency(db.Model):
-    __tablename__ = 'lesson_dependencies'
-    depenedent_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
-    follow_up_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
-
-
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True)
@@ -2986,24 +3261,12 @@ class Lesson(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     hour = db.Column(db.Interval, default=timedelta(hours=0))
     priority = db.Column(db.Integer, default=0)
+    order = db.Column(db.Integer, default=0)
+    include_video = db.Column(db.Integer, default=False)
     advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
     tests = db.relationship('Test', backref='lesson', lazy='dynamic')
-    depenedents = db.relationship(
-        'LessonDependency',
-        foreign_keys=[LessonDependency.follow_up_id],
-        backref=db.backref('follow_up', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    follow_ups = db.relationship(
-        'LessonDependency',
-        foreign_keys=[LessonDependency.depenedent_id],
-        backref=db.backref('depenedent', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
     occupied_ipads = db.relationship(
         'iPadContent',
         foreign_keys=[iPadContent.lesson_id],
@@ -3024,6 +3287,7 @@ class Lesson(db.Model):
     @property
     def abbr(self):
         abbreviations = {
+            u'词典使用': u'词',
             u'VB总论': u'总',
             u'L1': u'1',
             u'L2': u'2',
@@ -3061,31 +3325,6 @@ class Lesson(db.Model):
         return u'N/A'
 
     @property
-    def first_section(self):
-        return self.sections\
-            .order_by(Section.id.asc())\
-            .first()
-
-    def add_dependent(self, depenedent):
-        if not self.has_dependent(depenedent):
-            lesson_dependency = LessonDependency(depenedent_id=depenedent.id, follow_up_id=self.id)
-            db.session.add(lesson_dependency)
-
-    def remove_dependent(self, depenedent):
-        lesson_dependency = self.depenedents.filter_by(depenedent_id=depenedent.id).first()
-        if lesson_dependency:
-            db.session.delete(lesson_dependency)
-
-    def has_dependent(self, depenedent):
-        return self.depenedents.filter_by(depenedent_id=depenedent.id).first() is not None
-
-    @property
-    def all_dependents(self):
-        if self.depenedents.count() == 0:
-            return []
-        return self.depenedents.first().depenedent.all_dependents + [self.depenedents.first().depenedent.name]
-
-    @property
     def occupied_ipads_alias(self):
         return iPadContent.query\
             .join(iPad, iPad.id == iPadContent.ipad_id)\
@@ -3101,36 +3340,54 @@ class Lesson(db.Model):
             .filter(iPadState.name != u'退役')\
             .filter(iPadContent.lesson_id == self.id)
 
+    def to_json(self, user=None):
+        lesson_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'abbr': self.abbr,
+            'course_type': self.type.name,
+            'hour': self.hour_alias,
+            'priority': self.priority,
+            'order': self.order,
+            'include_video': self.include_video,
+            'advanced': self.advanced,
+            'sections': [section.to_json(user=user) for section in self.sections],
+            'assignments': [assignment.to_json(user=user) for assignment in self.assignments],
+            'tests': [test.to_json(user=user) for test in self.tests],
+        }
+        return lesson_json
+
     @staticmethod
     def insert_lessons():
         lessons = [
-            (u'VB总论', u'VB', 20, 16, False, [], ),
-            (u'L1', u'VB', 8, 15, False, [u'VB总论'], ),
-            (u'L2', u'VB', 8, 14, False, [u'L1'], ),
-            (u'L3', u'VB', 8, 13, False, [u'L2'], ),
-            (u'L4', u'VB', 8, 12, False, [u'L3'], ),
-            (u'L5', u'VB', 8, 11, False, [u'L4'], ),
-            (u'L6', u'VB', 10, 7, False, [u'L5'], ),
-            (u'L7', u'VB', 10, 6, False, [u'L6'], ),
-            (u'L8', u'VB', 10, 5, False, [u'L7'], ),
-            (u'L9', u'VB', 10, 4, False, [u'L8'], ),
-            (u'L10', u'VB', 10, -2, False, [u'L9'], ),
-            (u'L11', u'VB', 10, -1, True, [u'L9'], ),
-            (u'L12', u'VB', 10, -1, True, [u'L11'], ),
-            (u'L13', u'VB', 10, -1, True, [u'L12'], ),
-            (u'L14', u'VB', 10, -1, True, [u'L13'], ),
-            (u'Y-GRE总论', u'Y-GRE', 10, 17, False, [], ),
-            (u'1st', u'Y-GRE', 30, 17, False, [u'Y-GRE总论'], ),
-            (u'2nd', u'Y-GRE', 30, 17, False, [u'1st'], ),
-            (u'3rd', u'Y-GRE', 50, 17, False, [u'2nd'], ),
-            (u'4th', u'Y-GRE', 30, 10, False, [u'3rd'], ),
-            (u'5th', u'Y-GRE', 40, 9, False, [u'4th'], ),
-            (u'6th', u'Y-GRE', 40, 8, False, [u'5th'], ),
-            (u'7th', u'Y-GRE', 30, 3, False, [u'6th'], ),
-            (u'8th', u'Y-GRE', 30, 2, False, [u'7th'], ),
-            (u'9th', u'Y-GRE', 30, 1, False, [u'8th'], ),
-            (u'Test', u'Y-GRE', 0, 0, False, [u'Y-GRE总论'], ),
-            (u'AW总论', u'Y-GRE', 3, 17, False, [u'Y-GRE总论'], ),
+            (u'词典使用', u'VB', 0, 0, 0, False, False, ),
+            (u'VB总论', u'VB', 20, 16, 1, True, False, ),
+            (u'L1', u'VB', 8, 15, 2, True, False, ),
+            (u'L2', u'VB', 8, 14, 3, True, False, ),
+            (u'L3', u'VB', 8, 13, 4, True, False, ),
+            (u'L4', u'VB', 8, 12, 5, True, False, ),
+            (u'L5', u'VB', 8, 11, 6, True, False, ),
+            (u'L6', u'VB', 10, 7, 7, True, False, ),
+            (u'L7', u'VB', 10, 6, 8, True, False, ),
+            (u'L8', u'VB', 10, 5, 9, True, False, ),
+            (u'L9', u'VB', 10, 4, 10, True, False, ),
+            (u'L10', u'VB', 0, 0, 11, False, False, ),
+            (u'L11', u'VB', 10, -1, 12, True, True, ),
+            (u'L12', u'VB', 10, -1, 13, True, True, ),
+            (u'L13', u'VB', 10, -1, 14, True, True, ),
+            (u'L14', u'VB', 10, -1, 15, True, True, ),
+            (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, True, False, ),
+            (u'1st', u'Y-GRE', 30, 17, 2, True, False, ),
+            (u'2nd', u'Y-GRE', 30, 17, 3, True, False, ),
+            (u'3rd', u'Y-GRE', 50, 17, 4, True, False, ),
+            (u'AW总论', u'Y-GRE', 3, 17, 5, True, False, ),
+            (u'4th', u'Y-GRE', 30, 10, 6, True, False, ),
+            (u'5th', u'Y-GRE', 40, 9, 7, True, False, ),
+            (u'6th', u'Y-GRE', 40, 8, 8, True, False, ),
+            (u'7th', u'Y-GRE', 30, 3, 9, True, False, ),
+            (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
+            (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
+            (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
         ]
         for L in lessons:
             lesson = Lesson.query.filter_by(name=L[0]).first()
@@ -3140,16 +3397,12 @@ class Lesson(db.Model):
                     type_id=CourseType.query.filter_by(name=L[1]).first().id,
                     hour=timedelta(hours=L[2]),
                     priority=L[3],
-                    advanced=L[4]
+                    order=L[4],
+                    include_video=L[5],
+                    advanced=L[6]
                 )
                 db.session.add(lesson)
-                db.session.commit()
                 print u'导入课程信息', L[0], L[1]
-            for D in L[5]:
-                depenedent = Lesson.query.filter_by(name=D).first()
-                if not lesson.has_dependent(depenedent=depenedent):
-                    lesson.add_dependent(depenedent=depenedent)
-                    print u'添加依赖课程：%s <- %s' % (L[0], D)
         db.session.commit()
 
     def __repr__(self):
@@ -3161,6 +3414,7 @@ class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+    order = db.Column(db.Integer, default=0)
     punches = db.relationship(
         'Punch',
         foreign_keys=[Punch.section_id],
@@ -3171,13 +3425,13 @@ class Section(db.Model):
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.name, self.name)
+        if self.lesson.sections.count() > 1:
+            return u'%s - %s' % (self.lesson.name, self.name)
+        return u'%s' % self.name
 
     @property
     def alias2(self):
-        if self.lesson.type.name == u'Y-GRE':
-            return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
-        return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.name)
+        return u'%s - %s' % (self.lesson.type.name, self.alias)
 
     @property
     def abbr(self):
@@ -3185,167 +3439,183 @@ class Section(db.Model):
             return u'0.%s%s' % (self.name[4], self.name[6])
         return self.name
 
+    def to_json(self, user=None):
+        section_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'abbr': self.abbr,
+            'lesson': self.lesson.name,
+            'course_type': self.lesson.type.name,
+            'order': self.order,
+        }
+        if user:
+            section_json['progress_url'] = url_for('main.profile_progress_section', user_id=user.id, section_id=self.id)
+        return section_json
+
     @staticmethod
     def insert_sections():
         sections = [
-            (u'Day 1-1', u'VB总论', ),
-            (u'Day 1-2', u'VB总论', ),
-            (u'Day 1-3', u'VB总论', ),
-            (u'Day 1-4', u'VB总论', ),
-            (u'Day 2-1', u'VB总论', ),
-            (u'Day 2-2', u'VB总论', ),
-            (u'Day 2-3', u'VB总论', ),
-            (u'Day 2-4', u'VB总论', ),
-            (u'Day 3-1', u'VB总论', ),
-            (u'Day 3-2', u'VB总论', ),
-            (u'Day 3-3', u'VB总论', ),
-            (u'Day 3-4', u'VB总论', ),
-            (u'Day 4-1', u'VB总论', ),
-            (u'Day 4-2', u'VB总论', ),
-            (u'Day 4-3', u'VB总论', ),
-            (u'Day 4-4', u'VB总论', ),
-            (u'1.1', u'L1', ),
-            (u'1.2', u'L1', ),
-            (u'1.3', u'L1', ),
-            (u'1.4', u'L1', ),
-            (u'1.5', u'L1', ),
-            (u'1.6', u'L1', ),
-            (u'1.7', u'L1', ),
-            (u'1.8', u'L1', ),
-            (u'2.1', u'L2', ),
-            (u'2.2', u'L2', ),
-            (u'2.3', u'L2', ),
-            (u'2.4', u'L2', ),
-            (u'2.5', u'L2', ),
-            (u'2.6', u'L2', ),
-            (u'2.7', u'L2', ),
-            (u'2.8', u'L2', ),
-            (u'3.1', u'L3', ),
-            (u'3.2', u'L3', ),
-            (u'3.3', u'L3', ),
-            (u'3.4', u'L3', ),
-            (u'3.5', u'L3', ),
-            (u'3.6', u'L3', ),
-            (u'3.7', u'L3', ),
-            (u'3.8', u'L3', ),
-            (u'4.1', u'L4', ),
-            (u'4.2', u'L4', ),
-            (u'4.3', u'L4', ),
-            (u'4.4', u'L4', ),
-            (u'4.5', u'L4', ),
-            (u'4.6', u'L4', ),
-            (u'4.7', u'L4', ),
-            (u'4.8', u'L4', ),
-            (u'5.1', u'L5', ),
-            (u'5.2', u'L5', ),
-            (u'5.3', u'L5', ),
-            (u'5.4', u'L5', ),
-            (u'5.5', u'L5', ),
-            (u'5.6', u'L5', ),
-            (u'5.7', u'L5', ),
-            (u'5.8', u'L5', ),
-            (u'6.1', u'L6', ),
-            (u'6.2', u'L6', ),
-            (u'6.3', u'L6', ),
-            (u'6.4', u'L6', ),
-            (u'6.5', u'L6', ),
-            (u'6.6', u'L6', ),
-            (u'6.7', u'L6', ),
-            (u'6.8', u'L6', ),
-            (u'7.1', u'L7', ),
-            (u'7.2', u'L7', ),
-            (u'7.3', u'L7', ),
-            (u'7.4', u'L7', ),
-            (u'7.5', u'L7', ),
-            (u'7.6', u'L7', ),
-            (u'7.7', u'L7', ),
-            (u'7.8', u'L7', ),
-            (u'8.1', u'L8', ),
-            (u'8.2', u'L8', ),
-            (u'8.3', u'L8', ),
-            (u'8.4', u'L8', ),
-            (u'8.5', u'L8', ),
-            (u'8.6', u'L8', ),
-            (u'8.7', u'L8', ),
-            (u'8.8', u'L8', ),
-            (u'8.9', u'L8', ),
-            (u'9.1', u'L9', ),
-            (u'9.2', u'L9', ),
-            (u'9.3', u'L9', ),
-            (u'9.4', u'L9', ),
-            (u'9.5', u'L9', ),
-            (u'9.6', u'L9', ),
-            (u'9.7', u'L9', ),
-            (u'9.8', u'L9', ),
-            (u'9.9', u'L9', ),
-            (u'L10', u'L10', ),
-            (u'11.1', u'L11', ),
-            (u'11.2', u'L11', ),
-            (u'11.3', u'L11', ),
-            (u'11.4', u'L11', ),
-            (u'11.5', u'L11', ),
-            (u'11.6', u'L11', ),
-            (u'11.7', u'L11', ),
-            (u'11.8', u'L11', ),
-            (u'11.9', u'L11', ),
-            (u'11.10', u'L11', ),
-            (u'11.11', u'L11', ),
-            (u'11.12', u'L11', ),
-            (u'12.1', u'L12', ),
-            (u'12.2', u'L12', ),
-            (u'12.3', u'L12', ),
-            (u'12.4', u'L12', ),
-            (u'12.5', u'L12', ),
-            (u'12.6', u'L12', ),
-            (u'12.7', u'L12', ),
-            (u'12.8', u'L12', ),
-            (u'12.9', u'L12', ),
-            (u'12.10', u'L12', ),
-            (u'12.11', u'L12', ),
-            (u'12.12', u'L12', ),
-            (u'13.1', u'L13', ),
-            (u'13.2', u'L13', ),
-            (u'13.3', u'L13', ),
-            (u'13.4', u'L13', ),
-            (u'13.5', u'L13', ),
-            (u'13.6', u'L13', ),
-            (u'13.7', u'L13', ),
-            (u'13.8', u'L13', ),
-            (u'13.9', u'L13', ),
-            (u'13.10', u'L13', ),
-            (u'13.11', u'L13', ),
-            (u'13.12', u'L13', ),
-            (u'14.1', u'L14', ),
-            (u'14.2', u'L14', ),
-            (u'14.3', u'L14', ),
-            (u'14.4', u'L14', ),
-            (u'14.5', u'L14', ),
-            (u'14.6', u'L14', ),
-            (u'14.7', u'L14', ),
-            (u'14.8', u'L14', ),
-            (u'14.9', u'L14', ),
-            (u'14.10', u'L14', ),
-            (u'14.11', u'L14', ),
-            (u'14.12', u'L14', ),
-            (u'Y-GRE总论', u'Y-GRE总论', ),
-            (u'1st', u'1st', ),
-            (u'2nd', u'2nd', ),
-            (u'3rd', u'3rd', ),
-            (u'4th', u'4th', ),
-            (u'5th', u'5th', ),
-            (u'6th', u'6th', ),
-            (u'7th', u'7th', ),
-            (u'8th', u'8th', ),
-            (u'9th', u'9th', ),
-            (u'Test', u'Test', ),
-            (u'AW总论', u'AW总论', ),
+            (u'词典使用', u'词典使用', 0, ),
+            (u'Day 1-1', u'VB总论', 1, ),
+            (u'Day 1-2', u'VB总论', 2, ),
+            (u'Day 1-3', u'VB总论', 3, ),
+            (u'Day 1-4', u'VB总论', 4, ),
+            (u'Day 2-1', u'VB总论', 5, ),
+            (u'Day 2-2', u'VB总论', 6, ),
+            (u'Day 2-3', u'VB总论', 7, ),
+            (u'Day 2-4', u'VB总论', 8, ),
+            (u'Day 3-1', u'VB总论', 9, ),
+            (u'Day 3-2', u'VB总论', 10, ),
+            (u'Day 3-3', u'VB总论', 11, ),
+            (u'Day 3-4', u'VB总论', 12, ),
+            (u'Day 4-1', u'VB总论', 13, ),
+            (u'Day 4-2', u'VB总论', 14, ),
+            (u'Day 4-3', u'VB总论', 15, ),
+            (u'Day 4-4', u'VB总论', 16, ),
+            (u'1.1', u'L1', 17, ),
+            (u'1.2', u'L1', 18, ),
+            (u'1.3', u'L1', 19, ),
+            (u'1.4', u'L1', 20, ),
+            (u'1.5', u'L1', 21, ),
+            (u'1.6', u'L1', 22, ),
+            (u'1.7', u'L1', 23, ),
+            (u'1.8', u'L1', 24, ),
+            (u'2.1', u'L2', 25, ),
+            (u'2.2', u'L2', 26, ),
+            (u'2.3', u'L2', 27, ),
+            (u'2.4', u'L2', 28, ),
+            (u'2.5', u'L2', 29, ),
+            (u'2.6', u'L2', 30, ),
+            (u'2.7', u'L2', 31, ),
+            (u'2.8', u'L2', 32, ),
+            (u'3.1', u'L3', 33, ),
+            (u'3.2', u'L3', 34, ),
+            (u'3.3', u'L3', 35, ),
+            (u'3.4', u'L3', 36, ),
+            (u'3.5', u'L3', 37, ),
+            (u'3.6', u'L3', 38, ),
+            (u'3.7', u'L3', 39, ),
+            (u'3.8', u'L3', 40, ),
+            (u'4.1', u'L4', 41, ),
+            (u'4.2', u'L4', 42, ),
+            (u'4.3', u'L4', 43, ),
+            (u'4.4', u'L4', 44, ),
+            (u'4.5', u'L4', 45, ),
+            (u'4.6', u'L4', 46, ),
+            (u'4.7', u'L4', 47, ),
+            (u'4.8', u'L4', 48, ),
+            (u'5.1', u'L5', 49, ),
+            (u'5.2', u'L5', 50, ),
+            (u'5.3', u'L5', 51, ),
+            (u'5.4', u'L5', 52, ),
+            (u'5.5', u'L5', 53, ),
+            (u'5.6', u'L5', 54, ),
+            (u'5.7', u'L5', 55, ),
+            (u'5.8', u'L5', 56, ),
+            (u'6.1', u'L6', 57, ),
+            (u'6.2', u'L6', 58, ),
+            (u'6.3', u'L6', 59, ),
+            (u'6.4', u'L6', 60, ),
+            (u'6.5', u'L6', 61, ),
+            (u'6.6', u'L6', 62, ),
+            (u'6.7', u'L6', 63, ),
+            (u'6.8', u'L6', 64, ),
+            (u'7.1', u'L7', 65, ),
+            (u'7.2', u'L7', 66, ),
+            (u'7.3', u'L7', 67, ),
+            (u'7.4', u'L7', 68, ),
+            (u'7.5', u'L7', 69, ),
+            (u'7.6', u'L7', 70, ),
+            (u'7.7', u'L7', 71, ),
+            (u'7.8', u'L7', 72, ),
+            (u'8.1', u'L8', 73, ),
+            (u'8.2', u'L8', 74, ),
+            (u'8.3', u'L8', 75, ),
+            (u'8.4', u'L8', 76, ),
+            (u'8.5', u'L8', 77, ),
+            (u'8.6', u'L8', 78, ),
+            (u'8.7', u'L8', 79, ),
+            (u'8.8', u'L8', 80, ),
+            (u'8.9', u'L8', 81, ),
+            (u'9.1', u'L9', 82, ),
+            (u'9.2', u'L9', 83, ),
+            (u'9.3', u'L9', 84, ),
+            (u'9.4', u'L9', 85, ),
+            (u'9.5', u'L9', 86, ),
+            (u'9.6', u'L9', 87, ),
+            (u'9.7', u'L9', 88, ),
+            (u'9.8', u'L9', 89, ),
+            (u'9.9', u'L9', 90, ),
+            (u'L10', u'L10', 91, ),
+            (u'11.1', u'L11', 92, ),
+            (u'11.2', u'L11', 93, ),
+            (u'11.3', u'L11', 94, ),
+            (u'11.4', u'L11', 95, ),
+            (u'11.5', u'L11', 96, ),
+            (u'11.6', u'L11', 97, ),
+            (u'11.7', u'L11', 98, ),
+            (u'11.8', u'L11', 99, ),
+            (u'11.9', u'L11', 100, ),
+            (u'11.10', u'L11', 101, ),
+            (u'11.11', u'L11', 102, ),
+            (u'11.12', u'L11', 103, ),
+            (u'12.1', u'L12', 104, ),
+            (u'12.2', u'L12', 105, ),
+            (u'12.3', u'L12', 106, ),
+            (u'12.4', u'L12', 107, ),
+            (u'12.5', u'L12', 108, ),
+            (u'12.6', u'L12', 109, ),
+            (u'12.7', u'L12', 110, ),
+            (u'12.8', u'L12', 111, ),
+            (u'12.9', u'L12', 112, ),
+            (u'12.10', u'L12', 113, ),
+            (u'12.11', u'L12', 114, ),
+            (u'12.12', u'L12', 115, ),
+            (u'13.1', u'L13', 116, ),
+            (u'13.2', u'L13', 117, ),
+            (u'13.3', u'L13', 118, ),
+            (u'13.4', u'L13', 119, ),
+            (u'13.5', u'L13', 120, ),
+            (u'13.6', u'L13', 121, ),
+            (u'13.7', u'L13', 122, ),
+            (u'13.8', u'L13', 123, ),
+            (u'13.9', u'L13', 124, ),
+            (u'13.10', u'L13', 125, ),
+            (u'13.11', u'L13', 126, ),
+            (u'13.12', u'L13', 127, ),
+            (u'14.1', u'L14', 128, ),
+            (u'14.2', u'L14', 129, ),
+            (u'14.3', u'L14', 130, ),
+            (u'14.4', u'L14', 131, ),
+            (u'14.5', u'L14', 132, ),
+            (u'14.6', u'L14', 133, ),
+            (u'14.7', u'L14', 134, ),
+            (u'14.8', u'L14', 135, ),
+            (u'14.9', u'L14', 136, ),
+            (u'14.10', u'L14', 137, ),
+            (u'14.11', u'L14', 138, ),
+            (u'14.12', u'L14', 139, ),
+            (u'Y-GRE总论', u'Y-GRE总论', 1, ),
+            (u'1st', u'1st', 2, ),
+            (u'2nd', u'2nd', 3, ),
+            (u'3rd', u'3rd', 4, ),
+            (u'AW总论', u'AW总论', 5, ),
+            (u'4th', u'4th', 6, ),
+            (u'5th', u'5th', 7, ),
+            (u'6th', u'6th', 8, ),
+            (u'7th', u'7th', 9, ),
+            (u'8th', u'8th', 10, ),
+            (u'9th', u'9th', 11, ),
+            (u'Test', u'Test', -1, ),
         ]
         for S in sections:
             section = Section.query.filter_by(name=S[0]).first()
             if section is None:
                 section = Section(
                     name=S[0],
-                    lesson_id=Lesson.query.filter_by(name=S[1]).first().id
+                    lesson_id=Lesson.query.filter_by(name=S[1]).first().id,
+                    order=S[2]
                 )
                 db.session.add(section)
                 print u'导入节信息', S[0], S[1]
@@ -3380,6 +3650,17 @@ class Assignment(db.Model):
             .filter(User.created == True)\
             .filter(User.activated == True)\
             .filter(User.deleted == False)
+
+    def to_json(self, user=None):
+        assignment_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'lesson': self.lesson.name,
+            'course_type': self.lesson.type.name,
+        }
+        if user:
+            assignment_json['progress_url'] = url_for('main.profile_progress_assignment', user_id=user.id, assignment_id=self.id)
+        return assignment_json
 
     @staticmethod
     def insert_assignments():
@@ -3458,6 +3739,18 @@ class Test(db.Model):
                 .filter(User.activated == True)\
                 .filter(User.deleted == False)
 
+    def to_json(self, user=None):
+        test_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'lesson': self.lesson.name,
+            'course_type': self.lesson.type.name,
+        }
+        if user:
+            test_json['progress_url'] = url_for('main.profile_progress_test', user_id=user.id, test_id=self.id)
+        return test_json
+
     @staticmethod
     def insert_tests():
         tests = [
@@ -3468,12 +3761,12 @@ class Test(db.Model):
             (u'Unit 2', u'2nd', ),
             (u'Unit 3', u'3rd', ),
             (u'模考1', u'3rd', ),
+            (u'PPII-1', u'3rd', ),
             (u'Unit 4', u'4th', ),
             (u'Unit 5', u'5th', ),
             (u'Unit 6', u'6th', ),
             (u'模考2', u'6th', ),
-            (u'PPII-1', u'Y-GRE总论', ),
-            (u'PPII-2', u'Y-GRE总论', ),
+            (u'PPII-2', u'6th', ),
         ]
         for T in tests:
             test = Test.query.filter_by(name=T[0]).first()

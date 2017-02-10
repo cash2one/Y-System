@@ -6,83 +6,7 @@
 {% block customized_styles %}
 {{ super() }}
 <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.css" />
-<style type="text/css">
-.masthead.segment {
-    min-height: 300px;
-    padding: 1em 0em;
-}
-.masthead h1.ui.header {
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
-    font-size: 3em;
-    font-weight: normal;
-}
-
-.ui.vertical.stripe {
-    padding: 8em 0em;
-}
-.ui.vertical.stripe h3 {
-    font-size: 2em;
-}
-.ui.vertical.stripe .ui.table .ui.button {
-    margin: auto;
-}
-.ui.vertical.stripe .button + h3,
-.ui.vertical.stripe p + h3,
-.ui.vertical.stripe .ui.list + h3 {
-    margin-top: 3em;
-}
-.ui.vertical.stripe .floated.image {
-    clear: both;
-}
-.ui.vertical.stripe .ui.tabular.menu,
-.ui.vertical.stripe .ui.statistic .label,
-.ui.vertical.stripe p,
-.ui.vertical.stripe .ui.table {
-    /*font-size: 1.2em;*/
-}
-.ui.vertical.stripe .horizontal.divider {
-    margin: 3em 0em;
-}
-.ui.vertical.stripe .ui.form .ui.flask.message {
-    display: block;
-}
-.ui.vertical.stripe .ui.list .right.floated .ui.button {
-    margin: auto;
-}
-
-.stats.stripe.segment,
-.quote.stripe.segment {
-    padding: 0em;
-}
-.stats.stripe.segment .grid .column,
-.quote.stripe.segment .grid .column {
-    padding-top: 5em;
-    padding-bottom: 5em;
-}
-.quote.stripe.segment p span {
-    font-size: 0.85em;
-}
-
-.masthead.segment #message-container {
-    margin-top: 70px;
-}
-
-
-@media only screen and (max-width: 767px) {
-    .masthead.segment {
-        min-height: 160px;
-    }
-    .masthead h1.ui.header {
-        margin-top: 1em;
-        margin-bottom: 1em;
-        font-size: 1.8em;
-    }
-    .masthead.segment #message-container {
-        margin-top: 20px;
-    }
-}
-</style>
+{% include '_style_common.html' %}
 {% endblock %}
 
 {% block page_masthead %}
@@ -478,7 +402,12 @@
                             {{ new_education_record_form.full_gpa(placeholder='GPA满分') }}
                         </div>
                         <div class="two wide field">
-                            {{ new_education_record_form.year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ new_education_record_form.year(placeholder='入学年份') }}
+                                </div>
+                            </div>
                         </div>
                         <div class="one wide field">
                             {{ new_education_record_form.submit(class='ui primary mini button') }}
@@ -511,7 +440,12 @@
                             {{ new_employment_record_form.position(placeholder='职务') }}
                         </div>
                         <div class="two wide field">
-                            {{ new_employment_record_form.year(class='ui compact dropdown') }}
+                            <div class="ui year calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ new_employment_record_form.year(placeholder='入职年份') }}
+                                </div>
+                            </div>
                         </div>
                         <div class="one wide field">
                             {{ new_employment_record_form.submit(class='ui primary mini button') }}
@@ -587,9 +521,9 @@
                         </div>
                         <div class="three wide field">
                             <div class="ui date calendar">
-                                <div class="ui input left icon">
+                                <div class="ui left icon input">
                                     <i class="calendar icon"></i>
-                                    {{ new_toefl_test_score_form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                                    {{ new_toefl_test_score_form.test_date(placeholder='考试日期') }}
                                 </div>
                             </div>
                         </div>
@@ -822,7 +756,9 @@ $('.message .close')
 
 $('.ui.checkbox').checkbox();
 
-{{ macros.date_js_snippet() }}
+{{ macros.date_picker_js_snippet() }}
+
+{{ macros.year_picker_js_snippet() }}
 
 $('#edit-name-trigger')
     .on('click', function() {
@@ -1570,7 +1506,7 @@ $(document)
 $('.ui.search')
     .search({
         apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
+            url: "{{ url_for('manage.suggest_email_all') }}?keyword={query}"
         },
         showNoResults: false
     })

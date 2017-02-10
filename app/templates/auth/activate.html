@@ -5,37 +5,7 @@
 
 {% block customized_styles %}
 {{ super() }}
-<style type="text/css">
-.masthead.segment .ui.grid {
-    height: 100%;
-    margin-top: 100px;
-    margin-bottom: 50px;
-}
-.masthead.segment .column {
-    max-width: 450px;
-}
-.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link {
-    color: rgba(255,255,255,.5);
-}
-.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:active,
-.masthead.segment .ui.inverted.form .ui.inverted.segment div.fields a.link:hover {
-    color: #fff;
-}
-.masthead.segment .ui.inverted.form .ui.inverted.segment .ui.flask.message {
-    display: block;
-}
-
-@media only screen and (max-width: 767px) {
-    .masthead.segment .ui.grid {
-        margin-top: 50px;
-        margin-bottom: 0;
-    }
-    .masthead.segment .ui.inverted.form .ui.inverted.segment div.fields {
-        -webkit-flex-wrap: nowrap;
-        -ms-flex-wrap: nowrap;
-        flex-wrap: nowrap;
-}
-</style>
+{% include '_style_auth.html' %}
 {% endblock %}
 
 {% block page_masthead %}

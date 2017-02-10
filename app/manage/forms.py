@@ -91,9 +91,12 @@ class EditPunchLessonForm(FlaskForm):
     lesson = SelectField(u'课程进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(EditPunchLessonForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.order_by(Lesson.id.asc()).all()]
+        if user.can_access_advanced_vb:
+            self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.order >= 1).order_by(Lesson.id.asc()).all()]
+        else:
+            self.lesson.choices = [(u'', u'选择课程进度')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.order >= 1).filter(Lesson.advanced == False).order_by(Lesson.id.asc()).all()]
 
 
 class EditPunchSectionForm(FlaskForm):
@@ -309,33 +312,33 @@ class NewUserForm(FlaskForm):
     emergency_contact_mobile = StringField(u'联系方式', validators=[Required(), Length(1, 64)])
     # high school
     high_school = StringField(u'毕业高中', validators=[Length(0, 64)])
-    high_school_year = SelectField(u'入学年份', coerce=unicode)
+    high_school_year = StringField(u'入学年份', validators=[Length(0, 16)])
     # bachelor
     bachelor_school = StringField(u'本科学校', validators=[Length(0, 64)])
     bachelor_major = StringField(u'院系（专业）', validators=[Length(0, 64)])
     bachelor_gpa = StringField(u'GPA', validators=[Length(0, 64)])
     bachelor_full_gpa = StringField(u'GPA满分', validators=[Length(0, 64)])
-    bachelor_year = SelectField(u'入学年份', coerce=unicode)
+    bachelor_year = StringField(u'入学年份', validators=[Length(0, 16)])
     # master
     master_school = StringField(u'研究生学校（硕士）', validators=[Length(0, 64)])
     master_major = StringField(u'院系（专业）', validators=[Length(0, 64)])
     master_gpa = StringField(u'GPA', validators=[Length(0, 64)])
     master_full_gpa = StringField(u'GPA满分', validators=[Length(0, 64)])
-    master_year = SelectField(u'入学年份', coerce=unicode)
+    master_year = StringField(u'入学年份', validators=[Length(0, 16)])
     # doctor
     doctor_school = StringField(u'研究生学校（博士）', validators=[Length(0, 64)])
     doctor_major = StringField(u'院系（专业）', validators=[Length(0, 64)])
     doctor_gpa = StringField(u'GPA', validators=[Length(0, 64)])
     doctor_full_gpa = StringField(u'GPA满分', validators=[Length(0, 64)])
-    doctor_year = SelectField(u'入学年份', coerce=unicode)
+    doctor_year = StringField(u'入学年份', validators=[Length(0, 16)])
     # job 1
     employer_1 = StringField(u'工作单位', validators=[Length(0, 64)])
     position_1 = StringField(u'职务', validators=[Length(0, 64)])
-    job_year_1 = SelectField(u'入职年份', coerce=unicode)
+    job_year_1 = StringField(u'入职年份', validators=[Length(0, 16)])
     # job 2
     employer_2 = StringField(u'工作单位', validators=[Length(0, 64)])
     position_2 = StringField(u'职务', validators=[Length(0, 64)])
-    job_year_2 = SelectField(u'入职年份', coerce=unicode)
+    job_year_2 = StringField(u'入职年份', validators=[Length(0, 16)])
     # scores
     cee_total = StringField(u'高考总分', validators=[Length(0, 64)])
     cee_total_full = StringField(u'高考总分满分', validators=[Length(0, 64)])
@@ -373,12 +376,6 @@ class NewUserForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
         self.emergency_contact_relationship.choices = [(u'', u'选择关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
-        self.high_school_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.bachelor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.master_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.doctor_year.choices = [(u'', u'入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.job_year_1.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
-        self.job_year_2.choices = [(u'', u'入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
         self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
@@ -414,24 +411,19 @@ class NewEducationRecordForm(FlaskForm):
     major = StringField(u'院系（专业）', validators=[Length(0, 64)])
     gpa = StringField(u'GPA', validators=[Length(0, 64)])
     full_gpa = StringField(u'GPA满分', validators=[Length(0, 64)])
-    year = SelectField(u'入学年份', coerce=unicode, validators=[Required()])
+    year = StringField(u'入学年份', validators=[Required(), Length(1, 16)])
     submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(NewEducationRecordForm, self).__init__(*args, **kwargs)
         self.education_type.choices = [(u'', u'选择学历类型')] + [(unicode(education_type.id), education_type.name) for education_type in EducationType.query.order_by(EducationType.id.asc()).all()]
-        self.year.choices = [(u'', u'选择入学年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
 
 
 class NewEmploymentRecordForm(FlaskForm):
     employer = StringField(u'工作单位', validators=[Required(), Length(1, 64)])
     position = StringField(u'职务', validators=[Required(), Length(1, 64)])
-    year = SelectField(u'入职年份', coerce=unicode, validators=[Required()])
+    year = StringField(u'入职年份', validators=[Required(), Length(1, 16)])
     submit = SubmitField(u'添加')
-
-    def __init__(self, *args, **kwargs):
-        super(NewEmploymentRecordForm, self).__init__(*args, **kwargs)
-        self.year.choices = [(u'', u'选择入职年份')] + [(unicode(year), u'%s年' % year) for year in range(int(date.today().year), 1948, -1)]
 
 
 class NewScoreRecordForm(FlaskForm):
@@ -707,8 +699,8 @@ class NewiPadForm(FlaskForm):
         self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB' and lesson.priority >= -1]
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE' and lesson.priority >= -1]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
 
     def validate_serial(self, field):
         if iPad.query.filter_by(serial=field.data).first():
@@ -731,8 +723,8 @@ class EditiPadForm(FlaskForm):
         self.capacity.choices = [(u'', u'选择容量')] + [(unicode(capacity.id), capacity.name) for capacity in iPadCapacity.query.order_by(iPadCapacity.id.asc()).all()]
         self.room.choices = [(u'', u'选择房间')] + [(u'0', u'无')] + [(unicode(room.id), room.name) for room in Room.query.order_by(Room.id.asc()).all()]
         self.state.choices = [(u'', u'选择状态')] + [(unicode(state.id), state.name) for state in iPadState.query.order_by(iPadState.id.asc()).all() if state.name not in [u'借出']]
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB' and lesson.priority >= -1]
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE' and lesson.priority >= -1]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
         self.ipad = ipad
 
     def validate_serial(self, field):
@@ -747,8 +739,8 @@ class FilteriPadForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(FilteriPadForm, self).__init__(*args, **kwargs)
-        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'VB' and lesson.priority >= -1]
-        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.type.name == u'Y-GRE' and lesson.priority >= -1]
+        self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'VB']
+        self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
 
 
 class NewAnnouncementForm(FlaskForm):
