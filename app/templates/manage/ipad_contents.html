@@ -73,7 +73,7 @@ $.getJSON(url, function(data) {
         }
     });
     for (var i in data.ipad_contents) {
-        $('#' + data.ipad_contents[i].element_id).text(data.ipad_contents[i].lesson.name);
+        $('#' + data.ipad_contents[i].element_id).text(data.ipad_contents[i].lesson);
         $('#page-loading-progress').progress('increment');
     };
 });
