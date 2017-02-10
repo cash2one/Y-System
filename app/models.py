@@ -3425,13 +3425,13 @@ class Section(db.Model):
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.name, self.name)
+        if self.lesson.sections.count() > 1:
+            return u'%s - %s' % (self.lesson.name, self.name)
+        return u'%s' % self.name
 
     @property
     def alias2(self):
-        if self.lesson.type.name == u'Y-GRE':
-            return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
-        return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.name)
+        return u'%s - %s' % (self.lesson.type.name, self.alias)
 
     @property
     def abbr(self):
