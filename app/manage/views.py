@@ -46,9 +46,10 @@ from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
 from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
-from ..models import Announcement, AnnouncementType
+from ..models import Announcement
 from ..models import Product, Purchase
 from ..email import send_email, send_emails
+from ..notify import get_announcements
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -64,17 +65,6 @@ def after_request(response):
 @login_required
 @permission_required(u'管理')
 def summary():
-    announcements = Announcement.query\
-        .join(AnnouncementType, AnnouncementType.id == Announcement.type_id)\
-        .filter(AnnouncementType.name == u'管理主页通知')\
-        .filter(Announcement.show == True)\
-        .filter(Announcement.deleted == False)\
-        .order_by(Announcement.modified_at.desc())\
-        .all()
-    for announcement in announcements:
-        if not current_user.notified_by(announcement=announcement):
-            flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
-            announcement.notify(user=current_user._get_current_object())
     show_summary_ipad_1103 = True
     show_summary_ipad_1707 = False
     show_summary_ipad_others = False
@@ -88,6 +78,7 @@ def summary():
         room_id = Room.query.filter_by(name=u'1707').first().id
     if show_summary_ipad_others:
         room_id = 0
+    announcements = get_announcements(type_name=u'管理主页通知', user=current_user._get_current_object())
     return render_template('manage/summary.html',
         room_id=room_id,
         show_summary_ipad_1103=show_summary_ipad_1103,
@@ -4460,7 +4451,7 @@ def suggest_email():
 @manage.route('/suggest/email/all')
 @login_required
 @permission_required(u'管理')
-def suggest_referrer():
+def suggest_email_all():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:

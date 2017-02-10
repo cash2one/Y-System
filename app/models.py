@@ -558,6 +558,8 @@ class Booking(db.Model):
         booking_json = {
             'user': self.user.to_json(),
             'schedule': self.schedule.to_json(),
+            'state': self.state.name,
+            'timestamp': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'token': self.token,
         }
         return booking_json
@@ -687,6 +689,18 @@ class AssignmentScore(db.Model):
     def alias(self):
         return u'%s %s %s' % (self.user.name_alias, self.assignment.name, self.grade.name)
 
+    def to_json(self):
+        assignment_score_json = {
+            'user': self.user.name,
+            'assignment': self.assignment.to_json(),
+            'grade': self.grade.name,
+            'alias': self.alias,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return assignment_score_json
+
     def __repr__(self):
         return '<Assignment Score %r>' % self.alias
 
@@ -719,6 +733,20 @@ class VBTestScore(db.Model):
         self.retrieved = not self.retrieved
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    def to_json(self):
+        vb_test_score_json = {
+            'user': self.user.name,
+            'test': self.test.to_json(),
+            'score': self.score,
+            'retrieved': self.retrieved,
+            'alias': self.alias,
+            'score_alias': self.score_alias,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return vb_test_score_json
 
     def __repr__(self):
         return '<VB Test Score %r>' % self.alias
@@ -789,10 +817,33 @@ class YGRETestScore(db.Model):
     def v_score_alias(self):
         return u'V%s' % self.v_score
 
+    @property
+    def aw_score_alias(self):
+        if self.aw_score:
+            return self.aw_score.name
+        return u''
+
     def toggle_retrieve(self, modified_by):
         self.retrieved = not self.retrieved
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    def to_json(self):
+        y_gre_test_score_json = {
+            'user': self.user.name,
+            'test': self.test.to_json(),
+            'v_score': self.v_score,
+            'q_score': self.q_score,
+            'aw_score': self.aw_score_alias,
+            'retrieved': self.retrieved,
+            'alias': self.alias,
+            'score_alias': self.score_alias,
+            'v_score_alias': self.v_score_alias,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return y_gre_test_score_json
 
     def __repr__(self):
         return '<Y-GRE Test Score %r>' % self.alias
@@ -1914,10 +1965,6 @@ class User(UserMixin, db.Model):
     def punched(self, section):
         return self.punches.filter_by(section_id=section.id).first() is not None
 
-    def punched_at(self, section):
-        if self.punched(section):
-            return self.punches.filter_by(section_id=section.id).first().timestamp
-
     @property
     def last_punch(self):
         if self.last_y_gre_punch is not None:
@@ -1937,6 +1984,12 @@ class User(UserMixin, db.Model):
             .first()
 
     @property
+    def last_vb_punch_json(self):
+        if self.last_vb_punch:
+            return self.last_vb_punch.to_json()
+        return u'N/A'
+
+    @property
     def last_y_gre_punch(self):
         return Punch.query\
             .join(Section, Section.id == Punch.section_id)\
@@ -1949,68 +2002,78 @@ class User(UserMixin, db.Model):
             .first()
 
     @property
-    def vb_progress(self):
-        if self.last_vb_punch is not None:
-            punched_sections = Punch.query\
-                .join(Section, Section.id == Punch.section_id)\
-                .join(Lesson, Lesson.id == Section.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(Punch.user_id == self.id)\
-                .filter(CourseType.name == u'VB')\
-                .count()
-            query = Section.query\
-                .join(Lesson, Lesson.id == Section.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(CourseType.name == u'VB')
-            if self.can_access_advanced_vb:
-                total_sections = query.count()
-            else:
-                total_sections = query.filter(Lesson.advanced == False).count()
-            assignments = Assignment.query\
-                .join(Lesson, Lesson.id == Assignment.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(CourseType.name == u'VB')
-            submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
-            total_assignments = assignments.count()
-            tests = Test.query\
-                .join(Lesson, Lesson.id == Test.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(CourseType.name == u'VB')
-            taken_tests = sum([self.taken_vb(test=test) is not None for test in tests])
-            total_tests = tests.count()
-            return int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
-        return 0
+    def last_y_gre_punch_json(self):
+        if self.last_y_gre_punch:
+            return self.last_y_gre_punch.to_json()
+        return u'N/A'
 
     @property
-    def y_gre_progress(self):
-        if self.last_y_gre_punch is not None:
-            punched_sections = Punch.query\
-                .join(Section, Section.id == Punch.section_id)\
-                .join(Lesson, Lesson.id == Section.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(Punch.user_id == self.id)\
-                .filter(CourseType.name == u'Y-GRE')\
-                .count()
-            total_sections = Section.query\
-                .join(Lesson, Lesson.id == Section.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(CourseType.name == u'Y-GRE')\
-                .filter(Section.order >= 1)\
-                .count()
-            assignments = Assignment.query\
-                .join(Lesson, Lesson.id == Assignment.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(CourseType.name == u'Y-GRE')
-            submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
-            total_assignments = assignments.count()
-            tests = Test.query\
-                .join(Lesson, Lesson.id == Test.lesson_id)\
-                .join(CourseType, CourseType.id == Lesson.type_id)\
-                .filter(CourseType.name == u'Y-GRE')
-            taken_tests = sum([self.taken_y_gre(test=test) is not None for test in tests])
-            total_tests = tests.count()
-            return int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100)
-        return 0
+    def vb_progress_json(self):
+        punched_sections = Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'VB')\
+            .count()
+        query = Section.query\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')
+        if self.can_access_advanced_vb:
+            total_sections = query.count()
+        else:
+            total_sections = query.filter(Lesson.advanced == False).count()
+        assignments = Assignment.query\
+            .join(Lesson, Lesson.id == Assignment.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')
+        submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
+        total_assignments = assignments.count()
+        tests = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')
+        taken_tests = sum([self.taken_vb(test=test) is not None for test in tests])
+        total_tests = tests.count()
+        return {
+            'value': punched_sections + submitted_assignments + taken_tests,
+            'total': total_sections + total_assignments + total_tests,
+            'percent': int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100),
+        }
+
+    @property
+    def y_gre_progress_json(self):
+        punched_sections = Punch.query\
+            .join(Section, Section.id == Punch.section_id)\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(Punch.user_id == self.id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .count()
+        total_sections = Section.query\
+            .join(Lesson, Lesson.id == Section.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(Section.order >= 1)\
+            .count()
+        assignments = Assignment.query\
+            .join(Lesson, Lesson.id == Assignment.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')
+        submitted_assignments = sum([self.submitted(assignment=assignment) is not None for assignment in assignments])
+        total_assignments = assignments.count()
+        tests = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')
+        taken_tests = sum([self.taken_y_gre(test=test) is not None for test in tests])
+        total_tests = tests.count()
+        return {
+            'value': punched_sections + submitted_assignments + taken_tests,
+            'total': total_sections + total_assignments + total_tests,
+            'percent': int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100),
+        }
 
     @property
     def next_punch(self):
@@ -2049,15 +2112,6 @@ class User(UserMixin, db.Model):
             modified_by_id=modified_by.id
         )
         db.session.add(toefl_test_score)
-
-    # def add_assignment_score(self, assignment, grade, modified_by):
-    #     assignment_score = AssignmentScore(
-    #         user_id=self.id,
-    #         assignment_id=assignment.id,
-    #         grade_id=grade.id,
-    #         modified_by_id=modified_by.id
-    #     )
-    #     db.session.add(assignment_score)
 
     def submitted(self, assignment):
         return self.assignment_scores.filter_by(assignment_id=assignment.id).order_by(AssignmentScore.modified_at.desc()).first()
@@ -2613,7 +2667,7 @@ class Period(db.Model):
             'alias': self.alias,
             'alias2': self.alias2,
             'alias3': self.alias3,
-            'type': self.type.show,
+            'course_type': self.type.name,
             'show': self.show,
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
@@ -3233,6 +3287,7 @@ class Lesson(db.Model):
     @property
     def abbr(self):
         abbreviations = {
+            u'词典使用': u'词',
             u'VB总论': u'总',
             u'L1': u'1',
             u'L2': u'2',
@@ -3284,6 +3339,23 @@ class Lesson(db.Model):
             .filter(iPad.deleted == False)\
             .filter(iPadState.name != u'退役')\
             .filter(iPadContent.lesson_id == self.id)
+
+    def to_json(self, user=None):
+        lesson_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'abbr': self.abbr,
+            'course_type': self.type.name,
+            'hour': self.hour_alias,
+            'priority': self.priority,
+            'order': self.order,
+            'include_video': self.include_video,
+            'advanced': self.advanced,
+            'sections': [section.to_json(user=user) for section in self.sections],
+            'assignments': [assignment.to_json(user=user) for assignment in self.assignments],
+            'tests': [test.to_json(user=user) for test in self.tests],
+        }
+        return lesson_json
 
     @staticmethod
     def insert_lessons():
@@ -3353,19 +3425,33 @@ class Section(db.Model):
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.name, self.name)
+        if self.lesson.sections.count() > 1:
+            return u'%s - %s' % (self.lesson.name, self.name)
+        return u'%s' % self.name
 
     @property
     def alias2(self):
-        if self.lesson.type.name == u'Y-GRE':
-            return u'%s - %s' % (self.lesson.type.name, self.lesson.name)
-        return u'%s - %s - %s' % (self.lesson.type.name, self.lesson.name, self.name)
+        return u'%s - %s' % (self.lesson.type.name, self.alias)
 
     @property
     def abbr(self):
         if self.name[:3] == u'Day':
             return u'0.%s%s' % (self.name[4], self.name[6])
         return self.name
+
+    def to_json(self, user=None):
+        section_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'abbr': self.abbr,
+            'lesson': self.lesson.name,
+            'course_type': self.lesson.type.name,
+            'order': self.order,
+        }
+        if user:
+            section_json['progress_url'] = url_for('main.profile_progress_section', user_id=user.id, section_id=self.id)
+        return section_json
 
     @staticmethod
     def insert_sections():
@@ -3565,6 +3651,17 @@ class Assignment(db.Model):
             .filter(User.activated == True)\
             .filter(User.deleted == False)
 
+    def to_json(self, user=None):
+        assignment_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'lesson': self.lesson.name,
+            'course_type': self.lesson.type.name,
+        }
+        if user:
+            assignment_json['progress_url'] = url_for('main.profile_progress_assignment', user_id=user.id, assignment_id=self.id)
+        return assignment_json
+
     @staticmethod
     def insert_assignments():
         assignments = [
@@ -3641,6 +3738,18 @@ class Test(db.Model):
                 .filter(User.created == True)\
                 .filter(User.activated == True)\
                 .filter(User.deleted == False)
+
+    def to_json(self, user=None):
+        test_json = {
+            'name': self.name,
+            'alias': self.alias,
+            'alias2': self.alias2,
+            'lesson': self.lesson.name,
+            'course_type': self.lesson.type.name,
+        }
+        if user:
+            test_json['progress_url'] = url_for('main.profile_progress_test', user_id=user.id, test_id=self.id)
+        return test_json
 
     @staticmethod
     def insert_tests():

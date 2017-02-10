@@ -1574,7 +1574,7 @@ $(document)
 $('.ui.search')
     .search({
         apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/suggest/email/all?keyword={query}'
+            url: "{{ url_for('manage.suggest_email_all') }}?keyword={query}"
         },
         showNoResults: false
     })

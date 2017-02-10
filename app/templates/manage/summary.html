@@ -316,7 +316,7 @@ $('#page-loading-progress').progress({
 $('.ui.search')
     .search({
         apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user?keyword={query}'
+            url: "{{ url_for('manage.search_user') }}?keyword={query}"
         },
         showNoResults: false
     })
@@ -352,7 +352,7 @@ var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-9-total', 0, 0, 0, 2.5, countU
 var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
 var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
 function updateStats(updateProgressBar) {
-    var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/statistics';
+    var url = "{{ url_for('manage.summary_statistics') }}";
     $.getJSON(url, function(data) {
         iPadRent1103CountUp.update(data.room_1103.ipad.rent);
         iPadTotal1103CountUp.update(data.room_1103.ipad.total);
@@ -386,7 +386,7 @@ setInterval(function() {
 
 // update iPad info
 function updateCards(updateProgressBar) {
-    var url = '//' + window.location.hostname + ':' + window.location.port + '/manage/summary/ipad/room/{{ room_id }}';
+    var url = "{{ url_for('manage.summary_room', room_id=room_id) }}";
     $.getJSON(url, function(data) {
         $('.card').remove();
         for (var i in data.ipads) {

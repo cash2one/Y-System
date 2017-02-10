@@ -39,6 +39,11 @@
 
 {% block page_content %}
 <div class="ui vertical stripe segment">
+    {% if show_profile_progress %}
+    <div id="page-loading-progress" class="ui top attached blue inverted progress">
+        <div class="bar"></div>
+    </div>
+    {% endif %}
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
@@ -52,13 +57,13 @@
                     <i class="flag icon"></i>
                     <div class="content">
                         研修进度
-                        <div class="sub header">VB完成 {{ user.vb_progress }}%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 {{ user.y_gre_progress }}%{% endif %}</div>
+                        <div class="sub header">VB完成 <span id="vb-progress">0</span>%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 <span id="y-gre-progress">0</span>%{% endif %}</div>
                     </div>
                 </h3>
-                <h4 class="ui header{% if not user.last_vb_punch %} disabled{% endif %}"">VB进度：{% if user.last_vb_punch %}{{ user.last_vb_punch.section.alias }}{% else %}尚未开始{% endif %}</h4>
-                <div class="ui {% if user.last_vb_punch %}blue{% else %}grey{% endif %} vb progress{% if not user.last_vb_punch %} disabled{% endif %}" data-percent="{{ user.vb_progress }}">
+                <h4 id="last-vb-punch" class="ui header disabled">VB进度：<span>N/A</span></h4>
+                <div id="vb-progress-bar" class="ui progress disabled">
                     <div class="bar">
-                        <div class="progress"></div>
+                        <div class="progress">0%</div>
                     </div>
                 </div>
                 <table class="ui very basic selectable celled table">
@@ -70,22 +75,13 @@
                             <th>考试</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for lesson in vb_lessons %}
-                        <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
-                            <td class="single line">{{ lesson.name }}</td>
-                            {% with sections = lesson.sections %}<td{% if sections.count() < 3 %} class="single line"{% endif %}>{% if sections.count() %}<div class="ui labels">{% for section in sections %}{% if user.punched(section) %}<div class="ui {% if section.id == user.last_punch.section.id %}orange{% else %}green{% endif %} label popup-trigger" data-variation="inverted"><i class="{% if section.id == user.last_punch.section.id %}play{% else %}check{% endif %} icon"></i>{{ section.name }}</div><div class="ui popup popup-content">{{ moment(user.punched_at(section)).fromNow() }}<br />{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ section.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                            {% with assignments = lesson.assignments %}<td{% if assignments.count() < 3 %} class="single line"{% endif %}>{% if assignments.count() %}<div class="ui labels">{% for assignment in assignments %}{% if user.submitted(assignment) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ assignment.name }}<div class="detail">{{ user.submitted(assignment).grade.name }}</div></div><div class="ui popup popup-content">{{ moment(user.submitted(assignment).modified_at).fromNow() }}<br />{{ moment(user.submitted(assignment).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ assignment.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                            {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_vb(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_vb(test).score_alias }}</div></div><div class="ui popup popup-content">{{ moment(user.taken_vb(test).modified_at).fromNow() }}<br />{{ moment(user.taken_vb(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody id="vb-lessons"></tbody>
                 </table>
                 {% if user.can('预约Y-GRE课程') %}
-                <h4 class="ui header{% if not user.last_y_gre_punch %} disabled{% endif %}">Y-GRE进度：{% if user.last_y_gre_punch %}{{ user.last_y_gre_punch.section.name }}{% else %}尚未开始{% endif %}</h4>
-                <div class="ui {% if user.last_y_gre_punch %}teal{% else %}grey{% endif %} y-gre progress{% if not user.last_y_gre_punch %} disabled{% endif %}" data-percent="{{ user.y_gre_progress }}">
+                <h4 id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>N/A</span></h4>
+                <div id="y-gre-progress-bar" class="ui progress disabled">
                     <div class="bar">
-                        <div class="progress"></div>
+                        <div class="progress">0%</div>
                     </div>
                 </div>
                 <table class="ui very basic selectable celled table">
@@ -96,15 +92,7 @@
                             <th>考试</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for lesson in y_gre_lessons %}
-                        <tr>
-                            <td class="single line">{{ lesson.name }}</td>
-                            {% with sections = lesson.sections %}<td{% if sections.count() < 3 %} class="single line"{% endif %}>{% if sections.count() %}<div class="ui labels">{% for section in sections %}{% if user.punched(section) %}<div class="ui {% if section.id == user.last_punch.section.id and section.name != '9th' %}orange{% else %}green{% endif %} label popup-trigger" data-variation="inverted"><i class="{% if section.id == user.last_punch.section.id and section.name != '9th' %}play{% else %}check{% endif %} icon"></i>{{ section.name }}</div><div class="ui popup popup-content">{{ moment(user.punched_at(section)).fromNow() }}<br />{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ section.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                            {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_y_gre(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_y_gre(test).v_score_alias }}</div></div><div class="ui popup popup-content">{{ user.taken_y_gre(test).score_alias }}<br />{{ moment(user.taken_y_gre(test).modified_at).fromNow() }}<br />{{ moment(user.taken_y_gre(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                    <tbody id="y-gre-lessons"></tbody>
                 </table>
                 {% endif %}
                 {% endif %}
@@ -197,7 +185,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
-<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+{% if show_profile_progress %}<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/{{ Version.CountUp }}/countUp.min.js"></script>{% endif %}
+{% if show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -208,24 +197,286 @@ $('.message .close')
     })
 ;
 
-$('.ui.sortable.table').tablesort();
+{% if show_profile_progress %}
+// progress bar
+$('#page-loading-progress').progress({
+    total: {% if user.can('预约Y-GRE课程') %}2{% else %}1{% endif %},
+    onSuccess: function() {
+        $('#page-loading-progress').fadeOut(1000, function() {
+            $('#page-loading-progress').remove();
+        });
+    }
+});
 
-// progress bars
-$('.ui.vb.progress').progress();
-$('.ui.y-gre.progress').progress();
+// count up settings
+var countUpOptions = {
+    useEasing: true,
+    useGrouping: true,
+    separator: ',',
+    decimal: '.',
+    prefix: '',
+    suffix: ''
+};
 
-{% if announcements and current_user.can('管理通知') %}
-$('.right.floated .ui.circular.icon.button').popup();
+// VB progress
+var VBProgressCountUp = new CountUp('vb-progress', 0, 0, 0, 2.5, countUpOptions);
+var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
+$.getJSON(VBProgressUrl, function(data) {
+    if (data.progress.value > 0) {
+        $('#last-vb-punch').removeClass('disabled');
+        $('#last-vb-punch span').text(data.last_punch.alias);
+        $('#vb-progress-bar').removeClass('disabled').addClass('blue').progress({
+            total: data.progress.total,
+            onChange: function(percent) {
+                VBProgressCountUp.update(percent);
+            }
+        });
+    };
+    for (var i in data.lessons) {
+        $('#vb-lessons').append(
+            $('<tr>')
+                .attr('id', 'vb-lesson-' + i)
+                .append(
+                    $('<td>')
+                        .addClass('single line')
+                        .text(data.lessons[i].name)
+                )
+                .append(
+                    $('<td>').attr('id', 'vb-lesson-' + i + '-sections')
+                )
+                .append(
+                    $('<td>').attr('id', 'vb-lesson-' + i + '-assignments')
+                )
+                .append(
+                    $('<td>').attr('id', 'vb-lesson-' + i + '-tests')
+                )
+        );
+        if (data.lessons[i].sections.length > 1) {
+            $('#vb-lesson-' + i).addClass('top aligned');
+        };
+        if (data.lessons[i].sections.length < 3) {
+            $('#vb-lesson-' + i + '-sections').addClass('single line');
+        };
+        if (data.lessons[i].sections.length > 0) {
+            $('#vb-lesson-' + i + '-sections').append(
+                $('<div>').addClass('ui labels')
+            );
+            for (var x in data.lessons[i].sections) {
+                $('#vb-lesson-' + i + '-sections .ui.labels').append(
+                    $('<div>')
+                        .attr('id', 'vb-lesson-' + i + '-section-' + x)
+                        .addClass('ui label')
+                        .text(data.lessons[i].sections[x].name)
+                );
+                $.getJSON(data.lessons[i].sections[x].progress_url, {
+                    'element_id': 'vb-lesson-' + i + '-section-' + x
+                }, function(data) {
+                    if (data.status !== 'undone') {
+                        if (data.status === 'ongoing') {
+                            $('#' + data.element_id)
+                                .addClass('orange')
+                                .html('<i class="play icon"></i>' + data.section.name);
+                        };
+                        if (data.status === 'done') {
+                            $('#' + data.element_id)
+                                .addClass('green')
+                                .html('<i class="check icon"></i>' + data.section.name);
+                        };
+                        $('#' + data.element_id)
+                            .attr('data-html', moment(data.punch.punched_at).fromNow() + '<br />' + moment(data.punch.punched_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#vb-progress-bar').progress('increment');
+                    };
+                });
+            };
+        } else {
+            $('#vb-lesson-' + i + '-sections').text('无');
+        };
+        if (data.lessons[i].assignments.length < 3) {
+            $('#vb-lesson-' + i + '-assignments').addClass('single line');
+        };
+        if (data.lessons[i].assignments.length > 0) {
+            $('#vb-lesson-' + i + '-assignments').append(
+                $('<div>').addClass('ui labels')
+            );
+            for (var y in data.lessons[i].assignments) {
+                $('#vb-lesson-' + i + '-assignments .ui.labels').append(
+                    $('<div>')
+                        .attr('id', 'vb-lesson-' + i + '-assignment-' + y)
+                        .addClass('ui label')
+                        .text(data.lessons[i].assignments[y].name)
+                );
+                $.getJSON(data.lessons[i].assignments[y].progress_url, {
+                    'element_id': 'vb-lesson-' + i + '-assignment-' + y
+                }, function(data) {
+                    if (data.submitted) {
+                        $('#' + data.element_id)
+                            .addClass('green')
+                            .html('<i class="check icon"></i>' + data.assignment.name + '<div class="detail">' + data.score.grade + '</div>')
+                            .attr('data-html', moment(data.score.modified_at).fromNow() + '<br />' + moment(data.score.modified_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#vb-progress-bar').progress('increment');
+                    };
+                });
+            };
+        } else {
+            $('#vb-lesson-' + i + '-assignments').text('无');
+        };
+        if (data.lessons[i].tests.length < 3) {
+            $('#vb-lesson-' + i + '-tests').addClass('single line');
+        };
+        if (data.lessons[i].tests.length > 0) {
+            $('#vb-lesson-' + i + '-tests').append(
+                $('<div>').addClass('ui labels')
+            );
+            for (var z in data.lessons[i].tests) {
+                $('#vb-lesson-' + i + '-tests .ui.labels').append(
+                    $('<div>')
+                        .attr('id', 'vb-lesson-' + i + '-test-' + z)
+                        .addClass('ui label')
+                        .text(data.lessons[i].tests[z].name)
+                );
+                $.getJSON(data.lessons[i].tests[z].progress_url, {
+                    'element_id': 'vb-lesson-' + i + '-test-' + z
+                }, function(data) {
+                    if (data.taken) {
+                        $('#' + data.element_id)
+                            .addClass('green')
+                            .html('<i class="check icon"></i>' + data.test.name + '<div class="detail">' + data.score.score_alias + '</div>')
+                            .attr('data-html', moment(data.score.modified_at).fromNow() + '<br />' + moment(data.score.modified_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#vb-progress-bar').progress('increment');
+                    };
+                });
+            };
+        } else {
+            $('#vb-lesson-' + i + '-tests').text('无');
+        };
+    };
+    $('#page-loading-progress').progress('increment');
+});
+
+{% if user.can('预约Y-GRE课程') %}
+// Y-GRE progress
+var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
+var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
+$.getJSON(YGREProgressUrl, function(data) {
+    if (data.progress.value > 0) {
+        $('#last-y-gre-punch').removeClass('disabled');
+        $('#last-y-gre-punch span').text(data.last_punch.alias);
+        $('#y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({
+            total: data.progress.total,
+            onChange: function(percent) {
+                YGREProgressCountUp.update(percent);
+            }
+        });
+    };
+    $('.ui.y-gre.progress').progress({ percent: data.progress });
+    for (var i in data.lessons) {
+        $('#y-gre-lessons').append(
+            $('<tr>')
+                .attr('id', 'y-gre-lesson-' + i)
+                .append(
+                    $('<td>')
+                        .addClass('single line')
+                        .text(data.lessons[i].name)
+                )
+                .append(
+                    $('<td>').attr('id', 'y-gre-lesson-' + i + '-sections')
+                )
+                .append(
+                    $('<td>').attr('id', 'y-gre-lesson-' + i + '-tests')
+                )
+        );
+        if (data.lessons[i].sections.length > 1) {
+            $('#y-gre-lesson-' + i).addClass('top aligned');
+        };
+        if (data.lessons[i].sections.length < 3) {
+            $('#y-gre-lesson-' + i + '-sections').addClass('single line');
+        };
+        if (data.lessons[i].sections.length > 0) {
+            $('#y-gre-lesson-' + i + '-sections').append(
+                $('<div>').addClass('ui labels')
+            );
+            for (var x in data.lessons[i].sections) {
+                $('#y-gre-lesson-' + i + '-sections .ui.labels').append(
+                    $('<div>')
+                        .addClass('ui label')
+                        .attr('id', 'y-gre-lesson-' + i + '-section-' + x)
+                        .text(data.lessons[i].sections[x].name)
+                );
+                $.getJSON(data.lessons[i].sections[x].progress_url, {
+                    'element_id': 'y-gre-lesson-' + i + '-section-' + x
+                }, function(data) {
+                    if (data.status !== 'undone') {
+                        if (data.status === 'ongoing') {
+                            $('#' + data.element_id)
+                                .addClass('orange')
+                                .html('<i class="play icon"></i>' + data.section.name);
+                        };
+                        if (data.status === 'done') {
+                            $('#' + data.element_id)
+                                .addClass('green')
+                                .html('<i class="check icon"></i>' + data.section.name);
+                        };
+                        $('#' + data.element_id)
+                            .attr('data-html', moment(data.punch.punched_at).fromNow() + '<br />' + moment(data.punch.punched_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#y-gre-progress-bar').progress('increment');
+                    };
+                });
+            };
+        } else {
+            $('#y-gre-lesson-' + i + '-sections').text('无');
+        };
+        if (data.lessons[i].tests.length < 3) {
+            $('#y-gre-lesson-' + i + '-tests').addClass('single line');
+        };
+        if (data.lessons[i].tests.length > 0) {
+            $('#y-gre-lesson-' + i + '-tests').append(
+                $('<div>').addClass('ui labels')
+            );
+            for (var y in data.lessons[i].tests) {
+                $('#y-gre-lesson-' + i + '-tests .ui.labels').append(
+                    $('<div>')
+                        .addClass('ui label')
+                        .attr('id', 'y-gre-lesson-' + i + '-test-' + y)
+                        .text(data.lessons[i].tests[y].name)
+                );
+                $.getJSON(data.lessons[i].tests[y].progress_url, {
+                    'element_id': 'y-gre-lesson-' + i + '-test-' + y
+                }, function(data) {
+                    if (data.taken) {
+                        $('#' + data.element_id)
+                            .addClass('green')
+                            .html('<i class="check icon"></i>' + data.test.name + '<div class="detail">' + data.score.v_score_alias + '</div>')
+                            .attr('data-html', data.score.score_alias + '<br />' + moment(data.score.modified_at).fromNow() + '<br />' + moment(data.score.modified_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#y-gre-progress-bar').progress('increment');
+                    };
+                });
+            };
+        } else {
+            $('#y-gre-lesson-' + i + '-tests').text('无');
+        };
+    };
+    $('#page-loading-progress').progress('increment');
+});
+{% endif %}
 {% endif %}
 
-$('.ui.search')
-    .search({
-        apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user?keyword={query}'
-        },
-        showNoResults: false
-    })
-;
+{% if show_profile_bookings %}
+$('.ui.sortable.table').tablesort();
 
 {% for booking in bookings %}
 $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
@@ -235,5 +486,21 @@ $('#booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}')
     })
 ;
 {% endfor %}
+{% endif %}
+
+{% if announcements and current_user.can('管理通知') %}
+$('.right.floated .ui.circular.icon.button').popup();
+{% endif %}
+
+{% if current_user.can('管理') %}
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: "{{ url_for('manage.search_user') }}?keyword={query}"
+        },
+        showNoResults: false
+    })
+;
+{% endif %}
 </script>
 {% endblock %}
