@@ -475,7 +475,7 @@ function updateCards(updateProgressBar) {
                                 )
                         )
                 );
-            if (data.ipads[i].state == '待机') {
+            if (data.ipads[i].state === '待机') {
                 // $('#ipad-' + i).addClass('grey');
                 $('#ipad-state-' + i).html('<i class="clock icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('grey');
@@ -508,7 +508,7 @@ function updateCards(updateProgressBar) {
                                     )
                             )
                     );
-            } else if (data.ipads[i].state == '借出') {
+            } else if (data.ipads[i].state === '借出') {
                 if (data.ipads[i].battery_life.percent === 0) {
                     $('#ipad-battery-' + i).removeClass('indicating disabled').addClass('red').progress({
                         percent: data.ipads[i].battery_life.percent,
@@ -598,12 +598,12 @@ function updateCards(updateProgressBar) {
                     $('#ipad-content-' + i + ' .statistic').addClass('yellow');
                     $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
                 };
-            } else if (data.ipads[i].state == '候补') {
+            } else if (data.ipads[i].state === '候补') {
                 $('#ipad-' + i).addClass('grey');
                 $('#ipad-state-' + i).html('<i class="cube icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('grey');
                 $('#ipad-content-' + i + ' .value').html('<i class="cube icon"></i>');
-            } else if (data.ipads[i].state == '维护') {
+            } else if (data.ipads[i].state === '维护') {
                 $('#ipad-' + i).addClass('red');
                 $('#ipad-state-' + i).html('<i class="configure icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('red');
@@ -636,7 +636,7 @@ function updateCards(updateProgressBar) {
                                     )
                             )
                     );
-            } else if (data.ipads[i].state == '充电') {
+            } else if (data.ipads[i].state === '充电') {
                 $('#ipad-' + i).addClass('green');
                 $('#ipad-state-' + i).html('<i class="plug icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('green');
@@ -669,7 +669,7 @@ function updateCards(updateProgressBar) {
                                     )
                             )
                     );
-            } else if (data.ipads[i].state == '退役') {
+            } else if (data.ipads[i].state === '退役') {
                 $('#ipad-' + i).addClass('olive');
                 $('#ipad-state-' + i).html('<i class="recycle icon"></i>' + data.ipads[i].state);
                 $('#ipad-content-' + i + ' .statistic').addClass('olive');

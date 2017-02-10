@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: f6aba408095a
+Revision ID: 811f0369b0cb
 Revises: 
-Create Date: 2017-02-08 23:30:40.209501
+Create Date: 2017-02-10 06:13:11.420984
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f6aba408095a'
+revision = '811f0369b0cb'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -79,11 +79,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_ipad_capacities_name'), 'ipad_capacities', ['name'], unique=True)
-    op.create_table('ipad_contents_json',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('json_string', sa.UnicodeText(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('ipad_states',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -642,7 +637,6 @@ def downgrade():
     op.drop_table('origin_types')
     op.drop_index(op.f('ix_ipad_states_name'), table_name='ipad_states')
     op.drop_table('ipad_states')
-    op.drop_table('ipad_contents_json')
     op.drop_index(op.f('ix_ipad_capacities_name'), table_name='ipad_capacities')
     op.drop_table('ipad_capacities')
     op.drop_index(op.f('ix_invitation_types_name'), table_name='invitation_types')
