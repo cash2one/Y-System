@@ -4451,7 +4451,7 @@ def suggest_email():
 @manage.route('/suggest/email/all')
 @login_required
 @permission_required(u'管理')
-def suggest_referrer():
+def suggest_email_all():
     users = []
     name_or_email = request.args.get('keyword')
     if name_or_email:

@@ -242,8 +242,8 @@ var countUpOptions = {
 
 // VB progress
 var VBProgressCountUp = new CountUp('vb-progress', 0, 0, 0, 2.5, countUpOptions);
-var progressVBurl = '//' + window.location.hostname + ':' + window.location.port + '/profile/{{ user.id }}/progress/vb';
-$.getJSON(progressVBurl, function(data) {
+var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
+$.getJSON(VBProgressUrl, function(data) {
     if (data.progress > 0) {
         VBProgressCountUp.update(data.progress);
         $('#last-vb-punch').removeClass('disabled');
@@ -330,8 +330,8 @@ $.getJSON(progressVBurl, function(data) {
 {% if user.can('预约Y-GRE课程') %}
 // Y-GRE progress
 var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
-var progressYGREurl = '//' + window.location.hostname + ':' + window.location.port + '/profile/{{ user.id }}/progress/y-gre';
-$.getJSON(progressYGREurl, function(data) {
+var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
+$.getJSON(YGREProgressUrl, function(data) {
     if (data.progress > 0) {
         YGREProgressCountUp.update(data.progress);
         $('#last-y-gre-punch').removeClass('disabled');
@@ -419,7 +419,7 @@ $('.right.floated .ui.circular.icon.button').popup();
 $('.ui.search')
     .search({
         apiSettings: {
-            url: '//' + window.location.hostname + ':' + window.location.port + '/manage/search/user?keyword={query}'
+            url: "{{ url_for('manage.search_user') }}?keyword={query}"
         },
         showNoResults: false
     })
