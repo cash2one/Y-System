@@ -2283,7 +2283,8 @@ def user():
                     User.email.like('%' + keyword + '%')
                 ))\
                 .order_by(User.last_seen_at.desc())\
-                .limit(current_app.config['RECORD_PER_QUERY'])
+                .limit(current_app.config['RECORD_PER_QUERY'])\
+                .all()
             search_form.keyword.data = keyword
         else:
             return redirect(url_for('manage.activated_users'))
@@ -4446,7 +4447,8 @@ def suggest_user():
                 User.email.like('%' + name_or_email + '%')
             ))\
             .order_by(User.last_seen_at.desc())\
-            .limit(current_app.config['RECORD_PER_QUERY'])
+            .limit(current_app.config['RECORD_PER_QUERY'])\
+            .all()
     return jsonify({'results': [user.to_json_suggestion() for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
@@ -4465,7 +4467,8 @@ def suggest_email():
                 User.email.like('%' + name_or_email + '%')
             ))\
             .order_by(User.last_seen_at.desc())\
-            .limit(current_app.config['RECORD_PER_QUERY'])
+            .limit(current_app.config['RECORD_PER_QUERY'])\
+            .all()
     return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
@@ -4485,7 +4488,8 @@ def suggest_email_all():
                 User.email.like('%' + name_or_email + '%')
             ))\
             .order_by(User.last_seen_at.desc())\
-            .limit(current_app.config['RECORD_PER_QUERY'])
+            .limit(current_app.config['RECORD_PER_QUERY'])\
+            .all()
     return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if user.role.name != u'开发人员']})
 
 
@@ -4504,5 +4508,6 @@ def search_user():
                 User.email.like('%' + name_or_email + '%')
             ))\
             .order_by(User.last_seen_at.desc())\
-            .limit(current_app.config['RECORD_PER_QUERY'])
+            .limit(current_app.config['RECORD_PER_QUERY'])\
+            .all()
     return jsonify({'results': [user.to_json_suggestion(include_url=True) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
