@@ -1987,7 +1987,7 @@ class User(UserMixin, db.Model):
     def last_vb_punch_json(self):
         if self.last_vb_punch:
             return self.last_vb_punch.to_json()
-        return u'尚未开始'
+        return u'N/A'
 
     @property
     def last_y_gre_punch(self):
@@ -2005,7 +2005,7 @@ class User(UserMixin, db.Model):
     def last_y_gre_punch_json(self):
         if self.last_y_gre_punch:
             return self.last_y_gre_punch.to_json()
-        return u'尚未开始'
+        return u'N/A'
 
     @property
     def vb_progress_json(self):
