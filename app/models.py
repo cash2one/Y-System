@@ -2008,12 +2008,6 @@ class User(UserMixin, db.Model):
         return u'尚未开始'
 
     @property
-    def vb_progress(self):
-        if self.last_vb_punch is not None:
-            return self.vb_progress_json['percent']
-        return 0
-
-    @property
     def vb_progress_json(self):
         punched_sections = Punch.query\
             .join(Section, Section.id == Punch.section_id)\
@@ -2047,12 +2041,6 @@ class User(UserMixin, db.Model):
             'total': total_sections + total_assignments + total_tests,
             'percent': int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100),
         }
-
-    @property
-    def y_gre_progress(self):
-        if self.last_y_gre_punch is not None:
-            return self.y_gre_progress_json['percent']
-        return 0
 
     @property
     def y_gre_progress_json(self):
