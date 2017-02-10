@@ -222,11 +222,15 @@ var countUpOptions = {
 var VBProgressCountUp = new CountUp('vb-progress', 0, 0, 0, 2.5, countUpOptions);
 var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
 $.getJSON(VBProgressUrl, function(data) {
-    if (data.progress.current > 0) {
-        VBProgressCountUp.update(data.progress.percent);
+    if (data.progress.value > 0) {
         $('#last-vb-punch').removeClass('disabled');
         $('#last-vb-punch span').text(data.last_punch.alias);
-        $('#vb-progress-bar').removeClass('disabled').addClass('blue').progress({ total: data.progress.total });
+        $('#vb-progress-bar').removeClass('disabled').addClass('blue').progress({
+            total: data.progress.total,
+            onChange: function(percent) {
+                VBProgressCountUp.update(percent);
+            }
+        });
     };
     for (var i in data.lessons) {
         $('#vb-lessons').append(
@@ -363,11 +367,15 @@ $.getJSON(VBProgressUrl, function(data) {
 var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
 var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
 $.getJSON(YGREProgressUrl, function(data) {
-    if (data.progress.current > 0) {
-        YGREProgressCountUp.update(data.progress.percent);
+    if (data.progress.value > 0) {
         $('#last-y-gre-punch').removeClass('disabled');
         $('#last-y-gre-punch span').text(data.last_punch.alias);
-        $('#y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({ total: data.progress.total });
+        $('#y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({
+            total: data.progress.total,
+            onChange: function(percent) {
+                YGREProgressCountUp.update(percent);
+            }
+        });
     };
     $('.ui.y-gre.progress').progress({ percent: data.progress });
     for (var i in data.lessons) {

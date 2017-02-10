@@ -2043,7 +2043,7 @@ class User(UserMixin, db.Model):
         taken_tests = sum([self.taken_vb(test=test) is not None for test in tests])
         total_tests = tests.count()
         return {
-            'current': punched_sections + submitted_assignments + taken_tests,
+            'value': punched_sections + submitted_assignments + taken_tests,
             'total': total_sections + total_assignments + total_tests,
             'percent': int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100),
         }
@@ -2082,7 +2082,7 @@ class User(UserMixin, db.Model):
         taken_tests = sum([self.taken_y_gre(test=test) is not None for test in tests])
         total_tests = tests.count()
         return {
-            'current': punched_sections + submitted_assignments + taken_tests,
+            'value': punched_sections + submitted_assignments + taken_tests,
             'total': total_sections + total_assignments + total_tests,
             'percent': int(float(punched_sections + submitted_assignments + taken_tests) / (total_sections + total_assignments + total_tests) * 100),
         }
