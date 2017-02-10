@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, date, time, timedelta
-from json import loads
+from json import dumps
 from sqlalchemy import or_, and_
 from flask import render_template, redirect, url_for, abort, flash, current_app, make_response, request, jsonify
 from flask_login import login_required, current_user
@@ -45,7 +45,7 @@ from ..models import Period, Schedule
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
 from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
-from ..models import iPad, iPadState, iPadContent, iPadContentJSON, Room
+from ..models import iPad, iPadState, iPadContent, Room
 from ..models import Announcement
 from ..models import Product, Purchase
 from ..email import send_email, send_emails
@@ -3652,7 +3652,6 @@ def ipad():
         db.session.commit()
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
-        iPadContentJSON.insert_ipad(ipad=ipad)
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
     filter_form = FilteriPadForm(prefix='filter')
@@ -4000,7 +3999,6 @@ def delete_ipad(id):
 @login_required
 @permission_required(u'管理')
 def ipad_contents():
-    ipad_contents = iPadContentJSON.query.get_or_404(1)
     ipads = iPad.query\
         .filter_by(deleted=False)\
         .order_by(iPad.alias.asc())
@@ -4010,9 +4008,32 @@ def ipad_contents():
         .order_by(Lesson.id.asc())
     return render_template('manage/ipad_contents.html',
         ipads=ipads,
-        lessons=lessons,
-        ipad_contents=loads(ipad_contents.json_string)
+        lessons=lessons
     )
+
+
+@manage.route('/ipad/contents/data')
+@login_required
+@permission_required(u'管理')
+def ipad_contents_data():
+    ipads = iPad.query\
+        .filter_by(deleted=False)\
+        .order_by(iPad.alias.asc())
+    ipad_contents = iPadContent.query\
+        .join(iPad, iPad.id == iPadContent.ipad_id)\
+        .join(Lesson, Lesson.id == iPadContent.lesson_id)\
+        .filter(iPad.deleted == False)\
+        .filter(Lesson.include_video == True)\
+        .filter(Lesson.advanced == False)\
+        .order_by(
+            iPadContent.ipad_id.asc(),
+            iPadContent.lesson_id.asc()
+        )\
+        .all()
+    return jsonify({
+        'ipads': [ipad.to_json() for ipad in ipads],
+        'ipad_contents': [ipad_content.to_json() for ipad_content in ipad_contents],
+    })
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])
