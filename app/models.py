@@ -2084,7 +2084,8 @@ class User(UserMixin, db.Model):
                 .filter(CourseType.name == u'VB')\
                 .filter(Section.order >= self.last_punch.section.order)\
                 .order_by(Section.order.asc())\
-                .limit(10) + \
+                .limit(10)\
+                .all() + \
                 [Section.query.filter_by(name=u'Y-GRE总论').first()]
         if self.last_punch.section.lesson.type.name == u'Y-GRE':
             return Section.query\
@@ -2191,6 +2192,7 @@ class User(UserMixin, db.Model):
         user_json = {
             'name': self.name,
             'email': self.email,
+            'name_alias': self.name_alias,
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -3141,6 +3143,7 @@ class iPad(db.Model):
 
     def to_json(self):
         ipad_json = {
+            'id': self.id,
             'serial': self.serial,
             'alias': self.alias,
             'capacity': self.capacity.name,

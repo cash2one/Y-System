@@ -4016,6 +4016,9 @@ def ipad_contents():
 @login_required
 @permission_required(u'管理')
 def ipad_contents_data():
+    ipads = iPad.query\
+        .filter_by(deleted=False)\
+        .order_by(iPad.alias.asc())
     ipad_contents = iPadContent.query\
         .join(iPad, iPad.id == iPadContent.ipad_id)\
         .join(Lesson, Lesson.id == iPadContent.lesson_id)\
@@ -4027,7 +4030,10 @@ def ipad_contents_data():
             iPadContent.lesson_id.asc()
         )\
         .all()
-    return jsonify({'ipad_contents': [ipad_content.to_json() for ipad_content in ipad_contents]})
+    return jsonify({
+        'ipads': [ipad.to_json() for ipad in ipads],
+        'ipad_contents': [ipad_content.to_json() for ipad_content in ipad_contents],
+    })
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])
