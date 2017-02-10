@@ -61,9 +61,9 @@
                     </div>
                 </h3>
                 <h4 id="last-vb-punch" class="ui header disabled">VB进度：<span>尚未开始</span></h4>
-                <div class="ui vb progress disabled">
+                <div id="vb-progress-bar" class="ui progress disabled">
                     <div class="bar">
-                        <div class="progress"></div>
+                        <div class="progress">0%</div>
                     </div>
                 </div>
                 <table class="ui very basic selectable celled table">
@@ -76,25 +76,12 @@
                         </tr>
                     </thead>
                     <tbody id="vb-lessons"></tbody>
-                    {# <tbody>
-                        {% for lesson in vb_lessons %}
-                        <tr{% if lesson.sections.count() > 1 %} class="top aligned"{% endif %}>
-                            <td class="single line">{{ lesson.name }}</td>
-
-                            {% with sections = lesson.sections %}<td{% if sections.count() < 3 %} class="single line"{% endif %}>{% if sections.count() %}<div class="ui labels">{% for section in sections %}{% if user.punched(section) %}<div class="ui {% if section.id == user.last_punch.section.id %}orange{% else %}green{% endif %} label popup-trigger" data-variation="inverted"><i class="{% if section.id == user.last_punch.section.id %}play{% else %}check{% endif %} icon"></i>{{ section.name }}</div><div class="ui popup popup-content">{{ moment(user.punched_at(section)).fromNow() }}<br />{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ section.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-
-                            {% with assignments = lesson.assignments %}<td{% if assignments.count() < 3 %} class="single line"{% endif %}>{% if assignments.count() %}<div class="ui labels">{% for assignment in assignments %}{% if user.submitted(assignment) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ assignment.name }}<div class="detail">{{ user.submitted(assignment).grade.name }}</div></div><div class="ui popup popup-content">{{ moment(user.submitted(assignment).modified_at).fromNow() }}<br />{{ moment(user.submitted(assignment).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ assignment.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-
-                            {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_vb(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_vb(test).score_alias }}</div></div><div class="ui popup popup-content">{{ moment(user.taken_vb(test).modified_at).fromNow() }}<br />{{ moment(user.taken_vb(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                        </tr>
-                        {% endfor %}
-                    </tbody> #}
                 </table>
                 {% if user.can('预约Y-GRE课程') %}
                 <h4 id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>尚未开始</span></h4>
-                <div class="ui y-gre progress disabled">
+                <div id="y-gre-progress-bar" class="ui progress disabled">
                     <div class="bar">
-                        <div class="progress"></div>
+                        <div class="progress">0%</div>
                     </div>
                 </div>
                 <table class="ui very basic selectable celled table">
@@ -106,15 +93,6 @@
                         </tr>
                     </thead>
                     <tbody id="y-gre-lessons"></tbody>
-                    {# <tbody>
-                        {% for lesson in y_gre_lessons %}
-                        <tr>
-                            <td class="single line">{{ lesson.name }}</td>
-                            {% with sections = lesson.sections %}<td{% if sections.count() < 3 %} class="single line"{% endif %}>{% if sections.count() %}<div class="ui labels">{% for section in sections %}{% if user.punched(section) %}<div class="ui {% if section.id == user.last_punch.section.id and section.name != '9th' %}orange{% else %}green{% endif %} label popup-trigger" data-variation="inverted"><i class="{% if section.id == user.last_punch.section.id and section.name != '9th' %}play{% else %}check{% endif %} icon"></i>{{ section.name }}</div><div class="ui popup popup-content">{{ moment(user.punched_at(section)).fromNow() }}<br />{{ moment(user.punched_at(section)).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ section.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                            {% with tests = lesson.tests %}<td{% if tests.count() < 3 %} class="single line"{% endif %}>{% if tests.count() %}<div class="ui labels">{% for test in tests %}{% if user.taken_y_gre(test) %}<div class="ui green label popup-trigger" data-variation="inverted"><i class="check icon"></i>{{ test.name }}<div class="detail">{{ user.taken_y_gre(test).v_score_alias }}</div></div><div class="ui popup popup-content">{{ user.taken_y_gre(test).score_alias }}<br />{{ moment(user.taken_y_gre(test).modified_at).fromNow() }}<br />{{ moment(user.taken_y_gre(test).modified_at).format('YYYY-M-D H:mm:ss') }}</div>{% else %}<div class="ui label">{{ test.name }}</div>{% endif %}{% endfor %}</div>{% else %}无{% endif %}</td>{% endwith %}
-                        </tr>
-                        {% endfor %}
-                    </tbody> #}
                 </table>
                 {% endif %}
                 {% endif %}
@@ -244,84 +222,137 @@ var countUpOptions = {
 var VBProgressCountUp = new CountUp('vb-progress', 0, 0, 0, 2.5, countUpOptions);
 var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
 $.getJSON(VBProgressUrl, function(data) {
-    if (data.progress > 0) {
-        VBProgressCountUp.update(data.progress);
+    if (data.progress.current > 0) {
+        VBProgressCountUp.update(data.progress.percent);
         $('#last-vb-punch').removeClass('disabled');
         $('#last-vb-punch span').text(data.last_punch.alias);
-        $('.ui.vb.progress').removeClass('disabled').addClass('blue').progress({ percent: data.progress });
+        $('#vb-progress-bar').removeClass('disabled').addClass('blue').progress({ total: data.progress.total });
     };
     for (var i in data.lessons) {
         $('#vb-lessons').append(
             $('<tr>')
-                .attr('id', 'vb-lessons-' + i)
+                .attr('id', 'vb-lesson-' + i)
                 .append(
                     $('<td>')
                         .addClass('single line')
                         .text(data.lessons[i].name)
                 )
                 .append(
-                    $('<td>').attr('id', 'vb-lessons-' + i + '-sections')
+                    $('<td>').attr('id', 'vb-lesson-' + i + '-sections')
                 )
                 .append(
-                    $('<td>').attr('id', 'vb-lessons-' + i + '-assignments')
+                    $('<td>').attr('id', 'vb-lesson-' + i + '-assignments')
                 )
                 .append(
-                    $('<td>').attr('id', 'vb-lessons-' + i + '-tests')
+                    $('<td>').attr('id', 'vb-lesson-' + i + '-tests')
                 )
         );
         if (data.lessons[i].sections.length > 1) {
-            $('#vb-lessons-' + i).addClass('top aligned');
+            $('#vb-lesson-' + i).addClass('top aligned');
         };
         if (data.lessons[i].sections.length < 3) {
-            $('#vb-lessons-' + i + '-sections').addClass('single line');
+            $('#vb-lesson-' + i + '-sections').addClass('single line');
         };
         if (data.lessons[i].sections.length > 0) {
-            $('#vb-lessons-' + i + '-sections').append(
+            $('#vb-lesson-' + i + '-sections').append(
                 $('<div>').addClass('ui labels')
             );
             for (var x in data.lessons[i].sections) {
-                $('#vb-lessons-' + i + '-sections .ui.labels').append(
+                $('#vb-lesson-' + i + '-sections .ui.labels').append(
                     $('<div>')
+                        .attr('id', 'vb-lesson-' + i + '-section-' + x)
                         .addClass('ui label')
                         .text(data.lessons[i].sections[x].name)
                 );
+                $.getJSON(data.lessons[i].sections[x].progress_url, {
+                    'element_id': 'vb-lesson-' + i + '-section-' + x
+                }, function(data) {
+                    if (data.status !== 'undone') {
+                        if (data.status === 'ongoing') {
+                            $('#' + data.element_id)
+                                .addClass('orange')
+                                .html('<i class="play icon"></i>' + data.section.name);
+                        };
+                        if (data.status === 'done') {
+                            $('#' + data.element_id)
+                                .addClass('green')
+                                .html('<i class="check icon"></i>' + data.section.name);
+                        };
+                        $('#' + data.element_id)
+                            .attr('data-html', moment(data.punch.punched_at).fromNow() + '<br />' + moment(data.punch.punched_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#vb-progress-bar').progress('increment');
+                    };
+                });
             };
         } else {
-            $('#vb-lessons-' + i + '-sections').text('无');
+            $('#vb-lesson-' + i + '-sections').text('无');
         };
         if (data.lessons[i].assignments.length < 3) {
-            $('#vb-lessons-' + i + '-assignments').addClass('single line');
+            $('#vb-lesson-' + i + '-assignments').addClass('single line');
         };
         if (data.lessons[i].assignments.length > 0) {
-            $('#vb-lessons-' + i + '-assignments').append(
+            $('#vb-lesson-' + i + '-assignments').append(
                 $('<div>').addClass('ui labels')
             );
             for (var y in data.lessons[i].assignments) {
-                $('#vb-lessons-' + i + '-assignments .ui.labels').append(
+                $('#vb-lesson-' + i + '-assignments .ui.labels').append(
                     $('<div>')
+                        .attr('id', 'vb-lesson-' + i + '-assignment-' + y)
                         .addClass('ui label')
                         .text(data.lessons[i].assignments[y].name)
                 );
+                $.getJSON(data.lessons[i].assignments[y].progress_url, {
+                    'element_id': 'vb-lesson-' + i + '-assignment-' + y
+                }, function(data) {
+                    if (data.submitted) {
+                        $('#' + data.element_id)
+                            .addClass('green')
+                            .html('<i class="check icon"></i>' + data.assignment.name + '<div class="detail">' + data.score.grade + '</div>')
+                            .attr('data-html', moment(data.score.modified_at).fromNow() + '<br />' + moment(data.score.modified_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#vb-progress-bar').progress('increment');
+                    };
+                });
             };
         } else {
-            $('#vb-lessons-' + i + '-assignments').text('无');
+            $('#vb-lesson-' + i + '-assignments').text('无');
         };
         if (data.lessons[i].tests.length < 3) {
-            $('#vb-lessons-' + i + '-tests').addClass('single line');
+            $('#vb-lesson-' + i + '-tests').addClass('single line');
         };
         if (data.lessons[i].tests.length > 0) {
-            $('#vb-lessons-' + i + '-tests').append(
+            $('#vb-lesson-' + i + '-tests').append(
                 $('<div>').addClass('ui labels')
             );
             for (var z in data.lessons[i].tests) {
-                $('#vb-lessons-' + i + '-tests .ui.labels').append(
+                $('#vb-lesson-' + i + '-tests .ui.labels').append(
                     $('<div>')
+                        .attr('id', 'vb-lesson-' + i + '-test-' + z)
                         .addClass('ui label')
                         .text(data.lessons[i].tests[z].name)
                 );
+                $.getJSON(data.lessons[i].tests[z].progress_url, {
+                    'element_id': 'vb-lesson-' + i + '-test-' + z
+                }, function(data) {
+                    if (data.taken) {
+                        $('#' + data.element_id)
+                            .addClass('green')
+                            .html('<i class="check icon"></i>' + data.test.name + '<div class="detail">' + data.score.score_alias + '</div>')
+                            .attr('data-html', moment(data.score.modified_at).fromNow() + '<br />' + moment(data.score.modified_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#vb-progress-bar').progress('increment');
+                    };
+                });
             };
         } else {
-            $('#vb-lessons-' + i + '-tests').text('无');
+            $('#vb-lesson-' + i + '-tests').text('无');
         };
     };
     $('#page-loading-progress').progress('increment');
@@ -332,65 +363,103 @@ $.getJSON(VBProgressUrl, function(data) {
 var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
 var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
 $.getJSON(YGREProgressUrl, function(data) {
-    if (data.progress > 0) {
-        YGREProgressCountUp.update(data.progress);
+    if (data.progress.current > 0) {
+        YGREProgressCountUp.update(data.progress.percent);
         $('#last-y-gre-punch').removeClass('disabled');
         $('#last-y-gre-punch span').text(data.last_punch.alias);
-        $('.ui.y-gre.progress').removeClass('disabled').addClass('teal').progress({ percent: data.progress });
+        $('#y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({ total: data.progress.total });
     };
     $('.ui.y-gre.progress').progress({ percent: data.progress });
     for (var i in data.lessons) {
         $('#y-gre-lessons').append(
             $('<tr>')
-                .attr('id', 'y-gre-lessons-' + i)
+                .attr('id', 'y-gre-lesson-' + i)
                 .append(
                     $('<td>')
                         .addClass('single line')
                         .text(data.lessons[i].name)
                 )
                 .append(
-                    $('<td>').attr('id', 'y-gre-lessons-' + i + '-sections')
+                    $('<td>').attr('id', 'y-gre-lesson-' + i + '-sections')
                 )
                 .append(
-                    $('<td>').attr('id', 'y-gre-lessons-' + i + '-tests')
+                    $('<td>').attr('id', 'y-gre-lesson-' + i + '-tests')
                 )
         );
         if (data.lessons[i].sections.length > 1) {
-            $('#y-gre-lessons-' + i).addClass('top aligned');
+            $('#y-gre-lesson-' + i).addClass('top aligned');
         };
         if (data.lessons[i].sections.length < 3) {
-            $('#y-gre-lessons-' + i + '-sections').addClass('single line');
+            $('#y-gre-lesson-' + i + '-sections').addClass('single line');
         };
         if (data.lessons[i].sections.length > 0) {
-            $('#y-gre-lessons-' + i + '-sections').append(
+            $('#y-gre-lesson-' + i + '-sections').append(
                 $('<div>').addClass('ui labels')
             );
             for (var x in data.lessons[i].sections) {
-                $('#y-gre-lessons-' + i + '-sections .ui.labels').append(
+                $('#y-gre-lesson-' + i + '-sections .ui.labels').append(
                     $('<div>')
                         .addClass('ui label')
+                        .attr('id', 'y-gre-lesson-' + i + '-section-' + x)
                         .text(data.lessons[i].sections[x].name)
                 );
+                $.getJSON(data.lessons[i].sections[x].progress_url, {
+                    'element_id': 'y-gre-lesson-' + i + '-section-' + x
+                }, function(data) {
+                    if (data.status !== 'undone') {
+                        if (data.status === 'ongoing') {
+                            $('#' + data.element_id)
+                                .addClass('orange')
+                                .html('<i class="play icon"></i>' + data.section.name);
+                        };
+                        if (data.status === 'done') {
+                            $('#' + data.element_id)
+                                .addClass('green')
+                                .html('<i class="check icon"></i>' + data.section.name);
+                        };
+                        $('#' + data.element_id)
+                            .attr('data-html', moment(data.punch.punched_at).fromNow() + '<br />' + moment(data.punch.punched_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#y-gre-progress-bar').progress('increment');
+                    };
+                });
             };
         } else {
-            $('#y-gre-lessons-' + i + '-sections').text('无');
+            $('#y-gre-lesson-' + i + '-sections').text('无');
         };
         if (data.lessons[i].tests.length < 3) {
-            $('#y-gre-lessons-' + i + '-tests').addClass('single line');
+            $('#y-gre-lesson-' + i + '-tests').addClass('single line');
         };
         if (data.lessons[i].tests.length > 0) {
-            $('#y-gre-lessons-' + i + '-tests').append(
+            $('#y-gre-lesson-' + i + '-tests').append(
                 $('<div>').addClass('ui labels')
             );
             for (var y in data.lessons[i].tests) {
-                $('#y-gre-lessons-' + i + '-tests .ui.labels').append(
+                $('#y-gre-lesson-' + i + '-tests .ui.labels').append(
                     $('<div>')
                         .addClass('ui label')
+                        .attr('id', 'y-gre-lesson-' + i + '-test-' + y)
                         .text(data.lessons[i].tests[y].name)
                 );
+                $.getJSON(data.lessons[i].tests[y].progress_url, {
+                    'element_id': 'y-gre-lesson-' + i + '-test-' + y
+                }, function(data) {
+                    if (data.taken) {
+                        $('#' + data.element_id)
+                            .addClass('green')
+                            .html('<i class="check icon"></i>' + data.test.name + '<div class="detail">' + data.score.v_score_alias + '</div>')
+                            .attr('data-html', data.score.score_alias + '<br />' + moment(data.score.modified_at).fromNow() + '<br />' + moment(data.score.modified_at).format('YYYY-M-D H:mm:ss'))
+                            .attr('data-position', 'top left')
+                            .attr('data-variation', 'inverted')
+                            .popup();
+                        $('#y-gre-progress-bar').progress('increment');
+                    };
+                });
             };
         } else {
-            $('#y-gre-lessons-' + i + '-tests').text('无');
+            $('#y-gre-lesson-' + i + '-tests').text('无');
         };
     };
     $('#page-loading-progress').progress('increment');
