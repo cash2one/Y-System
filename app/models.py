@@ -2519,13 +2519,13 @@ class Product(db.Model):
         products = [
             (u'VB基本技术费', 6800.0, True, ),
             (u'Y-GRE基本技术费', 6800.0, True, ),
+            (u'联报优惠', -1000.0, True, ),
+            (u'在校生减免', -800.0, True, ),
+            (u'本校减免', -500.0, True, ),
+            (u'团报优惠', -200.0, True, ),
             (u'AW费用', 800.0, True, ),
             (u'Q费用', 800.0, True, ),
             (u'Y-GRE多轮费用', 2000.0, True, ),
-            (u'在校生减免', -800.0, True, ),
-            (u'本校减免', -500.0, True, ),
-            (u'联报优惠', -1000.0, True, ),
-            (u'团报优惠', -200.0, True, ),
             (u'按月延长有效期', 1000.0, True, ),
             (u'一次性延长2年有效期', 3000.0, True, ),
         ]
@@ -3160,11 +3160,8 @@ class iPad(db.Model):
 
     @property
     def now_rented_by(self):
-        return User.query\
-            .join(Rental, Rental.user_id == User.id)\
-            .filter(Rental.returned == False)\
-            .filter(Rental.ipad_id == self.id)\
-            .first()
+        if self.current_rental is not None:
+            return self.current_rental.user
 
     @property
     def current_rental(self):
