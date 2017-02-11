@@ -120,6 +120,22 @@ def profile_bookings(id):
     return resp
 
 
+@main.route('/profile/<int:id>/progress/data')
+@login_required
+def profile_progress_data(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    if user.id != current_user.id and not current_user.can(u'管理'):
+        abort(403)
+    return jsonify({
+        'progress': {
+            'vb': user.vb_progress_json,
+            'y_gre': user.y_gre_progress_json,
+        },
+    })
+
+
 @main.route('/profile/<int:id>/progress/vb')
 @login_required
 def profile_progress_vb(id):

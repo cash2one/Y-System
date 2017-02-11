@@ -6,34 +6,18 @@
 {% block customized_styles %}
 {{ super() }}
 {% include '_style_common.html' %}
+<style type="text/css">
+#side-bar-vb-progress div.label,
+#side-bar-y-gre-progress div.label {
+    text-align: left;
+}
+</style>
 {% endblock %}
 
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="archive icon"></i>{% if current_user.id == user.id %}研修档案{% else %}{{ user.name }}的档案{% endif %}</h1>
-    {# <div class="ui inverted divided horizontal list">
-        <div class="item">
-            <div class="content">
-                <div class="header">用户权限</div>
-                <div class="description">{{ user.role.name }}</div>
-            </div>
-        </div>
-        <div class="item">
-            <div class="content">
-                <div class="header">VB班</div>
-                <div class="description">{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
-            </div>
-        </div>
-        {% if user.can('预约Y-GRE课程') %}
-        <div class="item">
-            <div class="content">
-                <div class="header">Y-GRE班</div>
-                <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
-            </div>
-        </div>
-        {% endif %}
-    </div> #}
+    <h1 class="ui inverted header"><i class="id card outline icon"></i>{% if current_user.id == user.id %}研修档案{% else %}{{ user.name }}的档案{% endif %}</h1>
 </div>
 {% endblock %}
 
@@ -44,37 +28,60 @@
         <div class="bar"></div>
     </div>
     {% endif %}
-    <div class="ui middle aligned stackable grid container">
+    <div class="ui internally celled stackable grid container">
         <div class="row">
-            <div class="column">
-                <div class="ui three item labeled icon pointing menu">
-                    <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="id card outline icon"></i>研修概况</a>
-                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="{% if show_profile_progress %}red {% endif %}flag icon"></i>研修进度</a>
-                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="{% if show_profile_bookings %}green {% endif %}checked calendar icon"></i>预约记录</a>
+            <div class="four wide column">
+                <div class="ui vertical segment">
+                    <img class="ui medium image" src="{{ user.avatar(size=300) }}">
+                    <h3 class="ui header">
+                        <div class="content">
+                            {{ macros.user_gender(user) }}
+                            <div class="sub header">{{ user.role.name }}</div>
+                        </div>
+                    </h3>
+                    <div>VB班：{% if user.vb_course %}{{ user.vb_course.name }}{% else %}无{% endif %}</div>
+                    {% if user.can('预约Y-GRE课程') %}<div>Y-GRE班：{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>{% endif %}
+                </div>
+                <div class="ui vertical segment">
+                    <div>{{ macros.user_email(user) }}</div>
+                </div>
+                <div id="side-bar-progress" class="ui vertical segment loading">
+                    <div class="ui header">学习进度</div>
+                    <div id="side-bar-vb-progress" class="ui tiny progress disabled">
+                        <div class="bar"></div>
+                        <div class="label">VB完成 0%</div>
+                    </div>
+                    {% if user.can('预约Y-GRE课程') %}
+                    <div id="side-bar-y-gre-progress" class="ui tiny progress disabled">
+                        <div class="bar"></div>
+                        <div class="label">Y-GRE完成 0%</div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">预约统计</div>
+                    <div>即将开始 {{ user.valid_bookings.count() }}</div>
+                    <div>排队中 {{ user.wait_bookings.count() }}</div>
+                    <div>赴约 {{ user.keep_bookings.count() }} 次</div>
+                    <div>爽约 {{ user.miss_bookings.count() }} 次</div>
+                    <div>取消 {{ user.cancel_bookings.count() }} 次</div>
+                    <div>迟到 {{ user.late_bookings.count() }} 次</div>
+                    <div>未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="popup-trigger" data-variation="inverted">激活时间：{{ moment(user.activated_at).fromNow() }}</div>
+                    <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
+                </div>
+            </div>
+            <div class="twelve wide column">
+                <div class="ui three item secondary pointing menu">
+                    <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="id card outline icon"></i>概况</a>
+                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="write icon"></i>研修数据</a>
+                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约记录</a>
                 </div>
                 {% if show_profile_overview %}
-                <h3 class="ui header">
-                    <i class="id card outline icon"></i>
-                    <div class="content">
-                        研修概况
-                        <div class="sub header"></div>
-                    </div>
-                </h3>
-
-
-
-
-
-
                 {% endif %}
                 {% if show_profile_progress %}
-                <h3 class="ui header">
-                    <i class="flag icon"></i>
-                    <div class="content">
-                        研修进度
-                        <div class="sub header">VB完成 <span id="vb-progress">0</span>%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 <span id="y-gre-progress">0</span>%{% endif %}</div>
-                    </div>
-                </h3>
                 <div id="vb" class="ui basic segment loading">
                     <h4 id="last-vb-punch" class="ui header disabled">VB进度：<span>N/A</span></h4>
                     <div id="vb-progress-bar" class="ui progress disabled">
@@ -116,13 +123,6 @@
                 {% endif %}
                 {% endif %}
                 {% if show_profile_bookings %}
-                <h3 class="ui header">
-                    <i class="checked calendar icon"></i>
-                    <div class="content">
-                        预约记录
-                        <div class="sub header">{{ user.valid_bookings.count() }} 个即将开始 &middot; {{ user.wait_bookings.count() }} 个排队中 &middot; 赴约 {{ user.keep_bookings.count() }} 次 &middot; 爽约 {{ user.miss_bookings.count() }} 次 &middot; 取消 {{ user.cancel_bookings.count() }} 次 &middot; 迟到 {{ user.late_bookings.count() }} 次 &middot; 未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
-                    </div>
-                </h3>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
@@ -204,7 +204,6 @@
 
 {% block customized_scripts %}
 {{ super() }}
-{% if show_profile_progress %}<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/{{ Version.CountUp }}/countUp.min.js"></script>{% endif %}
 {% if show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
@@ -215,6 +214,28 @@ $('.message .close')
         ;
     })
 ;
+
+var progressDataUrl = "{{ url_for('main.profile_progress_data', id=user.id) }}";
+$.getJSON(progressDataUrl, function(data) {
+    $('#side-bar-progress').removeClass('loading');
+    $('#side-bar-vb-progress').removeClass('disabled').addClass('blue').progress({
+        total: data.progress.vb.total,
+        value: data.progress.vb.value,
+        text: {
+            active: 'VB完成 {percent}%'
+        }
+    });
+    $('#side-bar-y-gre-progress').removeClass('disabled').addClass('teal').progress({
+        total: data.progress.y_gre.total,
+        value: data.progress.y_gre.value,
+        text: {
+            active: 'Y-GRE完成 {percent}%'
+        }
+    });
+});
+
+{% if show_profile_overview %}
+{% endif %}
 
 {% if show_profile_progress %}
 // progress bar
@@ -227,18 +248,7 @@ $('#page-loading-progress').progress({
     }
 });
 
-// count up settings
-var countUpOptions = {
-    useEasing: true,
-    useGrouping: true,
-    separator: ',',
-    decimal: '.',
-    prefix: '',
-    suffix: ''
-};
-
 // VB progress
-var VBProgressCountUp = new CountUp('vb-progress', 0, 0, 0, 2.5, countUpOptions);
 var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
 $.getJSON(VBProgressUrl, function(data) {
     $('#vb').removeClass('loading');
@@ -252,10 +262,7 @@ $.getJSON(VBProgressUrl, function(data) {
             };
         });
         $('#vb-progress-bar').removeClass('disabled').addClass('blue').progress({
-            total: data.progress.total,
-            onChange: function(percent) {
-                VBProgressCountUp.update(percent);
-            }
+            total: data.progress.total
         });
     };
     for (var lesson_idx in data.lessons) {
@@ -339,7 +346,7 @@ $.getJSON(VBProgressUrl, function(data) {
         if (data.punches[punch_idx].section.element_id === data.last_punch.section.element_id) {
             $('#' + data.punches[punch_idx].section.element_id)
                 .addClass('orange')
-                .html('<i class="play icon"></i>' + data.last_punch.section.name);
+                .html('<i class="bookmark icon"></i>' + data.last_punch.section.name);
         } else {
             $('#' + data.punches[punch_idx].section.element_id)
                 .addClass('green')
@@ -377,7 +384,6 @@ $.getJSON(VBProgressUrl, function(data) {
 
 {% if user.can('预约Y-GRE课程') %}
 // Y-GRE progress
-var YGREProgressCountUp = new CountUp('y-gre-progress', 0, 0, 0, 2.5, countUpOptions);
 var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
 $.getJSON(YGREProgressUrl, function(data) {
     $('#y-gre').removeClass('loading');
@@ -391,10 +397,7 @@ $.getJSON(YGREProgressUrl, function(data) {
             };
         });
         $('#y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({
-            total: data.progress.total,
-            onChange: function(percent) {
-                YGREProgressCountUp.update(percent);
-            }
+            total: data.progress.total
         });
     };
     $('.ui.y-gre.progress').progress({ percent: data.progress });
@@ -458,7 +461,7 @@ $.getJSON(YGREProgressUrl, function(data) {
         if (data.punches[punch_idx].section.element_id === data.last_punch.section.element_id) {
             $('#' + data.punches[punch_idx].section.element_id)
                 .addClass('orange')
-                .html('<i class="play icon"></i>' + data.last_punch.section.name);
+                .html('<i class="bookmark icon"></i>' + data.last_punch.section.name);
         } else {
             $('#' + data.punches[punch_idx].section.element_id)
                 .addClass('green')
