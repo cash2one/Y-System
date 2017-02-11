@@ -14,7 +14,8 @@
     <meta name="keywords" content="Y-English, Y-System, English, Education" />
 
     <!-- Semantic UI CSS -->
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.css">
+    {# <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.css"> #}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/dev/semantic.min.css') }}">
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/{{ Version.FontAwesome }}/css/font-awesome.min.css">
@@ -169,7 +170,7 @@
         </div>
         {% if current_user.is_authenticated %}
         {% if current_user.is_developer %}<div class="disabled item">{{ Version.Application }}</div>{% endif %}
-        <a class="item loading-trigger" href="{{ url_for('main.profile', id=current_user.id) }}"><i class="user icon"></i>{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</a>
+        <a class="item loading-trigger" href="{{ url_for('main.profile', id=current_user.id) }}"><i class="user circle outline icon"></i>{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</a>
         <a class="item loading-trigger" href="#"><i class="mail icon"></i>无未读消息</a>
         {% if current_user.can('管理') %}<a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i>系统实况</a>{% endif %}
         {% else %}
@@ -419,7 +420,8 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/{{ Version.jQuery }}/jquery.min.js"></script>
 
     <!-- Semantic UI JS -->
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.js"></script>
+    {# <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.js"></script> #}
+    <script type="text/javascript" src="{{ url_for('static', filename='assets/dev/semantic.min.js') }}"></script>
 
     <!-- Moment.js -->
     {{ moment.include_moment(version=Version.MomentJS) }}
