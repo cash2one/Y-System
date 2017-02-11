@@ -9,11 +9,28 @@
 }
 
 .ui.logo.image {
-    width: 22px;
-    margin-right: 0.5em;
+    width: 30px;
+    margin-right: 0.75em;
 }
 .item.logo span {
-    font-size: 22px;
+    font-size: 1.7em;
+}
+
+.ui.menu .item .ui.less-relaxed.empty.circular.label,
+.ui.menu .item i.less-relaxed.dropdown.icon {
+    margin-left: 0.5em;
+}
+
+.ui.sidebar.menu .ui.header {
+    font-weight: normal;
+}
+.ui.sidebar.menu .ui.header .ui.logo.image {
+    margin: auto;
+}
+
+.ui.small-avatar.image {
+    width: 20px;
+    height: 20px;
 }
 
 .footer.segment {

@@ -4,7 +4,7 @@ import os
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
-from hashlib import sha512
+from hashlib import sha512, md5
 from json import loads, dumps
 from bs4 import BeautifulSoup
 from sqlalchemy import or_, and_
@@ -1440,6 +1440,14 @@ class User(UserMixin, db.Model):
         if self.birthdate:
             return u'%s年%s月%s日' % (self.birthdate.year, self.birthdate.month, self.birthdate.day)
         return u'无'
+
+    def avatar(self, ext='', size=512, default='identicon', rating='g'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        email_hash = md5(self.email.encode('utf-8')).hexdigest()
+        return '{url}/{hash}{ext}?s={size}&d={default}&r={rating}'.format(url=url, hash=email_hash, ext=ext, size=size, default=default, rating=rating)
 
     def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
         if gpa and (not isinstance(gpa, float)):
