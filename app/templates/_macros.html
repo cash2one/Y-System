@@ -100,23 +100,23 @@
 
 
 {% macro user_url(user, is_current_user=False) %}
-{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.profile', id=user.id) }}" target="_blank">{{ user.name }}</a>
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.profile_overview', id=user.id) }}" target="_blank">{{ user.name }}</a>
 {% endmacro %}
 
 
 {% macro user_url_gender(user, is_current_user=False) %}
-{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.profile', id=user.id) }}" target="_blank">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a href="{{ url_for('main.profile_overview', id=user.id) }}" target="_blank">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
 {% endmacro %}
 
 
 {% macro user_popup(user, is_current_user=False) %}
-{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.profile', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>
 <div class="ui flowing popup popup-content">{{ user.name_alias }}</div>
 {% endmacro %}
 
 
 {% macro user_popup_gender(user, is_current_user=False) %}
-{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.profile', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
+{% if is_current_user %}<i class="yellow star icon"></i>{% endif %}<a class="popup-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}" target="_blank" data-variation="inverted">{{ user.name }}</a>{% if user.gender %}<i class="{% if user.gender.name == '男' %}blue man{% elif user.gender.name == '女' %}pink woman{% endif %} icon"></i>{% endif %}
 <div class="ui flowing popup popup-content">{{ user.name_alias }}</div>
 {% endmacro %}
 
