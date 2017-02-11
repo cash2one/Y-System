@@ -41,7 +41,7 @@ def login():
         return redirect(request.args.get('next') or url_for('main.profile', id=current_user.id))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, created=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data.lower(), created=True, deleted=False).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             # flash(u'欢迎登录云英语教育服务支撑系统！', category='info')
@@ -69,7 +69,7 @@ def activate():
         return redirect(request.args.get('next') or url_for('main.profile', id=current_user.id))
     form = ActivationForm()
     if form.validate_on_submit():
-        new_user = User.query.filter_by(email=form.email.data, created=True, activated=False, deleted=False).first()
+        new_user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=False, deleted=False).first()
         if new_user is not None and new_user.verify_password(form.activation_code.data):
             new_user.activate(new_password=form.password.data)
             token = new_user.generate_confirmation_token()
@@ -135,7 +135,7 @@ def reset_password_request():
         return redirect(request.args.get('next') or url_for('main.profile', id=current_user.id))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         if user:
             token = user.generate_reset_token()
             send_email(user.email, u'重置您的密码', 'auth/mail/reset_password', user=user, token=token, next=request.args.get('next'))
@@ -153,7 +153,7 @@ def reset_password(token):
         return redirect(url_for('main.profile', id=current_user.id))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data.lower()).first()
         if user is None:
             flash(u'用户邮箱错误', category='error')
             return redirect(url_for('auth.reset_password_request'))
@@ -172,7 +172,7 @@ def change_email_request():
     form = ChangeEmailForm()
     if form.validate_on_submit():
         if current_user.verify_password(form.password.data):
-            new_email = form.email.data
+            new_email = form.email.data.lower()
             token = current_user.generate_email_change_token(new_email)
             send_email(new_email, u'确认您的邮箱账户', 'auth/mail/change_email', user=current_user, token=token)
             flash(u'一封确认邮件已经发送至您的邮箱', category='info')
