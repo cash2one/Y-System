@@ -60,7 +60,7 @@
                         <div class="sub header">VB完成 <span id="vb-progress">0</span>%{% if user.can('预约Y-GRE课程') %} &middot; Y-GRE完成 <span id="y-gre-progress">0</span>%{% endif %}</div>
                     </div>
                 </h3>
-                <div id="vb" class="ui basic loading segment">
+                <div id="vb" class="ui basic segment loading">
                     <h4 id="last-vb-punch" class="ui header disabled">VB进度：<span>N/A</span></h4>
                     <div id="vb-progress-bar" class="ui progress disabled">
                         <div class="bar">
@@ -80,7 +80,7 @@
                     </table>
                 </div>
                 {% if user.can('预约Y-GRE课程') %}
-                <div id="y-gre" class="ui basic loading segment">
+                <div id="y-gre" class="ui basic segment loading">
                     <h4 id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>N/A</span></h4>
                     <div id="y-gre-progress-bar" class="ui progress disabled">
                         <div class="bar">
@@ -348,7 +348,7 @@ $.getJSON(VBProgressUrl, function(data) {
         $('#vb-progress-bar').progress('increment');
     };
     for (var test_score_idx in data.test_scores) {
-        $('#' + data.test_scores[test_score_idx].element_id)
+        $('#' + data.test_scores[test_score_idx].test.element_id)
             .addClass('green')
             .html('<i class="check icon"></i>' + data.test_scores[test_score_idx].test.name + '<div class="detail">' + data.test_scores[test_score_idx].score_alias + '</div>')
             .attr('data-html', moment(data.test_scores[test_score_idx].modified_at).fromNow() + '<br />' + moment(data.test_scores[test_score_idx].modified_at).format('YYYY-M-D H:mm:ss'))
@@ -457,7 +457,7 @@ $.getJSON(YGREProgressUrl, function(data) {
         $('#y-gre-progress-bar').progress('increment');
     };
     for (var test_score_idx in data.test_scores) {
-        $('#' + data.test_scores[test_score_idx].element_id)
+        $('#' + data.test_scores[test_score_idx].test.element_id)
             .addClass('green')
             .html('<i class="check icon"></i>' + data.test_scores[test_score_idx].test.name + '<div class="detail">' + data.test_scores[test_score_idx].v_score_alias + '</div>')
             .attr('data-html', data.test_scores[test_score_idx].score_alias + '<br />' + moment(data.test_scores[test_score_idx].modified_at).fromNow() + '<br />' + moment(data.modified_at).format('YYYY-M-D H:mm:ss'))

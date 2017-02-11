@@ -3626,7 +3626,7 @@ class Assignment(db.Model):
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.alias, self.name)
+        return u'%s - %s' % (self.lesson.type.name, self.name)
 
     @property
     def finished_by_alias(self):
@@ -3701,11 +3701,7 @@ class Test(db.Model):
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.alias, self.name)
-
-    @property
-    def alias2(self):
-        return u'%s - %s' % (self.lesson.name, self.name)
+        return u'%s - %s' % (self.lesson.type.name, self.name)
 
     @property
     def finished_by_alias(self):
@@ -3728,7 +3724,6 @@ class Test(db.Model):
         test_json = {
             'name': self.name,
             'alias': self.alias,
-            'alias2': self.alias2,
             'lesson': self.lesson.name,
             'course_type': self.lesson.type.name,
             'element_id': '%s-lesson-%s-test-%s' % (self.lesson.type.alias, self.lesson.id, self.id),
