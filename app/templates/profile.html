@@ -48,18 +48,24 @@
         <div class="row">
             <div class="column">
                 <div class="ui three item labeled icon pointing menu">
-                    <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="user icon"></i>基本信息</a>
-                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="flag icon"></i>研修进度</a>
-                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约记录</a>
+                    <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="id card outline icon"></i>基本信息</a>
+                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="{% if show_profile_progress %}red {% endif %}flag icon"></i>研修进度</a>
+                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="{% if show_profile_bookings %}green {% endif %}checked calendar icon"></i>预约记录</a>
                 </div>
                 {% if show_profile_overview %}
                 <h3 class="ui header">
-                    <i class="user icon"></i>
+                    <i class="id card outline icon"></i>
                     <div class="content">
                         基本信息
                         <div class="sub header"></div>
                     </div>
                 </h3>
+
+
+
+
+
+
                 {% endif %}
                 {% if show_profile_progress %}
                 <h3 class="ui header">
