@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import requests
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
-from hashlib import sha512
+from hashlib import sha512, md5
 from json import loads, dumps
 from bs4 import BeautifulSoup
 from sqlalchemy import or_, and_
@@ -1440,6 +1441,30 @@ class User(UserMixin, db.Model):
         if self.birthdate:
             return u'%s年%s月%s日' % (self.birthdate.year, self.birthdate.month, self.birthdate.day)
         return u'无'
+
+    def avatar(self, ext='', size=512, default='identicon', rating='g'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        email_hash = md5(self.email.encode('utf-8')).hexdigest()
+        if ext != '':
+            base_url = '%s/%s.%s' % (url, email_hash, ext)
+        else:
+            base_url = '%s/%s' % (url, email_hash)
+        payload = {
+            's': size,
+            'd': default,
+            'r': rating,
+        }
+        avatar_url = '%s?%s' % (base_url, '&'.join(['%s=%s' % (key, payload[key]) for key in payload]))
+        if default in [404, '404']:
+            r = requests.get(base_url, params=payload)
+            if r.status_code == 200:
+                return '<img class="ui small-avatar image" src="%s">' % avatar_url
+            else:
+                return '<i class="fa fa-user-circle-o"></i>'
+        return avatar_url
 
     def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
         if gpa and (not isinstance(gpa, float)):

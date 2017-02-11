@@ -694,7 +694,7 @@ def rental_rent_step_4_lesson(user_id, lesson_id, ipad_id, schedule_id):
 def rental_rent_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_rent_step_1_alt'))
@@ -884,7 +884,7 @@ def rental_return_step_3(user_id, section_id):
 def rental_return_step_1_alt():
     form = RentalEmailForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
             return redirect(url_for('manage.rental_return_step_1_alt', next=request.args.get('next')))
@@ -1477,9 +1477,9 @@ def y_gre_lessons():
 def assignment():
     form = NewAssignmentScoreForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+            flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
             return redirect(url_for('manage.assignment', page=request.args.get('page', 1, type=int)))
         score = AssignmentScore(
             user_id=user.id,
@@ -1549,9 +1549,9 @@ def assignment_score(id):
         return redirect(url_for('manage.assignment'))
     form = NewAssignmentScoreForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+            flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
             return redirect(url_for('manage.assignment_score', id=assignment.id))
         score = AssignmentScore(
             user_id=user.id,
@@ -1613,9 +1613,9 @@ def delete_assignment_score(id):
 def test():
     vb_form = NewVBTestScoreForm(prefix='vb')
     if vb_form.submit.data and vb_form.validate_on_submit():
-        user = User.query.filter_by(email=vb_form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=vb_form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'用户邮箱不存在：%s' % vb_form.email.data, category='error')
+            flash(u'用户邮箱不存在：%s' % vb_form.email.data.lower(), category='error')
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
         score = VBTestScore(
             user_id=user.id,
@@ -1630,9 +1630,9 @@ def test():
         return redirect(url_for('manage.test_score', test_type=u'vb', id=int(vb_form.test.data)))
     y_gre_form = NewYGRETestScoreForm(prefix='y_gre')
     if y_gre_form.submit.data and y_gre_form.validate_on_submit():
-        user = User.query.filter_by(email=y_gre_form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=y_gre_form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'用户邮箱不存在：%s' % y_gre_form.email.data, category='error')
+            flash(u'用户邮箱不存在：%s' % y_gre_form.email.data.lower(), category='error')
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
         q_score = None
         if y_gre_form.q_score.data:
@@ -1655,9 +1655,9 @@ def test():
         return redirect(url_for('manage.test_score', test_type=u'y_gre', id=int(y_gre_form.test.data)))
     gre_form = NewGRETestScoreForm(prefix='gre')
     if gre_form.submit.data and gre_form.validate_on_submit():
-        user = User.query.filter_by(email=gre_form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=gre_form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'用户邮箱不存在：%s' % gre_form.email.data, category='error')
+            flash(u'用户邮箱不存在：%s' % gre_form.email.data.lower(), category='error')
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
         test = GRETest.query.filter_by(date=gre_form.test_date.data).first()
         if test is None:
@@ -1678,9 +1678,9 @@ def test():
         return redirect(url_for('manage.test_score', test_type=u'gre', id=test.id))
     toefl_form = NewTOEFLTestScoreForm(prefix='toefl')
     if toefl_form.submit.data and toefl_form.validate_on_submit():
-        user = User.query.filter_by(email=toefl_form.email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=toefl_form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'用户邮箱不存在：%s' % toefl_form.email.data, category='error')
+            flash(u'用户邮箱不存在：%s' % toefl_form.email.data.lower(), category='error')
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
         test = TOEFLTest.query.filter_by(date=toefl_form.test_date.data).first()
         if test is None:
@@ -1808,9 +1808,9 @@ def test_score(test_type, id):
             return redirect(url_for('manage.test'))
         form = NewVBTestScoreForm()
         if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
             if user is None:
-                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             score = VBTestScore(
                 user_id=user.id,
@@ -1837,9 +1837,9 @@ def test_score(test_type, id):
             return redirect(url_for('manage.test'))
         form = NewYGRETestScoreForm()
         if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
             if user is None:
-                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             q_score = None
             if form.q_score.data:
@@ -1874,9 +1874,9 @@ def test_score(test_type, id):
             return redirect(url_for('manage.test'))
         form = NewGRETestScoreForm()
         if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
             if user is None:
-                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             test = GRETest.query.filter_by(date=form.test_date.data).first()
             if test is None:
@@ -1909,9 +1909,9 @@ def test_score(test_type, id):
             return redirect(url_for('manage.test'))
         form = NewTOEFLTestScoreForm()
         if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data, created=True, activated=True, deleted=False).first()
+            user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
             if user is None:
-                flash(u'用户邮箱不存在：%s' % form.email.data, category='error')
+                flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
             if test is None:
@@ -2087,11 +2087,11 @@ def user():
     # create admin form
     form = NewAdminForm(creator=current_user._get_current_object())
     if form.submit.data and form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
-            flash(u'%s已经被注册' % form.email.data, category='error')
+        if User.query.filter_by(email=form.email.data.lower()).first():
+            flash(u'%s已经被注册' % form.email.data.lower(), category='error')
             return redirect(url_for('manage.user', page=request.args.get('page', 1, type=int)))
         admin = User(
-            email=form.email.data,
+            email=form.email.data.lower(),
             role_id=int(form.role.data),
             password=form.id_number.data.upper()[-6:],
             name=form.name.data,
@@ -2527,7 +2527,7 @@ def create_user():
     form = NewUserForm()
     if form.validate_on_submit():
         user = User(
-            email=form.email.data,
+            email=form.email.data.lower(),
             role_id=int(form.role.data),
             password=form.id_number.data.upper()[-6:],
             name=form.name.data,
@@ -2662,9 +2662,9 @@ def create_user():
         if form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=form.other_referrer.data)
         if form.inviter_email.data:
-            inviter = User.query.filter_by(email=form.inviter_email.data, created=True, activated=True, deleted=False).first()
+            inviter = User.query.filter_by(email=form.inviter_email.data.lower(), created=True, activated=True, deleted=False).first()
             if inviter is None:
-                flash(u'推荐人邮箱不存在：%s' % form.inviter_email.data, category='error')
+                flash(u'推荐人邮箱不存在：%s' % form.inviter_email.data.lower(), category='error')
                 return redirect(url_for('manage.create_user', id=user.id, next=request.args.get('next')))
             inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         if int(form.vb_course.data):
@@ -2714,11 +2714,11 @@ def create_user_confirm(id):
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
     if edit_email_form.submit.data and edit_email_form.validate_on_submit():
-        if User.query.filter_by(email=edit_email_form.email.data).first() and edit_email_form.email.data != user.email:
-            flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
+        if User.query.filter_by(email=edit_email_form.email.data.lower()).first() and edit_email_form.email.data.lower() != user.email:
+            flash(u'%s已经被注册' % edit_email_form.email.data.lower(), category='error')
             return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-        if edit_email_form.email.data != user.email:
-            user.email = edit_email_form.email.data
+        if edit_email_form.email.data.lower() != user.email:
+            user.email = edit_email_form.email.data.lower()
             db.session.add(user)
         flash(u'已更新用户邮箱', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
@@ -2881,12 +2881,12 @@ def create_user_confirm(id):
     # inviter
     new_inviter_form = NewInviterForm(prefix='new_inviter')
     if new_inviter_form.submit.data and new_inviter_form.validate_on_submit():
-        inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data, created=True, activated=True, deleted=False).first()
+        inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data.lower(), created=True, activated=True, deleted=False).first()
         if inviter is None:
-            flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
+            flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data.lower(), category='error')
             return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
         if inviter.invited_user(user=user):
-            flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data, category='warning')
+            flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data.lower(), category='warning')
             return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
         inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         flash(u'已添加推荐人：%s' % inviter.name_alias, category='success')
@@ -2946,9 +2946,9 @@ def create_user_confirm(id):
         user.worked_in_same_field = confirm_user_form.worked_in_same_field.data
         user.deformity = confirm_user_form.deformity.data
         db.session.add(user)
-        receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data, created=True, activated=True, deleted=False).first()
+        receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data.lower(), created=True, activated=True, deleted=False).first()
         if receptionist is None:
-            flash(u'接待人邮箱不存在：%s' % confirm_user_form.receptionist_email.data, category='error')
+            flash(u'接待人邮箱不存在：%s' % confirm_user_form.receptionist_email.data.lower(), category='error')
         receptionist.receive_user(user=user)
         current_user.create_user(user=user)
         flash(u'成功添加%s：%s' % (user.role.name, user.name), category='success')
@@ -3076,16 +3076,16 @@ def edit_user(id):
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
     if edit_email_form.submit.data and edit_email_form.validate_on_submit():
-        if User.query.filter_by(email=edit_email_form.email.data).first() and edit_email_form.email.data != user.email:
-            flash(u'%s已经被注册' % edit_email_form.email.data, category='error')
+        if User.query.filter_by(email=edit_email_form.email.data.lower()).first() and edit_email_form.email.data.lower() != user.email:
+            flash(u'%s已经被注册' % edit_email_form.email.data.lower(), category='error')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-        if edit_email_form.email.data != user.email:
+        if edit_email_form.email.data.lower() != user.email:
             if user.confirmed:
-                token = user.generate_email_change_token(edit_email_form.email.data)
-                send_email(edit_email_form.email.data, u'确认您的邮箱账户', 'auth/mail/change_email', user=user, token=token)
-                flash(u'一封确认邮件已经发送至邮箱：%s' % edit_email_form.email.data, category='info')
+                token = user.generate_email_change_token(edit_email_form.email.data.lower())
+                send_email(edit_email_form.email.data.lower(), u'确认您的邮箱账户', 'auth/mail/change_email', user=user, token=token)
+                flash(u'一封确认邮件已经发送至邮箱：%s' % edit_email_form.email.data.lower(), category='info')
                 return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-            user.email = edit_email_form.email.data
+            user.email = edit_email_form.email.data.lower()
             db.session.add(user)
         flash(u'已更新用户邮箱', category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
@@ -3248,15 +3248,15 @@ def edit_user(id):
     # inviter
     new_inviter_form = NewInviterForm(prefix='new_inviter')
     if new_inviter_form.submit.data and new_inviter_form.validate_on_submit():
-        inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data, created=True, activated=True, deleted=False).first()
+        inviter = User.query.filter_by(email=new_inviter_form.inviter_email.data.lower(), created=True, activated=True, deleted=False).first()
         if inviter is None:
-            flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data, category='error')
+            flash(u'推荐人邮箱不存在：%s' % new_inviter_form.inviter_email.data.lower(), category='error')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         if inviter.id == user.id:
-            flash(u'推荐人邮箱有误：%s' % new_inviter_form.inviter_email.data, category='error')
+            flash(u'推荐人邮箱有误：%s' % new_inviter_form.inviter_email.data.lower(), category='error')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         if inviter.invited_user(user=user):
-            flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data, category='warning')
+            flash(u'推荐人已存在：%s' % new_inviter_form.inviter_email.data.lower(), category='warning')
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         flash(u'已添加推荐人：%s' % inviter.name_alias, category='success')
@@ -3402,7 +3402,7 @@ def restore_user(id):
     form = RestoreUserForm(restorer=current_user._get_current_object())
     if form.validate_on_submit():
         role = Role.query.get(int(form.role.data))
-        user.restore(email=form.email.data, role=role)
+        user.restore(email=form.email.data.lower(), role=role)
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.email.data = user.email[:-len(u'_%s_deleted' % user.id)]
@@ -3545,9 +3545,9 @@ def delete_course(id):
 def group():
     form = NewGroupForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.organizer_email.data, created=True, activated=True, deleted=False).first()
+        user = User.query.filter_by(email=form.organizer_email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
-            flash(u'团报发起人邮箱不存在：%s' % form.organizer_email.data, category='error')
+            flash(u'团报发起人邮箱不存在：%s' % form.organizer_email.data.lower(), category='error')
             return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
         if user.organized_groups.count():
             flash(u'%s已经发起过团报' % user.name_alias, category='error')
@@ -3592,9 +3592,9 @@ def add_group_member(id):
         abort(404)
     form = NewGroupMemberForm(organizer=organizer)
     if form.validate_on_submit():
-        member = User.query.filter_by(email=form.member_email.data, created=True, activated=True, deleted=False).first()
+        member = User.query.filter_by(email=form.member_email.data.lower(), created=True, activated=True, deleted=False).first()
         if member is None:
-            flash(u'团报成员邮箱不存在：%s' % form.member_email.data, category='error')
+            flash(u'团报成员邮箱不存在：%s' % form.member_email.data.lower(), category='error')
             return redirect(url_for('manage.add_group_member', id=organizer.id))
         if member.organized_groups.count():
             flash(u'%s已经发起过团报' % (member.name_alias), category='error')
