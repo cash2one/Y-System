@@ -78,12 +78,21 @@ def summary():
         room_id = Room.query.filter_by(name=u'1707').first().id
     if show_summary_ipad_others:
         room_id = 0
+    if room_id == 0:
+        ipads_num = iPad.query\
+            .filter_by(room_id=None, deleted=False)\
+            .count()
+    else:
+        ipads_num = iPad.query\
+            .filter_by(room_id=room_id, deleted=False)\
+            .count()
     announcements = get_announcements(type_name=u'管理主页通知', user=current_user._get_current_object())
     return render_template('manage/summary.html',
-        room_id=room_id,
         show_summary_ipad_1103=show_summary_ipad_1103,
         show_summary_ipad_1707=show_summary_ipad_1707,
         show_summary_ipad_others=show_summary_ipad_others,
+        room_id=room_id,
+        ipads_num=ipads_num,
         announcements=announcements
     )
 
