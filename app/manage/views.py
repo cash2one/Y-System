@@ -78,12 +78,21 @@ def summary():
         room_id = Room.query.filter_by(name=u'1707').first().id
     if show_summary_ipad_others:
         room_id = 0
+    if room_id == 0:
+        ipads_num = iPad.query\
+            .filter_by(room_id=None, deleted=False)\
+            .count()
+    else:
+        ipads_num = iPad.query\
+            .filter_by(room_id=room_id, deleted=False)\
+            .count()
     announcements = get_announcements(type_name=u'管理主页通知', user=current_user._get_current_object())
     return render_template('manage/summary.html',
-        room_id=room_id,
         show_summary_ipad_1103=show_summary_ipad_1103,
         show_summary_ipad_1707=show_summary_ipad_1707,
         show_summary_ipad_others=show_summary_ipad_others,
+        room_id=room_id,
+        ipads_num=ipads_num,
         announcements=announcements
     )
 
@@ -4461,26 +4470,6 @@ def suggest_email():
     if name_or_email:
         users = User.query\
             .filter(User.created == True)\
-            .filter(User.deleted == False)\
-            .filter(or_(
-                User.name.like('%' + name_or_email + '%'),
-                User.email.like('%' + name_or_email + '%')
-            ))\
-            .order_by(User.last_seen_at.desc())\
-            .limit(current_app.config['RECORD_PER_QUERY'])\
-            .all()
-    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
-
-
-@manage.route('/suggest/email/all')
-@login_required
-@permission_required(u'管理')
-def suggest_email_all():
-    users = []
-    name_or_email = request.args.get('keyword')
-    if name_or_email:
-        users = User.query\
-            .filter(User.created == True)\
             .filter(User.activated == True)\
             .filter(User.deleted == False)\
             .filter(or_(
@@ -4491,6 +4480,26 @@ def suggest_email_all():
             .limit(current_app.config['RECORD_PER_QUERY'])\
             .all()
     return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if user.role.name != u'开发人员']})
+
+
+@manage.route('/suggest/email/dev')
+@login_required
+@permission_required(u'管理')
+def suggest_email_dev():
+    users = []
+    name_or_email = request.args.get('keyword')
+    if name_or_email:
+        users = User.query\
+            .filter(User.created == True)\
+            .filter(User.deleted == False)\
+            .filter(or_(
+                User.name.like('%' + name_or_email + '%'),
+                User.email.like('%' + name_or_email + '%')
+            ))\
+            .order_by(User.last_seen_at.desc())\
+            .limit(current_app.config['RECORD_PER_QUERY'])\
+            .all()
+    return jsonify({'results': [user.to_json_suggestion(suggest_email=True) for user in users if not user.is_superior_than(user=current_user._get_current_object())]})
 
 
 @manage.route('/search/user')
