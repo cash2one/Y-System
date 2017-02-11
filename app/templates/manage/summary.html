@@ -617,7 +617,7 @@ function updateCards(updateProgressBar) {
                                     )
                             )
                     );
-                if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
+                if (data.ipads[i].now_rented_by.last_punch.section.course_type == 'VB') {
                     $('#ipad-' + i).addClass('blue');
                     $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('blue');
                     $('#ipad-state-' + i).append(
@@ -632,9 +632,9 @@ function updateCards(updateProgressBar) {
                             .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('blue');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias);
-                } else if (data.ipads[i].now_rented_by.last_punch.course_type == 'Y-GRE') {
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.section.alias);
+                } else if (data.ipads[i].now_rented_by.last_punch.section.course_type == 'Y-GRE') {
                     $('#ipad-' + i).addClass('teal');
                     $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('teal');
                     $('#ipad-state-' + i).append(
@@ -650,8 +650,8 @@ function updateCards(updateProgressBar) {
                             .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('teal');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.lesson);
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.section.lesson);
                 } else {
                     $('#ipad-' + i).addClass('yellow');
                     $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('yellow');

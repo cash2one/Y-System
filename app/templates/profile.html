@@ -235,41 +235,41 @@ $.getJSON(VBProgressUrl, function(data) {
     for (var i in data.lessons) {
         $('#vb-lessons').append(
             $('<tr>')
-                .attr('id', 'vb-lesson-' + i)
+                .attr('id', data.lessons[i].element_id)
                 .append(
                     $('<td>')
                         .addClass('single line')
                         .text(data.lessons[i].name)
                 )
                 .append(
-                    $('<td>').attr('id', 'vb-lesson-' + i + '-sections')
+                    $('<td>').attr('id', data.lessons[i].element_id + '-sections')
                 )
                 .append(
-                    $('<td>').attr('id', 'vb-lesson-' + i + '-assignments')
+                    $('<td>').attr('id', data.lessons[i].element_id + '-assignments')
                 )
                 .append(
-                    $('<td>').attr('id', 'vb-lesson-' + i + '-tests')
+                    $('<td>').attr('id', data.lessons[i].element_id + '-tests')
                 )
         );
         if (data.lessons[i].sections.length > 1) {
-            $('#vb-lesson-' + i).addClass('top aligned');
+            $('#' + data.lessons[i].element_id).addClass('top aligned');
         };
         if (data.lessons[i].sections.length < 3) {
-            $('#vb-lesson-' + i + '-sections').addClass('single line');
+            $('#' + data.lessons[i].element_id + '-sections').addClass('single line');
         };
         if (data.lessons[i].sections.length > 0) {
-            $('#vb-lesson-' + i + '-sections').append(
+            $('#' + data.lessons[i].element_id + '-sections').append(
                 $('<div>').addClass('ui labels')
             );
             for (var x in data.lessons[i].sections) {
-                $('#vb-lesson-' + i + '-sections .ui.labels').append(
+                $('#' + data.lessons[i].element_id + '-sections .ui.labels').append(
                     $('<div>')
-                        .attr('id', 'vb-lesson-' + i + '-section-' + x)
+                        .attr('id', data.lessons[i].sections[x].element_id)
                         .addClass('ui label')
                         .text(data.lessons[i].sections[x].name)
                 );
                 $.getJSON(data.lessons[i].sections[x].progress_url, {
-                    'element_id': 'vb-lesson-' + i + '-section-' + x
+                    'element_id': data.lessons[i].sections[x].element_id
                 }, function(data) {
                     if (data.status !== 'undone') {
                         if (data.status === 'ongoing') {
@@ -292,24 +292,24 @@ $.getJSON(VBProgressUrl, function(data) {
                 });
             };
         } else {
-            $('#vb-lesson-' + i + '-sections').text('无');
+            $('#' + data.lessons[i].element_id + '-sections').text('无');
         };
         if (data.lessons[i].assignments.length < 3) {
-            $('#vb-lesson-' + i + '-assignments').addClass('single line');
+            $('#' + data.lessons[i].element_id + '-assignments').addClass('single line');
         };
         if (data.lessons[i].assignments.length > 0) {
-            $('#vb-lesson-' + i + '-assignments').append(
+            $('#' + data.lessons[i].element_id + '-assignments').append(
                 $('<div>').addClass('ui labels')
             );
             for (var y in data.lessons[i].assignments) {
-                $('#vb-lesson-' + i + '-assignments .ui.labels').append(
+                $('#' + data.lessons[i].element_id + '-assignments .ui.labels').append(
                     $('<div>')
-                        .attr('id', 'vb-lesson-' + i + '-assignment-' + y)
+                        .attr('id', data.lessons[i].assignments[y].element_id)
                         .addClass('ui label')
                         .text(data.lessons[i].assignments[y].name)
                 );
                 $.getJSON(data.lessons[i].assignments[y].progress_url, {
-                    'element_id': 'vb-lesson-' + i + '-assignment-' + y
+                    'element_id': data.lessons[i].assignments[y].element_id
                 }, function(data) {
                     if (data.submitted) {
                         $('#' + data.element_id)
@@ -324,24 +324,24 @@ $.getJSON(VBProgressUrl, function(data) {
                 });
             };
         } else {
-            $('#vb-lesson-' + i + '-assignments').text('无');
+            $('#' + data.lessons[i].element_id + '-assignments').text('无');
         };
         if (data.lessons[i].tests.length < 3) {
-            $('#vb-lesson-' + i + '-tests').addClass('single line');
+            $('#' + data.lessons[i].element_id + '-tests').addClass('single line');
         };
         if (data.lessons[i].tests.length > 0) {
-            $('#vb-lesson-' + i + '-tests').append(
+            $('#' + data.lessons[i].element_id + '-tests').append(
                 $('<div>').addClass('ui labels')
             );
             for (var z in data.lessons[i].tests) {
-                $('#vb-lesson-' + i + '-tests .ui.labels').append(
+                $('#' + data.lessons[i].element_id + '-tests .ui.labels').append(
                     $('<div>')
-                        .attr('id', 'vb-lesson-' + i + '-test-' + z)
+                        .attr('id', data.lessons[i].tests[z].element_id)
                         .addClass('ui label')
                         .text(data.lessons[i].tests[z].name)
                 );
                 $.getJSON(data.lessons[i].tests[z].progress_url, {
-                    'element_id': 'vb-lesson-' + i + '-test-' + z
+                    'element_id': data.lessons[i].tests[z].element_id
                 }, function(data) {
                     if (data.taken) {
                         $('#' + data.element_id)
@@ -356,7 +356,7 @@ $.getJSON(VBProgressUrl, function(data) {
                 });
             };
         } else {
-            $('#vb-lesson-' + i + '-tests').text('无');
+            $('#' + data.lessons[i].element_id + '-tests').text('无');
         };
     };
     $('#page-loading-progress').progress('increment');
@@ -381,38 +381,38 @@ $.getJSON(YGREProgressUrl, function(data) {
     for (var i in data.lessons) {
         $('#y-gre-lessons').append(
             $('<tr>')
-                .attr('id', 'y-gre-lesson-' + i)
+                .attr('id', data.lessons[i].element_id)
                 .append(
                     $('<td>')
                         .addClass('single line')
                         .text(data.lessons[i].name)
                 )
                 .append(
-                    $('<td>').attr('id', 'y-gre-lesson-' + i + '-sections')
+                    $('<td>').attr('id', data.lessons[i].element_id + '-sections')
                 )
                 .append(
-                    $('<td>').attr('id', 'y-gre-lesson-' + i + '-tests')
+                    $('<td>').attr('id', data.lessons[i].element_id + '-tests')
                 )
         );
         if (data.lessons[i].sections.length > 1) {
-            $('#y-gre-lesson-' + i).addClass('top aligned');
+            $('#' + data.lessons[i].element_id).addClass('top aligned');
         };
         if (data.lessons[i].sections.length < 3) {
-            $('#y-gre-lesson-' + i + '-sections').addClass('single line');
+            $('#' + data.lessons[i].element_id + '-sections').addClass('single line');
         };
         if (data.lessons[i].sections.length > 0) {
-            $('#y-gre-lesson-' + i + '-sections').append(
+            $('#' + data.lessons[i].element_id + '-sections').append(
                 $('<div>').addClass('ui labels')
             );
             for (var x in data.lessons[i].sections) {
-                $('#y-gre-lesson-' + i + '-sections .ui.labels').append(
+                $('#' + data.lessons[i].element_id + '-sections .ui.labels').append(
                     $('<div>')
                         .addClass('ui label')
-                        .attr('id', 'y-gre-lesson-' + i + '-section-' + x)
+                        .attr('id', data.lessons[i].sections[x].element_id)
                         .text(data.lessons[i].sections[x].name)
                 );
                 $.getJSON(data.lessons[i].sections[x].progress_url, {
-                    'element_id': 'y-gre-lesson-' + i + '-section-' + x
+                    'element_id': data.lessons[i].sections[x].element_id
                 }, function(data) {
                     if (data.status !== 'undone') {
                         if (data.status === 'ongoing') {
@@ -435,24 +435,24 @@ $.getJSON(YGREProgressUrl, function(data) {
                 });
             };
         } else {
-            $('#y-gre-lesson-' + i + '-sections').text('无');
+            $('#' + data.lessons[i].element_id + '-sections').text('无');
         };
         if (data.lessons[i].tests.length < 3) {
-            $('#y-gre-lesson-' + i + '-tests').addClass('single line');
+            $('#' + data.lessons[i].element_id + '-tests').addClass('single line');
         };
         if (data.lessons[i].tests.length > 0) {
-            $('#y-gre-lesson-' + i + '-tests').append(
+            $('#' + data.lessons[i].element_id + '-tests').append(
                 $('<div>').addClass('ui labels')
             );
             for (var y in data.lessons[i].tests) {
-                $('#y-gre-lesson-' + i + '-tests .ui.labels').append(
+                $('#' + data.lessons[i].element_id + '-tests .ui.labels').append(
                     $('<div>')
                         .addClass('ui label')
-                        .attr('id', 'y-gre-lesson-' + i + '-test-' + y)
+                        .attr('id', data.lessons[i].tests[y].element_id)
                         .text(data.lessons[i].tests[y].name)
                 );
                 $.getJSON(data.lessons[i].tests[y].progress_url, {
-                    'element_id': 'y-gre-lesson-' + i + '-test-' + y
+                    'element_id': data.lessons[i].tests[y].element_id
                 }, function(data) {
                     if (data.taken) {
                         $('#' + data.element_id)
@@ -467,7 +467,7 @@ $.getJSON(YGREProgressUrl, function(data) {
                 });
             };
         } else {
-            $('#y-gre-lesson-' + i + '-tests').text('无');
+            $('#' + data.lessons[i].element_id + '-tests').text('无');
         };
     };
     $('#page-loading-progress').progress('increment');

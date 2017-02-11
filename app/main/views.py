@@ -57,33 +57,10 @@ def profile(id):
         show_profile_bookings = bool(request.cookies.get('show_profile_bookings', ''))
     # progress
     if show_profile_progress:
-        # if user.can_access_advanced_vb:
-        #     vb_lessons = Lesson.query\
-        #         .join(CourseType, CourseType.id == Lesson.type_id)\
-        #         .filter(CourseType.name == u'VB')\
-        #         .filter(Lesson.order >= 0)\
-        #         .all()
-        # else:
-        #     vb_lessons = Lesson.query\
-        #         .join(CourseType, CourseType.id == Lesson.type_id)\
-        #         .filter(CourseType.name == u'VB')\
-        #         .filter(Lesson.advanced == False)\
-        #         .filter(Lesson.order >= 0)\
-        #         .all()
-        # if user.can(u'预约Y-GRE课程'):
-        #     y_gre_lessons = Lesson.query\
-        #         .join(CourseType, CourseType.id == Lesson.type_id)\
-        #         .filter(CourseType.name == u'Y-GRE')\
-        #         .filter(Lesson.order >= 0)\
-        #         .all()
-        # else:
-        #     y_gre_lessons = []
         bookings = []
         pagination = None
     # bookings
     if show_profile_bookings:
-        # vb_lessons = []
-        # y_gre_lessons = []
         page = request.args.get('page', 1, type=int)
         pagination = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
@@ -100,8 +77,6 @@ def profile(id):
         user=user,
         show_profile_progress=show_profile_progress,
         show_profile_bookings=show_profile_bookings,
-        # vb_lessons=vb_lessons,
-        # y_gre_lessons=y_gre_lessons,
         bookings=bookings,
         pagination=pagination,
         announcements=announcements
@@ -150,7 +125,8 @@ def profile_progress_vb(id):
     return jsonify({
         'last_punch': user.last_vb_punch_json,
         'progress': user.vb_progress_json,
-        'lessons': [lesson.to_json(user=user) for lesson in lessons]
+        'lessons': [lesson.to_json(user=user) for lesson in lessons],
+        'punches': [punch.to_json() for punch in user.vb_punches],
     })
 
 
@@ -170,7 +146,8 @@ def profile_progress_y_gre(id):
     return jsonify({
         'last_punch': user.last_y_gre_punch_json,
         'progress': user.y_gre_progress_json,
-        'lessons': [lesson.to_json(user=user) for lesson in lessons]
+        'lessons': [lesson.to_json(user=user) for lesson in lessons],
+        'punches': [punch.to_json() for punch in user.y_gre_punches],
     })
 
 
