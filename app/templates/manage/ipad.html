@@ -135,8 +135,8 @@
                             <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}<div class="ui circular labels">{% for lesson in lessons %}<a class="ui teal label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}{% endwith %}</td>
                             <td class="single line">
                                 {% if ipad.state.name == '借出' %}
-                                <div class="ui orange mini button" style="cursor: not-allowed;">
-                                    <i class="upload icon"></i>
+                                <div class="ui orange mini button rented" style="cursor: not-allowed;" data-content="{{ ipad.now_rented_by.name_alias }}" data-position="top left" data-variation="inverted">
+                                    <i class="user icon"></i>
                                     {{ ipad.state.name }}
                                 </div>
                                 {% else %}
@@ -227,7 +227,9 @@ $('.message .close')
 
 $('.ui.sortable.table').tablesort();
 
-$('td .ui.circular.label').popup();
+$('td .ui.label').popup();
+
+$('div .rented').popup();
 
 {% if current_user.can('管理iPad设备') %}
 {% for ipad in ipads %}

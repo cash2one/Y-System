@@ -1506,7 +1506,7 @@ $(document)
 $('.ui.search')
     .search({
         apiSettings: {
-            url: "{{ url_for('manage.suggest_email_all') }}?keyword={query}"
+            url: "{% if current_user.is_developer %}{{ url_for('manage.suggest_email_dev') }}{% else %}{{ url_for('manage.suggest_email') }}{% endif %}?keyword={query}"
         },
         showNoResults: false
     })

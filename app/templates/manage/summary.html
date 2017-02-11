@@ -230,6 +230,7 @@
                     <a class="item {% if show_summary_ipad_others %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_other_ipads') }}#ipads">其它</a>
                 </div>
                 <div id="ipads-container" class="ui five stackable cards"></div>
+                {% if ipads_num %}<div id="ipads-loader" class="ui active centered inline text loader">正在加载 {{ ipads_num }} 台iPad…</div>{% else %}<div class="ui center aligned icon header disabled"><i class="tablet icon"></i>0 台iPad</div>{% endif %}
             </div>
         </div>
     </div>
@@ -304,7 +305,7 @@ $('.right.floated .ui.circular.icon.button').popup();
 
 // progress bar
 $('#page-loading-progress').progress({
-    total: 2,
+    total: 20 + {{ ipads_num }},
     onSuccess: function() {
         $('#page-loading-progress').fadeOut(1000, function() {
             $('#page-loading-progress').remove();
@@ -355,24 +356,81 @@ function updateStats(updateProgressBar) {
     var url = "{{ url_for('manage.summary_statistics') }}";
     $.getJSON(url, function(data) {
         iPadRent1103CountUp.update(data.room_1103.ipad.rent);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         iPadTotal1103CountUp.update(data.room_1103.ipad.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         iPadWalkIn1103CountUp.update(data.room_1103.rental.walk_in);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         iPadOvertime1103CountUp.update(data.room_1103.rental.overtime);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         iPadRent1707CountUp.update(data.room_1707.ipad.rent);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         iPadTotal1707CountUp.update(data.room_1707.ipad.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         iPadWalkIn1707CountUp.update(data.room_1707.rental.walk_in);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         iPadOvertime1707CountUp.update(data.room_1707.rental.overtime);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         VBIntroCountUp.update(data.booking.vb.intro.show_up);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         VBIntroTotalCountUp.update(data.booking.vb.intro.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         GREIntroCountUp.update(data.booking.y_gre.intro.show_up);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         GREIntroTotalCountUp.update(data.booking.y_gre.intro.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         AWIntroCountUp.update(data.booking.y_gre.aw_intro.show_up);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         AWIntroTotalCountUp.update(data.booking.y_gre.aw_intro.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         VBL1_3CountUp.update(data.booking.vb.l1_3.show_up);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         VBL1_3TotalCountUp.update(data.booking.vb.l1_3.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         VBL4_10CountUp.update(data.booking.vb.l4_9.show_up);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         VBL4_10TotalCountUp.update(data.booking.vb.l4_9.total);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         YGRECountUp.update(data.booking.y_gre.y_gre.show_up);
+        if (updateProgressBar) {
+            $('#page-loading-progress').progress('increment');
+        };
         YGRETotalCountUp.update(data.booking.y_gre.y_gre.total);
         if (updateProgressBar) {
             $('#page-loading-progress').progress('increment');
@@ -389,6 +447,9 @@ function updateCards(updateProgressBar) {
     var url = "{{ url_for('manage.summary_room', room_id=room_id) }}";
     $.getJSON(url, function(data) {
         $('.card').remove();
+        if (data.ipads.length > 0) {
+            $('#ipads-loader').remove();
+        };
         for (var i in data.ipads) {
             $('#ipads-container')
                 .append(
@@ -556,7 +617,7 @@ function updateCards(updateProgressBar) {
                                     )
                             )
                     );
-                if (data.ipads[i].now_rented_by.last_punch.course_type == 'VB') {
+                if (data.ipads[i].now_rented_by.last_punch.section.course_type == 'VB') {
                     $('#ipad-' + i).addClass('blue');
                     $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('blue');
                     $('#ipad-state-' + i).append(
@@ -571,9 +632,9 @@ function updateCards(updateProgressBar) {
                             .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('blue');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.alias);
-                } else if (data.ipads[i].now_rented_by.last_punch.course_type == 'Y-GRE') {
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.section.alias);
+                } else if (data.ipads[i].now_rented_by.last_punch.section.course_type == 'Y-GRE') {
                     $('#ipad-' + i).addClass('teal');
                     $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('teal');
                     $('#ipad-state-' + i).append(
@@ -589,8 +650,8 @@ function updateCards(updateProgressBar) {
                             .popup()
                     );
                     $('#ipad-content-' + i + ' .statistic').addClass('teal');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.lesson);
+                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
+                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.section.lesson);
                 } else {
                     $('#ipad-' + i).addClass('yellow');
                     $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('yellow');
@@ -675,9 +736,9 @@ function updateCards(updateProgressBar) {
                 $('#ipad-content-' + i + ' .statistic').addClass('olive');
                 $('#ipad-content-' + i + ' .value').html('<i class="recycle icon"></i>');
             };
-        };
-        if (updateProgressBar) {
-            $('#page-loading-progress').progress('increment');
+            if (updateProgressBar) {
+                $('#page-loading-progress').progress('increment');
+            };
         };
     });
 };

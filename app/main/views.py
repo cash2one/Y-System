@@ -57,33 +57,10 @@ def profile(id):
         show_profile_bookings = bool(request.cookies.get('show_profile_bookings', ''))
     # progress
     if show_profile_progress:
-        # if user.can_access_advanced_vb:
-        #     vb_lessons = Lesson.query\
-        #         .join(CourseType, CourseType.id == Lesson.type_id)\
-        #         .filter(CourseType.name == u'VB')\
-        #         .filter(Lesson.order >= 0)\
-        #         .all()
-        # else:
-        #     vb_lessons = Lesson.query\
-        #         .join(CourseType, CourseType.id == Lesson.type_id)\
-        #         .filter(CourseType.name == u'VB')\
-        #         .filter(Lesson.advanced == False)\
-        #         .filter(Lesson.order >= 0)\
-        #         .all()
-        # if user.can(u'预约Y-GRE课程'):
-        #     y_gre_lessons = Lesson.query\
-        #         .join(CourseType, CourseType.id == Lesson.type_id)\
-        #         .filter(CourseType.name == u'Y-GRE')\
-        #         .filter(Lesson.order >= 0)\
-        #         .all()
-        # else:
-        #     y_gre_lessons = []
         bookings = []
         pagination = None
     # bookings
     if show_profile_bookings:
-        # vb_lessons = []
-        # y_gre_lessons = []
         page = request.args.get('page', 1, type=int)
         pagination = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
@@ -100,8 +77,6 @@ def profile(id):
         user=user,
         show_profile_progress=show_profile_progress,
         show_profile_bookings=show_profile_bookings,
-        # vb_lessons=vb_lessons,
-        # y_gre_lessons=y_gre_lessons,
         bookings=bookings,
         pagination=pagination,
         announcements=announcements
@@ -150,7 +125,10 @@ def profile_progress_vb(id):
     return jsonify({
         'last_punch': user.last_vb_punch_json,
         'progress': user.vb_progress_json,
-        'lessons': [lesson.to_json(user=user) for lesson in lessons]
+        'lessons': [lesson.to_json() for lesson in lessons],
+        'punches': [punch.to_json() for punch in user.vb_punches],
+        'assignment_scores': [score.to_json() for score in user.vb_assignment_scores],
+        'test_scores': [score.to_json() for score in user.vb_test_scores_alias],
     })
 
 
@@ -170,73 +148,7 @@ def profile_progress_y_gre(id):
     return jsonify({
         'last_punch': user.last_y_gre_punch_json,
         'progress': user.y_gre_progress_json,
-        'lessons': [lesson.to_json(user=user) for lesson in lessons]
+        'lessons': [lesson.to_json() for lesson in lessons],
+        'punches': [punch.to_json() for punch in user.y_gre_punches],
+        'test_scores': [score.to_json() for score in user.y_gre_test_scores_alias],
     })
-
-
-@main.route('/profile/<int:user_id>/progress/section/<int:section_id>')
-@login_required
-def profile_progress_section(user_id, section_id):
-    user = User.query.get_or_404(user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    if user.id != current_user.id and not current_user.can(u'管理'):
-        abort(403)
-    section = Section.query.get_or_404(section_id)
-    progress_json = {
-        'section': section.to_json(),
-        'status': 'undone',
-        'element_id': request.args.get('element_id'),
-    }
-    punch = Punch.query.filter_by(user_id=user.id, section_id=section_id).first()
-    if punch is not None:
-        progress_json['status'] = 'done'
-        if section_id == user.last_punch.section_id:
-            progress_json['status'] = 'ongoing'
-        progress_json['punch'] = punch.to_json()
-    return jsonify(progress_json)
-
-
-@main.route('/profile/<int:user_id>/progress/assignment/<int:assignment_id>')
-@login_required
-def profile_progress_assignment(user_id, assignment_id):
-    user = User.query.get_or_404(user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    if user.id != current_user.id and not current_user.can(u'管理'):
-        abort(403)
-    assignment = Assignment.query.get_or_404(assignment_id)
-    progress_json = {
-        'assignment': assignment.to_json(),
-        'submitted': False,
-        'element_id': request.args.get('element_id'),
-    }
-    assignment_score = user.submitted(assignment=assignment)
-    if assignment_score is not None:
-        progress_json['submitted'] = True
-        progress_json['score'] = assignment_score.to_json()
-    return jsonify(progress_json)
-
-
-@main.route('/profile/<int:user_id>/progress/test/<int:test_id>')
-@login_required
-def profile_progress_test(user_id, test_id):
-    user = User.query.get_or_404(user_id)
-    if not user.created or user.deleted:
-        abort(404)
-    if user.id != current_user.id and not current_user.can(u'管理'):
-        abort(403)
-    test = Test.query.get_or_404(test_id)
-    progress_json = {
-        'test': test.to_json(),
-        'taken': False,
-        'element_id': request.args.get('element_id'),
-    }
-    if test.lesson.type.name == u'VB':
-        test_score = user.taken_vb(test=test)
-    elif test.lesson.type.name == u'Y-GRE':
-        test_score = user.taken_y_gre(test=test)
-    if test_score is not None:
-        progress_json['taken'] = True
-        progress_json['score'] = test_score.to_json()
-    return jsonify(progress_json)

@@ -621,11 +621,8 @@ class Punch(db.Model):
     def to_json(self):
         punch_json = {
             'user': self.user.name,
-            'course_type': self.section.lesson.type.name,
-            'lesson': self.section.lesson.name,
-            'section': self.section.name,
-            'alias': self.section.alias,
-            'alias2': self.section.alias2,
+            'section': self.section.to_json(),
+            'milestone': self.milestone,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
         return punch_json
@@ -1972,40 +1969,44 @@ class User(UserMixin, db.Model):
         return self.last_vb_punch
 
     @property
-    def last_vb_punch(self):
+    def vb_punches(self):
         return Punch.query\
             .join(Section, Section.id == Punch.section_id)\
             .join(Lesson, Lesson.id == Section.lesson_id)\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(Punch.user_id == self.id)\
             .filter(CourseType.name == u'VB')\
-            .filter(Section.order >= 1)\
-            .order_by(Section.order.desc())\
-            .first()
+            .order_by(Section.order.desc())
+
+    @property
+    def last_vb_punch(self):
+        return self.vb_punches.filter(Section.order >= 1).first()
 
     @property
     def last_vb_punch_json(self):
         if self.last_vb_punch:
             return self.last_vb_punch.to_json()
-        return u'N/A'
+        return None
 
     @property
-    def last_y_gre_punch(self):
+    def y_gre_punches(self):
         return Punch.query\
             .join(Section, Section.id == Punch.section_id)\
             .join(Lesson, Lesson.id == Section.lesson_id)\
             .join(CourseType, CourseType.id == Lesson.type_id)\
             .filter(Punch.user_id == self.id)\
             .filter(CourseType.name == u'Y-GRE')\
-            .filter(Section.order >= 1)\
-            .order_by(Section.order.desc())\
-            .first()
+            .order_by(Section.order.desc())
+
+    @property
+    def last_y_gre_punch(self):
+        return self.y_gre_punches.filter(Section.order >= 1).first()
 
     @property
     def last_y_gre_punch_json(self):
         if self.last_y_gre_punch:
             return self.last_y_gre_punch.to_json()
-        return u'N/A'
+        return None
 
     @property
     def vb_progress_json(self):
@@ -2117,11 +2118,53 @@ class User(UserMixin, db.Model):
     def submitted(self, assignment):
         return self.assignment_scores.filter_by(assignment_id=assignment.id).order_by(AssignmentScore.modified_at.desc()).first()
 
+    @property
+    def vb_assignment_scores(self):
+        assignments = Assignment.query\
+            .join(Lesson, Lesson.id == Assignment.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .all()
+        scores = []
+        for assignment in assignments:
+            score = self.submitted(assignment=assignment)
+            if score is not None:
+                scores.append(score)
+        return scores
+
     def taken_vb(self, test):
         return self.vb_test_scores.filter_by(test_id=test.id).order_by(VBTestScore.modified_at.desc()).first()
 
     def taken_y_gre(self, test):
         return self.y_gre_test_scores.filter_by(test_id=test.id).order_by(YGRETestScore.modified_at.desc()).first()
+
+    @property
+    def vb_test_scores_alias(self):
+        tests = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .all()
+        scores = []
+        for test in tests:
+            score = self.taken_vb(test=test)
+            if score is not None:
+                scores.append(score)
+        return scores
+
+    @property
+    def y_gre_test_scores_alias(self):
+        tests = Test.query\
+            .join(Lesson, Lesson.id == Test.lesson_id)\
+            .join(CourseType, CourseType.id == Lesson.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .all()
+        scores = []
+        for test in tests:
+            score = self.taken_y_gre(test=test)
+            if score is not None:
+                scores.append(score)
+        return scores
 
     @property
     def can_access_advanced_vb(self):
@@ -2476,13 +2519,13 @@ class Product(db.Model):
         products = [
             (u'VB基本技术费', 6800.0, True, ),
             (u'Y-GRE基本技术费', 6800.0, True, ),
+            (u'联报优惠', -1000.0, True, ),
+            (u'在校生减免', -800.0, True, ),
+            (u'本校减免', -500.0, True, ),
+            (u'团报优惠', -200.0, True, ),
             (u'AW费用', 800.0, True, ),
             (u'Q费用', 800.0, True, ),
             (u'Y-GRE多轮费用', 2000.0, True, ),
-            (u'在校生减免', -800.0, True, ),
-            (u'本校减免', -500.0, True, ),
-            (u'联报优惠', -1000.0, True, ),
-            (u'团报优惠', -200.0, True, ),
             (u'按月延长有效期', 1000.0, True, ),
             (u'一次性延长2年有效期', 3000.0, True, ),
         ]
@@ -2510,6 +2553,10 @@ class CourseType(db.Model):
     lessons = db.relationship('Lesson', backref='type', lazy='dynamic')
     courses = db.relationship('Course', backref='type', lazy='dynamic')
     periods = db.relationship('Period', backref='type', lazy='dynamic')
+
+    @property
+    def alias(self):
+        return self.name.lower()
 
     @staticmethod
     def insert_course_types():
@@ -3113,11 +3160,8 @@ class iPad(db.Model):
 
     @property
     def now_rented_by(self):
-        return User.query\
-            .join(Rental, Rental.user_id == User.id)\
-            .filter(Rental.returned == False)\
-            .filter(Rental.ipad_id == self.id)\
-            .first()
+        if self.current_rental is not None:
+            return self.current_rental.user
 
     @property
     def current_rental(self):
@@ -3279,7 +3323,7 @@ class Lesson(db.Model):
             .filter(iPadState.name != u'退役')\
             .filter(iPadContent.lesson_id == self.id)
 
-    def to_json(self, user=None):
+    def to_json(self):
         lesson_json = {
             'name': self.name,
             'alias': self.alias,
@@ -3290,9 +3334,10 @@ class Lesson(db.Model):
             'order': self.order,
             'include_video': self.include_video,
             'advanced': self.advanced,
-            'sections': [section.to_json(user=user) for section in self.sections],
-            'assignments': [assignment.to_json(user=user) for assignment in self.assignments],
-            'tests': [test.to_json(user=user) for test in self.tests],
+            'sections': [section.to_json() for section in self.sections],
+            'assignments': [assignment.to_json() for assignment in self.assignments],
+            'tests': [test.to_json() for test in self.tests],
+            'element_id': '%s-lesson-%s' % (self.type.alias, self.id),
         }
         return lesson_json
 
@@ -3378,7 +3423,7 @@ class Section(db.Model):
             return u'0.%s%s' % (self.name[4], self.name[6])
         return self.name
 
-    def to_json(self, user=None):
+    def to_json(self):
         section_json = {
             'name': self.name,
             'alias': self.alias,
@@ -3387,9 +3432,8 @@ class Section(db.Model):
             'lesson': self.lesson.name,
             'course_type': self.lesson.type.name,
             'order': self.order,
+            'element_id': '%s-lesson-%s-section-%s' % (self.lesson.type.alias, self.lesson.id, self.id),
         }
-        if user:
-            section_json['progress_url'] = url_for('main.profile_progress_section', user_id=user.id, section_id=self.id)
         return section_json
 
     @staticmethod
@@ -3579,7 +3623,7 @@ class Assignment(db.Model):
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.alias, self.name)
+        return u'%s - %s' % (self.lesson.type.name, self.name)
 
     @property
     def finished_by_alias(self):
@@ -3590,15 +3634,14 @@ class Assignment(db.Model):
             .filter(User.activated == True)\
             .filter(User.deleted == False)
 
-    def to_json(self, user=None):
+    def to_json(self):
         assignment_json = {
             'name': self.name,
             'alias': self.alias,
             'lesson': self.lesson.name,
             'course_type': self.lesson.type.name,
+            'element_id': '%s-lesson-%s-assignment-%s' % (self.lesson.type.alias, self.lesson.id, self.id),
         }
-        if user:
-            assignment_json['progress_url'] = url_for('main.profile_progress_assignment', user_id=user.id, assignment_id=self.id)
         return assignment_json
 
     @staticmethod
@@ -3655,11 +3698,7 @@ class Test(db.Model):
 
     @property
     def alias(self):
-        return u'%s - %s' % (self.lesson.alias, self.name)
-
-    @property
-    def alias2(self):
-        return u'%s - %s' % (self.lesson.name, self.name)
+        return u'%s - %s' % (self.lesson.type.name, self.name)
 
     @property
     def finished_by_alias(self):
@@ -3678,16 +3717,14 @@ class Test(db.Model):
                 .filter(User.activated == True)\
                 .filter(User.deleted == False)
 
-    def to_json(self, user=None):
+    def to_json(self):
         test_json = {
             'name': self.name,
             'alias': self.alias,
-            'alias2': self.alias2,
             'lesson': self.lesson.name,
             'course_type': self.lesson.type.name,
+            'element_id': '%s-lesson-%s-test-%s' % (self.lesson.type.alias, self.lesson.id, self.id),
         }
-        if user:
-            test_json['progress_url'] = url_for('main.profile_progress_test', user_id=user.id, test_id=self.id)
         return test_json
 
     @staticmethod

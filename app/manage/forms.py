@@ -204,7 +204,7 @@ class NewVBTestScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewVBTestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择VB考试')] + [(unicode(test.id), test.alias2) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'VB']
+        self.test.choices = [(u'', u'选择VB考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'VB']
 
 
 class EditVBTestScoreForm(FlaskForm):
@@ -215,7 +215,7 @@ class EditVBTestScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditVBTestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择VB考试')] + [(unicode(test.id), test.alias2) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'VB']
+        self.test.choices = [(u'', u'选择VB考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'VB']
 
 
 class NewYGRETestScoreForm(FlaskForm):
@@ -229,7 +229,7 @@ class NewYGRETestScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewYGRETestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择Y-GRE考试')] + [(unicode(test.id), test.alias2) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'Y-GRE']
+        self.test.choices = [(u'', u'选择Y-GRE考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'Y-GRE']
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
 
 
@@ -243,7 +243,7 @@ class EditYGRETestScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditYGRETestScoreForm, self).__init__(*args, **kwargs)
-        self.test.choices = [(u'', u'选择Y-GRE考试')] + [(unicode(test.id), test.alias2) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'Y-GRE']
+        self.test.choices = [(u'', u'选择Y-GRE考试')] + [(unicode(test.id), test.alias) for test in Test.query.order_by(Test.id.asc()).all() if test.lesson.type.name == u'Y-GRE']
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
 
 

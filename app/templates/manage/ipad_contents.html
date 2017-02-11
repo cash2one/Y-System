@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="ui vertical stripe segment">
+<div id="ipad-contents" class="ui vertical stripe segment loading">
     <div id="page-loading-progress" class="ui top attached blue inverted progress">
         <div class="bar"></div>
     </div>
@@ -60,9 +60,14 @@ $('.message .close')
 
 $('.ui.sortable.table').tablesort();
 
+$('#page-loading-progress').progress();
+
 function updateiPads(updateProgressBar) {
     var url = "{{ url_for('manage.ipad_contents_data') }}";
     $.getJSON(url, function(data) {
+        if (updateProgressBar) {
+            $('#ipad-contents').removeClass('loading');
+        };
         $('#page-loading-progress').progress({
             total: data.ipads.length + data.ipad_contents.length,
             onSuccess: function() {
@@ -91,7 +96,7 @@ function updateiPads(updateProgressBar) {
             if (data.ipads[i].state === '待机') {
                 $('#ipad-' + data.ipads[i].id + '-label').html('<i class="clock icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '借出') {
-                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="orange upload icon"></i>' + data.ipads[i].alias);
+                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="orange user icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '候补') {
                 $('#ipad-' + data.ipads[i].id + '-label').html('<i class="grey cube icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '维护') {
