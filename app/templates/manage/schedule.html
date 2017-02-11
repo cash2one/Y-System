@@ -96,17 +96,17 @@
                             <td{% if schedule.full %} class="negative"{% endif %}>
                                 {{ schedule.occupied_quota }} / {{ schedule.quota }}
                                 {% if schedule.out_of_date %}
-                                <div class="ui mini buttons">
-                                    <div class="ui disabled icon button"><i class="plus icon"></i></div>
-                                    <div class="ui disabled icon button"><i class="minus icon"></i></div>
+                                <div class="ui mini icon buttons">
+                                    <div class="ui disabled button"><i class="plus icon"></i></div>
+                                    <div class="ui disabled button"><i class="minus icon"></i></div>
                                 </div>
                                 {% else %}
-                                <div class="ui mini buttons">
-                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.increase_schedule_quota', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="plus icon"></i></a>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.increase_schedule_quota', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="plus icon"></i></a>
                                     {% if schedule.quota <= 0 or schedule.quota <= schedule.occupied_quota %}
-                                    <div class="ui disabled icon button"><i class="minus icon"></i></div>
+                                    <div class="ui disabled button"><i class="minus icon"></i></div>
                                     {% else %}
-                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.decrease_schedule_quota', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="minus icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.decrease_schedule_quota', id=schedule.id, next=url_for('manage.schedule', page=pagination.page)) }}"><i class="minus icon"></i></a>
                                     {% endif %}
                                 </div>
                                 {% endif %}

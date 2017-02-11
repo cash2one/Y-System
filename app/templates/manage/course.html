@@ -79,14 +79,14 @@
                             </td>
                             <td class="single line">{{ macros.user_popup(course.modified_by, course.modified_by.id == current_user.id) }}</td>
                             <td>
-                                <div class="ui mini buttons">
+                                <div class="ui mini icon buttons">
                                     {% if course.show %}
-                                    <a class="ui grey icon button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="unhide icon"></i></a>
+                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="unhide icon"></i></a>
                                     {% else %}
-                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_course_show', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <div id="delete-trigger-{{ course.id }}" class="ui negative icon button"><i class="trash outline icon"></i></div>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_course', id=course.id, next=url_for('manage.course', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ course.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ course.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除班级“{{ course.name }}”？</div>

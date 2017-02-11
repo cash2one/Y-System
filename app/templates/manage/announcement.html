@@ -83,14 +83,14 @@
                             </td>
                             <td class="single line">{{ macros.user_popup(announcement.modified_by, announcement.modified_by.id == current_user.id) }}</td>
                             <td>
-                                <div class="ui mini buttons">
+                                <div class="ui mini icon buttons">
                                     {% if announcement.show %}
-                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="撤回"><i class="undo icon"></i></a>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.retract_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="撤回"><i class="undo icon"></i></a>
                                     {% else %}
-                                    <a class="ui primary icon button loading-trigger" href="{{ url_for('manage.publish_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="发布"><i class="send icon"></i></a>
+                                    <a class="ui primary button loading-trigger" href="{{ url_for('manage.publish_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}" title="发布"><i class="send icon"></i></a>
                                     {% endif %}
-                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <div id="delete-trigger-{{ announcement.id }}" class="ui negative icon button"><i class="trash outline icon"></i></div>
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_announcement', id=announcement.id, next=url_for('manage.announcement', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ announcement.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                 </div>
                                 <div id="delete-modal-{{ announcement.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除通知“{{ announcement.title }}”？</div>
