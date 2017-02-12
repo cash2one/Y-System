@@ -85,8 +85,8 @@
                 {% if show_profile_overview %}
                 {% endif %}
                 {% if show_profile_progress %}
-                <div id="vb" class="ui basic segment loading">
-                    <h4 id="last-vb-punch" class="ui header disabled">VB进度：<span>N/A</span></h4>
+                <div id="vb" class="ui vertical segment loading">
+                    <div id="last-vb-punch" class="ui header disabled">VB进度：<span>N/A</span></div>
                     <div id="vb-progress-bar" class="ui progress disabled">
                         <div class="bar">
                             <div class="progress">0%</div>
@@ -105,8 +105,8 @@
                     </table>
                 </div>
                 {% if user.can('预约Y-GRE课程') %}
-                <div id="y-gre" class="ui basic segment loading">
-                    <h4 id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>N/A</span></h4>
+                <div id="y-gre" class="ui vertical segment loading">
+                    <div id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>N/A</span></div>
                     <div id="y-gre-progress-bar" class="ui progress disabled">
                         <div class="bar">
                             <div class="progress">0%</div>
@@ -221,20 +221,26 @@ $('.message .close')
 var progressDataUrl = "{{ url_for('main.profile_progress_data', id=user.id) }}";
 $.getJSON(progressDataUrl, function(data) {
     $('#side-bar-progress').removeClass('loading');
-    $('#side-bar-vb-progress').removeClass('disabled').addClass('blue').progress({
-        total: data.progress.vb.total,
-        value: data.progress.vb.value,
-        text: {
-            active: 'VB完成 {percent}%'
-        }
-    });
-    $('#side-bar-y-gre-progress').removeClass('disabled').addClass('teal').progress({
-        total: data.progress.y_gre.total,
-        value: data.progress.y_gre.value,
-        text: {
-            active: 'Y-GRE完成 {percent}%'
-        }
-    });
+    if (data.progress.vb.value > 0) {
+        $('#side-bar-vb-progress').removeClass('disabled').addClass('blue').progress({
+            total: data.progress.vb.total,
+            value: data.progress.vb.value,
+            text: {
+                active: 'VB完成 {percent}%'
+            }
+        });
+    };
+    {% if user.can('预约Y-GRE课程') %}
+    if (data.progress.y_gre.value > 0) {
+        $('#side-bar-y-gre-progress').removeClass('disabled').addClass('teal').progress({
+            total: data.progress.y_gre.total,
+            value: data.progress.y_gre.value,
+            text: {
+                active: 'Y-GRE完成 {percent}%'
+            }
+        });
+    };
+    {% endif %}
 });
 
 {% if show_profile_overview %}
