@@ -79,6 +79,12 @@ celerybeat-schedule
 celery-beat.log
 celery-worker.log
 
+# celery flower config file
+flowerconfig.py
+
+# celery flower basic auth file
+celery_flower_basic_auth
+
 # dotenv
 .env
 
@@ -98,7 +104,7 @@ ENV/
 *.db
 
 # uWSGI configuration
-uwsgi-conf.ini
+uwsgiconfig.ini
 
 # Supervisor log
 uwsgi.log

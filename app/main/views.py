@@ -50,11 +50,17 @@ def profile(id):
         abort(404)
     if user.id != current_user.id and not current_user.can(u'管理'):
         abort(403)
-    show_profile_progress = True
+    show_profile_overview = True
+    show_profile_progress = False
     show_profile_bookings = False
     if current_user.is_authenticated:
-        show_profile_progress = bool(request.cookies.get('show_profile_progress', '1'))
+        show_profile_overview = bool(request.cookies.get('show_profile_overview', '1'))
+        show_profile_progress = bool(request.cookies.get('show_profile_progress', ''))
         show_profile_bookings = bool(request.cookies.get('show_profile_bookings', ''))
+    # overview
+    if show_profile_overview:
+        bookings = []
+        pagination = None
     # progress
     if show_profile_progress:
         bookings = []
@@ -75,6 +81,7 @@ def profile(id):
         announcements = get_announcements(type_name=u'用户主页通知', user=current_user._get_current_object())
     return render_template('profile.html',
         user=user,
+        show_profile_overview=show_profile_overview,
         show_profile_progress=show_profile_progress,
         show_profile_bookings=show_profile_bookings,
         bookings=bookings,
@@ -83,22 +90,50 @@ def profile(id):
     )
 
 
+@main.route('/profile/<int:id>/overview')
+@login_required
+def profile_overview(id):
+    resp = make_response(redirect(url_for('main.profile', id=id)))
+    resp.set_cookie('show_profile_overview', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_progress', '', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_bookings', '', max_age=30*24*60*60)
+    return resp
+
+
 @main.route('/profile/<int:id>/progress')
 @login_required
 def profile_progress(id):
     resp = make_response(redirect(url_for('main.profile', id=id)))
+    resp.set_cookie('show_profile_overview', '', max_age=30*24*60*60)
     resp.set_cookie('show_profile_progress', '1', max_age=30*24*60*60)
     resp.set_cookie('show_profile_bookings', '', max_age=30*24*60*60)
     return resp
 
 
-@main.route('/profile/<int:id>/booking')
+@main.route('/profile/<int:id>/bookings')
 @login_required
 def profile_bookings(id):
     resp = make_response(redirect(url_for('main.profile', id=id)))
+    resp.set_cookie('show_profile_overview', '', max_age=30*24*60*60)
     resp.set_cookie('show_profile_progress', '', max_age=30*24*60*60)
     resp.set_cookie('show_profile_bookings', '1', max_age=30*24*60*60)
     return resp
+
+
+@main.route('/profile/<int:id>/progress/data')
+@login_required
+def profile_progress_data(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    if user.id != current_user.id and not current_user.can(u'管理'):
+        abort(403)
+    return jsonify({
+        'progress': {
+            'vb': user.vb_progress_json,
+            'y_gre': user.y_gre_progress_json,
+        },
+    })
 
 
 @main.route('/profile/<int:id>/progress/vb')

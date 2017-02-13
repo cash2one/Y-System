@@ -107,12 +107,12 @@
                                 {% endwith %}
                              </td>
                             <td>
-                                <div class="ui mini buttons">
-                                    <a class="ui icon button loading-trigger" href="{{ url_for('manage.edit_role', id=role.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_role', id=role.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a>
                                     {% if role.users.count() %}
-                                    <div class="ui negative icon button disabled"><i class="trash outline icon"></i></div>
+                                    <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
                                     {% else %}
-                                    <div id="delete-trigger-{{ role.id }}" class="ui negative icon button"><i class="trash outline icon"></i></div>
+                                    <div id="delete-trigger-{{ role.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                     {% endif %}
                                 </div>
                                 {% if role.users.count() == 0 %}

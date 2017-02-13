@@ -5,6 +5,7 @@ import requests
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
+from base64 import b64encode
 from hashlib import sha512, md5
 from json import loads, dumps
 from bs4 import BeautifulSoup
@@ -1442,27 +1443,32 @@ class User(UserMixin, db.Model):
             return u'%s年%s月%s日' % (self.birthdate.year, self.birthdate.month, self.birthdate.day)
         return u'无'
 
-    def avatar(self, ext='', size=512, default='identicon', rating='g'):
+    @property
+    def email_hash(self):
+        return md5(self.email.encode('utf-8')).hexdigest()
+
+    def avatar(self, size=512, default='identicon', rating='g', wrap=False):
         if request.is_secure:
             url = 'https://secure.gravatar.com/avatar'
         else:
             url = 'http://www.gravatar.com/avatar'
         email_hash = md5(self.email.encode('utf-8')).hexdigest()
-        if ext != '':
-            base_url = '%s/%s.%s' % (url, email_hash, ext)
-        else:
-            base_url = '%s/%s' % (url, email_hash)
+        base_url = '%s/%s' % (url, email_hash)
         payload = {
             's': size,
             'd': default,
             'r': rating,
         }
         avatar_url = '%s?%s' % (base_url, '&'.join(['%s=%s' % (key, payload[key]) for key in payload]))
-        if default in [404, '404']:
-            r = requests.get(base_url, params=payload)
-            if r.status_code == 200:
-                return '<img class="ui small-avatar image" src="%s">' % avatar_url
-            else:
+        if wrap:
+            payload['d'] = 404
+            try:
+                r = requests.get(base_url, params=payload)
+                if r.status_code == 200:
+                    return '<img class="ui small-avatar image" src="data:%s;base64,%s">' % (r.headers['Content-Type'], b64encode(r.content))
+                else:
+                    return '<i class="fa fa-user-circle-o"></i>'
+            except Exception as e:
                 return '<i class="fa fa-user-circle-o"></i>'
         return avatar_url
 
@@ -2264,7 +2270,7 @@ class User(UserMixin, db.Model):
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'url': url_for('main.profile', id=self.id),
+            'url': url_for('main.profile_overview', id=self.id),
         }
         return user_json
 
@@ -2286,7 +2292,7 @@ class User(UserMixin, db.Model):
             else:
                 user_json_suggestion['description'] = self.email
         if include_url:
-            user_json_suggestion['url'] = url_for('main.profile', id=self.id)
+            user_json_suggestion['url'] = url_for('main.profile_overview', id=self.id)
         return user_json_suggestion
 
     @staticmethod

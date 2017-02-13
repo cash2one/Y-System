@@ -23,9 +23,9 @@
                 <h3 class="ui header"><i class="checked calendar icon"></i>预约记录</h3>
                 <a id="batch-mark-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.set_booking_state_missed_all', next=url_for('manage.booking', page=pagination.page)) }}" data-content="批量标记爽约/失效" data-position="top center" data-variation="inverted"><i class="repeat icon"></i></a>
                 <div class="ui secondary stackable menu">
-                    <a class="item {% if show_today_booking %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_booking') }}">当日记录</a>
-                    <a class="item {% if show_future_booking %}active {% endif %}loading-trigger" href="{{ url_for('manage.future_booking') }}">未来记录</a>
-                    <a class="item {% if show_history_booking %}active {% endif %}loading-trigger" href="{{ url_for('manage.history_booking') }}">历史记录</a>
+                    <a class="item {% if show_today_bookings %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_bookings') }}">当日记录</a>
+                    <a class="item {% if show_future_bookings %}active {% endif %}loading-trigger" href="{{ url_for('manage.future_bookings') }}">未来记录</a>
+                    <a class="item {% if show_history_bookings %}active {% endif %}loading-trigger" href="{{ url_for('manage.history_bookings') }}">历史记录</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
@@ -33,7 +33,7 @@
                             <th>日期</th>
                             <th>用户</th>
                             <th>课程</th>
-                            {% if show_history_booking %}
+                            {% if show_history_bookings %}
                             {% else %}
                             <th>进度</th>
                             {% endif %}
@@ -49,7 +49,7 @@
                             <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
                             <td class="single line">{{ macros.user_popup(booking.user, booking.user.id == current_user.id) }}</td>
                             <td>{{ booking.schedule.period.type.name }}</td>
-                            {% if show_history_booking %}
+                            {% if show_history_bookings %}
                             {% else %}
                             <td>
                                 {{ booking.user.last_punch.section.alias2 }}

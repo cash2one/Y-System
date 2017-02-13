@@ -446,7 +446,7 @@ setInterval(function() {
 function updateCards(updateProgressBar) {
     var url = "{{ url_for('manage.summary_room', room_id=room_id) }}";
     $.getJSON(url, function(data) {
-        $('.card').remove();
+        $('.ipad.card').remove();
         if (data.ipads.length > 0) {
             $('#ipads-loader').remove();
         };
@@ -455,7 +455,7 @@ function updateCards(updateProgressBar) {
                 .append(
                     $('<div>')
                         .attr('id', 'ipad-' + i)
-                        .addClass('card')
+                        .addClass('ipad card')
                         .append(
                             $('<div>')
                                 .addClass('ipad-basic-info content')
