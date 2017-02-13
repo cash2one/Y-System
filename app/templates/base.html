@@ -68,7 +68,7 @@
             </div>
             {% if current_user.is_authenticated %}
             {% if current_user.can('管理') %}<a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i>系统实况</a>{% else %}
-            <a class="item loading-trigger" href="{{ url_for('main.profile', id=current_user.id) }}"><i class="archive icon"></i>研修档案</a>
+            <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card outline icon"></i>研修档案</a>
             {% endif %}
             {% else %}
             <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i>首页</a>
@@ -129,7 +129,7 @@
                 {% if current_user.is_authenticated %}
                 <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed blue empty circular label"></div></a>
                 <div class="ui dropdown item menu-popup-trigger" data-content="研修档案与设置" data-position="bottom center" data-variation="inverted">
-                    {{ current_user.avatar(size=20, default='404') | safe }}
+                    {{ current_user.avatar(size=40, default='404') | safe }}
                     <i class="less-relaxed dropdown icon"></i>
                     <div class="menu">
                         {% if current_user.is_developer %}
@@ -137,7 +137,7 @@
                         <div class="divider"></div>
                         {% endif %}
                         <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
-                        <a class="item loading-trigger" href="{{ url_for('main.profile', id=current_user.id) }}"><i class="archive icon"></i>研修档案</a>
+                        <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card outline icon"></i>研修档案</a>
                         {% if current_user.can('预约') and current_user.can('管理') %}
                         <div class="divider"></div>
                         <div class="header">课程预约</div>
@@ -170,7 +170,7 @@
         </div>
         {% if current_user.is_authenticated %}
         {% if current_user.is_developer %}<div class="disabled item">{{ Version.Application }}</div>{% endif %}
-        <a class="item loading-trigger" href="{{ url_for('main.profile', id=current_user.id) }}"><i class="user circle outline icon"></i>{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</a>
+        <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card icon"></i>{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</a>
         <a class="item loading-trigger" href="#"><i class="mail icon"></i>无未读消息</a>
         {% if current_user.can('管理') %}<a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i>系统实况</a>{% endif %}
         {% else %}
@@ -267,7 +267,7 @@
                     {% if current_user.can('管理') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.summary') }}"><i class="dashboard icon"></i>系统实况</a>
                     {% else %}
-                    <a class="item loading-trigger" href="{{ url_for('main.profile', id=current_user.id) }}"><i class="archive icon"></i>研修档案</a>
+                    <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card outline icon"></i>研修档案</a>
                     {% endif %}
                     {% else %}
                     <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i>首页</a>
@@ -326,7 +326,7 @@
                         {% if current_user.is_authenticated %}
                         <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed yellow empty circular label"></div></a>
                         <div class="ui dropdown item menu-popup-trigger" data-content="研修档案与设置" data-position="bottom center" data-variation="inverted">
-                            {{ current_user.avatar(size=20, default='404') | safe }}
+                            {{ current_user.avatar(size=40, default='404') | safe }}
                             <i class="less-relaxed dropdown icon"></i>
                             <div class="menu">
                                 {% if current_user.is_developer %}
@@ -334,7 +334,7 @@
                                 <div class="divider"></div>
                                 {% endif %}
                                 <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
-                                <a class="item loading-trigger" href="{{ url_for('main.profile', id=current_user.id) }}"><i class="archive icon"></i>研修档案</a>
+                                <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card outline icon"></i>研修档案</a>
                                 {% if current_user.can('预约') and current_user.can('管理') %}
                                 <div class="divider"></div>
                                 <div class="header">课程预约</div>

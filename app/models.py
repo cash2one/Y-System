@@ -1459,10 +1459,13 @@ class User(UserMixin, db.Model):
         }
         avatar_url = '%s?%s' % (base_url, '&'.join(['%s=%s' % (key, payload[key]) for key in payload]))
         if default in [404, '404']:
-            r = requests.get(base_url, params=payload)
-            if r.status_code == 200:
-                return '<img class="ui small-avatar image" src="%s">' % avatar_url
-            else:
+            try:
+                r = requests.get(base_url, params=payload)
+                if r.status_code == 200:
+                    return '<img class="ui small-avatar image" src="%s">' % avatar_url
+                else:
+                    return '<i class="fa fa-user-circle-o"></i>'
+            except Exception as e:
                 return '<i class="fa fa-user-circle-o"></i>'
         return avatar_url
 
