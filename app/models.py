@@ -5,6 +5,7 @@ import requests
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
+from base64 import b64encode
 from hashlib import sha512, md5
 from json import loads, dumps
 from bs4 import BeautifulSoup
@@ -1462,7 +1463,7 @@ class User(UserMixin, db.Model):
             try:
                 r = requests.get(base_url, params=payload)
                 if r.status_code == 200:
-                    return '<img class="ui small-avatar image" src="%s">' % avatar_url
+                    return '<img class="ui small-avatar image" src="data:%s;base64,%s">' % (r.headers['Content-Type'], b64encode(r.content))
                 else:
                     return '<i class="fa fa-user-circle-o"></i>'
             except Exception as e:
