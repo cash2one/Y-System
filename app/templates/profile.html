@@ -33,7 +33,7 @@
             <div class="four wide column">
                 <div class="ui basic vertical segment">
                     <a id="avatar" href="//cn.gravatar.com/emails/" target="_blank" data-position="top center" data-variation="inverted" data-content="通过Gravatar设置头像">
-                        <img class="ui centered small rounded image" src="{{ user.avatar(300) }}" onerror="noAvatar(this)">
+                        <img class="ui centered medium rounded image" src="{{ user.avatar(300) }}" onerror="noAvatar(this)">
                     </a>
                 </div>
                 <div class="ui vertical segment">
@@ -224,7 +224,7 @@ $('.message .close')
 
 $('#avatar').popup();
 
-$('#avatar img').transition('jiggle');
+$('#avatar img').transition('pulse');
 
 function noAvatar(avatarImage) {
     $(avatarImage).attr('src', "{{ url_for('static', filename='images/wireframes/square-image.png') }}");
