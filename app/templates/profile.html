@@ -31,8 +31,12 @@
     <div class="ui internally celled stackable grid container">
         <div class="row">
             <div class="four wide column">
+                <div class="ui basic vertical segment">
+                    <a id="avatar" href="//cn.gravatar.com/emails/" target="_blank" data-position="top center" data-variation="inverted" data-content="通过Gravatar设置头像">
+                        <img class="ui centered medium rounded image" src="{{ user.avatar(300) }}" onerror="noAvatar(this)">
+                    </a>
+                </div>
                 <div class="ui vertical segment">
-                    <img class="ui medium image" src="{{ user.avatar(size=300) }}">
                     <h3 class="ui header">
                         <div class="content">
                             {{ macros.user_gender(user) }}
@@ -217,6 +221,14 @@ $('.message .close')
         ;
     })
 ;
+
+$('#avatar').popup();
+
+$('#avatar img').transition('pulse');
+
+function noAvatar(avatarImage) {
+    $(avatarImage).attr('src', "{{ url_for('static', filename='images/wireframes/square-image.png') }}");
+};
 
 var progressDataUrl = "{{ url_for('main.profile_progress_data', id=user.id) }}";
 $.getJSON(progressDataUrl, function(data) {

@@ -228,27 +228,27 @@ def summary_statistics():
 @login_required
 @permission_required(u'管理课程预约')
 def booking():
-    show_today_booking = True
-    show_future_booking = False
-    show_history_booking = False
+    show_today_bookings = True
+    show_future_bookings = False
+    show_history_bookings = False
     if current_user.is_authenticated:
-        show_today_booking = bool(request.cookies.get('show_today_booking', '1'))
-        show_future_booking = bool(request.cookies.get('show_future_booking', ''))
-        show_history_booking = bool(request.cookies.get('show_history_booking', ''))
-    if show_today_booking:
+        show_today_bookings = bool(request.cookies.get('show_today_bookings', '1'))
+        show_future_bookings = bool(request.cookies.get('show_future_bookings', ''))
+        show_history_bookings = bool(request.cookies.get('show_history_bookings', ''))
+    if show_today_bookings:
         query = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.date == date.today())\
             .order_by(Schedule.period_id.asc())\
             .order_by(Booking.timestamp.desc())
-    if show_history_booking:
+    if show_history_bookings:
         query = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.date < date.today())\
             .order_by(Schedule.date.desc())\
             .order_by(Schedule.period_id.asc())\
             .order_by(Booking.timestamp.desc())
-    if show_future_booking:
+    if show_future_bookings:
         query = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Schedule.date > date.today())\
@@ -260,9 +260,9 @@ def booking():
     bookings = pagination.items
     return render_template('manage/booking.html',
         bookings=bookings,
-        show_today_booking=show_today_booking,
-        show_future_booking=show_future_booking,
-        show_history_booking=show_history_booking,
+        show_today_bookings=show_today_bookings,
+        show_future_bookings=show_future_bookings,
+        show_history_bookings=show_history_bookings,
         pagination=pagination
     )
 
@@ -270,33 +270,33 @@ def booking():
 @manage.route('/booking/today')
 @login_required
 @permission_required(u'管理课程预约')
-def today_booking():
+def today_bookings():
     resp = make_response(redirect(url_for('manage.booking')))
-    resp.set_cookie('show_today_booking', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_future_booking', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history_booking', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_bookings', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_future_bookings', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_bookings', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/booking/future')
 @login_required
 @permission_required(u'管理课程预约')
-def future_booking():
+def future_bookings():
     resp = make_response(redirect(url_for('manage.booking')))
-    resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future_booking', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_history_booking', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_bookings', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_bookings', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_history_bookings', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/booking/history')
 @login_required
 @permission_required(u'管理课程预约')
-def history_booking():
+def history_bookings():
     resp = make_response(redirect(url_for('manage.booking')))
-    resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future_booking', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history_booking', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_bookings', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_bookings', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_bookings', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -459,21 +459,21 @@ def set_booking_state_missed_all():
 @login_required
 @permission_required(u'管理iPad借阅')
 def rental():
-    show_today_rental = True
-    show_today_rental_1103 = False
-    show_today_rental_1707 = False
-    show_history_rental = False
+    show_today_rentals = True
+    show_today_rentals_1103 = False
+    show_today_rentals_1707 = False
+    show_history_rentals = False
     if current_user.is_authenticated:
-        show_today_rental = bool(request.cookies.get('show_today_rental', '1'))
-        show_today_rental_1103 = bool(request.cookies.get('show_today_rental_1103', ''))
-        show_today_rental_1707 = bool(request.cookies.get('show_today_rental_1707', ''))
-        show_history_rental = bool(request.cookies.get('show_history_rental', ''))
-    if show_today_rental:
+        show_today_rentals = bool(request.cookies.get('show_today_rentals', '1'))
+        show_today_rentals_1103 = bool(request.cookies.get('show_today_rentals_1103', ''))
+        show_today_rentals_1707 = bool(request.cookies.get('show_today_rentals_1707', ''))
+        show_history_rentals = bool(request.cookies.get('show_history_rentals', ''))
+    if show_today_rentals:
         query = Rental.query\
             .join(Schedule, Schedule.id == Rental.schedule_id)\
             .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
-    if show_today_rental_1103:
+    if show_today_rentals_1103:
         query = Rental.query\
             .join(Schedule, Schedule.id == Rental.schedule_id)\
             .join(iPad, iPad.id == Rental.ipad_id)\
@@ -481,7 +481,7 @@ def rental():
             .filter(Room.name == u'1103')\
             .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
-    if show_today_rental_1707:
+    if show_today_rentals_1707:
         query = Rental.query\
             .join(Schedule, Schedule.id == Rental.schedule_id)\
             .join(iPad, iPad.id == Rental.ipad_id)\
@@ -489,7 +489,7 @@ def rental():
             .filter(Room.name == u'1707')\
             .filter(Schedule.date >= date.today())\
             .order_by(Rental.rent_time.desc())
-    if show_history_rental:
+    if show_history_rentals:
         query = Rental.query\
             .join(Schedule, Schedule.id == Rental.schedule_id)\
             .filter(Schedule.date < date.today())\
@@ -500,10 +500,10 @@ def rental():
     rentals = pagination.items
     return render_template('manage/rental.html',
         rentals=rentals,
-        show_today_rental=show_today_rental,
-        show_today_rental_1103=show_today_rental_1103,
-        show_today_rental_1707=show_today_rental_1707,
-        show_history_rental=show_history_rental,
+        show_today_rentals=show_today_rentals,
+        show_today_rentals_1103=show_today_rentals_1103,
+        show_today_rentals_1707=show_today_rentals_1707,
+        show_history_rentals=show_history_rentals,
         pagination=pagination
     )
 
@@ -511,48 +511,48 @@ def rental():
 @manage.route('/rental/today')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_today():
+def today_rentals():
     resp = make_response(redirect(url_for('manage.rental')))
-    resp.set_cookie('show_today_rental', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history_rental', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rentals', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/rental/today/1103')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_today_1103():
+def today_rentals_1103():
     resp = make_response(redirect(url_for('manage.rental')))
-    resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1103', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history_rental', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1103', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rentals', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/rental/today/1707')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_today_1707():
+def today_rentals_1707():
     resp = make_response(redirect(url_for('manage.rental')))
-    resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1707', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_history_rental', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1707', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rentals', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/rental/history')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_history():
+def history_rentals():
     resp = make_response(redirect(url_for('manage.rental')))
-    resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
-    resp.set_cookie('show_today_rental_1707', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history_rental', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1103', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_rentals_1707', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_rentals', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -832,7 +832,7 @@ def rental_return_step_1():
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % iPad.alias, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
                 manager=current_user
@@ -942,7 +942,7 @@ def rental_exchange_step_1(rental_id):
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
                 manager=current_user
@@ -1185,11 +1185,51 @@ def period():
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
         return redirect(url_for('manage.period', page=request.args.get('page', 1, type=int)))
-    query = Period.query.filter_by(deleted=False)
+    show_vb_periods = True
+    show_y_gre_periods = False
+    if current_user.is_authenticated:
+        show_vb_periods = bool(request.cookies.get('show_vb_periods', '1'))
+        show_y_gre_periods = bool(request.cookies.get('show_y_gre_periods', ''))
+    if show_vb_periods:
+        query = Period.query\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .filter(Period.deleted == False)
+    if show_y_gre_periods:
+        query = Period.query\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(Period.deleted == False)
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     periods = pagination.items
-    return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
+    return render_template('manage/period.html',
+        form=form,
+        show_vb_periods=show_vb_periods,
+        show_y_gre_periods=show_y_gre_periods,
+        periods=periods,
+        pagination=pagination
+    )
+
+
+@manage.route('/period/vb')
+@login_required
+@permission_required(u'管理预约时段')
+def vb_periods():
+    resp = make_response(redirect(url_for('manage.period')))
+    resp.set_cookie('show_vb_periods', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_periods', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/period/y-gre')
+@login_required
+@permission_required(u'管理预约时段')
+def y_gre_periods():
+    resp = make_response(redirect(url_for('manage.period')))
+    resp.set_cookie('show_vb_periods', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_periods', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/period/toggle-show/<int:id>')
@@ -1274,23 +1314,23 @@ def schedule():
                     db.session.commit()
                     flash(u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category='success')
         return redirect(url_for('manage.schedule', page=request.args.get('page', 1, type=int)))
-    show_today_schedule = True
-    show_future_schedule = False
-    show_history_schedule = False
+    show_today_schedules = True
+    show_future_schedules = False
+    show_history_schedules = False
     if current_user.is_authenticated:
-        show_today_schedule = bool(request.cookies.get('show_today_schedule', '1'))
-        show_future_schedule = bool(request.cookies.get('show_future_schedule', ''))
-        show_history_schedule = bool(request.cookies.get('show_history_schedule', ''))
-    if show_today_schedule:
+        show_today_schedules = bool(request.cookies.get('show_today_schedules', '1'))
+        show_future_schedules = bool(request.cookies.get('show_future_schedules', ''))
+        show_history_schedules = bool(request.cookies.get('show_history_schedules', ''))
+    if show_today_schedules:
         query = Schedule.query\
             .filter(Schedule.date == date.today())\
             .order_by(Schedule.period_id.asc())
-    if show_future_schedule:
+    if show_future_schedules:
         query = Schedule.query\
             .filter(Schedule.date > date.today())\
             .order_by(Schedule.date.asc())\
             .order_by(Schedule.period_id.asc())
-    if show_history_schedule:
+    if show_history_schedules:
         query = Schedule.query\
             .filter(Schedule.date < date.today())\
             .order_by(Schedule.date.desc())\
@@ -1301,9 +1341,9 @@ def schedule():
     return render_template('manage/schedule.html',
         form=form,
         schedules=schedules,
-        show_today_schedule=show_today_schedule,
-        show_future_schedule=show_future_schedule,
-        show_history_schedule=show_history_schedule,
+        show_today_schedules=show_today_schedules,
+        show_future_schedules=show_future_schedules,
+        show_history_schedules=show_history_schedules,
         pagination=pagination
     )
 
@@ -1311,33 +1351,33 @@ def schedule():
 @manage.route('/schedule/today')
 @login_required
 @permission_required(u'管理预约时段')
-def today_schedule():
+def today_schedules():
     resp = make_response(redirect(url_for('manage.schedule')))
-    resp.set_cookie('show_today_schedule', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_future_schedule', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history_schedule', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_schedules', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_future_schedules', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_schedules', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/schedule/future')
 @login_required
 @permission_required(u'管理预约时段')
-def future_schedule():
+def future_schedules():
     resp = make_response(redirect(url_for('manage.schedule')))
-    resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future_schedule', '1', max_age=30*24*60*60)
-    resp.set_cookie('show_history_schedule', '', max_age=30*24*60*60)
+    resp.set_cookie('show_today_schedules', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_schedules', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_history_schedules', '', max_age=30*24*60*60)
     return resp
 
 
 @manage.route('/schedule/history')
 @login_required
 @permission_required(u'管理预约时段')
-def history_schedule():
+def history_schedules():
     resp = make_response(redirect(url_for('manage.schedule')))
-    resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
-    resp.set_cookie('show_future_schedule', '', max_age=30*24*60*60)
-    resp.set_cookie('show_history_schedule', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_today_schedules', '', max_age=30*24*60*60)
+    resp.set_cookie('show_future_schedules', '', max_age=30*24*60*60)
+    resp.set_cookie('show_history_schedules', '1', max_age=30*24*60*60)
     return resp
 
 
@@ -3919,7 +3959,7 @@ def set_ipad_state_maintain(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
-    send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为“%s”的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
+    send_emails(User.users_can(u'管理iPad设备').all(), u'编号为“%s”的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
         ipad=ipad,
         time=datetime.utcnow(),
         manager=current_user
@@ -4362,7 +4402,7 @@ def permission():
 @manage.route('/permission/book')
 @login_required
 @developer_required
-def permission_book():
+def booking_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '1', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
@@ -4374,7 +4414,7 @@ def permission_book():
 @manage.route('/permission/manage')
 @login_required
 @developer_required
-def permission_manage():
+def manage_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '1', max_age=30*24*60*60)
@@ -4386,7 +4426,7 @@ def permission_manage():
 @manage.route('/permission/develop')
 @login_required
 @developer_required
-def permission_develop():
+def develop_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
@@ -4398,7 +4438,7 @@ def permission_develop():
 @manage.route('/permission/other')
 @login_required
 @developer_required
-def permission_other():
+def other_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
