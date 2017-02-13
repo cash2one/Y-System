@@ -58,9 +58,9 @@
                     </div>
                 </div>
                 <div class="ui secondary stackable menu">
-                    <a class="item {% if show_today_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_schedule') }}">当日时段</a>
-                    <a class="item {% if show_future_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.future_schedule') }}">未来时段</a>
-                    <a class="item {% if show_history_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.history_schedule') }}">历史时段</a>
+                    <a class="item {% if show_today_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_schedules') }}">当日时段</a>
+                    <a class="item {% if show_future_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.future_schedules') }}">未来时段</a>
+                    <a class="item {% if show_history_schedule %}active {% endif %}loading-trigger" href="{{ url_for('manage.history_schedules') }}">历史时段</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.period') }}">管理时段模板</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">

@@ -37,10 +37,10 @@
                     </div>
                 </div>
                 <div class="ui secondary stackable menu">
-                    <a class="item {% if show_booking_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_book') }}">预约权限</a>
-                    <a class="item {% if show_manage_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_manage') }}">管理权限</a>
-                    <a class="item {% if show_develop_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_develop') }}">开发权限</a>
-                    <a class="item {% if show_other_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.permission_other') }}">其它权限</a>
+                    <a class="item {% if show_booking_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.booking_permissions') }}">预约权限</a>
+                    <a class="item {% if show_manage_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.manage_permissions') }}">管理权限</a>
+                    <a class="item {% if show_develop_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.develop_permissions') }}">开发权限</a>
+                    <a class="item {% if show_other_permissions %}active {% endif %}loading-trigger" href="{{ url_for('manage.other_permissions') }}">其它权限</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>

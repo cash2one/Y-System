@@ -23,10 +23,10 @@
                 <h3 class="ui header"><i class="retweet icon"></i>iPad借阅记录</h3>
                 <a id="rental-rent-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.rental', page=pagination.page)) }}" data-content="借出iPad" data-position="top center" data-variation="inverted"><i class="upload icon"></i></a>
                 <div class="ui secondary stackable menu">
-                    <a class="item {% if show_today_rental %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today') }}">当日记录</a>
-                    <a class="item {% if show_today_rental_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today_1103') }}">当日记录 [1103]</a>
-                    <a class="item {% if show_today_rental_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_today_1707') }}">当日记录 [1707]</a>
-                    <a class="item {% if show_history_rental %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_history') }}">历史记录</a>
+                    <a class="item {% if show_today_rental %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_rentals') }}">当日记录</a>
+                    <a class="item {% if show_today_rental_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_rentals_1103') }}">当日记录 [1103]</a>
+                    <a class="item {% if show_today_rental_1707 %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_rentals_1707') }}">当日记录 [1707]</a>
+                    <a class="item {% if show_history_rental %}active {% endif %}loading-trigger" href="{{ url_for('manage.history_rentals') }}">历史记录</a>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>

@@ -270,7 +270,7 @@ def booking():
 @manage.route('/booking/today')
 @login_required
 @permission_required(u'管理课程预约')
-def today_booking():
+def today_bookings():
     resp = make_response(redirect(url_for('manage.booking')))
     resp.set_cookie('show_today_booking', '1', max_age=30*24*60*60)
     resp.set_cookie('show_future_booking', '', max_age=30*24*60*60)
@@ -281,7 +281,7 @@ def today_booking():
 @manage.route('/booking/future')
 @login_required
 @permission_required(u'管理课程预约')
-def future_booking():
+def future_bookings():
     resp = make_response(redirect(url_for('manage.booking')))
     resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
     resp.set_cookie('show_future_booking', '1', max_age=30*24*60*60)
@@ -292,7 +292,7 @@ def future_booking():
 @manage.route('/booking/history')
 @login_required
 @permission_required(u'管理课程预约')
-def history_booking():
+def history_bookings():
     resp = make_response(redirect(url_for('manage.booking')))
     resp.set_cookie('show_today_booking', '', max_age=30*24*60*60)
     resp.set_cookie('show_future_booking', '', max_age=30*24*60*60)
@@ -511,7 +511,7 @@ def rental():
 @manage.route('/rental/today')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_today():
+def today_rentals():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '1', max_age=30*24*60*60)
     resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
@@ -523,7 +523,7 @@ def rental_today():
 @manage.route('/rental/today/1103')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_today_1103():
+def today_rentals_1103():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
     resp.set_cookie('show_today_rental_1103', '1', max_age=30*24*60*60)
@@ -535,7 +535,7 @@ def rental_today_1103():
 @manage.route('/rental/today/1707')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_today_1707():
+def today_rentals_1707():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
     resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
@@ -547,7 +547,7 @@ def rental_today_1707():
 @manage.route('/rental/history')
 @login_required
 @permission_required(u'管理iPad借阅')
-def rental_history():
+def history_rentals():
     resp = make_response(redirect(url_for('manage.rental')))
     resp.set_cookie('show_today_rental', '', max_age=30*24*60*60)
     resp.set_cookie('show_today_rental_1103', '', max_age=30*24*60*60)
@@ -1311,7 +1311,7 @@ def schedule():
 @manage.route('/schedule/today')
 @login_required
 @permission_required(u'管理预约时段')
-def today_schedule():
+def today_schedules():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '1', max_age=30*24*60*60)
     resp.set_cookie('show_future_schedule', '', max_age=30*24*60*60)
@@ -1322,7 +1322,7 @@ def today_schedule():
 @manage.route('/schedule/future')
 @login_required
 @permission_required(u'管理预约时段')
-def future_schedule():
+def future_schedules():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
     resp.set_cookie('show_future_schedule', '1', max_age=30*24*60*60)
@@ -1333,7 +1333,7 @@ def future_schedule():
 @manage.route('/schedule/history')
 @login_required
 @permission_required(u'管理预约时段')
-def history_schedule():
+def history_schedules():
     resp = make_response(redirect(url_for('manage.schedule')))
     resp.set_cookie('show_today_schedule', '', max_age=30*24*60*60)
     resp.set_cookie('show_future_schedule', '', max_age=30*24*60*60)
@@ -4362,7 +4362,7 @@ def permission():
 @manage.route('/permission/book')
 @login_required
 @developer_required
-def permission_book():
+def booking_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '1', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
@@ -4374,7 +4374,7 @@ def permission_book():
 @manage.route('/permission/manage')
 @login_required
 @developer_required
-def permission_manage():
+def manage_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '1', max_age=30*24*60*60)
@@ -4386,7 +4386,7 @@ def permission_manage():
 @manage.route('/permission/develop')
 @login_required
 @developer_required
-def permission_develop():
+def develop_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
@@ -4398,7 +4398,7 @@ def permission_develop():
 @manage.route('/permission/other')
 @login_required
 @developer_required
-def permission_other():
+def other_permissions():
     resp = make_response(redirect(url_for('manage.permission')))
     resp.set_cookie('show_booking_permissions', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_permissions', '', max_age=30*24*60*60)
