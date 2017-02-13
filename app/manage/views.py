@@ -1185,11 +1185,51 @@ def period():
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
         return redirect(url_for('manage.period', page=request.args.get('page', 1, type=int)))
-    query = Period.query.filter_by(deleted=False)
+    show_vb_periods = True
+    show_y_gre_periods = False
+    if current_user.is_authenticated:
+        show_vb_periods = bool(request.cookies.get('show_vb_periods', '1'))
+        show_y_gre_periods = bool(request.cookies.get('show_y_gre_periods', ''))
+    if show_vb_periods:
+        query = Period.query\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .filter(Period.deleted == False)
+    if show_y_gre_periods:
+        query = Period.query\
+            .join(CourseType, CourseType.id == Period.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(Period.deleted == False)
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     periods = pagination.items
-    return render_template('manage/period.html', form=form, periods=periods, pagination=pagination)
+    return render_template('manage/period.html',
+        form=form,
+        show_vb_periods=show_vb_periods,
+        show_y_gre_periods=show_y_gre_periods,
+        periods=periods,
+        pagination=pagination
+    )
+
+
+@manage.route('/period/vb')
+@login_required
+@permission_required(u'管理预约时段')
+def vb_periods():
+    resp = make_response(redirect(url_for('manage.period')))
+    resp.set_cookie('show_vb_periods', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_periods', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/period/y-gre')
+@login_required
+@permission_required(u'管理预约时段')
+def y_gre_periods():
+    resp = make_response(redirect(url_for('manage.period')))
+    resp.set_cookie('show_vb_periods', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_periods', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/period/toggle-show/<int:id>')
