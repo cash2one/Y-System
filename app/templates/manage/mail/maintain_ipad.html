@@ -1,4 +1,5 @@
 <p>iPad编号：{{ ipad.alias }}</p>
 <p>iPad序列号：{{ ipad.serial }}</p>
+<p>房间：{% if ipad.room %}{{ ipad.room.name }}{% else %}N/A{% endif %}</p>
 <p>目前状态：{{ ipad.state.name }}</p>
 <p>标记人：{{ manager.name_alias }}</p>

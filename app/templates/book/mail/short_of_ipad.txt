@@ -2,7 +2,7 @@
 
 预约时段：{{ schedule.period.alias2 }}
 
-课程：{{ lesson.type.name }} - {{ lesson.name }}
+课程：{{ lesson.alias }}
 
 预约数量：{{ booked_ipads_quantity }}
 

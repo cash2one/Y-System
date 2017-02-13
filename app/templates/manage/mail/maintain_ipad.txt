@@ -2,6 +2,8 @@ iPad编号：{{ ipad.alias }}
 
 iPad序列号：{{ ipad.serial }}
 
+房间：{% if ipad.room %}{{ ipad.room.name }}{% else %}N/A{% endif %}
+
 目前状态：{{ ipad.state.name }}
 
 标记人：{{ manager.name_alias }}

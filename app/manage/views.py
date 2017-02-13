@@ -832,7 +832,7 @@ def rental_return_step_1():
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % iPad.alias, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
                 manager=current_user
@@ -942,7 +942,7 @@ def rental_exchange_step_1(rental_id):
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为%s的iPad处于维护状态' % serial, 'manage/mail/maintain_ipad',
+            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
                 manager=current_user
@@ -3919,7 +3919,7 @@ def set_ipad_state_maintain(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
-    send_emails(User.users_can(u'管理iPad设备').all(), u'序列号为“%s”的iPad处于维护状态' % ipad.serial, 'manage/mail/maintain_ipad',
+    send_emails(User.users_can(u'管理iPad设备').all(), u'编号为“%s”的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
         ipad=ipad,
         time=datetime.utcnow(),
         manager=current_user
