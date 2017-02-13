@@ -1443,23 +1443,25 @@ class User(UserMixin, db.Model):
             return u'%s年%s月%s日' % (self.birthdate.year, self.birthdate.month, self.birthdate.day)
         return u'无'
 
-    def avatar(self, ext='', size=512, default='identicon', rating='g'):
+    @property
+    def email_hash(self):
+        return md5(self.email.encode('utf-8')).hexdigest()
+
+    def avatar(self, size=512, default='identicon', rating='g', wrap=False):
         if request.is_secure:
             url = 'https://secure.gravatar.com/avatar'
         else:
             url = 'http://www.gravatar.com/avatar'
         email_hash = md5(self.email.encode('utf-8')).hexdigest()
-        if ext != '':
-            base_url = '%s/%s.%s' % (url, email_hash, ext)
-        else:
-            base_url = '%s/%s' % (url, email_hash)
+        base_url = '%s/%s' % (url, email_hash)
         payload = {
             's': size,
             'd': default,
             'r': rating,
         }
         avatar_url = '%s?%s' % (base_url, '&'.join(['%s=%s' % (key, payload[key]) for key in payload]))
-        if default in [404, '404']:
+        if wrap:
+            payload['d'] = 404
             try:
                 r = requests.get(base_url, params=payload)
                 if r.status_code == 200:
