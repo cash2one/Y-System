@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 811f0369b0cb
+Revision ID: 8fce1a72734c
 Revises: 
-Create Date: 2017-02-10 06:13:11.420984
+Create Date: 2017-02-14 19:50:24.411403
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '811f0369b0cb'
+revision = '8fce1a72734c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -146,7 +146,7 @@ def upgrade():
     sa.Column('hour', sa.Interval(), nullable=True),
     sa.Column('priority', sa.Integer(), nullable=True),
     sa.Column('order', sa.Integer(), nullable=True),
-    sa.Column('include_video', sa.Integer(), nullable=True),
+    sa.Column('include_video', sa.Boolean(), nullable=True),
     sa.Column('advanced', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
     sa.PrimaryKeyConstraint('id')

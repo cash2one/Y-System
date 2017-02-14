@@ -3281,7 +3281,7 @@ class Lesson(db.Model):
     hour = db.Column(db.Interval, default=timedelta(hours=0))
     priority = db.Column(db.Integer, default=0)
     order = db.Column(db.Integer, default=0)
-    include_video = db.Column(db.Integer, default=False)
+    include_video = db.Column(db.Boolean, default=False)
     advanced = db.Column(db.Boolean, default=False)
     sections = db.relationship('Section', backref='lesson', lazy='dynamic')
     assignments = db.relationship('Assignment', backref='lesson', lazy='dynamic')
