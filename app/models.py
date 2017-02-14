@@ -1986,7 +1986,9 @@ class User(UserMixin, db.Model):
         db.session.add(punch)
 
     def unpunch(self, section):
-        self.__unpunch(section)
+        if section.name in [u'词典使用']:
+            self.__unpunch(section)
+            return
 
     def __unpunch(self, section):
         punch = self.punches.filter_by(section_id=section.id).first()
