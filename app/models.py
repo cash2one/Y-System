@@ -1924,7 +1924,7 @@ class User(UserMixin, db.Model):
                     ))\
                     .all()
                 for uncovered_section in uncovered_sections:
-                    self.unpunch(section=uncovered_section)
+                    self.__unpunch(section=uncovered_section)
             self.__punch(section=section, milestone=True, timestamp=timestamp)
             return
         if self.last_punch.section.lesson.type.name == u'VB' and section.lesson.type.name == u'Y-GRE':
@@ -1958,7 +1958,7 @@ class User(UserMixin, db.Model):
                 .filter(Section.order > section.order)\
                 .all()
             for uncovered_section in uncovered_sections:
-                self.unpunch(section=uncovered_section)
+                self.__unpunch(section=uncovered_section)
             covered_sections = Section.query\
                 .join(Lesson, Lesson.id == Section.lesson_id)\
                 .filter(Lesson.type_id == section.lesson.type_id)\
@@ -1986,6 +1986,9 @@ class User(UserMixin, db.Model):
         db.session.add(punch)
 
     def unpunch(self, section):
+        self.__unpunch(section)
+
+    def __unpunch(self, section):
         punch = self.punches.filter_by(section_id=section.id).first()
         if punch:
             db.session.delete(punch)
