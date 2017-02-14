@@ -322,6 +322,20 @@ $.getJSON(VBProgressUrl, function(data) {
                         .addClass('ui label')
                         .text(data.lessons[lesson_idx].sections[section_idx].name)
                 );
+                {% if current_user.can('管理学习进度') %}
+                if (data.lessons[lesson_idx].sections[section_idx].order === 0) {
+                    $('#' + data.lessons[lesson_idx].element_id + '-sections .ui.labels').append(
+                        $('<a>')
+                            .attr('id', data.lessons[lesson_idx].sections[section_idx].element_id + '-action')
+                            .attr('href', '/manage/punch/{{ user.id }}/' + data.lessons[lesson_idx].sections[section_idx].element_id.split('-').pop() + "?next={{ url_for('main.profile', id=user.id) }}")
+                            .attr('data-content','标记为已完成')
+                            .attr('data-position', 'top center')
+                            .attr('data-variation', 'inverted')
+                            .html('<i class="green add icon"></i>')
+                            .popup()
+                    );
+                };
+                {% endif %}
             };
         } else {
             $('#' + data.lessons[lesson_idx].element_id + '-sections').text('无');
@@ -378,6 +392,18 @@ $.getJSON(VBProgressUrl, function(data) {
             .attr('data-position', 'top left')
             .attr('data-variation', 'inverted')
             .popup();
+        {% if current_user.can('管理学习进度') %}
+        if (data.punches[punch_idx].section.order === 0) {
+            $('#' + data.punches[punch_idx].section.element_id + '-action')
+                .attr('href', '/manage/unpunch/{{ user.id }}/' + data.punches[punch_idx].section.element_id.split('-').pop() + "?next={{ url_for('main.profile', id=user.id) }}")
+                .attr('data-content','标记为未完成')
+                .attr('data-position', 'top center')
+                .attr('data-variation', 'inverted')
+                .html('<i class="red remove icon"></i>')
+                .popup('destroy')
+                .popup();
+        };
+        {% endif %}
         $('#vb-progress-bar').progress('increment');
     };
     for (var assignment_score_idx in data.assignment_scores) {
