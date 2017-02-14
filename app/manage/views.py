@@ -1158,9 +1158,35 @@ def edit_punch_step_3(user_id, section_id):
     form = ConfirmPunchForm()
     if form.validate_on_submit():
         user.punch(section=section)
-        flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
+        flash(u'已保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
+
+
+@manage.route('/punch/<int:user_id>/<int:section_id>')
+@login_required
+@permission_required(u'管理学习进度')
+def punch(user_id, section_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
+    section = Section.query.get_or_404(section_id)
+    user.punch(section=section)
+    flash(u'已为%s标记进度：%s' % (user.name_alias, section.alias2), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
+@manage.route('/unpunch/<int:user_id>/<int:section_id>')
+@login_required
+@permission_required(u'管理学习进度')
+def unpunch(user_id, section_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
+    section = Section.query.get_or_404(section_id)
+    user.unpunch(section=section)
+    flash(u'已取消标记%s的进度：%s' % (user.name_alias, section.alias2), category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
 
 
 @manage.route('/period', methods=['GET', 'POST'])
@@ -3912,7 +3938,7 @@ def other_ipads():
 @login_required
 @permission_required(u'管理')
 def filter_ipad_results():
-    resp = make_response(redirect(url_for('manage.ipad', keyword=request.args.get('keyword'))))
+    resp = make_response(redirect(url_for('manage.ipad', keyword=request.args.get('keyword'), next=request.args.get('next'))))
     resp.set_cookie('show_ipad_all', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_maintain', '', max_age=30*24*60*60)
     resp.set_cookie('show_ipad_charge', '', max_age=30*24*60*60)
