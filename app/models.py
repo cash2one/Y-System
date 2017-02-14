@@ -1898,7 +1898,7 @@ class User(UserMixin, db.Model):
 
     def punch(self, section):
         timestamp = datetime.utcnow()
-        if self.last_punch is None or section.name in [u'词典使用']:
+        if self.last_punch is None or section.order == 0:
             self.__punch(section=section, milestone=True)
             return
         if section.lesson.type_id == self.last_punch.section.lesson.type_id:
@@ -1986,9 +1986,8 @@ class User(UserMixin, db.Model):
         db.session.add(punch)
 
     def unpunch(self, section):
-        if section.name in [u'词典使用']:
+        if section.order == 0:
             self.__unpunch(section)
-            return
 
     def __unpunch(self, section):
         punch = self.punches.filter_by(section_id=section.id).first()
