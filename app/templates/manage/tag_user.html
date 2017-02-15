@@ -46,8 +46,8 @@
                             <td class="single line">{{ macros.user_url_gender(user, user.id == current_user.id) }}</td>
                             <td>{{ macros.user_email(user) }}</td>
                             <td>{{ user.role.name }}</td>
-                            <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.tag_user', id=user.vb_course.id) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
-                            <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.tag_user', id=user.y_gre_course.id) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.vb_course.id) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.course_user', id=user.y_gre_course.id) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
                             <td>
                                 {% if user.activated %}
                                 {{ user.last_punch.section.alias2 }}
