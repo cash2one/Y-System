@@ -2308,6 +2308,7 @@ class User(UserMixin, db.Model):
             'name': self.name,
             'email': self.email,
             'name_alias': self.name_alias,
+            'avatar': self.avatar(),
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -2316,18 +2317,17 @@ class User(UserMixin, db.Model):
         return user_json
 
     def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False):
+        user_json_suggestion = {
+            'image': self.avatar(size=80),
+        }
         if suggest_email:
-            user_json_suggestion = {
-                'title': self.email,
-            }
+            user_json_suggestion['title'] = self.email
             if include_role:
                 user_json_suggestion['description'] = u'%s [%s]' % (self.name, self.role.name)
             else:
                 user_json_suggestion['description'] = self.name
         else:
-            user_json_suggestion = {
-                'title': self.name,
-            }
+            user_json_suggestion['title'] = self.name
             if include_role:
                 user_json_suggestion['description'] = u'%s [%s]' % (self.email, self.role.name)
             else:

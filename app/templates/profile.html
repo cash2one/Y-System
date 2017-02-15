@@ -132,6 +132,19 @@
                 {% endif %}{% endwith %}
                 {% with records = user.employment_records %}{% if records.count() %}
                 <div class="ui blue dividing header">工作经历</div>
+                <div class="ui relaxed divided list">
+                    {% for record in records %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ record.year }}年</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ record.employer }}</div>
+                            <div class="description">{{ record.position }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
                         <tr>
