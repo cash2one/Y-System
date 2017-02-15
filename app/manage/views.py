@@ -18,7 +18,7 @@ from .forms import NewGRETestScoreForm, EditGRETestScoreForm
 from .forms import NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
-from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUserRoleForm
+from .forms import EditNameForm, EditIDNumberForm, EditUserTagForm, EditStudentRoleForm, EditUserRoleForm
 from .forms import EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditReferrerForm
@@ -2629,6 +2629,12 @@ def create_user():
                 full_gpa=form.bachelor_full_gpa.data,
                 year=form.bachelor_year.data
             )
+            if u'北京大学' in form.bachelor_school.data:
+                user.add_tag(tag=Tag.query.filter_by(name=u'北大').first())
+            if u'清华' in form.bachelor_school.data:
+                user.add_tag(tag=Tag.query.filter_by(name=u'清华').first())
+            if int(form.bachelor_full_gpa.data) == 100 and int(form.bachelor_gpa.data) >= 90:
+                user.add_tag(tag=Tag.query.filter_by(name=u'GPA90+').first())
         if form.master_school.data:
             user.add_education_record(
                 education_type=EducationType.query.filter_by(name=u'硕士').first(),
@@ -2638,6 +2644,12 @@ def create_user():
                 full_gpa=form.master_full_gpa.data,
                 year=form.master_year.data
             )
+            if u'北京大学' in form.master_school.data:
+                user.add_tag(tag=Tag.query.filter_by(name=u'北大').first())
+            if u'清华' in form.master_school.data:
+                user.add_tag(tag=Tag.query.filter_by(name=u'清华').first())
+            if int(form.master_full_gpa.data) == 100 and int(form.master_gpa.data) >= 90:
+                user.add_tag(tag=Tag.query.filter_by(name=u'GPA90+').first())
         if form.doctor_school.data:
             user.add_education_record(
                 education_type=EducationType.query.filter_by(name=u'博士').first(),
@@ -2647,6 +2659,12 @@ def create_user():
                 full_gpa=form.doctor_full_gpa.data,
                 year=form.doctor_year.data
             )
+            if u'北京大学' in form.doctor_school.data:
+                user.add_tag(tag=Tag.query.filter_by(name=u'北大').first())
+            if u'清华' in form.doctor_school.data:
+                user.add_tag(tag=Tag.query.filter_by(name=u'清华').first())
+            if int(form.doctor_full_gpa.data) == 100 and int(form.doctor_gpa.data) >= 90:
+                user.add_tag(tag=Tag.query.filter_by(name=u'GPA90+').first())
         # employment
         if form.employer_1.data:
             user.add_employment_record(
@@ -2673,6 +2691,8 @@ def create_user():
                 score=form.cee_math.data,
                 full_score=form.cee_math_full.data
             )
+            if int(form.cee_math_full.data) == 150 and int(form.cee_math.data) >= 135:
+                user.add_tag(tag=Tag.query.filter_by(name=u'高考数学135+').first())
         if form.cee_english.data:
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'高考英语').first(),
@@ -2689,6 +2709,8 @@ def create_user():
                 score_type=ScoreType.query.filter_by(name=u'大学英语六级').first(),
                 score=form.cet_6.data
             )
+            if int(form.cet_6.data) >= 600:
+                user.add_tag(tag=Tag.query.filter_by(name=u'六级600+').first())
         if form.tem_4.data:
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'专业英语四级').first(),
@@ -2714,6 +2736,7 @@ def create_user():
                 score_type=ScoreType.query.filter_by(name=u'竞赛').first(),
                 remark=form.competition.data
             )
+            user.add_tag(tag=Tag.query.filter_by(name=u'竞赛').first())
         if form.other_score.data:
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'其它').first(),
@@ -2778,6 +2801,18 @@ def create_user_confirm(id):
         flash(u'已更新身份证号', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     edit_id_number_form.id_number.data = user.id_number
+    # tag
+    edit_tag_form = EditUserTagForm(prefix='edit_tag')
+    if edit_tag_form.submit.data and edit_tag_form.validate_on_submit():
+        for tag in user.has_tags:
+            user.remove_tag(tag=tag.tag)
+        for tag_id in edit_tag_form.tags.data:
+            user.add_tag(tag=Tag.query.get(int(tag_id)))
+        flash(u'已更新用户标签', category='success')
+        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
+    edit_tag_form.tags.data = []
+    for tag in user.has_tags:
+        edit_tag_form.tags.data.append(unicode(tag.tag_id))
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
     if edit_email_form.submit.data and edit_email_form.validate_on_submit():
@@ -3013,6 +3048,7 @@ def create_user_confirm(id):
     return render_template('manage/create_user_confirm.html',
         edit_name_form=edit_name_form,
         edit_id_number_form=edit_id_number_form,
+        edit_tag_form=edit_tag_form,
         edit_email_form=edit_email_form,
         edit_mobile_form=edit_mobile_form,
         edit_address_form=edit_address_form,
@@ -3033,7 +3069,6 @@ def create_user_confirm(id):
         edit_role_form=edit_role_form,
         edit_vb_course_form=edit_vb_course_form,
         edit_y_gre_course_form=edit_y_gre_course_form,
-        edit_origin_type_form=edit_origin_type_form,
         confirm_user_form=confirm_user_form,
         user=user
     )
@@ -3116,6 +3151,18 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
+    # tag
+    edit_tag_form = EditUserTagForm(prefix='edit_tag')
+    if edit_tag_form.submit.data and edit_tag_form.validate_on_submit():
+        for tag in user.has_tags:
+            user.remove_tag(tag=tag.tag)
+        for tag_id in edit_tag_form.tags.data:
+            user.add_tag(tag=Tag.query.get(int(tag_id)))
+        flash(u'已更新用户标签', category='success')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_tag_form.tags.data = []
+    for tag in user.has_tags:
+        edit_tag_form.tags.data.append(unicode(tag.tag_id))
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
     if edit_email_form.submit.data and edit_email_form.validate_on_submit():
@@ -3334,7 +3381,7 @@ def edit_user(id):
         edit_role_form=edit_role_form,
         edit_vb_course_form=edit_vb_course_form,
         edit_y_gre_course_form=edit_y_gre_course_form,
-        edit_origin_type_form=edit_origin_type_form,
+        edit_tag_form=edit_tag_form,
         edit_email_form=edit_email_form,
         edit_mobile_form=edit_mobile_form,
         edit_address_form=edit_address_form,

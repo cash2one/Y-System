@@ -269,7 +269,7 @@
                     {% if current_user.can('管理') %}
                     <a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}"><i class="dashboard icon"></i>系统实况</a>
                     {% else %}
-                    <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card outline icon"></i>研修档案</a>
+                    <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card icon"></i>研修档案</a>
                     {% endif %}
                     {% else %}
                     <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i>首页</a>

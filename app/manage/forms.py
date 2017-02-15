@@ -463,6 +463,15 @@ class EditIDNumberForm(FlaskForm):
     submit = SubmitField(u'更新')
 
 
+class EditUserTagForm(FlaskForm):
+    tags = SelectMultipleField(u'用户标签', coerce=unicode)
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditUserTagForm, self).__init__(*args, **kwargs)
+        self.tags.choices = [(u'', u'选择用户标签')] + [(unicode(tag.id), tag.name) for tag in Tag.query.order_by(Tag.id.asc()).all()]
+
+
 class EditEmailForm(FlaskForm):
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'更新')

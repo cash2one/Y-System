@@ -1254,6 +1254,8 @@ class User(UserMixin, db.Model):
     )
 
     def delete(self):
+        for tag in self.has_tags:
+            self.remove_tag(tag=tag.tag)
         for purpose in self.purposes:
             self.remove_purpose(purpose_type=purpose.type)
         for referrer in self.referrers:
@@ -1264,6 +1266,8 @@ class User(UserMixin, db.Model):
             db.session.delete(employment_record)
         for score_record in self.score_records:
             db.session.delete(score_record)
+        for gre_test_score in self.gre_test_scores:
+            db.session.delete(gre_test_score)
         for toefl_test_score in self.toefl_test_scores:
             db.session.delete(toefl_test_score)
         for purchase in self.purchases:
@@ -1461,7 +1465,7 @@ class User(UserMixin, db.Model):
                 return '<i class="fa fa-user-circle-o"></i>'
         return avatar_url
 
-    def add_tag(self, tag, remark=None):
+    def add_tag(self, tag):
         if not self.has_tag(tag):
             tag = UserTag(user_id=self.id, tag_id=tag.id)
             db.session.add(tag)
@@ -1473,6 +1477,12 @@ class User(UserMixin, db.Model):
 
     def has_tag(self, tag):
         return self.has_tags.filter_by(tag_id=tag.id).first() is not None
+
+    @property
+    def has_tags_alias(self):
+        if self.has_tags.count() == 0:
+            return u'无'
+        return u' · '.join([tag.tag.name for tag in self.has_tags if tag.tag.name])
 
     def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
         if gpa and (not isinstance(gpa, float)):
@@ -2385,13 +2395,13 @@ class Tag(db.Model):
     @staticmethod
     def insert_tags():
         tags = [
-            (u'清华', ),
             (u'北大', ),
+            (u'清华', ),
             (u'一本', ),
             (u'非一本', ),
+            (u'GPA90+', ),
             (u'竞赛', ),
             (u'六级600+', ),
-            (u'GPA90+', ),
             (u'高考数学135+', ),
         ]
         for entry in tags:
@@ -2446,6 +2456,18 @@ class EducationRecord(db.Model):
     @property
     def alias(self):
         return u'%s %s %s %s' % (self.user.name, self.type.name, self.school, self.year)
+
+    @property
+    def gpa_alias(self):
+        if self.gpa is not None:
+            return u'%g' % self.gpa
+        return u''
+
+    @property
+    def full_gpa_alias(self):
+        if self.full_gpa is not None:
+            return u'%g' % self.full_gpa
+        return u''
 
     @property
     def gpa_percentage(self):

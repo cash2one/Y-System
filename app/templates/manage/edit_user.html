@@ -62,6 +62,15 @@
                             <div class="description">{{ user.role.name }}</div>
                         </div>
                     </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-tag-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">用户标签</div>
+                            <div class="description">{{ user.has_tags_alias }}</div>
+                        </div>
+                    </div>
                 </div>
                 <div id="edit-name-modal" class="ui modal">
                     <i class="close icon"></i>
@@ -102,6 +111,20 @@
                                 {{ edit_role_form.role(class='ui dropdown') }}
                             </div>
                             {{ edit_role_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-tag-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="edit icon"></i>编辑用户标签</div>
+                    <div class="content">
+                        <form id="edit-tag" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui form">
+                            {{ edit_tag_form.hidden_tag() }}
+                            <div class="field">
+                                {{ edit_tag_form.tags.label() }}
+                                {{ edit_tag_form.tags(class='ui dropdown') }}
+                            </div>
+                            {{ edit_tag_form.submit(class='ui primary button') }}
                         </form>
                     </div>
                 </div>
@@ -354,7 +377,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.school }}</div>
-                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA：{{ education_record.gpa }} / {{ education_record.full_gpa }}{% endif %}</div>
+                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA：{{ education_record.gpa_alias }}/{{ education_record.full_gpa_alias }}{% endif %}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -755,6 +778,12 @@ $('#edit-role-trigger')
     })
 ;
 
+$('#edit-tag-trigger')
+    .on('click', function() {
+        $('#edit-tag-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
 $('#edit-vb-course-trigger')
     .on('click', function() {
         $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
@@ -764,6 +793,12 @@ $('#edit-vb-course-trigger')
 $('#edit-y-gre-course-trigger')
     .on('click', function() {
         $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$('#edit-tag-trigger')
+    .on('click', function() {
+        $('#edit-tag-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
