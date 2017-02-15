@@ -35,6 +35,46 @@ class Analytics:
     GATrackID = os.getenv('GA_TRACK_ID')
 
 
+class Color(db.Model):
+    __tablename__ = 'colors'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    css_class = db.Column(db.Unicode(64))
+    tags = db.relationship('Tag', backref='color', lazy='dynamic')
+
+    @staticmethod
+    def insert_colors():
+        colors = [
+            (u'None', u'', ),
+            (u'Red', u'red', ),
+            (u'Orange', u'orange', ),
+            (u'Yellow', u'yellow', ),
+            (u'Olive', u'olive', ),
+            (u'Green', u'green', ),
+            (u'Teal', u'teal', ),
+            (u'Blue', u'blue', ),
+            (u'Violet', u'violet', ),
+            (u'Purple', u'purple', ),
+            (u'Pink', u'pink', ),
+            (u'Brown', u'brown', ),
+            (u'Grey', u'grey', ),
+            (u'Black', u'black', ),
+        ]
+        for entry in colors:
+            color = Color.query.filter_by(name=entry[0]).first()
+            if color is None:
+                color = Color(
+                    name=entry[0],
+                    css_class=entry[1]
+                )
+                db.session.add(color)
+                print u'导入颜色信息', entry[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Color %r>' % self.name
+
+
 class RolePermission(db.Model):
     __tablename__ = 'role_permissions'
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), primary_key=True)
@@ -2376,6 +2416,7 @@ class Tag(db.Model):
     __tablename__ = 'tags'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    color_id = db.Column(db.Integer, db.ForeignKey('colors.id'))
     tagged_users = db.relationship(
         'UserTag',
         foreign_keys=[UserTag.tag_id],
@@ -2395,21 +2436,26 @@ class Tag(db.Model):
     @staticmethod
     def insert_tags():
         tags = [
-            (u'北大', ),
-            (u'清华', ),
-            (u'一本', ),
-            (u'非一本', ),
-            (u'GPA90+', ),
-            (u'竞赛', ),
-            (u'六级600+', ),
-            (u'高考数学135+', ),
+            (u'北大', u'Red', ),
+            (u'清华', u'Purple', ),
+            (u'一本', u'Blue', ),
+            (u'非一本', u'Grey', ),
+            (u'GPA90+', u'Teal', ),
+            (u'竞赛', u'Teal', ),
+            (u'六级600+', u'Teal', ),
+            (u'高考数学135+', u'Teal', ),
+            (u'3rd', u'Green', ),
+            (u'6th', u'Green', ),
         ]
         for entry in tags:
             tag = Tag.query.filter_by(name=entry[0]).first()
             if tag is None:
-                tag = Tag(name=entry[0])
+                tag = Tag(
+                    name=entry[0],
+                    color_id=Color.query.filter_by(name=entry[1]).first().id
+                )
                 db.session.add(tag)
-                print u'导入用户标签信息', entry[0]
+                print u'导入用户标签信息', entry[0], entry[1]
         db.session.commit()
 
     def __repr__(self):

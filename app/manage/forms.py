@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, DateField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email, Optional
 from wtforms import ValidationError
+from ..models import Color
 from ..models import Permission, Role, User, Tag
 from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
 from ..models import Period
@@ -683,15 +684,22 @@ class NewGroupMemberForm(FlaskForm):
 
 class NewTagForm(FlaskForm):
     name = StringField(u'用户标签名称', validators=[Required(), Length(1, 64)])
+    color = SelectField('标签颜色', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewTagForm, self).__init__(*args, **kwargs)
+        self.color.choices = [(u'', u'选择标签颜色')] + [(unicode(color.id), color.name) for color in Color.query.order_by(Color.id.asc()).all()]
 
 
 class EditTagForm(FlaskForm):
     name = StringField(u'用户标签名称', validators=[Required(), Length(1, 64)])
+    color = SelectField('标签颜色', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'提交')
 
     def __init__(self, tag, *args, **kwargs):
         super(EditTagForm, self).__init__(*args, **kwargs)
+        self.color.choices = [(u'', u'选择标签颜色')] + [(unicode(color.id), color.name) for color in Color.query.order_by(Color.id.asc()).all()]
         self.tag = tag
 
     def validate_name(self, field):

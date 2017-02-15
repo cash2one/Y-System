@@ -41,6 +41,7 @@ manager.add_command('db', MigrateCommand)
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
+    from app.models import Color
     from app.models import Permission
     from app.models import Role
     from app.models import Gender
@@ -74,6 +75,7 @@ def deploy():
     upgrade()
 
     # insert initial data
+    Color.insert_colors()
     Permission.insert_permissions()
     Role.insert_roles()
     Gender.insert_genders()
