@@ -325,7 +325,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ education_record.school }}</div>
-                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA：{{ education_record.gpa_alias }}/{{ education_record.full_gpa_alias }}{% endif %}</div>
+                            <div class="description">{{ education_record.type.name }} &middot; {{ education_record.year }}级{% if education_record.major %} &middot; {{ education_record.major }}{% endif %}{% if education_record.gpa %} &middot; GPA：{{ education_record.gpa_alias }}{% endif %}</div>
                         </div>
                     </div>
                     {% endfor %}
@@ -410,7 +410,7 @@
                         </div>
                         <div class="content">
                             <div class="header">{{ score_record.type.name }}</div>
-                            <div class="description">{{ score_record.alias2 }}</div>
+                            <div class="description">{{ score_record.score_alias }}</div>
                         </div>
                     </div>
                     {% endfor %}

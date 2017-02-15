@@ -2491,13 +2491,7 @@ class EducationRecord(db.Model):
     @property
     def gpa_alias(self):
         if self.gpa is not None:
-            return u'%g' % self.gpa
-        return u''
-
-    @property
-    def full_gpa_alias(self):
-        if self.full_gpa is not None:
-            return u'%g' % self.full_gpa
+            return u'%g/%g' % (self.gpa, self.full_gpa)
         return u''
 
     @property
@@ -2574,10 +2568,10 @@ class ScoreRecord(db.Model):
 
     @property
     def alias(self):
-        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.full_score, self.remark)
+        return u'%s %s %s' % (self.user.name_alias, self.type.name, self.score_alias)
 
     @property
-    def alias2(self):
+    def score_alias(self):
         if self.score:
             if self.full_score:
                 return u'%g/%g 分' % (self.score, self.full_score)

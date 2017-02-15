@@ -102,84 +102,130 @@
                     <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
                 </div>
                 {% if show_profile_overview %}
+                <div class="ui blue dividing header">基本信息</div>
+                <div class="ui blue dividing header">联系方式</div>
+                <div class="ui blue dividing header">紧急联系人</div>
+                {% with records = user.education_records %}{% if records.count() %}
+                <div class="ui blue dividing header">教育经历</div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>学历</th>
+                            <th>学校</th>
+                            <th>专业</th>
+                            <th>GPA</th>
+                            <th>入学年份</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.type.name }}</td>
+                            <td>{{ record.school }}</td>
+                            <td>{{ record.major }}</td>
+                            <td>{{ record.gpa_alias }}</td>
+                            <td>{{ record.year }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}{% endwith %}
+                {% with records = user.employment_records %}{% if records.count() %}
+                <div class="ui blue dividing header">工作经历</div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>工作单位</th>
+                            <th>职务</th>
+                            <th>入职年份</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.employer }}</td>
+                            <td>{{ record.position }}</td>
+                            <td>{{ record.year }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}{% endwith %}
                 {% with scores = user.gre_test_scores %}{% if scores.count() %}
-                <div class="ui vertical segment">
-                    <div class="ui header">GRE成绩</div>
-                    <table class="ui very basic sortable selectable celled table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>Verbal Reasoning</th>
-                                <th>Quantitative Reasoning</th>
-                                <th>Analytical Writing</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for score in scores %}
-                            <tr>
-                                <td>{{ score.test.date }}</td>
-                                <td>{{ score.v_score }}</td>
-                                <td>{{ score.q_score }}</td>
-                                <td>{{ score.aw_score.name }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                <div class="ui blue dividing header">GRE成绩</div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>Verbal Reasoning</th>
+                            <th>Quantitative Reasoning</th>
+                            <th>Analytical Writing</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for score in scores %}
+                        <tr>
+                            <td>{{ score.test.date }}</td>
+                            <td>{{ score.v_score }}</td>
+                            <td>{{ score.q_score }}</td>
+                            <td>{{ score.aw_score.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
                 {% endif %}{% endwith %}
                 {% with scores = user.toefl_test_scores %}{% if scores.count() %}
-                <div class="ui vertical segment">
-                    <div class="ui header">TOEFL成绩</div>
-                    <table class="ui very basic sortable selectable celled table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>总分</th>
-                                <th>阅读</th>
-                                <th>听力</th>
-                                <th>口语</th>
-                                <th>写作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for score in scores %}
-                            <tr>
-                                <td>{{ score.test.date }}</td>
-                                <td>{{ score.total_score }}</td>
-                                <td>{{ score.reading_score }}</td>
-                                <td>{{ score.listening_score }}</td>
-                                <td>{{ score.speaking_score }}</td>
-                                <td>{{ score.writing_score }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                <div class="ui blue dividing header">TOEFL成绩</div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>总分</th>
+                            <th>阅读</th>
+                            <th>听力</th>
+                            <th>口语</th>
+                            <th>写作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for score in scores %}
+                        <tr>
+                            <td>{{ score.test.date }}</td>
+                            <td>{{ score.total_score }}</td>
+                            <td>{{ score.reading_score }}</td>
+                            <td>{{ score.listening_score }}</td>
+                            <td>{{ score.speaking_score }}</td>
+                            <td>{{ score.writing_score }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
                 {% endif %}{% endwith %}
-                <div class="ui vertical segment">
-                    <div class="ui header">基本信息</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">联系方式</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">紧急联系人</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">教育经历</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">工作经历</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">既往成绩</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">报名信息</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">其它信息</div>
-                </div>
+                {% with scores = user.score_records %}{% if scores.count() %}
+                <div class="ui blue dividing header">既往成绩</div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>类型</th>
+                            <th>成绩</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for score in scores %}
+                        <tr>
+                            <td>{{ score.type.name }}</td>
+                            <td>{{ score.score_alias }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}{% endwith %}
+                <div class="ui blue dividing header">报名信息</div>
+                {% if user.worked_in_same_field or user.deformity %}
+                <div class="ui blue dividing header">其它信息</div>
+                {% if user.worked_in_same_field %}<div><i class="fa fa-industry fa-fw text-orange"></i>（曾）在培训/留学机构任职</div>{% endif %}
+                {% if user.deformity %}<div><i class="fa fa-heartbeat fa-fw text-red"></i>有严重心里或身体疾病</div>{% endif %}
+                {% endif %}
                 {% endif %}
                 {% if show_profile_progress %}
                 <div id="vb" class="ui vertical segment loading">
@@ -258,7 +304,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="announcement icon"></i>通知</h3>
-                <div class="ui divided items">
+                <div class="ui blue dividing items">
                     {% for announcement in announcements %}
                     <div class="item">
                         <div class="content">
