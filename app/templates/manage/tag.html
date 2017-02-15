@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}用户标签管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="tags icon"></i>用户标签管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="tags icon"></i>用户标签列表</h3>
+                <div id="new-tag-trigger" class="ui right floated positive circular icon button" data-content="新建用户标签" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-tag-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建用户标签</div>
+                    <div class="content">
+                        <form id="new-tag" action="{{ url_for('manage.tag') }}" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ form.name.label() }}
+                                    {{ form.name(placeholder='用户标签名称') }}
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ form.color.label() }}
+                                    {{ form.color(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.tag', page=pagination.page) }}">全部</a>
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>标签名称</th>
+                            <th>标记用户数量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tag in tags %}
+                        <tr{% if tag.valid_tagged_users.count() > 1 %} class="top aligned"{% endif %}>
+                            <td><i class="{{ tag.color.css_class }} tag icon"></i>{{ tag.name }}</td>
+                            <td>{% if tag.valid_tagged_users.count() %}<a class="user loading-trigger" href="{{ url_for('manage.tag_user', id=tag.id) }}" data-content="查看被标记的用户" data-position="top center" data-variation="inverted">{{ tag.valid_tagged_users.count() }} 人</a>{% else %}0 人{% endif %}</td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_tag', id=tag.id, next=url_for('manage.tag', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    {% if tag.valid_tagged_users.count() %}
+                                    <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
+                                    {% else %}
+                                    <div id="delete-trigger-{{ tag.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                    {% endif %}
+                                </div>
+                                {% if tag.valid_tagged_users.count() == 0 %}
+                                <div id="delete-modal-{{ tag.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除用户标签“{{ tag.name }}”？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_tag', id=tag.id, next=url_for('manage.tag', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ tag.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.tag') }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.checkbox').checkbox();
+
+$('.ui.sortable.table').tablesort();
+
+{% for tag in tags %}
+{% if tag.valid_tagged_users.count() == 0 %}
+$('#delete-trigger-{{ tag.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ tag.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger-{{ tag.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ tag.id }}').modal('hide');
+    })
+;
+{% endif %}
+{% endfor %}
+
+$('#new-tag-trigger').popup();
+$('#new-tag-trigger')
+    .on('click', function() {
+        $('#new-tag-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$(document)
+    .ready(function() {
+        $('#new-tag')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    name: {
+                        identifier: 'name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户标签名称'
+                            }
+                        ]
+                    },
+                    color: {
+                        identifier: 'color',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择标签颜色'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
+{% endblock %}

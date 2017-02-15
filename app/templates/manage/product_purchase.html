@@ -11,7 +11,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="tag icon"></i>{{ product.name }}</h1>
+    <h1 class="ui inverted header"><i class="shop icon"></i>{{ product.name }}</h1>
 </div>
 {% endblock %}
 
@@ -20,7 +20,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="shop icon"></i>产品购买记录</h3>
+                <h3 class="ui header"><i class="in cart icon"></i>产品购买记录</h3>
                 <div class="ui secondary stackable menu">
                     <a class="item active loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id, page=pagination.page) }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.product') }}">产品列表</a>

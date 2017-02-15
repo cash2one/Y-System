@@ -62,9 +62,12 @@
                     </div>
                     {% endif %}
                 </div>
+                {% if user.gre_verbal_prediction %}
                 <div class="ui vertical segment">
-                    <div class="ui header">分数预测</div>
+                    <div class="ui header">分数预测<div class="ui label">Beta</div></div>
+                    <div>GRE Verbal：{{ user.gre_verbal_prediction }}</div>
                 </div>
+                {% endif %}
                 <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
                     <div>即将开始 {{ user.valid_bookings.count() }}</div>
@@ -75,6 +78,18 @@
                     <div>迟到 {{ user.late_bookings.count() }} 次</div>
                     <div>未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
                 </div>
+                {% if current_user.can('管理') %}
+                <div class="ui vertical segment">
+                    <div class="ui header">用户标签</div>
+                    {% if user.has_tags.count() %}
+                    {% with tags = user.has_tags %}
+                    <div class="ui labels">
+                        {% for tag in tags %}<div class="ui {{ tag.tag.color.css_class }} label"><i class="tag icon"></i>{{ tag.tag.name }}</div>{% endfor %}
+                    </div>
+                    {% endwith %}
+                    {% else %}无{% endif %}
+                </div>
+                {% endif %}
                 <div class="ui vertical segment">
                     <div class="popup-trigger" data-variation="inverted">激活时间：{{ moment(user.activated_at).fromNow() }}</div>
                     <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
@@ -331,7 +346,7 @@ $.getJSON(VBProgressUrl, function(data) {
                             .attr('data-content','标记为已完成')
                             .attr('data-position', 'top center')
                             .attr('data-variation', 'inverted')
-                            .html('<i class="green add icon"></i>')
+                            .html('<i class="green add link icon"></i>')
                             .popup()
                     );
                 };
@@ -399,7 +414,7 @@ $.getJSON(VBProgressUrl, function(data) {
                 .attr('data-content','标记为未完成')
                 .attr('data-position', 'top center')
                 .attr('data-variation', 'inverted')
-                .html('<i class="red remove icon"></i>')
+                .html('<i class="red remove link icon"></i>')
                 .popup('destroy')
                 .popup();
         };
