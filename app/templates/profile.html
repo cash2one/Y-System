@@ -102,16 +102,36 @@
                     <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
                 </div>
                 {% if show_profile_overview %}
-                <div class="ui dividing header">基本信息</div>
-                <div class="ui dividing header">联系方式</div>
-                <div class="ui dividing header">紧急联系人</div>
-                <div class="ui dividing header">教育经历</div>
-                <div class="ui dividing header">工作经历</div>
-                <div class="ui dividing header">既往成绩</div>
-                <div class="ui dividing header">TOEFL成绩</div>
-                <div class="ui dividing header">GRE成绩</div>
-                <div class="ui dividing header">报名信息</div>
-                <div class="ui dividing header">其它信息</div>
+                <div class="ui vertical segment">
+                    <div class="ui header">基本信息</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">联系方式</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">紧急联系人</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">教育经历</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">工作经历</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">既往成绩</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">GRE成绩</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">TOEFL成绩</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">报名信息</div>
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">其它信息</div>
+                </div>
                 {% endif %}
                 {% if show_profile_progress %}
                 <div id="vb" class="ui vertical segment loading">
