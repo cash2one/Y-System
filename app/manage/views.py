@@ -3734,7 +3734,7 @@ def tag():
         if Tag.query.filter_by(name=form.name.data).first() is not None:
             flash(u'“%s”标签已存在' % form.name.data, category='error')
             return redirect(url_for('manage.tag', page=request.args.get('page', 1, type=int)))
-        tag = Tag(name=form.name.data)
+        tag = Tag(name=form.name.data, color_id=int(form.color.data))
         db.session.add(tag)
         flash(u'已添加用户标签：%s' % form.name.data, category='success')
         return redirect(url_for('manage.tag', page=request.args.get('page', 1, type=int)))
@@ -3771,10 +3771,12 @@ def edit_tag(id):
     form = EditTagForm(tag=tag)
     if form.validate_on_submit():
         tag.name = form.name.data
+        tag.color_id = int(form.color.data)
         db.session.add(tag)
         flash(u'已更新标签：%s' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.tag'))
     form.name.data = tag.name
+    form.color.data = unicode(tag.color_id)
     return render_template('manage/edit_tag.html', form=form, tag=tag)
 
 

@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 2a6d3d73ab8b
+Revision ID: 54480533235e
 Revises: 
-Create Date: 2017-02-15 01:55:57.535351
+Create Date: 2017-02-15 06:22:08.753619
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2a6d3d73ab8b'
+revision = '54480533235e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,6 +36,13 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_booking_states_name'), 'booking_states', ['name'], unique=True)
+    op.create_table('colors',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('css_class', sa.Unicode(length=64), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_colors_name'), 'colors', ['name'], unique=True)
     op.create_table('course_types',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -127,12 +134,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_score_types_name'), 'score_types', ['name'], unique=True)
-    op.create_table('tags',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_tags_name'), 'tags', ['name'], unique=True)
     op.create_table('toefl_tests',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('date', sa.Date(), nullable=True),
@@ -159,6 +160,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('role_id', 'permission_id')
     )
+    op.create_table('tags',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('color_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['color_id'], ['colors.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_tags_name'), 'tags', ['name'], unique=True)
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.Unicode(length=64), nullable=True),
@@ -621,13 +630,13 @@ def downgrade():
     op.drop_index(op.f('ix_users_id_number'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
+    op.drop_index(op.f('ix_tags_name'), table_name='tags')
+    op.drop_table('tags')
     op.drop_table('role_permissions')
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')
     op.drop_index(op.f('ix_toefl_tests_date'), table_name='toefl_tests')
     op.drop_table('toefl_tests')
-    op.drop_index(op.f('ix_tags_name'), table_name='tags')
-    op.drop_table('tags')
     op.drop_index(op.f('ix_score_types_name'), table_name='score_types')
     op.drop_table('score_types')
     op.drop_index(op.f('ix_rooms_name'), table_name='rooms')
@@ -658,6 +667,8 @@ def downgrade():
     op.drop_table('education_types')
     op.drop_index(op.f('ix_course_types_name'), table_name='course_types')
     op.drop_table('course_types')
+    op.drop_index(op.f('ix_colors_name'), table_name='colors')
+    op.drop_table('colors')
     op.drop_index(op.f('ix_booking_states_name'), table_name='booking_states')
     op.drop_table('booking_states')
     op.drop_index(op.f('ix_assignment_score_grades_name'), table_name='assignment_score_grades')

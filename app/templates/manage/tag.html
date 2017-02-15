@@ -28,9 +28,15 @@
                     <div class="content">
                         <form id="new-tag" action="{{ url_for('manage.tag') }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
-                            <div class="required field">
-                                {{ form.name.label() }}
-                                {{ form.name(placeholder='用户标签名称') }}
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ form.name.label() }}
+                                    {{ form.name(placeholder='用户标签名称') }}
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ form.color.label() }}
+                                    {{ form.color(class='ui dropdown') }}
+                                </div>
                             </div>
                             {{ form.submit(class='ui primary button') }}
                         </form>
@@ -50,7 +56,7 @@
                     <tbody>
                         {% for tag in tags %}
                         <tr{% if tag.valid_tagged_users.count() > 1 %} class="top aligned"{% endif %}>
-                            <td>{{ tag.name }}</td>
+                            <td><i class="{{ tag.color.css_class }} tag icon"></i>{{ tag.name }}</td>
                             <td>{% if tag.valid_tagged_users.count() %}<a class="user loading-trigger" href="{{ url_for('manage.tag_user', id=tag.id) }}" data-content="查看被标记的用户" data-position="top center" data-variation="inverted">{{ tag.valid_tagged_users.count() }} 人</a>{% else %}0 人{% endif %}</td>
                             <td>
                                 <div class="ui mini icon buttons">
@@ -135,6 +141,15 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请输入用户标签名称'
+                            }
+                        ]
+                    },
+                    color: {
+                        identifier: 'color',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择标签颜色'
                             }
                         ]
                     }
