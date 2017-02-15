@@ -2374,6 +2374,14 @@ class Tag(db.Model):
         cascade='all, delete-orphan'
     )
 
+    @property
+    def valid_tagged_users(self):
+        return UserTag.query\
+            .join(User, User.id == UserTag.user_id)\
+            .filter(UserTag.tag_id == self.id)\
+            .filter(User.created == True)\
+            .filter(User.deleted == False)
+
     @staticmethod
     def insert_tags():
         tags = [

@@ -27,6 +27,7 @@ from .forms import EditWorkInSameFieldForm, EditDeformityForm
 from .forms import EditVBCourseForm, EditYGRECourseForm
 from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
+from .forms import NewTagForm, EditTagForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
@@ -38,6 +39,7 @@ from ..models import PurposeType, ReferrerType, InvitationType
 from ..models import EducationRecord, EducationType, EmploymentRecord, ScoreRecord, ScoreType
 from ..models import Course, CourseType, CourseRegistration
 from ..models import GroupRegistration
+from ..models import Tag, UserTag
 from ..models import Booking, BookingState
 from ..models import Rental
 from ..models import Punch
@@ -3674,6 +3676,71 @@ def remove_group_member(organizer_id, member_id):
     member.unregister_group(organizer=organizer)
     flash(u'已删除%s发起的团报成员：%s' % (organizer.name_alias, member.name_alias), category='success')
     return redirect(request.args.get('next') or url_for('manage.group'))
+
+
+@manage.route('/tag', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理用户标签')
+def tag():
+    form = NewTagForm()
+    if form.validate_on_submit():
+        if Tag.query.filter_by(name=form.name.data).first() is not None:
+            flash(u'“%s”标签已存在' % form.name.data, category='error')
+            return redirect(url_for('manage.tag', page=request.args.get('page', 1, type=int)))
+        tag = Tag(name=form.name.data)
+        db.session.add(tag)
+        flash(u'已添加用户标签：%s' % form.name.data, category='success')
+        return redirect(url_for('manage.tag', page=request.args.get('page', 1, type=int)))
+    query = Tag.query
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    tags = pagination.items
+    return render_template('manage/tag.html', form=form, tags=tags, pagination=pagination)
+
+
+@manage.route('/tag/<int:id>')
+@login_required
+@permission_required(u'管理')
+def tag_user(id):
+    tag = Tag.query.get_or_404(id)
+    if tag.valid_tagged_users.count() == 0:
+        return redirect(url_for('manage.tag'))
+    query = User.query\
+        .join(UserTag, UserTag.user_id == User.id)\
+        .filter(UserTag.tag_id == tag.id)\
+        .filter(User.created == True)\
+        .filter(User.deleted == False)
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    users = pagination.items
+    return render_template('manage/tag_user.html', tag=tag, users=users, pagination=pagination)
+
+
+@manage.route('/tag/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理用户标签')
+def edit_tag(id):
+    tag = Tag.query.get_or_404(id)
+    form = EditTagForm(tag=tag)
+    if form.validate_on_submit():
+        tag.name = form.name.data
+        db.session.add(tag)
+        flash(u'已更新标签：%s' % form.name.data, category='success')
+        return redirect(request.args.get('next') or url_for('manage.tag'))
+    form.name.data = tag.name
+    return render_template('manage/edit_tag.html', form=form, tag=tag)
+
+
+@manage.route('/tag/delete/<int:id>')
+@login_required
+@permission_required(u'管理用户标签')
+def delete_tag(id):
+    tag = Tag.query.get_or_404(id)
+    if tag.valid_tagged_users.count():
+        abort(403)
+    db.session.delete(tag)
+    flash(u'已删除用户标签：%s' % tag.name, category='success')
+    return redirect(request.args.get('next') or url_for('manage.tag'))
 
 
 @manage.route('/ipad', methods=['GET', 'POST'])

@@ -672,6 +672,24 @@ class NewGroupMemberForm(FlaskForm):
                 raise ValidationError(u'%s发起的团报人数已达到上限（5人）' % (self.organizer.name_alias))
 
 
+class NewTagForm(FlaskForm):
+    name = StringField(u'用户标签名称', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'提交')
+
+
+class EditTagForm(FlaskForm):
+    name = StringField(u'用户标签名称', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, tag, *args, **kwargs):
+        super(EditTagForm, self).__init__(*args, **kwargs)
+        self.tag = tag
+
+    def validate_name(self, field):
+        if field.data != self.tag.name and Tag.query.filter_by(name=field.data).first():
+            raise ValidationError(u'“%s”标签已存在' % field.data)
+
+
 class NewiPadForm(FlaskForm):
     alias = StringField(u'编号', validators=[Required(), Length(1, 64)])
     serial = StringField(u'序列号', validators=[Required()])
