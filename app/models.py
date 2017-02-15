@@ -1025,6 +1025,14 @@ class User(UserMixin, db.Model):
     deformity = db.Column(db.Boolean, default=False)
     # application properties
     application_aim = db.Column(db.Unicode(64))
+    # tags
+    has_tags = db.relationship(
+        'UserTag',
+        foreign_keys=[UserTag.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     # study properties
     purposes = db.relationship(
         'Purpose',
@@ -1244,14 +1252,6 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    # tags
-    tags = db.relationship(
-        'UserTag',
-        foreign_keys=[UserTag.user_id],
-        backref=db.backref('user', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
 
     def delete(self):
         for purpose in self.purposes:
@@ -1460,6 +1460,19 @@ class User(UserMixin, db.Model):
             except Exception as e:
                 return '<i class="fa fa-user-circle-o"></i>'
         return avatar_url
+
+    def add_tag(self, tag, remark=None):
+        if not self.has_tag(tag):
+            tag = UserTag(user_id=self.id, tag_id=tag.id)
+            db.session.add(tag)
+
+    def remove_tag(self, tag):
+        tag = self.has_tags.filter_by(tag_id=tag.id).first()
+        if tag:
+            db.session.delete(tag)
+
+    def has_tag(self, tag):
+        return self.has_tags.filter_by(tag_id=tag.id).first() is not None
 
     def add_education_record(self, education_type, school, year, major=None, gpa=None, full_gpa=None):
         if gpa and (not isinstance(gpa, float)):
