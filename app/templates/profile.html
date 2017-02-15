@@ -102,6 +102,60 @@
                     <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
                 </div>
                 {% if show_profile_overview %}
+                {% with scores = user.gre_test_scores %}{% if scores.count() %}
+                <div class="ui vertical segment">
+                    <div class="ui header">GRE成绩</div>
+                    <table class="ui very basic sortable selectable celled table">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>Verbal Reasoning</th>
+                                <th>Quantitative Reasoning</th>
+                                <th>Analytical Writing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for score in scores %}
+                            <tr>
+                                <td>{{ score.test.date }}</td>
+                                <td>{{ score.v_score }}</td>
+                                <td>{{ score.q_score }}</td>
+                                <td>{{ score.aw_score.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}{% endwith %}
+                {% with scores = user.toefl_test_scores %}{% if scores.count() %}
+                <div class="ui vertical segment">
+                    <div class="ui header">TOEFL成绩</div>
+                    <table class="ui very basic sortable selectable celled table">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>总分</th>
+                                <th>阅读</th>
+                                <th>听力</th>
+                                <th>口语</th>
+                                <th>写作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for score in scores %}
+                            <tr>
+                                <td>{{ score.test.date }}</td>
+                                <td>{{ score.total_score }}</td>
+                                <td>{{ score.reading_score }}</td>
+                                <td>{{ score.listening_score }}</td>
+                                <td>{{ score.speaking_score }}</td>
+                                <td>{{ score.writing_score }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}{% endwith %}
                 <div class="ui vertical segment">
                     <div class="ui header">基本信息</div>
                 </div>
@@ -119,12 +173,6 @@
                 </div>
                 <div class="ui vertical segment">
                     <div class="ui header">既往成绩</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">GRE成绩</div>
-                </div>
-                <div class="ui vertical segment">
-                    <div class="ui header">TOEFL成绩</div>
                 </div>
                 <div class="ui vertical segment">
                     <div class="ui header">报名信息</div>
@@ -256,7 +304,7 @@
 
 {% block customized_scripts %}
 {{ super() }}
-{% if show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
+{% if show_profile_overview or show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -581,7 +629,7 @@ $.getJSON(YGREProgressUrl, function(data) {
 {% endif %}
 {% endif %}
 
-{% if show_profile_bookings %}
+{% if show_profile_overview or show_profile_bookings %}
 $('.ui.sortable.table').tablesort();
 
 {% for booking in bookings %}
