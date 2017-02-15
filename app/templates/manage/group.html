@@ -54,21 +54,27 @@
                     </thead>
                     <tbody>
                         {% for group in groups %}
-                        <tr>
+                        <tr class="top aligned">
                             <td class="single line">{{ macros.user_popup_gender(group.organizer, group.organizer.id == current_user.id) }}</td>
                             <td>{{ group.organizer.organized_groups.count() }}</td>
                             <td>
                                 {% with group_registrations = group.organizer.organized_groups %}
                                 {% if group_registrations.count() > 1 %}
-                                <div class="ui labels">
+                                <div class="ui relaxed divided list">
                                 {% for group_registration in group_registrations %}
                                 {% if group_registration.member.id != group_registration.organizer.id %}
-                                <div class="ui orange label">{{ macros.user_popup(group_registration.member) }}<i id="remove-member-trigger-{{ group_registration.member.id }}" class="delete icon"></i></div>
-                                <div id="remove-member-modal-{{ group_registration.member.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i>确定要删除{{ group.organizer.name_alias }}的团报成员{{ group_registration.member.name_alias }}么？</div>
-                                    <div class="actions">
-                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.remove_group_member', organizer_id=group.organizer.id, member_id=group_registration.member.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="remove user icon"></i>删除</a>
-                                        <div id="remove-member-hide-trigger-{{ group_registration.member.id }}" class="ui black button">保留</div>
+                                <div class="item">
+                                    <img class="ui avatar image" src="{{ group_registration.member.avatar(size=56) }}">
+                                    <div class="content">
+                                        <div class="header"><a href="{{ url_for('main.profile_overview', id=group_registration.member.id) }}" target="_blank">{{ group_registration.member.name }}</a><i id="remove-member-trigger-{{ group_registration.member.id }}" class="delete link icon"></i></div>
+                                        <div class="description">{{ group_registration.member.email }}</div>
+                                    </div>
+                                    <div id="remove-member-modal-{{ group_registration.member.id }}" class="ui modal">
+                                        <div class="header"><i class="warning sign icon"></i>确定要删除{{ group.organizer.name_alias }}的团报成员{{ group_registration.member.name_alias }}么？</div>
+                                        <div class="actions">
+                                            <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.remove_group_member', organizer_id=group.organizer.id, member_id=group_registration.member.id, next=url_for('manage.group', page=pagination.page)) }}"><i class="remove user icon"></i>删除</a>
+                                            <div id="remove-member-hide-trigger-{{ group_registration.member.id }}" class="ui black button">保留</div>
+                                        </div>
                                     </div>
                                 </div>
                                 {% endif %}

@@ -22,7 +22,7 @@ from .forms import EditNameForm, EditIDNumberForm, EditStudentRoleForm, EditUser
 from .forms import EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditReferrerForm
-from .forms import EditOriginTypeForm, EditApplicationAimForm
+from .forms import EditApplicationAimForm
 from .forms import EditWorkInSameFieldForm, EditDeformityForm
 from .forms import EditVBCourseForm, EditYGRECourseForm
 from .forms import NewCourseForm, EditCourseForm
@@ -2607,7 +2607,6 @@ def create_user():
             emergency_contact_name=form.emergency_contact_name.data,
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
             emergency_contact_mobile=form.emergency_contact_mobile.data,
-            origin_type_id=int(form.origin_type.data),
             application_aim=form.application_aim.data
         )
         db.session.add(user)
@@ -2994,18 +2993,6 @@ def create_user_confirm(id):
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
-    # origin type
-    edit_origin_type_form = EditOriginTypeForm(prefix='edit_origin_type')
-    if edit_origin_type_form.submit.data and edit_origin_type_form.validate_on_submit():
-        if int(edit_origin_type_form.origin_type.data):
-            user.origin_type_id = int(edit_origin_type_form.origin_type.data)
-        else:
-            user.origin_type_id = None
-        db.session.add(user)
-        flash(u'已更新生源类型', category='success')
-        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    if user.origin_type:
-        edit_origin_type_form.origin_type.data = unicode(user.origin_type_id)
     # confirm
     confirm_user_form = ConfirmUserForm(prefix='confirm_user')
     if confirm_user_form.submit.data and confirm_user_form.validate_on_submit():
@@ -3127,18 +3114,6 @@ def edit_user(id):
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
-    # origin type
-    edit_origin_type_form = EditOriginTypeForm(prefix='edit_origin_type')
-    if edit_origin_type_form.submit.data and edit_origin_type_form.validate_on_submit():
-        if int(edit_origin_type_form.origin_type.data):
-            user.origin_type_id = int(edit_origin_type_form.origin_type.data)
-        else:
-            user.origin_type_id = None
-        db.session.add(user)
-        flash(u'已更新生源类型', category='success')
-        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    if user.origin_type:
-        edit_origin_type_form.origin_type.data = unicode(user.origin_type_id)
     # email
     edit_email_form = EditEmailForm(prefix='edit_email')
     if edit_email_form.submit.data and edit_email_form.validate_on_submit():

@@ -361,7 +361,7 @@
                         {{ form.products(class='ui dropdown') }}
                     </div>
                     <div class="fields">
-                        <div class="four wide required field">
+                        <div class="eight wide required field">
                             {{ form.role.label() }}
                             {{ form.role(class='ui dropdown') }}
                         </div>
@@ -372,10 +372,6 @@
                         <div class="four wide required field">
                             {{ form.y_gre_course.label() }}
                             {{ form.y_gre_course(class='ui dropdown') }}
-                        </div>
-                        <div class="four wide required field">
-                            {{ form.origin_type.label() }}
-                            {{ form.origin_type(class='ui dropdown') }}
                         </div>
                     </div>
                     {{ form.submit(class='ui primary button') }}
@@ -1041,15 +1037,6 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请选择Y-GRE班'
-                            }
-                        ]
-                    },
-                    origin_type: {
-                        identifier: 'origin_type',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择生源类型'
                             }
                         ]
                     }

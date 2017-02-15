@@ -45,7 +45,6 @@ def deploy():
     from app.models import Role
     from app.models import Gender
     from app.models import Relationship
-    from app.models import OriginType
     from app.models import PurposeType
     from app.models import ReferrerType
     from app.models import BookingState
@@ -56,6 +55,7 @@ def deploy():
     from app.models import Lesson
     from app.models import Section
     from app.models import User
+    from app.models import Tag
     from app.models import EducationType
     from app.models import ScoreType
     from app.models import Product
@@ -78,7 +78,6 @@ def deploy():
     Role.insert_roles()
     Gender.insert_genders()
     Relationship.insert_relationships()
-    OriginType.insert_origin_types()
     PurposeType.insert_purpose_types()
     ReferrerType.insert_referrer_types()
     BookingState.insert_booking_states()
@@ -89,6 +88,7 @@ def deploy():
     Lesson.insert_lessons()
     Section.insert_sections()
     User.insert_admin()
+    Tag.insert_tags()
     EducationType.insert_education_types()
     ScoreType.insert_score_types()
     Product.insert_products()

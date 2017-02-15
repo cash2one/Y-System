@@ -525,15 +525,6 @@
                             <div class="description">{% if user.y_gre_course %}{{ user.y_gre_course.name }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
-                    <div class="item">
-                        <div class="right floated content">
-                            <div id="edit-origin-type-trigger" class="ui mini button">编辑</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">生源类型</div>
-                            <div class="description">{% if user.origin_type %}{{ user.origin_type.name }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
                 </div>
                 <div id="edit-purpose-modal" class="ui modal">
                     <i class="close icon"></i>
@@ -697,20 +688,6 @@
                                 {{ edit_y_gre_course_form.y_gre_course(class='ui dropdown') }}
                             </div>
                             {{ edit_y_gre_course_form.submit(class='ui primary button') }}
-                        </form>
-                    </div>
-                </div>
-                <div id="edit-origin-type-modal" class="ui modal">
-                    <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑生源类型</div>
-                    <div class="content">
-                        <form id="edit-origin-type" action="{{ url_for('manage.create_user_confirm', id=user.id) }}" method="POST" class="ui form">
-                            {{ edit_origin_type_form.hidden_tag() }}
-                            <div class="required field">
-                                {{ edit_origin_type_form.origin_type.label() }}
-                                {{ edit_origin_type_form.origin_type(class='ui dropdown') }}
-                            </div>
-                            {{ edit_origin_type_form.submit(class='ui primary button') }}
                         </form>
                     </div>
                 </div>
@@ -891,12 +868,6 @@ $('#edit-vb-course-trigger')
 $('#edit-y-gre-course-trigger')
     .on('click', function() {
         $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
-    })
-;
-
-$('#edit-origin-type-trigger')
-    .on('click', function() {
-        $('#edit-origin-type-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
@@ -1513,24 +1484,6 @@ $(document)
                             {
                                 type: 'empty',
                                 prompt: '请选择Y-GRE班'
-                            }
-                        ]
-                    }
-                }
-            })
-        ;
-        $('#edit-origin-type')
-            .form({
-                onSuccess: submitForm,
-                inline: true,
-                on: 'blur',
-                fields: {
-                    origin_type: {
-                        identifier: 'edit_origin_type-origin_type',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择生源类型'
                             }
                         ]
                     }
