@@ -5,8 +5,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, DateField, SelectField, SelectMultipleField, SubmitField
 from wtforms.validators import Required, NumberRange, Length, Email, Optional
 from wtforms import ValidationError
-from ..models import Permission, Role, User
-from ..models import Relationship, OriginType, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
+from ..models import Permission, Role, User, Tag
+from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
@@ -369,7 +369,6 @@ class NewUserForm(FlaskForm):
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
     y_gre_course = SelectField(u'Y-GRE班', coerce=unicode, validators=[Required()])
-    origin_type = SelectField(u'生源类型', coerce=unicode, validators=[Required()])
     # submit
     submit = SubmitField(u'下一步')
 
@@ -382,7 +381,6 @@ class NewUserForm(FlaskForm):
         self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
         self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
-        self.origin_type.choices = [(u'', u'选择生源类型')] + [(unicode(origin_type.id), origin_type.name) for origin_type in OriginType.query.order_by(OriginType.id.asc()).all()]
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
@@ -463,6 +461,15 @@ class EditNameForm(FlaskForm):
 class EditIDNumberForm(FlaskForm):
     id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
     submit = SubmitField(u'更新')
+
+
+class EditUserTagForm(FlaskForm):
+    tags = SelectMultipleField(u'用户标签', coerce=unicode)
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditUserTagForm, self).__init__(*args, **kwargs)
+        self.tags.choices = [(u'', u'选择用户标签')] + [(unicode(tag.id), tag.name) for tag in Tag.query.order_by(Tag.id.asc()).all()]
 
 
 class EditEmailForm(FlaskForm):
@@ -597,15 +604,6 @@ class EditYGRECourseForm(FlaskForm):
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
 
 
-class EditOriginTypeForm(FlaskForm):
-    origin_type = SelectField(u'生源类型', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'更新')
-
-    def __init__(self, *args, **kwargs):
-        super(EditOriginTypeForm, self).__init__(*args, **kwargs)
-        self.origin_type.choices = [(u'', u'选择生源类型')] + [(u'0', u'无')] + [(unicode(origin_type.id), origin_type.name) for origin_type in OriginType.query.order_by(OriginType.id.asc()).all()]
-
-
 class EditWorkInSameFieldForm(FlaskForm):
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     submit = SubmitField(u'更新')
@@ -681,6 +679,24 @@ class NewGroupMemberForm(FlaskForm):
                 raise ValidationError(u'%s已经参加过%s发起的团报' % (user.name_alias, user.registered_groups.first().organizer.name_alias))
             elif self.organizer.organized_groups.count() > 5:
                 raise ValidationError(u'%s发起的团报人数已达到上限（5人）' % (self.organizer.name_alias))
+
+
+class NewTagForm(FlaskForm):
+    name = StringField(u'用户标签名称', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'提交')
+
+
+class EditTagForm(FlaskForm):
+    name = StringField(u'用户标签名称', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, tag, *args, **kwargs):
+        super(EditTagForm, self).__init__(*args, **kwargs)
+        self.tag = tag
+
+    def validate_name(self, field):
+        if field.data != self.tag.name and Tag.query.filter_by(name=field.data).first():
+            raise ValidationError(u'“%s”标签已存在' % field.data)
 
 
 class NewiPadForm(FlaskForm):

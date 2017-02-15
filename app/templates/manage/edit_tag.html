@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}编辑用户标签{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="edit icon"></i>编辑用户标签</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <form id="edit-tag" action="{{ url_for('manage.edit_tag', id=tag.id) }}" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="required field">
+                        {{ form.name.label() }}
+                        {{ form.name(placeholder='用户标签名称') }}
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.tag') }}">取消</a>
+                    {{ macros.form_validation_error_widget(form) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$(document)
+    .ready(function() {
+        $('#edit-tag')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    name: {
+                        identifier: 'name',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户标签名称'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
+{% endblock %}

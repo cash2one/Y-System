@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}{{ tag.name }}{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="tag icon"></i>{{ tag.name }}</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="user icon"></i>用户列表</h3>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.tag_user', id=tag.id, page=pagination.page) }}">全部</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.tag') }}">用户标签列表</a>
+                    {% if request.args.get('next') %}<a class="item loading-trigger" href="{{ request.args.get('next') }}">返回</a>{% endif %}
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>用户权限</th>
+                            <th>VB班</th>
+                            <th>Y-GRE班</th>
+                            <th>进度</th>
+                            <th>激活时间</th>
+                            <th>上次登录</th>
+                            {% if current_user.can('管理用户') %}<th>操作</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="single line">{{ macros.user_url_gender(user, user.id == current_user.id) }}</td>
+                            <td>{{ macros.user_email(user) }}</td>
+                            <td>{{ user.role.name }}</td>
+                            <td>{% if user.vb_course %}<a class="loading-trigger" href="{{ url_for('manage.tag_user', id=user.vb_course.id) }}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{{ url_for('manage.tag_user', id=user.y_gre_course.id) }}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
+                            <td>
+                                {% if user.activated %}
+                                {{ user.last_punch.section.alias2 }}
+                                {% if current_user.can('管理学习进度') %}
+                                <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.tag_user', id=tag.id, page=pagination.page)) }}"><i class="refresh icon"></i></a>
+                                {% endif %}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(user.activated_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            {% if current_user.can('管理用户') %}
+                            <td>
+                                {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.tag_user', id=tag.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>
+                                </div>
+                                <div id="delete-modal-{{ user.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.tag_user', id=tag.id, page=pagination.page)) }}"><i class="remove user icon"></i>注销</a>
+                                        <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="ui mini icon buttons">
+                                    <div class="ui button disabled"><i class="edit icon"></i></div>
+                                    <div class="ui negative button disabled"><i class="remove user icon"></i></div>
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.tag_user', id=tag.id) }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.sortable.table').tablesort();
+
+{% for user in users %}
+{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and user.id == current_user.id) %}
+$('#delete-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ user.id }}').modal('hide');
+    })
+;
+{% endif %}
+{% endfor %}
+</script>
+{% endblock %}
