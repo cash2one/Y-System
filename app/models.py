@@ -45,7 +45,7 @@ class Color(db.Model):
     @staticmethod
     def insert_colors():
         colors = [
-            (u'None', u'', ),
+            (u'Default', u'', ),
             (u'Red', u'red', ),
             (u'Orange', u'orange', ),
             (u'Yellow', u'yellow', ),
