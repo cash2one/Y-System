@@ -62,9 +62,12 @@
                     </div>
                     {% endif %}
                 </div>
+                {% if user.gre_verbal_prediction %}
                 <div class="ui vertical segment">
                     <div class="ui header">分数预测</div>
+                    <div>GRE Verbal：{{ user.gre_verbal_prediction }}</div>
                 </div>
+                {% endif %}
                 <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
                     <div>即将开始 {{ user.valid_bookings.count() }}</div>
