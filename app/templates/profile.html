@@ -74,10 +74,11 @@
                 {% endif %}
             </div>
             <div class="twelve wide column">
-                <div class="ui large three item secondary pointing menu">
+                <div class="ui large four item secondary pointing menu">
                     <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="address card outline icon"></i>概览</a>
                     <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="book icon"></i>进度</a>
                     <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
+                    {% if current_user.can('管理') %}<a class="item {% if show_profile_archive %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_archive', id=user.id) }}"><i class="archive icon"></i>存档</a>{% endif %}
                 </div>
                 {% if show_profile_overview %}
                 <div id="overview-progress" class="ui vertical segment loading">
@@ -93,7 +94,22 @@
                     {% endif %}
                 </div>
                 <div class="ui vertical segment">
-                    {% with scores = user.gre_test_scores %}{% if scores.count() %}
+                    <div class="ui header">预约统计</div>
+                    <div>即将开始 {{ user.valid_bookings.count() }}</div>
+                    <div>排队中 {{ user.wait_bookings.count() }}</div>
+                    <div>赴约 {{ user.keep_bookings.count() }} 次</div>
+                    <div>爽约 {{ user.miss_bookings.count() }} 次</div>
+                    <div>取消 {{ user.cancel_bookings.count() }} 次</div>
+                    <div>迟到 {{ user.late_bookings.count() }} 次</div>
+                    <div>未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
+                </div>
+                {% if user.gre_verbal_prediction %}
+                <div class="ui vertical segment">
+                    <div class="ui header">分数预测<div class="ui label">Beta</div></div>
+                    <div>GRE Verbal：{{ user.gre_verbal_prediction }}</div>
+                </div>
+                {% endif %}
+                {% with scores = user.gre_test_scores %}{% if scores.count() %}<div class="ui vertical segment">
                     <div class="ui header">GRE成绩</div>
                     <div class="ui relaxed list">
                         {% for score in scores %}
@@ -107,10 +123,8 @@
                         </div>
                         {% endfor %}
                     </div>
-                    {% endif %}{% endwith %}
-                </div>
-                <div class="ui vertical segment">
-                    {% with scores = user.toefl_test_scores %}{% if scores.count() %}
+                </div>{% endif %}{% endwith %}
+                {% with scores = user.toefl_test_scores %}{% if scores.count() %}<div class="ui vertical segment">
                     <div class="ui header">TOEFL成绩</div>
                     <div class="ui relaxed list">
                         {% for score in scores %}
@@ -124,27 +138,12 @@
                         </div>
                         {% endfor %}
                     </div>
-                    {% endif %}{% endwith %}
-                </div>
-                {% if user.gre_verbal_prediction %}
-                <div class="ui vertical segment">
-                    <div class="ui header">分数预测<div class="ui label">Beta</div></div>
-                    <div>GRE Verbal：{{ user.gre_verbal_prediction }}</div>
-                </div>
-                {% endif %}
-                <div class="ui vertical segment">
-                    <div class="ui header">预约统计</div>
-                    <div>即将开始 {{ user.valid_bookings.count() }}</div>
-                    <div>排队中 {{ user.wait_bookings.count() }}</div>
-                    <div>赴约 {{ user.keep_bookings.count() }} 次</div>
-                    <div>爽约 {{ user.miss_bookings.count() }} 次</div>
-                    <div>取消 {{ user.cancel_bookings.count() }} 次</div>
-                    <div>迟到 {{ user.late_bookings.count() }} 次</div>
-                    <div>未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
-                </div>
+                </div>{% endif %}{% endwith %}
                 <div class="ui vertical segment">
                     <div class="ui header">时间线</div>
                 </div>
+                {% endif %}
+                {% if show_profile_archive and current_user.can('管理') %}
                 <div class="ui vertical segment">
                     <div class="ui header">基本信息</div>
                     <div class="ui relaxed list">
@@ -488,7 +487,7 @@ var countUpOptions = {
     suffix: ''
 };
 var VBProgressCountUp = new CountUp('overview-vb-progress-data', 0, 0, 0, 2.5, countUpOptions);
-var YGREProgressCountUp = new CountUp('overview-y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);
+{% if user.can('预约Y-GRE课程') %}var YGREProgressCountUp = new CountUp('overview-y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);{% endif %}
 var progressDataUrl = "{{ url_for('main.profile_progress_data', id=user.id) }}";
 $.getJSON(progressDataUrl, function(data) {
     $('#overview-progress').removeClass('loading');
