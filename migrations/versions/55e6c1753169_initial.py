@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: e90f89770ebe
+Revision ID: 55e6c1753169
 Revises: 
-Create Date: 2017-02-16 20:21:02.499243
+Create Date: 2017-02-16 21:00:22.843625
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'e90f89770ebe'
+revision = '55e6c1753169'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -396,12 +396,11 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('original_role_id', sa.Integer(), nullable=True),
-    sa.Column('start_date', sa.Date(), nullable=True),
-    sa.Column('end_date', sa.Date(), nullable=True),
+    sa.Column('start_datetime', sa.DateTime(), nullable=True),
+    sa.Column('end_datetime', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
-    sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['original_role_id'], ['roles.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),

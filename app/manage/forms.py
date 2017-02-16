@@ -378,7 +378,7 @@ class NewUserForm(FlaskForm):
         self.emergency_contact_relationship.choices = [(u'', u'选择关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
-        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        self.products.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), u'%s（%g元）' % (product.name, product.price)) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠']]
         self.role.choices = [(u'', u'选择用户权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'单VB', u'Y-GRE 普通', u'Y-GRE VB×2', u'Y-GRE A权限']]
         self.vb_course.choices = [(u'', u'选择VB班')] + [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'VB']
         self.y_gre_course.choices = [(u'', u'选择Y-GRE班')] +  [(u'0', u'无')] + [(unicode(course.id), course.name) for course in Course.query.filter_by(show=True, deleted=False).order_by(Course.id.desc()).all() if course.type.name == u'Y-GRE']
@@ -559,7 +559,7 @@ class NewPurchaseForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewPurchaseForm, self).__init__(*args, **kwargs)
-        self.product.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), product.alias) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠', u'按月延长有效期', u'一次性延长2年有效期']]
+        self.product.choices = [(u'', u'选择研修产品')] + [(unicode(product.id), product.alias) for product in Product.query.filter_by(available=True, deleted=False).order_by(Product.id.asc()).all() if product.name not in [u'团报优惠']]
 
 
 class EditStudentRoleForm(FlaskForm):

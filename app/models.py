@@ -394,25 +394,19 @@ class SuspensionRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     original_role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
+    start_datetime = db.Column(db.DateTime, default=datetime.utcnow)
+    end_datetime = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    deleted = db.Column(db.Boolean, default=False)
 
     def ping(self, modified_by):
         self.modified_at = datetime.utcnow()
         self.modified_by_id = modified_by.id
         db.session.add(self)
 
-    def safe_delete(self, modified_by):
-        self.deleted = True
-        self.ping(modified_by=modified_by)
-        db.session.add(self)
-
     def __repr__(self):
-        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_date, self.end_date)
+        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_datetime, self.end_datetime)
 
 
 class CourseRegistration(db.Model):
@@ -1652,17 +1646,26 @@ class User(UserMixin, db.Model):
     def purchases_total(self):
         return u'%g 元' % sum([purchase.total for purchase in self.purchases])
 
-    def toggle_suspension(self):
+    def toggle_suspension(self, modified_by):
         if self.is_suspended:
-            pass
+            suspension_record = self.suspension_records.filter_by(end_datetime=None).order_by(SuspensionRecord.modified_at.desc()).first()
+            if suspension_record is not None:
+                suspension_record.end_datetime = datetime.utcnow()
+                suspension_record.ping(modified_by=modified_by)
+                db.session.add(suspension_record)
+                self.role_id = suspension_record.original_role_id
+                db.session.add(self)
+                return False
+            return True
         else:
-            suspension_record = SuspensionRecord(user_id=self.id, start_date=date.today(), modified_by_id=current_user.id)
+            suspension_record = SuspensionRecord(user_id=self.id, original_role_id=self.role_id, modified_by_id=modified_by.id)
             db.session.add(suspension_record)
             self.role_id = Role.query.filter_by(name=u'挂起').first().id
             db.session.add(self)
+            return True
 
     @property
-    def due_date(self):
+    def due_datetime(self):
         if self.is_developer or self.is_administrator or self.is_moderator:
             return
         extended_years = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'一次性延长2年有效期').first().id)]) * 2
@@ -1670,14 +1673,14 @@ class User(UserMixin, db.Model):
         year = self.activated_at.year + 1 + extended_years + (self.activated_at.month + extended_months) / 12
         month = (self.activated_at.month + extended_months) % 12
         day = self.activated_at.day
-        suspended_days = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_date - record.start_date for record in self.suspension_records if record.end_date is not None], timedelta(0))
-        return date(year, month, day) + suspended_days
+        suspended_days = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_datetime - record.start_datetime for record in self.suspension_records if record.end_datetime is not None], timedelta(0))
+        return datetime(year, month, day, self.activated_at.hour, self.activated_at.minute, self.activated_at.second, self.activated_at.microsecond) + suspended_days
 
     @property
     def overdue(self):
         if self.is_developer or self.is_administrator or self.is_moderator:
             return False
-        return date.today() > self.due_date
+        return datetime.utcnow() > self.due_datetime
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):

@@ -3500,6 +3500,23 @@ def restore_user(id):
     return render_template('manage/restore_user.html', form=form, user=user)
 
 
+@manage.route('/user/toggle-suspension/<int:id>')
+@login_required
+@permission_required(u'管理用户')
+def toggle_suspension(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and (user.id != current_user.id or not current_user.is_superior_than(user=user))):
+        abort(403)
+    is_suspended = user.toggle_suspension(modified_by=current_user._get_current_object())
+    if is_suspended:
+        flash(u'已挂起用户：%s' % user.name_alias, category='success')
+    else:
+        flash(u'已恢复用户：%s' % user.name_alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
 @manage.route('/course', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理班级')
