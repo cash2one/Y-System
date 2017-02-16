@@ -1652,8 +1652,10 @@ class User(UserMixin, db.Model):
 
     @property
     def due_date(self):
-        year = self.activated_at.year + 1
-        month = self.activated_at.month
+        extended_years = self.purchases.filter_by(name=u'一次性延长2年有效期').count() * 2
+        extended_months = self.purchases.filter_by(name=u'按月延长有效期').count()
+        year = self.activated_at.year + 1 + extended_years + (self.activated_at.month + extended_months) / 12
+        month = (self.activated_at.month + extended_months) % 12
         day = self.activated_at.day
         return date(year, month, day)
 
