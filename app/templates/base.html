@@ -137,7 +137,7 @@
                         <div class="header" style="text-transform: none;">{{ Version.Application }}</div>
                         <div class="divider"></div>
                         {% endif %}
-                        <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
+                        <div class="header" style="text-transform: none;">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
                         <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card outline icon"></i>研修档案</a>
                         {% if current_user.can('预约') and current_user.can('管理') %}
                         <div class="divider"></div>
@@ -336,7 +336,7 @@
                                 <div class="header" style="text-transform: none;">{{ Version.Application }}</div>
                                 <div class="divider"></div>
                                 {% endif %}
-                                <div class="header">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
+                                <div class="header" style="text-transform: none;">{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</div>
                                 <a class="item loading-trigger" href="{{ url_for('main.profile_overview', id=current_user.id) }}"><i class="id card outline icon"></i>研修档案</a>
                                 {% if current_user.can('预约') and current_user.can('管理') %}
                                 <div class="divider"></div>

@@ -127,7 +127,7 @@ class Permission(db.Model):
             permission = Permission.query.filter_by(name=entry[0]).first()
             if permission is None:
                 permission = Permission(
-                    name=entry[0], v
+                    name=entry[0],
                     overdue_check=entry[1]
                 )
                 db.session.add(permission)
