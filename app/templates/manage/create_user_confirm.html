@@ -41,7 +41,7 @@
                         </div>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">基本信息</h4>
+                <div class="ui blue dividing header">基本信息</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -125,7 +125,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">联系方式</h4>
+                <div class="ui blue dividing header">联系方式</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -243,7 +243,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui orange dividing header">紧急联系人</h4>
+                <div class="ui orange dividing header">紧急联系人</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -315,7 +315,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">教育经历</h4>
+                <div class="ui blue dividing header">教育经历</div>
                 {% if user.education_records.count() %}
                 <div class="ui relaxed divided list">
                     {% for education_record in user.education_records %}
@@ -362,7 +362,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui blue dividing header">工作经历</h4>
+                <div class="ui blue dividing header">工作经历</div>
                 {% if user.employment_records.count() %}
                 <div class="ui relaxed divided list">
                     {% for employment_record in user.employment_records %}
@@ -400,7 +400,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui blue dividing header">既往成绩</h4>
+                <div class="ui blue dividing header">既往成绩</div>
                 {% if user.score_records.count() %}
                 <div class="ui relaxed divided list">
                     {% for score_record in user.score_records %}
@@ -433,7 +433,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui blue dividing header">TOEFL成绩</h4>
+                <div class="ui blue dividing header">TOEFL成绩</div>
                 {% if user.toefl_test_scores.count() %}
                 <div class="ui relaxed divided list">
                     {% for toefl_test_score in user.toefl_test_scores %}
@@ -480,7 +480,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui teal dividing header">报名信息</h4>
+                <div class="ui teal dividing header">报名信息</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -722,7 +722,7 @@
                 </div>
                 <form id="confirm-user" action="{{ url_for('manage.create_user_confirm', id=user.id) }}" method="POST" class="ui form">
                     {{ confirm_user_form.hidden_tag() }}
-                    <h4 class="ui blue dividing header">其它信息</h4>
+                    <div class="ui blue dividing header">其它信息</div>
                     <div class="ui segment">
                         <div class="inline field">
                             <div class="ui toggle checkbox">
@@ -737,7 +737,7 @@
                             </div>
                         </div>
                     </div>
-                    <h4 class="ui red dividing header">服务条款</h4>
+                    <div class="ui red dividing header">服务条款</div>
                     <div class="ui segment">
                         <div class="inline required field">
                             <div class="ui toggle checkbox">

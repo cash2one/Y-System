@@ -102,9 +102,77 @@
                     <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
                 </div>
                 {% if show_profile_overview %}
+                {% if current_user.can('管理') %}
                 <div class="ui blue dividing header">基本信息</div>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">生日</div>
+                            <div class="description">{{ user.birthdate_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">身份证号</div>
+                            <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="ui blue dividing header">联系方式</div>
-                <div class="ui blue dividing header">紧急联系人</div>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">电子邮箱</div>
+                            <div class="description">{{ user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">移动电话</div>
+                            <div class="description">{% if user.mobile %}{{ user.mobile }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">联系地址</div>
+                            <div class="description">{% if user.address %}{{ user.address }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">QQ</div>
+                            <div class="description">{% if user.qq %}{{ user.qq }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">微信</div>
+                            <div class="description">{% if user.wechat %}{{ user.wechat }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui orange dividing header">紧急联系人</div>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">姓名</div>
+                            <div class="description">{% if user.emergency_contact_name %}{{ user.emergency_contact_name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">关系</div>
+                            <div class="description">{% if user.emergency_contact_relationship_id %}{{ user.relationship.name }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">联系方式</div>
+                            <div class="description">{% if user.emergency_contact_mobile %}{{ user.emergency_contact_mobile }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
                 {% with records = user.education_records %}{% if records.count() %}
                 <div class="ui blue dividing header">教育经历</div>
                 <div class="ui relaxed divided list">
@@ -137,80 +205,108 @@
                     {% endfor %}
                 </div>
                 {% endif %}{% endwith %}
+                {% with scores = user.score_records %}{% if scores.count() %}
+                <div class="ui blue dividing header">既往成绩</div>
+                <div class="ui relaxed divided list">
+                    {% for score_record in user.score_records %}
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">{{ score_record.type.name }}</div>
+                            <div class="description">{{ score_record.score_alias }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}{% endwith %}
                 {% with scores = user.gre_test_scores %}{% if scores.count() %}
                 <div class="ui blue dividing header">GRE成绩</div>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>日期</th>
-                            <th>Verbal Reasoning</th>
-                            <th>Quantitative Reasoning</th>
-                            <th>Analytical Writing</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for score in scores %}
-                        <tr>
-                            <td>{{ score.test.date }}</td>
-                            <td>{{ score.v_score }}</td>
-                            <td>{{ score.q_score }}</td>
-                            <td>{{ score.aw_score.name }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="ui relaxed divided list">
+                    {% for score in scores %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ score.test.date }}</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ score.alias2 }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}{% endwith %}
                 {% with scores = user.toefl_test_scores %}{% if scores.count() %}
                 <div class="ui blue dividing header">TOEFL成绩</div>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>日期</th>
-                            <th>总分</th>
-                            <th>阅读</th>
-                            <th>听力</th>
-                            <th>口语</th>
-                            <th>写作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for score in scores %}
-                        <tr>
-                            <td>{{ score.test.date }}</td>
-                            <td>{{ score.total_score }}</td>
-                            <td>{{ score.reading_score }}</td>
-                            <td>{{ score.listening_score }}</td>
-                            <td>{{ score.speaking_score }}</td>
-                            <td>{{ score.writing_score }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="ui relaxed divided list">
+                    {% for score in scores %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ score.test.date }}</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ score.alias2 }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}{% endwith %}
-                {% with scores = user.score_records %}{% if scores.count() %}
-                <div class="ui blue dividing header">既往成绩</div>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>类型</th>
-                            <th>成绩</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for score in scores %}
-                        <tr>
-                            <td>{{ score.type.name }}</td>
-                            <td>{{ score.score_alias }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% endif %}{% endwith %}
-                <div class="ui blue dividing header">报名信息</div>
+                {% if current_user.can('管理') %}
+                <div class="ui teal dividing header">报名信息</div>
+                <div class="ui relaxed divided list">
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">研修目的</div>
+                            <div class="description">{{ user.purposes_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">申请方向</div>
+                            <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">了解渠道</div>
+                            <div class="description">{{ user.referrers_alias }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">推荐人</div>
+                            <div class="description">{{ user.inviters }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">研修产品（总计：{{ user.purchases_total }}）</div>
+                            <div class="description">{{ user.purchases_alias }}</div>
+                        </div>
+                    </div>
+                </div>
                 {% if user.worked_in_same_field or user.deformity %}
                 <div class="ui blue dividing header">其它信息</div>
-                {% if user.worked_in_same_field %}<div><i class="fa fa-industry fa-fw text-orange"></i>（曾）在培训/留学机构任职</div>{% endif %}
-                {% if user.deformity %}<div><i class="fa fa-heartbeat fa-fw text-red"></i>有严重心里或身体疾病</div>{% endif %}
+                <div class="ui relaxed divided list">
+                    {% if user.worked_in_same_field %}
+                    <div class="item">
+                        <i class="orange warning sign icon"></i>
+                        <div class="content">
+                            <div class="header">（曾）在培训/留学机构任职</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if user.deformity %}
+                    <div class="item">
+                        <i class="orange warning sign icon"></i>
+                        <div class="content">
+                            <div class="header">有严重心里或身体疾病</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+                </div>
+                {% if current_user.can('管理用户') and not user.deleted and ((not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user)))) %}
+                <div class="ui grey dividing header">操作</div>
+                <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>
+                {% endif %}
                 {% endif %}
                 {% endif %}
                 {% if show_profile_progress %}

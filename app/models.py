@@ -907,6 +907,10 @@ class GRETestScore(db.Model):
     def alias(self):
         return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.date, self.v_score, self.q_score, self.aw_score.name)
 
+    @property
+    def alias2(self):
+        return u'Verbal Reasoning：%g · Quantitative Reasoning：%g · Analytical Writing：%s' % (self.v_score, self.q_score, self.aw_score.name)
+
     def __repr__(self):
         return '<GRE Test Score %r>' % self.alias
 

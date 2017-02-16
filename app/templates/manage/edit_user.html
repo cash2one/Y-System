@@ -21,7 +21,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h4 class="ui blue dividing header">基本信息</h4>
+                <div class="ui blue dividing header">基本信息</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -128,7 +128,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">研修信息</h4>
+                <div class="ui blue dividing header">研修信息</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -177,7 +177,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">联系方式</h4>
+                <div class="ui blue dividing header">联系方式</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -295,7 +295,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui orange dividing header">紧急联系人</h4>
+                <div class="ui orange dividing header">紧急联系人</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -367,7 +367,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">教育经历</h4>
+                <div class="ui blue dividing header">教育经历</div>
                 {% if user.education_records.count() %}
                 <div class="ui relaxed divided list">
                     {% for education_record in user.education_records %}
@@ -414,7 +414,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui blue dividing header">工作经历</h4>
+                <div class="ui blue dividing header">工作经历</div>
                 {% if user.employment_records.count() %}
                 <div class="ui relaxed divided list">
                     {% for employment_record in user.employment_records %}
@@ -452,7 +452,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui blue dividing header">既往成绩</h4>
+                <div class="ui blue dividing header">既往成绩</div>
                 {% if user.score_records.count() %}
                 <div class="ui relaxed divided list">
                     {% for score_record in user.score_records %}
@@ -485,7 +485,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui blue dividing header">TOEFL成绩</h4>
+                <div class="ui blue dividing header">TOEFL成绩</div>
                 {% if user.toefl_test_scores.count() %}
                 <div class="ui relaxed divided list">
                     {% for toefl_test_score in user.toefl_test_scores %}
@@ -532,7 +532,7 @@
                         </div>
                     </div>
                 </form>
-                <h4 class="ui teal dividing header">报名信息</h4>
+                <div class="ui teal dividing header">报名信息</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="right floated content">
@@ -703,7 +703,7 @@
                         </form>
                     </div>
                 </div>
-                <h4 class="ui blue dividing header">其它信息</h4>
+                <div class="ui blue dividing header">其它信息</div>
                 <form id="edit-worked-in-same-field" action="{{ url_for('manage.edit_user', id=user.id) }}" method="POST" class="ui mini form">
                     {{ edit_worked_in_same_field_form.hidden_tag() }}
                     <div class="fields">

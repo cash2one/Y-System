@@ -37,7 +37,7 @@
                 </div>
                 <form id="create-user" action="{{ url_for('manage.create_user') }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
-                    <h4 class="ui blue dividing header">基本信息</h4>
+                    <div class="ui blue dividing header">基本信息</div>
                     <div class="fields">
                         <div class="eight wide required field">
                             {{ form.name.label() }}
@@ -62,7 +62,7 @@
                             {{ form.residence(placeholder='归属地（自动生成）', readonly='') }}
                         </div>
                     </div>
-                    <h4 class="ui blue dividing header">联系方式</h4>
+                    <div class="ui blue dividing header">联系方式</div>
                     <div class="fields">
                         <div class="eight wide required field">
                             {{ form.email.label() }}
@@ -87,7 +87,7 @@
                             {{ form.wechat(placeholder='微信号/手机号') }}
                         </div>
                     </div>
-                    <h4 class="ui orange dividing header">紧急联系人</h4>
+                    <div class="ui orange dividing header">紧急联系人</div>
                     <div class="fields">
                         <div class="six wide required field">
                             {{ form.emergency_contact_name.label() }}
@@ -102,7 +102,7 @@
                             {{ form.emergency_contact_mobile(placeholder='移动电话') }}
                         </div>
                     </div>
-                    <h4 class="ui blue dividing header">教育经历</h4>
+                    <div class="ui blue dividing header">教育经历</div>
                     <div class="fields">
                         <div class="fourteen wide field">
                             {{ form.high_school.label() }}
@@ -199,7 +199,7 @@
                             </div>
                         </div>
                     </div>
-                    <h4 class="ui blue dividing header">工作经历</h4>
+                    <div class="ui blue dividing header">工作经历</div>
                     <div class="fields">
                         <div class="eight wide field">
                             {{ form.employer_1.label() }}
@@ -238,7 +238,7 @@
                             </div>
                         </div>
                     </div>
-                    <h4 class="ui blue dividing header">既往成绩</h4>
+                    <div class="ui blue dividing header">既往成绩</div>
                     <div class="fields">
                         <div class="four wide field">
                             {{ form.cee_total.label() }}
@@ -324,7 +324,7 @@
                         {{ form.other_score.label() }}
                         {{ form.other_score(placeholder='其它成绩') }}
                     </div>
-                    <h4 class="ui teal dividing header">报名信息</h4>
+                    <div class="ui teal dividing header">报名信息</div>
                     <div class="fields">
                         <div class="eight wide field">
                             {{ form.purposes.label() }}
