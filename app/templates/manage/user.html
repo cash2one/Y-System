@@ -166,6 +166,7 @@
                                 {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
+                                    {% if user.is_suspended %}<a class="ui button loading-trigger" href="#"><i class="play icon"></i></a>{% else %}<a class="ui button loading-trigger" href="#"><i class="pause icon"></i></a>{% endif %}
                                     {% if user.id == current_user.id %}<div class="ui negative button disabled"><i class="remove user icon"></i></div>{% else %}<div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>{% endif %}
                                 </div>
                                 {% if user.id != current_user.id %}<div id="delete-modal-{{ user.id }}" class="ui modal">
