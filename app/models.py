@@ -85,6 +85,7 @@ class Permission(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    overdue_check = db.Column(db.Boolean, default=False)
     roles = db.relationship(
         'RolePermission',
         foreign_keys=[RolePermission.permission_id],
@@ -96,36 +97,39 @@ class Permission(db.Model):
     @staticmethod
     def insert_permissions():
         permissions = [
-            (u'预约', ),
-            (u'预约VB课程', ),
-            (u'预约Y-GRE课程', ),
-            (u'预约VB课程×2', ),
-            (u'预约任意课程', ),
-            (u'管理', ),
-            (u'管理课程预约', ),
-            (u'管理学习进度', ),
-            (u'管理iPad借阅', ),
-            (u'管理预约时段', ),
-            (u'管理课程', ),
-            (u'管理作业', ),
-            (u'管理考试', ),
-            (u'管理用户', ),
-            (u'管理团报', ),
-            (u'管理班级', ),
-            (u'管理用户标签', ),
-            (u'管理iPad设备', ),
-            (u'管理通知', ),
-            (u'管理站内信', ),
-            (u'管理反馈', ),
-            (u'管理进站', ),
-            (u'管理产品', ),
-            (u'管理权限', ),
-            (u'开发权限', ),
+            (u'预约', True, ),
+            (u'预约VB课程', True, ),
+            (u'预约Y-GRE课程', True, ),
+            (u'预约VB课程×2', True, ),
+            (u'预约任意课程', True, ),
+            (u'管理', False, ),
+            (u'管理课程预约', False, ),
+            (u'管理学习进度', False, ),
+            (u'管理iPad借阅', False, ),
+            (u'管理预约时段', False, ),
+            (u'管理课程', False, ),
+            (u'管理作业', False, ),
+            (u'管理考试', False, ),
+            (u'管理用户', False, ),
+            (u'管理团报', False, ),
+            (u'管理班级', False, ),
+            (u'管理用户标签', False, ),
+            (u'管理iPad设备', False, ),
+            (u'管理通知', False, ),
+            (u'管理站内信', False, ),
+            (u'管理反馈', False, ),
+            (u'管理进站', False, ),
+            (u'管理产品', False, ),
+            (u'管理权限', False, ),
+            (u'开发权限', False, ),
         ]
         for entry in permissions:
             permission = Permission.query.filter_by(name=entry[0]).first()
             if permission is None:
-                permission = Permission(name=entry[0])
+                permission = Permission(
+                    name=entry[0], v
+                    overdue_check=entry[1]
+                )
                 db.session.add(permission)
                 print u'导入用户权限信息', entry[0]
         db.session.commit()
@@ -1399,7 +1403,11 @@ class User(UserMixin, db.Model):
         return True
 
     def can(self, permission_name):
-        return self.role is not None and self.role.has_permission(permission=Permission.query.filter_by(name=permission_name).first())
+        permission = Permission.query.filter_by(name=permission_name).first()
+        return permission is not None and \
+            not (permission.overdue_check and self.overdue) and \
+            self.role is not None and \
+            self.role.has_permission(permission=permission)
 
     @staticmethod
     def users_can(permission_name):
