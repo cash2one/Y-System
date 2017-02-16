@@ -98,13 +98,36 @@
                 </div>
                 <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
-                    <div>即将开始 {{ user.valid_bookings.count() }}</div>
-                    <div>排队中 {{ user.wait_bookings.count() }}</div>
-                    <div>赴约 {{ user.keep_bookings.count() }} 次</div>
-                    <div>爽约 {{ user.miss_bookings.count() }} 次</div>
-                    <div>取消 {{ user.cancel_bookings.count() }} 次</div>
-                    <div>迟到 {{ user.late_bookings.count() }} 次</div>
-                    <div>未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
+                    <div id="booking-stats" class="ui seven tiny statistics">
+                        <div class="statistic">
+                            <div class="value">{{ user.valid_bookings.count() }}</div>
+                            <div class="label">即将开始</div>
+                        </div>
+                        <div class="statistic">
+                            <div class="value">{{ user.wait_bookings.count() }}</div>
+                            <div class="label">排队中</div>
+                        </div>
+                        <div class="statistic">
+                            <div class="value">{{ user.keep_bookings.count() }}</div>
+                            <div class="label">赴约</div>
+                        </div>
+                        <div class="statistic">
+                            <div class="value">{{ user.miss_bookings.count() }}</div>
+                            <div class="label">爽约</div>
+                        </div>
+                        <div class="statistic">
+                            <div class="value">{{ user.cancel_bookings.count() }}</div>
+                            <div class="label">取消</div>
+                        </div>
+                        <div class="statistic">
+                            <div class="value">{{ user.late_bookings.count() }}</div>
+                            <div class="label">迟到</div>
+                        </div>
+                        <div class="statistic">
+                            <div class="value">{{ user.walk_in_rentals.count() }}</div>
+                            <div class="label">未预约到场</div>
+                        </div>
+                    </div>
                 </div>
                 {% if user.gre_verbal_prediction %}
                 <div class="ui vertical segment">
@@ -521,6 +544,10 @@ $.getJSON(overviewDataUrl, function(data) {
     };
     {% endif %}
 });
+
+if ($(window).width() < 768) {
+    $('#booking-stats').removeClass('seven').addClass('horizontal');
+};
 {% endif %}
 
 {% if show_profile_progress %}
