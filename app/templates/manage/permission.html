@@ -32,6 +32,14 @@
                                 {{ form.name.label() }}
                                 {{ form.name(placeholder='权限名称') }}
                             </div>
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.overdue_check() }}
+                                        {{ form.overdue_check.label() }}
+                                    </div>
+                                </div>
+                            </div>
                             {{ form.submit(class='ui primary button') }}
                         </form>
                     </div>
@@ -48,6 +56,7 @@
                             <th>权限名称</th>
                             <th>角色数量</th>
                             <th>赋予角色</th>
+                            <th>逾期失效</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -63,6 +72,7 @@
                                 </div>
                                 {% else %}无{% endif %}
                             </td>
+                            {% if permission.overdue_check %}<td class="active">是</td>{% else %}<td>否</td>{% endif %}
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.permission', page=pagination.page)) }}"><i class="edit icon"></i></a>

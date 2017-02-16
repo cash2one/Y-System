@@ -4486,7 +4486,7 @@ def permission():
         if Permission.query.filter_by(name=form.name.data).first() is not None:
             flash(u'“%s”权限已存在' % form.name.data, category='error')
             return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
-        permission = Permission(name=form.name.data)
+        permission = Permission(name=form.name.data, overdue_check=form.overdue_check.data)
         db.session.add(permission)
         flash(u'已添加权限：%s' % form.name.data, category='success')
         return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
@@ -4589,10 +4589,12 @@ def edit_permission(id):
     form = EditPermissionForm(permission=permission)
     if form.validate_on_submit():
         permission.name = form.name.data
+        permission.overdue_check = form.overdue_check.data
         db.session.add(permission)
         flash(u'已更新权限：%s' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.permission'))
     form.name.data = permission.name
+    form.overdue_check.data = permission.overdue_check
     return render_template('manage/edit_permission.html', form=form, permission=permission)
 
 
