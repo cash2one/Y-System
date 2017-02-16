@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <div class="column">
-                        <form id="find-ipad" action="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id) }}" method="POST" class="ui form">
+                        <form id="find-ipad" action="{{ url_for('manage.rental_exchange_step_1', rental_id=rental.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.serial.label() }}

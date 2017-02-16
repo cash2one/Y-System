@@ -53,10 +53,12 @@ def profile(id):
     show_profile_overview = True
     show_profile_progress = False
     show_profile_bookings = False
+    show_profile_archive = False
     if current_user.is_authenticated:
         show_profile_overview = bool(request.cookies.get('show_profile_overview', '1'))
         show_profile_progress = bool(request.cookies.get('show_profile_progress', ''))
         show_profile_bookings = bool(request.cookies.get('show_profile_bookings', ''))
+        show_profile_archive = bool(request.cookies.get('show_profile_archive', ''))
     # overview
     if show_profile_overview:
         bookings = []
@@ -75,6 +77,10 @@ def profile(id):
             .order_by(Schedule.period_id.asc())\
             .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
         bookings = pagination.items
+    # progress
+    if show_profile_archive:
+        bookings = []
+        pagination = None
     # announcements
     announcements = []
     if user.id == current_user.id:
@@ -84,6 +90,7 @@ def profile(id):
         show_profile_overview=show_profile_overview,
         show_profile_progress=show_profile_progress,
         show_profile_bookings=show_profile_bookings,
+        show_profile_archive=show_profile_archive,
         bookings=bookings,
         pagination=pagination,
         announcements=announcements
@@ -97,6 +104,7 @@ def profile_overview(id):
     resp.set_cookie('show_profile_overview', '1', max_age=30*24*60*60)
     resp.set_cookie('show_profile_progress', '', max_age=30*24*60*60)
     resp.set_cookie('show_profile_bookings', '', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_archive', '', max_age=30*24*60*60)
     return resp
 
 
@@ -107,6 +115,7 @@ def profile_progress(id):
     resp.set_cookie('show_profile_overview', '', max_age=30*24*60*60)
     resp.set_cookie('show_profile_progress', '1', max_age=30*24*60*60)
     resp.set_cookie('show_profile_bookings', '', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_archive', '', max_age=30*24*60*60)
     return resp
 
 
@@ -117,12 +126,24 @@ def profile_bookings(id):
     resp.set_cookie('show_profile_overview', '', max_age=30*24*60*60)
     resp.set_cookie('show_profile_progress', '', max_age=30*24*60*60)
     resp.set_cookie('show_profile_bookings', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_archive', '', max_age=30*24*60*60)
     return resp
 
 
-@main.route('/profile/<int:id>/progress/data')
+@main.route('/profile/<int:id>/archive')
 @login_required
-def profile_progress_data(id):
+def profile_archive(id):
+    resp = make_response(redirect(url_for('main.profile', id=id)))
+    resp.set_cookie('show_profile_overview', '', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_progress', '', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_bookings', '', max_age=30*24*60*60)
+    resp.set_cookie('show_profile_archive', '1', max_age=30*24*60*60)
+    return resp
+
+
+@main.route('/profile/<int:id>/overview/data')
+@login_required
+def profile_overview_data(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
@@ -132,6 +153,10 @@ def profile_progress_data(id):
         'progress': {
             'vb': user.vb_progress_json,
             'y_gre': user.y_gre_progress_json,
+        },
+        'last_punch': {
+            'vb': user.last_vb_punch_json,
+            'y_gre': user.last_y_gre_punch_json,
         },
     })
 

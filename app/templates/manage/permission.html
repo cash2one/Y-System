@@ -61,9 +61,7 @@
                                 <div class="ui ordered list">
                                     {% for role_permission in permission.roles %}<div class="item">{{ role_permission.role.name }} <a href="{{ url_for('manage.edit_role', id=role_permission.role.id, next=url_for('manage.permission', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
                                 </div>
-                                {% else %}
-                                无
-                                {% endif %}
+                                {% else %}无{% endif %}
                             </td>
                             <td>
                                 <div class="ui mini icon buttons">
@@ -74,15 +72,13 @@
                                     <div id="delete-trigger-{{ permission.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                     {% endif %}
                                 </div>
-                                {% if permission.roles.count() == 0 %}
-                                <div id="delete-modal-{{ permission.id }}" class="ui modal">
+                                {% if permission.roles.count() == 0 %}<div id="delete-modal-{{ permission.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除权限“{{ permission.name }}”？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_permission', id=permission.id, next=url_for('manage.permission', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ permission.id }}" class="ui black button">保留</div>
                                     </div>
-                                </div>
-                                {% endif %}
+                                </div>{% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -112,8 +108,7 @@ $('.ui.checkbox').checkbox();
 
 $('.ui.sortable.table').tablesort();
 
-{% for permission in permissions %}
-{% if permission.roles.count() == 0 %}
+{% for permission in permissions %}{% if permission.roles.count() == 0 %}
 $('#delete-trigger-{{ permission.id }}')
     .on('click', function() {
         $('#delete-modal-{{ permission.id }}').modal({ autofocus: false }).modal('show');
@@ -124,8 +119,7 @@ $('#delete-hide-trigger-{{ permission.id }}')
         $('#delete-modal-{{ permission.id }}').modal('hide');
     })
 ;
-{% endif %}
-{% endfor %}
+{% endif %}{% endfor %}
 
 $('#new-permission-trigger').popup();
 $('#new-permission-trigger')

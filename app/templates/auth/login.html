@@ -25,7 +25,7 @@
 <div class="ui middle aligned center aligned grid">
     <div class="column">
         <h2 class="ui inverted header">登录账户</h2>
-        <form id="login" action="{{ url_for('auth.login') }}" method="POST" class="ui inverted form">
+        <form id="login" action="{{ url_for('auth.login', next=request.args.get('next')) }}" method="POST" class="ui inverted form">
             <div class="ui inverted segment">
                 {{ form.hidden_tag() }}
                 {% with email_errors = form.email.errors %}

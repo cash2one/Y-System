@@ -907,6 +907,10 @@ class GRETestScore(db.Model):
     def alias(self):
         return u'%s %s V%g Q%g AW%s' % (self.user.name_alias, self.test.date, self.v_score, self.q_score, self.aw_score.name)
 
+    @property
+    def alias2(self):
+        return u'Verbal Reasoning：%g · Quantitative Reasoning：%g · Analytical Writing：%s' % (self.v_score, self.q_score, self.aw_score.name)
+
     def __repr__(self):
         return '<GRE Test Score %r>' % self.alias
 
@@ -1686,6 +1690,11 @@ class User(UserMixin, db.Model):
     def received_user(self, user):
         return self.made_receptions.filter_by(user_id=user.id).first() is not None
 
+    @property
+    def received_by(self):
+        if self.received_receptions.count():
+            return self.received_receptions.first().receptionist
+
     def create_user(self, user):
         user.created = True
         user.created_at = datetime.utcnow()
@@ -1705,6 +1714,10 @@ class User(UserMixin, db.Model):
 
     def created_user(self, user):
         return self.made_user_creations.filter_by(user_id=user.id).first() is not None
+
+    @property
+    def created_by(self):
+        return self.received_user_creations.first().creator
 
     def register_group(self, organizer):
         if not self.is_registering_group(organizer):
@@ -2308,6 +2321,7 @@ class User(UserMixin, db.Model):
             'name': self.name,
             'email': self.email,
             'name_alias': self.name_alias,
+            'avatar': self.avatar(),
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
@@ -2316,18 +2330,17 @@ class User(UserMixin, db.Model):
         return user_json
 
     def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False):
+        user_json_suggestion = {
+            'image': self.avatar(size=80),
+        }
         if suggest_email:
-            user_json_suggestion = {
-                'title': self.email,
-            }
+            user_json_suggestion['title'] = self.email
             if include_role:
                 user_json_suggestion['description'] = u'%s [%s]' % (self.name, self.role.name)
             else:
                 user_json_suggestion['description'] = self.name
         else:
-            user_json_suggestion = {
-                'title': self.name,
-            }
+            user_json_suggestion['title'] = self.name
             if include_role:
                 user_json_suggestion['description'] = u'%s [%s]' % (self.email, self.role.name)
             else:
@@ -2491,13 +2504,7 @@ class EducationRecord(db.Model):
     @property
     def gpa_alias(self):
         if self.gpa is not None:
-            return u'%g' % self.gpa
-        return u''
-
-    @property
-    def full_gpa_alias(self):
-        if self.full_gpa is not None:
-            return u'%g' % self.full_gpa
+            return u'%g/%g' % (self.gpa, self.full_gpa)
         return u''
 
     @property
@@ -2574,10 +2581,10 @@ class ScoreRecord(db.Model):
 
     @property
     def alias(self):
-        return u'%s %s %g %s' % (self.user.name_alias, self.type.name, self.score, self.full_score, self.remark)
+        return u'%s %s %s' % (self.user.name_alias, self.type.name, self.score_alias)
 
     @property
-    def alias2(self):
+    def score_alias(self):
         if self.score:
             if self.full_score:
                 return u'%g/%g 分' % (self.score, self.full_score)

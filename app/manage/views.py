@@ -570,7 +570,7 @@ def rental_rent_step_1():
             return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))
         if not booking.valid:
             flash(u'该预约处于“%s”状态' % booking.state.name, category='error')
-            return redirect(url_for('manage.rental_rent_step_1'))
+            return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))
         if booking.schedule.date != date.today():
             flash(u'预约的日期（%s）不在今天' % booking.schedule.date, category='error')
             return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))
@@ -699,8 +699,8 @@ def rental_rent_step_1_alt():
         user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
         if user is None:
             flash(u'邮箱不存在', category='error')
-            return redirect(url_for('manage.rental_rent_step_1_alt'))
-        return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user.id))
+            return redirect(url_for('manage.rental_rent_step_1_alt', next=request.args.get('next')))
+        return redirect(url_for('manage.rental_rent_step_2_alt', user_id=user.id, next=request.args.get('next')))
     return render_template('manage/rental_rent_step_1_alt.html', form=form)
 
 
@@ -713,7 +713,7 @@ def rental_rent_step_2_alt(user_id):
         abort(404)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=int(form.ipad.data)))
+        return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
     return render_template('manage/rental_rent_step_2_alt.html', user=user, form=form)
 
 
@@ -730,19 +730,19 @@ def rental_rent_step_3_alt(user_id, ipad_id):
     schedule = Schedule.current_schedule(user.last_punch.section.lesson.type.name)
     if schedule is None:
         flash(u'目前没有开放的%s时段，无法借出iPad' % user.last_punch.section.lesson.type.name, category='error')
-        return redirect(url_for('manage.rental'))
+        return redirect(request.args.get('next') or url_for('manage.rental'))
     form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
         if serial != ipad.serial:
             flash(u'iPad序列号信息有误', category='error')
-            return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
+            return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id, next=request.args.get('next')))
         if ipad.state.name not in [u'待机', u'候补']:
             flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
-            return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
+            return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id, next=request.args.get('next')))
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
-            return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id))
+            return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=ipad_id, next=request.args.get('next')))
         rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, walk_in=True, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
@@ -760,7 +760,7 @@ def rental_rent_step_2_lesson_alt(user_id):
         abort(404)
     form = SelectLessonForm()
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_3_lesson_alt', user_id=user_id, lesson_id=int(form.lesson.data)))
+        return redirect(url_for('manage.rental_rent_step_3_lesson_alt', user_id=user_id, lesson_id=int(form.lesson.data), next=request.args.get('next')))
     return render_template('manage/rental_rent_step_2_lesson_alt.html', user=user, form=form)
 
 
@@ -774,7 +774,7 @@ def rental_rent_step_3_lesson_alt(user_id, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
     form = RentiPadByLessonForm(lesson=lesson)
     if form.validate_on_submit():
-        return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data)))
+        return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
     return render_template('manage/rental_rent_step_3_lesson_alt.html', user=user, lesson=lesson, form=form)
 
 
@@ -792,19 +792,19 @@ def rental_rent_step_4_lesson_alt(user_id, lesson_id, ipad_id):
     schedule = Schedule.current_schedule(lesson.type.name)
     if schedule is None:
         flash(u'目前没有开放的%s时段，无法借出iPad' % lesson.type.name, category='error')
-        return redirect(url_for('manage.rental'))
+        return redirect(request.args.get('next') or url_for('manage.rental'))
     form = ConfirmiPadForm()
     if form.validate_on_submit():
         serial = form.serial.data
         if serial != ipad.serial:
             flash(u'iPad序列号信息有误', category='error')
-            return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=ipad_id))
+            return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         if ipad.state.name not in [u'待机', u'候补']:
             flash(u'序列号为%s的iPad处于“%s”状态，不能借出' % (ipad.serial, ipad.state.name), category='error')
-            return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=ipad_id))
+            return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         if user.has_unreturned_ipads:
             flash(u'%s有未归换的iPad' % user.name, category='error')
-            return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=ipad_id))
+            return redirect(url_for('manage.rental_rent_step_4_lesson_alt', user_id=user_id, lesson_id=lesson_id, ipad_id=ipad_id, next=request.args.get('next')))
         rental = Rental(user_id=user.id, ipad_id=ipad.id, schedule_id=schedule.id, walk_in=True, rent_agent_id=current_user.id)
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
@@ -3101,7 +3101,7 @@ def edit_user(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and user.id != current_user.id):
+    if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and (user.id != current_user.id or not current_user.is_superior_than(user=user))):
         abort(403)
     # name
     edit_name_form = EditNameForm(prefix='edit_name')
@@ -3473,7 +3473,7 @@ def delete_user(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.is_superior_than(user=current_user._get_current_object()) or user.id == current_user.id:
+    if user.id == current_user.id or (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and not current_user.is_superior_than(user=user)):
         abort(403)
     user.safe_delete()
     flash(u'已注销用户：%s' % user.name_alias, category='success')
@@ -3685,19 +3685,19 @@ def add_group_member(id):
         member = User.query.filter_by(email=form.member_email.data.lower(), created=True, activated=True, deleted=False).first()
         if member is None:
             flash(u'团报成员邮箱不存在：%s' % form.member_email.data.lower(), category='error')
-            return redirect(url_for('manage.add_group_member', id=organizer.id))
+            return redirect(url_for('manage.add_group_member', id=organizer.id, next=request.args.get('next')))
         if member.organized_groups.count():
             flash(u'%s已经发起过团报' % (member.name_alias), category='error')
-            return redirect(url_for('manage.add_group_member', id=organizer.id))
+            return redirect(url_for('manage.add_group_member', id=organizer.id, next=request.args.get('next')))
         if member.registered_groups.count():
             flash(u'%s已经参加过%s发起的团报' % (member.name_alias, member.registered_groups.first().organizer.name_alias), category='error')
-            return redirect(url_for('manage.add_group_member', id=organizer.id))
+            return redirect(url_for('manage.add_group_member', id=organizer.id, next=request.args.get('next')))
         if member.is_registering_group(organizer=organizer):
             flash(u'%s已经参加过%s发起的团报' % (member.name_alias, organizer.name_alias), category='error')
-            return redirect(request.args.get('next') or url_for('manage.add_group_member', id=organizer.id))
+            return redirect(url_for('manage.add_group_member', id=organizer.id, next=request.args.get('next')))
         if organizer.organized_groups.count() > current_app.config['MAX_GROUP_SIZE']:
             flash(u'%s发起的团报人数已达到上限（%s人）' % (organizer.name_alias, current_app.config['MAX_GROUP_SIZE']), category='error')
-            return redirect(url_for('manage.add_group_member', id=organizer.id))
+            return redirect(url_for('manage.add_group_member', id=organizer.id, next=request.args.get('next')))
         member.register_group(organizer=organizer)
         flash(u'%s已成功加入%s发起的团报' % (member.name_alias, organizer.name_alias), category='success')
         return redirect(request.args.get('next') or url_for('manage.group'))
