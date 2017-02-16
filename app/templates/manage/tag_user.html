@@ -74,7 +74,7 @@
                                     {% if user.id == current_user.id %}<div class="ui negative button disabled"><i class="remove user icon"></i></div>{% else %}<div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>{% endif %}
                                 </div>
                                 {% if user.id != current_user.id %}<div id="delete-modal-{{ user.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i>确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要注销用户：[{{ user.role.name }}]{{ user.name_alias }}？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.tag_user', id=tag.id, page=pagination.page)) }}"><i class="remove user icon"></i>注销</a>
                                         <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>

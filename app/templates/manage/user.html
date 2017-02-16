@@ -166,11 +166,18 @@
                                 {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
-                                    {% if user.is_suspended %}<a class="ui button loading-trigger" href="#"><i class="play icon"></i></a>{% else %}<a class="ui button loading-trigger" href="#"><i class="pause icon"></i></a>{% endif %}
+                                    <div class="ui {% if user.is_suspended %}green{% else %}orange{% endif %} button"><i id="suspend-trigger-{{ user.id }}" class="{% if user.is_suspended %}play{% else %}pause{% endif %} icon"></i></div>
                                     {% if user.id == current_user.id %}<div class="ui negative button disabled"><i class="remove user icon"></i></div>{% else %}<div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>{% endif %}
                                 </div>
+                                <div id="suspend-modal-{{ user.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要挂起用户：[{{ user.role.name }}]{{ user.name_alias }}？</div>
+                                    <div class="actions">
+                                        <a class="ui {% if user.is_suspended %}green{% else %}orange{% endif %} left labeled icon button loading-trigger" href="#"><i class="{% if user.is_suspended %}play{% else %}pause{% endif %} icon"></i>{% if user.is_suspended %}继续{% else %}挂起{% endif %} </a>
+                                        <div id="suspend-hide-trigger-{{ user.id }}" class="ui black button">返回</div>
+                                    </div>
+                                </div>
                                 {% if user.id != current_user.id %}<div id="delete-modal-{{ user.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i>确定要{% if user.created %}注销用户{% else %}删除未完成注册的用户信息{% endif %}：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要{% if user.created %}注销用户{% else %}删除未完成注册的用户信息{% endif %}：[{{ user.role.name }}]{{ user.name_alias }}？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{% if user.created %}{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_delete', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="remove user icon"></i>{% if user.created %}注销{% else %}删除{% endif %}</a>
                                         <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
@@ -214,7 +221,18 @@ $('.ui.sortable.table').tablesort();
 
 {% if current_user.can('管理用户') %}
 $('#create-user-trigger').popup();
-{% for user in users %}{% if user.id != current_user.id and (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and current_user.is_superior_than(user=user)) %}
+{% for user in users %}{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
+$('#suspend-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#suspend-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#suspend-hide-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#suspend-modal-{{ user.id }}').modal('hide');
+    })
+;
+{% if user.id != current_user.id %}
 $('#delete-trigger-{{ user.id }}')
     .on('click', function() {
         $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
@@ -225,6 +243,7 @@ $('#delete-hide-trigger-{{ user.id }}')
         $('#delete-modal-{{ user.id }}').modal('hide');
     })
 ;
+{% endif %}
 {% endif %}{% endfor %}
 {% if current_user.can('管理权限') %}
 $('#create-admin-trigger')
