@@ -107,28 +107,19 @@
                 <div class="ui blue dividing header">紧急联系人</div>
                 {% with records = user.education_records %}{% if records.count() %}
                 <div class="ui blue dividing header">教育经历</div>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>学历</th>
-                            <th>学校</th>
-                            <th>专业</th>
-                            <th>GPA</th>
-                            <th>入学年份</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for record in records %}
-                        <tr>
-                            <td>{{ record.type.name }}</td>
-                            <td>{{ record.school }}</td>
-                            <td>{{ record.major }}</td>
-                            <td>{{ record.gpa_alias }}</td>
-                            <td>{{ record.year }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="ui relaxed divided list">
+                    {% for record in records %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ record.year }}级</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ record.school }}</div>
+                            <div class="description">{{ record.type.name }} &middot; {% if record.major %}{{ record.major }}{% endif %}{% if record.gpa %} &middot; GPA：{{ record.gpa_alias }}{% endif %}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% endif %}{% endwith %}
                 {% with records = user.employment_records %}{% if records.count() %}
                 <div class="ui blue dividing header">工作经历</div>
@@ -145,24 +136,6 @@
                     </div>
                     {% endfor %}
                 </div>
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>工作单位</th>
-                            <th>职务</th>
-                            <th>入职年份</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for record in records %}
-                        <tr>
-                            <td>{{ record.employer }}</td>
-                            <td>{{ record.position }}</td>
-                            <td>{{ record.year }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
                 {% endif %}{% endwith %}
                 {% with scores = user.gre_test_scores %}{% if scores.count() %}
                 <div class="ui blue dividing header">GRE成绩</div>
