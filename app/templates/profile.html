@@ -6,13 +6,6 @@
 {% block customized_styles %}
 {{ super() }}
 {% include '_style_common.html' %}
-{% if show_profile_overview %}
-<style type="text/css">
-#overview-vb-progress div.label,
-#overview-y-gre-progress div.label {
-    text-align: left;
-}
-{% endif %}
 </style>
 {% endblock %}
 
@@ -76,19 +69,29 @@
             <div class="twelve wide column">
                 <div class="ui large four item secondary pointing menu">
                     <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="address card outline icon"></i>概览</a>
-                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="book icon"></i>进度</a>
+                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="flag icon"></i>进度</a>
                     <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
                     {% if current_user.can('管理') %}<a class="item {% if show_profile_archive %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_archive', id=user.id) }}"><i class="archive icon"></i>存档</a>{% endif %}
                 </div>
                 {% if show_profile_overview %}
-                <div id="overview-progress" class="ui vertical segment loading">
-                    <div id="overview-vb-progress" class="ui header disabled">VB完成 <span id="overview-vb-progress-data">0</span>%</div>
+                <div id="progress" class="ui vertical segment loading">
+                    <div id="vb-progress" class="ui header disabled">
+                        <div class="content">
+                            VB完成 <span id="vb-progress-data">0</span>%
+                            <div class="sub header"><i class="bookmark icon"></i><span id="last-vb-punch">N/A</span></div>
+                        </div>
+                    </div>
                     <div id="overview-vb-progress-bar" class="ui tiny progress disabled">
                         <div class="bar"></div>
                     </div>
                     {% if user.can('预约Y-GRE课程') %}
-                    <div id="overview-y-gre-progress" class="ui header disabled">Y-GRE完成 <span id="overview-y-gre-progress-data">0</span>%</div>
-                    <div id="overview-y-gre-progress-bar" class="ui tiny progress disabled">
+                    <div id="y-gre-progress" class="ui header disabled">
+                        <div class="content">
+                            Y-GRE完成 <span id="y-gre-progress-data">0</span>%
+                            <div class="sub header"><i class="bookmark icon"></i><span id="last-y-gre-punch">N/A</span></div>
+                        </div>
+                    </div>
+                    <div id="y-gre-progress-bar" class="ui tiny progress disabled">
                         <div class="bar"></div>
                     </div>
                     {% endif %}
@@ -219,8 +222,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="ui vertical segment">
-                    {% with records = user.education_records %}{% if records.count() %}
+                {% with records = user.education_records %}{% if records.count() %}<div class="ui vertical segment">
                     <div class="ui header">教育经历</div>
                     <div class="ui relaxed list">
                         {% for record in records %}
@@ -235,10 +237,8 @@
                         </div>
                         {% endfor %}
                     </div>
-                    {% endif %}{% endwith %}
-                </div>
-                <div class="ui vertical segment">
-                    {% with records = user.employment_records %}{% if records.count() %}
+                </div>{% endif %}{% endwith %}
+                {% with records = user.employment_records %}{% if records.count() %}<div class="ui vertical segment">
                     <div class="ui header">工作经历</div>
                     <div class="ui relaxed list">
                         {% for record in records %}
@@ -253,10 +253,8 @@
                         </div>
                         {% endfor %}
                     </div>
-                    {% endif %}{% endwith %}
-                </div>
-                <div class="ui vertical segment">
-                    {% with scores = user.score_records %}{% if scores.count() %}
+                </div>{% endif %}{% endwith %}
+                {% with scores = user.score_records %}{% if scores.count() %}<div class="ui vertical segment">
                     <div class="ui header">既往成绩</div>
                     <div class="ui relaxed list">
                         {% for score_record in user.score_records %}
@@ -268,8 +266,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                    {% endif %}{% endwith %}
-                </div>
+                </div>{% endif %}{% endwith %}
                 <div class="ui vertical segment">
                     <div class="ui header">报名信息</div>
                     <div class="ui relaxed list">
@@ -305,8 +302,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="ui vertical segment">
-                    {% if user.worked_in_same_field or user.deformity %}
+                {% if user.worked_in_same_field or user.deformity %}<div class="ui vertical segment">
                     <div class="ui header">其它信息</div>
                     <div class="ui relaxed list">
                         {% if user.worked_in_same_field %}
@@ -326,13 +322,10 @@
                         </div>
                         {% endif %}
                     </div>
-                    {% endif %}
-                </div>
-                <div class="ui vertical segment">
-                    {% if current_user.can('管理用户') and not user.deleted and ((not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user)))) %}
+                </div>{% endif %}
+                {% if current_user.can('管理用户') and not user.deleted and ((not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user)))) %}<div class="ui vertical segment">
                     <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>
-                    {% endif %}
-                </div>
+                </div>{% endif %}
                 {% endif %}
                 {% if show_profile_progress %}
                 <div id="vb" class="ui vertical segment loading">
@@ -486,14 +479,21 @@ var countUpOptions = {
     prefix: '',
     suffix: ''
 };
-var VBProgressCountUp = new CountUp('overview-vb-progress-data', 0, 0, 0, 2.5, countUpOptions);
-{% if user.can('预约Y-GRE课程') %}var YGREProgressCountUp = new CountUp('overview-y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);{% endif %}
-var progressDataUrl = "{{ url_for('main.profile_progress_data', id=user.id) }}";
-$.getJSON(progressDataUrl, function(data) {
-    $('#overview-progress').removeClass('loading');
+var VBProgressCountUp = new CountUp('vb-progress-data', 0, 0, 0, 2.5, countUpOptions);
+{% if user.can('预约Y-GRE课程') %}var YGREProgressCountUp = new CountUp('y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);{% endif %}
+var overviewDataUrl = "{{ url_for('main.profile_overview_data', id=user.id) }}";
+$.getJSON(overviewDataUrl, function(data) {
+    $('#progress').removeClass('loading');
     if (data.progress.vb.value > 0) {
-        $('#overview-vb-progress').removeClass('disabled');
-        $('#overview-vb-progress-bar').removeClass('disabled').addClass('blue').progress({
+        $('#vb-progress').removeClass('disabled');
+        $('#last-vb-punch').text(function() {
+            if (data.last_punch.vb) {
+                return data.last_punch.vb.section.alias;
+            } else {
+                return 'N/A';
+            };
+        });
+        $('#vb-progress-bar').removeClass('disabled').addClass('blue').progress({
             total: data.progress.vb.total,
             value: data.progress.vb.value,
             onChange: function(percent) {
@@ -503,8 +503,15 @@ $.getJSON(progressDataUrl, function(data) {
     };
     {% if user.can('预约Y-GRE课程') %}
     if (data.progress.y_gre.value > 0) {
-        $('#overview-y-gre-progress').removeClass('disabled');
-        $('#overview-y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({
+        $('#y-gre-progress').removeClass('disabled');
+        $('#last-y-gre-punch').text(function() {
+            if (data.last_punch.y_gre) {
+                return data.last_punch.y_gre.section.alias;
+            } else {
+                return 'N/A';
+            };
+        });
+        $('#y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({
             total: data.progress.y_gre.total,
             value: data.progress.y_gre.value,
             onChange: function(percent) {

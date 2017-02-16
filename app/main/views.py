@@ -141,9 +141,9 @@ def profile_archive(id):
     return resp
 
 
-@main.route('/profile/<int:id>/progress/data')
+@main.route('/profile/<int:id>/overview/data')
 @login_required
-def profile_progress_data(id):
+def profile_overview_data(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
@@ -153,6 +153,10 @@ def profile_progress_data(id):
         'progress': {
             'vb': user.vb_progress_json,
             'y_gre': user.y_gre_progress_json,
+        },
+        'last_punch': {
+            'vb': user.last_vb_punch_json,
+            'y_gre': user.last_y_gre_punch_json,
         },
     })
 
