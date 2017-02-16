@@ -6,11 +6,13 @@
 {% block customized_styles %}
 {{ super() }}
 {% include '_style_common.html' %}
+{% if show_profile_overview %}
 <style type="text/css">
-#side-bar-vb-progress div.label,
-#side-bar-y-gre-progress div.label {
+#overview-vb-progress div.label,
+#overview-y-gre-progress div.label {
     text-align: left;
 }
+{% endif %}
 </style>
 {% endblock %}
 
@@ -49,18 +51,80 @@
                 <div class="ui vertical segment">
                     <div>{{ macros.user_email(user) }}</div>
                 </div>
-                <div id="side-bar-progress" class="ui vertical segment loading">
-                    <div class="ui header">学习进度</div>
-                    <div id="side-bar-vb-progress" class="ui tiny progress disabled">
+                {% if current_user.can('管理') and user.has_tags.count()  %}
+                <div class="ui vertical segment">
+                    {% with tags = user.has_tags %}
+                    <div class="ui labels">
+                        {% for tag in tags %}<div class="ui {{ tag.tag.color.css_class }} label"><i class="tag icon"></i>{{ tag.tag.name }}</div>{% endfor %}
+                    </div>
+                    {% endwith %}
+                </div>
+                {% endif %}
+                <div class="ui vertical segment">
+                    <div>激活时间：<span class="popup-trigger" data-variation="inverted">{{ moment(user.activated_at).fromNow() }}</span></div>
+                    <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
+                    <div>上次登录：<span class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</span></div>
+                    <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
+                </div>
+                {% if current_user.can('管理') %}
+                <div class="ui vertical segment">
+                    <div>创建人：{{ macros.user_popup(user.created_by, user.created_by.id == current_user.id) }}</div>
+                    {% if user.received_by %}<div>接待人：{{ macros.user_popup(user.received_by, user.received_by.id == current_user.id) }}</div>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="twelve wide column">
+                <div class="ui large three item secondary pointing menu">
+                    <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="address card outline icon"></i>概览</a>
+                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="book icon"></i>进度</a>
+                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
+                </div>
+                {% if show_profile_overview %}
+                <div id="overview-progress" class="ui vertical segment loading">
+                    <div id="overview-vb-progress" class="ui header disabled">VB完成 <span id="overview-vb-progress-data">0</span>%</div>
+                    <div id="overview-vb-progress-bar" class="ui tiny progress disabled">
                         <div class="bar"></div>
-                        <div class="label">VB完成 0%</div>
                     </div>
                     {% if user.can('预约Y-GRE课程') %}
-                    <div id="side-bar-y-gre-progress" class="ui tiny progress disabled">
+                    <div id="overview-y-gre-progress" class="ui header disabled">Y-GRE完成 <span id="overview-y-gre-progress-data">0</span>%</div>
+                    <div id="overview-y-gre-progress-bar" class="ui tiny progress disabled">
                         <div class="bar"></div>
-                        <div class="label">Y-GRE完成 0%</div>
                     </div>
                     {% endif %}
+                </div>
+                <div class="ui vertical segment">
+                    {% with scores = user.gre_test_scores %}{% if scores.count() %}
+                    <div class="ui header">GRE成绩</div>
+                    <div class="ui relaxed list">
+                        {% for score in scores %}
+                        <div class="item">
+                            <div class="right floated content">
+                                <div class="description">{{ score.test.date }}</div>
+                            </div>
+                            <div class="content">
+                                <div class="header">{{ score.alias2 }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}{% endwith %}
+                </div>
+                <div class="ui vertical segment">
+                    {% with scores = user.toefl_test_scores %}{% if scores.count() %}
+                    <div class="ui header">TOEFL成绩</div>
+                    <div class="ui relaxed list">
+                        {% for score in scores %}
+                        <div class="item">
+                            <div class="right floated content">
+                                <div class="description">{{ score.test.date }}</div>
+                            </div>
+                            <div class="content">
+                                <div class="header">{{ score.alias2 }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}{% endwith %}
                 </div>
                 {% if user.gre_verbal_prediction %}
                 <div class="ui vertical segment">
@@ -78,236 +142,198 @@
                     <div>迟到 {{ user.late_bookings.count() }} 次</div>
                     <div>未预约到场 {{ user.walk_in_rentals.count() }} 次</div>
                 </div>
-                {% if current_user.can('管理') %}
                 <div class="ui vertical segment">
-                    <div class="ui header">用户标签</div>
-                    {% if user.has_tags.count() %}
-                    {% with tags = user.has_tags %}
-                    <div class="ui labels">
-                        {% for tag in tags %}<div class="ui {{ tag.tag.color.css_class }} label"><i class="tag icon"></i>{{ tag.tag.name }}</div>{% endfor %}
-                    </div>
-                    {% endwith %}
-                    {% else %}无{% endif %}
+                    <div class="ui header">时间线</div>
                 </div>
-                {% endif %}
                 <div class="ui vertical segment">
-                    <div class="popup-trigger" data-variation="inverted">激活时间：{{ moment(user.activated_at).fromNow() }}</div>
-                    <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
-                </div>
-            </div>
-            <div class="twelve wide column">
-                <div class="ui large three item secondary pointing menu">
-                    <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="address card outline icon"></i>概览</a>
-                    <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="book icon"></i>进度</a>
-                    <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
-                </div>
-                {% if show_profile_overview %}
-                {% if current_user.can('管理') %}
-                <div class="ui blue dividing header">基本信息</div>
-                <div class="ui relaxed divided list">
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">生日</div>
-                            <div class="description">{{ user.birthdate_alias }}</div>
+                    <div class="ui header">基本信息</div>
+                    <div class="ui relaxed list">
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">生日</div>
+                                <div class="description">{{ user.birthdate_alias }}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">身份证号</div>
-                            <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">身份证号</div>
+                                <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="ui blue dividing header">联系方式</div>
-                <div class="ui relaxed divided list">
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">电子邮箱</div>
-                            <div class="description">{{ user.email }}</div>
+                <div class="ui vertical segment">
+                    <div class="ui header">联系方式</div>
+                    <div class="ui relaxed list">
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">电子邮箱</div>
+                                <div class="description">{{ user.email }}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">移动电话</div>
-                            <div class="description">{% if user.mobile %}{{ user.mobile }}{% else %}无{% endif %}</div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">移动电话</div>
+                                <div class="description">{% if user.mobile %}{{ user.mobile }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">联系地址</div>
-                            <div class="description">{% if user.address %}{{ user.address }}{% else %}无{% endif %}</div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">联系地址</div>
+                                <div class="description">{% if user.address %}{{ user.address }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">QQ</div>
-                            <div class="description">{% if user.qq %}{{ user.qq }}{% else %}无{% endif %}</div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">QQ</div>
+                                <div class="description">{% if user.qq %}{{ user.qq }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">微信</div>
-                            <div class="description">{% if user.wechat %}{{ user.wechat }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="ui orange dividing header">紧急联系人</div>
-                <div class="ui relaxed divided list">
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">姓名</div>
-                            <div class="description">{% if user.emergency_contact_name %}{{ user.emergency_contact_name }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">关系</div>
-                            <div class="description">{% if user.emergency_contact_relationship_id %}{{ user.relationship.name }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">联系方式</div>
-                            <div class="description">{% if user.emergency_contact_mobile %}{{ user.emergency_contact_mobile }}{% else %}无{% endif %}</div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">微信</div>
+                                <div class="description">{% if user.wechat %}{{ user.wechat }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                {% endif %}
-                {% with records = user.education_records %}{% if records.count() %}
-                <div class="ui blue dividing header">教育经历</div>
-                <div class="ui relaxed divided list">
-                    {% for record in records %}
-                    <div class="item">
-                        <div class="right floated content">
-                            <div class="description">{{ record.year }}级</div>
+                <div class="ui vertical segment">
+                    <div class="ui header">紧急联系人</div>
+                    <div class="ui relaxed list">
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">姓名</div>
+                                <div class="description">{% if user.emergency_contact_name %}{{ user.emergency_contact_name }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
-                        <div class="content">
-                            <div class="header">{{ record.school }}</div>
-                            <div class="description">{{ record.type.name }} &middot; {% if record.major %}{{ record.major }}{% endif %}{% if record.gpa %} &middot; GPA：{{ record.gpa_alias }}{% endif %}</div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">关系</div>
+                                <div class="description">{% if user.emergency_contact_relationship_id %}{{ user.relationship.name }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}{% endwith %}
-                {% with records = user.employment_records %}{% if records.count() %}
-                <div class="ui blue dividing header">工作经历</div>
-                <div class="ui relaxed divided list">
-                    {% for record in records %}
-                    <div class="item">
-                        <div class="right floated content">
-                            <div class="description">{{ record.year }}年</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">{{ record.employer }}</div>
-                            <div class="description">{{ record.position }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}{% endwith %}
-                {% with scores = user.score_records %}{% if scores.count() %}
-                <div class="ui blue dividing header">既往成绩</div>
-                <div class="ui relaxed divided list">
-                    {% for score_record in user.score_records %}
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">{{ score_record.type.name }}</div>
-                            <div class="description">{{ score_record.score_alias }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}{% endwith %}
-                {% with scores = user.gre_test_scores %}{% if scores.count() %}
-                <div class="ui blue dividing header">GRE成绩</div>
-                <div class="ui relaxed divided list">
-                    {% for score in scores %}
-                    <div class="item">
-                        <div class="right floated content">
-                            <div class="description">{{ score.test.date }}</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">{{ score.alias2 }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}{% endwith %}
-                {% with scores = user.toefl_test_scores %}{% if scores.count() %}
-                <div class="ui blue dividing header">TOEFL成绩</div>
-                <div class="ui relaxed divided list">
-                    {% for score in scores %}
-                    <div class="item">
-                        <div class="right floated content">
-                            <div class="description">{{ score.test.date }}</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">{{ score.alias2 }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}{% endwith %}
-                {% if current_user.can('管理') %}
-                <div class="ui teal dividing header">报名信息</div>
-                <div class="ui relaxed divided list">
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">研修目的</div>
-                            <div class="description">{{ user.purposes_alias }}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">申请方向</div>
-                            <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">了解渠道</div>
-                            <div class="description">{{ user.referrers_alias }}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">推荐人</div>
-                            <div class="description">{{ user.inviters }}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="content">
-                            <div class="header">研修产品（总计：{{ user.purchases_total }}）</div>
-                            <div class="description">{{ user.purchases_alias }}</div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">联系方式</div>
+                                <div class="description">{% if user.emergency_contact_mobile %}{{ user.emergency_contact_mobile }}{% else %}无{% endif %}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                {% if user.worked_in_same_field or user.deformity %}
-                <div class="ui blue dividing header">其它信息</div>
-                <div class="ui relaxed divided list">
-                    {% if user.worked_in_same_field %}
-                    <div class="item">
-                        <i class="orange warning sign icon"></i>
-                        <div class="content">
-                            <div class="header">（曾）在培训/留学机构任职</div>
+                <div class="ui vertical segment">
+                    {% with records = user.education_records %}{% if records.count() %}
+                    <div class="ui header">教育经历</div>
+                    <div class="ui relaxed list">
+                        {% for record in records %}
+                        <div class="item">
+                            <div class="right floated content">
+                                <div class="description">{{ record.year }}级</div>
+                            </div>
+                            <div class="content">
+                                <div class="header">{{ record.school }}</div>
+                                <div class="description">{{ record.type.name }} &middot; {% if record.major %}{{ record.major }}{% endif %}{% if record.gpa %} &middot; GPA：{{ record.gpa_alias }}{% endif %}</div>
+                            </div>
                         </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}{% endwith %}
+                </div>
+                <div class="ui vertical segment">
+                    {% with records = user.employment_records %}{% if records.count() %}
+                    <div class="ui header">工作经历</div>
+                    <div class="ui relaxed list">
+                        {% for record in records %}
+                        <div class="item">
+                            <div class="right floated content">
+                                <div class="description">{{ record.year }}年</div>
+                            </div>
+                            <div class="content">
+                                <div class="header">{{ record.employer }}</div>
+                                <div class="description">{{ record.position }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}{% endwith %}
+                </div>
+                <div class="ui vertical segment">
+                    {% with scores = user.score_records %}{% if scores.count() %}
+                    <div class="ui header">既往成绩</div>
+                    <div class="ui relaxed list">
+                        {% for score_record in user.score_records %}
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">{{ score_record.type.name }}</div>
+                                <div class="description">{{ score_record.score_alias }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}{% endwith %}
+                </div>
+                <div class="ui vertical segment">
+                    <div class="ui header">报名信息</div>
+                    <div class="ui relaxed list">
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">研修目的</div>
+                                <div class="description">{{ user.purposes_alias }}</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">申请方向</div>
+                                <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">了解渠道</div>
+                                <div class="description">{{ user.referrers_alias }}</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">推荐人</div>
+                                <div class="description">{{ user.inviters }}</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">研修产品（总计：{{ user.purchases_total }}）</div>
+                                <div class="description">{{ user.purchases_alias }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui vertical segment">
+                    {% if user.worked_in_same_field or user.deformity %}
+                    <div class="ui header">其它信息</div>
+                    <div class="ui relaxed list">
+                        {% if user.worked_in_same_field %}
+                        <div class="item">
+                            <i class="orange warning sign icon"></i>
+                            <div class="content">
+                                <div class="header">（曾）在培训/留学机构任职</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if user.deformity %}
+                        <div class="item">
+                            <i class="orange warning sign icon"></i>
+                            <div class="content">
+                                <div class="header">有严重心里或身体疾病</div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endif %}
-                    {% if user.deformity %}
-                    <div class="item">
-                        <i class="orange warning sign icon"></i>
-                        <div class="content">
-                            <div class="header">有严重心里或身体疾病</div>
-                        </div>
-                    </div>
-                    {% endif %}
-                {% endif %}
                 </div>
-                {% if current_user.can('管理用户') and not user.deleted and ((not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user)))) %}
-                <div class="ui grey dividing header">操作</div>
-                <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>
-                {% endif %}
-                {% endif %}
+                <div class="ui vertical segment">
+                    {% if current_user.can('管理用户') and not user.deleted and ((not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user)))) %}
+                    <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>
+                    {% endif %}
+                </div>
                 {% endif %}
                 {% if show_profile_progress %}
                 <div id="vb" class="ui vertical segment loading">
@@ -432,7 +458,8 @@
 
 {% block customized_scripts %}
 {{ super() }}
-{% if show_profile_overview or show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
+{% if show_profile_overview %}<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/{{ Version.CountUp }}/countUp.min.js"></script>{% endif %}
+{% if show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
     .on('click', function() {
@@ -451,32 +478,43 @@ function noAvatar(avatarImage) {
     $(avatarImage).attr('src', "{{ url_for('static', filename='images/wireframes/square-image.png') }}");
 };
 
+{% if show_profile_overview %}
+var countUpOptions = {
+    useEasing: true,
+    useGrouping: true,
+    separator: ',',
+    decimal: '.',
+    prefix: '',
+    suffix: ''
+};
+var VBProgressCountUp = new CountUp('overview-vb-progress-data', 0, 0, 0, 2.5, countUpOptions);
+var YGREProgressCountUp = new CountUp('overview-y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);
 var progressDataUrl = "{{ url_for('main.profile_progress_data', id=user.id) }}";
 $.getJSON(progressDataUrl, function(data) {
-    $('#side-bar-progress').removeClass('loading');
+    $('#overview-progress').removeClass('loading');
     if (data.progress.vb.value > 0) {
-        $('#side-bar-vb-progress').removeClass('disabled').addClass('blue').progress({
+        $('#overview-vb-progress').removeClass('disabled');
+        $('#overview-vb-progress-bar').removeClass('disabled').addClass('blue').progress({
             total: data.progress.vb.total,
             value: data.progress.vb.value,
-            text: {
-                active: 'VB完成 {percent}%'
+            onChange: function(percent) {
+                VBProgressCountUp.update(percent);
             }
         });
     };
     {% if user.can('预约Y-GRE课程') %}
     if (data.progress.y_gre.value > 0) {
-        $('#side-bar-y-gre-progress').removeClass('disabled').addClass('teal').progress({
+        $('#overview-y-gre-progress').removeClass('disabled');
+        $('#overview-y-gre-progress-bar').removeClass('disabled').addClass('teal').progress({
             total: data.progress.y_gre.total,
             value: data.progress.y_gre.value,
-            text: {
-                active: 'Y-GRE完成 {percent}%'
+            onChange: function(percent) {
+                YGREProgressCountUp.update(percent);
             }
         });
     };
     {% endif %}
 });
-
-{% if show_profile_overview %}
 {% endif %}
 
 {% if show_profile_progress %}
@@ -757,7 +795,7 @@ $.getJSON(YGREProgressUrl, function(data) {
 {% endif %}
 {% endif %}
 
-{% if show_profile_overview or show_profile_bookings %}
+{% if show_profile_bookings %}
 $('.ui.sortable.table').tablesort();
 
 {% for booking in bookings %}

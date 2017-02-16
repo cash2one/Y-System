@@ -1690,6 +1690,11 @@ class User(UserMixin, db.Model):
     def received_user(self, user):
         return self.made_receptions.filter_by(user_id=user.id).first() is not None
 
+    @property
+    def received_by(self):
+        if self.received_receptions.count():
+            return self.received_receptions.first().receptionist
+
     def create_user(self, user):
         user.created = True
         user.created_at = datetime.utcnow()
@@ -1709,6 +1714,10 @@ class User(UserMixin, db.Model):
 
     def created_user(self, user):
         return self.made_user_creations.filter_by(user_id=user.id).first() is not None
+
+    @property
+    def created_by(self):
+        return self.received_user_creations.first().creator
 
     def register_group(self, organizer):
         if not self.is_registering_group(organizer):
