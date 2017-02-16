@@ -1673,8 +1673,8 @@ class User(UserMixin, db.Model):
         year = self.activated_at.year + 1 + extended_years + (self.activated_at.month + extended_months) / 12
         month = (self.activated_at.month + extended_months) % 12
         day = self.activated_at.day
-        suspended_days = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_datetime - record.start_datetime for record in self.suspension_records if record.end_datetime is not None], timedelta(0))
-        return datetime(year, month, day, self.activated_at.hour, self.activated_at.minute, self.activated_at.second, self.activated_at.microsecond) + suspended_days
+        suspended_time = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_datetime - record.start_datetime for record in self.suspension_records if record.end_datetime is not None], timedelta(0))
+        return datetime(year, month, day, self.activated_at.hour, self.activated_at.minute, self.activated_at.second, self.activated_at.microsecond) + suspended_time
 
     @property
     def overdue(self):
