@@ -1650,14 +1650,21 @@ class User(UserMixin, db.Model):
     def purchases_total(self):
         return u'%g 元' % sum([purchase.total for purchase in self.purchases])
 
+    def toggle_suspension(self):
+        if self.is_suspended:
+            pass
+        else:
+            pass
+
     @property
     def due_date(self):
-        extended_years = self.purchases.filter_by(name=u'一次性延长2年有效期').count() * 2
-        extended_months = self.purchases.filter_by(name=u'按月延长有效期').count()
+        extended_years = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'一次性延长2年有效期').first().id)]) * 2
+        extended_months = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'按月延长有效期').first().id)])
         year = self.activated_at.year + 1 + extended_years + (self.activated_at.month + extended_months) / 12
         month = (self.activated_at.month + extended_months) % 12
         day = self.activated_at.day
-        return date(year, month, day)
+        suspended_days = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_date - record.start_date for record in self.suspension_records if record.end_date is not None], timedelta(0))
+        return date(year, month, day) + suspended_days
 
     @property
     def overdue(self):

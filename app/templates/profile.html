@@ -58,6 +58,7 @@
                     <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
                     <div>上次登录：<span class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
+                    {% if not user.is_suspended %}<div>有效期至：{{ moment(user.due_date).format('YYYY-M-D') }}</div>{% endif %}
                 </div>
                 {% if current_user.can('管理') %}
                 <div class="ui vertical segment">
