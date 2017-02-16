@@ -79,9 +79,7 @@
                                 <div class="ui ordered list">
                                     {% for permission in permissions %}<div class="item">{{ permission.name }} <a href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
                                 </div>
-                                {% else %}
-                                无
-                                {% endif %}
+                                {% else %}无{% endif %}
                                 {% endwith %}
                             </td>
                             <td>
@@ -90,9 +88,7 @@
                                 <div class="ui ordered list">
                                     {% for permission in permissions %}<div class="item">{{ permission.name }} <a href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
                                 </div>
-                                {% else %}
-                                无
-                                {% endif %}
+                                {% else %}无{% endif %}
                                 {% endwith %}
                              </td>
                             <td>
@@ -101,9 +97,7 @@
                                 <div class="ui ordered list">
                                     {% for permission in permissions %}<div class="item">{{ permission.name }} <a href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="edit icon"></i></a></div>{% endfor %}
                                 </div>
-                                {% else %}
-                                无
-                                {% endif %}
+                                {% else %}无{% endif %}
                                 {% endwith %}
                              </td>
                             <td>
@@ -115,15 +109,13 @@
                                     <div id="delete-trigger-{{ role.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
                                     {% endif %}
                                 </div>
-                                {% if role.users.count() == 0 %}
-                                <div id="delete-modal-{{ role.id }}" class="ui modal">
+                                {% if role.users.count() == 0 %}<div id="delete-modal-{{ role.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除角色“{{ role.name }}”？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_role', id=role.id, next=url_for('manage.role', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ role.id }}" class="ui black button">保留</div>
                                     </div>
-                                </div>
-                                {% endif %}
+                                </div>{% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -153,8 +145,7 @@ $('.ui.checkbox').checkbox();
 
 $('.ui.sortable.table').tablesort();
 
-{% for role in roles %}
-{% if role.users.count() == 0 %}
+{% for role in roles %}{% if role.users.count() == 0 %}
 $('#delete-trigger-{{ role.id }}')
     .on('click', function() {
         $('#delete-modal-{{ role.id }}').modal({ autofocus: false }).modal('show');
@@ -165,8 +156,7 @@ $('#delete-hide-trigger-{{ role.id }}')
         $('#delete-modal-{{ role.id }}').modal('hide');
     })
 ;
-{% endif %}
-{% endfor %}
+{% endif %}{% endfor %}
 
 $('#new-role-trigger').popup();
 $('#new-role-trigger')
