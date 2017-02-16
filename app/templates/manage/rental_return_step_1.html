@@ -44,7 +44,7 @@
                         </div>
                     </div>
                     <div class="column">
-                        <form id="find-ipad" action="{{ url_for('manage.rental_return_step_1') }}" method="POST" class="ui form">
+                        <form id="find-ipad" action="{{ url_for('manage.rental_return_step_1', next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.serial.label() }}

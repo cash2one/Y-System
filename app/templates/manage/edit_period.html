@@ -20,7 +20,7 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <form id="edit-period" action="{{ url_for('manage.edit_period', id=period.id) }}" method="POST" class="ui form">
+                <form id="edit-period" action="{{ url_for('manage.edit_period', id=period.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="fields">
                         <div class="four wide required field">

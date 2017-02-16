@@ -44,7 +44,7 @@
                         </div>
                     </div>
                     <div class="column">
-                        <form id="find-user" action="{{ url_for('manage.rental_return_step_1_alt') }}" method="POST" class="ui form">
+                        <form id="find-user" action="{{ url_for('manage.rental_return_step_1_alt', next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.email.label() }}

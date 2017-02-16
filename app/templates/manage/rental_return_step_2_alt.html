@@ -48,7 +48,7 @@
                             <div class="item">{{ user.name }}（{{ user.email }}）</div>
                             <div class="item">原先进度：{{ user.last_punch.section.alias2 }}</div>
                         </div>
-                        <form id="punch-section" action="{{ url_for('manage.rental_return_step_2_alt', user_id=user.id) }}" method="POST" class="ui form">
+                        <form id="punch-section" action="{{ url_for('manage.rental_return_step_2_alt', user_id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
                             <div class="required field">
                                 {{ form.section.label() }}
