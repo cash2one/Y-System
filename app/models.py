@@ -1650,6 +1650,17 @@ class User(UserMixin, db.Model):
     def purchases_total(self):
         return u'%g 元' % sum([purchase.total for purchase in self.purchases])
 
+    @property
+    def due_date(self):
+        year = self.activated_at.year + 1
+        month = self.activated_at.month
+        day = self.activated_at.day
+        return date(year, month, day)
+
+    @property
+    def overdue(self):
+        return date.today() > self.due_date
+
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
             invitation = Invitation(inviter_id=self.id, user_id=user.id, type_id=invitation_type.id)
