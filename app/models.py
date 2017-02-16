@@ -1658,6 +1658,8 @@ class User(UserMixin, db.Model):
 
     @property
     def due_date(self):
+        if self.can(u'管理'):
+            return
         extended_years = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'一次性延长2年有效期').first().id)]) * 2
         extended_months = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'按月延长有效期').first().id)])
         year = self.activated_at.year + 1 + extended_years + (self.activated_at.month + extended_months) / 12
@@ -1668,6 +1670,8 @@ class User(UserMixin, db.Model):
 
     @property
     def overdue(self):
+        if self.can(u'管理'):
+            return False
         return date.today() > self.due_date
 
     def invite_user(self, user, invitation_type):
