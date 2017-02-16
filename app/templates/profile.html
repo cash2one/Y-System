@@ -64,6 +64,15 @@
                     <div>创建人：{{ macros.user_popup(user.created_by, user.created_by.id == current_user.id) }}</div>
                     {% if user.received_by %}<div>接待人：{{ macros.user_popup(user.received_by, user.received_by.id == current_user.id) }}</div>{% endif %}
                 </div>
+                <div class="ui vertical segment">
+                    <div class="ui search">
+                        <div class="ui fluid left icon input">
+                            <input class="prompt" type="text" placeholder="查询用户档案">
+                            <i class="user icon"></i>
+                        </div>
+                        <div class="results"></div>
+                    </div>
+                </div>
                 {% endif %}
             </div>
             <div class="twelve wide column">
@@ -444,25 +453,6 @@
                         </div>
                     </div>
                     {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-{% if current_user.can('管理') %}
-<div class="ui vertical stripe segment">
-    <div class="ui middle aligned stackable grid container">
-        <div class="row">
-            <div class="column">
-                <h3 class="ui header"><i class="user icon"></i>查询用户档案</h3>
-                <div class="ui search">
-                    <div class="ui left icon input">
-                        <input class="prompt" type="text" placeholder="姓名/邮箱">
-                        <i class="user icon"></i>
-                    </div>
-                    <div class="results"></div>
                 </div>
             </div>
         </div>
