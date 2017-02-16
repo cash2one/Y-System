@@ -59,7 +59,7 @@
                             <td>{{ group.organizer.organized_groups.count() }}</td>
                             <td>
                                 {% with group_registrations = group.organizer.organized_groups %}
-                                {% if group_registrations.count() > 1 %}
+                                {% if group_registrations.count() %}
                                 <div class="ui relaxed divided list">
                                 {% for group_registration in group_registrations %}
                                 <div class="item">

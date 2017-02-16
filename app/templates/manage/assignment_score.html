@@ -52,7 +52,6 @@
                 <div class="ui secondary stackable menu">
                     <a class="item active loading-trigger" href="{{ url_for('manage.assignment_score', id=assignment.id, page=pagination.page) }}">全部</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.assignment') }}">作业列表</a>
-                    {% if current_user.can('管理课程') %}<a class="item loading-trigger" href="{{ url_for('manage.lesson') }}">课程列表</a>{% endif %}
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>
