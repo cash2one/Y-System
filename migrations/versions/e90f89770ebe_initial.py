@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 54480533235e
+Revision ID: e90f89770ebe
 Revises: 
-Create Date: 2017-02-15 06:22:08.753619
+Create Date: 2017-02-16 20:21:02.499243
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '54480533235e'
+revision = 'e90f89770ebe'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -395,6 +395,7 @@ def upgrade():
     op.create_table('suspension_records',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('original_role_id', sa.Integer(), nullable=True),
     sa.Column('start_date', sa.Date(), nullable=True),
     sa.Column('end_date', sa.Date(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -402,6 +403,7 @@ def upgrade():
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['original_role_id'], ['roles.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

@@ -146,6 +146,7 @@ class Role(db.Model):
         cascade='all, delete-orphan'
     )
     users = db.relationship('User', backref='role', lazy='dynamic')
+    suspension_records = db.relationship('SuspensionRecord', backref='original_role', lazy='dynamic')
 
     def add_permission(self, permission):
         if not self.has_permission(permission):
@@ -392,6 +393,7 @@ class SuspensionRecord(db.Model):
     __tablename__ = 'suspension_records'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    original_role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -1654,11 +1656,14 @@ class User(UserMixin, db.Model):
         if self.is_suspended:
             pass
         else:
-            pass
+            suspension_record = SuspensionRecord(user_id=self.id, start_date=date.today(), modified_by_id=current_user.id)
+            db.session.add(suspension_record)
+            self.role_id = Role.query.filter_by(name=u'挂起').first().id
+            db.session.add(self)
 
     @property
     def due_date(self):
-        if self.can(u'管理'):
+        if self.is_developer or self.is_administrator or self.is_moderator:
             return
         extended_years = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'一次性延长2年有效期').first().id)]) * 2
         extended_months = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'按月延长有效期').first().id)])
@@ -1670,7 +1675,7 @@ class User(UserMixin, db.Model):
 
     @property
     def overdue(self):
-        if self.can(u'管理'):
+        if self.is_developer or self.is_administrator or self.is_moderator:
             return False
         return date.today() > self.due_date
 
