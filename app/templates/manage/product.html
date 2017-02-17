@@ -87,21 +87,16 @@
                                     {% else %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    {% if product.fixed %}
-                                    <div class="ui button disabled"><i class="edit icon"></i></div>
-                                    <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
-                                    {% else %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <div id="delete-trigger-{{ product.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
-                                    {% endif %}
+                                    {% if product.pinned %}<div class="ui negative button disabled"><i class="trash outline icon"></i></div>{% else %}<div id="delete-trigger-{{ product.id }}" class="ui negative button"><i class="trash outline icon"></i></div>{% endif %}
                                 </div>
-                                <div id="delete-modal-{{ product.id }}" class="ui modal">
+                                {% if not product.pinned %}<div id="delete-modal-{{ product.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除产品“{{ product.name }}”？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
                                         <div id="delete-hide-trigger-{{ product.id }}" class="ui black button">保留</div>
                                     </div>
-                                </div>
+                                </div>{% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -133,7 +128,7 @@ $('.ui.sortable.table').tablesort();
 
 $('td .purchase.loading-trigger').popup();
 
-{% for product in products %}
+{% for product in products %}{% if not product.pinned %}
 $('#delete-trigger-{{ product.id }}')
     .on('click', function() {
         $('#delete-modal-{{ product.id }}').modal({ autofocus: false }).modal('show');
@@ -144,7 +139,7 @@ $('#delete-hide-trigger-{{ product.id }}')
         $('#delete-modal-{{ product.id }}').modal('hide');
     })
 ;
-{% endfor %}
+{% endif %}{% endfor %}
 
 $('#new-product-trigger').popup();
 $('#new-product-trigger')

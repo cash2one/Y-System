@@ -3787,7 +3787,8 @@ def edit_tag(id):
     tag = Tag.query.get_or_404(id)
     form = EditTagForm(tag=tag)
     if form.validate_on_submit():
-        tag.name = form.name.data
+        if not tag.pinned:
+            tag.name = form.name.data
         tag.color_id = int(form.color.data)
         db.session.add(tag)
         flash(u'已更新标签：%s' % form.name.data, category='success')
@@ -3802,7 +3803,7 @@ def edit_tag(id):
 @permission_required(u'管理用户标签')
 def delete_tag(id):
     tag = Tag.query.get_or_404(id)
-    if tag.valid_tagged_users.count():
+    if tag.pinned or tag.valid_tagged_users.count():
         abort(403)
     db.session.delete(tag)
     flash(u'已删除用户标签：%s' % tag.name, category='success')
@@ -4366,8 +4367,10 @@ def edit_product(id):
         abort(404)
     form = EditProductForm()
     if form.validate_on_submit():
-        product.name = form.name.data
-        product.price = float(form.price.data)
+        if not product.pinned:
+            product.name = form.name.data
+        if product.purchases.count() == 0:
+            product.price = float(form.price.data)
         product.available = form.available.data
         product.modified_at = datetime.utcnow()
         product.modified_by_id = current_user.id
@@ -4387,6 +4390,8 @@ def delete_product(id):
     product = Product.query.get_or_404(id)
     if product.deleted:
         abort(404)
+    if product.pinned:
+        abort(403)
     product.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除研修产品：%s' % product.name, category='success')
     return redirect(request.args.get('next') or url_for('manage.product'))
@@ -4586,8 +4591,6 @@ def other_permissions():
 @developer_required
 def edit_permission(id):
     permission = Permission.query.get_or_404(id)
-    if permission.fixed:
-        abort(403)
     form = EditPermissionForm(permission=permission)
     if form.validate_on_submit():
         permission.name = form.name.data
@@ -4605,7 +4608,7 @@ def edit_permission(id):
 @developer_required
 def delete_permission(id):
     permission = Permission.query.get_or_404(id)
-    if permission.fixed or permission.roles.count():
+    if permission.roles.count():
         abort(403)
     db.session.delete(permission)
     flash(u'已删除权限：%s' % permission.name, category='success')
