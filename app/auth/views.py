@@ -26,9 +26,7 @@ def unconfirmed():
     if current_user.is_anonymous:
         return redirect(url_for('main.index'))
     if current_user.confirmed:
-        if current_user.can(u'管理'):
-            return redirect(url_for('manage.summary'))
-        return redirect(url_for('main.profile_overview', id=current_user.id))
+        return redirect(current_user.index_url)
     return render_template('auth/unconfirmed.html')
 
 
@@ -36,18 +34,14 @@ def unconfirmed():
 def login():
     if current_user.is_authenticated:
         flash(u'您已经登录', 'info')
-        if current_user.can(u'管理'):
-            return redirect(request.args.get('next') or url_for('manage.summary'))
-        return redirect(request.args.get('next') or url_for('main.profile_overview', id=current_user.id))
+        return redirect(request.args.get('next') or current_user.index_url)
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower(), created=True, deleted=False).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             get_announcements(type_name=u'登录通知', flash_first=True)
-            if user.can(u'管理'):
-                return redirect(request.args.get('next') or url_for('manage.summary'))
-            return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
+            return redirect(request.args.get('next') or user.index_url)
         flash(u'无效的用户名或密码', category='error')
     return render_template('auth/login.html', form=form)
 
@@ -63,9 +57,7 @@ def logout():
 def activate():
     if current_user.is_authenticated and current_user.confirmed:
         flash(u'您已经登录', category='info')
-        if current_user.can(u'管理'):
-            return redirect(request.args.get('next') or url_for('manage.summary'))
-        return redirect(request.args.get('next') or url_for('main.profile_overview', id=current_user.id))
+        return redirect(request.args.get('next') or current_user.index_url)
     form = ActivationForm()
     if form.validate_on_submit():
         new_user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=False, deleted=False).first()
@@ -86,17 +78,13 @@ def activate():
 @login_required
 def confirm(token):
     if current_user.confirmed:
-        if current_user.can(u'管理'):
-            return redirect(url_for('manage.summary'))
-        return redirect(url_for('main.profile_overview', id=current_user.id))
+        return redirect(current_user.index_url)
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！', category='success')
     else:
         flash(u'确认链接无效或者已经过期', category='error')
         return redirect(url_for('auth.unconfirmed'))
-    if current_user.can(u'管理'):
-        return redirect(url_for('manage.summary'))
-    return redirect(url_for('main.profile_overview', id=current_user.id))
+    return redirect(current_user.index_url)
 
 
 @auth.route('/confirm')
@@ -117,9 +105,7 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             flash(u'修改密码成功', category='success')
-            if current_user.can(u'管理'):
-                return redirect(url_for('manage.summary'))
-            return redirect(url_for('main.profile_overview', id=current_user.id))
+            return redirect(current_user.index_url)
         else:
             flash(u'密码有误', category='error')
     return render_template("auth/change_password.html", form=form)
@@ -129,9 +115,7 @@ def change_password():
 def reset_password_request():
     if current_user.is_authenticated:
         flash(u'您已经登录', category='info')
-        if current_user.can(u'管理'):
-            return redirect(request.args.get('next') or url_for('manage.summary'))
-        return redirect(request.args.get('next') or url_for('main.profile_overview', id=current_user.id))
+        return redirect(request.args.get('next') or current_user.index_url)
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
@@ -147,9 +131,7 @@ def reset_password_request():
 def reset_password(token):
     if current_user.is_authenticated:
         flash(u'您已经登录', category='info')
-        if current_user.can(u'管理'):
-            return redirect(url_for('manage.summary'))
-        return redirect(url_for('main.profile_overview', id=current_user.id))
+        return redirect(current_user.index_url)
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
@@ -188,6 +170,4 @@ def change_email(token):
         flash(u'修改邮箱成功', category='success')
     else:
         flash(u'请求无效', category='error')
-    if current_user.can(u'管理'):
-        return redirect(url_for('manage.summary'))
-    return redirect(url_for('main.profile_overview', id=current_user.id))
+    return redirect(current_user.index_url)
