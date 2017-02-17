@@ -335,7 +335,7 @@
                         </div>
                     </div>
                 </div>
-                {% with registrations = user.registered_groups.first().organizer.organized_groups %}{% if registrations.count() %}<div class="ui vertical segment">
+                {% if user.registered_groups.count() %}{% with registrations = user.registered_groups.first().organizer.organized_groups %}<div class="ui vertical segment">
                     <div class="ui header">团报信息</div>
                     <div class="ui relaxed list">
                         {% for registration in registrations %}
@@ -349,7 +349,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                </div>{% endif %}{% endwith %}
+                </div>{% endwith %}{% endif %}
                 {% if user.worked_in_same_field or user.deformity %}<div class="ui vertical segment">
                     <div class="ui header">其它信息</div>
                     <div class="ui relaxed list">
