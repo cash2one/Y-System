@@ -1487,6 +1487,10 @@ class User(UserMixin, db.Model):
     def email_hash(self):
         return md5(self.email.encode('utf-8')).hexdigest()
 
+    @property
+    def url(self):
+        return url_for('main.profile_overview', id=self.id)
+
     def avatar(self, size=512, default='identicon', rating='g', wrap=False):
         if request.is_secure:
             url = 'https://secure.gravatar.com/avatar'
@@ -2364,7 +2368,7 @@ class User(UserMixin, db.Model):
             'role': self.role.name,
             'last_punch': self.last_punch.to_json(),
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'url': url_for('main.profile_overview', id=self.id),
+            'url': self.url,
         }
         return user_json
 
