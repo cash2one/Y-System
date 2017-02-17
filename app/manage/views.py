@@ -568,7 +568,7 @@ def rental_rent_step_1():
         if not booking:
             flash(u'预约码无效', category='error')
             return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))
-        if not booking.valid:
+        if not booking.valid or booking.kept or booking.late:
             flash(u'该预约处于“%s”状态' % booking.state.name, category='error')
             return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))
         if booking.schedule.date != date.today():
@@ -591,6 +591,8 @@ def rental_rent_step_2(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
+    if user.has_tag_name(u'未缴全款'):
+        flash(u'%s尚未缴齐全款，需要先办理补齐全款手续！' % user.name_alias, category='warning')
     schedule = Schedule.query.get_or_404(schedule_id)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
@@ -711,6 +713,8 @@ def rental_rent_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
+    if user.has_tag_name(u'未缴全款'):
+        flash(u'%s尚未缴齐全款，需要先办理补齐全款手续！' % user.name_alias, category='warning')
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
@@ -3036,6 +3040,10 @@ def create_user_confirm(id):
         user.worked_in_same_field = confirm_user_form.worked_in_same_field.data
         user.deformity = confirm_user_form.deformity.data
         db.session.add(user)
+        if confirm_user_form.paid_in_full.data:
+            user.remove_tag(tag=Tag.query.filter_by(name=u'未缴全款').first())
+        else:
+            user.add_tag(tag=Tag.query.filter_by(name=u'未缴全款').first())
         receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data.lower(), created=True, activated=True, deleted=False).first()
         if receptionist is None:
             flash(u'接待人邮箱不存在：%s' % confirm_user_form.receptionist_email.data.lower(), category='error')

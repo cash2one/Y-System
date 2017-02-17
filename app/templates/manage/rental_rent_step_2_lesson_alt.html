@@ -51,8 +51,8 @@
                     </div>
                     <div class="column">
                         <div class="ui big list">
-                            <div class="item">{{ user.name }}（{{ user.email }}）</div>
-                            <div class="item">进度：{{user.last_punch.alias2 }}</div>
+                            <div class="item">{{ user.name_alias }}</div>
+                            <div class="item">进度：{{ user.last_punch.section.alias2 }}</div>
                         </div>
                         <form id="select-lesson" action="{{ url_for('manage.rental_rent_step_2_lesson_alt', user_id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}

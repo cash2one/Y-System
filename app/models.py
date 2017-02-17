@@ -258,6 +258,10 @@ class Relationship(db.Model):
     @staticmethod
     def insert_relationships():
         relationships = [
+            (u'朋友', ),
+            (u'同学', ),
+            (u'同事', ),
+            (u'恋人', ),
             (u'父母', ),
             (u'配偶', ),
             (u'子女', ),
@@ -265,10 +269,6 @@ class Relationship(db.Model):
             (u'兄妹', ),
             (u'姊妹', ),
             (u'姊弟', ),
-            (u'朋友', ),
-            (u'恋人', ),
-            (u'同学', ),
-            (u'同事', ),
         ]
         for entry in relationships:
             relationship = Relationship.query.filter_by(name=entry[0]).first()

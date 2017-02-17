@@ -44,7 +44,6 @@ def login():
         user = User.query.filter_by(email=form.email.data.lower(), created=True, deleted=False).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            # flash(u'欢迎登录云英语教育服务支撑系统！', category='info')
             get_announcements(type_name=u'登录通知', flash_first=True)
             if user.can(u'管理'):
                 return redirect(request.args.get('next') or url_for('manage.summary'))

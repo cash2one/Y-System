@@ -58,7 +58,7 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ rental.user.name }}（{{ rental.user.email }}）</div>
-                            <div class="item">原先进度：{{ rental.user.last_punch.alias2 }}</div>
+                            <div class="item">原先进度：{{ rental.user.last_punch.section.alias2 }}</div>
                             <div class="item">更新进度：{{ section.alias2 }}</div>
                         </div>
                         <form id="confirm-punch" action="{{ url_for('manage.rental_exchange_step_3', rental_id=rental.id, section_id=section.id, next=request.args.get('next')) }}" method="POST" class="ui form">

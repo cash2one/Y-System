@@ -33,6 +33,10 @@
     height: 20px;
 }
 
+#message-container .ui.message {
+    text-align: left;
+}
+
 .footer.segment {
     padding: 5em 0em;
 }
