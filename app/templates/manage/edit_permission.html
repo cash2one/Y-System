@@ -26,6 +26,14 @@
                         {{ form.name.label() }}
                         {{ form.name(placeholder='权限名称') }}
                     </div>
+                    <div class="ui segment">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ form.overdue_check() }}
+                                {{ form.overdue_check.label() }}
+                            </div>
+                        </div>
+                    </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.permission') }}">取消</a>
                     {{ macros.form_validation_error_widget(form) }}
@@ -47,6 +55,8 @@ $('.message .close')
         ;
     })
 ;
+
+$('.ui.checkbox').checkbox();
 
 $(document)
     .ready(function() {

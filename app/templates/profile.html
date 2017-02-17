@@ -58,6 +58,7 @@
                     <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
                     <div>上次登录：<span class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
+                    {% if not user.is_suspended and user.due_datetime %}<div>{% if user.overdue %}<i class="yellow warning sign icon"></i>{% endif %}有效期至：{{ moment(user.due_datetime).format('YYYY-M-D') }}</div>{% endif %}
                 </div>
                 {% if current_user.can('管理') %}
                 <div class="ui vertical segment">
@@ -339,7 +340,7 @@
                     <div class="ui relaxed list">
                         {% if user.worked_in_same_field %}
                         <div class="item">
-                            <i class="orange warning sign icon"></i>
+                            <i class="yellow warning sign icon"></i>
                             <div class="content">
                                 <div class="header">（曾）在培训/留学机构任职</div>
                             </div>
@@ -347,7 +348,7 @@
                         {% endif %}
                         {% if user.deformity %}
                         <div class="item">
-                            <i class="orange warning sign icon"></i>
+                            <i class="yellow warning sign icon"></i>
                             <div class="content">
                                 <div class="header">有严重心里或身体疾病</div>
                             </div>
@@ -356,7 +357,7 @@
                     </div>
                 </div>{% endif %}
                 {% if current_user.can('管理用户') and not user.deleted and ((not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user)))) %}<div class="ui vertical segment">
-                    <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>
+                    <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('main.profile_archive', id=user.id)) }}"><i class="edit icon"></i>编辑</a>
                 </div>{% endif %}
                 {% endif %}
                 {% if show_profile_progress %}

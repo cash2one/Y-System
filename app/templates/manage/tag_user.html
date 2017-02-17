@@ -71,10 +71,18 @@
                                 {% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.tag_user', id=tag.id, page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="suspend-trigger-{{ user.id }}" class="ui {% if user.is_suspended %}green{% else %}orange{% endif %} button"><i class="{% if user.is_suspended %}play{% else %}pause{% endif %} icon"></i></div>
                                     {% if user.id == current_user.id %}<div class="ui negative button disabled"><i class="remove user icon"></i></div>{% else %}<div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>{% endif %}
                                 </div>
+                                <div id="suspend-modal-{{ user.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要{% if user.is_suspended %}恢复{% else %}挂起{% endif %}用户：[{{ user.role.name }}]{{ user.name_alias }}？</div>
+                                    <div class="actions">
+                                        <a class="ui {% if user.is_suspended %}green{% else %}orange{% endif %} left labeled icon button loading-trigger" href="{{ url_for('manage.toggle_suspension', id=user.id, next=url_for('manage.tag_user', id=tag.id, page=pagination.page)) }}"><i class="{% if user.is_suspended %}play{% else %}pause{% endif %} icon"></i>{% if user.is_suspended %}恢复{% else %}挂起{% endif %}</a>
+                                        <div id="suspend-hide-trigger-{{ user.id }}" class="ui black button">返回</div>
+                                    </div>
+                                </div>
                                 {% if user.id != current_user.id %}<div id="delete-modal-{{ user.id }}" class="ui modal">
-                                    <div class="header"><i class="warning sign icon"></i>确定要注销用户：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                                    <div class="header"><i class="warning sign icon"></i>确定要注销用户：[{{ user.role.name }}]{{ user.name_alias }}？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_user', id=user.id, next=url_for('manage.tag_user', id=tag.id, page=pagination.page)) }}"><i class="remove user icon"></i>注销</a>
                                         <div id="delete-hide-trigger-{{ user.id }}" class="ui black button">保留</div>
@@ -114,7 +122,18 @@ $('.message .close')
 
 $('.ui.sortable.table').tablesort();
 
-{% if current_user.can('管理用户') %}{% for user in users %}{% if user.id != current_user.id and (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and current_user.is_superior_than(user=user)) %}
+{% if current_user.can('管理用户') %}{% for user in users %}{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
+$('#suspend-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#suspend-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#suspend-hide-trigger-{{ user.id }}')
+    .on('click', function() {
+        $('#suspend-modal-{{ user.id }}').modal('hide');
+    })
+;
+{% if user.id != current_user.id %}
 $('#delete-trigger-{{ user.id }}')
     .on('click', function() {
         $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
@@ -125,6 +144,7 @@ $('#delete-hide-trigger-{{ user.id }}')
         $('#delete-modal-{{ user.id }}').modal('hide');
     })
 ;
+{% endif %}
 {% endif %}{% endfor %}{% endif %}
 </script>
 {% endblock %}

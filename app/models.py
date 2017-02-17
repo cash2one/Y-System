@@ -85,6 +85,7 @@ class Permission(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
+    overdue_check = db.Column(db.Boolean, default=False)
     roles = db.relationship(
         'RolePermission',
         foreign_keys=[RolePermission.permission_id],
@@ -96,36 +97,39 @@ class Permission(db.Model):
     @staticmethod
     def insert_permissions():
         permissions = [
-            (u'预约', ),
-            (u'预约VB课程', ),
-            (u'预约Y-GRE课程', ),
-            (u'预约VB课程×2', ),
-            (u'预约任意课程', ),
-            (u'管理', ),
-            (u'管理课程预约', ),
-            (u'管理学习进度', ),
-            (u'管理iPad借阅', ),
-            (u'管理预约时段', ),
-            (u'管理课程', ),
-            (u'管理作业', ),
-            (u'管理考试', ),
-            (u'管理用户', ),
-            (u'管理团报', ),
-            (u'管理班级', ),
-            (u'管理用户标签', ),
-            (u'管理iPad设备', ),
-            (u'管理通知', ),
-            (u'管理站内信', ),
-            (u'管理反馈', ),
-            (u'管理进站', ),
-            (u'管理产品', ),
-            (u'管理权限', ),
-            (u'开发权限', ),
+            (u'预约', True, ),
+            (u'预约VB课程', True, ),
+            (u'预约Y-GRE课程', True, ),
+            (u'预约VB课程×2', True, ),
+            (u'预约任意课程', True, ),
+            (u'管理', False, ),
+            (u'管理课程预约', False, ),
+            (u'管理学习进度', False, ),
+            (u'管理iPad借阅', False, ),
+            (u'管理预约时段', False, ),
+            (u'管理课程', False, ),
+            (u'管理作业', False, ),
+            (u'管理考试', False, ),
+            (u'管理用户', False, ),
+            (u'管理团报', False, ),
+            (u'管理班级', False, ),
+            (u'管理用户标签', False, ),
+            (u'管理iPad设备', False, ),
+            (u'管理通知', False, ),
+            (u'管理站内信', False, ),
+            (u'管理反馈', False, ),
+            (u'管理进站', False, ),
+            (u'管理产品', False, ),
+            (u'管理权限', False, ),
+            (u'开发权限', False, ),
         ]
         for entry in permissions:
             permission = Permission.query.filter_by(name=entry[0]).first()
             if permission is None:
-                permission = Permission(name=entry[0])
+                permission = Permission(
+                    name=entry[0],
+                    overdue_check=entry[1]
+                )
                 db.session.add(permission)
                 print u'导入用户权限信息', entry[0]
         db.session.commit()
@@ -146,6 +150,7 @@ class Role(db.Model):
         cascade='all, delete-orphan'
     )
     users = db.relationship('User', backref='role', lazy='dynamic')
+    suspension_records = db.relationship('SuspensionRecord', backref='original_role', lazy='dynamic')
 
     def add_permission(self, permission):
         if not self.has_permission(permission):
@@ -392,25 +397,20 @@ class SuspensionRecord(db.Model):
     __tablename__ = 'suspension_records'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
+    original_role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    start_datetime = db.Column(db.DateTime, default=datetime.utcnow)
+    end_datetime = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    deleted = db.Column(db.Boolean, default=False)
 
     def ping(self, modified_by):
         self.modified_at = datetime.utcnow()
         self.modified_by_id = modified_by.id
         db.session.add(self)
 
-    def safe_delete(self, modified_by):
-        self.deleted = True
-        self.ping(modified_by=modified_by)
-        db.session.add(self)
-
     def __repr__(self):
-        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_date, self.end_date)
+        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_datetime, self.end_datetime)
 
 
 class CourseRegistration(db.Model):
@@ -1328,7 +1328,6 @@ class User(UserMixin, db.Model):
 
     def safe_delete(self):
         self.email = u'%s_%s_deleted' % (self.email, self.id)
-        self.confirmed = False
         self.role_id = Role.query.filter_by(name=u'挂起').first().id
         self.deleted = True
         db.session.add(self)
@@ -1404,7 +1403,11 @@ class User(UserMixin, db.Model):
         return True
 
     def can(self, permission_name):
-        return self.role is not None and self.role.has_permission(permission=Permission.query.filter_by(name=permission_name).first())
+        permission = Permission.query.filter_by(name=permission_name).first()
+        return permission is not None and \
+            not (permission.overdue_check and self.overdue) and \
+            self.role is not None and \
+            self.role.has_permission(permission=permission)
 
     @staticmethod
     def users_can(permission_name):
@@ -1650,6 +1653,42 @@ class User(UserMixin, db.Model):
     @property
     def purchases_total(self):
         return u'%g 元' % sum([purchase.total for purchase in self.purchases])
+
+    def toggle_suspension(self, modified_by):
+        if self.is_suspended:
+            suspension_record = self.suspension_records.filter_by(end_datetime=None).order_by(SuspensionRecord.modified_at.desc()).first()
+            if suspension_record is not None:
+                suspension_record.end_datetime = datetime.utcnow()
+                suspension_record.ping(modified_by=modified_by)
+                db.session.add(suspension_record)
+                self.role_id = suspension_record.original_role_id
+                db.session.add(self)
+                return False
+            return True
+        else:
+            suspension_record = SuspensionRecord(user_id=self.id, original_role_id=self.role_id, modified_by_id=modified_by.id)
+            db.session.add(suspension_record)
+            self.role_id = Role.query.filter_by(name=u'挂起').first().id
+            db.session.add(self)
+            return True
+
+    @property
+    def due_datetime(self):
+        if self.is_developer or self.is_administrator or self.is_moderator:
+            return
+        extended_years = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'一次性延长2年有效期').first().id)]) * 2
+        extended_months = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'按月延长有效期').first().id)])
+        year = self.activated_at.year + 1 + extended_years + (self.activated_at.month + extended_months) / 12
+        month = (self.activated_at.month + extended_months) % 12
+        day = self.activated_at.day
+        suspended_time = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_datetime - record.start_datetime for record in self.suspension_records if record.end_datetime is not None], timedelta(0))
+        return datetime(year, month, day, self.activated_at.hour, self.activated_at.minute, self.activated_at.second, self.activated_at.microsecond) + suspended_time
+
+    @property
+    def overdue(self):
+        if self.is_developer or self.is_administrator or self.is_moderator:
+            return False
+        return datetime.utcnow() > self.due_datetime
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
@@ -2616,6 +2655,7 @@ class Product(db.Model):
     name = db.Column(db.Unicode(64), index=True)
     price = db.Column(db.Float, default=0.0)
     available = db.Column(db.Boolean, default=False)
+    fixed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -2658,17 +2698,17 @@ class Product(db.Model):
     @staticmethod
     def insert_products():
         products = [
-            (u'VB基本技术费', 6800.0, True, ),
-            (u'Y-GRE基本技术费', 6800.0, True, ),
-            (u'联报优惠', -1000.0, True, ),
-            (u'在校生减免', -800.0, True, ),
-            (u'本校减免', -500.0, True, ),
-            (u'团报优惠', -200.0, True, ),
-            (u'AW费用', 800.0, True, ),
-            (u'Q费用', 800.0, True, ),
-            (u'Y-GRE多轮费用', 2000.0, True, ),
-            (u'按月延长有效期', 1000.0, True, ),
-            (u'一次性延长2年有效期', 3000.0, True, ),
+            (u'VB基本技术费', 6800.0, True, False, ),
+            (u'Y-GRE基本技术费', 6800.0, True, False, ),
+            (u'联报优惠', -1000.0, True, False, ),
+            (u'在校生减免', -800.0, True, False, ),
+            (u'本校减免', -500.0, True, False, ),
+            (u'团报优惠', -200.0, True, True, ),
+            (u'AW费用', 800.0, True, False, ),
+            (u'Q费用', 800.0, True, False, ),
+            (u'Y-GRE多轮费用', 2000.0, True, False, ),
+            (u'按月延长有效期', 1000.0, True, True, ),
+            (u'一次性延长2年有效期', 3000.0, True, True, ),
         ]
         for entry in products:
             product = Product.query.filter_by(name=entry[0]).first()
@@ -2677,6 +2717,7 @@ class Product(db.Model):
                     name=entry[0],
                     price=entry[1],
                     available=entry[2],
+                    fixed=entry[3],
                     modified_by_id=User.query.get(1).id
                 )
                 db.session.add(product)

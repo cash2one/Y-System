@@ -47,10 +47,12 @@
                                     {{ form.quota(placeholder='0') }}
                                 </div>
                             </div>
-                            <div class="inline field">
-                                <div class="ui toggle checkbox">
-                                    {{ form.publish_now() }}
-                                    {{ form.publish_now.label() }}
+                            <div class="ui segment">
+                                <div class="inline field">
+                                    <div class="ui toggle checkbox">
+                                        {{ form.publish_now() }}
+                                        {{ form.publish_now.label() }}
+                                    </div>
                                 </div>
                             </div>
                             {{ form.submit(class='ui primary button') }}

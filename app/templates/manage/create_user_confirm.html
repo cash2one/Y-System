@@ -759,7 +759,7 @@
                     {{ macros.form_validation_error_widget(confirm_user_form) }}
                 </form>
                 <div id="delete-modal" class="ui modal">
-                    <div class="header"><i class="warning sign icon"></i>确定要删除未完成注册的用户信息：{{ user.name }} [{{ user.role.name }}]（{{ user.email }}）？</div>
+                    <div class="header"><i class="warning sign icon"></i>确定要删除未完成注册的用户信息：[{{ user.role.name }}]{{ user.name_alias }} ？</div>
                     <div class="actions">
                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.create_user_delete', id=user.id, next=request.args.get('next')) }}"><i class="remove user icon"></i>删除</a>
                         <div id="delete-hide-trigger" class="ui black button">保留</div>

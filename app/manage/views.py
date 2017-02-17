@@ -3500,6 +3500,23 @@ def restore_user(id):
     return render_template('manage/restore_user.html', form=form, user=user)
 
 
+@manage.route('/user/toggle-suspension/<int:id>')
+@login_required
+@permission_required(u'管理用户')
+def toggle_suspension(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and (user.id != current_user.id or not current_user.is_superior_than(user=user))):
+        abort(403)
+    is_suspended = user.toggle_suspension(modified_by=current_user._get_current_object())
+    if is_suspended:
+        flash(u'已挂起用户：%s' % user.name_alias, category='success')
+    else:
+        flash(u'已恢复用户：%s' % user.name_alias, category='success')
+    return redirect(request.args.get('next') or url_for('manage.user'))
+
+
 @manage.route('/course', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理班级')
@@ -4469,7 +4486,7 @@ def permission():
         if Permission.query.filter_by(name=form.name.data).first() is not None:
             flash(u'“%s”权限已存在' % form.name.data, category='error')
             return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
-        permission = Permission(name=form.name.data)
+        permission = Permission(name=form.name.data, overdue_check=form.overdue_check.data)
         db.session.add(permission)
         flash(u'已添加权限：%s' % form.name.data, category='success')
         return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
@@ -4569,13 +4586,17 @@ def other_permissions():
 @developer_required
 def edit_permission(id):
     permission = Permission.query.get_or_404(id)
+    if permission.fixed:
+        abort(403)
     form = EditPermissionForm(permission=permission)
     if form.validate_on_submit():
         permission.name = form.name.data
+        permission.overdue_check = form.overdue_check.data
         db.session.add(permission)
         flash(u'已更新权限：%s' % form.name.data, category='success')
         return redirect(request.args.get('next') or url_for('manage.permission'))
     form.name.data = permission.name
+    form.overdue_check.data = permission.overdue_check
     return render_template('manage/edit_permission.html', form=form, permission=permission)
 
 
@@ -4584,7 +4605,7 @@ def edit_permission(id):
 @developer_required
 def delete_permission(id):
     permission = Permission.query.get_or_404(id)
-    if permission.roles.count():
+    if permission.fixed or permission.roles.count():
         abort(403)
     db.session.delete(permission)
     flash(u'已删除权限：%s' % permission.name, category='success')
