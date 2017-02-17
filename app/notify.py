@@ -22,3 +22,7 @@ def get_announcements(type_name, user=None, flash_first=False):
                 flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
                 announcement.notify(user=user)
         return announcements
+
+
+def add_feed(user, message, category, snapshot_json):
+    pass
