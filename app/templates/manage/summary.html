@@ -101,7 +101,7 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="ui vertical stripe stats segment">
+<div id="stats" class="ui vertical stripe stats segment loading">
     <div id="page-loading-progress" class="ui top attached blue inverted progress">
         <div class="bar"></div>
     </div>
@@ -162,11 +162,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<div class="ui vertical stripe stats segment">
-    <div class="ui equal width stackable internally celled grid">
         <div class="center aligned row">
             <div class="column">
                 <div class="ui statistic">
@@ -222,7 +217,13 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
-                <h3 class="ui header"><i class="tablet icon"></i>iPad状态</h3>
+                <h3 class="ui header">
+                    <i class="tablet icon"></i>
+                    <div class="content">
+                        iPad状态
+                        <div class="sub header">{{ ipads_num }} 台iPad{% if show_summary_ipad_1103 %}位于1103室{% endif %}{% if show_summary_ipad_1707 %}位于1707室{% endif %}{% if show_summary_ipad_others %}未分配房间{% endif %}</div>
+                    </div>
+                </h3>
                 <a id="rental-rent-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.summary')) }}" data-content="借出iPad" data-position="top center" data-variation="inverted"><i class="upload icon"></i></a>
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_summary_ipad_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}#ipads">1103</a>
@@ -355,6 +356,9 @@ var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOpti
 function updateStats(updateProgressBar) {
     var url = "{{ url_for('manage.summary_statistics') }}";
     $.getJSON(url, function(data) {
+        if (updateProgressBar) {
+            $('#stats').removeClass('loading');
+        };
         iPadRent1103CountUp.update(data.room_1103.ipad.rent);
         if (updateProgressBar) {
             $('#page-loading-progress').progress('increment');
