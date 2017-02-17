@@ -591,6 +591,8 @@ def rental_rent_step_2(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
+    if user.has_tag_name(u'未缴全款'):
+        flash(u'%s尚未缴齐全款，需要先办理补齐全款手续！' % user.name_alias, category='warning')
     schedule = Schedule.query.get_or_404(schedule_id)
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
@@ -711,6 +713,8 @@ def rental_rent_step_2_alt(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
+    if user.has_tag_name(u'未缴全款'):
+        flash(u'%s尚未缴齐全款，需要先办理补齐全款手续！' % user.name_alias, category='warning')
     form = RentiPadForm(user=user)
     if form.validate_on_submit():
         return redirect(url_for('manage.rental_rent_step_3_alt', user_id=user_id, ipad_id=int(form.ipad.data), next=request.args.get('next')))
