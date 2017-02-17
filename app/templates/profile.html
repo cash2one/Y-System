@@ -175,23 +175,6 @@
                         {% endfor %}
                     </div>
                 </div>{% endif %}{% endwith %}
-                {% with registrations = user.registered_groups.first().organizer.organized_groups %}{% if registrations.count() %}<div class="ui vertical segment">
-                    <div class="ui header">团报</div>
-                    <div class="ui relaxed list">
-                        {% for registration in registrations %}
-                        <div class="item">
-                            <div class="right floated content">
-                                <div class="description">{% if registration.member.id == registration.organizer.id %}发起{% else %}加入{% endif %}时间：<span class="popup-trigger" data-variation="inverted">{{ moment(registration.timestamp).fromNow() }}</span></div>
-                                <div class="ui popup popup-content">{{ moment(registration.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
-                            </div>
-                            <div class="content">
-                                <div class="header">{% if registration.member.id == registration.organizer.id %}发起人：{% else %}成员：{% endif %}{{ macros.user_gender(registration.member) }}</div>
-                                <div class="description">{{ registration.member.email }}</div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>{% endif %}{% endwith %}
                 <div class="ui vertical segment">
                     <div class="ui header">时间线</div>
                 </div>
@@ -352,6 +335,21 @@
                         </div>
                     </div>
                 </div>
+                {% with registrations = user.registered_groups.first().organizer.organized_groups %}{% if registrations.count() %}<div class="ui vertical segment">
+                    <div class="ui header">团报信息</div>
+                    <div class="ui relaxed list">
+                        {% for registration in registrations %}
+                        <div class="item">
+                            <div class="right floated content">
+                                <div class="description">{{ moment(registration.timestamp).fromNow() }}</div>
+                            </div>
+                            <div class="content">
+                                <div class="header">{% if registration.member.id == registration.organizer.id %}发起人：{% else %}成员：{% endif %}{{ macros.user_popup_gender(registration.member, registration.member.id == user.id) }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>{% endif %}{% endwith %}
                 {% if user.worked_in_same_field or user.deformity %}<div class="ui vertical segment">
                     <div class="ui header">其它信息</div>
                     <div class="ui relaxed list">
