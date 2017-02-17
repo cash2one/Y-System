@@ -87,8 +87,13 @@
                                     {% else %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
+                                    {% if product.fixed %}
+                                    <div class="ui button disabled"><i class="edit icon"></i></div>
+                                    <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
+                                    {% else %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    <div id="delete-trigger-{{ product.id }}" class="ui negative icon button"><i class="trash outline icon"></i></div>
+                                    <div id="delete-trigger-{{ product.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                    {% endif %}
                                 </div>
                                 <div id="delete-modal-{{ product.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除产品“{{ product.name }}”？</div>
