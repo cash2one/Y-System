@@ -13,13 +13,13 @@ def get_announcements(type_name, user=None, flash_first=False):
     if flash_first:
         announcement = query.first()
         if announcement is not None:
-            flash(u'[%s]%s' % (announcement.title, announcement.body), category='announcement')
+            flash(u'<div class="content"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
         return
     else:
         announcements = query.order_by(Announcement.modified_at.desc()).all()
         for announcement in announcements:
             if not user.notified_by(announcement=announcement):
-                flash(u'<div class="content" style="text-align: left;"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
+                flash(u'<div class="content"><div class="header">%s</div>%s</div>' % (announcement.title, announcement.body_html), category='announcement')
                 announcement.notify(user=user)
         return announcements
 
