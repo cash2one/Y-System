@@ -2483,6 +2483,7 @@ class Tag(db.Model):
             (u'高考数学135+', u'Teal', ),
             (u'3rd', u'Green', ),
             (u'6th', u'Green', ),
+            (u'未缴纳齐全款', u'Red', ),
         ]
         for entry in tags:
             tag = Tag.query.filter_by(name=entry[0]).first()
