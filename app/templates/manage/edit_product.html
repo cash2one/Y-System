@@ -25,7 +25,7 @@
                     <div class="fields">
                         <div class="eight wide required field">
                             {{ form.name.label() }}
-                            {% if product.pinned %}{{ form.name(placeholder='研修产品名称', readonly='') }}{% else %}{{ form.name(placeholder='研修产品名称') }}{% endif %}
+                            {% if product.pinned and not current_user.is_developer %}{{ form.name(placeholder='研修产品名称', readonly='') }}{% else %}{{ form.name(placeholder='研修产品名称') }}{% endif %}
                         </div>
                         <div class="eight wide required field">
                             {{ form.price.label() }}

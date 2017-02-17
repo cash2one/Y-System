@@ -56,14 +56,14 @@
                     <tbody>
                         {% for tag in tags %}
                         <tr{% if tag.valid_tagged_users.count() > 1 %} class="top aligned"{% endif %}>
-                            <td><i class="{{ tag.color.css_class }} tag icon"></i>{{ tag.name }}</td>
+                            <td>{% if tag.pinned and current_user.is_developer %}<i class="pin icon"></i>{% endif %}<i class="{{ tag.color.css_class }} tag icon"></i>{{ tag.name }}</td>
                             <td>{% if tag.valid_tagged_users.count() %}<a class="user loading-trigger" href="{{ url_for('manage.tag_user', id=tag.id) }}" data-content="查看被标记的用户" data-position="top center" data-variation="inverted">{{ tag.valid_tagged_users.count() }} 人</a>{% else %}0 人{% endif %}</td>
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_tag', id=tag.id, next=url_for('manage.tag', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    {% if tag.pinned or tag.valid_tagged_users.count() %}<div class="ui negative button disabled"><i class="trash outline icon"></i></div>{% else %}<div id="delete-trigger-{{ tag.id }}" class="ui negative button"><i class="trash outline icon"></i></div>{% endif %}
+                                    {% if (tag.pinned and not current_user.is_developer) or tag.valid_tagged_users.count() %}<div class="ui negative button disabled"><i class="trash outline icon"></i></div>{% else %}<div id="delete-trigger-{{ tag.id }}" class="ui negative button"><i class="trash outline icon"></i></div>{% endif %}
                                 </div>
-                                {% if not tag.pinned and tag.valid_tagged_users.count() == 0 %}<div id="delete-modal-{{ tag.id }}" class="ui modal">
+                                {% if (not tag.pinned or current_user.is_developer) and tag.valid_tagged_users.count() == 0 %}<div id="delete-modal-{{ tag.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除用户标签“{{ tag.name }}”？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_tag', id=tag.id, next=url_for('manage.tag', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
@@ -99,7 +99,7 @@ $('.ui.checkbox').checkbox();
 
 $('.ui.sortable.table').tablesort();
 
-{% for tag in tags %}{% if not tag.pinned and tag.valid_tagged_users.count() == 0 %}
+{% for tag in tags %}{% if (not tag.pinned or current_user.is_developer) and tag.valid_tagged_users.count() == 0 %}
 $('#delete-trigger-{{ tag.id }}')
     .on('click', function() {
         $('#delete-modal-{{ tag.id }}').modal({ autofocus: false }).modal('show');

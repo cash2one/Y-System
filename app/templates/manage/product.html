@@ -71,7 +71,7 @@
                     <tbody>
                         {% for product in products %}
                         <tr>
-                            <td>{{ product.name }}</td>
+                            <td>{% if product.pinned and current_user.is_developer %}<i class="pin icon"></i>{% endif %}{{ product.name }}</td>
                             <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
                             <td>{% if product.sales_volume %}<a class="purchase loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id) }}" data-content="查看购买记录" data-position="top center" data-variation="inverted">{{ product.sales_volume }}</a>{% else %}0{% endif %}</td>
                             <td{% if product.available %} class="active"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
@@ -82,15 +82,11 @@
                             <td class="single line">{{ macros.user_popup(product.modified_by, product.modified_by.id == current_user.id) }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
-                                    {% if product.available %}
-                                    <a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="unhide icon"></i></a>
-                                    {% else %}
-                                    <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="hide icon"></i></a>
-                                    {% endif %}
+                                    {% if product.available %}<a class="ui grey button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="unhide icon"></i></a>{% else %}<a class="ui button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="hide icon"></i></a>{% endif %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="edit icon"></i></a>
-                                    {% if product.pinned %}<div class="ui negative button disabled"><i class="trash outline icon"></i></div>{% else %}<div id="delete-trigger-{{ product.id }}" class="ui negative button"><i class="trash outline icon"></i></div>{% endif %}
+                                    {% if product.pinned and not current_user.is_developer %}<div class="ui negative button disabled"><i class="trash outline icon"></i></div>{% else %}<div id="delete-trigger-{{ product.id }}" class="ui negative button"><i class="trash outline icon"></i></div>{% endif %}
                                 </div>
-                                {% if not product.pinned %}<div id="delete-modal-{{ product.id }}" class="ui modal">
+                                {% if not product.pinned or current_user.is_developer %}<div id="delete-modal-{{ product.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要删除产品“{{ product.name }}”？</div>
                                     <div class="actions">
                                         <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_product', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
@@ -128,7 +124,7 @@ $('.ui.sortable.table').tablesort();
 
 $('td .purchase.loading-trigger').popup();
 
-{% for product in products %}{% if not product.pinned %}
+{% for product in products %}{% if not product.pinned or current_user.is_developer %}
 $('#delete-trigger-{{ product.id }}')
     .on('click', function() {
         $('#delete-modal-{{ product.id }}').modal({ autofocus: false }).modal('show');

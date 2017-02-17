@@ -3787,7 +3787,7 @@ def edit_tag(id):
     tag = Tag.query.get_or_404(id)
     form = EditTagForm(tag=tag)
     if form.validate_on_submit():
-        if not tag.pinned:
+        if current_user.is_developer or not tag.pinned:
             tag.name = form.name.data
         tag.color_id = int(form.color.data)
         db.session.add(tag)
@@ -3803,7 +3803,7 @@ def edit_tag(id):
 @permission_required(u'管理用户标签')
 def delete_tag(id):
     tag = Tag.query.get_or_404(id)
-    if tag.pinned or tag.valid_tagged_users.count():
+    if (tag.pinned and not current_user.is_developer) or tag.valid_tagged_users.count():
         abort(403)
     db.session.delete(tag)
     flash(u'已删除用户标签：%s' % tag.name, category='success')
@@ -4367,7 +4367,7 @@ def edit_product(id):
         abort(404)
     form = EditProductForm()
     if form.validate_on_submit():
-        if not product.pinned:
+        if current_user.is_developer or not product.pinned:
             product.name = form.name.data
         if product.purchases.count() == 0:
             product.price = float(form.price.data)
@@ -4390,7 +4390,7 @@ def delete_product(id):
     product = Product.query.get_or_404(id)
     if product.deleted:
         abort(404)
-    if product.pinned:
+    if product.pinned and not current_user.is_developer:
         abort(403)
     product.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除研修产品：%s' % product.name, category='success')
