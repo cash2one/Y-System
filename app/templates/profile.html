@@ -81,7 +81,7 @@
                     <a class="item {% if show_profile_overview %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_overview', id=user.id) }}"><i class="address card outline icon"></i>概览</a>
                     <a class="item {% if show_profile_progress %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_progress', id=user.id) }}"><i class="flag icon"></i>进度</a>
                     <a class="item {% if show_profile_bookings %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_bookings', id=user.id) }}"><i class="checked calendar icon"></i>预约</a>
-                    {% if current_user.can('管理') %}<a class="item {% if show_profile_archive %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_archive', id=user.id) }}"><i class="archive icon"></i>存档</a>{% endif %}
+                    {% if current_user.can('管理') %}<a class="item {% if show_profile_archive %}active {% endif %}loading-trigger" href="{{ url_for('main.profile_archive', id=user.id) }}"><i class="archive icon"></i>资料</a>{% endif %}
                 </div>
                 {% if show_profile_overview %}
                 <div id="progress" class="ui vertical segment loading">
@@ -200,12 +200,6 @@
                 <div class="ui vertical segment">
                     <div class="ui header">联系方式</div>
                     <div class="ui relaxed list">
-                        <div class="item">
-                            <div class="content">
-                                <div class="header">电子邮箱</div>
-                                <div class="description">{{ user.email }}</div>
-                            </div>
-                        </div>
                         <div class="item">
                             <div class="content">
                                 <div class="header">移动电话</div>
@@ -335,7 +329,7 @@
                         </div>
                     </div>
                 </div>
-                {% with registrations = user.registered_groups.first().organizer.organized_groups %}{% if registrations.count() %}<div class="ui vertical segment">
+                {% if user.registered_groups.count() %}{% with registrations = user.registered_groups.first().organizer.organized_groups %}<div class="ui vertical segment">
                     <div class="ui header">团报信息</div>
                     <div class="ui relaxed list">
                         {% for registration in registrations %}
@@ -349,7 +343,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                </div>{% endif %}{% endwith %}
+                </div>{% endwith %}{% endif %}
                 {% if user.worked_in_same_field or user.deformity %}<div class="ui vertical segment">
                     <div class="ui header">其它信息</div>
                     <div class="ui relaxed list">
