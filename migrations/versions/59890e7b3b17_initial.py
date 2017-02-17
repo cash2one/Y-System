@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 92348e7bbbb7
+Revision ID: 59890e7b3b17
 Revises: 
-Create Date: 2017-02-17 00:15:22.965947
+Create Date: 2017-02-17 04:13:03.211741
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '92348e7bbbb7'
+revision = '59890e7b3b17'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -165,6 +165,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('color_id', sa.Integer(), nullable=True),
+    sa.Column('pinned', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['color_id'], ['colors.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -339,7 +340,7 @@ def upgrade():
     sa.Column('name', sa.Unicode(length=64), nullable=True),
     sa.Column('price', sa.Float(), nullable=True),
     sa.Column('available', sa.Boolean(), nullable=True),
-    sa.Column('fixed', sa.Boolean(), nullable=True),
+    sa.Column('pinned', sa.Boolean(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),

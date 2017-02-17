@@ -70,6 +70,8 @@ def book_vb(id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！', category='success')
+    if current_user.has_tag_name(u'未缴全款'):
+        flash(u'您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！', category='warning')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
     available_ipads_quantity = current_user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
@@ -201,6 +203,8 @@ def book_y_gre(id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！', category='success')
+    if current_user.has_tag_name(u'未缴全款'):
+        flash(u'您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！', category='warning')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
     available_ipads_quantity = current_user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:

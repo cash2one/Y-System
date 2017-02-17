@@ -166,10 +166,10 @@
                                 {% elif (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{% if user.created %}{{ url_for('manage.edit_user', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% else %}{{ url_for('manage.create_user_confirm', id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="edit icon"></i></a>
-                                    {% if user.created %}<div id="suspend-trigger-{{ user.id }}" class="ui {% if user.is_suspended %}green{% else %}orange{% endif %} button"><i class="{% if user.is_suspended %}play{% else %}pause{% endif %} icon"></i></div>{% endif %}
+                                    {% if user.activated %}<div id="suspend-trigger-{{ user.id }}" class="ui {% if user.is_suspended %}green{% else %}orange{% endif %} button"><i class="{% if user.is_suspended %}play{% else %}pause{% endif %} icon"></i></div>{% endif %}
                                     {% if user.id == current_user.id %}<div class="ui negative button disabled"><i class="remove user icon"></i></div>{% else %}<div id="delete-trigger-{{ user.id }}" class="ui negative button"><i class="remove user icon"></i></div>{% endif %}
                                 </div>
-                                {% if user.created %}<div id="suspend-modal-{{ user.id }}" class="ui modal">
+                                {% if user.activated %}<div id="suspend-modal-{{ user.id }}" class="ui modal">
                                     <div class="header"><i class="warning sign icon"></i>确定要{% if user.is_suspended %}恢复{% else %}挂起{% endif %}用户：[{{ user.role.name }}]{{ user.name_alias }}？</div>
                                     <div class="actions">
                                         <a class="ui {% if user.is_suspended %}green{% else %}orange{% endif %} left labeled icon button loading-trigger" href="{{ url_for('manage.toggle_suspension', id=user.id, next=url_for('manage.user', page=pagination.page)) }}"><i class="{% if user.is_suspended %}play{% else %}pause{% endif %} icon"></i>{% if user.is_suspended %}恢复{% else %}挂起{% endif %}</a>
@@ -222,7 +222,7 @@ $('.ui.sortable.table').tablesort();
 {% if current_user.can('管理用户') %}
 $('#create-user-trigger').popup();
 {% for user in users %}{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
-{% if user.created %}
+{% if user.activated %}
 $('#suspend-trigger-{{ user.id }}')
     .on('click', function() {
         $('#suspend-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');

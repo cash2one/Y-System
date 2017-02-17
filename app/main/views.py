@@ -48,7 +48,7 @@ def profile(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.id != current_user.id and not current_user.can(u'管理'):
+    if (user.id != current_user.id and not current_user.can(u'管理')) or (user.is_developer and not current_user.is_developer):
         abort(403)
     show_profile_overview = True
     show_profile_progress = False
@@ -147,7 +147,7 @@ def profile_overview_data(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.id != current_user.id and not current_user.can(u'管理'):
+    if (user.id != current_user.id and not current_user.can(u'管理')) or (user.is_developer and not current_user.is_developer):
         abort(403)
     return jsonify({
         'progress': {
@@ -167,7 +167,7 @@ def profile_progress_vb(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.id != current_user.id and not current_user.can(u'管理'):
+    if (user.id != current_user.id and not current_user.can(u'管理')) or (user.is_developer and not current_user.is_developer):
         abort(403)
     if user.can_access_advanced_vb:
         lessons = Lesson.query\
@@ -198,7 +198,7 @@ def profile_progress_y_gre(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if user.id != current_user.id and not current_user.can(u'管理'):
+    if (user.id != current_user.id and not current_user.can(u'管理')) or (user.is_developer and not current_user.is_developer):
         abort(403)
     lessons = Lesson.query\
         .join(CourseType, CourseType.id == Lesson.type_id)\

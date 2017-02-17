@@ -395,6 +395,7 @@ class NewUserForm(FlaskForm):
 class ConfirmUserForm(FlaskForm):
     worked_in_same_field = BooleanField(u'（曾）在培训/留学机构任职')
     deformity = BooleanField(u'有严重心理或身体疾病')
+    paid_in_full = BooleanField(u'已缴纳齐全款')
     disclaimer = BooleanField(u'确认无偿授权“云英语”使用申请者姓名、肖像、GRE成绩单以及其它必要信息用于宣传', validators=[Required()])
     receptionist_email = StringField(u'接待人（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'确认并新建学生用户')

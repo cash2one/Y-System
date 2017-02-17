@@ -258,6 +258,10 @@ class Relationship(db.Model):
     @staticmethod
     def insert_relationships():
         relationships = [
+            (u'朋友', ),
+            (u'同学', ),
+            (u'同事', ),
+            (u'恋人', ),
             (u'父母', ),
             (u'配偶', ),
             (u'子女', ),
@@ -265,10 +269,6 @@ class Relationship(db.Model):
             (u'兄妹', ),
             (u'姊妹', ),
             (u'姊弟', ),
-            (u'朋友', ),
-            (u'恋人', ),
-            (u'同学', ),
-            (u'同事', ),
         ]
         for entry in relationships:
             relationship = Relationship.query.filter_by(name=entry[0]).first()
@@ -2454,6 +2454,7 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
     color_id = db.Column(db.Integer, db.ForeignKey('colors.id'))
+    pinned = db.Column(db.Boolean, default=False)
     tagged_users = db.relationship(
         'UserTag',
         foreign_keys=[UserTag.tag_id],
@@ -2473,23 +2474,25 @@ class Tag(db.Model):
     @staticmethod
     def insert_tags():
         tags = [
-            (u'北大', u'Red', ),
-            (u'清华', u'Purple', ),
-            (u'一本', u'Blue', ),
-            (u'非一本', u'Grey', ),
-            (u'GPA90+', u'Teal', ),
-            (u'竞赛', u'Teal', ),
-            (u'六级600+', u'Teal', ),
-            (u'高考数学135+', u'Teal', ),
-            (u'3rd', u'Green', ),
-            (u'6th', u'Green', ),
+            (u'未缴全款', u'Red', True, ),
+            (u'北大', u'Red', True, ),
+            (u'清华', u'Purple', True, ),
+            (u'一本', u'Blue', True, ),
+            (u'非一本', u'Grey', True, ),
+            (u'GPA90+', u'Teal', True, ),
+            (u'竞赛', u'Teal', True, ),
+            (u'六级600+', u'Teal', True, ),
+            (u'高考数学135+', u'Teal', True, ),
+            (u'3rd', u'Green', True, ),
+            (u'6th', u'Green', True, ),
         ]
         for entry in tags:
             tag = Tag.query.filter_by(name=entry[0]).first()
             if tag is None:
                 tag = Tag(
                     name=entry[0],
-                    color_id=Color.query.filter_by(name=entry[1]).first().id
+                    color_id=Color.query.filter_by(name=entry[1]).first().id,
+                    pinned=entry[2]
                 )
                 db.session.add(tag)
                 print u'导入用户标签信息', entry[0], entry[1]
@@ -2655,7 +2658,7 @@ class Product(db.Model):
     name = db.Column(db.Unicode(64), index=True)
     price = db.Column(db.Float, default=0.0)
     available = db.Column(db.Boolean, default=False)
-    fixed = db.Column(db.Boolean, default=False)
+    pinned = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -2717,7 +2720,7 @@ class Product(db.Model):
                     name=entry[0],
                     price=entry[1],
                     available=entry[2],
-                    fixed=entry[3],
+                    pinned=entry[3],
                     modified_by_id=User.query.get(1).id
                 )
                 db.session.add(product)
