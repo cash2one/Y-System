@@ -737,6 +737,15 @@
                             </div>
                         </div>
                     </div>
+                    <div class="ui red dividing header">付款信息</div>
+                    <div class="ui segment">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ confirm_user_form.paid_in_full() }}
+                                {{ confirm_user_form.paid_in_full.label() }}
+                            </div>
+                        </div>
+                    </div>
                     <div class="ui red dividing header">服务条款</div>
                     <div class="ui segment">
                         <div class="inline required field">

@@ -3036,6 +3036,10 @@ def create_user_confirm(id):
         user.worked_in_same_field = confirm_user_form.worked_in_same_field.data
         user.deformity = confirm_user_form.deformity.data
         db.session.add(user)
+        if confirm_user_form.paid_in_full.data:
+            user.remove_tag(tag=Tag.query.filter_by(name=u'未缴全款').first())
+        else:
+            user.add_tag(tag=Tag.query.filter_by(name=u'未缴全款').first())
         receptionist = User.query.filter_by(email=confirm_user_form.receptionist_email.data.lower(), created=True, activated=True, deleted=False).first()
         if receptionist is None:
             flash(u'接待人邮箱不存在：%s' % confirm_user_form.receptionist_email.data.lower(), category='error')
