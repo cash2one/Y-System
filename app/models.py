@@ -2655,6 +2655,7 @@ class Product(db.Model):
     name = db.Column(db.Unicode(64), index=True)
     price = db.Column(db.Float, default=0.0)
     available = db.Column(db.Boolean, default=False)
+    fixed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -2697,17 +2698,17 @@ class Product(db.Model):
     @staticmethod
     def insert_products():
         products = [
-            (u'VB基本技术费', 6800.0, True, ),
-            (u'Y-GRE基本技术费', 6800.0, True, ),
-            (u'联报优惠', -1000.0, True, ),
-            (u'在校生减免', -800.0, True, ),
-            (u'本校减免', -500.0, True, ),
-            (u'团报优惠', -200.0, True, ),
-            (u'AW费用', 800.0, True, ),
-            (u'Q费用', 800.0, True, ),
-            (u'Y-GRE多轮费用', 2000.0, True, ),
-            (u'按月延长有效期', 1000.0, True, ),
-            (u'一次性延长2年有效期', 3000.0, True, ),
+            (u'VB基本技术费', 6800.0, True, False, ),
+            (u'Y-GRE基本技术费', 6800.0, True, False, ),
+            (u'联报优惠', -1000.0, True, False, ),
+            (u'在校生减免', -800.0, True, False, ),
+            (u'本校减免', -500.0, True, False, ),
+            (u'团报优惠', -200.0, True, True, ),
+            (u'AW费用', 800.0, True, False, ),
+            (u'Q费用', 800.0, True, False, ),
+            (u'Y-GRE多轮费用', 2000.0, True, False, ),
+            (u'按月延长有效期', 1000.0, True, True, ),
+            (u'一次性延长2年有效期', 3000.0, True, True, ),
         ]
         for entry in products:
             product = Product.query.filter_by(name=entry[0]).first()
@@ -2716,6 +2717,7 @@ class Product(db.Model):
                     name=entry[0],
                     price=entry[1],
                     available=entry[2],
+                    fixed=entry[3],
                     modified_by_id=User.query.get(1).id
                 )
                 db.session.add(product)

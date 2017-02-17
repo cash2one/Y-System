@@ -87,7 +87,7 @@
                                     {% else %}
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.toggle_product_availability', id=product.id, next=url_for('manage.product', page=pagination.page)) }}"><i class="hide icon"></i></a>
                                     {% endif %}
-                                    {% if product.name in ['团报优惠', '按月延长有效期', '一次性延长2年有效期'] %}
+                                    {% if product.fixed %}
                                     <div class="ui button disabled"><i class="edit icon"></i></div>
                                     <div class="ui negative button disabled"><i class="trash outline icon"></i></div>
                                     {% else %}

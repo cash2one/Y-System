@@ -4586,6 +4586,8 @@ def other_permissions():
 @developer_required
 def edit_permission(id):
     permission = Permission.query.get_or_404(id)
+    if permission.fixed:
+        abort(403)
     form = EditPermissionForm(permission=permission)
     if form.validate_on_submit():
         permission.name = form.name.data
@@ -4603,7 +4605,7 @@ def edit_permission(id):
 @developer_required
 def delete_permission(id):
     permission = Permission.query.get_or_404(id)
-    if permission.roles.count():
+    if permission.fixed or permission.roles.count():
         abort(403)
     db.session.delete(permission)
     flash(u'已删除权限：%s' % permission.name, category='success')
