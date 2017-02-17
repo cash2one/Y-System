@@ -568,7 +568,7 @@ def rental_rent_step_1():
         if not booking:
             flash(u'预约码无效', category='error')
             return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))
-        if not booking.valid:
+        if not booking.valid or booking.kept or booking.late:
             flash(u'该预约处于“%s”状态' % booking.state.name, category='error')
             return redirect(url_for('manage.rental_rent_step_1', next=request.args.get('next')))
         if booking.schedule.date != date.today():
