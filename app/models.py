@@ -1491,6 +1491,12 @@ class User(UserMixin, db.Model):
     def url(self):
         return url_for('main.profile_overview', id=self.id)
 
+    @property
+    def index_url(self):
+        if self.can(u'管理'):
+            return url_for('manage.summary')
+        return self.url
+
     def avatar(self, size=512, default='identicon', rating='g', wrap=False):
         if request.is_secure:
             url = 'https://secure.gravatar.com/avatar'
