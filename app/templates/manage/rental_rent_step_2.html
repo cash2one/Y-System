@@ -46,7 +46,7 @@
                     <div class="column">
                         <div class="ui big list">
                             <div class="item">{{ user.name_alias }}</div>
-                            <div class="item">进度：{{user.last_punch.alias2 }}</div>
+                            <div class="item">进度：{{ user.last_punch.section.alias2 }}</div>
                         </div>
                         <form id="select-ipad" action="{{ url_for('manage.rental_rent_step_2', user_id=user.id, schedule_id=schedule.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}

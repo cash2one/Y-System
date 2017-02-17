@@ -45,8 +45,8 @@
                     </div>
                     <div class="column">
                         <div class="ui big list">
-                            <div class="item">{{ user.name_alias }}</div>
-                            <div class="item">进度：{{user.last_punch.alias2 }}</div>
+                            <div class="item">{{ user.name_alias }}{% if user.has_tag_name('未缴全款') %}<i class="yellow warning sign icon"></i>未缴全款{% endif %}</div>
+                            <div class="item">进度：{{ user.last_punch.section.alias2 }}</div>
                         </div>
                         <form id="select-ipad" action="{{ url_for('manage.rental_rent_step_2_alt', user_id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ form.hidden_tag() }}
