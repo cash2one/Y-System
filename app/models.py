@@ -2389,7 +2389,7 @@ class User(UserMixin, db.Model):
             else:
                 user_json_suggestion['description'] = self.email
         if include_url:
-            user_json_suggestion['url'] = url_for('main.profile_overview', id=self.id)
+            user_json_suggestion['url'] = self.url
         return user_json_suggestion
 
     @staticmethod

@@ -65,7 +65,7 @@
                                     <div class="item">
                                         <img class="ui avatar image" src="{{ group_registration.member.avatar(size=56) }}">
                                         <div class="content">
-                                            <div class="header"><a href="{{ url_for('main.profile_overview', id=group_registration.member.id) }}" target="_blank">{{ group_registration.member.name_alias }}</a>{% if group_registration.member.id != group_registration.organizer.id %}<i id="remove-member-trigger-{{ group_registration.member.id }}" class="delete link icon"></i>{% endif %}</div>
+                                            <div class="header"><a href="{{ group_registration.member.url }}" target="_blank">{{ group_registration.member.name_alias }}</a>{% if group_registration.member.id != group_registration.organizer.id %}<i id="remove-member-trigger-{{ group_registration.member.id }}" class="delete link icon"></i>{% endif %}</div>
                                             <div class="description popup-trigger" data-variation="inverted">{{ moment(group_registration.timestamp).fromNow() }}</div>
                                             <div class="ui popup popup-content">{{ moment(group_registration.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
                                         </div>
