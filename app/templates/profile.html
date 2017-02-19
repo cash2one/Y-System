@@ -344,6 +344,22 @@
                         {% endfor %}
                     </div>
                 </div>{% endwith %}{% endif %}
+                {% with records = user.suspension_records %}{% if records.count() %}<div class="ui vertical segment">
+                    <div class="ui header">挂起记录</div>
+                    <div class="ui relaxed list">
+                        {% for record in records %}
+                        <div class="item">
+                            <div class="right floated content">
+                                <div class="description">操作人：{{ macros.user_popup(record.modified_by, record.modified_by.id == current_user.id) }}</div>
+                            </div>
+                            <div class="content">
+                                <div class="header">{{ moment(record.start_time).format('YYYY-M-D H:mm:ss') }} - {% if record.end_time %}{{ moment(record.end_time).format('YYYY-M-D H:mm:ss') }}{% else %}现在{% endif %}</div>
+                                {% if record.end_time %}<div class="description">{{ record.duration }}</div>{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>{% endif %}{% endwith %}
                 {% if user.worked_in_same_field or user.deformity %}<div class="ui vertical segment">
                     <div class="ui header">其它信息</div>
                     <div class="ui relaxed list">

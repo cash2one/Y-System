@@ -398,8 +398,9 @@ class SuspensionRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     original_role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    start_datetime = db.Column(db.DateTime, default=datetime.utcnow)
-    end_datetime = db.Column(db.DateTime)
+    start_time = db.Column(db.DateTime, default=datetime.utcnow)
+    end_time = db.Column(db.DateTime)
+    current = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -409,8 +410,18 @@ class SuspensionRecord(db.Model):
         self.modified_by_id = modified_by.id
         db.session.add(self)
 
+    @property
+    def duration(self):
+        if self.end_time is not None:
+            duration = self.end_time - self.start_time
+            hours = duration.seconds / 3600
+            remaining_seconds = duration.seconds % 3600
+            minutes = remaining_seconds / 60
+            seconds = remaining_seconds % 60
+            return u'共 %s天 %s小时 %s分钟 %s秒' % (duration.days, hours, minutes, seconds)
+
     def __repr__(self):
-        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_datetime, self.end_datetime)
+        return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_time, self.end_time)
 
 
 class CourseRegistration(db.Model):
@@ -1664,23 +1675,44 @@ class User(UserMixin, db.Model):
     def purchases_total(self):
         return u'%g 元' % sum([purchase.total for purchase in self.purchases])
 
-    def toggle_suspension(self, modified_by):
-        if self.is_suspended:
-            suspension_record = self.suspension_records.filter_by(end_datetime=None).order_by(SuspensionRecord.modified_at.desc()).first()
-            if suspension_record is not None:
-                suspension_record.end_datetime = datetime.utcnow()
-                suspension_record.ping(modified_by=modified_by)
-                db.session.add(suspension_record)
-                self.role_id = suspension_record.original_role_id
-                db.session.add(self)
-                return False
-            return True
-        else:
-            suspension_record = SuspensionRecord(user_id=self.id, original_role_id=self.role_id, modified_by_id=modified_by.id)
+    @property
+    def current_suspension(self):
+        return self.suspension_records.filter_by(current=True).first()
+
+    def add_suspension(self, modified_by):
+        if not self.is_suspended:
+            suspension_record = SuspensionRecord(
+                user_id=self.id,
+                original_role_id=self.role_id,
+                start_time=self.due_time,
+                end_time=datetime.utcnow(),
+                current=False,
+                modified_by_id=modified_by.id
+            )
+            db.session.add(suspension_record)
+
+    def start_suspension(self, modified_by):
+        if not self.is_suspended:
+            suspension_record = SuspensionRecord(user_id=self.id, original_role_id=self.role_id, current=True, modified_by_id=modified_by.id)
+            if self.overdue:
+                suspension_record.start_time = self.due_time
             db.session.add(suspension_record)
             self.role_id = Role.query.filter_by(name=u'挂起').first().id
             db.session.add(self)
-            return True
+
+    def end_suspension(self, modified_by):
+        if self.is_suspended:
+            suspension_record = self.current_suspension
+            if suspension_record is not None:
+                if self.overdue:
+                    db.session.delete(suspension_record)
+                else:
+                    suspension_record.end_time = datetime.utcnow()
+                    suspension_record.current = False
+                    suspension_record.ping(modified_by=modified_by)
+                    db.session.add(suspension_record)
+                self.role_id = suspension_record.original_role_id
+                db.session.add(self)
 
     @property
     def due_time(self):
@@ -1691,7 +1723,7 @@ class User(UserMixin, db.Model):
         year = self.activated_at.year + 1 + extended_years + (self.activated_at.month + extended_months) / 12
         month = (self.activated_at.month + extended_months) % 12
         day = self.activated_at.day
-        suspended_time = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_datetime - record.start_datetime for record in self.suspension_records if record.end_datetime is not None], timedelta(0))
+        suspended_time = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_time - record.start_time for record in self.suspension_records if record.end_time is not None], timedelta(0))
         return datetime(year, month, day, self.activated_at.hour, self.activated_at.minute, self.activated_at.second, self.activated_at.microsecond) + suspended_time
 
     @property

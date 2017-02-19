@@ -3001,6 +3001,11 @@ def create_user_confirm(id):
     new_purchase_form = NewPurchaseForm(prefix='new_purchase')
     if new_purchase_form.submit.data and new_purchase_form.validate_on_submit():
         product = Product.query.get_or_404(int(new_purchase_form.product.data))
+        if product.name in [u'按月延长有效期', u'一次性延长2年有效期']:
+            if user.is_suspended:
+                user.end_suspension(modified_by=current_user._get_current_object())
+            if user.overdue:
+                user.add_suspension(modified_by=current_user._get_current_object())
         user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
         flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
@@ -3517,11 +3522,12 @@ def toggle_suspension(id):
         abort(404)
     if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and (user.id != current_user.id or not current_user.is_superior_than(user=user))):
         abort(403)
-    is_suspended = user.toggle_suspension(modified_by=current_user._get_current_object())
-    if is_suspended:
-        flash(u'已挂起用户：%s' % user.name_alias, category='success')
-    else:
+    if user.is_suspended:
+        user.end_suspension(modified_by=current_user._get_current_object())
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
+    else:
+        user.start_suspension(modified_by=current_user._get_current_object())
+        flash(u'已挂起用户：%s' % user.name_alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
