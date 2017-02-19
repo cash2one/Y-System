@@ -3001,6 +3001,8 @@ def create_user_confirm(id):
     new_purchase_form = NewPurchaseForm(prefix='new_purchase')
     if new_purchase_form.submit.data and new_purchase_form.validate_on_submit():
         product = Product.query.get_or_404(int(new_purchase_form.product.data))
+        if product.name in [u'按月延长有效期', u'一次性延长2年有效期'] and user.overdue:
+            user.add_overdue_suspension(modified_by=current_user._get_current_object())
         user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
         flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
@@ -3285,20 +3287,6 @@ def edit_user(id):
             )
         flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    # TOEFL
-    new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
-    if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
-        user.add_toefl_test_score(
-            test_date=new_toefl_test_score_form.test_date.data,
-            total_score=int(new_toefl_test_score_form.total.data),
-            reading_score=int(new_toefl_test_score_form.reading.data),
-            listening_score=int(new_toefl_test_score_form.listening.data),
-            speaking_score=int(new_toefl_test_score_form.speaking.data),
-            writing_score=int(new_toefl_test_score_form.writing.data),
-            modified_by=current_user._get_current_object()
-        )
-        flash(u'已添加TOEFL成绩', category='success')
-        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
     if edit_purpose_form.submit.data and edit_purpose_form.validate_on_submit():
@@ -3401,7 +3389,6 @@ def edit_user(id):
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
         new_score_record_form=new_score_record_form,
-        new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
         edit_application_aim_form=edit_application_aim_form,
         edit_referrer_form=edit_referrer_form,
@@ -3517,11 +3504,12 @@ def toggle_suspension(id):
         abort(404)
     if (not current_user.is_moderator and user.is_superior_than(user=current_user._get_current_object())) or (current_user.is_moderator and (user.id != current_user.id or not current_user.is_superior_than(user=user))):
         abort(403)
-    is_suspended = user.toggle_suspension(modified_by=current_user._get_current_object())
-    if is_suspended:
-        flash(u'已挂起用户：%s' % user.name_alias, category='success')
-    else:
+    if user.is_suspended:
+        user.end_suspension(modified_by=current_user._get_current_object())
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
+    else:
+        user.start_suspension(modified_by=current_user._get_current_object())
+        flash(u'已挂起用户：%s' % user.name_alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
