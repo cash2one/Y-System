@@ -1733,6 +1733,14 @@ class User(UserMixin, db.Model):
             return False
         return datetime.utcnow() > self.due_time
 
+    @property
+    def valid_time(self):
+        return self.due_time - self.activated_at
+
+    @property
+    def remaining_time(self):
+        return self.due_time - datetime.utcnow()
+
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
             invitation = Invitation(inviter_id=self.id, user_id=user.id, type_id=invitation_type.id)
