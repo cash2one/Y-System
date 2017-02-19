@@ -2420,9 +2420,7 @@ class User(UserMixin, db.Model):
         return user_json
 
     def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False):
-        user_json_suggestion = {
-            'image': self.avatar(size=80),
-        }
+        user_json_suggestion = {}
         if suggest_email:
             user_json_suggestion['title'] = self.email
             if include_role:
