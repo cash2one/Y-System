@@ -48,15 +48,13 @@
                 <div class="ui vertical segment">
                     <div>{{ macros.user_email(user) }}</div>
                 </div>
-                {% if current_user.can('管理') and user.has_tags.count()  %}
-                <div class="ui vertical segment">
+                {% if current_user.can('管理') and user.has_tags.count()  %}<div class="ui vertical segment">
                     {% with tags = user.has_tags %}
                     <div class="ui labels">
                         {% for tag in tags %}<div class="ui {{ tag.tag.color.css_class }} label"><i class="tag icon"></i>{{ tag.tag.name }}</div>{% endfor %}
                     </div>
                     {% endwith %}
-                </div>
-                {% endif %}
+                </div>{% endif %}
                 {% if not user.is_suspended and user.due_time %}<div class="ui vertical segment">
                     <div id="due-time" class="ui tiny indicating progress">
                         <div class="bar"></div>
