@@ -1679,17 +1679,18 @@ class User(UserMixin, db.Model):
     def current_suspension(self):
         return self.suspension_records.filter_by(current=True).first()
 
-    def add_suspension(self, modified_by):
-        if not self.is_suspended:
-            suspension_record = SuspensionRecord(
-                user_id=self.id,
-                original_role_id=self.role_id,
-                start_time=self.due_time,
-                end_time=datetime.utcnow(),
-                current=False,
-                modified_by_id=modified_by.id
-            )
-            db.session.add(suspension_record)
+    def add_overdue_suspension(self, modified_by):
+        if self.is_suspended:
+            self.end_suspension(modified_by=modified_by)
+        suspension_record = SuspensionRecord(
+            user_id=self.id,
+            original_role_id=self.role_id,
+            start_time=self.due_time,
+            end_time=datetime.utcnow(),
+            current=False,
+            modified_by_id=modified_by.id
+        )
+        db.session.add(suspension_record)
 
     def start_suspension(self, modified_by):
         if not self.is_suspended:
