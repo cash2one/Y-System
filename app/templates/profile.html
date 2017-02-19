@@ -58,9 +58,9 @@
                 </div>
                 {% endif %}
                 {% if not user.is_suspended and user.due_time %}<div class="ui vertical segment">
-                    <div id="due-time" class="ui tiny indicating progress" data-value="{{ user.remaining_time.days }}" data-total="{{ user.valid_time.days }}">
+                    <div id="due-time" class="ui tiny indicating progress">
                         <div class="bar"></div>
-                        <div class="label">剩余研修时间：{{ user.remaining_time.days }}/{{ user.valid_time.days }}天</div>
+                        <div class="label"></div>
                     </div>
                 </div>{% endif %}
                 <div class="ui vertical segment">
@@ -518,7 +518,13 @@ function noAvatar(avatarImage) {
     $(avatarImage).attr('src', "{{ url_for('static', filename='images/wireframes/square-image.png') }}");
 };
 
-$('#due-time').progress();
+$('#due-time').progress({
+    total: {{ user.valid_time.days }},
+    value: {{ user.remaining_time.days }},
+    text: {
+        active: '可用研修时间：{value} / {total} 天'
+    }
+});
 
 {% if show_profile_overview %}
 var countUpOptions = {
