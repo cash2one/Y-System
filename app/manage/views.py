@@ -3287,20 +3287,6 @@ def edit_user(id):
             )
         flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    # TOEFL
-    new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
-    if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
-        user.add_toefl_test_score(
-            test_date=new_toefl_test_score_form.test_date.data,
-            total_score=int(new_toefl_test_score_form.total.data),
-            reading_score=int(new_toefl_test_score_form.reading.data),
-            listening_score=int(new_toefl_test_score_form.listening.data),
-            speaking_score=int(new_toefl_test_score_form.speaking.data),
-            writing_score=int(new_toefl_test_score_form.writing.data),
-            modified_by=current_user._get_current_object()
-        )
-        flash(u'已添加TOEFL成绩', category='success')
-        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
     if edit_purpose_form.submit.data and edit_purpose_form.validate_on_submit():
@@ -3403,7 +3389,6 @@ def edit_user(id):
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
         new_score_record_form=new_score_record_form,
-        new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
         edit_application_aim_form=edit_application_aim_form,
         edit_referrer_form=edit_referrer_form,
