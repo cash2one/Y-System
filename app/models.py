@@ -1683,7 +1683,7 @@ class User(UserMixin, db.Model):
             return True
 
     @property
-    def due_datetime(self):
+    def due_time(self):
         if self.is_developer or self.is_administrator or self.is_moderator:
             return
         extended_years = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'一次性延长2年有效期').first().id)]) * 2
@@ -1698,7 +1698,7 @@ class User(UserMixin, db.Model):
     def overdue(self):
         if self.is_developer or self.is_administrator or self.is_moderator:
             return False
-        return datetime.utcnow() > self.due_datetime
+        return datetime.utcnow() > self.due_time
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):
