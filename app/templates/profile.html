@@ -6,6 +6,10 @@
 {% block customized_styles %}
 {{ super() }}
 {% include '_style_common.html' %}
+<style type="text/css">
+#due-time .label {
+    text-align: left;
+}
 </style>
 {% endblock %}
 
@@ -53,12 +57,17 @@
                     {% endwith %}
                 </div>
                 {% endif %}
+                {% if not user.is_suspended and user.due_time %}<div class="ui vertical segment">
+                    <div id="due-time" class="ui tiny indicating progress" data-value="{{ user.remaining_time.days }}" data-total="{{ user.valid_time.days }}">
+                        <div class="bar"></div>
+                        <div class="label">剩余研修时间：{{ user.remaining_time.days }}/{{ user.valid_time.days }}天</div>
+                    </div>
+                </div>{% endif %}
                 <div class="ui vertical segment">
                     <div>激活时间：<span class="popup-trigger" data-variation="inverted">{{ moment(user.activated_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
                     <div>上次登录：<span class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
-                    {% if not user.is_suspended and user.due_time %}<div>{% if user.overdue %}<i class="yellow warning sign icon"></i>{% endif %}有效期至：{{ moment(user.due_time).format('YYYY-M-D') }}</div>{% endif %}
                 </div>
                 {% if current_user.can('管理') %}
                 <div class="ui vertical segment">
@@ -508,6 +517,8 @@ $('#avatar img').transition('pulse');
 function noAvatar(avatarImage) {
     $(avatarImage).attr('src', "{{ url_for('static', filename='images/wireframes/square-image.png') }}");
 };
+
+$('#due-time').progress();
 
 {% if show_profile_overview %}
 var countUpOptions = {
