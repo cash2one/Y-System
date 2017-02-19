@@ -839,13 +839,13 @@ class EditRoleForm(FlaskForm):
 
 class NewPermissionForm(FlaskForm):
     name = StringField(u'权限名称', validators=[Required(), Length(1, 64)])
-    overdue_check = BooleanField(u'逾期失效')
+    check_overdue = BooleanField(u'逾期失效')
     submit = SubmitField(u'提交')
 
 
 class EditPermissionForm(FlaskForm):
     name = StringField(u'权限名称', validators=[Required(), Length(1, 64)])
-    overdue_check = BooleanField(u'逾期失效')
+    check_overdue = BooleanField(u'逾期失效')
     submit = SubmitField(u'提交')
 
     def __init__(self, permission, *args, **kwargs):

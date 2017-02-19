@@ -85,7 +85,7 @@ class Permission(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(64), unique=True, index=True)
-    overdue_check = db.Column(db.Boolean, default=False)
+    check_overdue = db.Column(db.Boolean, default=False)
     roles = db.relationship(
         'RolePermission',
         foreign_keys=[RolePermission.permission_id],
@@ -128,7 +128,7 @@ class Permission(db.Model):
             if permission is None:
                 permission = Permission(
                     name=entry[0],
-                    overdue_check=entry[1]
+                    check_overdue=entry[1]
                 )
                 db.session.add(permission)
                 print u'导入用户权限信息', entry[0]
@@ -1405,7 +1405,7 @@ class User(UserMixin, db.Model):
     def can(self, permission_name):
         permission = Permission.query.filter_by(name=permission_name).first()
         return permission is not None and \
-            not (permission.overdue_check and self.overdue) and \
+            not (permission.check_overdue and self.overdue) and \
             self.role is not None and \
             self.role.has_permission(permission=permission)
 
@@ -1683,7 +1683,7 @@ class User(UserMixin, db.Model):
             return True
 
     @property
-    def due_datetime(self):
+    def due_time(self):
         if self.is_developer or self.is_administrator or self.is_moderator:
             return
         extended_years = sum([purchase.quantity for purchase in self.purchases.filter_by(product_id=Product.query.filter_by(name=u'一次性延长2年有效期').first().id)]) * 2
@@ -1698,7 +1698,7 @@ class User(UserMixin, db.Model):
     def overdue(self):
         if self.is_developer or self.is_administrator or self.is_moderator:
             return False
-        return datetime.utcnow() > self.due_datetime
+        return datetime.utcnow() > self.due_time
 
     def invite_user(self, user, invitation_type):
         if not self.invited_user(user):

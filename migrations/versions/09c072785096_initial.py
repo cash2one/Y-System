@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 59890e7b3b17
+Revision ID: 09c072785096
 Revises: 
-Create Date: 2017-02-17 04:13:03.211741
+Create Date: 2017-02-19 08:03:34.900042
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '59890e7b3b17'
+revision = '09c072785096'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -95,7 +95,7 @@ def upgrade():
     op.create_table('permissions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
-    sa.Column('overdue_check', sa.Boolean(), nullable=True),
+    sa.Column('check_overdue', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_permissions_name'), 'permissions', ['name'], unique=True)

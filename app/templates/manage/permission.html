@@ -35,8 +35,8 @@
                             <div class="ui segment">
                                 <div class="inline field">
                                     <div class="ui toggle checkbox">
-                                        {{ form.overdue_check() }}
-                                        {{ form.overdue_check.label() }}
+                                        {{ form.check_overdue() }}
+                                        {{ form.check_overdue.label() }}
                                     </div>
                                 </div>
                             </div>
@@ -72,7 +72,7 @@
                                 </div>
                                 {% else %}无{% endif %}
                             </td>
-                            {% if permission.overdue_check %}<td class="active">是</td>{% else %}<td>否</td>{% endif %}
+                            {% if permission.check_overdue %}<td class="active">是</td>{% else %}<td>否</td>{% endif %}
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_permission', id=permission.id, next=url_for('manage.permission', page=pagination.page)) }}"><i class="edit icon"></i></a>
