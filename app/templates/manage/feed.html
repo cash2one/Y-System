@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}系统日志{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="feed icon"></i>系统日志</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="feed icon"></i>日志列表</h3>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.feed', page=pagination.page) }}">全部</a>
+                </div>
+                <div class="ui feed">
+                    {% for feed in feeds %}
+                    <div class="event">
+                        <div class="label"><img src="{{ feed.user.avatar(size=70) }}"></div>
+                        <div class="content">
+                            <div class="summary">
+                                {{ macros.feed_event(feed, feed.user.id == current_user.id) }}
+                                <div class="date popup-trigger" data-variation="inverted">{{ moment(feed.timestamp).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(feed.timestamp).format('YYYY-M-D H:mm:ss') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.feed') }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.sortable.table').tablesort();
+</script>
+{% endblock %}

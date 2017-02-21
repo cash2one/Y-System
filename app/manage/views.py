@@ -50,6 +50,7 @@ from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRET
 from ..models import iPad, iPadState, iPadContent, Room
 from ..models import Announcement
 from ..models import Product, Purchase
+from ..models import Feed
 from ..email import send_email, send_emails
 from ..notify import get_announcements
 from ..decorators import permission_required, administrator_required, developer_required
@@ -4616,6 +4617,19 @@ def delete_permission(id):
 @permission_required(u'管理')
 def analytics():
     return render_template('manage/analytics.html', analytics_token=current_app.config['ANALYTICS_TOKEN'])
+
+
+@manage.route('/feed')
+@login_required
+@developer_required
+def feed():
+    query = Feed.query\
+        .filter(Feed.category == u'log')\
+        .order_by(Feed.timestamp.desc())
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    feeds = pagination.items
+    return render_template('manage/feed.html', feeds=feeds, pagination=pagination)
 
 
 @manage.route('/suggest/user/')

@@ -14,7 +14,6 @@ from ..notify import get_announcements, add_feed
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
-        add_feed(user=current_user, event=u'登录系统', category=u'log', ignore_in=30*60)
         if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
             logout_user()
             return redirect(url_for('auth.activate'))
@@ -42,6 +41,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             get_announcements(type_name=u'登录通知', flash_first=True)
+            add_feed(user=current_user, event=u'登录系统', category=u'log')
             return redirect(request.args.get('next') or user.index_url)
         flash(u'无效的用户名或密码', category='error')
     return render_template('auth/login.html', form=form)
