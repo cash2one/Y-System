@@ -22,7 +22,10 @@
             <div class="column">
                 <h3 class="ui header"><i class="feed icon"></i>日志列表</h3>
                 <div class="ui secondary stackable menu">
-                    <a class="item active loading-trigger" href="{{ url_for('manage.feed', page=pagination.page) }}">全部</a>
+                    <a class="item {% if show_all_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.all_feeds', page=pagination.page) }}">全部</a>
+                    <a class="item {% if show_auth_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.auth_feeds') }}">鉴权日志</a>
+                    <a class="item {% if show_booking_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.booking_feeds') }}">预约日志</a>
+                    <a class="item {% if show_manage_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.manage_feeds') }}">管理日志</a>
                 </div>
                 <div class="ui feed">
                     {% for feed in feeds %}

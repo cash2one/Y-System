@@ -7,7 +7,6 @@ from random import choice
 from string import ascii_letters, digits
 from base64 import b64encode
 from hashlib import sha512, md5
-from json import loads, dumps
 from bs4 import BeautifulSoup
 from sqlalchemy import or_, and_
 from werkzeug.security import generate_password_hash, check_password_hash
