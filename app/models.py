@@ -4105,7 +4105,7 @@ class Feed(db.Model):
     __tablename__ = 'feeds'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    event = db.Column(db.UnicodeText)
+    event = db.Column(db.UnicodeText) # log/user/admin
     category = db.Column(db.Unicode(64))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
