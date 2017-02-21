@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import flash
+from . import db
 from .models import Announcement, AnnouncementType
 from .models import Feed
 

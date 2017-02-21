@@ -7,13 +7,14 @@ from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordR
 from .. import db
 from ..models import User, Role
 from ..email import send_email, send_emails
-from ..notify import get_announcements
+from ..notify import get_announcements, add_feed
 
 
 @auth.before_app_request
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
+        add_feed(user=current_user, event=u'登录了系统', category=u'log')
         if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
             logout_user()
             return redirect(url_for('auth.activate'))
