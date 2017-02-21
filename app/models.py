@@ -1307,6 +1307,8 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    # feeds
+    feeds = db.relationship('Feed', backref='user', lazy='dynamic')
 
     def delete(self):
         for tag in self.has_tags:
@@ -4107,8 +4109,8 @@ class Feed(db.Model):
     __tablename__ = 'feeds'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    event = db.Column(db.UnicodeText) # log/user/admin
-    category = db.Column(db.Unicode(64))
+    event = db.Column(db.UnicodeText, index=True) # log/user/admin
+    category = db.Column(db.Unicode(64), index=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):

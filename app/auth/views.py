@@ -14,7 +14,7 @@ from ..notify import get_announcements, add_feed
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
-        add_feed(user=current_user, event=u'登录了系统', category=u'log')
+        add_feed(user=current_user, event=u'登录了系统', category=u'log', ignore_in=30*60)
         if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
             logout_user()
             return redirect(url_for('auth.activate'))
