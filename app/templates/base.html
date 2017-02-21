@@ -14,8 +14,7 @@
     <meta name="keywords" content="Y-English, Y-System, English, Education" />
 
     <!-- Semantic UI CSS -->
-    {# <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.css"> #}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/dev/semantic.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.css">
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/{{ Version.FontAwesome }}/css/font-awesome.min.css">
@@ -426,8 +425,7 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/{{ Version.jQuery }}/jquery.min.js"></script>
 
     <!-- Semantic UI JS -->
-    {# <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.js"></script> #}
-    <script type="text/javascript" src="{{ url_for('static', filename='assets/dev/semantic.min.js') }}"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.js"></script>
 
     <!-- Moment.js -->
     {{ moment.include_moment(version=Version.MomentJS) }}
