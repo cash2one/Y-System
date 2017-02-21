@@ -4105,9 +4105,9 @@ class Feed(db.Model):
     __tablename__ = 'feeds'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    event = db.Column(db.UnicodeText)
     category = db.Column(db.Unicode(64))
-    summary = db.Column(db.UnicodeText)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return '<Feed %r, %r, %r>' % (self.user.name_alias, self.category, self.summary, self.timestamp)
+        return '<Feed %r, %r, %r>' % (self.user.name_alias, self.event, self.category, self.timestamp)

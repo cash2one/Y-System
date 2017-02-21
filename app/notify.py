@@ -2,6 +2,7 @@
 
 from flask import flash
 from .models import Announcement, AnnouncementType
+from .models import Feed
 
 
 def get_announcements(type_name, user=None, flash_first=False):
@@ -24,5 +25,6 @@ def get_announcements(type_name, user=None, flash_first=False):
         return announcements
 
 
-def add_feed(user, message, category, snapshot_json):
-    pass
+def add_feed(user, event, category):
+    feed = Feed(user_id=user.id, event=event, category=category)
+    db.session.add(feed)

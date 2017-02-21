@@ -126,6 +126,11 @@
 {% endmacro %}
 
 
+{% macro feed(feed, is_current_user=False) %}
+{% if is_current_user %}你{% else %}{{ user_popup(feed.user) }}{% endif %} {{ feed.event }}
+{% endmacro %}
+
+
 {% macro date_picker_js_snippet() %}
 $('.ui.date.calendar').calendar({
     type: 'date',
