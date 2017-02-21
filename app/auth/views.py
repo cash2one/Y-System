@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime, timedelta
 from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_user, logout_user, login_required, current_user
 from . import auth
 from .forms import LoginForm, ActivationForm, ChangePasswordForm, ResetPasswordRequestForm, ResetPasswordForm, ChangeEmailForm
 from .. import db
 from ..models import User, Role
+from ..models import Feed
 from ..email import send_email, send_emails
 from ..notify import get_announcements, add_feed
 
@@ -14,6 +16,22 @@ from ..notify import get_announcements, add_feed
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
+        last_login_feed = Feed.query\
+            .filter(Feed.user_id == current_user.id)\
+            .filter(Feed.event == u'登录系统')\
+            .filter(Feed.category == u'log')\
+            .filter(Feed.timestamp + timedelta(seconds=30*60) < datetime.utcnow())\
+            .order_by(Feed.timestamp.desc())\
+            .first()
+        last_logout_feed = Feed.query\
+            .filter(Feed.user_id == current_user.id)\
+            .filter(Feed.event == u'登出系统')\
+            .filter(Feed.category == u'log')\
+            .filter(Feed.timestamp > last_login_feed.timestamp)\
+            .order_by(Feed.timestamp.desc())\
+            .first()
+        if last_login_feed is None or last_logout_feed is not None:
+            add_feed(user=current_user, event=u'登录系统', category=u'log')
         if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
             logout_user()
             return redirect(url_for('auth.activate'))
@@ -41,7 +59,6 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             get_announcements(type_name=u'登录通知', flash_first=True)
-            add_feed(user=current_user, event=u'登录系统', category=u'log')
             return redirect(request.args.get('next') or user.index_url)
         flash(u'无效的用户名或密码', category='error')
     return render_template('auth/login.html', form=form)

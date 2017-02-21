@@ -1873,13 +1873,12 @@ class User(UserMixin, db.Model):
 
     def book(self, schedule, state_name):
         if schedule.available and not self.booked(schedule):
-            b = Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first()
-            if b:
-                b.state_id = BookingState.query.filter_by(name=state_name).first().id
-                b.ping()
+            booking = Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first()
+            if booking:
+                booking.set_state(state_name)
             else:
-                b = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first())
-            db.session.add(b)
+                booking = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first())
+                db.session.add(booking)
 
     def unbook(self, schedule):
         # mark booking state as canceled
@@ -1896,16 +1895,16 @@ class User(UserMixin, db.Model):
             .order_by(Booking.timestamp.desc())\
             .first()
         if waited_booking:
-            waited_booking.state_id = BookingState.query.filter_by(name=u'预约').first().id
-            waited_booking.ping()
-            db.session.add(waited_booking)
+            waited_booking.set_state(u'预约')
             return User.query.get(waited_booking.user_id)
 
     def miss(self, schedule):
         booking = self.bookings.filter_by(schedule_id=schedule.id).first()
         if booking:
-            booking.state_id = BookingState.query.filter_by(name=u'爽约').first().id
-            db.session.add(booking)
+            if booking.state.name == u'预约':
+                booking.set_state(u'爽约')
+            if booking.state.name == u'排队':
+                booking.set_state(u'失效')
 
     def booked(self, schedule):
         return (self.bookings.filter_by(schedule_id=schedule.id).first() is not None) and\
