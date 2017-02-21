@@ -70,13 +70,13 @@ def book_vb(id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！', category='success')
+    add_feed(user=current_user, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if current_user.has_tag_name(u'未缴全款'):
         flash(u'您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！', category='warning')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
     available_ipads_quantity = current_user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
         send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
-    add_feed(user=current_user, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'log')
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -109,7 +109,7 @@ def wait_vb(id):
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'排队')
     flash(u'已将您加入候选名单', category='success')
-    add_feed(user=current_user, event=u'排队%s的%s课程' % (schedule.date, schedule.period.alias), category=u'log')
+    add_feed(user=current_user, event=u'排队%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -131,12 +131,13 @@ def unbook_vb(id):
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule.id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        add_feed(user=candidate, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     flash(u'取消成功！', category='success')
-    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'log')
+    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -156,6 +157,7 @@ def miss_vb(id):
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.miss(schedule)
     flash(u'取消成功！', category='success')
+    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -206,6 +208,7 @@ def book_y_gre(id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
     flash(u'预约成功！', category='success')
+    add_feed(user=current_user, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if current_user.has_tag_name(u'未缴全款'):
         flash(u'您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！', category='warning')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
@@ -241,6 +244,7 @@ def wait_y_gre(id):
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'排队')
     flash(u'已将您加入候选名单', category='success')
+    add_feed(user=current_user, event=u'排队%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
@@ -262,11 +266,13 @@ def unbook_y_gre(id):
     if candidate:
         booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule.id).first()
         send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
+        add_feed(user=candidate, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
             send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
     flash(u'取消成功！', category='success')
+    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
@@ -286,4 +292,5 @@ def miss_y_gre(id):
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.miss(schedule)
     flash(u'取消成功！', category='success')
+    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.y_gre'))

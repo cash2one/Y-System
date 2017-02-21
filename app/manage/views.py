@@ -4624,7 +4624,6 @@ def analytics():
 @developer_required
 def feed():
     query = Feed.query\
-        .filter(Feed.category == u'log')\
         .order_by(Feed.timestamp.desc())
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)

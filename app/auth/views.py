@@ -19,19 +19,22 @@ def before_request():
         last_login_feed = Feed.query\
             .filter(Feed.user_id == current_user.id)\
             .filter(Feed.event == u'登录系统')\
-            .filter(Feed.category == u'log')\
+            .filter(Feed.category == u'auth')\
             .filter(Feed.timestamp + timedelta(seconds=30*60) < datetime.utcnow())\
             .order_by(Feed.timestamp.desc())\
             .first()
-        last_logout_feed = Feed.query\
-            .filter(Feed.user_id == current_user.id)\
-            .filter(Feed.event == u'登出系统')\
-            .filter(Feed.category == u'log')\
-            .filter(Feed.timestamp > last_login_feed.timestamp)\
-            .order_by(Feed.timestamp.desc())\
-            .first()
-        if last_login_feed is None or last_logout_feed is not None:
-            add_feed(user=current_user, event=u'登录系统', category=u'log')
+        if last_login_feed is None:
+            add_feed(user=current_user, event=u'登录系统', category=u'auth')
+        else:
+            last_logout_feed = Feed.query\
+                .filter(Feed.user_id == current_user.id)\
+                .filter(Feed.event == u'登出系统')\
+                .filter(Feed.category == u'auth')\
+                .filter(Feed.timestamp > last_login_feed.timestamp)\
+                .order_by(Feed.timestamp.desc())\
+                .first()
+            if last_logout_feed is not None:
+                add_feed(user=current_user, event=u'登录系统', category=u'auth')
         if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
             logout_user()
             return redirect(url_for('auth.activate'))
@@ -67,7 +70,7 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
-    add_feed(user=current_user, event=u'登出系统', category=u'log')
+    add_feed(user=current_user, event=u'登出系统', category=u'auth')
     logout_user()
     return redirect(url_for('auth.login'))
 
@@ -88,7 +91,7 @@ def activate():
             flash(u'激活成功！', category='success')
             flash(u'一封确认邮件已经发送至您的邮箱', category='info')
             send_emails(User.users_can(u'管理用户').all(), u'新用户：%s' % (new_user.name_alias), 'auth/mail/new_user', user=new_user)
-            add_feed(user=new_user, event=u'激活账户', category=u'log')
+            add_feed(user=new_user, event=u'激活账户', category=u'auth')
             return redirect(url_for('auth.unconfirmed'))
         flash(u'激活信息有误，或账户已处于激活状态', category='error')
     return render_template('auth/activate.html', form=form)
@@ -101,7 +104,7 @@ def confirm(token):
         return redirect(current_user.index_url)
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！', category='success')
-        add_feed(user=current_user, event=u'已确认邮箱为：%s' % current_user.email, category=u'log')
+        add_feed(user=current_user, event=u'已确认邮箱为：%s' % current_user.email, category=u'auth')
     else:
         flash(u'确认链接无效或者已经过期', category='error')
         return redirect(url_for('auth.unconfirmed'))
@@ -114,7 +117,7 @@ def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
     flash(u'一封新的确认邮件已经发送至您的邮箱', category='info')
-    add_feed(user=current_user, event=u'请求重发邮箱确认邮件至：%s' % current_user.email, category=u'log')
+    add_feed(user=current_user, event=u'请求重发邮箱确认邮件至：%s' % current_user.email, category=u'auth')
     return redirect(url_for('auth.unconfirmed'))
 
 
@@ -127,7 +130,7 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             flash(u'修改密码成功', category='success')
-            add_feed(user=current_user, event=u'成功修改密码', category=u'log')
+            add_feed(user=current_user, event=u'成功修改密码', category=u'auth')
             return redirect(current_user.index_url)
         else:
             flash(u'密码有误', category='error')
@@ -146,7 +149,7 @@ def reset_password_request():
             token = user.generate_reset_token()
             send_email(user.email, u'重置您的密码', 'auth/mail/reset_password', user=user, token=token, next=request.args.get('next'))
             flash(u'一封用于重置密码的邮件已经发送至您的邮箱', category='info')
-            add_feed(user=current_user, event=u'请求重置密码', category=u'log')
+            add_feed(user=current_user, event=u'请求重置密码', category=u'auth')
             return redirect(url_for('auth.reset_password_request'))
     return render_template('auth/reset_password_request.html', form=form)
 
@@ -164,7 +167,7 @@ def reset_password(token):
             return redirect(url_for('auth.reset_password_request'))
         if user.reset_password(token, form.password.data):
             flash(u'重置密码成功', category='success')
-            add_feed(user=current_user, event=u'成功重置密码', category=u'log')
+            add_feed(user=current_user, event=u'成功重置密码', category=u'auth')
             return redirect(url_for('auth.login'))
         else:
             flash(u'重置密码失败', category='error')
@@ -182,7 +185,7 @@ def change_email_request():
             token = current_user.generate_email_change_token(new_email)
             send_email(new_email, u'确认您的邮箱账户', 'auth/mail/change_email', user=current_user, token=token)
             flash(u'一封确认邮件已经发送至您的邮箱', category='info')
-            add_feed(user=current_user, event=u'请求修改邮箱为：%s' % new_email, category=u'log')
+            add_feed(user=current_user, event=u'请求修改邮箱为：%s' % new_email, category=u'auth')
             return redirect(url_for('auth.change_email_request'))
         else:
             flash(u'无效的用户名或密码', category='error')
@@ -194,7 +197,7 @@ def change_email_request():
 def change_email(token):
     if current_user.change_email(token):
         flash(u'修改邮箱成功', category='success')
-        add_feed(user=current_user, event=u'成功修改邮箱为：%s' % current_user.email, category=u'log')
+        add_feed(user=current_user, event=u'成功修改邮箱为：%s' % current_user.email, category=u'auth')
     else:
         flash(u'请求无效', category='error')
     return redirect(current_user.index_url)
