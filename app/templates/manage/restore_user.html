@@ -33,6 +33,14 @@
                             {{ form.role(class='ui dropdown') }}
                         </div>
                     </div>
+                    <div class="ui segment">
+                        <div class="inline field">
+                            <div class="ui toggle checkbox">
+                                {{ form.reset_due_time() }}
+                                {{ form.reset_due_time.label() }}
+                            </div>
+                        </div>
+                    </div>
                     {{ form.submit(class='ui primary button') }}
                     <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.user') }}">取消</a>
                     {% with email_errors = form.email.errors %}
@@ -64,6 +72,8 @@ $('.message .close')
         ;
     })
 ;
+
+$('.ui.checkbox').checkbox();
 
 $(document)
     .ready(function() {

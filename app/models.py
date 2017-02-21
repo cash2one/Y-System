@@ -1343,9 +1343,11 @@ class User(UserMixin, db.Model):
         self.deleted = True
         db.session.add(self)
 
-    def restore(self, email, role):
+    def restore(self, email, role, reset_due_time=False):
         self.email = email
         self.role_id = role.id
+        if reset_due_time:
+            self.activated_at = datetime.utcnow()
         self.deleted = False
         db.session.add(self)
 

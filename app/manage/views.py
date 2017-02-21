@@ -3487,7 +3487,7 @@ def restore_user(id):
     form = RestoreUserForm(restorer=current_user._get_current_object())
     if form.validate_on_submit():
         role = Role.query.get(int(form.role.data))
-        user.restore(email=form.email.data.lower(), role=role)
+        user.restore(email=form.email.data.lower(), role=role, reset_due_time=form.reset_due_time.data)
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.email.data = user.email[:-len(u'_%s_deleted' % user.id)]
