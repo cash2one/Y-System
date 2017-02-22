@@ -127,7 +127,7 @@
 
 
 {% macro feed_event(feed, is_current_user=False) %}
-{% if is_current_user %}你{% else %}{{ user_popup(feed.user) }}{% endif %} {{ feed.event }}
+{% if is_current_user %}您{% else %}{{ user_popup(feed.user) }}{% endif %} {{ feed.event }}
 {% endmacro %}
 
 
