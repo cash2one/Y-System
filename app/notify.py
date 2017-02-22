@@ -33,14 +33,14 @@ def __add_feed(user, event, category):
 
 
 def add_feed(user, event, category, ignore_in=0):
-    last_feed = None
     if ignore_in > 0:
         last_feed = Feed.query\
             .filter(Feed.user_id == user.id)\
             .filter(Feed.event == event)\
             .filter(Feed.category == category)\
-            .filter(Feed.timestamp + timedelta(seconds=ignore_in) < datetime.utcnow())\
+            .filter(Feed.timestamp + timedelta(seconds=ignore_in) > datetime.utcnow())\
             .order_by(Feed.timestamp.desc())\
             .first()
-    if last_feed is None:
-        __add_feed(user_id=user.id, event=event, category=category)
+        if last_feed is not None:
+            return
+    __add_feed(user_id=user.id, event=event, category=category)
