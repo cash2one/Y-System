@@ -38,9 +38,8 @@ def add_feed(user, event, category, ignore_in=0):
             .filter(Feed.user_id == user.id)\
             .filter(Feed.event == event)\
             .filter(Feed.category == category)\
-            .filter(Feed.timestamp + timedelta(seconds=ignore_in) > datetime.utcnow())\
             .order_by(Feed.timestamp.desc())\
             .first()
-        if last_feed is not None:
+        if last_feed is not None and last_feed.timestamp + timedelta(seconds=ignore_in) > datetime.utcnow():
             return
-    __add_feed(user_id=user.id, event=event, category=category)
+    __add_feed(user=user, event=event, category=category)

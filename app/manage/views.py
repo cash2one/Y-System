@@ -4627,13 +4627,16 @@ def feed():
     show_auth_feeds = False
     show_booking_feeds = False
     show_manage_feeds = False
+    show_access_feeds = False
     if current_user.is_authenticated:
         show_all_feeds = bool(request.cookies.get('show_all_feeds', '1'))
         show_auth_feeds = bool(request.cookies.get('show_auth_feeds', ''))
         show_booking_feeds = bool(request.cookies.get('show_booking_feeds', ''))
         show_manage_feeds = bool(request.cookies.get('show_manage_feeds', ''))
+        show_access_feeds = bool(request.cookies.get('show_access_feeds', ''))
     if show_all_feeds:
         query = Feed.query\
+            .filter(Feed.category != u'access')\
             .order_by(Feed.timestamp.desc())
     if show_auth_feeds:
         query = Feed.query\
@@ -4647,6 +4650,10 @@ def feed():
         query = Feed.query\
             .filter(Feed.category == u'manage')\
             .order_by(Feed.timestamp.desc())
+    if show_access_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'access')\
+            .order_by(Feed.timestamp.desc())
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     feeds = pagination.items
@@ -4655,6 +4662,7 @@ def feed():
         show_auth_feeds=show_auth_feeds,
         show_booking_feeds=show_booking_feeds,
         show_manage_feeds=show_manage_feeds,
+        show_access_feeds=show_access_feeds,
         feeds=feeds,
         pagination=pagination
     )
@@ -4669,6 +4677,7 @@ def all_feeds():
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     return resp
 
 
@@ -4681,6 +4690,7 @@ def auth_feeds():
     resp.set_cookie('show_auth_feeds', '1', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     return resp
 
 
@@ -4693,6 +4703,7 @@ def booking_feeds():
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '1', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     return resp
 
 
@@ -4705,6 +4716,20 @@ def manage_feeds():
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/access')
+@login_required
+@developer_required
+def access_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '1', max_age=30*24*60*60)
     return resp
 
 

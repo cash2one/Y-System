@@ -65,6 +65,7 @@ def profile(id):
         page = request.args.get('page', 1, type=int)
         pagination = Feed.query\
             .filter(Feed.user_id == user.id)\
+            .filter(Feed.category != u'access')\
             .order_by(Feed.timestamp.desc())\
             .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
         feeds = pagination.items
