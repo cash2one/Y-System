@@ -27,8 +27,8 @@ def get_announcements(type_name, user=None, flash_first=False):
         return announcements
 
 
-def __add_feed(user, event, category):
-    feed = Feed(user_id=user.id, event=event, category=category)
+def __add_feed(user_id, event, category):
+    feed = Feed(user_id=user_id, event=event, category=category)
     db.session.add(feed)
 
 
@@ -42,4 +42,8 @@ def add_feed(user, event, category, ignore_in=0):
             .first()
         if last_feed is not None and last_feed.timestamp + timedelta(seconds=ignore_in) > datetime.utcnow():
             return
-    __add_feed(user=user, event=event, category=category)
+    __add_feed(user_id=user.id, event=event, category=category)
+
+
+def add_sys_feed(event, category):
+    __add_feed(user_id=1, event=event, category=category)
