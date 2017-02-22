@@ -3,6 +3,7 @@
 from flask import current_app, render_template
 from flask_mail import Message
 from .tasks import send_async_email, send_async_emails
+from .notify import add_feed
 
 
 def msg_to_dict(recipient, subject, template, **kwargs):

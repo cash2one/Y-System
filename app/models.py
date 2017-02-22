@@ -15,7 +15,7 @@ from flask import current_app, request, url_for
 from flask_login import UserMixin, AnonymousUserMixin
 from app.exceptions import ValidationError
 from . import db, login_manager
-from .email import send_email
+# from .email import send_email
 
 
 class Version:
