@@ -42,7 +42,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             get_announcements(type_name=u'登录通知', flash_first=True)
-            add_feed(user=current_user, event=u'登录系统', category=u'access')
+            add_feed(user=user, event=u'登录系统', category=u'access')
             return redirect(request.args.get('next') or user.index_url)
         flash(u'无效的用户名或密码', category='error')
     return render_template('auth/login.html', form=form)
@@ -130,7 +130,7 @@ def reset_password_request():
             token = user.generate_reset_token()
             send_email(user.email, u'重置您的密码', 'auth/mail/reset_password', user=user, token=token, next=request.args.get('next'))
             flash(u'一封用于重置密码的邮件已经发送至您的邮箱', category='info')
-            add_feed(user=current_user, event=u'请求重置密码', category=u'auth')
+            add_feed(user=user, event=u'请求重置密码', category=u'auth')
             return redirect(url_for('auth.reset_password_request'))
     return render_template('auth/reset_password_request.html', form=form)
 
@@ -148,7 +148,7 @@ def reset_password(token):
             return redirect(url_for('auth.reset_password_request'))
         if user.reset_password(token, form.password.data):
             flash(u'重置密码成功', category='success')
-            add_feed(user=current_user, event=u'成功重置密码', category=u'auth')
+            add_feed(user=user, event=u'成功重置密码', category=u'auth')
             return redirect(url_for('auth.login'))
         else:
             flash(u'重置密码失败', category='error')
