@@ -36,7 +36,7 @@
                                 <div class="eight wide required field">
                                     {{ form.price.label() }}
                                     <div class="ui left labeled input">
-                                        <div class="ui label"><i class="fa fa-cny"></i></div>
+                                        <div class="ui label"><i class="fa fa-rmb"></i></div>
                                         {{ form.price(placeholder='0') }}
                                     </div>
                                 </div>
@@ -72,7 +72,7 @@
                         {% for product in products %}
                         <tr>
                             <td>{% if product.pinned and current_user.is_developer %}<i class="pin icon"></i>{% endif %}{{ product.name }}</td>
-                            <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
+                            <td><i class="fa fa-rmb"></i> {{ product.price_alias }}</td>
                             <td>{% if product.sales_volume %}<a class="purchase loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id) }}" data-content="查看购买记录" data-position="top center" data-variation="inverted">{{ product.sales_volume }}</a>{% else %}0{% endif %}</td>
                             <td{% if product.available %} class="active"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
                             <td>
