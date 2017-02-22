@@ -325,7 +325,7 @@ def set_booking_state_valid(user_id, schedule_id):
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=user.last_punch.section.lesson)
     available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
-        send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
             schedule=schedule,
             lesson=user.last_punch.section.lesson,
             booked_ipads_quantity=booked_ipads_quantity,
@@ -399,7 +399,7 @@ def set_booking_state_canceled(user_id, schedule_id):
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
                 schedule=schedule,
                 lesson=candidate.last_punch.section.lesson,
                 booked_ipads_quantity=booked_ipads_quantity,
@@ -839,7 +839,7 @@ def rental_return_step_1():
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % iPad.alias, 'manage/mail/maintain_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'编号为%s的iPad处于维护状态' % iPad.alias, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
                 manager=current_user
@@ -949,7 +949,7 @@ def rental_exchange_step_1(rental_id):
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'编号为%s的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
                 manager=current_user
@@ -1465,7 +1465,7 @@ def increase_schedule_quota(id):
         booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
         available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
                 schedule=schedule,
                 lesson=candidate.last_punch.section.lesson,
                 booked_ipads_quantity=booked_ipads_quantity,
@@ -4091,7 +4091,7 @@ def set_ipad_state_maintain(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
-    send_emails(User.users_can(u'管理iPad设备').all(), u'编号为“%s”的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
+    send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'编号为“%s”的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
         ipad=ipad,
         time=datetime.utcnow(),
         manager=current_user
