@@ -15,7 +15,7 @@ from flask import current_app, request, url_for
 from flask_login import UserMixin, AnonymousUserMixin
 from app.exceptions import ValidationError
 from . import db, login_manager
-from .email import send_emails
+from .email import send_email
 
 
 class Version:
@@ -4066,9 +4066,11 @@ class Announcement(db.Model):
             for announcement in announcements:
                 announcement.retract(modified_by=modified_by)
         if self.type.name == u'用户邮件通知':
-            send_emails([user.email for user in User.users_can(u'预约').all()], self.title, 'manage/mail/announcement', user=user, announcement=self)
+            for user in User.users_can(u'预约').all():
+                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         if self.type.name == u'管理邮件通知':
-            send_emails([user.email for user in User.users_can(u'管理').all()], self.title, 'manage/mail/announcement', user=user, announcement=self)
+            for user in User.users_can(u'管理').all():
+                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         self.show = True
         self.ping(modified_by=modified_by)
         db.session.add(self)
