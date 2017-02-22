@@ -4065,12 +4065,12 @@ class Announcement(db.Model):
                 .all()
             for announcement in announcements:
                 announcement.retract(modified_by=modified_by)
-        if self.type.name == u'用户邮件通知':
-            for user in User.users_can(u'预约').all():
-                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
-        if self.type.name == u'管理邮件通知':
-            for user in User.users_can(u'管理').all():
-                send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
+        # if self.type.name == u'用户邮件通知':
+        #     for user in User.users_can(u'预约').all():
+        #         send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
+        # if self.type.name == u'管理邮件通知':
+        #     for user in User.users_can(u'管理').all():
+        #         send_email(user.email, self.title, 'manage/mail/announcement', user=user, announcement=self)
         self.show = True
         self.ping(modified_by=modified_by)
         db.session.add(self)

@@ -4234,6 +4234,12 @@ def announcement():
         db.session.commit()
         if form.show.data:
             announcement.publish(modified_by=current_user._get_current_object())
+            if announcement.type.name == u'用户邮件通知':
+                for user in User.users_can(u'预约').all():
+                    send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
+            if announcement.type.name == u'管理邮件通知':
+                for user in User.users_can(u'管理').all():
+                    send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
         else:
             announcement.clean_up()
         flash(u'已添加通知：“%s”' % form.title.data, category='success')
@@ -4260,6 +4266,12 @@ def publish_announcement(id):
         flash(u'所选通知已经发布', category='warning')
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.publish(modified_by=current_user._get_current_object())
+    if announcement.type.name == u'用户邮件通知':
+        for user in User.users_can(u'预约').all():
+            send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
+    if announcement.type.name == u'管理邮件通知':
+        for user in User.users_can(u'管理').all():
+            send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
     flash(u'“%s”发布成功！' % announcement.title, category='success')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
 
