@@ -52,7 +52,7 @@ from ..models import Announcement
 from ..models import Product, Purchase
 from ..models import Feed
 from ..email import send_email, send_emails
-from ..notify import get_announcements
+from ..notify import get_announcements, add_feed
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -310,24 +310,23 @@ def set_booking_state_valid(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     if booking.schedule.full:
         flash(u'该时段名额已经约满', category='error')
         return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'预约')
     db.session.commit()
-    send_email(user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking',
-        user=user,
-        schedule=schedule,
-        booking=booking
-    )
-    booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=user.last_punch.section.lesson)
-    available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
+    send_email(booking.user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', booking=booking)
+    flash(u'给%s预约%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给%s预约%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
+    booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=booking.user.last_punch.section.lesson)
+    available_ipads_quantity = booking.user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
-        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-            schedule=schedule,
-            lesson=user.last_punch.section.lesson,
+        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+            booking=booking,
             booked_ipads_quantity=booked_ipads_quantity,
             available_ipads_quantity=available_ipads_quantity
         )
@@ -338,8 +337,16 @@ def set_booking_state_valid(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_wait(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'排队')
+    flash(u'给%s排队%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给%s排队%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -347,8 +354,16 @@ def set_booking_state_wait(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_invalid(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'失效')
+    flash(u'标记%s预约的%s的%s课程为：失效' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：失效' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -356,8 +371,16 @@ def set_booking_state_invalid(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_kept(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'赴约')
+    flash(u'标记%s预约的%s的%s课程为：赴约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：赴约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -365,8 +388,16 @@ def set_booking_state_kept(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_late(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'迟到')
+    flash(u'标记%s预约的%s的%s课程为：迟到' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：迟到' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -374,8 +405,16 @@ def set_booking_state_late(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_missed(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'爽约')
+    flash(u'标记%s预约的%s的%s课程为：爽约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：爽约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -386,22 +425,21 @@ def set_booking_state_canceled(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
-    candidate = booking.set_state(u'取消')
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
+    waited_booking = booking.set_state(u'取消')
     db.session.commit()
-    if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking',
-            user=candidate,
-            schedule=schedule,
-            booking=booking
-        )
-        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
-        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
+    flash(u'标记%s预约的%s的%s课程为：取消' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：取消' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
+    if waited_booking:
+        send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
+        booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
+        available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-                schedule=schedule,
-                lesson=candidate.last_punch.section.lesson,
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % waited_booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                booking=waited_booking,
                 booked_ipads_quantity=booked_ipads_quantity,
                 available_ipads_quantity=available_ipads_quantity
             )
@@ -455,6 +493,7 @@ def set_booking_state_missed_all():
     for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
         booking.set_state(u'失效')
     flash(u'标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)), category='info')
+    add_feed(user=current_user._get_current_object(), event=u'批量标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -1454,20 +1493,14 @@ def increase_schedule_quota(id):
     if schedule.out_of_date:
         flash(u'所选时段已经过期', category='error')
         return redirect(request.args.get('next') or url_for('manage.schedule'))
-    candidate = schedule.increase_quota(modified_by=current_user._get_current_object())
-    if candidate:
-        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking',
-            user=candidate,
-            schedule=schedule,
-            booking=booking
-        )
-        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
-        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
+    waited_booking = schedule.increase_quota(modified_by=current_user._get_current_object())
+    if waited_booking:
+        send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
+        booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
+        available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-                schedule=schedule,
-                lesson=candidate.last_punch.section.lesson,
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % waited_booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                booking=waited_booking,
                 booked_ipads_quantity=booked_ipads_quantity,
                 available_ipads_quantity=available_ipads_quantity
             )

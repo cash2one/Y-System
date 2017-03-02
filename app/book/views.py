@@ -68,7 +68,7 @@ def book_vb(id):
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'预约')
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
-    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
+    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', booking=booking)
     flash(u'预约成功！', category='success')
     add_feed(user=current_user, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if current_user.has_tag_name(u'未缴全款'):
@@ -76,7 +76,11 @@ def book_vb(id):
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
     available_ipads_quantity = current_user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
-        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+            booking=booking,
+            booked_ipads_quantity=booked_ipads_quantity,
+            available_ipads_quantity=available_ipads_quantity
+        )
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -127,17 +131,20 @@ def unbook_vb(id):
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段', category='error')
         return redirect(request.args.get('next') or url_for('book.vb'))
-    candidate = current_user.unbook(schedule)
-    if candidate:
-        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule.id).first()
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
-        add_feed(user=candidate, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
-        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
-        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
-        if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+    waited_booking = current_user.unbook(schedule)
     flash(u'取消成功！', category='success')
     add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    if waited_booking:
+        send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
+        add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
+        booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
+        available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
+        if booked_ipads_quantity >= available_ipads_quantity:
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % waited_booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                booking=waited_booking,
+                booked_ipads_quantity=booked_ipads_quantity,
+                available_ipads_quantity=available_ipads_quantity
+            )
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -206,7 +213,7 @@ def book_y_gre(id):
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'预约')
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
-    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=current_user, schedule=schedule, booking=booking)
+    send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', booking=booking)
     flash(u'预约成功！', category='success')
     add_feed(user=current_user, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if current_user.has_tag_name(u'未缴全款'):
@@ -214,7 +221,11 @@ def book_y_gre(id):
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
     available_ipads_quantity = current_user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
-        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=current_user.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % current_user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+            booking=booking,
+            booked_ipads_quantity=booked_ipads_quantity,
+            available_ipads_quantity=available_ipads_quantity
+        )
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
@@ -262,17 +273,20 @@ def unbook_y_gre(id):
     if not current_user.booked(schedule):
         flash(u'您目前尚未预约该时段', category='warning')
         return redirect(request.args.get('next') or url_for('book.y_gre'))
-    candidate = current_user.unbook(schedule)
-    if candidate:
-        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule.id).first()
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', user=candidate, schedule=schedule, booking=booking)
-        add_feed(user=candidate, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
-        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
-        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
-        if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad', schedule=schedule, lesson=candidate.last_punch.section.lesson, booked_ipads_quantity=booked_ipads_quantity, available_ipads_quantity=available_ipads_quantity)
+    waited_booking = current_user.unbook(schedule)
     flash(u'取消成功！', category='success')
     add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    if waited_booking:
+        send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=booking)
+        add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
+        booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
+        available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
+        if booked_ipads_quantity >= available_ipads_quantity:
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % waited_booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                booking=waited_booking,
+                booked_ipads_quantity=booked_ipads_quantity,
+                available_ipads_quantity=available_ipads_quantity
+            )
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 

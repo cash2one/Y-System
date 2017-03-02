@@ -1,8 +1,8 @@
-预约日期：{{ schedule.date }}
+预约日期：{{ booking.schedule.date }}
 
-预约时段：{{ schedule.period.alias2 }}
+预约时段：{{ booking.schedule.period.alias2 }}
 
-课程：{{ lesson.alias }}
+课程：{{ booking.user.last_punch.section.lesson.alias }}
 
 预约数量：{{ booked_ipads_quantity }}
 
