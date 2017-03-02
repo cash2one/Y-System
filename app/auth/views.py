@@ -86,10 +86,10 @@ def confirm(token):
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！', category='success')
         add_feed(user=current_user, event=u'已确认邮箱为：%s' % current_user.email, category=u'auth')
+        return redirect(current_user.index_url)
     else:
         flash(u'确认链接无效或者已经过期', category='error')
         return redirect(url_for('auth.unconfirmed'))
-    return redirect(current_user.index_url)
 
 
 @auth.route('/confirm')
@@ -115,6 +115,7 @@ def change_password():
             return redirect(current_user.index_url)
         else:
             flash(u'密码有误', category='error')
+            return redirect(url_for('auth.change_password'))
     return render_template("auth/change_password.html", form=form)
 
 
@@ -170,6 +171,7 @@ def change_email_request():
             return redirect(url_for('auth.change_email_request'))
         else:
             flash(u'无效的用户名或密码', category='error')
+            return redirect(url_for('auth.change_email_request'))
     return render_template("auth/change_email.html", form=form)
 
 
