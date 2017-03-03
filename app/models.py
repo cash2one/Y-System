@@ -7,7 +7,6 @@ from random import choice
 from string import ascii_letters, digits
 from base64 import b64encode
 from hashlib import sha512, md5
-from json import loads, dumps
 from bs4 import BeautifulSoup
 from sqlalchemy import or_, and_
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -16,13 +15,12 @@ from flask import current_app, request, url_for
 from flask_login import UserMixin, AnonymousUserMixin
 from app.exceptions import ValidationError
 from . import db, login_manager
-from .email import send_emails
 
 
 class Version:
     Application = 'v1.0.0-dev'
     jQuery = '3.1.1'
-    SemanticUI = '2.2.7'
+    SemanticUI = '2.2.9'
     SemanticUICalendar = '0.0.6'
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
@@ -470,19 +468,19 @@ class Booking(db.Model):
 
     def __init__(self, **kwargs):
         super(Booking, self).__init__(**kwargs)
-        self.token = self.create_token()
+        self.token = self.__create_token()
 
     def ping(self):
         self.timestamp = datetime.utcnow()
         db.session.add(self)
 
-    def create_token(self):
+    def __create_token(self):
         nonce_str = ''.join(choice(ascii_letters + digits) for _ in range(24))
         string = 'user_id=%s&schedule_id=%s&timestamp=%s&nonce_str=%s' % (self.user_id, self.schedule_id, self.timestamp, nonce_str)
         return sha512(string).hexdigest()
 
-    def update_token(self):
-        self.token = self.create_token()
+    def __update_token(self):
+        self.token = self.__create_token()
         db.session.add(self)
 
     def set_state(self, state_name):
@@ -491,7 +489,7 @@ class Booking(db.Model):
         db.session.add(self)
         if state_name == u'预约':
             db.session.commit()
-            self.update_token()
+            self.__update_token()
         if state_name == u'取消' and self.schedule.unstarted:
             waited_booking = Booking.query\
                 .join(BookingState, BookingState.id == Booking.state_id)\
@@ -502,9 +500,11 @@ class Booking(db.Model):
                 .first()
             if waited_booking:
                 waited_booking.state_id = BookingState.query.filter_by(name=u'预约').first().id
-                waited_booking.ping()
                 db.session.add(waited_booking)
-                return User.query.get(waited_booking.user_id)
+                db.session.commit()
+                waited_booking.ping()
+                waited_booking.__update_token()
+                return waited_booking
 
     @property
     def valid(self):
@@ -1307,6 +1307,8 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    # feeds
+    feeds = db.relationship('Feed', backref='user', lazy='dynamic')
 
     def delete(self):
         for tag in self.has_tags:
@@ -1343,9 +1345,11 @@ class User(UserMixin, db.Model):
         self.deleted = True
         db.session.add(self)
 
-    def restore(self, email, role):
+    def restore(self, email, role, reset_due_time=False):
         self.email = email
         self.role_id = role.id
+        if reset_due_time:
+            self.activated_at = datetime.utcnow()
         self.deleted = False
         db.session.add(self)
 
@@ -1869,39 +1873,27 @@ class User(UserMixin, db.Model):
 
     def book(self, schedule, state_name):
         if schedule.available and not self.booked(schedule):
-            b = Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first()
-            if b:
-                b.state_id = BookingState.query.filter_by(name=state_name).first().id
-                b.ping()
+            booking = Booking.query.filter_by(user_id=self.id, schedule_id=schedule.id).first()
+            if booking:
+                booking.set_state(state_name)
             else:
-                b = Booking(user=self, schedule=schedule, state=BookingState.query.filter_by(name=state_name).first())
-            db.session.add(b)
+                booking = Booking(user_id=self.id, schedule_id=schedule.id, state_id=BookingState.query.filter_by(name=state_name).first().id)
+                db.session.add(booking)
 
     def unbook(self, schedule):
-        # mark booking state as canceled
         booking = self.bookings.filter_by(schedule_id=schedule.id).first()
-        if booking:
-            booking.state_id = BookingState.query.filter_by(name=u'取消').first().id
-            db.session.add(booking)
-        # transfer to candidate if exist
-        waited_booking = Booking.query\
-            .join(BookingState, BookingState.id == Booking.state_id)\
-            .join(Schedule, Schedule.id == Booking.schedule_id)\
-            .filter(Schedule.id == schedule.id)\
-            .filter(BookingState.name == u'排队')\
-            .order_by(Booking.timestamp.desc())\
-            .first()
-        if waited_booking:
-            waited_booking.state_id = BookingState.query.filter_by(name=u'预约').first().id
-            waited_booking.ping()
-            db.session.add(waited_booking)
-            return User.query.get(waited_booking.user_id)
+        if booking is not None:
+            waited_booking = booking.set_state(u'取消')
+            if waited_booking:
+                return waited_booking
 
     def miss(self, schedule):
         booking = self.bookings.filter_by(schedule_id=schedule.id).first()
         if booking:
-            booking.state_id = BookingState.query.filter_by(name=u'爽约').first().id
-            db.session.add(booking)
+            if booking.state.name == u'预约':
+                booking.set_state(u'爽约')
+            if booking.state.name == u'排队':
+                booking.set_state(u'失效')
 
     def booked(self, schedule):
         return (self.bookings.filter_by(schedule_id=schedule.id).first() is not None) and\
@@ -3035,10 +3027,8 @@ class Schedule(db.Model):
             .order_by(Booking.timestamp.desc())\
             .first()
         if waited_booking:
-            waited_booking.state_id = BookingState.query.filter_by(name=u'预约').first().id
-            waited_booking.ping()
-            db.session.add(waited_booking)
-            return User.query.get(waited_booking.user_id)
+            waited_booking.set_state(u'预约')
+            return waited_booking
 
     def decrease_quota(self, modified_by):
         if self.quota > 0:
@@ -3298,6 +3288,10 @@ class iPad(db.Model):
         self.deleted = True
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    @property
+    def alias2(self):
+        return u'%s（%s）' % (self.alias, self.serial)
 
     def set_state(self, state_name, modified_by, battery_life=-1):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
@@ -4063,10 +4057,6 @@ class Announcement(db.Model):
                 .all()
             for announcement in announcements:
                 announcement.retract(modified_by=modified_by)
-        if self.type.name == u'用户邮件通知':
-            send_emails(User.users_can(u'预约').all(), self.title, 'manage/mail/announcement', user=user, announcement=self)
-        if self.type.name == u'管理邮件通知':
-            send_emails(User.users_can(u'管理').all(), self.title, 'manage/mail/announcement', user=user, announcement=self)
         self.show = True
         self.ping(modified_by=modified_by)
         db.session.add(self)
@@ -4099,3 +4089,15 @@ class Announcement(db.Model):
 
 
 db.event.listen(Announcement.body_html, 'set', Announcement.on_changed_body_html)
+
+
+class Feed(db.Model):
+    __tablename__ = 'feeds'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    event = db.Column(db.UnicodeText, index=True) # log/user/admin
+    category = db.Column(db.Unicode(64), index=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Feed %r, %r, %r>' % (self.user.name_alias, self.event, self.category, self.timestamp)

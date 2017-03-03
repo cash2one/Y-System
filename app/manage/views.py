@@ -34,7 +34,7 @@ from .forms import NewProductForm, EditProductForm
 from .forms import NewRoleForm, EditRoleForm
 from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
-from ..models import Permission, Role, User, Gender
+from ..models import Permission, Role, User, Gender, Relationship
 from ..models import PurposeType, ReferrerType, InvitationType
 from ..models import EducationRecord, EducationType, EmploymentRecord, ScoreRecord, ScoreType
 from ..models import Course, CourseType, CourseRegistration
@@ -50,8 +50,9 @@ from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRET
 from ..models import iPad, iPadState, iPadContent, Room
 from ..models import Announcement
 from ..models import Product, Purchase
+from ..models import Feed
 from ..email import send_email, send_emails
-from ..notify import get_announcements
+from ..notify import get_announcements, add_feed
 from ..decorators import permission_required, administrator_required, developer_required
 
 
@@ -309,24 +310,23 @@ def set_booking_state_valid(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     if booking.schedule.full:
         flash(u'该时段名额已经约满', category='error')
         return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'预约')
     db.session.commit()
-    send_email(user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking',
-        user=user,
-        schedule=schedule,
-        booking=booking
-    )
-    booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=user.last_punch.section.lesson)
-    available_ipads_quantity = user.last_punch.section.lesson.available_ipads.count()
+    send_email(booking.user.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking', booking=booking)
+    flash(u'给%s预约%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给%s预约%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
+    booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=booking.user.last_punch.section.lesson)
+    available_ipads_quantity = booking.user.last_punch.section.lesson.available_ipads.count()
     if booked_ipads_quantity >= available_ipads_quantity:
-        send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-            schedule=schedule,
-            lesson=user.last_punch.section.lesson,
+        send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+            booking=booking,
             booked_ipads_quantity=booked_ipads_quantity,
             available_ipads_quantity=available_ipads_quantity
         )
@@ -337,8 +337,16 @@ def set_booking_state_valid(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_wait(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'排队')
+    flash(u'给%s排队%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给%s排队%s的%s课程' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -346,8 +354,16 @@ def set_booking_state_wait(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_invalid(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'失效')
+    flash(u'标记%s预约的%s的%s课程为：失效' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：失效' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -355,8 +371,16 @@ def set_booking_state_invalid(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_kept(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'赴约')
+    flash(u'标记%s预约的%s的%s课程为：赴约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：赴约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -364,8 +388,16 @@ def set_booking_state_kept(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_late(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'迟到')
+    flash(u'标记%s预约的%s的%s课程为：迟到' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：迟到' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -373,8 +405,16 @@ def set_booking_state_late(user_id, schedule_id):
 @login_required
 @permission_required(u'管理课程预约')
 def set_booking_state_missed(user_id, schedule_id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
     booking.set_state(u'爽约')
+    flash(u'标记%s预约的%s的%s课程为：爽约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：爽约' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -385,22 +425,22 @@ def set_booking_state_canceled(user_id, schedule_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
         abort(404)
-    schedule = Schedule.query.get_or_404(schedule_id)
     booking = Booking.query.filter_by(user_id=user_id, schedule_id=schedule_id).first()
-    candidate = booking.set_state(u'取消')
+    if booking is None:
+        flash(u'该预约记录不存在', category='error')
+        return redirect(request.args.get('next') or url_for('manage.booking'))
+    waited_booking = booking.set_state(u'取消')
     db.session.commit()
-    if candidate:
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (booking.schedule.date, booking.schedule.period.alias), 'book/mail/booking',
-            user=candidate,
-            schedule=schedule,
-            booking=booking
-        )
-        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
-        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
+    flash(u'标记%s预约的%s的%s课程为：取消' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：取消' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
+    if waited_booking:
+        send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
+        add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
+        booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
+        available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-                schedule=schedule,
-                lesson=candidate.last_punch.section.lesson,
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % waited_booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                booking=waited_booking,
                 booked_ipads_quantity=booked_ipads_quantity,
                 available_ipads_quantity=available_ipads_quantity
             )
@@ -454,6 +494,7 @@ def set_booking_state_missed_all():
     for booking in history_unmarked_waited_bookings + today_unmarked_waited_bookings:
         booking.set_state(u'失效')
     flash(u'标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)), category='info')
+    add_feed(user=current_user._get_current_object(), event=u'批量标记“爽约”：%s条；标记“失效”：%s条' % (len(history_unmarked_missed_bookings + today_unmarked_missed_bookings), len(history_unmarked_waited_bookings + today_unmarked_waited_bookings)), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.booking'))
 
 
@@ -627,6 +668,8 @@ def rental_rent_step_3(user_id, ipad_id, schedule_id):
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
+        add_feed(user=user, event=u'借出iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”借给%s' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3.html', user=user, ipad=ipad, schedule=schedule, form=form)
 
@@ -688,6 +731,8 @@ def rental_rent_step_4_lesson(user_id, lesson_id, ipad_id, schedule_id):
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
+        add_feed(user=user, event=u'借出iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”借给%s' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_rent_step_4_lesson.html', user=user, lesson=lesson, ipad=ipad, schedule=schedule, form=form)
 
@@ -751,6 +796,8 @@ def rental_rent_step_3_alt(user_id, ipad_id):
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
+        add_feed(user=user, event=u'借出iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”借给%s' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3_alt.html', user=user, ipad=ipad, form=form)
 
@@ -813,6 +860,8 @@ def rental_rent_step_4_lesson_alt(user_id, lesson_id, ipad_id):
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
+        add_feed(user=user, event=u'借出iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”借给%s' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_rent_step_4_lesson_alt.html', user=user, lesson=lesson, ipad=ipad, form=form)
 
@@ -838,19 +887,25 @@ def rental_return_step_1():
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % iPad.alias, 'manage/mail/maintain_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'iPad“%s”处于维护状态' % ipad.alias2, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
-                manager=current_user
+                manager=current_user._get_current_object()
             )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
+            add_feed(user=user, event=u'归还iPad：%s' % ipad.alias2, category=u'rental')
+            add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”从%s回收，并设为维护状态' % (ipad.alias2, user.name_alias), category=u'manage')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id, next=request.args.get('next')))
         if not form.battery.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'充电')
             flash(u'已回收序列号为%s的iPad，并设为充电状态' % serial, category='warning')
+            add_feed(user=user, event=u'归还iPad：%s' % ipad.alias2, category=u'rental')
+            add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”从%s回收，并设为充电状态' % (ipad.alias2, user.name_alias), category=u'manage')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id, next=request.args.get('next')))
         rental.set_returned(return_agent_id=current_user.id)
         flash(u'已回收序列号为%s的iPad' % serial, category='success')
+        add_feed(user=user, event=u'归还iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”从%s回收' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id, next=request.args.get('next')))
     return render_template('manage/rental_return_step_1.html', form=form)
 
@@ -880,6 +935,8 @@ def rental_return_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
+        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3.html', user=user, section=section, form=form)
 
@@ -923,6 +980,8 @@ def rental_return_step_3_alt(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
+        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3_alt.html', user=user, section=section, form=form)
 
@@ -948,19 +1007,25 @@ def rental_exchange_step_1(rental_id):
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails(User.users_can(u'管理iPad设备').all(), u'编号为%s的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'iPad“%s”处于维护状态' % ipad.alias2, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
-                manager=current_user
+                manager=current_user._get_current_object()
             )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
+            add_feed(user=user, event=u'归还iPad：%s' % ipad.alias2, category=u'rental')
+            add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”从%s回收，并设为维护状态' % (ipad.alias2, user.name_alias), category=u'manage')
             return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
         if not form.battery.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'充电')
             flash(u'已回收序列号为%s的iPad，并设为充电状态' % serial, category='warning')
+            add_feed(user=user, event=u'归还iPad：%s' % ipad.alias2, category=u'rental')
+            add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”从%s回收，并设为充电状态' % (ipad.alias2, user.name_alias), category=u'manage')
             return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
         rental.set_returned(return_agent_id=current_user.id)
         flash(u'已回收序列号为%s的iPad' % serial, category='success')
+        add_feed(user=user, event=u'归还iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”从%s回收' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_1.html', rental=rental, form=form)
 
@@ -998,6 +1063,8 @@ def rental_exchange_step_3(rental_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
+        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_3.html', rental=rental, section=section, form=form)
 
@@ -1050,6 +1117,8 @@ def rental_exchange_step_5(rental_id, ipad_id):
         db.session.add(new_rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
+        add_feed(user=user, event=u'借出iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”借给%s' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_exchange_step_5.html', rental=rental, ipad=ipad, form=form)
 
@@ -1121,6 +1190,8 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id, ipad_id):
         db.session.add(new_rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
+        add_feed(user=user, event=u'借出iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”借给%s' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_exchange_step_6_lesson.html', rental=rental, lesson=lesson, ipad=ipad, form=form)
 
@@ -1165,6 +1236,8 @@ def edit_punch_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category='success')
+        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
 
@@ -1179,6 +1252,8 @@ def punch(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     user.punch(section=section)
     flash(u'已为%s标记进度：%s' % (user.name_alias, section.alias2), category='success')
+    add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+    add_feed(user=current_user._get_current_object(), event=u'为%s标记进度：%s' % (user.name_alias, section.alias2), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -1192,6 +1267,7 @@ def unpunch(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     user.unpunch(section=section)
     flash(u'已取消标记%s的进度：%s' % (user.name_alias, section.alias2), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'取消标记%s的进度：%s' % (user.name_alias, section.alias2), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -1216,6 +1292,7 @@ def period():
         )
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加时段模板：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.period', page=request.args.get('page', 1, type=int)))
     show_vb_periods = True
     show_y_gre_periods = False
@@ -1274,8 +1351,10 @@ def toggle_period_show(id):
     period.toggle_show(modified_by=current_user._get_current_object())
     if period.show:
         flash(u'“%s”的可选状态改为：可选' % period.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更改预约时段“%s”的可选状态改为：可选' % period.alias, category=u'manage')
     else:
         flash(u'“%s”的可选状态改为：不可选' % period.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更改预约时段“%s”的可选状态改为：不可选' % period.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.period'))
 
 
@@ -1302,6 +1381,7 @@ def edit_period(id):
         period.modified_by_id = current_user.id
         db.session.add(period)
         flash(u'已更新时段模板：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新时段模板：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.period'))
     form.name.data = period.name
     form.start_time.data = period.start_time.strftime(u'%H:%M')
@@ -1320,6 +1400,7 @@ def delete_period(id):
         abort(404)
     period.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除时段模板：%s' % period.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除时段模板：%s' % period.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.period'))
 
 
@@ -1345,6 +1426,7 @@ def schedule():
                     db.session.add(schedule)
                     db.session.commit()
                     flash(u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category='success')
+                    add_feed(user=current_user._get_current_object(), event=u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
         return redirect(url_for('manage.schedule', page=request.args.get('page', 1, type=int)))
     show_today_schedules = True
     show_future_schedules = False
@@ -1426,6 +1508,7 @@ def publish_schedule(id):
         return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.publish(modified_by=current_user._get_current_object())
     flash(u'发布成功！', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'发布时段：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
@@ -1442,6 +1525,7 @@ def retract_schedule(id):
         return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.retract(modified_by=current_user._get_current_object())
     flash(u'撤销成功！', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'撤销时段：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
@@ -1453,24 +1537,20 @@ def increase_schedule_quota(id):
     if schedule.out_of_date:
         flash(u'所选时段已经过期', category='error')
         return redirect(request.args.get('next') or url_for('manage.schedule'))
-    candidate = schedule.increase_quota(modified_by=current_user._get_current_object())
-    if candidate:
-        booking = Booking.query.filter_by(user_id=candidate.id, schedule_id=schedule_id).first()
-        send_email(candidate.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking',
-            user=candidate,
-            schedule=schedule,
-            booking=booking
-        )
-        booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=candidate.last_punch.section.lesson)
-        available_ipads_quantity = candidate.last_punch.section.lesson.available_ipads.count()
+    waited_booking = schedule.increase_quota(modified_by=current_user._get_current_object())
+    if waited_booking:
+        send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
+        add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
+        booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
+        available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
-            send_emails(User.users_can(u'管理iPad设备').all(), u'含有课程“%s”的iPad资源紧张' % candidate.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
-                schedule=schedule,
-                lesson=candidate.last_punch.section.lesson,
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'含有课程“%s”的iPad资源紧张' % waited_booking.user.last_punch.section.lesson.name, 'book/mail/short_of_ipad',
+                booking=waited_booking,
                 booked_ipads_quantity=booked_ipads_quantity,
                 available_ipads_quantity=available_ipads_quantity
             )
     flash(u'所选时段名额+1', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给时段增加1个名额：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
@@ -1490,6 +1570,7 @@ def decrease_schedule_quota(id):
         return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.decrease_quota(modified_by=current_user._get_current_object())
     flash(u'所选时段名额-1', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给时段缩减1个名额：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
@@ -1562,6 +1643,7 @@ def assignment():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加作业记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     show_vb_assignments = True
     show_y_gre_assignments = False
@@ -1634,6 +1716,7 @@ def assignment_score(id):
         db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加作业记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     form.assignment.data = unicode(assignment.id)
     query = AssignmentScore.query\
@@ -1663,6 +1746,7 @@ def edit_assignment_score(id):
         db.session.add(score)
         db.session.commit()
         flash(u'已更新作业记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新作业记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     form.assignment.data = unicode(score.assignment_id)
     form.grade.data = unicode(score.grade_id)
@@ -1676,6 +1760,7 @@ def delete_assignment_score(id):
     score = AssignmentScore.query.get_or_404(id)
     db.session.delete(score)
     flash(u'已删除作业记录：%s' % score.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除作业记录：%s' % score.alias, category=u'manage')
     return redirect(url_for('manage.assignment_score', id=score.assignment_id))
 
 
@@ -1699,6 +1784,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加VB考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加VB考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'vb', id=int(vb_form.test.data)))
     y_gre_form = NewYGRETestScoreForm(prefix='y_gre')
     if y_gre_form.submit.data and y_gre_form.validate_on_submit():
@@ -1724,6 +1810,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加Y-GRE考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'y_gre', id=int(y_gre_form.test.data)))
     gre_form = NewGRETestScoreForm(prefix='gre')
     if gre_form.submit.data and gre_form.validate_on_submit():
@@ -1747,6 +1834,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加GRE考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'gre', id=test.id))
     toefl_form = NewTOEFLTestScoreForm(prefix='toefl')
     if toefl_form.submit.data and toefl_form.validate_on_submit():
@@ -1772,6 +1860,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加TOEFL考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'toefl', id=test.id))
     show_vb_tests = True
     show_y_gre_tests = False
@@ -1894,6 +1983,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加VB考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加VB考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(test.id)
         query = VBTestScore.query\
@@ -1931,6 +2021,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加Y-GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(test.id)
         query = YGRETestScore.query\
@@ -1966,6 +2057,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = test.date
         query = GRETestScore.query\
@@ -2003,6 +2095,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加TOEFL考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = test.date
         query = TOEFLTestScore.query\
@@ -2029,8 +2122,10 @@ def toggle_test_paper_retrieve(test_type, id):
     score.toggle_retrieve(modified_by=current_user._get_current_object())
     if score.retrieved:
         flash(u'已回收试卷：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'回收试卷：%s' % score.alias, category=u'manage')
     else:
         flash(u'已发放试卷：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'发放试卷：%s' % score.alias, category=u'manage')
     return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
 
 
@@ -2050,6 +2145,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新VB考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新VB考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(score.test_id)
         form.score.data = u'%g' % score.score
@@ -2070,6 +2166,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新Y-GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新Y-GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(score.test_id)
         form.v_score.data = u'%g' % score.v_score
@@ -2094,6 +2191,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
         form.v_score.data = u'%g' % score.v_score
@@ -2119,6 +2217,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新TOEFL考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新TOEFL考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
         form.total.data = u'%g' % score.total_score
@@ -2137,18 +2236,22 @@ def delete_test_score(test_type, id):
         score = VBTestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除VB考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除VB考试记录：%s' % score.alias, category=u'manage')
     if test_type == u'y_gre':
         score = YGRETestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除Y-GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除Y-GRE考试记录：%s' % score.alias, category=u'manage')
     if test_type == u'gre':
         score = GRETestScore.query.get_or_404(id)
         db.session.delete(score)
-        flash(u'已删除TOEFL考试记录：%s' % score.alias, category='success')
+        flash(u'已删除GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除GRE考试记录：%s' % score.alias, category=u'manage')
     if test_type == u'toefl':
         score = TOEFLTestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除TOEFL考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除TOEFL考试记录：%s' % score.alias, category=u'manage')
     return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
 
 
@@ -2175,6 +2278,7 @@ def user():
         db.session.commit()
         current_user.create_user(user=admin)
         flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加%s：%s' % (admin.role.name, admin.name), category=u'manage')
         return redirect(url_for('manage.user', page=request.args.get('page', 1, type=int)))
     # search user form
     search_form = SearchForm(prefix='search')
@@ -2768,6 +2872,7 @@ def create_user():
         for product_id in form.products.data:
             user.add_purchase(product=Product.query.get(int(product_id)))
         flash(u'资料填写完成，请确认信息', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'完成用户资料填写：%s' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     return render_template('manage/create_user.html', form=form)
 
@@ -3052,6 +3157,7 @@ def create_user_confirm(id):
         receptionist.receive_user(user=user)
         current_user.create_user(user=user)
         flash(u'成功添加%s：%s' % (user.role.name, user.name), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加%s：%s' % (user.role.name, user.name), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     confirm_user_form.worked_in_same_field.data = user.worked_in_same_field
     confirm_user_form.deformity.data = user.deformity
@@ -3101,6 +3207,7 @@ def create_user_delete(id):
         return redirect(request.args.get('next') or url_for('manage.user'))
     user.delete()
     flash(u'已删除用户：%s' % user.name_alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除用户：%s' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3119,6 +3226,7 @@ def edit_user(id):
         user.name = edit_name_form.name.data
         db.session.add(user)
         flash(u'已更新用户姓名', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户姓名为“%s”' % (user.name_alias, edit_name_form.name.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_name_form.name.data = user.name
     # ID number
@@ -3129,6 +3237,7 @@ def edit_user(id):
         user.birthdate = date(year=int(edit_id_number_form.id_number.data[6:10]), month=int(edit_id_number_form.id_number.data[10:12]), day=int(edit_id_number_form.id_number.data[12:14]))
         db.session.add(user)
         flash(u'已更新身份证号', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新身份证号为“%s”' % (user.name_alias, edit_id_number_form.id_number.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_id_number_form.id_number.data = user.id_number
     # role
@@ -3137,6 +3246,7 @@ def edit_user(id):
         user.role_id = int(edit_role_form.role.data)
         db.session.add(user)
         flash(u'已更新用户权限', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户权限为“%s”' % (user.name_alias, Role.query.get(int(edit_role_form.role.data)).name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_role_form.role.data = unicode(user.role_id)
     # VB course
@@ -3147,6 +3257,7 @@ def edit_user(id):
         if int(edit_vb_course_form.vb_course.data):
             user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
         flash(u'已更新VB班级', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新VB班级为“%s”' % (user.name_alias, Course.query.get(int(edit_vb_course_form.vb_course.data)).name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     if user.vb_course:
         edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
@@ -3158,6 +3269,7 @@ def edit_user(id):
         if int(edit_y_gre_course_form.y_gre_course.data):
             user.register_course(Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)))
         flash(u'已更新Y-GRE班', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新Y-GRE班级为“%s”' % (user.name_alias, Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)).name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
@@ -3166,9 +3278,12 @@ def edit_user(id):
     if edit_tag_form.submit.data and edit_tag_form.validate_on_submit():
         for tag in user.has_tags:
             user.remove_tag(tag=tag.tag)
+        new_tags = []
         for tag_id in edit_tag_form.tags.data:
             user.add_tag(tag=Tag.query.get(int(tag_id)))
+        new_tags.append(Tag.query.get(int(tag_id)).name)
         flash(u'已更新用户标签', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户标签为“%s”' % (user.name_alias, u'、'.join(new_tags)), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_tag_form.tags.data = []
     for tag in user.has_tags:
@@ -3188,6 +3303,7 @@ def edit_user(id):
             user.email = edit_email_form.email.data.lower()
             db.session.add(user)
         flash(u'已更新用户邮箱', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户邮箱为“%s”' % (user.name_alias, edit_email_form.email.data.lower()), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_email_form.email.data = user.email
     # mobile
@@ -3196,6 +3312,7 @@ def edit_user(id):
         user.mobile = edit_mobile_form.mobile.data
         db.session.add(user)
         flash(u'已更新移动电话', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新移动电话为“%s”' % (user.name_alias, edit_mobile_form.mobile.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_mobile_form.mobile.data = user.mobile
     # address
@@ -3204,6 +3321,7 @@ def edit_user(id):
         user.address = edit_address_form.address.data
         db.session.add(user)
         flash(u'已更新联系地址', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新联系地址为“%s”' % (user.name_alias, edit_address_form.address.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_address_form.address.data = user.address
     # QQ
@@ -3212,6 +3330,7 @@ def edit_user(id):
         user.qq = edit_qq_form.qq.data
         db.session.add(user)
         flash(u'已更新QQ号', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新QQ号为“%s”' % (user.name_alias, edit_qq_form.qq.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_qq_form.qq.data = user.qq
     # WeChat
@@ -3220,6 +3339,7 @@ def edit_user(id):
         user.wechat = edit_wechat_form.wechat.data
         db.session.add(user)
         flash(u'已更新微信账号', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新微信账号为“%s”' % (user.name_alias, edit_wechat_form.wechat.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_wechat_form.wechat.data = user.wechat
     # emergency contact name
@@ -3228,6 +3348,7 @@ def edit_user(id):
         user.emergency_contact_name = edit_emergency_contact_name_form.emergency_contact_name.data
         db.session.add(user)
         flash(u'已更新紧急联系人姓名', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新紧急联系人姓名为“%s”' % (user.name_alias, edit_emergency_contact_name_form.emergency_contact_name.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_name_form.emergency_contact_name.data = user.emergency_contact_name
     # emergency contact relationship
@@ -3236,6 +3357,7 @@ def edit_user(id):
         user.emergency_contact_relationship_id = int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)
         db.session.add(user)
         flash(u'已更新紧急联系人关系', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新紧急联系人关系为“%s”' % (user.name_alias, Relationship.query.get(int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)).name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_relationship_form.emergency_contact_relationship.data = unicode(user.emergency_contact_relationship_id)
     # emergency contact mobile
@@ -3244,6 +3366,7 @@ def edit_user(id):
         user.emergency_contact_mobile = edit_emergency_contact_mobile_form.emergency_contact_mobile.data
         db.session.add(user)
         flash(u'已更新紧急联系人移动电话', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新紧急联系人移动电话为“%s”' % (user.name_alias, edit_emergency_contact_mobile_form.emergency_contact_mobile.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_mobile_form.emergency_contact_mobile.data = user.emergency_contact_mobile
     # education
@@ -3259,6 +3382,7 @@ def edit_user(id):
             year=new_education_record_form.year.data
         )
         flash(u'已添加教育经历：%s %s' % (education_type.name, new_education_record_form.school.data), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加教育经历“%s %s”' % (user.name_alias, education_type.name, new_education_record_form.school.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # employment
     new_employment_record_form = NewEmploymentRecordForm(prefix='new_employment_record')
@@ -3269,6 +3393,7 @@ def edit_user(id):
             year=new_employment_record_form.year.data
         )
         flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加工作经历“%s %s”' % (user.name_alias, new_employment_record_form.employer.data, new_employment_record_form.position.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # scores
     new_score_record_form = NewScoreRecordForm(prefix='new_score_record')
@@ -3286,6 +3411,7 @@ def edit_user(id):
                 remark=new_score_record_form.score.data
             )
         flash(u'已添加既往成绩：%s' % score_type.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加既往成绩“%s”' % (user.name_alias, score_type.name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
@@ -3298,6 +3424,7 @@ def edit_user(id):
         if edit_purpose_form.other_purpose.data:
             user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=edit_purpose_form.other_purpose.data)
         flash(u'已更新研修目的', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新研修目的' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_purpose_form.purposes.data = []
     for purpose in user.purposes:
@@ -3311,6 +3438,7 @@ def edit_user(id):
         user.application_aim = edit_application_aim_form.application_aim.data
         db.session.add(user)
         flash(u'已更新申请方向', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新申请方向为“%s”' % (user.name_alias, edit_application_aim_form.application_aim.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_application_aim_form.application_aim.data = user.application_aim
     # referrer
@@ -3324,6 +3452,7 @@ def edit_user(id):
         if edit_referrer_form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=edit_referrer_form.other_referrer.data)
         flash(u'已更新了解渠道', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新了解渠道' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_referrer_form.referrers.data = []
     for referrer in user.referrers:
@@ -3346,6 +3475,7 @@ def edit_user(id):
             return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
         inviter.invite_user(user=user, invitation_type=InvitationType.query.filter_by(name=u'积分').first())
         flash(u'已添加推荐人：%s' % inviter.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加推荐人“%s”' % (user.name_alias, inviter.name_alias), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purchase
     new_purchase_form = NewPurchaseForm(prefix='new_purchase')
@@ -3353,13 +3483,15 @@ def edit_user(id):
         product = Product.query.get_or_404(int(new_purchase_form.product.data))
         user.add_purchase(product=product, quantity=new_purchase_form.quantity.data)
         flash(u'已添加研修产品：%s×%s' % (product.alias, new_purchase_form.quantity.data), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加研修产品“%s×%s”' % (user.name_alias, product.alias, new_purchase_form.quantity.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # worked_in_same_field
     edit_worked_in_same_field_form = EditWorkInSameFieldForm(prefix='edit_worked_in_same_field')
     if edit_worked_in_same_field_form.submit.data and edit_worked_in_same_field_form.validate_on_submit():
         user.worked_in_same_field = edit_worked_in_same_field_form.worked_in_same_field.data
         db.session.add(user)
-        flash(u'已更新"（曾）在培训/留学机构任职"状态', category='success')
+        flash(u'已更新“（曾）在培训/留学机构任职”状态', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新“（曾）在培训/留学机构任职”状态' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_worked_in_same_field_form.worked_in_same_field.data = user.worked_in_same_field
     # deformity
@@ -3367,7 +3499,8 @@ def edit_user(id):
     if edit_deformity_form.submit.data and edit_deformity_form.validate_on_submit():
         user.deformity = edit_deformity_form.deformity.data
         db.session.add(user)
-        flash(u'已更新"有严重心理或身体疾病"状态', category='success')
+        flash(u'已更新“有严重心理或身体疾病”状态', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新“有严重心理或身体疾病”状态' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_deformity_form.deformity.data = user.deformity
     # receptionist
@@ -3407,6 +3540,8 @@ def remove_education_record(id):
     education_record = EducationRecord.query.get_or_404(id)
     db.session.delete(education_record)
     flash(u'已删除教育经历：%s %s' % (education_record.type.name, education_record.school), category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除教育经历“%s %s”' % (user.name_alias, education_record.type.name, education_record.school), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3417,6 +3552,8 @@ def remove_employment_record(id):
     employment_record = EmploymentRecord.query.get_or_404(id)
     db.session.delete(employment_record)
     flash(u'已删除工作经历：%s %s' % (employment_record.employer, employment_record.position), category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除工作经历“%s %s”' % (user.name_alias, employment_record.employer, employment_record.position), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3427,6 +3564,8 @@ def remove_score_record(id):
     score_record = ScoreRecord.query.get_or_404(id)
     db.session.delete(score_record)
     flash(u'已删除既往成绩：%s' % score_record.type.name, category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除既往成绩“%s”' % (user.name_alias, score_record.type.name), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3448,6 +3587,8 @@ def remove_inviter(user_id, inviter_id):
     inviter = User.query.get_or_404(inviter_id)
     inviter.uninvite_user(user=user)
     flash(u'已删除推荐人：%s' % inviter.name_alias, category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除推荐人“%s”' % (user.name_alias, inviter.name_alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3458,6 +3599,8 @@ def remove_purchase(id):
     purchase = Purchase.query.get_or_404(id)
     db.session.delete(purchase)
     flash(u'已删除研修产品：%s' % purchase.alias, category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除研修产品“%s”' % (user.name_alias, purchase.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3472,6 +3615,7 @@ def delete_user(id):
         abort(403)
     user.safe_delete()
     flash(u'已注销用户：%s' % user.name_alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'注销用户：%s' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3487,8 +3631,9 @@ def restore_user(id):
     form = RestoreUserForm(restorer=current_user._get_current_object())
     if form.validate_on_submit():
         role = Role.query.get(int(form.role.data))
-        user.restore(email=form.email.data.lower(), role=role)
+        user.restore(email=form.email.data.lower(), role=role, reset_due_time=form.reset_due_time.data)
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'恢复用户：%s' % user.name_alias, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.email.data = user.email[:-len(u'_%s_deleted' % user.id)]
     form.role.data = unicode(user.role_id)
@@ -3507,9 +3652,11 @@ def toggle_suspension(id):
     if user.is_suspended:
         user.end_suspension(modified_by=current_user._get_current_object())
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'恢复用户：%s' % user.name_alias, category=u'manage')
     else:
         user.start_suspension(modified_by=current_user._get_current_object())
         flash(u'已挂起用户：%s' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'挂起用户：%s' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3521,7 +3668,8 @@ def course():
     if form.validate_on_submit():
         course = Course(name=form.name.data, type_id=int(form.course_type.data), show=form.show.data, modified_by_id=current_user.id)
         db.session.add(course)
-        flash(u'新建班级：%s' % form.name.data, category='success')
+        flash(u'添加班级：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加班级：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.course', page=request.args.get('page', 1, type=int)))
     show_vb_courses = True
     show_y_gre_courses = False
@@ -3602,8 +3750,10 @@ def toggle_course_show(id):
     course.toggle_show(modified_by=current_user._get_current_object())
     if course.show:
         flash(u'班级“%s”的可选状态改为：可选' % course.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改班级“%s”的可选状态改为：可选' % course.name, category=u'manage')
     else:
         flash(u'班级“%s”的可选状态改为：不可选' % course.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改班级“%s”的可选状态改为：不可选' % course.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.course'))
 
 
@@ -3623,6 +3773,7 @@ def edit_course(id):
         course.modified_by_id = current_user.id
         db.session.add(course)
         flash(u'已更新班级：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新班级：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.course'))
     form.name.data = course.name
     form.course_type.data = unicode(course.type_id)
@@ -3639,6 +3790,7 @@ def delete_course(id):
         abort(404)
     course.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除班级：%s' % course.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除班级：%s' % course.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.course'))
 
 
@@ -3660,6 +3812,8 @@ def group():
             return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
         user.register_group(organizer=user)
         flash(u'%s已成功发起团报' % user.name_alias, category='success')
+        add_feed(user=user, event=u'发起团报', category=u'group')
+        add_feed(user=current_user._get_current_object(), event=u'记录%s发起团报' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
     query = GroupRegistration.query\
         .filter(GroupRegistration.organizer_id == GroupRegistration.member_id)\
@@ -3683,6 +3837,7 @@ def delete_group(id):
     for group_registration in user.organized_groups:
         group_registration.member.unregister_group(organizer=user)
     flash(u'已删除%s发起的团报' % user.name_alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除%s发起的团报' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.group'))
 
 
@@ -3713,6 +3868,9 @@ def add_group_member(id):
             return redirect(url_for('manage.add_group_member', id=organizer.id, next=request.args.get('next')))
         member.register_group(organizer=organizer)
         flash(u'%s已成功加入%s发起的团报' % (member.name_alias, organizer.name_alias), category='success')
+        add_feed(user=member, event=u'加入%s发起的团报' % organizer.name_alias, category=u'group')
+        add_feed(user=organizer, event=u'%s加入您发起的团报' % member.name_alias, category=u'group')
+        add_feed(user=current_user._get_current_object(), event=u'记录%s加入%s发起的团报' % (member.name_alias, organizer.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.group'))
     return render_template('manage/add_group_member.html', form=form, organizer=organizer)
 
@@ -3735,6 +3893,7 @@ def remove_group_member(organizer_id, member_id):
         return redirect(request.args.get('next') or url_for('manage.group'))
     member.unregister_group(organizer=organizer)
     flash(u'已删除%s发起的团报成员：%s' % (organizer.name_alias, member.name_alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除%s发起的团报成员：%s' % (organizer.name_alias, member.name_alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.group'))
 
 
@@ -3750,6 +3909,7 @@ def tag():
         tag = Tag(name=form.name.data, color_id=int(form.color.data))
         db.session.add(tag)
         flash(u'已添加用户标签：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加用户标签：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.tag', page=request.args.get('page', 1, type=int)))
     query = Tag.query
     page = request.args.get('page', 1, type=int)
@@ -3788,6 +3948,7 @@ def edit_tag(id):
         tag.color_id = int(form.color.data)
         db.session.add(tag)
         flash(u'已更新标签：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新用户标签：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.tag'))
     form.name.data = tag.name
     form.color.data = unicode(tag.color_id)
@@ -3803,6 +3964,7 @@ def delete_tag(id):
         abort(403)
     db.session.delete(tag)
     flash(u'已删除用户标签：%s' % tag.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除用户标签：%s' % tag.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.tag'))
 
 
@@ -3834,6 +3996,7 @@ def ipad():
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加序列号为%s的iPad' % serial, category=u'manage')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
     filter_form = FilteriPadForm(prefix='filter')
     if filter_form.submit.data and filter_form.validate_on_submit():
@@ -4064,6 +4227,7 @@ def set_ipad_state_standby(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'待机', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：待机' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：待机' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4077,6 +4241,7 @@ def set_ipad_state_candidate(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'候补', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：候补' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：候补' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4090,12 +4255,13 @@ def set_ipad_state_maintain(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'维护', modified_by=current_user._get_current_object())
     db.session.commit()
-    send_emails(User.users_can(u'管理iPad设备').all(), u'编号为“%s”的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
+    send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'编号为“%s”的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
         ipad=ipad,
         time=datetime.utcnow(),
-        manager=current_user
+        manager=current_user._get_current_object()
     )
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：维护' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4109,6 +4275,7 @@ def set_ipad_state_charge(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'充电', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：充电' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：充电' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4122,6 +4289,7 @@ def set_ipad_state_obsolete(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'退役', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：退役' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：退役' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4152,6 +4320,7 @@ def edit_ipad(id):
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
         flash(u'iPad信息已更新', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新iPad“%s”的信息' % ipad.alias, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
     form.serial.data = ipad.serial
@@ -4173,6 +4342,7 @@ def delete_ipad(id):
         abort(404)
     ipad.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除序列号为“%s”的iPad' % ipad.serial, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除序列号为“%s”的iPad' % ipad.serial, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4233,9 +4403,16 @@ def announcement():
         db.session.commit()
         if form.show.data:
             announcement.publish(modified_by=current_user._get_current_object())
+            if announcement.type.name == u'用户邮件通知':
+                for user in User.users_can(u'预约').all():
+                    send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
+            if announcement.type.name == u'管理邮件通知':
+                for user in User.users_can(u'管理').all():
+                    send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
         else:
             announcement.clean_up()
         flash(u'已添加通知：“%s”' % form.title.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加通知：“%s”' % form.title.data, category=u'manage')
         return redirect(url_for('manage.announcement', page=request.args.get('page', 1, type=int)))
     query = Announcement.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
@@ -4259,7 +4436,14 @@ def publish_announcement(id):
         flash(u'所选通知已经发布', category='warning')
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.publish(modified_by=current_user._get_current_object())
+    if announcement.type.name == u'用户邮件通知':
+        for user in User.users_can(u'预约').all():
+            send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
+    if announcement.type.name == u'管理邮件通知':
+        for user in User.users_can(u'管理').all():
+            send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
     flash(u'“%s”发布成功！' % announcement.title, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'发布通知：“%s”' % announcement.title, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
@@ -4273,6 +4457,7 @@ def retract_announcement(id):
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.retract(modified_by=current_user._get_current_object())
     flash(u'“%s”撤销成功！' % announcement.title, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'撤销通知：“%s”' % announcement.title, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
@@ -4297,6 +4482,7 @@ def edit_announcement(id):
         else:
             announcement.clean_up()
         flash(u'已更新通知：“%s”' % form.title.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新通知：“%s”' % form.title.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     form.title.data = announcement.title
     form.body.data = announcement.body_html
@@ -4314,6 +4500,7 @@ def delete_announcement(id):
         abort(404)
     announcement.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除通知：“%s”' % announcement.title, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除通知：“%s”' % announcement.title, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
@@ -4331,6 +4518,7 @@ def product():
         )
         db.session.add(product)
         flash(u'已添加研修产品：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加研修产品：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.product', page=request.args.get('page', 1, type=int)))
     query = Product.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
@@ -4349,8 +4537,10 @@ def toggle_product_availability(id):
     product.toggle_availability(modified_by=current_user._get_current_object())
     if product.available:
         flash(u'“%s”的可选状态改为：可选' % product.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改“%s”的可选状态改为：可选' % product.name, category=u'manage')
     else:
         flash(u'“%s”的可选状态改为：不可选' % product.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改“%s”的可选状态改为：不可选' % product.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.product'))
 
 
@@ -4372,6 +4562,7 @@ def edit_product(id):
         product.modified_by_id = current_user.id
         db.session.add(product)
         flash(u'已更新研修产品：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新研修产品：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.product'))
     form.name.data = product.name
     form.price.data = unicode(product.price)
@@ -4390,6 +4581,7 @@ def delete_product(id):
         abort(403)
     product.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除研修产品：%s' % product.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除研修产品：%s' % product.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.product'))
 
 
@@ -4432,6 +4624,7 @@ def role():
         if form.is_developer.data:
             role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
         flash(u'已添加角色：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加角色：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.role', page=request.args.get('page', 1, type=int)))
     query = Role.query
     page = request.args.get('page', 1, type=int)
@@ -4456,6 +4649,7 @@ def edit_role(id):
         if form.is_developer.data:
             role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
         flash(u'已更新角色：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新角色：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.role'))
     form.name.data = role.name
     form.booking_permissions.data = [unicode(permission.id) for permission in role.permissions_alias(prefix=u'预约', formatted=False)]
@@ -4475,6 +4669,7 @@ def delete_role(id):
         role.remove_permission(permission=Permission.query.get(role_permission.permission_id))
     db.session.delete(role)
     flash(u'已删除角色：%s' % role.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除角色：%s' % role.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.role'))
 
 
@@ -4490,6 +4685,7 @@ def permission():
         permission = Permission(name=form.name.data, check_overdue=form.check_overdue.data)
         db.session.add(permission)
         flash(u'已添加权限：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加权限：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
     show_booking_permissions = True
     show_manage_permissions = False
@@ -4593,6 +4789,7 @@ def edit_permission(id):
         permission.check_overdue = form.check_overdue.data
         db.session.add(permission)
         flash(u'已更新权限：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新权限：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.permission'))
     form.name.data = permission.name
     form.check_overdue.data = permission.check_overdue
@@ -4608,6 +4805,7 @@ def delete_permission(id):
         abort(403)
     db.session.delete(permission)
     flash(u'已删除权限：%s' % permission.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除权限：%s' % permission.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.permission'))
 
 
@@ -4616,6 +4814,235 @@ def delete_permission(id):
 @permission_required(u'管理')
 def analytics():
     return render_template('manage/analytics.html', analytics_token=current_app.config['ANALYTICS_TOKEN'])
+
+
+@manage.route('/feed')
+@login_required
+@developer_required
+def feed():
+    show_all_feeds = True
+    show_auth_feeds = False
+    show_booking_feeds = False
+    show_rental_feeds = False
+    show_punch_feeds = False
+    show_group_feeds = False
+    show_manage_feeds = False
+    show_access_feeds = False
+    show_email_feeds = False
+    if current_user.is_authenticated:
+        show_all_feeds = bool(request.cookies.get('show_all_feeds', '1'))
+        show_auth_feeds = bool(request.cookies.get('show_auth_feeds', ''))
+        show_booking_feeds = bool(request.cookies.get('show_booking_feeds', ''))
+        show_rental_feeds = bool(request.cookies.get('show_rental_feeds', ''))
+        show_punch_feeds = bool(request.cookies.get('show_punch_feeds', ''))
+        show_group_feeds = bool(request.cookies.get('show_group_feeds', ''))
+        show_manage_feeds = bool(request.cookies.get('show_manage_feeds', ''))
+        show_access_feeds = bool(request.cookies.get('show_access_feeds', ''))
+        show_email_feeds = bool(request.cookies.get('show_email_feeds', ''))
+    if show_all_feeds:
+        query = Feed.query\
+            .order_by(Feed.timestamp.desc())
+    if show_auth_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'auth')\
+            .order_by(Feed.timestamp.desc())
+    if show_booking_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'book')\
+            .order_by(Feed.timestamp.desc())
+    if show_rental_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'rental')\
+            .order_by(Feed.timestamp.desc())
+    if show_punch_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'punch')\
+            .order_by(Feed.timestamp.desc())
+    if show_group_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'group')\
+            .order_by(Feed.timestamp.desc())
+    if show_manage_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'manage')\
+            .order_by(Feed.timestamp.desc())
+    if show_access_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'access')\
+            .order_by(Feed.timestamp.desc())
+    if show_email_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'email')\
+            .order_by(Feed.timestamp.desc())
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    feeds = pagination.items
+    return render_template('manage/feed.html',
+        show_all_feeds=show_all_feeds,
+        show_auth_feeds=show_auth_feeds,
+        show_booking_feeds=show_booking_feeds,
+        show_rental_feeds=show_rental_feeds,
+        show_punch_feeds=show_punch_feeds,
+        show_group_feeds=show_group_feeds,
+        show_manage_feeds=show_manage_feeds,
+        show_access_feeds=show_access_feeds,
+        show_email_feeds=show_email_feeds,
+        feeds=feeds,
+        pagination=pagination
+    )
+
+
+@manage.route('/feed/all')
+@login_required
+@developer_required
+def all_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/auth')
+@login_required
+@developer_required
+def auth_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/book')
+@login_required
+@developer_required
+def booking_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/rental')
+@login_required
+@developer_required
+def rental_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/punch')
+@login_required
+@developer_required
+def punch_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/group')
+@login_required
+@developer_required
+def group_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/manage')
+@login_required
+@developer_required
+def manage_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/access')
+@login_required
+@developer_required
+def access_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/email')
+@login_required
+@developer_required
+def email_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/suggest/user/')

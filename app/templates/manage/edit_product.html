@@ -30,7 +30,7 @@
                         <div class="eight wide required field">
                             {{ form.price.label() }}
                             <div class="ui left labeled input">
-                                <div class="ui label"><i class="fa fa-cny"></i></div>
+                                <div class="ui label"><i class="fa fa-rmb"></i></div>
                                 {% if product.purchases.count() %}{{ form.price(placeholder='0', readonly='') }}{% else %}{{ form.price(placeholder='0') }}{% endif %}
                             </div>
                         </div>

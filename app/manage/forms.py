@@ -619,6 +619,7 @@ class EditDeformityForm(FlaskForm):
 class RestoreUserForm(FlaskForm):
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
+    reset_due_time = BooleanField(u'重置有效期')
     submit = SubmitField(u'恢复')
 
     def __init__(self, restorer, *args, **kwargs):

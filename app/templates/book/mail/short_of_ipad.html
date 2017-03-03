@@ -1,5 +1,5 @@
-<p>预约日期：{{ schedule.date }}</p>
-<p>预约时段：{{ schedule.period.alias2 }}</p>
-<p>课程：{{ lesson.alias }}</p>
+<p>预约日期：{{ booking.schedule.date }}</p>
+<p>预约时段：{{ booking.schedule.period.alias2 }}</p>
+<p>课程：{{ booking.user.last_punch.section.lesson.alias }}</p>
 <p>预约数量：{{ booked_ipads_quantity }}</p>
 <p>已有数量：{{ available_ipads_quantity }}</p>

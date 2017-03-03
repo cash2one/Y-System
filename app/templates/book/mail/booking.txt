@@ -1,18 +1,18 @@
-亲爱的{{ user.name }}：
+亲爱的{{ booking.user.name }}：
 
 您好！
 
-您已经成功预约了{{ schedule.period.type.name }}课程！
+您已经成功预约了{{ booking.schedule.period.type.name }}课程！
 
-日期：{{ schedule.date }}
+日期：{{ booking.schedule.date }}
 
-时段：{{ schedule.period.alias2 }}
+时段：{{ booking.schedule.period.alias2 }}
 
-课程：{{ schedule.period.type.name }}
+课程：{{ booking.schedule.period.type.name }}
 
 预约码：{{ booking.token }}
 
-{% if user.has_tag_name('未缴全款') %}您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！{% endif %}
+{% if booking.user.has_tag_name('未缴全款') %}您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！{% endif %}
 
                 此致
 
