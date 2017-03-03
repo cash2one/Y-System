@@ -4685,6 +4685,7 @@ def permission():
         permission = Permission(name=form.name.data, check_overdue=form.check_overdue.data)
         db.session.add(permission)
         flash(u'已添加权限：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加权限：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.permission', page=request.args.get('page', 1, type=int)))
     show_booking_permissions = True
     show_manage_permissions = False
@@ -4788,6 +4789,7 @@ def edit_permission(id):
         permission.check_overdue = form.check_overdue.data
         db.session.add(permission)
         flash(u'已更新权限：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新权限：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.permission'))
     form.name.data = permission.name
     form.check_overdue.data = permission.check_overdue
@@ -4803,6 +4805,7 @@ def delete_permission(id):
         abort(403)
     db.session.delete(permission)
     flash(u'已删除权限：%s' % permission.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除权限：%s' % permission.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.permission'))
 
 
