@@ -935,6 +935,7 @@ def rental_return_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3.html', user=user, section=section, form=form)
 
@@ -978,6 +979,7 @@ def rental_return_step_3_alt(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3_alt.html', user=user, section=section, form=form)
 
@@ -1059,6 +1061,7 @@ def rental_exchange_step_3(rental_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_3.html', rental=rental, section=section, form=form)
 
@@ -1230,6 +1233,7 @@ def edit_punch_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
 
@@ -1244,6 +1248,7 @@ def punch(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     user.punch(section=section)
     flash(u'已为%s标记进度：%s' % (user.name_alias, section.alias2), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'为%s标记进度：%s' % (user.name_alias, section.alias2), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -1257,6 +1262,7 @@ def unpunch(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     user.unpunch(section=section)
     flash(u'已取消标记%s的进度：%s' % (user.name_alias, section.alias2), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'取消标记%s的进度：%s' % (user.name_alias, section.alias2), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
