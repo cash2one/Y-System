@@ -3668,7 +3668,8 @@ def course():
     if form.validate_on_submit():
         course = Course(name=form.name.data, type_id=int(form.course_type.data), show=form.show.data, modified_by_id=current_user.id)
         db.session.add(course)
-        flash(u'新建班级：%s' % form.name.data, category='success')
+        flash(u'添加班级：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加班级：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.course', page=request.args.get('page', 1, type=int)))
     show_vb_courses = True
     show_y_gre_courses = False
@@ -3749,8 +3750,10 @@ def toggle_course_show(id):
     course.toggle_show(modified_by=current_user._get_current_object())
     if course.show:
         flash(u'班级“%s”的可选状态改为：可选' % course.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改班级“%s”的可选状态改为：可选' % course.name, category=u'manage')
     else:
         flash(u'班级“%s”的可选状态改为：不可选' % course.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改班级“%s”的可选状态改为：不可选' % course.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.course'))
 
 
@@ -3770,6 +3773,7 @@ def edit_course(id):
         course.modified_by_id = current_user.id
         db.session.add(course)
         flash(u'已更新班级：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新班级：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.course'))
     form.name.data = course.name
     form.course_type.data = unicode(course.type_id)
@@ -3786,6 +3790,7 @@ def delete_course(id):
         abort(404)
     course.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除班级：%s' % course.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除班级：%s' % course.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.course'))
 
 
