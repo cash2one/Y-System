@@ -2872,6 +2872,7 @@ def create_user():
         for product_id in form.products.data:
             user.add_purchase(product=Product.query.get(int(product_id)))
         flash(u'资料填写完成，请确认信息', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'完成用户资料填写：%s' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     return render_template('manage/create_user.html', form=form)
 
@@ -3156,6 +3157,7 @@ def create_user_confirm(id):
         receptionist.receive_user(user=user)
         current_user.create_user(user=user)
         flash(u'成功添加%s：%s' % (user.role.name, user.name), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加%s：%s' % (user.role.name, user.name), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     confirm_user_form.worked_in_same_field.data = user.worked_in_same_field
     confirm_user_form.deformity.data = user.deformity
@@ -3205,6 +3207,7 @@ def create_user_delete(id):
         return redirect(request.args.get('next') or url_for('manage.user'))
     user.delete()
     flash(u'已删除用户：%s' % user.name_alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'除用户：%s' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
