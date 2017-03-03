@@ -39,9 +39,9 @@
                         {% for purchase in purchases %}
                         <tr>
                             <td class="single line">{{ macros.user_popup_gender(purchase.user, purchase.user.id == current_user.id) }}</td>
-                            <td><i class="fitted yen icon"></i> {{ product.price_alias }}</td>
+                            <td><i class="fa fa-rmb"></i> {{ product.price_alias }}</td>
                             <td>{{ purchase.quantity }}</td>
-                            <td><i class="fitted yen icon"></i> {{ purchase.total_alias }}</td>
+                            <td><i class="fa fa-rmb"></i> {{ purchase.total_alias }}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(purchase.timestamp).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(purchase.timestamp).format('YYYY-M-D H:mm:ss') }}</div>

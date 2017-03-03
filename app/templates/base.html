@@ -14,8 +14,7 @@
     <meta name="keywords" content="Y-English, Y-System, English, Education" />
 
     <!-- Semantic UI CSS -->
-    {# <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.css"> #}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/dev/semantic.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.css">
 
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/{{ Version.FontAwesome }}/css/font-awesome.min.css">
@@ -112,6 +111,7 @@
                     <div class="header">开发人员</div>
                     <a class="item loading-trigger" href="{{ url_for('manage.role') }}"><i class="spy icon"></i>角色管理</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.booking_permissions') }}"><i class="checkmark box icon"></i>权限管理</a>
+                    <a class="item loading-trigger" href="{{ url_for('manage.feed') }}"><i class="database icon"></i>系统日志</a>
                     {% endif %}
                 </div>
             </div>
@@ -217,6 +217,7 @@
             <div class="menu">
                 <a class="item loading-trigger" href="{{ url_for('manage.role') }}"><i class="spy icon"></i>角色管理</a>
                 <a class="item loading-trigger" href="{{ url_for('manage.booking_permissions') }}"><i class="checkmark box icon"></i>权限管理</a>
+                <a class="item loading-trigger" href="{{ url_for('manage.feed') }}"><i class="database icon"></i>系统日志</a>
             </div>
         </div>
         {% endif %}
@@ -311,6 +312,7 @@
                             <div class="header">开发人员</div>
                             <a class="item loading-trigger" href="{{ url_for('manage.role') }}"><i class="spy icon"></i>角色管理</a>
                             <a class="item loading-trigger" href="{{ url_for('manage.booking_permissions') }}"><i class="checkmark box icon"></i>权限管理</a>
+                            <a class="item loading-trigger" href="{{ url_for('manage.feed') }}"><i class="database icon"></i>系统日志</a>
                             {% endif %}
                         </div>
                     </div>
@@ -423,12 +425,11 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/{{ Version.jQuery }}/jquery.min.js"></script>
 
     <!-- Semantic UI JS -->
-    {# <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.js"></script> #}
-    <script type="text/javascript" src="{{ url_for('static', filename='assets/dev/semantic.min.js') }}"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/{{ Version.SemanticUI }}/semantic.min.js"></script>
 
     <!-- Moment.js -->
     {{ moment.include_moment(version=Version.MomentJS) }}
-    {{ moment.locale('zh-CN') }}
+    {{ moment.locale('zh-cn') }}
 
     <!-- Customized JS -->
     {% block customized_scripts %}

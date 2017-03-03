@@ -106,5 +106,11 @@ def deploy():
     AnnouncementType.insert_announcement_types()
 
 
+@manager.command
+def backup():
+    """Run backup tasks."""
+    pass
+
+
 if __name__ == '__main__':
     manager.run()

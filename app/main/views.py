@@ -10,6 +10,7 @@ from ..models import User
 from ..models import CourseType, Lesson, Section, Punch
 from ..models import Assignment, Test
 from ..models import Schedule, Booking
+from ..models import Feed
 from ..notify import get_announcements
 from ..decorators import permission_required
 
@@ -61,24 +62,33 @@ def profile(id):
         show_profile_archive = bool(request.cookies.get('show_profile_archive', ''))
     # overview
     if show_profile_overview:
+        page = request.args.get('page', 1, type=int)
+        pagination = Feed.query\
+            .filter(Feed.user_id == user.id)\
+            .filter(Feed.category != u'access')\
+            .order_by(Feed.timestamp.desc())\
+            .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+        feeds = pagination.items
         bookings = []
-        pagination = None
     # progress
     if show_profile_progress:
+        feeds = []
         bookings = []
         pagination = None
     # bookings
     if show_profile_bookings:
+        feeds = []
         page = request.args.get('page', 1, type=int)
         pagination = Booking.query\
             .join(Schedule, Schedule.id == Booking.schedule_id)\
             .filter(Booking.user_id == user.id)\
-            .order_by(Schedule.date.asc())\
+            .order_by(Schedule.date.desc())\
             .order_by(Schedule.period_id.asc())\
             .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
         bookings = pagination.items
     # progress
     if show_profile_archive:
+        feeds = []
         bookings = []
         pagination = None
     # announcements
@@ -91,6 +101,7 @@ def profile(id):
         show_profile_progress=show_profile_progress,
         show_profile_bookings=show_profile_bookings,
         show_profile_archive=show_profile_archive,
+        feeds=feeds,
         bookings=bookings,
         pagination=pagination,
         announcements=announcements

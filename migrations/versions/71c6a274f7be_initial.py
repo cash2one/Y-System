@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 288e09e5b264
+Revision ID: 71c6a274f7be
 Revises: 
-Create Date: 2017-02-19 10:44:54.147845
+Create Date: 2017-02-21 14:31:35.205991
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '288e09e5b264'
+revision = '71c6a274f7be'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -260,6 +260,15 @@ def upgrade():
     sa.Column('employer', sa.Unicode(length=64), nullable=True),
     sa.Column('position', sa.Unicode(length=64), nullable=True),
     sa.Column('year', sa.Unicode(length=16), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('feeds',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('event', sa.UnicodeText(), nullable=True),
+    sa.Column('category', sa.Unicode(length=64), nullable=True),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -624,6 +633,7 @@ def downgrade():
     op.drop_table('invitations')
     op.drop_table('group_registrations')
     op.drop_table('gre_test_scores')
+    op.drop_table('feeds')
     op.drop_table('employment_records')
     op.drop_table('education_records')
     op.drop_index(op.f('ix_courses_name'), table_name='courses')

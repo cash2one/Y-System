@@ -1,12 +1,12 @@
-<p>亲爱的 <b>{{ user.name }}</b>：</p>
+<p>亲爱的 <b>{{ booking.user.name }}</b>：</p>
 <p>您好！</p>
-<p>您已经成功预约了{{ schedule.period.type.name }}课程！</p>
-<p>日期：{{ schedule.date }}</p>
-<p>时段：{{ schedule.period.alias2 }}</p>
-<p>课程：{{ schedule.period.type.name }}</p>
+<p>您已经成功预约了{{ booking.schedule.period.type.name }}课程！</p>
+<p>日期：{{ booking.schedule.date }}</p>
+<p>时段：{{ booking.schedule.period.alias2 }}</p>
+<p>课程：{{ booking.schedule.period.type.name }}</p>
 <P><b>预约码</b></P>
 <p><img src="{{ qrcode(booking.token) }}" style="margin: 0; width: 200px;"></p>
-{% if user.has_tag_name('未缴全款') %}<p style="color: red;"><b>您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！</b></p>{% endif %}
+{% if booking.user.has_tag_name('未缴全款') %}<p style="color: red;"><b>您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！</b></p>{% endif %}
 <p style="padding-left: 150px;">此致</p>
 <p>敬礼！</p>
 <p><b>云英语团队</b></p>
