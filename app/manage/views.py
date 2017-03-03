@@ -3633,6 +3633,7 @@ def restore_user(id):
         role = Role.query.get(int(form.role.data))
         user.restore(email=form.email.data.lower(), role=role, reset_due_time=form.reset_due_time.data)
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'恢复用户：%s' % user.name_alias, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     form.email.data = user.email[:-len(u'_%s_deleted' % user.id)]
     form.role.data = unicode(user.role_id)
@@ -3651,9 +3652,11 @@ def toggle_suspension(id):
     if user.is_suspended:
         user.end_suspension(modified_by=current_user._get_current_object())
         flash(u'已恢复用户：%s' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'恢复用户：%s' % user.name_alias, category=u'manage')
     else:
         user.start_suspension(modified_by=current_user._get_current_object())
         flash(u'已挂起用户：%s' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'挂起用户：%s' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
