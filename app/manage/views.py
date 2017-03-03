@@ -2278,6 +2278,7 @@ def user():
         db.session.commit()
         current_user.create_user(user=admin)
         flash(u'成功添加%s：%s' % (admin.role.name, admin.name), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加%s：%s' % (admin.role.name, admin.name), category=u'manage')
         return redirect(url_for('manage.user', page=request.args.get('page', 1, type=int)))
     # search user form
     search_form = SearchForm(prefix='search')
