@@ -70,7 +70,7 @@ def book_vb(id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', booking=booking)
     flash(u'预约成功！', category='success')
-    add_feed(user=current_user, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if current_user.has_tag_name(u'未缴全款'):
         flash(u'您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！', category='warning')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
@@ -113,7 +113,7 @@ def wait_vb(id):
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.book(schedule, u'排队')
     flash(u'已将您加入候选名单', category='success')
-    add_feed(user=current_user, event=u'排队%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'排队%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -133,7 +133,7 @@ def unbook_vb(id):
         return redirect(request.args.get('next') or url_for('book.vb'))
     waited_booking = current_user.unbook(schedule)
     flash(u'取消成功！', category='success')
-    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if waited_booking:
         send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
         add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
@@ -164,7 +164,7 @@ def miss_vb(id):
         return redirect(request.args.get('next') or url_for('book.vb'))
     current_user.miss(schedule)
     flash(u'取消成功！', category='success')
-    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.vb'))
 
 
@@ -215,7 +215,7 @@ def book_y_gre(id):
     booking = Booking.query.filter_by(user_id=current_user.id, schedule_id=schedule.id).first()
     send_email(current_user.email, u'您已成功预约%s的%s课程' % (schedule.date, schedule.period.alias), 'book/mail/booking', booking=booking)
     flash(u'预约成功！', category='success')
-    add_feed(user=current_user, event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'预约%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if current_user.has_tag_name(u'未缴全款'):
         flash(u'您尚未缴齐全款，请先办理补齐全款手续，以免影响课程学习！', category='warning')
     booked_ipads_quantity = schedule.booked_ipads_quantity(lesson=current_user.last_punch.section.lesson)
@@ -255,7 +255,7 @@ def wait_y_gre(id):
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.book(schedule, u'排队')
     flash(u'已将您加入候选名单', category='success')
-    add_feed(user=current_user, event=u'排队%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'排队%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.y_gre'))
 
 
@@ -275,7 +275,7 @@ def unbook_y_gre(id):
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     waited_booking = current_user.unbook(schedule)
     flash(u'取消成功！', category='success')
-    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     if waited_booking:
         send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=booking)
         add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
@@ -306,5 +306,5 @@ def miss_y_gre(id):
         return redirect(request.args.get('next') or url_for('book.y_gre'))
     current_user.miss(schedule)
     flash(u'取消成功！', category='success')
-    add_feed(user=current_user, event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
+    add_feed(user=current_user._get_current_object(), event=u'取消%s的%s课程' % (schedule.date, schedule.period.alias), category=u'book')
     return redirect(request.args.get('next') or url_for('book.y_gre'))
