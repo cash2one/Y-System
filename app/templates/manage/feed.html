@@ -25,6 +25,9 @@
                     <a class="item {% if show_all_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.all_feeds', page=pagination.page) }}">全部</a>
                     <a class="item {% if show_auth_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.auth_feeds') }}">鉴权日志</a>
                     <a class="item {% if show_booking_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.booking_feeds') }}">预约日志</a>
+                    <a class="item {% if show_rental_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.rental_feeds') }}">iPad借阅日志</a>
+                    <a class="item {% if show_punch_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.punch_feeds') }}">进度打卡日志</a>
+                    <a class="item {% if show_group_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.group_feeds') }}">团报日志</a>
                     <a class="item {% if show_manage_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.manage_feeds') }}">管理日志</a>
                     <a class="item {% if show_access_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.access_feeds') }}">访问日志</a>
                     <a class="item {% if show_email_feeds %}active {% endif %}loading-trigger" href="{{ url_for('manage.email_feeds') }}">邮件日志</a>
