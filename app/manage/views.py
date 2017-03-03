@@ -1643,6 +1643,7 @@ def assignment():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加作业记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     show_vb_assignments = True
     show_y_gre_assignments = False
@@ -1715,6 +1716,7 @@ def assignment_score(id):
         db.session.add(score)
         db.session.commit()
         flash(u'已添加作业记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加作业记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     form.assignment.data = unicode(assignment.id)
     query = AssignmentScore.query\
@@ -1744,6 +1746,7 @@ def edit_assignment_score(id):
         db.session.add(score)
         db.session.commit()
         flash(u'已更新作业记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新作业记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.assignment_score', id=int(form.assignment.data)))
     form.assignment.data = unicode(score.assignment_id)
     form.grade.data = unicode(score.grade_id)
@@ -1757,6 +1760,7 @@ def delete_assignment_score(id):
     score = AssignmentScore.query.get_or_404(id)
     db.session.delete(score)
     flash(u'已删除作业记录：%s' % score.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除作业记录：%s' % score.alias, category=u'manage')
     return redirect(url_for('manage.assignment_score', id=score.assignment_id))
 
 
@@ -1780,6 +1784,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加VB考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加VB考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'vb', id=int(vb_form.test.data)))
     y_gre_form = NewYGRETestScoreForm(prefix='y_gre')
     if y_gre_form.submit.data and y_gre_form.validate_on_submit():
@@ -1805,6 +1810,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加Y-GRE考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'y_gre', id=int(y_gre_form.test.data)))
     gre_form = NewGRETestScoreForm(prefix='gre')
     if gre_form.submit.data and gre_form.validate_on_submit():
@@ -1828,6 +1834,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加GRE考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'gre', id=test.id))
     toefl_form = NewTOEFLTestScoreForm(prefix='toefl')
     if toefl_form.submit.data and toefl_form.validate_on_submit():
@@ -1853,6 +1860,7 @@ def test():
         db.session.add(score)
         db.session.commit()
         flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加TOEFL考试记录：%s' % score.alias, category=u'manage')
         return redirect(url_for('manage.test_score', test_type=u'toefl', id=test.id))
     show_vb_tests = True
     show_y_gre_tests = False
@@ -1975,6 +1983,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加VB考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加VB考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(test.id)
         query = VBTestScore.query\
@@ -2012,6 +2021,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加Y-GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加Y-GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(test.id)
         query = YGRETestScore.query\
@@ -2047,6 +2057,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = test.date
         query = GRETestScore.query\
@@ -2084,6 +2095,7 @@ def test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已添加TOEFL考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'添加TOEFL考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = test.date
         query = TOEFLTestScore.query\
@@ -2110,8 +2122,10 @@ def toggle_test_paper_retrieve(test_type, id):
     score.toggle_retrieve(modified_by=current_user._get_current_object())
     if score.retrieved:
         flash(u'已回收试卷：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'回收试卷：%s' % score.alias, category=u'manage')
     else:
         flash(u'已发放试卷：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'发放试卷：%s' % score.alias, category=u'manage')
     return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
 
 
@@ -2131,6 +2145,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新VB考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新VB考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(score.test_id)
         form.score.data = u'%g' % score.score
@@ -2151,6 +2166,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新Y-GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新Y-GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(score.test_id)
         form.v_score.data = u'%g' % score.v_score
@@ -2175,6 +2191,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新GRE考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
         form.v_score.data = u'%g' % score.v_score
@@ -2200,6 +2217,7 @@ def edit_test_score(test_type, id):
             db.session.add(score)
             db.session.commit()
             flash(u'已更新TOEFL考试记录：%s' % score.alias, category='success')
+            add_feed(user=current_user._get_current_object(), event=u'更新TOEFL考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
         form.total.data = u'%g' % score.total_score
@@ -2218,18 +2236,22 @@ def delete_test_score(test_type, id):
         score = VBTestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除VB考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除VB考试记录：%s' % score.alias, category=u'manage')
     if test_type == u'y_gre':
         score = YGRETestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除Y-GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除Y-GRE考试记录：%s' % score.alias, category=u'manage')
     if test_type == u'gre':
         score = GRETestScore.query.get_or_404(id)
         db.session.delete(score)
-        flash(u'已删除TOEFL考试记录：%s' % score.alias, category='success')
+        flash(u'已删除GRE考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除GRE考试记录：%s' % score.alias, category=u'manage')
     if test_type == u'toefl':
         score = TOEFLTestScore.query.get_or_404(id)
         db.session.delete(score)
         flash(u'已删除TOEFL考试记录：%s' % score.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'删除TOEFL考试记录：%s' % score.alias, category=u'manage')
     return redirect(url_for('manage.test_score', test_type=test_type, id=score.test_id))
 
 
