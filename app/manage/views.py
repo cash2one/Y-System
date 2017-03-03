@@ -435,6 +435,7 @@ def set_booking_state_canceled(user_id, schedule_id):
     add_feed(user=current_user._get_current_object(), event=u'标记%s预约的%s的%s课程为：取消' % (booking.user.name_alias, booking.schedule.date, booking.schedule.period.alias), category=u'manage')
     if waited_booking:
         send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
+        add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
         booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
         available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
@@ -667,6 +668,8 @@ def rental_rent_step_3(user_id, ipad_id, schedule_id):
         db.session.add(rental)
         ipad.set_state(u'借出', battery_life=form.battery_life.data, modified_by=current_user._get_current_object())
         flash(u'iPad借出信息登记成功', category='success')
+        add_feed(user=user, event=u'借出iPad：%s' % ipad.alias2, category=u'rental')
+        add_feed(user=current_user._get_current_object(), event=u'将iPad“%s”借给%s' % (ipad.alias2, user.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_rent_step_3.html', user=user, ipad=ipad, schedule=schedule, form=form)
 
@@ -878,10 +881,10 @@ def rental_return_step_1():
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'编号为%s的iPad处于维护状态' % iPad.alias, 'manage/mail/maintain_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'iPad“%s”处于维护状态' % ipad.alias2, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
-                manager=current_user
+                manager=current_user._get_current_object()
             )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_return_step_2', user_id=rental.user_id, next=request.args.get('next')))
@@ -988,10 +991,10 @@ def rental_exchange_step_1(rental_id):
         if not form.root.data:
             rental.set_returned(return_agent_id=current_user.id, ipad_state=u'维护')
             db.session.commit()
-            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'编号为%s的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
+            send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'iPad“%s”处于维护状态' % ipad.alias2, 'manage/mail/maintain_ipad',
                 ipad=ipad,
                 time=datetime.utcnow(),
-                manager=current_user
+                manager=current_user._get_current_object()
             )
             flash(u'已回收序列号为%s的iPad，并设为维护状态' % serial, category='warning')
             return redirect(url_for('manage.rental_exchange_step_2', rental_id=rental_id, next=request.args.get('next')))
@@ -1496,6 +1499,7 @@ def increase_schedule_quota(id):
     waited_booking = schedule.increase_quota(modified_by=current_user._get_current_object())
     if waited_booking:
         send_email(waited_booking.user.email, u'您已成功预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), 'book/mail/booking', booking=waited_booking)
+        add_feed(user=waited_booking.user, event=u'预约%s的%s课程' % (waited_booking.schedule.date, waited_booking.schedule.period.alias), category=u'book')
         booked_ipads_quantity = waited_booking.schedule.booked_ipads_quantity(lesson=waited_booking.user.last_punch.section.lesson)
         available_ipads_quantity = waited_booking.user.last_punch.section.lesson.available_ipads.count()
         if booked_ipads_quantity >= available_ipads_quantity:
@@ -4127,7 +4131,7 @@ def set_ipad_state_maintain(id):
     send_emails([user.email for user in User.users_can(u'管理iPad设备').all()], u'编号为“%s”的iPad处于维护状态' % ipad.alias, 'manage/mail/maintain_ipad',
         ipad=ipad,
         time=datetime.utcnow(),
-        manager=current_user
+        manager=current_user._get_current_object()
     )
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
     return redirect(request.args.get('next') or url_for('manage.ipad'))

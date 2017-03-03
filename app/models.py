@@ -3289,6 +3289,10 @@ class iPad(db.Model):
         self.ping(modified_by=modified_by)
         db.session.add(self)
 
+    @property
+    def alias2(self):
+        return u'%s（%s）' % (self.alias, self.serial)
+
     def set_state(self, state_name, modified_by, battery_life=-1):
         self.state_id = iPadState.query.filter_by(name=state_name).first().id
         if battery_life > -1:
