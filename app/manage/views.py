@@ -3207,7 +3207,7 @@ def create_user_delete(id):
         return redirect(request.args.get('next') or url_for('manage.user'))
     user.delete()
     flash(u'已删除用户：%s' % user.name_alias, category='success')
-    add_feed(user=current_user._get_current_object(), event=u'除用户：%s' % user.name_alias, category=u'manage')
+    add_feed(user=current_user._get_current_object(), event=u'删除用户：%s' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
