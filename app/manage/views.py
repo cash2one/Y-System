@@ -3909,6 +3909,7 @@ def tag():
         tag = Tag(name=form.name.data, color_id=int(form.color.data))
         db.session.add(tag)
         flash(u'已添加用户标签：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加用户标签：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.tag', page=request.args.get('page', 1, type=int)))
     query = Tag.query
     page = request.args.get('page', 1, type=int)
@@ -3947,6 +3948,7 @@ def edit_tag(id):
         tag.color_id = int(form.color.data)
         db.session.add(tag)
         flash(u'已更新标签：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新用户标签：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.tag'))
     form.name.data = tag.name
     form.color.data = unicode(tag.color_id)
@@ -3962,6 +3964,7 @@ def delete_tag(id):
         abort(403)
     db.session.delete(tag)
     flash(u'已删除用户标签：%s' % tag.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除用户标签：%s' % tag.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.tag'))
 
 
