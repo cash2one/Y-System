@@ -3812,6 +3812,8 @@ def group():
             return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
         user.register_group(organizer=user)
         flash(u'%s已成功发起团报' % user.name_alias, category='success')
+        add_feed(user=user, event=u'发起团报', category=u'group')
+        add_feed(user=current_user._get_current_object(), event=u'记录%s发起团报' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.group', page=request.args.get('page', 1, type=int)))
     query = GroupRegistration.query\
         .filter(GroupRegistration.organizer_id == GroupRegistration.member_id)\
@@ -3835,6 +3837,7 @@ def delete_group(id):
     for group_registration in user.organized_groups:
         group_registration.member.unregister_group(organizer=user)
     flash(u'已删除%s发起的团报' % user.name_alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除%s发起的团报' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.group'))
 
 
@@ -3865,6 +3868,9 @@ def add_group_member(id):
             return redirect(url_for('manage.add_group_member', id=organizer.id, next=request.args.get('next')))
         member.register_group(organizer=organizer)
         flash(u'%s已成功加入%s发起的团报' % (member.name_alias, organizer.name_alias), category='success')
+        add_feed(user=member, event=u'加入%s发起的团报' % organizer.name_alias, category=u'group')
+        add_feed(user=organizer, event=u'%s加入您发起的团报' % member.name_alias, category=u'group')
+        add_feed(user=current_user._get_current_object(), event=u'记录%s加入%s发起的团报' % (member.name_alias, organizer.name_alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.group'))
     return render_template('manage/add_group_member.html', form=form, organizer=organizer)
 
@@ -3887,6 +3893,7 @@ def remove_group_member(organizer_id, member_id):
         return redirect(request.args.get('next') or url_for('manage.group'))
     member.unregister_group(organizer=organizer)
     flash(u'已删除%s发起的团报成员：%s' % (organizer.name_alias, member.name_alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除%s发起的团报成员：%s' % (organizer.name_alias, member.name_alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.group'))
 
 
