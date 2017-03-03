@@ -4518,6 +4518,7 @@ def product():
         )
         db.session.add(product)
         flash(u'已添加研修产品：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加研修产品：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.product', page=request.args.get('page', 1, type=int)))
     query = Product.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
@@ -4536,8 +4537,10 @@ def toggle_product_availability(id):
     product.toggle_availability(modified_by=current_user._get_current_object())
     if product.available:
         flash(u'“%s”的可选状态改为：可选' % product.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改“%s”的可选状态改为：可选' % product.name, category=u'manage')
     else:
         flash(u'“%s”的可选状态改为：不可选' % product.name, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'修改“%s”的可选状态改为：不可选' % product.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.product'))
 
 
@@ -4559,6 +4562,7 @@ def edit_product(id):
         product.modified_by_id = current_user.id
         db.session.add(product)
         flash(u'已更新研修产品：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新研修产品：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.product'))
     form.name.data = product.name
     form.price.data = unicode(product.price)
@@ -4577,6 +4581,7 @@ def delete_product(id):
         abort(403)
     product.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除研修产品：%s' % product.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除研修产品：%s' % product.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.product'))
 
 
@@ -4619,6 +4624,7 @@ def role():
         if form.is_developer.data:
             role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
         flash(u'已添加角色：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加角色：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.role', page=request.args.get('page', 1, type=int)))
     query = Role.query
     page = request.args.get('page', 1, type=int)
@@ -4643,6 +4649,7 @@ def edit_role(id):
         if form.is_developer.data:
             role.add_permission(permission=Permission.query.filter_by(name=u'开发权限').first())
         flash(u'已更新角色：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新角色：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.role'))
     form.name.data = role.name
     form.booking_permissions.data = [unicode(permission.id) for permission in role.permissions_alias(prefix=u'预约', formatted=False)]
@@ -4662,6 +4669,7 @@ def delete_role(id):
         role.remove_permission(permission=Permission.query.get(role_permission.permission_id))
     db.session.delete(role)
     flash(u'已删除角色：%s' % role.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除角色：%s' % role.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.role'))
 
 
