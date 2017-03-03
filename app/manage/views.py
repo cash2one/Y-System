@@ -3257,7 +3257,7 @@ def edit_user(id):
         if int(edit_vb_course_form.vb_course.data):
             user.register_course(Course.query.get(int(edit_vb_course_form.vb_course.data)))
         flash(u'已更新VB班级', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新VB班级为“%s”' % (user.name_alias, Course.query.get(int(edit_vb_course_form.vb_course.data)).name), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新VB班级为“%s”' % (user.name_alias, Course.query.get(int(edit_vb_course_form.vb_course.data)).name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     if user.vb_course:
         edit_vb_course_form.vb_course.data = unicode(user.vb_course.id)
@@ -3269,7 +3269,7 @@ def edit_user(id):
         if int(edit_y_gre_course_form.y_gre_course.data):
             user.register_course(Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)))
         flash(u'已更新Y-GRE班', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新Y-GRE班级为“%s”' % (user.name_alias, Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)).name), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新Y-GRE班级为“%s”' % (user.name_alias, Course.query.get(int(edit_y_gre_course_form.y_gre_course.data)).name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     if user.y_gre_course:
         edit_y_gre_course_form.y_gre_course.data = unicode(user.y_gre_course.id)
@@ -3283,7 +3283,7 @@ def edit_user(id):
             user.add_tag(tag=Tag.query.get(int(tag_id)))
         new_tags.append(Tag.query.get(int(tag_id)).name)
         flash(u'已更新用户标签', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新用户标签为“%s”' % (user.name_alias, u'、'.join(new_tags)), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户标签为“%s”' % (user.name_alias, u'、'.join(new_tags)), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_tag_form.tags.data = []
     for tag in user.has_tags:
@@ -3303,7 +3303,7 @@ def edit_user(id):
             user.email = edit_email_form.email.data.lower()
             db.session.add(user)
         flash(u'已更新用户邮箱', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新用户邮箱为“%s”' % (user.name_alias, edit_email_form.email.data.lower()), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户邮箱为“%s”' % (user.name_alias, edit_email_form.email.data.lower()), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_email_form.email.data = user.email
     # mobile
@@ -3312,7 +3312,7 @@ def edit_user(id):
         user.mobile = edit_mobile_form.mobile.data
         db.session.add(user)
         flash(u'已更新移动电话', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新移动电话为“%s”' % (user.name_alias, edit_mobile_form.mobile.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新移动电话为“%s”' % (user.name_alias, edit_mobile_form.mobile.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_mobile_form.mobile.data = user.mobile
     # address
@@ -3321,7 +3321,7 @@ def edit_user(id):
         user.address = edit_address_form.address.data
         db.session.add(user)
         flash(u'已更新联系地址', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新联系地址为“%s”' % (user.name_alias, edit_address_form.address.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新联系地址为“%s”' % (user.name_alias, edit_address_form.address.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_address_form.address.data = user.address
     # QQ
@@ -3330,7 +3330,7 @@ def edit_user(id):
         user.qq = edit_qq_form.qq.data
         db.session.add(user)
         flash(u'已更新QQ号', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新QQ号为“%s”' % (user.name_alias, edit_qq_form.qq.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新QQ号为“%s”' % (user.name_alias, edit_qq_form.qq.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_qq_form.qq.data = user.qq
     # WeChat
@@ -3339,7 +3339,7 @@ def edit_user(id):
         user.wechat = edit_wechat_form.wechat.data
         db.session.add(user)
         flash(u'已更新微信账号', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新微信账号为“%s”' % (user.name_alias, edit_wechat_form.wechat.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新微信账号为“%s”' % (user.name_alias, edit_wechat_form.wechat.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_wechat_form.wechat.data = user.wechat
     # emergency contact name
@@ -3348,7 +3348,7 @@ def edit_user(id):
         user.emergency_contact_name = edit_emergency_contact_name_form.emergency_contact_name.data
         db.session.add(user)
         flash(u'已更新紧急联系人姓名', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新紧急联系人姓名为“%s”' % (user.name_alias, edit_emergency_contact_name_form.emergency_contact_name.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新紧急联系人姓名为“%s”' % (user.name_alias, edit_emergency_contact_name_form.emergency_contact_name.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_name_form.emergency_contact_name.data = user.emergency_contact_name
     # emergency contact relationship
@@ -3357,7 +3357,7 @@ def edit_user(id):
         user.emergency_contact_relationship_id = int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)
         db.session.add(user)
         flash(u'已更新紧急联系人关系', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新紧急联系人关系为“%s”' % (user.name_alias, Relationship.query.get(int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)).name), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新紧急联系人关系为“%s”' % (user.name_alias, Relationship.query.get(int(edit_emergency_contact_relationship_form.emergency_contact_relationship.data)).name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_relationship_form.emergency_contact_relationship.data = unicode(user.emergency_contact_relationship_id)
     # emergency contact mobile
@@ -3366,7 +3366,7 @@ def edit_user(id):
         user.emergency_contact_mobile = edit_emergency_contact_mobile_form.emergency_contact_mobile.data
         db.session.add(user)
         flash(u'已更新紧急联系人移动电话', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新紧急联系人移动电话为“%s”' % (user.name_alias, edit_emergency_contact_mobile_form.emergency_contact_mobile.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新紧急联系人移动电话为“%s”' % (user.name_alias, edit_emergency_contact_mobile_form.emergency_contact_mobile.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_emergency_contact_mobile_form.emergency_contact_mobile.data = user.emergency_contact_mobile
     # education
@@ -3382,7 +3382,7 @@ def edit_user(id):
             year=new_education_record_form.year.data
         )
         flash(u'已添加教育经历：%s %s' % (education_type.name, new_education_record_form.school.data), category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：添加教育经历：%s %s' % (user.name_alias, education_type.name, new_education_record_form.school.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加教育经历“%s %s”' % (user.name_alias, education_type.name, new_education_record_form.school.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # employment
     new_employment_record_form = NewEmploymentRecordForm(prefix='new_employment_record')
@@ -3393,7 +3393,7 @@ def edit_user(id):
             year=new_employment_record_form.year.data
         )
         flash(u'已添加工作经历：%s %s' % (new_employment_record_form.employer.data, new_employment_record_form.position.data), category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：添加工作经历：%s %s' % (user.name_alias, new_employment_record_form.employer.data, new_employment_record_form.position.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加工作经历“%s %s”' % (user.name_alias, new_employment_record_form.employer.data, new_employment_record_form.position.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # scores
     new_score_record_form = NewScoreRecordForm(prefix='new_score_record')
@@ -3411,7 +3411,7 @@ def edit_user(id):
                 remark=new_score_record_form.score.data
             )
         flash(u'已添加既往成绩：%s' % score_type.name, category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：添加既往成绩：%s' % (user.name_alias, score_type.name), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：添加既往成绩“%s”' % (user.name_alias, score_type.name), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
@@ -3424,7 +3424,7 @@ def edit_user(id):
         if edit_purpose_form.other_purpose.data:
             user.add_purpose(purpose_type=PurposeType.query.filter_by(name=u'其它').first(), remark=edit_purpose_form.other_purpose.data)
         flash(u'已更新研修目的', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新研修目的' % user.name_alias, category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新研修目的' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_purpose_form.purposes.data = []
     for purpose in user.purposes:
@@ -3438,7 +3438,7 @@ def edit_user(id):
         user.application_aim = edit_application_aim_form.application_aim.data
         db.session.add(user)
         flash(u'已更新申请方向', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新申请方向为“%s”' % (user.name_alias, edit_application_aim_form.application_aim.data), category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新申请方向为“%s”' % (user.name_alias, edit_application_aim_form.application_aim.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_application_aim_form.application_aim.data = user.application_aim
     # referrer
@@ -3452,7 +3452,7 @@ def edit_user(id):
         if edit_referrer_form.other_referrer.data:
             user.add_referrer(referrer_type=ReferrerType.query.filter_by(name=u'其它').first(), remark=edit_referrer_form.other_referrer.data)
         flash(u'已更新了解渠道', category='success')
-        add_feed(user=current_user._get_current_object(), event='编辑“%s”的资料：更新了解渠道' % user.name_alias, category=u'manage')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新了解渠道' % user.name_alias, category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_referrer_form.referrers.data = []
     for referrer in user.referrers:
@@ -3540,6 +3540,8 @@ def remove_education_record(id):
     education_record = EducationRecord.query.get_or_404(id)
     db.session.delete(education_record)
     flash(u'已删除教育经历：%s %s' % (education_record.type.name, education_record.school), category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除教育经历“%s %s”' % (user.name_alias, education_record.type.name, education_record.school), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3550,6 +3552,8 @@ def remove_employment_record(id):
     employment_record = EmploymentRecord.query.get_or_404(id)
     db.session.delete(employment_record)
     flash(u'已删除工作经历：%s %s' % (employment_record.employer, employment_record.position), category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除工作经历“%s %s”' % (user.name_alias, employment_record.employer, employment_record.position), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3560,6 +3564,8 @@ def remove_score_record(id):
     score_record = ScoreRecord.query.get_or_404(id)
     db.session.delete(score_record)
     flash(u'已删除既往成绩：%s' % score_record.type.name, category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除既往成绩“%s”' % (user.name_alias, score_record.type.name), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3581,6 +3587,8 @@ def remove_inviter(user_id, inviter_id):
     inviter = User.query.get_or_404(inviter_id)
     inviter.uninvite_user(user=user)
     flash(u'已删除推荐人：%s' % inviter.name_alias, category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除推荐人“%s”' % (user.name_alias, inviter.name_alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3591,6 +3599,8 @@ def remove_purchase(id):
     purchase = Purchase.query.get_or_404(id)
     db.session.delete(purchase)
     flash(u'已删除研修产品：%s' % purchase.alias, category='success')
+    if user.created:
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除研修产品“%s”' % (user.name_alias, purchase.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -3605,6 +3615,7 @@ def delete_user(id):
         abort(403)
     user.safe_delete()
     flash(u'已注销用户：%s' % user.name_alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'注销用户：%s' % user.name_alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
