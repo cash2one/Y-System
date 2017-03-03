@@ -1292,6 +1292,7 @@ def period():
         )
         db.session.add(period)
         flash(u'已添加时段模板：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加时段模板：%s' % form.name.data, category=u'manage')
         return redirect(url_for('manage.period', page=request.args.get('page', 1, type=int)))
     show_vb_periods = True
     show_y_gre_periods = False
@@ -1380,6 +1381,7 @@ def edit_period(id):
         period.modified_by_id = current_user.id
         db.session.add(period)
         flash(u'已更新时段模板：%s' % form.name.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新时段模板：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.period'))
     form.name.data = period.name
     form.start_time.data = period.start_time.strftime(u'%H:%M')
@@ -1398,6 +1400,7 @@ def delete_period(id):
         abort(404)
     period.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除时段模板：%s' % period.name, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除时段模板：%s' % period.name, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.period'))
 
 
@@ -1423,6 +1426,7 @@ def schedule():
                     db.session.add(schedule)
                     db.session.commit()
                     flash(u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category='success')
+                    add_feed(user=current_user._get_current_object(), event=u'添加时段：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
         return redirect(url_for('manage.schedule', page=request.args.get('page', 1, type=int)))
     show_today_schedules = True
     show_future_schedules = False
@@ -1504,6 +1508,7 @@ def publish_schedule(id):
         return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.publish(modified_by=current_user._get_current_object())
     flash(u'发布成功！', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'发布时段：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
@@ -1520,6 +1525,7 @@ def retract_schedule(id):
         return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.retract(modified_by=current_user._get_current_object())
     flash(u'撤销成功！', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'撤销时段：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
@@ -1544,6 +1550,7 @@ def increase_schedule_quota(id):
                 available_ipads_quantity=available_ipads_quantity
             )
     flash(u'所选时段名额+1', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给时段增加1个名额：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
@@ -1563,6 +1570,7 @@ def decrease_schedule_quota(id):
         return redirect(request.args.get('next') or url_for('manage.schedule'))
     schedule.decrease_quota(modified_by=current_user._get_current_object())
     flash(u'所选时段名额-1', category='success')
+    add_feed(user=current_user._get_current_object(), event=u'给时段缩减1个名额：%s，%s' % (schedule.date, schedule.period.alias), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.schedule'))
 
 
