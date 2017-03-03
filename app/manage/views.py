@@ -3996,6 +3996,7 @@ def ipad():
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
         flash(u'成功添加序列号为%s的iPad' % serial, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加序列号为%s的iPad' % serial, category=u'manage')
         return redirect(url_for('manage.ipad', page=request.args.get('page', 1, type=int)))
     filter_form = FilteriPadForm(prefix='filter')
     if filter_form.submit.data and filter_form.validate_on_submit():
@@ -4226,6 +4227,7 @@ def set_ipad_state_standby(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'待机', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：待机' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：待机' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4239,6 +4241,7 @@ def set_ipad_state_candidate(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'候补', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：候补' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：候补' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4258,6 +4261,7 @@ def set_ipad_state_maintain(id):
         manager=current_user._get_current_object()
     )
     flash(u'修改iPad“%s”的状态为：维护' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：维护' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4271,6 +4275,7 @@ def set_ipad_state_charge(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'充电', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：充电' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：充电' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4284,6 +4289,7 @@ def set_ipad_state_obsolete(id):
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     ipad.set_state(u'退役', modified_by=current_user._get_current_object())
     flash(u'修改iPad“%s”的状态为：退役' % ipad.alias, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'修改iPad“%s”的状态为：退役' % ipad.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4314,6 +4320,7 @@ def edit_ipad(id):
         for lesson_id in form.vb_lessons.data + form.y_gre_lessons.data:
             ipad.add_lesson(lesson=Lesson.query.get(int(lesson_id)))
         flash(u'iPad信息已更新', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新iPad“%s”的信息' % ipad.alias, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.ipad'))
     form.alias.data = ipad.alias
     form.serial.data = ipad.serial
@@ -4335,6 +4342,7 @@ def delete_ipad(id):
         abort(404)
     ipad.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除序列号为“%s”的iPad' % ipad.serial, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除序列号为“%s”的iPad' % ipad.serial, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.ipad'))
 
 
@@ -4404,6 +4412,7 @@ def announcement():
         else:
             announcement.clean_up()
         flash(u'已添加通知：“%s”' % form.title.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加通知：“%s”' % form.title.data, category=u'manage')
         return redirect(url_for('manage.announcement', page=request.args.get('page', 1, type=int)))
     query = Announcement.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
@@ -4434,6 +4443,7 @@ def publish_announcement(id):
         for user in User.users_can(u'管理').all():
             send_email(user.email, announcement.title, 'manage/mail/announcement', user=user, announcement=announcement)
     flash(u'“%s”发布成功！' % announcement.title, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'发布通知：“%s”' % announcement.title, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
@@ -4447,6 +4457,7 @@ def retract_announcement(id):
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     announcement.retract(modified_by=current_user._get_current_object())
     flash(u'“%s”撤销成功！' % announcement.title, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'撤销通知：“%s”' % announcement.title, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
@@ -4471,6 +4482,7 @@ def edit_announcement(id):
         else:
             announcement.clean_up()
         flash(u'已更新通知：“%s”' % form.title.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新通知：“%s”' % form.title.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.announcement'))
     form.title.data = announcement.title
     form.body.data = announcement.body_html
@@ -4488,6 +4500,7 @@ def delete_announcement(id):
         abort(404)
     announcement.safe_delete(modified_by=current_user._get_current_object())
     flash(u'已删除通知：“%s”' % announcement.title, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除通知：“%s”' % announcement.title, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.announcement'))
 
 
