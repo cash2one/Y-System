@@ -1350,8 +1350,10 @@ def toggle_period_show(id):
     period.toggle_show(modified_by=current_user._get_current_object())
     if period.show:
         flash(u'“%s”的可选状态改为：可选' % period.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更改预约时段“%s”的可选状态改为：可选' % period.alias, category=u'manage')
     else:
         flash(u'“%s”的可选状态改为：不可选' % period.alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更改预约时段“%s”的可选状态改为：不可选' % period.alias, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.period'))
 
 
