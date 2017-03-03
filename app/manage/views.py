@@ -4796,6 +4796,9 @@ def feed():
     show_all_feeds = True
     show_auth_feeds = False
     show_booking_feeds = False
+    show_rental_feeds = False
+    show_punch_feeds = False
+    show_group_feeds = False
     show_manage_feeds = False
     show_access_feeds = False
     show_email_feeds = False
@@ -4803,6 +4806,9 @@ def feed():
         show_all_feeds = bool(request.cookies.get('show_all_feeds', '1'))
         show_auth_feeds = bool(request.cookies.get('show_auth_feeds', ''))
         show_booking_feeds = bool(request.cookies.get('show_booking_feeds', ''))
+        show_rental_feeds = bool(request.cookies.get('show_rental_feeds', ''))
+        show_punch_feeds = bool(request.cookies.get('show_punch_feeds', ''))
+        show_group_feeds = bool(request.cookies.get('show_group_feeds', ''))
         show_manage_feeds = bool(request.cookies.get('show_manage_feeds', ''))
         show_access_feeds = bool(request.cookies.get('show_access_feeds', ''))
         show_email_feeds = bool(request.cookies.get('show_email_feeds', ''))
@@ -4816,6 +4822,18 @@ def feed():
     if show_booking_feeds:
         query = Feed.query\
             .filter(Feed.category == u'book')\
+            .order_by(Feed.timestamp.desc())
+    if show_rental_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'rental')\
+            .order_by(Feed.timestamp.desc())
+    if show_punch_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'punch')\
+            .order_by(Feed.timestamp.desc())
+    if show_group_feeds:
+        query = Feed.query\
+            .filter(Feed.category == u'group')\
             .order_by(Feed.timestamp.desc())
     if show_manage_feeds:
         query = Feed.query\
@@ -4836,6 +4854,9 @@ def feed():
         show_all_feeds=show_all_feeds,
         show_auth_feeds=show_auth_feeds,
         show_booking_feeds=show_booking_feeds,
+        show_rental_feeds=show_rental_feeds,
+        show_punch_feeds=show_punch_feeds,
+        show_group_feeds=show_group_feeds,
         show_manage_feeds=show_manage_feeds,
         show_access_feeds=show_access_feeds,
         show_email_feeds=show_email_feeds,
@@ -4852,6 +4873,9 @@ def all_feeds():
     resp.set_cookie('show_all_feeds', '1', max_age=30*24*60*60)
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
@@ -4866,6 +4890,9 @@ def auth_feeds():
     resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_auth_feeds', '1', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
@@ -4880,6 +4907,60 @@ def booking_feeds():
     resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/rental')
+@login_required
+@developer_required
+def rental_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/punch')
+@login_required
+@developer_required
+def punch_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feed/group')
+@login_required
+@developer_required
+def group_feeds():
+    resp = make_response(redirect(url_for('manage.feed')))
+    resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '1', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
@@ -4894,6 +4975,9 @@ def manage_feeds():
     resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '1', max_age=30*24*60*60)
     resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
@@ -4908,6 +4992,9 @@ def access_feeds():
     resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_access_feeds', '1', max_age=30*24*60*60)
     resp.set_cookie('show_email_feeds', '', max_age=30*24*60*60)
@@ -4922,6 +5009,9 @@ def email_feeds():
     resp.set_cookie('show_all_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_auth_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_booking_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_rental_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_punch_feeds', '', max_age=30*24*60*60)
+    resp.set_cookie('show_group_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_manage_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_access_feeds', '', max_age=30*24*60*60)
     resp.set_cookie('show_email_feeds', '1', max_age=30*24*60*60)
