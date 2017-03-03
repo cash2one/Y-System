@@ -14,7 +14,7 @@ from ..notify import get_announcements, add_feed
 def before_request():
     if current_user.is_authenticated:
         current_user.ping()
-        add_feed(user=current_user, event=u'请求访问', category=u'access', ignore_in=30*60)
+        add_feed(user=current_user._get_current_object(), event=u'请求访问', category=u'access', ignore_in=30*60)
         if not current_user.activated and request.endpoint[:13] != 'auth.activate' and request.endpoint != 'static':
             logout_user()
             return redirect(url_for('auth.activate'))
@@ -51,7 +51,7 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
-    add_feed(user=current_user, event=u'登出系统', category=u'access')
+    add_feed(user=current_user._get_current_object(), event=u'登出系统', category=u'access')
     logout_user()
     return redirect(url_for('auth.login'))
 
@@ -85,7 +85,7 @@ def confirm(token):
         return redirect(current_user.index_url)
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！', category='success')
-        add_feed(user=current_user, event=u'已确认邮箱为：%s' % current_user.email, category=u'auth')
+        add_feed(user=current_user._get_current_object(), event=u'已确认邮箱为：%s' % current_user.email, category=u'auth')
         return redirect(current_user.index_url)
     else:
         flash(u'确认链接无效或者已经过期', category='error')
@@ -96,9 +96,9 @@ def confirm(token):
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
-    send_email(current_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=current_user, token=token)
+    send_email(current_user.email, u'确认您的邮箱账户', 'auth/mail/confirm', user=current_user._get_current_object(), token=token)
     flash(u'一封新的确认邮件已经发送至您的邮箱', category='info')
-    add_feed(user=current_user, event=u'请求重发邮箱确认邮件至：%s' % current_user.email, category=u'auth')
+    add_feed(user=current_user._get_current_object(), event=u'请求重发邮箱确认邮件至：%s' % current_user.email, category=u'auth')
     return redirect(url_for('auth.unconfirmed'))
 
 
@@ -111,7 +111,7 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             flash(u'修改密码成功', category='success')
-            add_feed(user=current_user, event=u'成功修改密码', category=u'auth')
+            add_feed(user=current_user._get_current_object(), event=u'成功修改密码', category=u'auth')
             return redirect(current_user.index_url)
         else:
             flash(u'密码有误', category='error')
@@ -165,9 +165,9 @@ def change_email_request():
         if current_user.verify_password(form.password.data):
             new_email = form.email.data.lower()
             token = current_user.generate_email_change_token(new_email)
-            send_email(new_email, u'确认您的邮箱账户', 'auth/mail/change_email', user=current_user, token=token)
+            send_email(new_email, u'确认您的邮箱账户', 'auth/mail/change_email', user=current_user._get_current_object(), token=token)
             flash(u'一封确认邮件已经发送至您的邮箱', category='info')
-            add_feed(user=current_user, event=u'请求修改邮箱为：%s' % new_email, category=u'auth')
+            add_feed(user=current_user._get_current_object(), event=u'请求修改邮箱为：%s' % new_email, category=u'auth')
             return redirect(url_for('auth.change_email_request'))
         else:
             flash(u'无效的用户名或密码', category='error')
@@ -180,7 +180,7 @@ def change_email_request():
 def change_email(token):
     if current_user.change_email(token):
         flash(u'修改邮箱成功', category='success')
-        add_feed(user=current_user, event=u'成功修改邮箱为：%s' % current_user.email, category=u'auth')
+        add_feed(user=current_user._get_current_object(), event=u'成功修改邮箱为：%s' % current_user.email, category=u'auth')
     else:
         flash(u'请求无效', category='error')
     return redirect(current_user.index_url)
