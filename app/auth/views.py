@@ -72,7 +72,7 @@ def activate():
             flash(u'激活成功！', category='success')
             flash(u'一封确认邮件已经发送至您的邮箱', category='info')
             send_emails([user.email for user in User.users_can(u'管理用户').all()], u'新用户：%s' % (new_user.name_alias), 'auth/mail/new_user', user=new_user)
-            add_feed(user=new_user, event=u'已激活账户', category=u'auth')
+            add_feed(user=new_user, event=u'激活账户', category=u'auth')
             return redirect(url_for('auth.unconfirmed'))
         flash(u'激活信息有误，或账户已处于激活状态', category='error')
     return render_template('auth/activate.html', form=form)
@@ -85,7 +85,7 @@ def confirm(token):
         return redirect(current_user.index_url)
     if current_user.confirm(token):
         flash(u'您的邮箱账户确认成功！', category='success')
-        add_feed(user=current_user._get_current_object(), event=u'已确认邮箱为：%s' % current_user.email, category=u'auth')
+        add_feed(user=current_user._get_current_object(), event=u'确认邮箱为：%s' % current_user.email, category=u'auth')
         return redirect(current_user.index_url)
     else:
         flash(u'确认链接无效或者已经过期', category='error')
@@ -111,7 +111,7 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             flash(u'修改密码成功', category='success')
-            add_feed(user=current_user._get_current_object(), event=u'成功修改密码', category=u'auth')
+            add_feed(user=current_user._get_current_object(), event=u'修改密码', category=u'auth')
             return redirect(current_user.index_url)
         else:
             flash(u'密码有误', category='error')
@@ -149,7 +149,7 @@ def reset_password(token):
             return redirect(url_for('auth.reset_password_request'))
         if user.reset_password(token, form.password.data):
             flash(u'重置密码成功', category='success')
-            add_feed(user=user, event=u'成功重置密码', category=u'auth')
+            add_feed(user=user, event=u'重置密码', category=u'auth')
             return redirect(url_for('auth.login'))
         else:
             flash(u'重置密码失败', category='error')
@@ -180,7 +180,7 @@ def change_email_request():
 def change_email(token):
     if current_user.change_email(token):
         flash(u'修改邮箱成功', category='success')
-        add_feed(user=current_user._get_current_object(), event=u'成功修改邮箱为：%s' % current_user.email, category=u'auth')
+        add_feed(user=current_user._get_current_object(), event=u'修改邮箱为：%s' % current_user.email, category=u'auth')
     else:
         flash(u'请求无效', category='error')
     return redirect(current_user.index_url)
