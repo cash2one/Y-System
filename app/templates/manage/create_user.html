@@ -39,23 +39,32 @@
                     {{ form.hidden_tag() }}
                     <div class="ui blue dividing header">基本信息</div>
                     <div class="fields">
-                        <div class="eight wide required field">
+                        <div class="four wide required field">
                             {{ form.name.label() }}
                             {{ form.name(placeholder='姓名') }}
                         </div>
+                        <div class="four wide required field">
+                            {{ form.id_type.label() }}
+                            {{ form.id_type(class='ui dropdown') }}
+                        </div>
                         <div class="eight wide required field">
                             {{ form.id_number.label() }}
-                            {{ form.id_number(placeholder='身份证号（18位）') }}
+                            {{ form.id_number(placeholder='证件编号') }}
                         </div>
                     </div>
                     <div class="fields">
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.gender.label() }}
-                            {{ form.gender(placeholder='性别（自动生成）', readonly='') }}
+                            {{ form.gender(class='ui dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="four wide required field">
                             {{ form.birthdate.label() }}
-                            {{ form.birthdate(placeholder='出生日期（自动生成）', readonly='') }}
+                            <div class="ui date calendar">
+                                <div class="ui left icon input">
+                                    <i class="birthday icon"></i>
+                                    {{ form.birthdate(placeholder='YYYY-MM-DD') }}
+                                </div>
+                            </div>
                         </div>
                         <div class="eight wide field">
                             {{ form.residence.label() }}
@@ -409,22 +418,23 @@ var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
         $.fn.form.settings.rules.idNumber = function(value) {
-            if (Validator.isValid(value, 18)) {
-                var idInfo = Validator.getInfo(value, 18);
-                $('#create-user').form('set values', {
-                    gender: function() {
-                        if (idInfo.sex === 1) {
-                            return '男';
-                        } else {
-                            return '女';
-                        };
-                    },
-                    birthdate: idInfo.birth,
-                    residence: idInfo.addr
-                });
-                return true;
+            if ($('#id_type').val() === '1') {
+                if (Validator.isValid(value, 18)) {
+                    if (Validator.getInfo(value, 18).sex === 1) {
+                        $('#create-user').form('set values', { gender: '1' });
+                    } else {
+                        $('#create-user').form('set values', { gender: '2' });
+                    };
+                    $('#create-user').form('set values', {
+                        birthdate: Validator.getInfo(value, 18).birth,
+                        residence: Validator.getInfo(value, 18).addr
+                    });
+                    return true;
+                } else {
+                    return false;
+                };
             } else {
-                return false;
+                return true;
             };
         };
         $.fn.form.settings.rules.bachelorGPAwithinLimit = function(value) {
@@ -491,6 +501,15 @@ $(document)
                             }
                         ]
                     },
+                    id_type: {
+                        identifier: 'id_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择证件类型'
+                            }
+                        ]
+                    },
                     id_number: {
                         identifier: 'id_number',
                         rules: [
@@ -501,6 +520,28 @@ $(document)
                             {
                                 type: 'idNumber',
                                 prompt: '请输入一个有效的身份证号'
+                            }
+                        ]
+                    },
+                    gender: {
+                        identifier: 'gender',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择性别'
+                            }
+                        ]
+                    },
+                    birthdate: {
+                        identifier: 'birthdate',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写出生日期'
+                            },
+                            {
+                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                prompt: '请填写一个有效的出生日期'
                             }
                         ]
                     },
