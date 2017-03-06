@@ -33,14 +33,20 @@
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-gender-trigger" class="ui mini button">编辑</div>
+                        </div>
                         <div class="content">
                             <div class="header">性别</div>
                             <div class="description">{% if user.gender_id %}{{ user.gender.name }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-birthdate-trigger" class="ui mini button">编辑</div>
+                        </div>
                         <div class="content">
-                            <div class="header">生日</div>
+                            <div class="header">出生日期</div>
                             <div class="description">{{ user.birthdate_alias }}</div>
                         </div>
                     </div>
@@ -49,8 +55,8 @@
                             <div id="edit-id-number-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
-                            <div class="header">身份证号</div>
-                            <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
+                            <div class="header">证件编号</div>
+                            <div class="description">{% if user.id_number %}{{ user.id_number }} [{{ user.id_type.name }}]{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
@@ -86,15 +92,52 @@
                         </form>
                     </div>
                 </div>
+                <div id="edit-gender-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="edit icon"></i>编辑性别</div>
+                    <div class="content">
+                        <form id="edit-gender" action="{{ url_for('manage.edit_user', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
+                            {{ edit_gender_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_gender_form.gender.label() }}
+                                {{ edit_gender_form.gender(class='ui dropdown') }}
+                            </div>
+                            {{ edit_gender_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-birthdate-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="edit icon"></i>编辑出生日期</div>
+                    <div class="content">
+                        <form id="edit-birthdate" action="{{ url_for('manage.edit_user', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
+                            {{ edit_birthdate_form.hidden_tag() }}
+                            <div class="required field">
+                                {{ edit_birthdate_form.birthdate.label() }}
+                                <div class="ui left icon input">
+                                    <i class="birthday icon"></i>
+                                    {{ edit_birthdate_form.birthdate(placeholder='YYYY-MM-DD') }}
+                                </div>
+                            </div>
+                            {{ edit_birthdate_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
                 <div id="edit-id-number-modal" class="ui modal">
                     <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑身份证号</div>
+                    <div class="header"><i class="edit icon"></i>编辑证件编号</div>
                     <div class="content">
                         <form id="edit-id-number" action="{{ url_for('manage.edit_user', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ edit_id_number_form.hidden_tag() }}
-                            <div class="required field">
-                                {{ edit_id_number_form.id_number.label() }}
-                                {{ edit_id_number_form.id_number(placeholder='身份证号（18位）') }}
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ edit_id_number_form.id_type.label() }}
+                                    {{ edit_id_number_form.id_type(class='ui dropdown') }}
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ edit_id_number_form.id_number.label() }}
+                                    {{ edit_id_number_form.id_number(placeholder='证件编号') }}
+                                </div>
                             </div>
                             {{ edit_id_number_form.submit(class='ui primary button') }}
                         </form>
@@ -719,6 +762,18 @@ $('#edit-name-trigger')
     })
 ;
 
+$('#edit-gender-trigger')
+    .on('click', function() {
+        $('#edit-gender-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$('#edit-birthdate-trigger')
+    .on('click', function() {
+        $('#edit-birthdate-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
 $('#edit-id-number-trigger')
     .on('click', function() {
         $('#edit-id-number-modal').modal({ autofocus: false }).modal('show');
@@ -854,8 +909,52 @@ $(document)
                 }
             })
         ;
+        $('#edit-gender')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    gender: {
+                        identifier: 'edit_gender-gender',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择性别'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+        $('#edit-birthdate')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    birthdate: {
+                        identifier: 'edit_birthdate-birthdate',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写出生日期'
+                            },
+                            {
+                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                prompt: '请填写一个有效的出生日期'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
         $.fn.form.settings.rules.idNumber = function(value) {
-            return (Validator.isValid(value, 18));
+            if ($('#edit_id_number-id_type').val() === '1') {
+                return (Validator.isValid(value, 18));
+            } else {
+                return true;
+            };
         };
         $('#edit-id-number')
             .form({
@@ -863,16 +962,29 @@ $(document)
                 inline: true,
                 on: 'blur',
                 fields: {
+                    id_type: {
+                        identifier: 'edit_id_number-id_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择证件类型'
+                            }
+                        ]
+                    },
                     id_number: {
                         identifier: 'edit_id_number-id_number',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请填写身份证号'
+                                prompt: '请填写证件编号'
+                            },
+                            {
+                                type: 'minLength[6]',
+                                prompt: '证件编号长度过短'
                             },
                             {
                                 type: 'idNumber',
-                                prompt: '请输入一个有效的身份证号'
+                                prompt: '请输入一个有效的证件编号'
                             }
                         ]
                     }
