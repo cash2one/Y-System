@@ -223,6 +223,30 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
+class IDType(db.Model):
+    __tablename__ = 'id_types'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), unique=True, index=True)
+    users = db.relationship('User', backref='id_type', lazy='dynamic')
+
+    @staticmethod
+    def insert_id_types():
+        id_types = [
+            (u'身份证', ),
+            (u'其它', ),
+        ]
+        for entry in id_types:
+            id_type = IDType.query.filter_by(name=entry[0]).first()
+            if id_type is None:
+                id_type = IDType(name=entry[0])
+                db.session.add(id_type)
+                print u'导入ID类型信息', entry[0]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<ID Type %r>' % self.name
+
+
 class Gender(db.Model):
     __tablename__ = 'genders'
     id = db.Column(db.Integer, primary_key=True)
@@ -1063,6 +1087,7 @@ class User(UserMixin, db.Model):
     deleted = db.Column(db.Boolean, default=False)
     # profile properties
     name = db.Column(db.Unicode(64), index=True)
+    id_type_id = db.Column(db.Integer, db.ForeignKey('id_types.id'))
     id_number = db.Column(db.Unicode(64), index=True)
     gender_id = db.Column(db.Integer, db.ForeignKey('genders.id'))
     birthdate = db.Column(db.Date)
