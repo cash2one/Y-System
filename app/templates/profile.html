@@ -207,14 +207,14 @@
                     <div class="ui relaxed list">
                         <div class="item">
                             <div class="content">
-                                <div class="header">生日</div>
+                                <div class="header">出生日期</div>
                                 <div class="description">{{ user.birthdate_alias }}</div>
                             </div>
                         </div>
                         <div class="item">
                             <div class="content">
-                                <div class="header">身份证号</div>
-                                <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
+                                <div class="header">证件编号</div>
+                                <div class="description">{% if user.id_number %}{{ user.id_number }} [{{ user.id_type.name }}]{% else %}无{% endif %}</div>
                             </div>
                         </div>
                     </div>
