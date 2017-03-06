@@ -315,8 +315,12 @@ $(document)
                                 prompt: '请填写证件编号'
                             },
                             {
+                                type: 'minLength[6]',
+                                prompt: '证件编号长度过短'
+                            },
+                            {
                                 type: 'idNumber',
-                                prompt: '请输入一个有效的身份证号'
+                                prompt: '请输入一个有效的证件编号'
                             }
                         ]
                     },

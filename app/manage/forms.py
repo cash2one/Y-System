@@ -467,9 +467,28 @@ class EditNameForm(FlaskForm):
     submit = SubmitField(u'更新')
 
 
-class EditIDNumberForm(FlaskForm):
-    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+class EditGenderForm(FlaskForm):
+    gender = SelectField(u'性别', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditGenderForm, self).__init__(*args, **kwargs)
+        self.gender.choices = [(u'', u'选择性别')] + [(unicode(gender.id), gender.name) for gender in Gender.query.order_by(Gender.id.asc()).all()]
+
+
+class EditBirthdateForm(FlaskForm):
+    birthdate = DateField(u'出生日期', validators=[Required()])
+    submit = SubmitField(u'更新')
+
+
+class EditIDNumberForm(FlaskForm):
+    id_type = SelectField(u'证件类型', coerce=unicode, validators=[Required()])
+    id_number = StringField(u'证件号码', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditIDNumberForm, self).__init__(*args, **kwargs)
+        self.id_type.choices = [(u'', u'选择证件类型')] + [(unicode(id_type.id), id_type.name) for id_type in IDType.query.order_by(IDType.id.asc()).all()]
 
 
 class EditUserTagForm(FlaskForm):

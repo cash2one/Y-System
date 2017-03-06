@@ -18,7 +18,7 @@ from .forms import NewGRETestScoreForm, EditGRETestScoreForm
 from .forms import NewTOEFLTestScoreForm, EditTOEFLTestScoreForm
 from .forms import NewUserForm, NewAdminForm, ConfirmUserForm, RestoreUserForm
 from .forms import NewEducationRecordForm, NewEmploymentRecordForm, NewScoreRecordForm, NewInviterForm, NewPurchaseForm
-from .forms import EditNameForm, EditIDNumberForm, EditUserTagForm, EditStudentRoleForm, EditUserRoleForm
+from .forms import EditNameForm, EditGenderForm, EditBirthdateForm, EditIDNumberForm, EditUserTagForm, EditStudentRoleForm, EditUserRoleForm
 from .forms import EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditReferrerForm
@@ -34,7 +34,7 @@ from .forms import NewProductForm, EditProductForm
 from .forms import NewRoleForm, EditRoleForm
 from .forms import NewPermissionForm, EditPermissionForm
 from .. import db
-from ..models import Permission, Role, User, Gender, Relationship
+from ..models import Permission, Role, User, IDType, Gender, Relationship
 from ..models import PurposeType, ReferrerType, InvitationType
 from ..models import EducationRecord, EducationType, EmploymentRecord, ScoreRecord, ScoreType
 from ..models import Course, CourseType, CourseRegistration
@@ -3231,16 +3231,34 @@ def edit_user(id):
         add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户姓名为“%s”' % (user.name_alias, edit_name_form.name.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
     edit_name_form.name.data = user.name
+    # gender
+    edit_gender_form = EditGenderForm(prefix='edit_gender')
+    if edit_gender_form.submit.data and edit_gender_form.validate_on_submit():
+        user.gender_id = int(edit_gender_form.gender.data)
+        db.session.add(user)
+        flash(u'已更新用户性别', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新用户性别为“%s”' % (user.name_alias, Gender.query.get(int(edit_gender_form.gender.data)).name), category=u'manage')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_gender_form.gender.data = unicode(user.gender_id)
+    # birthdate
+    edit_birthdate_form = EditBirthdateForm(prefix='edit_birthdate')
+    if edit_birthdate_form.submit.data and edit_birthdate_form.validate_on_submit():
+        user.birthdate = edit_birthdate_form.birthdate.data
+        db.session.add(user)
+        flash(u'已更新出生日期', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新出生日期为“%s”' % (user.name_alias, edit_birthdate_form.birthdate.data), category=u'manage')
+        return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_birthdate_form.birthdate.data = user.birthdate
     # ID number
     edit_id_number_form = EditIDNumberForm(prefix='edit_id_number')
     if edit_id_number_form.submit.data and edit_id_number_form.validate_on_submit():
+        user.id_type_id = int(edit_id_number_form.id_type.data)
         user.id_number = edit_id_number_form.id_number.data
-        user.gender_id = get_gender_id(edit_id_number_form.id_number.data)
-        user.birthdate = date(year=int(edit_id_number_form.id_number.data[6:10]), month=int(edit_id_number_form.id_number.data[10:12]), day=int(edit_id_number_form.id_number.data[12:14]))
         db.session.add(user)
-        flash(u'已更新身份证号', category='success')
-        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新身份证号为“%s”' % (user.name_alias, edit_id_number_form.id_number.data), category=u'manage')
+        flash(u'已更新身份证件', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新身份证件为“%s：%s”' % (user.name_alias, IDType.query.get(int(edit_id_number_form.id_type.data)).name, edit_id_number_form.id_number.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
+    edit_id_number_form.id_type.data = unicode(user.id_type_id)
     edit_id_number_form.id_number.data = user.id_number
     # role
     edit_role_form = EditUserRoleForm(prefix='edit_role', editor=current_user._get_current_object(), is_self=(user.id == current_user.id))
@@ -3508,6 +3526,8 @@ def edit_user(id):
     # receptionist
     return render_template('manage/edit_user.html',
         edit_name_form=edit_name_form,
+        edit_gender_form=edit_gender_form,
+        edit_birthdate_form=edit_birthdate_form,
         edit_id_number_form=edit_id_number_form,
         edit_role_form=edit_role_form,
         edit_vb_course_form=edit_vb_course_form,
