@@ -7,6 +7,7 @@ from wtforms.validators import Required, NumberRange, Length, Email, Optional
 from wtforms import ValidationError
 from ..models import Color
 from ..models import Permission, Role, User, Tag
+from ..models import IDType, Gender
 from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
 from ..models import Period
 from ..models import Lesson, Section
@@ -297,9 +298,10 @@ class EditTOEFLTestScoreForm(FlaskForm):
 class NewUserForm(FlaskForm):
     # basic
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
-    gender = StringField(u'性别')
-    birthdate = StringField(u'出生日期')
+    id_type = SelectField(u'证件类型', coerce=unicode, validators=[Required()])
+    id_number = StringField(u'证件号码', validators=[Required(), Length(1, 64)])
+    gender = SelectField(u'性别', coerce=unicode, validators=[Required()])
+    birthdate = DateField(u'出生日期', validators=[Required()])
     residence = StringField(u'归属地')
     # contact
     email = StringField(u'电子邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
@@ -375,6 +377,8 @@ class NewUserForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewUserForm, self).__init__(*args, **kwargs)
+        self.id_type.choices = [(u'', u'选择证件类型')] + [(unicode(id_type.id), id_type.name) for id_type in IDType.query.order_by(IDType.id.asc()).all()]
+        self.gender.choices = [(u'', u'选择性别')] + [(unicode(gender.id), gender.name) for gender in Gender.query.order_by(Gender.id.asc()).all()]
         self.emergency_contact_relationship.choices = [(u'', u'选择关系')] +  [(unicode(relationship.id), relationship.name) for relationship in Relationship.query.order_by(Relationship.id.asc()).all()]
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
         self.referrers.choices = [(u'', u'选择了解渠道')] + [(unicode(referrer_type.id), referrer_type.name) for referrer_type in ReferrerType.query.order_by(ReferrerType.id.asc()).all() if referrer_type.name != u'其它']
@@ -439,9 +443,10 @@ class NewScoreRecordForm(FlaskForm):
 
 class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
-    gender = StringField(u'性别')
-    birthdate = StringField(u'出生日期')
+    id_type = SelectField(u'证件类型', coerce=unicode, validators=[Required()])
+    id_number = StringField(u'证件号码', validators=[Required(), Length(1, 64)])
+    gender = SelectField(u'性别', coerce=unicode, validators=[Required()])
+    birthdate = DateField(u'出生日期', validators=[Required()])
     residence = StringField(u'归属地')
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
@@ -449,6 +454,8 @@ class NewAdminForm(FlaskForm):
 
     def __init__(self, creator, *args, **kwargs):
         super(NewAdminForm, self).__init__(*args, **kwargs)
+        self.id_type.choices = [(u'', u'选择证件类型')] + [(unicode(id_type.id), id_type.name) for id_type in IDType.query.order_by(IDType.id.asc()).all()]
+        self.gender.choices = [(u'', u'选择性别')] + [(unicode(gender.id), gender.name) for gender in Gender.query.order_by(Gender.id.asc()).all()]
         if creator.is_developer:
             self.role.choices = [(u'', u'选择权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
         else:
@@ -460,9 +467,28 @@ class EditNameForm(FlaskForm):
     submit = SubmitField(u'更新')
 
 
-class EditIDNumberForm(FlaskForm):
-    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
+class EditGenderForm(FlaskForm):
+    gender = SelectField(u'性别', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditGenderForm, self).__init__(*args, **kwargs)
+        self.gender.choices = [(u'', u'选择性别')] + [(unicode(gender.id), gender.name) for gender in Gender.query.order_by(Gender.id.asc()).all()]
+
+
+class EditBirthdateForm(FlaskForm):
+    birthdate = DateField(u'出生日期', validators=[Required()])
+    submit = SubmitField(u'更新')
+
+
+class EditIDNumberForm(FlaskForm):
+    id_type = SelectField(u'证件类型', coerce=unicode, validators=[Required()])
+    id_number = StringField(u'证件号码', validators=[Required(), Length(1, 64)])
+    submit = SubmitField(u'更新')
+
+    def __init__(self, *args, **kwargs):
+        super(EditIDNumberForm, self).__init__(*args, **kwargs)
+        self.id_type.choices = [(u'', u'选择证件类型')] + [(unicode(id_type.id), id_type.name) for id_type in IDType.query.order_by(IDType.id.asc()).all()]
 
 
 class EditUserTagForm(FlaskForm):

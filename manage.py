@@ -38,12 +38,19 @@ manager.add_command('db', MigrateCommand)
 
 
 @manager.command
+def cleanup():
+    """Run cleanup tasks."""
+    db.drop_all()
+
+
+@manager.command
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
     from app.models import Color
     from app.models import Permission
     from app.models import Role
+    from app.models import IDType
     from app.models import Gender
     from app.models import Relationship
     from app.models import PurposeType
@@ -78,6 +85,7 @@ def deploy():
     Color.insert_colors()
     Permission.insert_permissions()
     Role.insert_roles()
+    IDType.insert_id_types()
     Gender.insert_genders()
     Relationship.insert_relationships()
     PurposeType.insert_purpose_types()
