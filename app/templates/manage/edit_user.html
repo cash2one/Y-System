@@ -46,7 +46,7 @@
                             <div id="edit-birthdate-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
-                            <div class="header">生日</div>
+                            <div class="header">出生日期</div>
                             <div class="description">{{ user.birthdate_alias }}</div>
                         </div>
                     </div>
@@ -56,7 +56,7 @@
                         </div>
                         <div class="content">
                             <div class="header">证件编号</div>
-                            <div class="description">{% if user.id_number %}{{ user.id_number }}{% else %}无{% endif %}</div>
+                            <div class="description">{% if user.id_number %}{{ user.id_number }} [{{ user.id_type.name }}]{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
@@ -94,7 +94,7 @@
                 </div>
                 <div id="edit-gender-modal" class="ui modal">
                     <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑用户性别</div>
+                    <div class="header"><i class="edit icon"></i>编辑性别</div>
                     <div class="content">
                         <form id="edit-gender" action="{{ url_for('manage.edit_user', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ edit_gender_form.hidden_tag() }}
@@ -108,7 +108,7 @@
                 </div>
                 <div id="edit-birthdate-modal" class="ui modal">
                     <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑用户姓名</div>
+                    <div class="header"><i class="edit icon"></i>编辑出生日期</div>
                     <div class="content">
                         <form id="edit-birthdate" action="{{ url_for('manage.edit_user', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                             {{ edit_birthdate_form.hidden_tag() }}
