@@ -38,6 +38,12 @@ manager.add_command('db', MigrateCommand)
 
 
 @manager.command
+def cleanup():
+    """Run cleanup tasks."""
+    db.drop_all()
+
+
+@manager.command
 def deploy():
     """Run deployment tasks."""
     from flask_migrate import upgrade
