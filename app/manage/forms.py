@@ -7,6 +7,7 @@ from wtforms.validators import Required, NumberRange, Length, Email, Optional
 from wtforms import ValidationError
 from ..models import Color
 from ..models import Permission, Role, User, Tag
+from ..models import IDType, Gender
 from ..models import Relationship, PurposeType, ReferrerType, InvitationType, EducationType, ScoreType
 from ..models import Period
 from ..models import Lesson, Section
@@ -439,9 +440,10 @@ class NewScoreRecordForm(FlaskForm):
 
 class NewAdminForm(FlaskForm):
     name = StringField(u'姓名', validators=[Required(), Length(1, 64)])
-    id_number = StringField(u'身份证号', validators=[Required(), Length(1, 64)])
-    gender = StringField(u'性别')
-    birthdate = StringField(u'出生日期')
+    id_type = SelectField(u'证件类型', coerce=unicode, validators=[Required()])
+    id_number = StringField(u'证件号码', validators=[Required(), Length(1, 64)])
+    gender = SelectField(u'性别', coerce=unicode, validators=[Required()])
+    birthdate = DateField(u'出生日期', validators=[Required()])
     residence = StringField(u'归属地')
     email = StringField(u'邮箱', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
@@ -449,6 +451,8 @@ class NewAdminForm(FlaskForm):
 
     def __init__(self, creator, *args, **kwargs):
         super(NewAdminForm, self).__init__(*args, **kwargs)
+        self.id_type.choices = [(u'', u'选择证件类型')] + [(unicode(id_type.id), id_type.name) for id_type in IDType.query.order_by(IDType.id.asc()).all()]
+        self.gender.choices = [(u'', u'选择性别')] + [(unicode(gender.id), gender.name) for gender in Gender.query.order_by(Gender.id.asc()).all()]
         if creator.is_developer:
             self.role.choices = [(u'', u'选择权限')] + [(unicode(role.id), role.name) for role in Role.query.order_by(Role.id.asc()).all() if role.name in [u'志愿者', u'协管员', u'管理员', u'开发人员']]
         else:

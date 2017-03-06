@@ -2270,9 +2270,10 @@ def user():
             role_id=int(form.role.data),
             password=form.id_number.data.upper()[-6:],
             name=form.name.data,
+            id_type_id=form.id_type.data,
             id_number=form.id_number.data.upper(),
-            gender_id=get_gender_id(form.id_number.data),
-            birthdate=date(year=int(form.id_number.data[6:10]), month=int(form.id_number.data[10:12]), day=int(form.id_number.data[12:14]))
+            gender_id=int(form.gender.data),
+            birthdate=form.birthdate.data
         )
         db.session.add(admin)
         db.session.commit()
