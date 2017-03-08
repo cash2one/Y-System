@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import requests
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
@@ -1559,30 +1558,13 @@ class User(UserMixin, db.Model):
             return url_for('manage.summary')
         return self.url
 
-    def avatar(self, size=512, default='identicon', rating='g', wrap=False):
+    def avatar(self, size=512, default='identicon', rating='g'):
         if request.is_secure:
             url = 'https://secure.gravatar.com/avatar'
         else:
             url = 'http://www.gravatar.com/avatar'
         email_hash = md5(self.email.encode('utf-8')).hexdigest()
-        base_url = '%s/%s' % (url, email_hash)
-        payload = {
-            's': size,
-            'd': default,
-            'r': rating,
-        }
-        avatar_url = '%s?%s' % (base_url, '&'.join(['%s=%s' % (key, payload[key]) for key in payload]))
-        if wrap:
-            payload['d'] = 404
-            try:
-                r = requests.get(base_url, params=payload)
-                if r.status_code == 200:
-                    return '<img class="ui small-avatar image" src="data:%s;base64,%s">' % (r.headers['Content-Type'], b64encode(r.content))
-                else:
-                    return '<i class="fa fa-user-circle-o"></i>'
-            except Exception as e:
-                return '<i class="fa fa-user-circle-o"></i>'
-        return avatar_url
+        return '%s/%s?s=%s&d=%s&r=%s' % (url, email_hash, size, default, rating)
 
     def add_tag(self, tag):
         if not self.has_tag(tag):
@@ -2422,7 +2404,7 @@ class User(UserMixin, db.Model):
 
     @property
     def can_access_advanced_vb(self):
-        vb_test_score = self.vb_test_scores.filter_by(test_id=Test.query.filter_by(name=u'L6-9').first().id).first()
+        vb_test_score = self.vb_test_scores.filter_by(test_id=Test.query.filter_by(name=u'Test 6-9').first().id).first()
         return vb_test_score is not None and vb_test_score.score >= 90.0
 
     def notified_by(self, announcement):
@@ -3594,6 +3576,7 @@ class Lesson(db.Model):
             u'9th': u'9',
             u'Test': u'T',
             u'AW总论': u'A',
+            u'Y-GRE临考': u'临',
         }
         return abbreviations[self.name]
 
@@ -3668,6 +3651,7 @@ class Lesson(db.Model):
             (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
             (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
             (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
+            (u'Y-GRE临考', u'Y-GRE', 80, 0, -1, False, False, ),
         ]
         for entry in lessons:
             lesson = Lesson.query.filter_by(name=entry[0]).first()
@@ -4026,19 +4010,20 @@ class Test(db.Model):
     @staticmethod
     def insert_tests():
         tests = [
-            (u'L1-5', u'L5', ),
-            (u'L6-9', u'L9', ),
+            (u'Test 1-5', u'L5', ),
+            (u'Test 6-9', u'L9', ),
             (u'入学测试', u'Y-GRE总论', ),
-            (u'Unit 1', u'1st', ),
-            (u'Unit 2', u'2nd', ),
-            (u'Unit 3', u'3rd', ),
-            (u'模考1', u'3rd', ),
-            (u'PPII-1', u'3rd', ),
-            (u'Unit 4', u'4th', ),
-            (u'Unit 5', u'5th', ),
-            (u'Unit 6', u'6th', ),
-            (u'模考2', u'6th', ),
-            (u'PPII-2', u'6th', ),
+            (u'Test 1', u'1st', ),
+            (u'Test 2', u'2nd', ),
+            (u'Test 3', u'3rd', ),
+            (u'Exam-1', u'3rd', ),
+            (u'Test 4', u'4th', ),
+            (u'Test 5', u'5th', ),
+            (u'Test 6', u'6th', ),
+            (u'Exam-2', u'6th', ),
+            (u'Test 7', u'7th', ),
+            (u'PPII-1', u'Y-GRE临考', ),
+            (u'PPII-2', u'Y-GRE临考', ),
         ]
         for entry in tests:
             test = Test.query.filter_by(name=entry[0]).first()
@@ -4163,7 +4148,7 @@ class Feed(db.Model):
     __tablename__ = 'feeds'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    event = db.Column(db.UnicodeText, index=True) # log/user/admin
+    event = db.Column(db.UnicodeText)
     category = db.Column(db.Unicode(64), index=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 

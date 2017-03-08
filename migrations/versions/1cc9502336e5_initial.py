@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 1dbd345d1b2e
+Revision ID: 1cc9502336e5
 Revises: 
-Create Date: 2017-03-07 00:45:19.400586
+Create Date: 2017-03-08 20:26:41.080059
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1dbd345d1b2e'
+revision = '1cc9502336e5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -202,7 +202,8 @@ def upgrade():
     sa.Column('emergency_contact_relationship_id', sa.Integer(), nullable=True),
     sa.Column('worked_in_same_field', sa.Boolean(), nullable=True),
     sa.Column('deformity', sa.Boolean(), nullable=True),
-    sa.Column('application_aim', sa.Unicode(length=64), nullable=True),
+    sa.Column('application_aim', sa.Unicode(length=128), nullable=True),
+    sa.Column('application_agency', sa.Unicode(length=128), nullable=True),
     sa.ForeignKeyConstraint(['emergency_contact_relationship_id'], ['relationships.id'], ),
     sa.ForeignKeyConstraint(['gender_id'], ['genders.id'], ),
     sa.ForeignKeyConstraint(['id_type_id'], ['id_types.id'], ),
@@ -281,7 +282,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_feeds_category'), 'feeds', ['category'], unique=False)
-    op.create_index(op.f('ix_feeds_event'), 'feeds', ['event'], unique=False)
     op.create_table('gre_test_scores',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -462,6 +462,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('creator_id', 'user_id')
     )
+    op.create_table('user_supervisions',
+    sa.Column('supervisor_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['supervisor_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('supervisor_id', 'user_id')
+    )
     op.create_table('user_tags',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('tag_id', sa.Integer(), nullable=False),
@@ -623,6 +631,7 @@ def downgrade():
     op.drop_table('course_registrations')
     op.drop_table('assignment_scores')
     op.drop_table('user_tags')
+    op.drop_table('user_supervisions')
     op.drop_table('user_creations')
     op.drop_table('toefl_test_score')
     op.drop_index(op.f('ix_tests_name'), table_name='tests')
@@ -643,7 +652,6 @@ def downgrade():
     op.drop_table('invitations')
     op.drop_table('group_registrations')
     op.drop_table('gre_test_scores')
-    op.drop_index(op.f('ix_feeds_event'), table_name='feeds')
     op.drop_index(op.f('ix_feeds_category'), table_name='feeds')
     op.drop_table('feeds')
     op.drop_table('employment_records')

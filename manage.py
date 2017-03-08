@@ -33,19 +33,34 @@ def make_shell_context():
     return dict(app=app, db=db)
 
 
-manager.add_command("shell", Shell(make_context=make_shell_context))
+manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
 
 @manager.command
 def cleanup():
-    """Run cleanup tasks."""
+    '''Run cleanup tasks.'''
+    if app.debug:
+        from config import basedir
+        from shutil import rmtree
+        db_files = [
+            'ysys-dev.sqlite',
+            'migrations',
+        ]
+        for db_file in db_files:
+            full_db_file = os.path.join(basedir, db_file)
+            if os.path.exists(full_db_file):
+                if os.path.isfile(full_db_file):
+                    os.remove(full_db_file)
+                elif os.path.isdir(full_db_file):
+                    rmtree(full_db_file)
+                print 'remove', full_db_file
     db.drop_all()
 
 
 @manager.command
 def deploy():
-    """Run deployment tasks."""
+    '''Run deployment tasks.'''
     from flask_migrate import upgrade
     from app.models import Color
     from app.models import Permission
@@ -116,7 +131,7 @@ def deploy():
 
 @manager.command
 def backup():
-    """Run backup tasks."""
+    '''Run backup tasks.'''
     pass
 
 
