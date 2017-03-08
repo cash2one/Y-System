@@ -1050,6 +1050,13 @@ class Reception(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Supervision(db.Model):
+    __tablename__ = 'user_supervisions'
+    supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class UserCreation(db.Model):
     __tablename__ = 'user_creations'
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -1104,7 +1111,8 @@ class User(UserMixin, db.Model):
     worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
     # application properties
-    application_aim = db.Column(db.Unicode(64))
+    application_aim = db.Column(db.Unicode(128))
+    application_agency = db.Column(db.Unicode(128))
     # tags
     has_tags = db.relationship(
         'UserTag',
@@ -1300,6 +1308,20 @@ class User(UserMixin, db.Model):
     received_receptions = db.relationship(
         'Reception',
         foreign_keys=[Reception.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    made_supervisions = db.relationship(
+        'Supervision',
+        foreign_keys=[Supervision.supervisor_id],
+        backref=db.backref('supervisor', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    received_supervisions = db.relationship(
+        'Supervision',
+        foreign_keys=[Supervision.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -1813,6 +1835,27 @@ class User(UserMixin, db.Model):
     def received_by(self):
         if self.received_receptions.count():
             return self.received_receptions.first().receptionist
+
+    def supervise_user(self, user):
+        if not self.supervised_user(user):
+            supervision = Supervision(supervisor_id=self.id, user_id=user.id)
+        else:
+            supervision = self.made_supervisions.filter_by(user_id=user.id).first()
+            supervision.timestamp = datetime.utcnow()
+        db.session.add(supervision)
+
+    def unsupervise_user(self, user):
+        supervision = self.made_supervisions.filter_by(user_id=user.id).first()
+        if supervision:
+            db.session.delete(supervision)
+
+    def supervised_user(self, user):
+        return self.made_supervisions.filter_by(user_id=user.id).first() is not None
+
+    @property
+    def supervised_by(self):
+        if self.received_supervisions.count():
+            return self.received_supervisions.first().supervisor
 
     def create_user(self, user):
         user.created = True
