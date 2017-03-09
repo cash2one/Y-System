@@ -662,6 +662,21 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
+class StudyPlan(db.Model):
+    __tablename__ = 'study_plans'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+
+    @property
+    def alias(self):
+        return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
+
+    def __repr__(self):
+        return '<Study Plan %r>' % self.alias
+
+
 class Punch(db.Model):
     __tablename__ = 'punches'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
