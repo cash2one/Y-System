@@ -1185,6 +1185,14 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    speed = db.Column(db.Float, default=1.0)
+    study_plans = db.relationship(
+        'StudyPlan',
+        foreign_keys=[StudyPlan.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
     punches = db.relationship(
         'Punch',
         foreign_keys=[Punch.user_id],
