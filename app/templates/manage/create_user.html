@@ -339,13 +339,9 @@
                             {{ form.purposes.label() }}
                             {{ form.purposes(class='ui dropdown') }}
                         </div>
-                        <div class="four wide field">
+                        <div class="eight wide field">
                             {{ form.other_purpose.label() }}
                             {{ form.other_purpose(placeholder='其它研修目的') }}
-                        </div>
-                        <div class="four wide field">
-                            {{ form.application_aim.label() }}
-                            {{ form.application_aim(placeholder='申请方向') }}
                         </div>
                     </div>
                     <div class="fields">
@@ -363,6 +359,16 @@
                                 {{ form.inviter_email(placeholder='输入推荐人姓名/邮箱查询', class='prompt') }}
                                 <div class="results"></div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.application_aim.label() }}
+                            {{ form.application_aim(placeholder='申请方向') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.application_agency.label() }}
+                            {{ form.application_agency(placeholder='留学中介') }}
                         </div>
                     </div>
                     <div class="required field">

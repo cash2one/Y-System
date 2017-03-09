@@ -364,10 +364,11 @@ class NewUserForm(FlaskForm):
     # registration
     purposes = SelectMultipleField(u'研修目的', coerce=unicode)
     other_purpose = StringField(u'其它研修目的', validators=[Length(0, 64)])
-    application_aim = StringField(u'申请方向', validators=[Length(0, 64)])
     referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
     other_referrer = StringField(u'其它了解渠道', validators=[Length(0, 64)])
     inviter_email = StringField(u'同学推荐（邮箱）', validators=[Length(0, 64)])
+    application_aim = StringField(u'申请方向', validators=[Length(0, 128)])
+    application_agency = StringField(u'留学中介', validators=[Length(0, 128)])
     products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
@@ -554,8 +555,9 @@ class EditPurposeForm(FlaskForm):
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
 
 
-class EditApplicationAimForm(FlaskForm):
-    application_aim = StringField(u'申请方向', validators=[Length(0, 64)])
+class EditApplicationForm(FlaskForm):
+    application_aim = StringField(u'申请方向', validators=[Length(0, 128)])
+    application_agency = StringField(u'留学中介', validators=[Length(0, 128)])
     submit = SubmitField(u'更新')
 
 

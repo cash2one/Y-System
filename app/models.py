@@ -1762,7 +1762,7 @@ class User(UserMixin, db.Model):
 
     @property
     def overdue(self):
-        if self.is_developer or self.is_administrator or self.is_moderator:
+        if self.is_developer or self.is_administrator or self.is_moderator or (not self.activated):
             return False
         return datetime.utcnow() > self.due_time
 

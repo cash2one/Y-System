@@ -22,7 +22,7 @@ from .forms import EditNameForm, EditGenderForm, EditBirthdateForm, EditIDNumber
 from .forms import EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditReferrerForm
-from .forms import EditApplicationAimForm
+from .forms import EditApplicationForm
 from .forms import EditWorkInSameFieldForm, EditDeformityForm
 from .forms import EditVBCourseForm, EditYGRECourseForm
 from .forms import NewCourseForm, EditCourseForm
@@ -2719,7 +2719,8 @@ def create_user():
             emergency_contact_name=form.emergency_contact_name.data,
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
             emergency_contact_mobile=form.emergency_contact_mobile.data,
-            application_aim=form.application_aim.data
+            application_aim=form.application_aim.data,
+            application_agency=form.application_agency.data
         )
         db.session.add(user)
         db.session.commit()
@@ -3081,14 +3082,16 @@ def create_user_confirm(id):
             edit_purpose_form.purposes.data.append(unicode(purpose.type_id))
         else:
             edit_purpose_form.other_purpose.data = purpose.remark
-    # application aim
-    edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
-    if edit_application_aim_form.submit.data and edit_application_aim_form.validate_on_submit():
-        user.application_aim = edit_application_aim_form.application_aim.data
+    # application
+    edit_application_form = EditApplicationForm(prefix='edit_application')
+    if edit_application_form.submit.data and edit_application_form.validate_on_submit():
+        user.application_aim = edit_application_form.application_aim.data
+        user.application_agency = edit_application_form.application_agency.data
         db.session.add(user)
-        flash(u'已更新申请方向', category='success')
+        flash(u'已更新申请信息', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    edit_application_aim_form.application_aim.data = user.application_aim
+    edit_application_form.application_aim.data = user.application_aim
+    edit_application_form.application_agency.data = user.application_agency
     # referrer
     edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
     if edit_referrer_form.submit.data and edit_referrer_form.validate_on_submit():
@@ -3198,7 +3201,7 @@ def create_user_confirm(id):
         new_score_record_form=new_score_record_form,
         new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
-        edit_application_aim_form=edit_application_aim_form,
+        edit_application_form=edit_application_form,
         edit_referrer_form=edit_referrer_form,
         new_inviter_form=new_inviter_form,
         new_purchase_form=new_purchase_form,
@@ -3470,15 +3473,17 @@ def edit_user(id):
             edit_purpose_form.purposes.data.append(unicode(purpose.type_id))
         else:
             edit_purpose_form.other_purpose.data = purpose.remark
-    # application aim
-    edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
-    if edit_application_aim_form.submit.data and edit_application_aim_form.validate_on_submit():
-        user.application_aim = edit_application_aim_form.application_aim.data
+    # application
+    edit_application_form = EditApplicationForm(prefix='edit_application')
+    if edit_application_form.submit.data and edit_application_form.validate_on_submit():
+        user.application_aim = edit_application_form.application_aim.data
+        user.application_agency = edit_application_form.application_agency.data
         db.session.add(user)
-        flash(u'已更新申请方向', category='success')
-        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新申请方向为“%s”' % (user.name_alias, edit_application_aim_form.application_aim.data), category=u'manage')
+        flash(u'已更新申请信息', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新申请信息为“%s %s”' % (user.name_alias, edit_application_form.application_aim.data, edit_application_form.application_agency.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    edit_application_aim_form.application_aim.data = user.application_aim
+    edit_application_form.application_aim.data = user.application_aim
+    edit_application_form.application_agency.data = user.application_agency
     # referrer
     edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
     if edit_referrer_form.submit.data and edit_referrer_form.validate_on_submit():
@@ -3563,7 +3568,7 @@ def edit_user(id):
         new_employment_record_form=new_employment_record_form,
         new_score_record_form=new_score_record_form,
         edit_purpose_form=edit_purpose_form,
-        edit_application_aim_form=edit_application_aim_form,
+        edit_application_form=edit_application_form,
         edit_referrer_form=edit_referrer_form,
         new_inviter_form=new_inviter_form,
         new_purchase_form=new_purchase_form,
