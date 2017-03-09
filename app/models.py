@@ -3563,6 +3563,13 @@ class Lesson(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    study_plans = db.relationship(
+        'StudyPlan',
+        foreign_keys=[StudyPlan.user_id],
+        backref=db.backref('lesson', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
 
     @property
     def alias(self):
