@@ -1136,6 +1136,8 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     # study properties
+    speed = db.Column(db.Float, default=1.0)
+    deadline = db.Column(db.Date)
     purposes = db.relationship(
         'Purpose',
         foreign_keys=[Purpose.user_id],
@@ -1185,7 +1187,6 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    speed = db.Column(db.Float, default=1.0)
     study_plans = db.relationship(
         'StudyPlan',
         foreign_keys=[StudyPlan.user_id],
@@ -3607,6 +3608,7 @@ class Lesson(db.Model):
             u'Test': u'T',
             u'AW总论': u'A',
             u'Y-GRE临考': u'临',
+            u'PPII模考': u'P',
         }
         return abbreviations[self.name]
 
@@ -3681,7 +3683,7 @@ class Lesson(db.Model):
             (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
             (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
             (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
-            (u'Y-GRE临考', u'Y-GRE', 80, 0, -1, False, False, ),
+            (u'Y-GRE临考', u'Y-GRE', 80, 0, 12, False, False, ),
         ]
         for entry in lessons:
             lesson = Lesson.query.filter_by(name=entry[0]).first()
@@ -3893,7 +3895,10 @@ class Section(db.Model):
             (u'1st', u'1st', 2, ),
             (u'2nd', u'2nd', 3, ),
             (u'3rd', u'3rd', 4, ),
-            (u'AW总论', u'AW总论', 5, ),
+            (u'视频', u'AW总论', 5, ),
+            (u'OG AW', u'AW总论', 0, ),
+            (u'Issue', u'AW总论', 0, ),
+            (u'Argument', u'AW总论', 0, ),
             (u'4th', u'4th', 6, ),
             (u'5th', u'5th', 7, ),
             (u'6th', u'6th', 8, ),
@@ -3901,6 +3906,9 @@ class Section(db.Model):
             (u'8th', u'8th', 10, ),
             (u'9th', u'9th', 11, ),
             (u'Test', u'Test', -1, ),
+            (u'OG V', u'Y-GRE临考', 0, ),
+            (u'OG Q', u'Y-GRE临考', 0, ),
+            (u'OG V150/Magoosh', u'Y-GRE临考', 0, ),
         ]
         for entry in sections:
             section = Section.query.filter_by(name=entry[0]).first()
