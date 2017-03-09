@@ -73,7 +73,7 @@ function noProfileAvatar(avatarImage) {
                     <div>上次登录：<span class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
                     {% else %}
-                    <div><i class="yellow warning sign icon"></i>该账户未激活</div>
+                    <div><i class="yellow warning sign icon"></i>该账户尚未激活</div>
                     {% endif %}
                 </div>
                 {% if current_user.can('管理') %}
