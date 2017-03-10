@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 1cc9502336e5
+Revision ID: 7b928e373cb4
 Revises: 
-Create Date: 2017-03-08 20:26:41.080059
+Create Date: 2017-03-11 01:31:00.199647
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1cc9502336e5'
+revision = '7b928e373cb4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -204,6 +204,8 @@ def upgrade():
     sa.Column('deformity', sa.Boolean(), nullable=True),
     sa.Column('application_aim', sa.Unicode(length=128), nullable=True),
     sa.Column('application_agency', sa.Unicode(length=128), nullable=True),
+    sa.Column('speed', sa.Float(), nullable=True),
+    sa.Column('deadline', sa.Date(), nullable=True),
     sa.ForeignKeyConstraint(['emergency_contact_relationship_id'], ['relationships.id'], ),
     sa.ForeignKeyConstraint(['gender_id'], ['genders.id'], ),
     sa.ForeignKeyConstraint(['id_type_id'], ['id_types.id'], ),
@@ -289,6 +291,7 @@ def upgrade():
     sa.Column('v_score', sa.Integer(), nullable=True),
     sa.Column('q_score', sa.Integer(), nullable=True),
     sa.Column('aw_score_id', sa.Integer(), nullable=True),
+    sa.Column('remark', sa.Unicode(length=64), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
@@ -339,6 +342,17 @@ def upgrade():
     )
     op.create_index(op.f('ix_ipads_alias'), 'ipads', ['alias'], unique=False)
     op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=False)
+    op.create_table('notate_bene',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('body', sa.UnicodeText(), nullable=True),
+    sa.Column('body_html', sa.UnicodeText(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('modified_at', sa.DateTime(), nullable=True),
+    sa.Column('modified_by_id', sa.Integer(), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('periods',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -414,6 +428,17 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_sections_name'), 'sections', ['name'], unique=True)
+    op.create_table('study_plans',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('lesson_id', sa.Integer(), nullable=True),
+    sa.Column('start_date', sa.Date(), nullable=True),
+    sa.Column('end_date', sa.Date(), nullable=True),
+    sa.Column('remark', sa.UnicodeText(), nullable=True),
+    sa.ForeignKeyConstraint(['lesson_id'], ['lessons.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('suspension_records',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -446,6 +471,7 @@ def upgrade():
     sa.Column('listening_score', sa.Integer(), nullable=True),
     sa.Column('speaking_score', sa.Integer(), nullable=True),
     sa.Column('writing_score', sa.Integer(), nullable=True),
+    sa.Column('remark', sa.Unicode(length=64), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
@@ -500,6 +526,19 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('user_id', 'course_id')
     )
+    op.create_table('feedbacks',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('study_plan_id', sa.Integer(), nullable=True),
+    sa.Column('body', sa.UnicodeText(), nullable=True),
+    sa.Column('body_html', sa.UnicodeText(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('modified_at', sa.DateTime(), nullable=True),
+    sa.Column('modified_by_id', sa.Integer(), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['study_plan_id'], ['study_plans.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('ipad_contents',
     sa.Column('ipad_id', sa.Integer(), nullable=False),
     sa.Column('lesson_id', sa.Integer(), nullable=False),
@@ -542,6 +581,14 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_schedules_date'), 'schedules', ['date'], unique=False)
+    op.create_table('study_plan_nota_bene',
+    sa.Column('study_plan_id', sa.Integer(), nullable=False),
+    sa.Column('nota_bene_id', sa.Integer(), nullable=False),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['nota_bene_id'], ['notate_bene.id'], ),
+    sa.ForeignKeyConstraint(['study_plan_id'], ['study_plans.id'], ),
+    sa.PrimaryKeyConstraint('study_plan_id', 'nota_bene_id')
+    )
     op.create_table('user_announcements',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('announcement_id', sa.Integer(), nullable=False),
@@ -621,6 +668,7 @@ def downgrade():
     op.drop_table('y_gre_test_scores')
     op.drop_table('vb_test_scores')
     op.drop_table('user_announcements')
+    op.drop_table('study_plan_nota_bene')
     op.drop_index(op.f('ix_schedules_date'), table_name='schedules')
     op.drop_table('schedules')
     op.drop_table('purchases')
@@ -628,6 +676,7 @@ def downgrade():
     op.drop_index(op.f('ix_ipad_contents_lesson_id'), table_name='ipad_contents')
     op.drop_index(op.f('ix_ipad_contents_ipad_id'), table_name='ipad_contents')
     op.drop_table('ipad_contents')
+    op.drop_table('feedbacks')
     op.drop_table('course_registrations')
     op.drop_table('assignment_scores')
     op.drop_table('user_tags')
@@ -637,6 +686,7 @@ def downgrade():
     op.drop_index(op.f('ix_tests_name'), table_name='tests')
     op.drop_table('tests')
     op.drop_table('suspension_records')
+    op.drop_table('study_plans')
     op.drop_index(op.f('ix_sections_name'), table_name='sections')
     op.drop_table('sections')
     op.drop_table('score_records')
@@ -646,6 +696,7 @@ def downgrade():
     op.drop_index(op.f('ix_products_name'), table_name='products')
     op.drop_table('products')
     op.drop_table('periods')
+    op.drop_table('notate_bene')
     op.drop_index(op.f('ix_ipads_serial'), table_name='ipads')
     op.drop_index(op.f('ix_ipads_alias'), table_name='ipads')
     op.drop_table('ipads')
