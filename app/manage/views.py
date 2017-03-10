@@ -29,6 +29,7 @@ from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewTagForm, EditTagForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
+from .forms import NewNotaBeneForm, EditNotaBeneForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
 from .forms import NewRoleForm, EditRoleForm
@@ -48,6 +49,7 @@ from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
 from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, Room
+from ..models import NotaBene
 from ..models import Announcement
 from ..models import Product, Purchase
 from ..models import Feed
@@ -4430,6 +4432,103 @@ def ipad_contents_data():
         'ipads': [ipad.to_json() for ipad in ipads],
         'ipad_contents': [ipad_content.to_json() for ipad_content in ipad_contents],
     })
+
+
+@manage.route('/nota-bene', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理NB')
+def nota_bene():
+    form = NewNotaBeneForm()
+    if form.validate_on_submit():
+        nota_bene = NotaBene(
+            body=form.body.data,
+            type_id=int(form.nota_bene_type.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(nota_bene)
+        flash(u'已添加N.B.模板：%s' % form.body.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加N.B.模板：%s' % form.body.data, category=u'manage')
+        return redirect(url_for('manage.nota_bene', page=request.args.get('page', 1, type=int)))
+    show_vb_notate_bene = True
+    show_y_gre_notate_bene = False
+    if current_user.is_authenticated:
+        show_vb_notate_bene = bool(request.cookies.get('show_vb_notate_bene', '1'))
+        show_y_gre_notate_bene = bool(request.cookies.get('show_y_gre_notate_bene', ''))
+    if show_vb_notate_bene:
+        query = NotaBene.query\
+            .join(CourseType, CourseType.id == NotaBene.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .filter(NotaBene.deleted == False)
+    if show_y_gre_notate_bene:
+        query = NotaBene.query\
+            .join(CourseType, CourseType.id == NotaBene.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(NotaBene.deleted == False)
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    notate_bene = pagination.items
+    return render_template('manage/nota_bene.html',
+        form=form,
+        show_vb_notate_bene=show_vb_notate_bene,
+        show_y_gre_notate_bene=show_y_gre_notate_bene,
+        notate_bene=notate_bene,
+        pagination=pagination
+    )
+
+
+@manage.route('/nota-bene/vb')
+@login_required
+@permission_required(u'管理NB')
+def vb_notate_bene():
+    resp = make_response(redirect(url_for('manage.nota_bene')))
+    resp.set_cookie('show_vb_notate_bene', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_notate_bene', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/nota-bene/y-gre')
+@login_required
+@permission_required(u'管理NB')
+def y_gre_notate_bene():
+    resp = make_response(redirect(url_for('manage.nota_bene')))
+    resp.set_cookie('show_vb_notate_bene', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_notate_bene', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/nota-bene/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理NB')
+def edit_nota_bene(id):
+    nota_bene = NotaBene.query.get_or_404(id)
+    if nota_bene.deleted:
+        abort(404)
+    form = EditNotaBeneForm()
+    if form.validate_on_submit():
+        nota_bene.body = form.body.data
+        nota_bene.type_id = int(form.nota_bene_type.data)
+        nota_bene.modified_at = datetime.utcnow()
+        nota_bene.modified_by_id = current_user.id
+        db.session.add(nota_bene)
+        flash(u'已更新N.B.模板：%s' % form.body.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新N.B.模板：%s' % form.body.data, category=u'manage')
+        return redirect(request.args.get('next') or url_for('manage.nota_bene'))
+    form.body.data = nota_bene.body
+    form.nota_bene_type.data = unicode(nota_bene.type_id)
+    return render_template('manage/edit_nota_bene.html', form=form, nota_bene=nota_bene)
+
+
+@manage.route('/nota-bene/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理NB')
+def delete_nota_bene(id):
+    nota_bene = NotaBene.query.get_or_404(id)
+    if nota_bene.deleted:
+        abort(404)
+    nota_bene.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除N.B.模板：%s' % nota_bene.body, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除N.B.模板：%s' % nota_bene.body, category=u'manage')
+    return redirect(request.args.get('next') or url_for('manage.nota_bene'))
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])

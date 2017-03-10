@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}N.B.模板管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="sticky note icon"></i>N.B.模板管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="sticky note outline icon"></i>N.B.模板列表</h3>
+                <div id="new-nota-bene-trigger" class="ui right floated positive circular icon button" data-content="新建N.B.模板" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-nota-bene-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建N.B.模板</div>
+                    <div class="content">
+                        <form id="new-nota-bene" action="{{ url_for('manage.nota_bene') }}" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="twelve wide required field">
+                                    {{ form.body.label() }}
+                                    {{ form.body(placeholder='Nota Bene') }}
+                                </div>
+                                <div class="four wide required field">
+                                    {{ form.nota_bene_type.label() }}
+                                    {{ form.nota_bene_type(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div class="ui secondary stackable menu">
+                    <a class="item {% if show_vb_notate_bene %}active {% endif%}loading-trigger" href="{{ url_for('manage.vb_notate_bene', page=pagination.page) }}">VB N.B.模板</a>
+                    <a class="item {% if show_y_gre_notate_bene %}active {% endif%}loading-trigger" href="{{ url_for('manage.y_gre_notate_bene', page=pagination.page) }}">Y-GRE N.B.模板</a>
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>Nota Bene</th>
+                            <th>N.B.类型</th>
+                            <th>上次操作</th>
+                            <th>操作人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for nota_bene in notate_bene %}
+                        <tr>
+                            <td>{{ nota_bene.body }}</td>
+                            <td>{{ nota_bene.type.name }}</td>
+                            <td>
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(nota_bene.modified_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(nota_bene.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td class="single line">{{ macros.user_popup(nota_bene.modified_by, nota_bene.modified_by.id == current_user.id) }}</td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_nota_bene', id=nota_bene.id, next=url_for('manage.nota_bene', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ nota_bene.id }}" class="ui negative icon button"><i class="trash outline icon"></i></div>
+                                </div>
+                                <div id="delete-modal-{{ nota_bene.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除N.B.模板“{{ nota_bene.body }}”？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_nota_bene', id=nota_bene.id, next=url_for('manage.nota_bene', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ nota_bene.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.nota_bene') }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.checkbox').checkbox();
+
+$('.ui.sortable.table').tablesort();
+
+{% for nota_bene in notate_bene %}
+$('#delete-trigger-{{ nota_bene.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ nota_bene.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger-{{ nota_bene.id }}')
+    .on('click', function() {
+        $('#delete-modal-{{ nota_bene.id }}').modal('hide');
+    })
+;
+{% endfor %}
+
+$('#new-nota-bene-trigger').popup()
+$('#new-nota-bene-trigger')
+    .on('click', function() {
+        $('#new-nota-bene-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$(document)
+    .ready(function() {
+        $('#new-nota-bene')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    body: {
+                        identifier: 'body',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入Nota Bene内容'
+                            }
+                        ]
+                    },
+                    nota_bene_type: {
+                        identifier: 'nota_bene_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择N.B.类型'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
+{% endblock %}

@@ -797,6 +797,26 @@ class FilteriPadForm(FlaskForm):
         self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
 
 
+class NewNotaBeneForm(FlaskForm):
+    body = StringField(u'Nota Bene', validators=[Required(), Length(1, 128)])
+    nota_bene_type = SelectField(u'N.B.类型', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewNotaBeneForm, self).__init__(*args, **kwargs)
+        self.nota_bene_type.choices = [(u'', u'选择N.B.类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class EditNotaBeneForm(FlaskForm):
+    body = StringField(u'Nota Bene', validators=[Required(), Length(1, 128)])
+    nota_bene_type = SelectField(u'N.B.类型', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditNotaBeneForm, self).__init__(*args, **kwargs)
+        self.nota_bene_type.choices = [(u'', u'选择N.B.类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
 class NewAnnouncementForm(FlaskForm):
     title = StringField(u'通知标题', validators=[Required(), Length(1, 64)])
     body = TextAreaField(u'通知内容', validators=[Required()])

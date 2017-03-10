@@ -91,6 +91,7 @@ def deploy():
     from app.models import iPadContent
     from app.models import Assignment
     from app.models import Test
+    from app.models import NotaBene
     from app.models import AnnouncementType
 
     # migrate database to latest revision
@@ -126,6 +127,7 @@ def deploy():
     iPadContent.insert_ipad_contents()
     Assignment.insert_assignments()
     Test.insert_tests()
+    NotaBene.insert_notate_bene()
     AnnouncementType.insert_announcement_types()
 
 
