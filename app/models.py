@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import requests
 from datetime import datetime, date, time, timedelta
 from random import choice
 from string import ascii_letters, digits
@@ -929,6 +928,7 @@ class GRETestScore(db.Model):
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
+    remark = db.Column(db.Unicode(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -983,6 +983,7 @@ class TOEFLTestScore(db.Model):
     listening_score = db.Column(db.Integer)
     speaking_score = db.Column(db.Integer)
     writing_score = db.Column(db.Integer)
+    remark = db.Column(db.Unicode(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -1050,6 +1051,13 @@ class Reception(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Supervision(db.Model):
+    __tablename__ = 'user_supervisions'
+    supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class UserCreation(db.Model):
     __tablename__ = 'user_creations'
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -1104,7 +1112,8 @@ class User(UserMixin, db.Model):
     worked_in_same_field = db.Column(db.Boolean, default=False)
     deformity = db.Column(db.Boolean, default=False)
     # application properties
-    application_aim = db.Column(db.Unicode(64))
+    application_aim = db.Column(db.Unicode(128))
+    application_agency = db.Column(db.Unicode(128))
     # tags
     has_tags = db.relationship(
         'UserTag',
@@ -1114,6 +1123,9 @@ class User(UserMixin, db.Model):
         cascade='all, delete-orphan'
     )
     # study properties
+    speed = db.Column(db.Float, default=1.0)
+    deadline = db.Column(db.Date)
+    study_plans = db.relationship('StudyPlan', backref='user', lazy='dynamic')
     purposes = db.relationship(
         'Purpose',
         foreign_keys=[Purpose.user_id],
@@ -1274,6 +1286,8 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    modified_notate_bene = db.relationship('NotaBene', backref='modified_by', lazy='dynamic')
+    modified_feedbacks = db.relationship('Feedback', backref='modified_by', lazy='dynamic')
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
     # user relationship properties
     sent_invitations = db.relationship(
@@ -1300,6 +1314,20 @@ class User(UserMixin, db.Model):
     received_receptions = db.relationship(
         'Reception',
         foreign_keys=[Reception.user_id],
+        backref=db.backref('user', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    made_supervisions = db.relationship(
+        'Supervision',
+        foreign_keys=[Supervision.supervisor_id],
+        backref=db.backref('supervisor', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    received_supervisions = db.relationship(
+        'Supervision',
+        foreign_keys=[Supervision.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -1537,30 +1565,13 @@ class User(UserMixin, db.Model):
             return url_for('manage.summary')
         return self.url
 
-    def avatar(self, size=512, default='identicon', rating='g', wrap=False):
+    def avatar(self, size=512, default='identicon', rating='g'):
         if request.is_secure:
             url = 'https://secure.gravatar.com/avatar'
         else:
             url = 'http://www.gravatar.com/avatar'
         email_hash = md5(self.email.encode('utf-8')).hexdigest()
-        base_url = '%s/%s' % (url, email_hash)
-        payload = {
-            's': size,
-            'd': default,
-            'r': rating,
-        }
-        avatar_url = '%s?%s' % (base_url, '&'.join(['%s=%s' % (key, payload[key]) for key in payload]))
-        if wrap:
-            payload['d'] = 404
-            try:
-                r = requests.get(base_url, params=payload)
-                if r.status_code == 200:
-                    return '<img class="ui small-avatar image" src="data:%s;base64,%s">' % (r.headers['Content-Type'], b64encode(r.content))
-                else:
-                    return '<i class="fa fa-user-circle-o"></i>'
-            except Exception as e:
-                return '<i class="fa fa-user-circle-o"></i>'
-        return avatar_url
+        return '%s/%s?s=%s&d=%s&r=%s' % (url, email_hash, size, default, rating)
 
     def add_tag(self, tag):
         if not self.has_tag(tag):
@@ -1758,7 +1769,7 @@ class User(UserMixin, db.Model):
 
     @property
     def overdue(self):
-        if self.is_developer or self.is_administrator or self.is_moderator:
+        if self.is_developer or self.is_administrator or self.is_moderator or (not self.activated):
             return False
         return datetime.utcnow() > self.due_time
 
@@ -1813,6 +1824,27 @@ class User(UserMixin, db.Model):
     def received_by(self):
         if self.received_receptions.count():
             return self.received_receptions.first().receptionist
+
+    def supervise_user(self, user):
+        if not self.supervised_user(user):
+            supervision = Supervision(supervisor_id=self.id, user_id=user.id)
+        else:
+            supervision = self.made_supervisions.filter_by(user_id=user.id).first()
+            supervision.timestamp = datetime.utcnow()
+        db.session.add(supervision)
+
+    def unsupervise_user(self, user):
+        supervision = self.made_supervisions.filter_by(user_id=user.id).first()
+        if supervision:
+            db.session.delete(supervision)
+
+    def supervised_user(self, user):
+        return self.made_supervisions.filter_by(user_id=user.id).first() is not None
+
+    @property
+    def supervised_by(self):
+        if self.received_supervisions.count():
+            return self.received_supervisions.first().supervisor
 
     def create_user(self, user):
         user.created = True
@@ -2379,7 +2411,7 @@ class User(UserMixin, db.Model):
 
     @property
     def can_access_advanced_vb(self):
-        vb_test_score = self.vb_test_scores.filter_by(test_id=Test.query.filter_by(name=u'L6-9').first().id).first()
+        vb_test_score = self.vb_test_scores.filter_by(test_id=Test.query.filter_by(name=u'Test 6-9').first().id).first()
         return vb_test_score is not None and vb_test_score.score >= 90.0
 
     def notified_by(self, announcement):
@@ -3515,6 +3547,7 @@ class Lesson(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    study_plans = db.relationship('StudyPlan', backref='lesson', lazy='dynamic')
 
     @property
     def alias(self):
@@ -3551,6 +3584,8 @@ class Lesson(db.Model):
             u'9th': u'9',
             u'Test': u'T',
             u'AW总论': u'A',
+            u'Y-GRE临考': u'临',
+            u'PPII模考': u'P',
         }
         return abbreviations[self.name]
 
@@ -3625,6 +3660,7 @@ class Lesson(db.Model):
             (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
             (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
             (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
+            (u'Y-GRE临考', u'Y-GRE', 80, 0, 12, False, False, ),
         ]
         for entry in lessons:
             lesson = Lesson.query.filter_by(name=entry[0]).first()
@@ -3844,6 +3880,13 @@ class Section(db.Model):
             (u'8th', u'8th', 10, ),
             (u'9th', u'9th', 11, ),
             (u'Test', u'Test', -1, ),
+            (u'OG V', u'Y-GRE临考', 0, ),
+            (u'OG Q', u'Y-GRE临考', 0, ),
+            (u'OG AW', u'Y-GRE临考', 0, ),
+            (u'Issue', u'Y-GRE临考', 0, ),
+            (u'Argument', u'Y-GRE临考', 0, ),
+            (u'V150', u'Y-GRE临考', 0, ),
+            (u'Magoosh V', u'Y-GRE临考', 0, ),
         ]
         for entry in sections:
             section = Section.query.filter_by(name=entry[0]).first()
@@ -3983,19 +4026,20 @@ class Test(db.Model):
     @staticmethod
     def insert_tests():
         tests = [
-            (u'L1-5', u'L5', ),
-            (u'L6-9', u'L9', ),
+            (u'Test 1-5', u'L5', ),
+            (u'Test 6-9', u'L9', ),
             (u'入学测试', u'Y-GRE总论', ),
-            (u'Unit 1', u'1st', ),
-            (u'Unit 2', u'2nd', ),
-            (u'Unit 3', u'3rd', ),
-            (u'模考1', u'3rd', ),
-            (u'PPII-1', u'3rd', ),
-            (u'Unit 4', u'4th', ),
-            (u'Unit 5', u'5th', ),
-            (u'Unit 6', u'6th', ),
-            (u'模考2', u'6th', ),
-            (u'PPII-2', u'6th', ),
+            (u'Test 1', u'1st', ),
+            (u'Test 2', u'2nd', ),
+            (u'Test 3', u'3rd', ),
+            (u'Exam-1', u'3rd', ),
+            (u'Test 4', u'4th', ),
+            (u'Test 5', u'5th', ),
+            (u'Test 6', u'6th', ),
+            (u'Exam-2', u'6th', ),
+            (u'Test 7', u'7th', ),
+            (u'PPII-1', u'Y-GRE临考', ),
+            (u'PPII-2', u'Y-GRE临考', ),
         ]
         for entry in tests:
             test = Test.query.filter_by(name=entry[0]).first()
@@ -4010,6 +4054,116 @@ class Test(db.Model):
 
     def __repr__(self):
         return '<Test %r>' % self.alias
+
+
+class StudyPlanNotaBene(db.Model):
+    __tablename__ = 'study_plan_nota_bene'
+    study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'), primary_key=True)
+    nota_bene_id = db.Column(db.Integer, db.ForeignKey('notate_bene.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class StudyPlan(db.Model):
+    __tablename__ = 'study_plans'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    remark = db.Column(db.UnicodeText)
+    notate_bene = db.relationship(
+        'StudyPlanNotaBene',
+        foreign_keys=[StudyPlanNotaBene.study_plan_id],
+        backref=db.backref('study_plan', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    feedbacks = db.relationship('Feedback', backref='study_plan', lazy='dynamic')
+
+    @property
+    def alias(self):
+        return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
+
+    def __repr__(self):
+        return '<Study Plan %r>' % self.alias
+
+
+class NotaBene(db.Model):
+    __tablename__ = 'notate_bene'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.UnicodeText)
+    body_html = db.Column(db.UnicodeText)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
+    study_plans = db.relationship(
+        'StudyPlanNotaBene',
+        foreign_keys=[StudyPlanNotaBene.nota_bene_id],
+        backref=db.backref('nota_bene', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    @staticmethod
+    def on_changed_body_html(target, value, oldvalue, initiator):
+        newline_tags = ['p', 'li']
+        soup = BeautifulSoup(value, 'html.parser')
+        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
+
+    def __repr__(self):
+        return '<Nota Bene %r>' % self.body
+
+
+db.event.listen(NotaBene.body_html, 'set', NotaBene.on_changed_body_html)
+
+
+class Feedback(db.Model):
+    __tablename__ = 'feedbacks'
+    id = db.Column(db.Integer, primary_key=True)
+    study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'))
+    body = db.Column(db.UnicodeText)
+    body_html = db.Column(db.UnicodeText)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s %s %s' % (self.study_plan.alias, self.body)
+
+    @staticmethod
+    def on_changed_body_html(target, value, oldvalue, initiator):
+        newline_tags = ['p', 'li']
+        soup = BeautifulSoup(value, 'html.parser')
+        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
+
+    def __repr__(self):
+        return '<Feedback %r>' % self.alias
+
+
+db.event.listen(Feedback.body_html, 'set', Feedback.on_changed_body_html)
 
 
 class AnnouncementType(db.Model):
@@ -4120,7 +4274,7 @@ class Feed(db.Model):
     __tablename__ = 'feeds'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    event = db.Column(db.UnicodeText, index=True) # log/user/admin
+    event = db.Column(db.UnicodeText)
     category = db.Column(db.Unicode(64), index=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 

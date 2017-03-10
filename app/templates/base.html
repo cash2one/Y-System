@@ -22,6 +22,13 @@
     <!-- Customized CSS -->
     {% block customized_styles %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/css/customize.css') }}">
+    <script type="text/javascript">
+        // avatar
+        function noAvatar(avatarImage) {
+            $(avatarImage).parent().prepend('<i class="fa fa-user-circle-o"></i>');
+            $(avatarImage).remove();
+        };
+    </script>
     {% endblock %}
 
     <!-- Favicons -->
@@ -130,7 +137,7 @@
                 {% if current_user.is_authenticated %}
                 <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed blue empty circular label"></div></a>
                 <div class="ui dropdown item menu-popup-trigger" data-content="研修档案与设置" data-position="bottom center" data-variation="inverted">
-                    {{ current_user.avatar(size=40, wrap=True) | safe }}
+                    <img class="ui small-avatar image" src="{{ current_user.avatar(size=40, default='404') }}" onerror="noAvatar(this)">
                     <i class="less-relaxed dropdown icon"></i>
                     <div class="menu">
                         {% if current_user.is_developer %}
@@ -331,7 +338,7 @@
                         {% if current_user.is_authenticated %}
                         <a class="item menu-popup-trigger loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed yellow empty circular label"></div></a>
                         <div class="ui dropdown item menu-popup-trigger" data-content="研修档案与设置" data-position="bottom center" data-variation="inverted">
-                            {{ current_user.avatar(size=40, wrap=True) | safe }}
+                            <img class="ui small-avatar image" src="{{ current_user.avatar(size=40, default='404') }}" onerror="noAvatar(this)">
                             <i class="less-relaxed dropdown icon"></i>
                             <div class="menu">
                                 {% if current_user.is_developer %}

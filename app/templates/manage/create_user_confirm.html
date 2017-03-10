@@ -536,15 +536,6 @@
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div id="edit-application-aim-trigger" class="ui mini button">编辑</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">申请方向</div>
-                            <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="right floated content">
                             <div id="edit-referrer-trigger" class="ui mini button">编辑</div>
                         </div>
                         <div class="content">
@@ -559,6 +550,15 @@
                         <div class="content">
                             <div class="header">推荐人</div>
                             <div class="description">{{ user.inviters }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-application-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">申请信息</div>
+                            <div class="description">申请方向：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
@@ -616,20 +616,6 @@
                         </form>
                     </div>
                 </div>
-                <div id="edit-application-aim-modal" class="ui modal">
-                    <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑申请方向</div>
-                    <div class="content">
-                        <form id="edit-application-aim" action="{{ url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
-                            {{ edit_application_aim_form.hidden_tag() }}
-                            <div class="field">
-                                {{ edit_application_aim_form.application_aim.label() }}
-                                {{ edit_application_aim_form.application_aim(placeholder='申请方向') }}
-                            </div>
-                            {{ edit_application_aim_form.submit(class='ui primary button') }}
-                        </form>
-                    </div>
-                </div>
                 <div id="edit-referrer-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑了解渠道</div>
@@ -683,6 +669,26 @@
                                 </div>
                             </div>
                             {{ new_inviter_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-application-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="edit icon"></i>编辑申请信息</div>
+                    <div class="content">
+                        <form id="edit-application" action="{{ url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
+                            {{ edit_application_form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="eight wide field">
+                                    {{ edit_application_form.application_aim.label() }}
+                                    {{ edit_application_form.application_aim(placeholder='申请信息') }}
+                                </div>
+                                <div class="eight wide field">
+                                    {{ edit_application_form.application_agency.label() }}
+                                    {{ edit_application_form.application_agency(placeholder='留学中介') }}
+                                </div>
+                            </div>
+                            {{ edit_application_form.submit(class='ui primary button') }}
                         </form>
                     </div>
                 </div>
@@ -928,9 +934,9 @@ $('#edit-purpose-trigger')
     })
 ;
 
-$('#edit-application-aim-trigger')
+$('#edit-application-trigger')
     .on('click', function() {
-        $('#edit-application-aim-modal').modal({ autofocus: false }).modal('show');
+        $('#edit-application-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 

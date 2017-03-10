@@ -11,6 +11,11 @@
     text-align: left;
 }
 </style>
+<script type="text/javascript">
+function noProfileAvatar(avatarImage) {
+    $(avatarImage).attr('src', "{{ url_for('static', filename='images/wireframes/square-image.png') }}");
+};
+</script>
 {% endblock %}
 
 {% block page_masthead %}
@@ -32,7 +37,7 @@
             <div class="four wide column">
                 <div class="ui basic vertical segment">
                     <a id="avatar" href="//cn.gravatar.com/emails/" target="_blank" data-position="top center" data-variation="inverted" data-content="通过Gravatar设置头像">
-                        <img class="ui centered medium rounded image" src="{{ user.avatar(300) }}" onerror="noAvatar(this)">
+                        <img class="ui centered medium rounded image" src="{{ user.avatar(size=300) }}" onerror="noProfileAvatar(this)">
                     </a>
                 </div>
                 <div class="ui vertical segment">
@@ -48,7 +53,7 @@
                 <div class="ui vertical segment">
                     <div>{{ macros.user_email(user) }}</div>
                 </div>
-                {% if current_user.can('管理') and user.has_tags.count()  %}<div class="ui vertical segment">
+                {% if current_user.can('管理') and user.has_tags.count() %}<div class="ui vertical segment">
                     {% with tags = user.has_tags %}
                     <div class="ui labels">
                         {% for tag in tags %}<div class="ui {{ tag.tag.color.css_class }} label"><i class="tag icon"></i>{{ tag.tag.name }}</div>{% endfor %}
@@ -62,10 +67,14 @@
                     </div>
                 </div>{% endif %}
                 <div class="ui vertical segment">
+                    {% if user.activated %}
                     <div>激活时间：<span class="popup-trigger" data-variation="inverted">{{ moment(user.activated_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
                     <div>上次登录：<span class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
+                    {% else %}
+                    <div><i class="yellow warning sign icon"></i>该账户尚未激活</div>
+                    {% endif %}
                 </div>
                 {% if current_user.can('管理') %}
                 <div class="ui vertical segment">
@@ -327,8 +336,8 @@
                         </div>
                         <div class="item">
                             <div class="content">
-                                <div class="header">申请方向</div>
-                                <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
+                                <div class="header">申请信息</div>
+                                <div class="description">申请信息：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
                             </div>
                         </div>
                         <div class="item">
@@ -526,10 +535,6 @@ $('.message .close')
 $('#avatar').popup();
 
 $('#avatar img').transition('pulse');
-
-function noAvatar(avatarImage) {
-    $(avatarImage).attr('src', "{{ url_for('static', filename='images/wireframes/square-image.png') }}");
-};
 
 {% if not user.is_suspended and user.due_time %}
 $('#due-time').progress({
