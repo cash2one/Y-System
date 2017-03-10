@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: f14d76465134
+Revision ID: afcac47f1476
 Revises: 
-Create Date: 2017-03-11 01:47:46.391933
+Create Date: 2017-03-11 02:16:24.176725
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f14d76465134'
+revision = 'afcac47f1476'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -344,13 +344,14 @@ def upgrade():
     op.create_index(op.f('ix_ipads_serial'), 'ipads', ['serial'], unique=False)
     op.create_table('notate_bene',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('body', sa.UnicodeText(), nullable=True),
-    sa.Column('body_html', sa.UnicodeText(), nullable=True),
+    sa.Column('body', sa.Unicode(length=128), nullable=True),
+    sa.Column('type_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['type_id'], ['course_types.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('periods',

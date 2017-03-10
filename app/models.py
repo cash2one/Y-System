@@ -4092,8 +4092,7 @@ class StudyPlan(db.Model):
 class NotaBene(db.Model):
     __tablename__ = 'notate_bene'
     id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.UnicodeText)
-    body_html = db.Column(db.UnicodeText)
+    body = db.Column(db.Unicode(128))
     type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -4118,16 +4117,25 @@ class NotaBene(db.Model):
         db.session.add(self)
 
     @staticmethod
-    def on_changed_body_html(target, value, oldvalue, initiator):
-        newline_tags = ['p', 'li']
-        soup = BeautifulSoup(value, 'html.parser')
-        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
+    def insert_notate_bene():
+        import xlrd
+        data = xlrd.open_workbook('initial-notate-bene.xlsx')
+        table = data.sheet_by_index(0)
+        notate_bene = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+        for entry in notate_bene:
+            nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
+            if nota_bene is None:
+                nota_bene = NotaBene(
+                    body=entry[0],
+                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                    modified_by_id=User.query.get(1).id
+                )
+                db.session.add(nota_bene)
+                print u'导入Nota Bene信息', entry[0], entry[1]
+        db.session.commit()
 
     def __repr__(self):
         return '<Nota Bene %r>' % self.body
-
-
-db.event.listen(NotaBene.body_html, 'set', NotaBene.on_changed_body_html)
 
 
 class Feedback(db.Model):
