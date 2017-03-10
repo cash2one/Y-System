@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}编辑N.B.模板信息{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="edit icon"></i>编辑N.B.模板信息</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <form id="edit-nota-bene" action="{{ url_for('manage.edit_nota_bene', id=nota_bene.id, next=request.args.get('next')) }}" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="fields">
+                        <div class="twelve wide required field">
+                            {{ form.body.label() }}
+                            {{ form.body(placeholder='Nota Bene') }}
+                        </div>
+                        <div class="four wide required field">
+                            {{ form.nota_bene_type.label() }}
+                            {{ form.nota_bene_type(class='ui dropdown') }}
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('manage.nota_bene') }}">取消</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.checkbox').checkbox();
+
+$(document)
+    .ready(function() {
+        $('#edit-nota-bene')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    body: {
+                        identifier: 'body',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写Nota Bene内容'
+                            }
+                        ]
+                    },
+                    nota_bene_type: {
+                        identifier: 'nota_bene_type',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择N.B.类型'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+</script>
+{% endblock %}
