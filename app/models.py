@@ -2836,6 +2836,7 @@ class CourseType(db.Model):
     lessons = db.relationship('Lesson', backref='type', lazy='dynamic')
     courses = db.relationship('Course', backref='type', lazy='dynamic')
     periods = db.relationship('Period', backref='type', lazy='dynamic')
+    notate_bene = db.relationship('NotaBene', backref='type', lazy='dynamic')
 
     @property
     def alias(self):
@@ -4093,6 +4094,7 @@ class NotaBene(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.UnicodeText)
     body_html = db.Column(db.UnicodeText)
+    type_id = db.Column(db.Integer, db.ForeignKey('course_types.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
