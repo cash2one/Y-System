@@ -4069,6 +4069,7 @@ class StudyPlan(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
+    remark = db.Column(db.UnicodeText)
     notate_bene = db.relationship(
         'StudyPlanNotaBene',
         foreign_keys=[StudyPlanNotaBene.study_plan_id],
