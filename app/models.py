@@ -662,21 +662,6 @@ class Rental(db.Model):
         return '<Rental %r, %r, %r>' % (self.user.name, self.ipad.alias, self.ipad.serial)
 
 
-class StudyPlan(db.Model):
-    __tablename__ = 'study_plans'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
-
-    @property
-    def alias(self):
-        return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
-
-    def __repr__(self):
-        return '<Study Plan %r>' % self.alias
-
-
 class Punch(db.Model):
     __tablename__ = 'punches'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
@@ -1140,6 +1125,7 @@ class User(UserMixin, db.Model):
     # study properties
     speed = db.Column(db.Float, default=1.0)
     deadline = db.Column(db.Date)
+    study_plans = db.relationship('StudyPlan', backref='user', lazy='dynamic')
     purposes = db.relationship(
         'Purpose',
         foreign_keys=[Purpose.user_id],
@@ -1185,13 +1171,6 @@ class User(UserMixin, db.Model):
     rentals = db.relationship(
         'Rental',
         foreign_keys=[Rental.user_id],
-        backref=db.backref('user', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-    study_plans = db.relationship(
-        'StudyPlan',
-        foreign_keys=[StudyPlan.user_id],
         backref=db.backref('user', lazy='joined'),
         lazy='dynamic',
         cascade='all, delete-orphan'
@@ -1307,6 +1286,8 @@ class User(UserMixin, db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
+    modified_notate_bene = db.relationship('NotaBene', backref='modified_by', lazy='dynamic')
+    modified_feedbacks = db.relationship('Feedback', backref='modified_by', lazy='dynamic')
     modified_announcements = db.relationship('Announcement', backref='modified_by', lazy='dynamic')
     # user relationship properties
     sent_invitations = db.relationship(
@@ -3566,13 +3547,7 @@ class Lesson(db.Model):
         lazy='dynamic',
         cascade='all, delete-orphan'
     )
-    study_plans = db.relationship(
-        'StudyPlan',
-        foreign_keys=[StudyPlan.user_id],
-        backref=db.backref('lesson', lazy='joined'),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
+    study_plans = db.relationship('StudyPlan', backref='lesson', lazy='dynamic')
 
     @property
     def alias(self):
@@ -4080,6 +4055,115 @@ class Test(db.Model):
         return '<Test %r>' % self.alias
 
 
+class StudyPlanNotaBene(db.Model):
+    __tablename__ = 'study_plan_nota_bene'
+    study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'), primary_key=True)
+    nota_bene_id = db.Column(db.Integer, db.ForeignKey('notate_bene.id'), primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class StudyPlan(db.Model):
+    __tablename__ = 'study_plans'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'))
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    notate_bene = db.relationship(
+        'StudyPlanNotaBene',
+        foreign_keys=[StudyPlanNotaBene.study_plan_id],
+        backref=db.backref('study_plan', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    feedbacks = db.relationship('Feedback', backref='study_plan', lazy='dynamic')
+
+    @property
+    def alias(self):
+        return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
+
+    def __repr__(self):
+        return '<Study Plan %r>' % self.alias
+
+
+class NotaBene(db.Model):
+    __tablename__ = 'notate_bene'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.UnicodeText)
+    body_html = db.Column(db.UnicodeText)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
+    study_plans = db.relationship(
+        'StudyPlanNotaBene',
+        foreign_keys=[StudyPlanNotaBene.nota_bene_id],
+        backref=db.backref('nota_bene', lazy='joined'),
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    @staticmethod
+    def on_changed_body_html(target, value, oldvalue, initiator):
+        newline_tags = ['p', 'li']
+        soup = BeautifulSoup(value, 'html.parser')
+        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
+
+    def __repr__(self):
+        return '<Nota Bene %r>' % self.body
+
+
+db.event.listen(NotaBene.body_html, 'set', NotaBene.on_changed_body_html)
+
+
+class Feedback(db.Model):
+    __tablename__ = 'feedbacks'
+    id = db.Column(db.Integer, primary_key=True)
+    study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'))
+    body = db.Column(db.UnicodeText)
+    body_html = db.Column(db.UnicodeText)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s %s %s' % (self.study_plan.alias, self.body)
+
+    @staticmethod
+    def on_changed_body_html(target, value, oldvalue, initiator):
+        newline_tags = ['p', 'li']
+        soup = BeautifulSoup(value, 'html.parser')
+        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
+
+    def __repr__(self):
+        return '<Feedback %r>' % self.alias
+
+
+db.event.listen(Feedback.body_html, 'set', Feedback.on_changed_body_html)
+
+
 class AnnouncementType(db.Model):
     __tablename__ = 'announcement_types'
     id = db.Column(db.Integer, primary_key=True)
@@ -4182,45 +4266,6 @@ class Announcement(db.Model):
 
 
 db.event.listen(Announcement.body_html, 'set', Announcement.on_changed_body_html)
-
-
-class Feedback(db.Model):
-    __tablename__ = 'feedbacks'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
-    body = db.Column(db.UnicodeText)
-    body_html = db.Column(db.UnicodeText)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
-    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    deleted = db.Column(db.Boolean, default=False)
-
-    def ping(self, modified_by):
-        self.modified_at = datetime.utcnow()
-        self.modified_by_id = modified_by.id
-        db.session.add(self)
-
-    def safe_delete(self, modified_by):
-        self.deleted = True
-        self.ping(modified_by=modified_by)
-        db.session.add(self)
-
-    @property
-    def alias(self):
-        return u'%s %s %s' % (self.user.name_alias, self.lesson.alias, self.body)
-
-    @staticmethod
-    def on_changed_body_html(target, value, oldvalue, initiator):
-        newline_tags = ['p', 'li']
-        soup = BeautifulSoup(value, 'html.parser')
-        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
-
-    def __repr__(self):
-        return '<Feedback %r>' % self.alias
-
-
-db.event.listen(Feedback.body_html, 'set', Feedback.on_changed_body_html)
 
 
 class Feed(db.Model):
