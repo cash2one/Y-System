@@ -668,6 +668,15 @@ class StudyPlan(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
+    feedback = db.Column(db.UnicodeText)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
 
     @property
     def alias(self):
