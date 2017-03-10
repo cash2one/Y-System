@@ -668,15 +668,6 @@ class StudyPlan(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
-    feedback = db.Column(db.UnicodeText)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
-    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-    def ping(self, modified_by):
-        self.modified_at = datetime.utcnow()
-        self.modified_by_id = modified_by.id
-        db.session.add(self)
 
     @property
     def alias(self):
@@ -4191,6 +4182,45 @@ class Announcement(db.Model):
 
 
 db.event.listen(Announcement.body_html, 'set', Announcement.on_changed_body_html)
+
+
+class Feedback(db.Model):
+    __tablename__ = 'feedbacks'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True)
+    body = db.Column(db.UnicodeText)
+    body_html = db.Column(db.UnicodeText)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_at = db.Column(db.DateTime, default=datetime.utcnow)
+    modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    deleted = db.Column(db.Boolean, default=False)
+
+    def ping(self, modified_by):
+        self.modified_at = datetime.utcnow()
+        self.modified_by_id = modified_by.id
+        db.session.add(self)
+
+    def safe_delete(self, modified_by):
+        self.deleted = True
+        self.ping(modified_by=modified_by)
+        db.session.add(self)
+
+    @property
+    def alias(self):
+        return u'%s %s %s' % (self.user.name_alias, self.lesson.alias, self.body)
+
+    @staticmethod
+    def on_changed_body_html(target, value, oldvalue, initiator):
+        newline_tags = ['p', 'li']
+        soup = BeautifulSoup(value, 'html.parser')
+        target.body = u'\n\n'.join([child.get_text() for child in [child for child in soup.descendants if (reduce(lambda tag1, tag2: len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag1)) == 1 or len(BeautifulSoup(unicode(child), 'html.parser').find_all(tag2)) == 1, newline_tags))] if child.get_text()])
+
+    def __repr__(self):
+        return '<Feedback %r>' % self.alias
+
+
+db.event.listen(Feedback.body_html, 'set', Feedback.on_changed_body_html)
 
 
 class Feed(db.Model):
