@@ -3872,10 +3872,7 @@ class Section(db.Model):
             (u'1st', u'1st', 2, ),
             (u'2nd', u'2nd', 3, ),
             (u'3rd', u'3rd', 4, ),
-            (u'视频', u'AW总论', 5, ),
-            (u'OG AW', u'AW总论', 0, ),
-            (u'Issue', u'AW总论', 0, ),
-            (u'Argument', u'AW总论', 0, ),
+            (u'AW总论', u'AW总论', 5, ),
             (u'4th', u'4th', 6, ),
             (u'5th', u'5th', 7, ),
             (u'6th', u'6th', 8, ),
@@ -3885,7 +3882,11 @@ class Section(db.Model):
             (u'Test', u'Test', -1, ),
             (u'OG V', u'Y-GRE临考', 0, ),
             (u'OG Q', u'Y-GRE临考', 0, ),
-            (u'OG V150/Magoosh', u'Y-GRE临考', 0, ),
+            (u'OG AW', u'Y-GRE临考', 0, ),
+            (u'Issue', u'Y-GRE临考', 0, ),
+            (u'Argument', u'Y-GRE临考', 0, ),
+            (u'V150', u'Y-GRE临考', 0, ),
+            (u'Magoosh V', u'Y-GRE临考', 0, ),
         ]
         for entry in sections:
             section = Section.query.filter_by(name=entry[0]).first()
