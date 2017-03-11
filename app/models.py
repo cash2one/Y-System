@@ -928,7 +928,7 @@ class GRETestScore(db.Model):
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
-    remark = db.Column(db.Unicode(64))
+    label = db.Column(db.Unicode(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -983,7 +983,7 @@ class TOEFLTestScore(db.Model):
     listening_score = db.Column(db.Integer)
     speaking_score = db.Column(db.Integer)
     writing_score = db.Column(db.Integer)
-    remark = db.Column(db.Unicode(64))
+    label = db.Column(db.Unicode(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -2905,7 +2905,7 @@ class Course(db.Model):
     @staticmethod
     def insert_courses():
         import xlrd
-        data = xlrd.open_workbook('initial-courses.xlsx')
+        data = xlrd.open_workbook('data/initial/courses.xlsx')
         table = data.sheet_by_index(0)
         courses = [table.row_values(row) for row in range(table.nrows) if row >= 1]
         for entry in courses:
@@ -3290,7 +3290,7 @@ class iPadContent(db.Model):
     @staticmethod
     def insert_ipad_contents():
         import xlrd
-        data = xlrd.open_workbook('initial-ipad-contents.xlsx')
+        data = xlrd.open_workbook('data/initial/ipad-contents.xlsx')
         table = data.sheet_by_index(0)
         lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in table.row_values(0) if Lesson.query.filter_by(name=value).first()]
         ipad_contents = [table.row_values(row) for row in range(table.nrows) if row >= 1]
@@ -3504,7 +3504,7 @@ class iPad(db.Model):
     @staticmethod
     def insert_ipads():
         import xlrd
-        data = xlrd.open_workbook('initial-ipads.xlsx')
+        data = xlrd.open_workbook('data/initial/ipads.xlsx')
         table = data.sheet_by_index(0)
         ipads = [table.row_values(row) for row in range(table.nrows) if row >= 1]
         for entry in ipads:
@@ -4119,7 +4119,7 @@ class NotaBene(db.Model):
     @staticmethod
     def insert_notate_bene():
         import xlrd
-        data = xlrd.open_workbook('initial-notate-bene.xlsx')
+        data = xlrd.open_workbook('data/initial/notate-bene.xlsx')
         table = data.sheet_by_index(0)
         notate_bene = [table.row_values(row) for row in range(table.nrows) if row >= 1]
         for entry in notate_bene:

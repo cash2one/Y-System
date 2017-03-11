@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 68e07ea6daa2
+Revision ID: fc4c160cf487
 Revises: 
-Create Date: 2017-03-11 02:22:40.409991
+Create Date: 2017-03-12 04:24:40.758876
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '68e07ea6daa2'
+revision = 'fc4c160cf487'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -291,7 +291,7 @@ def upgrade():
     sa.Column('v_score', sa.Integer(), nullable=True),
     sa.Column('q_score', sa.Integer(), nullable=True),
     sa.Column('aw_score_id', sa.Integer(), nullable=True),
-    sa.Column('remark', sa.Unicode(length=64), nullable=True),
+    sa.Column('label', sa.Unicode(length=64), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
@@ -472,7 +472,7 @@ def upgrade():
     sa.Column('listening_score', sa.Integer(), nullable=True),
     sa.Column('speaking_score', sa.Integer(), nullable=True),
     sa.Column('writing_score', sa.Integer(), nullable=True),
-    sa.Column('remark', sa.Unicode(length=64), nullable=True),
+    sa.Column('label', sa.Unicode(length=64), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
