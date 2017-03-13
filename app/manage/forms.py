@@ -15,6 +15,7 @@ from ..models import Assignment, AssignmentScoreGrade
 from ..models import Test, GREAWScore
 from ..models import iPad, iPadCapacity, iPadState, Room
 from ..models import Course, CourseType
+from ..models import NotaBene
 from ..models import Announcement, AnnouncementType
 from ..models import Product
 
@@ -798,65 +799,95 @@ class FilteriPadForm(FlaskForm):
 
 
 class EditStudyPlanForm(FlaskForm):
-    speed = FloatField(u'时间系数', validators=[Required()])
+    speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
+    vb_intro_start_date = DateField(u'开始日期')
+    vb_intro_end_date = DateField(u'结束日期')
+    vb_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_1_start_date = DateField(u'开始日期')
     vb_1_end_date = DateField(u'结束日期')
-    vb_1_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_1_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_2_start_date = DateField(u'开始日期')
     vb_2_end_date = DateField(u'结束日期')
-    vb_2_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_2_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_3_start_date = DateField(u'开始日期')
     vb_3_end_date = DateField(u'结束日期')
-    vb_3_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_3_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_4_start_date = DateField(u'开始日期')
     vb_4_end_date = DateField(u'结束日期')
-    vb_4_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_4_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_5_start_date = DateField(u'开始日期')
     vb_5_end_date = DateField(u'结束日期')
-    vb_5_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_5_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_6_start_date = DateField(u'开始日期')
     vb_6_end_date = DateField(u'结束日期')
-    vb_6_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_6_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_7_start_date = DateField(u'开始日期')
     vb_7_end_date = DateField(u'结束日期')
-    vb_7_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_7_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_8_start_date = DateField(u'开始日期')
     vb_8_end_date = DateField(u'结束日期')
-    vb_8_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_8_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_9_start_date = DateField(u'开始日期')
     vb_9_end_date = DateField(u'结束日期')
-    vb_9_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_intro_start_date = DateField(u'开始日期')
+    y_gre_intro_end_date = DateField(u'结束日期')
+    y_gre_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_1_start_date = DateField(u'开始日期')
     y_gre_1_end_date = DateField(u'结束日期')
-    y_gre_1_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_1_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_2_start_date = DateField(u'开始日期')
     y_gre_2_end_date = DateField(u'结束日期')
-    y_gre_2_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_2_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_3_start_date = DateField(u'开始日期')
     y_gre_3_end_date = DateField(u'结束日期')
-    y_gre_3_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_3_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_4_start_date = DateField(u'开始日期')
     y_gre_4_end_date = DateField(u'结束日期')
-    y_gre_4_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_4_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_5_start_date = DateField(u'开始日期')
     y_gre_5_end_date = DateField(u'结束日期')
-    y_gre_5_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_5_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_6_start_date = DateField(u'开始日期')
     y_gre_6_end_date = DateField(u'结束日期')
-    y_gre_6_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_6_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_7_start_date = DateField(u'开始日期')
     y_gre_7_end_date = DateField(u'结束日期')
-    y_gre_7_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_7_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_8_start_date = DateField(u'开始日期')
     y_gre_8_end_date = DateField(u'结束日期')
-    y_gre_8_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_8_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_9_start_date = DateField(u'开始日期')
     y_gre_9_end_date = DateField(u'结束日期')
-    y_gre_9_nota_bene = SelectMultipleField(u'N.B.', coerce=unicode)
-    gre_0_date = DateField(u'G0')
-    gre_1_date = DateField(u'G1')
+    y_gre_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    gre_0_date = DateField(u'G<sub>0</sub>')
+    gre_1_date = DateField(u'G<sub>1</sub>')
     deadline = DateField(u'Deadline')
     designer_email = StringField(u'设计人（邮箱）', validators=[Length(0, 64)])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditStudyPlanForm, self).__init__(*args, **kwargs)
+        self.vb_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.y_gre_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
 
     def validate_designer_email(self, field):
         if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:

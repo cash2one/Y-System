@@ -4439,12 +4439,12 @@ def ipad_contents_data():
 @login_required
 @permission_required(u'管理研修计划')
 def edit_study_plan(id):
-    user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
     form = EditStudyPlanForm()
     if form.validate_on_submit():
-        return redirect(request.args.get('next') or user.url)
+        return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
     return render_template('manage/edit_study_plan.html', form=form, user=user)
 
 

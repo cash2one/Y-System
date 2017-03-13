@@ -1,0 +1,648 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}编辑{{ user.name }}的研修计划{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.css" />
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="edit icon"></i>编辑{{ user.name }}的研修计划</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <form id="edit-study-plan" action="{{ url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
+                    {{ form.hidden_tag() }}
+                    <div class="ui blue dividing header">基本信息</div>
+                    <div class="required field">
+                        {{ form.speed.label() }}
+                        {{ form.speed(placeholder='时间系数') }}
+                    </div>
+                    <div class="ui blue dividing header">申请信息</div>
+                    <div class="ui blue dividing header">VB</div>
+                    <div class="field">
+                        <label>总论</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-intro-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_intro_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-intro-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_intro_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_intro_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L1</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-1-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_1_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-1-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_1_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_1_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L2</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-2-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_2_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-2-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_2_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_2_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L3</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-3-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_3_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-3-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_3_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_3_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L4</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-4-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_4_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-4-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_4_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_4_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L5</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-5-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_5_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-5-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_5_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_5_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L6</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-6-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_6_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-6-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_6_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_6_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L7</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-7-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_7_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-7-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_7_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_7_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L8</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-8-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_8_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-8-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_8_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_8_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>L9</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="vb-9-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_9_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="vb-9-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.vb_9_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.vb_9_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui teal dividing header">Y-GRE</div>
+                    <div class="field">
+                        <label>总论</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-intro-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_intro_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-intro-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_intro_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_intro_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>1st</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-1-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_1_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-1-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_1_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_1_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>2nd</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-2-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_2_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-2-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_2_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_2_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>3rd</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-3-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_3_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-3-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_3_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_3_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>4th</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-4-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_4_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-4-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_4_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_4_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>5th</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-5-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_5_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-5-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_5_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_5_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>6th</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-6-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_6_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-6-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_6_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_6_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>7th</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-7-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_7_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-7-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_7_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_7_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>8th</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-8-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_8_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-8-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_8_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_8_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>9th</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-9-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_9_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-9-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_9_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_9_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui blue dividing header">预计GRE考试日期</div>
+                    <div class="fields">
+                        <div class="four wide field">
+                            {{ form.gre_0_date.label() | safe }}
+                            <div class="ui date calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.gre_0_date(placeholder='YYYY-MM-DD') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="four wide field">
+                            {{ form.gre_1_date.label() }}
+                            <div class="ui date calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.gre_1_date(placeholder='YYYY-MM-DD') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.deadline.label() }}
+                            <div class="ui date calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.deadline(placeholder='YYYY-MM-DD') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui blue dividing header">其它信息</div>
+                    <div class="required field">
+                        {{ form.designer_email.label() }}
+                        <div class="ui fluid search">
+                            {{ form.designer_email(placeholder='输入设计人姓名/邮箱查询', class='prompt') }}
+                            <div class="results"></div>
+                        </div>
+                    </div>
+                    {{ form.submit(class='ui primary button') }}
+                    <a class="ui button loading-trigger" href="{{ request.args.get('next') or url_for('main.profile_overview', id=user.id) }}">取消</a>
+                    {{ macros.form_validation_error_widget(form) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.js"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.checkbox').checkbox();
+
+{{ macros.date_picker_js_snippet() }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-intro-start-date', end_id='vb-intro-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-1-start-date', end_id='vb-1-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-2-start-date', end_id='vb-2-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-3-start-date', end_id='vb-3-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-4-start-date', end_id='vb-4-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-5-start-date', end_id='vb-5-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-6-start-date', end_id='vb-6-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-7-start-date', end_id='vb-7-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-8-start-date', end_id='vb-8-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='vb-9-start-date', end_id='vb-9-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-intro-start-date', end_id='y-gre-intro-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-1-start-date', end_id='y-gre-1-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-2-start-date', end_id='y-gre-2-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-3-start-date', end_id='y-gre-3-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-4-start-date', end_id='y-gre-4-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-5-start-date', end_id='y-gre-5-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-6-start-date', end_id='y-gre-6-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-7-start-date', end_id='y-gre-7-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-8-start-date', end_id='y-gre-8-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-9-start-date', end_id='y-gre-9-end-date') }}
+
+$(document)
+    .ready(function() {
+        $('#edit-study-plan')
+            .form({
+                onSuccess: submitForm,
+                inline: true,
+                on: 'blur',
+                fields: {
+                    speed: {
+                        identifier: 'speed',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写时间系数'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的时间系数'
+                            }
+                        ]
+                    },
+                    designer_email: {
+                        identifier: 'designer_email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写设计人邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入一个有效的电子邮箱地址'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: "{% if current_user.is_developer %}{{ url_for('manage.suggest_email_dev') }}{% else %}{{ url_for('manage.suggest_email') }}{% endif %}?keyword={query}"
+        },
+        showNoResults: false
+    })
+;
+</script>
+{% endblock %}

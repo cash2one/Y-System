@@ -125,7 +125,7 @@ function noProfileAvatar(avatarImage) {
                 <div class="ui vertical segment">
                     <div class="ui header">研修计划</div>
                     {% if user.study_plans.count() %}{% endif %}
-                    {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href=""><i class="edit icon"></i>编辑</a>{% endif %}
+                    {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>{% endif %}
                 </div>
                 <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
@@ -677,7 +677,7 @@ $.getJSON(VBProgressUrl, function(data) {
                     $('#' + data.lessons[lesson_idx].element_id + '-sections .ui.labels').append(
                         $('<a>')
                             .attr('id', data.lessons[lesson_idx].sections[section_idx].element_id + '-action')
-                            .attr('href', '/manage/punch/{{ user.id }}/' + data.lessons[lesson_idx].sections[section_idx].element_id.split('-').pop() + "?next={{ url_for('main.profile', id=user.id) }}")
+                            .attr('href', '/manage/punch/{{ user.id }}/' + data.lessons[lesson_idx].sections[section_idx].element_id.split('-').pop() + "?next={{ url_for('main.profile_progress', id=user.id) }}")
                             .attr('data-content','标记为已完成')
                             .attr('data-position', 'top center')
                             .attr('data-variation', 'inverted')
@@ -745,7 +745,7 @@ $.getJSON(VBProgressUrl, function(data) {
         {% if current_user.can('管理研修进度') %}
         if (data.punches[punch_idx].section.order === 0) {
             $('#' + data.punches[punch_idx].section.element_id + '-action')
-                .attr('href', '/manage/unpunch/{{ user.id }}/' + data.punches[punch_idx].section.element_id.split('-').pop() + "?next={{ url_for('main.profile', id=user.id) }}")
+                .attr('href', '/manage/unpunch/{{ user.id }}/' + data.punches[punch_idx].section.element_id.split('-').pop() + "?next={{ url_for('main.profile_progress', id=user.id) }}")
                 .attr('data-content','标记为未完成')
                 .attr('data-position', 'top center')
                 .attr('data-variation', 'inverted')

@@ -20,7 +20,7 @@ class Version:
     Application = 'v1.0.0-dev'
     jQuery = '3.1.1'
     SemanticUI = '2.2.9'
-    SemanticUICalendar = '0.0.6'
+    SemanticUICalendar = '0.0.7'
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
     CountUp = '1.8.1'

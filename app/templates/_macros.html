@@ -164,7 +164,81 @@ $('.ui.date.calendar').calendar({
                 return year + '-' + month + '-' + day
             };
         }
+    }
+});
+{% endmacro %}
+
+
+{% macro date_range_picker_js_snippet(start_id, end_id) %}
+$('#{{ start_id }}').calendar({
+    type: 'date',
+    ampm: false,
+    text: {
+        days: ['日', '一', '二', '三', '四', '五', '六'],
+        months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+        monthsShort: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一', '十二'],
+        today: '今天',
+        now: '现在',
+        am: '上午',
+        pm: '下午'
     },
+    formatter: {
+        header: function (date, mode, settings) {
+            return date.getFullYear() + '年 ' + settings.text.monthsShort[date.getMonth()]
+        },
+        date: function (date, settings) {
+            if (!date) {
+                return ''
+            } else {
+                var year = date.getFullYear();
+                var month = date.getMonth() + 1;
+                if (month < 10) {
+                    month = '0' + month;
+                };
+                var day = date.getDate();
+                if (day < 10) {
+                    day = '0' + day;
+                };
+                return year + '-' + month + '-' + day
+            };
+        }
+    },
+    endCalendar: $('#{{ end_id }}')
+});
+$('#{{ end_id }}').calendar({
+    type: 'date',
+    ampm: false,
+    text: {
+        days: ['日', '一', '二', '三', '四', '五', '六'],
+        months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+        monthsShort: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一', '十二'],
+        today: '今天',
+        now: '现在',
+        am: '上午',
+        pm: '下午'
+    },
+    formatter: {
+        header: function (date, mode, settings) {
+            return date.getFullYear() + '年 ' + settings.text.monthsShort[date.getMonth()]
+        },
+        date: function (date, settings) {
+            if (!date) {
+                return ''
+            } else {
+                var year = date.getFullYear();
+                var month = date.getMonth() + 1;
+                if (month < 10) {
+                    month = '0' + month;
+                };
+                var day = date.getDate();
+                if (day < 10) {
+                    day = '0' + day;
+                };
+                return year + '-' + month + '-' + day
+            };
+        }
+    },
+    startCalendar: $('#{{ start_id }}')
 });
 {% endmacro %}
 
