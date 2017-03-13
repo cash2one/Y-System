@@ -123,6 +123,11 @@ function noProfileAvatar(avatarImage) {
                     {% endif %}
                 </div>
                 <div class="ui vertical segment">
+                    <div class="ui header">研修计划</div>
+                    {% if user.study_plans.count() %}
+                    {% elif current_user.can('管理研修计划') %}<a class="ui positive left labeled icon button loading-trigger" href=""><i class="plus icon"></i>新建备考框架</a>{% endif %}
+                </div>
+                <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
                     <div id="booking-stats" class="ui seven tiny statistics">
                         <div class="statistic">
@@ -667,7 +672,7 @@ $.getJSON(VBProgressUrl, function(data) {
                         .addClass('ui label')
                         .text(data.lessons[lesson_idx].sections[section_idx].name)
                 );
-                {% if current_user.can('管理学习进度') %}
+                {% if current_user.can('管理研修进度') %}
                 if (data.lessons[lesson_idx].sections[section_idx].order === 0) {
                     $('#' + data.lessons[lesson_idx].element_id + '-sections .ui.labels').append(
                         $('<a>')
@@ -737,7 +742,7 @@ $.getJSON(VBProgressUrl, function(data) {
             .attr('data-position', 'top left')
             .attr('data-variation', 'inverted')
             .popup();
-        {% if current_user.can('管理学习进度') %}
+        {% if current_user.can('管理研修进度') %}
         if (data.punches[punch_idx].section.order === 0) {
             $('#' + data.punches[punch_idx].section.element_id + '-action')
                 .attr('href', '/manage/unpunch/{{ user.id }}/' + data.punches[punch_idx].section.element_id.split('-').pop() + "?next={{ url_for('main.profile', id=user.id) }}")

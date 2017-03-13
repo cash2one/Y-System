@@ -937,7 +937,7 @@ def rental_return_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3.html', user=user, section=section, form=form)
@@ -982,7 +982,7 @@ def rental_return_step_3_alt(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3_alt.html', user=user, section=section, form=form)
@@ -1065,7 +1065,7 @@ def rental_exchange_step_3(rental_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_3.html', rental=rental, section=section, form=form)
@@ -1200,7 +1200,7 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id, ipad_id):
 
 @manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1214,7 +1214,7 @@ def edit_punch_step_1(user_id):
 
 @manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def edit_punch_step_2(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1228,7 +1228,7 @@ def edit_punch_step_2(user_id, lesson_id):
 
 @manage.route('/punch/edit/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def edit_punch_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1238,7 +1238,7 @@ def edit_punch_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
@@ -1246,7 +1246,7 @@ def edit_punch_step_3(user_id, section_id):
 
 @manage.route('/punch/<int:user_id>/<int:section_id>')
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def punch(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1254,14 +1254,14 @@ def punch(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     user.punch(section=section)
     flash(u'已为%s标记进度：%s' % (user.name_alias, section.alias2), category='success')
-    add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+    add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
     add_feed(user=current_user._get_current_object(), event=u'为%s标记进度：%s' % (user.name_alias, section.alias2), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
 @manage.route('/unpunch/<int:user_id>/<int:section_id>')
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def unpunch(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:

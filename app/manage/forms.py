@@ -162,12 +162,12 @@ class iPadSerialForm(FlaskForm):
 
 
 class PunchSectionForm(FlaskForm):
-    section = SelectField(u'学习进度', coerce=unicode, validators=[Required()])
+    section = SelectField(u'研修进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, user, *args, **kwargs):
         super(PunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(u'', u'选择学习进度')] + [(unicode(section.id), section.alias2) for section in user.next_punch]
+        self.section.choices = [(u'', u'选择研修进度')] + [(unicode(section.id), section.alias2) for section in user.next_punch]
 
 
 class ConfirmPunchForm(FlaskForm):
