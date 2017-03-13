@@ -124,9 +124,8 @@ function noProfileAvatar(avatarImage) {
                 </div>
                 <div class="ui vertical segment">
                     <div class="ui header">研修计划</div>
-                    {% if user.study_plans.count() %}
+                    {% if user.study_plans.count() %}{% endif %}
                     {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href=""><i class="edit icon"></i>编辑</a>{% endif %}
-                    {% elif current_user.can('管理研修计划') %}<a class="ui positive left labeled icon button loading-trigger" href=""><i class="plus icon"></i>新建备考框架</a>{% endif %}
                 </div>
                 <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
