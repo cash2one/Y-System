@@ -862,6 +862,8 @@ class EditStudyPlanForm(FlaskForm):
     y_gre_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     gre_0_date = DateField(u'G<sub>0</sub>')
     gre_1_date = DateField(u'G<sub>1</sub>')
+    gre_2_date = DateField(u'G<sub>2</sub>')
+    gre_3_date = DateField(u'G<sub>3</sub>')
     deadline = DateField(u'Deadline')
     designer_email = StringField(u'设计人（邮箱）', validators=[Length(0, 64)])
     submit = SubmitField(u'提交')

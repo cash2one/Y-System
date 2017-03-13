@@ -24,10 +24,22 @@
                 <form id="edit-study-plan" action="{{ url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="ui blue dividing header">基本信息</div>
-                    <div class="required field">
-                        {{ form.speed.label() }}
-                        {{ form.speed(placeholder='时间系数') }}
+                    <div class="fields">
+                        <div class="eight wide required field">
+                            {{ form.speed.label() }}
+                            {{ form.speed(placeholder='时间系数') }}
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.deadline.label() }}
+                            <div class="ui date calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.deadline(placeholder='YYYY-MM-DD') }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <a class="ui positive left labeled icon button"><i class="rocket icon"></i>自动生成</a>
                     <div class="ui blue dividing header">申请信息</div>
                     <div class="ui blue dividing header">VB</div>
                     <div class="field">
@@ -531,12 +543,21 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="eight wide field">
-                            {{ form.deadline.label() }}
+                        <div class="four wide field">
+                            {{ form.gre_2_date.label() }}
                             <div class="ui date calendar">
                                 <div class="ui left icon input">
                                     <i class="calendar icon"></i>
-                                    {{ form.deadline(placeholder='YYYY-MM-DD') }}
+                                    {{ form.gre_2_date(placeholder='YYYY-MM-DD') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="four wide field">
+                            {{ form.gre_3_date.label() }}
+                            <div class="ui date calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.gre_3_date(placeholder='YYYY-MM-DD') }}
                                 </div>
                             </div>
                         </div>
@@ -614,6 +635,19 @@ $(document)
                             {
                                 type: 'number',
                                 prompt: '请填写一个有效的时间系数'
+                            }
+                        ]
+                    },
+                    deadline: {
+                        identifier: 'deadline',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写DDL日期'
+                            },
+                            {
+                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
+                                prompt: '请填写一个有效的DDL日期'
                             }
                         ]
                     },
