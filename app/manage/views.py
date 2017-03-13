@@ -29,6 +29,7 @@ from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewTagForm, EditTagForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
+from .forms import EditStudyPlanForm
 from .forms import NewNotaBeneForm, EditNotaBeneForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
@@ -4432,6 +4433,19 @@ def ipad_contents_data():
         'ipads': [ipad.to_json() for ipad in ipads],
         'ipad_contents': [ipad_content.to_json() for ipad_content in ipad_contents],
     })
+
+
+@manage.route('/study-plan/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理研修计划')
+def edit_study_plan(id):
+    user = User.query.get_or_404(user_id)
+    if not user.created or user.deleted:
+        abort(404)
+    form = EditStudyPlanForm()
+    if form.validate_on_submit():
+        return redirect(request.args.get('next') or user.url)
+    return render_template('manage/edit_study_plan.html', form=form, user=user)
 
 
 @manage.route('/nota-bene', methods=['GET', 'POST'])
