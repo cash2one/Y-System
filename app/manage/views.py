@@ -2905,16 +2905,6 @@ def create_user():
                 score_type=ScoreType.query.filter_by(name=u'专业英语八级').first(),
                 score=form.tem_8.data
             )
-        if form.toefl_total.data:
-            user.add_toefl_test_score(
-                test_date=form.toefl_test_date.data,
-                total_score=int(form.toefl_total.data),
-                reading_score=int(form.toefl_reading.data),
-                listening_score=int(form.toefl_listening.data),
-                speaking_score=int(form.toefl_speaking.data),
-                writing_score=int(form.toefl_writing.data),
-                modified_by=current_user._get_current_object()
-            )
         if form.competition.data:
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'竞赛').first(),
@@ -3123,20 +3113,6 @@ def create_user_confirm(id):
             )
         flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    # TOEFL
-    new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
-    if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
-        user.add_toefl_test_score(
-            test_date=new_toefl_test_score_form.test_date.data,
-            total_score=int(new_toefl_test_score_form.total.data),
-            reading_score=int(new_toefl_test_score_form.reading.data),
-            listening_score=int(new_toefl_test_score_form.listening.data),
-            speaking_score=int(new_toefl_test_score_form.speaking.data),
-            writing_score=int(new_toefl_test_score_form.writing.data),
-            modified_by=current_user._get_current_object()
-        )
-        flash(u'已添加TOEFL成绩', category='success')
-        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
     if edit_purpose_form.submit.data and edit_purpose_form.validate_on_submit():
@@ -3272,7 +3248,6 @@ def create_user_confirm(id):
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
         new_score_record_form=new_score_record_form,
-        new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
         edit_application_form=edit_application_form,
         edit_referrer_form=edit_referrer_form,
@@ -3684,16 +3659,6 @@ def remove_score_record(id):
     flash(u'已删除既往成绩：%s' % score_record.type.name, category='success')
     if user.created:
         add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除既往成绩“%s”' % (user.name_alias, score_record.type.name), category=u'manage')
-    return redirect(request.args.get('next') or url_for('manage.user'))
-
-
-@manage.route('/user/toefl-test-score/remove/<int:id>')
-@login_required
-@permission_required(u'管理用户')
-def remove_toefl_test_score(id):
-    toefl_test_score = TOEFLTestScore.query.get_or_404(id)
-    db.session.delete(toefl_test_score)
-    flash(u'已删除TOEFL成绩', category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 

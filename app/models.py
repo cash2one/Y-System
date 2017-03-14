@@ -2405,24 +2405,6 @@ class User(UserMixin, db.Model):
                 .order_by(Section.order.asc())\
                 .all()
 
-    def add_toefl_test_score(self, test_date, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
-        test = TOEFLTest.query.filter_by(date=test_date).first()
-        if test is None:
-            test = TOEFLTest(date=test_date)
-            db.session.add(test)
-            db.session.commit()
-        toefl_test_score = TOEFLTestScore(
-            user_id=self.id,
-            test_id=test.id,
-            total_score=total_score,
-            reading_score=reading_score,
-            listening_score=listening_score,
-            speaking_score=speaking_score,
-            writing_score=writing_score,
-            modified_by_id=modified_by.id
-        )
-        db.session.add(toefl_test_score)
-
     def submitted(self, assignment):
         return self.assignment_scores.filter_by(assignment_id=assignment.id).order_by(AssignmentScore.modified_at.desc()).first()
 

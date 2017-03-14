@@ -368,12 +368,6 @@ class NewUserForm(FlaskForm):
     cet_6 = StringField(u'CET-6', validators=[Length(0, 64)])
     tem_4 = StringField(u'TEM-4', validators=[Length(0, 64)])
     tem_8 = StringField(u'TEM-8', validators=[Length(0, 64)])
-    toefl_total = StringField(u'TOEFL', validators=[Length(0, 64)])
-    toefl_reading = StringField(u'Reading', validators=[Length(0, 64)])
-    toefl_listening = StringField(u'Listening', validators=[Length(0, 64)])
-    toefl_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
-    toefl_writing = StringField(u'Writing', validators=[Length(0, 64)])
-    toefl_test_date = DateField(u'考试日期', validators=[Optional()])
     competition = StringField(u'竞赛成绩', validators=[Length(0, 128)])
     other_score = StringField(u'其它成绩', validators=[Length(0, 128)])
     # registration
