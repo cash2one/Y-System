@@ -86,6 +86,7 @@ def deploy():
     from app.models import Tag
     from app.models import EducationType
     from app.models import ScoreType
+    from app.models import ScoreLabel
     from app.models import Product
     from app.models import Course
     from app.models import Period
@@ -122,6 +123,7 @@ def deploy():
     Tag.insert_tags()
     EducationType.insert_education_types()
     ScoreType.insert_score_types()
+    ScoreLabel.insert_score_labels()
     Product.insert_products()
     Course.insert_courses()
     Period.insert_periods()

@@ -38,6 +38,7 @@ class Color(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     css_class = db.Column(db.Unicode(64))
     tags = db.relationship('Tag', backref='color', lazy='dynamic')
+    score_labels = db.relationship('ScoreLabel', backref='color', lazy='dynamic')
 
     @staticmethod
     def insert_colors():
@@ -56,6 +57,7 @@ class Color(db.Model):
             (u'Brown', u'brown', ),
             (u'Grey', u'grey', ),
             (u'Black', u'black', ),
+            (u'Basic', u'basic', ),
         ]
         for entry in colors:
             color = Color.query.filter_by(name=entry[0]).first()
@@ -898,6 +900,63 @@ class YGRETestScore(db.Model):
         return '<Y-GRE Test Score %r>' % self.alias
 
 
+class ScoreLabel(db.Model):
+    __tablename__ = 'score_labels'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), index=True)
+    category = db.Column(db.Unicode(64), index=True)
+    color_id = db.Column(db.Integer, db.ForeignKey('colors.id'))
+    gre_test_scores = db.relationship('GRETestScore', backref='label', lazy='dynamic')
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='label', lazy='dynamic')
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.category, self.name)
+
+    @staticmethod
+    def insert_score_labels():
+        score_labels = [
+            (u'初始', u'GRE', u'Basic', ),
+            (u'目标', u'GRE', u'Basic', ),
+            (u'G0', u'GRE', u'Basic', ),
+            (u'G1', u'GRE', u'Basic', ),
+            (u'G2', u'GRE', u'Basic', ),
+            (u'G3', u'GRE', u'Basic', ),
+            (u'G4', u'GRE', u'Basic', ),
+            (u'G5', u'GRE', u'Basic', ),
+            (u'G6', u'GRE', u'Basic', ),
+            (u'G7', u'GRE', u'Basic', ),
+            (u'G8', u'GRE', u'Basic', ),
+            (u'G9', u'GRE', u'Basic', ),
+            (u'初始', u'TOEFL', u'Basic', ),
+            (u'目标', u'TOEFL', u'Basic', ),
+            (u'T0', u'TOEFL', u'Basic', ),
+            (u'T1', u'TOEFL', u'Basic', ),
+            (u'T2', u'TOEFL', u'Basic', ),
+            (u'T3', u'TOEFL', u'Basic', ),
+            (u'T4', u'TOEFL', u'Basic', ),
+            (u'T5', u'TOEFL', u'Basic', ),
+            (u'T6', u'TOEFL', u'Basic', ),
+            (u'T7', u'TOEFL', u'Basic', ),
+            (u'T8', u'TOEFL', u'Basic', ),
+            (u'T9', u'TOEFL', u'Basic', ),
+        ]
+        for entry in score_labels:
+            score_label = ScoreLabel.query.filter_by(name=entry[0], category=entry[1]).first()
+            if score_label is None:
+                score_label = ScoreLabel(
+                    name=entry[0],
+                    category=entry[1],
+                    color_id=Color.query.filter_by(name=entry[2]).first().id
+                )
+                db.session.add(score_label)
+                print u'导入G/T成绩标签信息', entry[0], entry[1], entry[2]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Score Label %r>' % self.alias
+
+
 class GRETest(db.Model):
     __tablename__ = 'gre_tests'
     id = db.Column(db.Integer, primary_key=True)
@@ -929,7 +988,7 @@ class GRETestScore(db.Model):
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
-    label = db.Column(db.Unicode(64))
+    label_id = db.Column(db.Integer, db.ForeignKey('score_labels.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -984,7 +1043,7 @@ class TOEFLTestScore(db.Model):
     listening_score = db.Column(db.Integer)
     speaking_score = db.Column(db.Integer)
     writing_score = db.Column(db.Integer)
-    label = db.Column(db.Unicode(64))
+    label_id = db.Column(db.Integer, db.ForeignKey('score_labels.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))

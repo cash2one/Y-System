@@ -61,7 +61,31 @@
                     {% endfor %}
                 </div>{% else %}<div>无</div>{% endif %}{% endwith %}
                 <div class="ui blue dividing header">GRE成绩</div>
+                {% with scores = user.gre_test_scores %}{% if scores.count() %}<div class="ui relaxed list">
+                    {% for score in scores %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ score.test.date }}</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{% if score.label %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>{% endif %}{% endwith %}
                 <div class="ui blue dividing header">TOEFL成绩</div>
+                {% with scores = user.toefl_test_scores %}{% if scores.count() %}<div class="ui relaxed list">
+                    {% for score in scores %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ score.test.date }}</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{% if score.label %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>{% endif %}{% endwith %}
                 <form id="edit-study-plan" action="{{ url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
                     <div class="ui blue dividing header">时间参数</div>

@@ -187,7 +187,7 @@
                         {% for score in scores %}
                         <tr>
                             <td class="single line">{{ macros.user_popup_gender(score.user, score.user.id == current_user.id) }}</td>
-                            <td>{% if test_type in ['gre', 'toefl'] %}{{ score.test.date }}{% else %}{{ score.test.name }}{% endif %}</td>
+                            <td>{% if test_type in ['gre', 'toefl'] %}{% if score.label %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.test.date }}{% else %}{{ score.test.name }}{% endif %}</td>
                             {% if test_type == 'vb' %}
                             <td>{{ score.score_alias }}</td>
                             {% if score.retrieved %}<td>已回收</td>{% else %}<td class="active">发出</td>{% endif %}

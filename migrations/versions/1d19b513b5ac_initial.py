@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 73b46e606e5b
+Revision ID: 1d19b513b5ac
 Revises: 
-Create Date: 2017-03-13 20:40:01.614638
+Create Date: 2017-03-14 17:32:48.773150
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '73b46e606e5b'
+revision = '1d19b513b5ac'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -167,6 +167,16 @@ def upgrade():
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('role_id', 'permission_id')
     )
+    op.create_table('score_labels',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('category', sa.Unicode(length=64), nullable=True),
+    sa.Column('color_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['color_id'], ['colors.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_score_labels_category'), 'score_labels', ['category'], unique=False)
+    op.create_index(op.f('ix_score_labels_name'), 'score_labels', ['name'], unique=False)
     op.create_table('tags',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -291,11 +301,12 @@ def upgrade():
     sa.Column('v_score', sa.Integer(), nullable=True),
     sa.Column('q_score', sa.Integer(), nullable=True),
     sa.Column('aw_score_id', sa.Integer(), nullable=True),
-    sa.Column('label', sa.Unicode(length=64), nullable=True),
+    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['aw_score_id'], ['gre_aw_scores.id'], ),
+    sa.ForeignKeyConstraint(['label_id'], ['score_labels.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['test_id'], ['gre_tests.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -472,10 +483,11 @@ def upgrade():
     sa.Column('listening_score', sa.Integer(), nullable=True),
     sa.Column('speaking_score', sa.Integer(), nullable=True),
     sa.Column('writing_score', sa.Integer(), nullable=True),
-    sa.Column('label', sa.Unicode(length=64), nullable=True),
+    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['label_id'], ['score_labels.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['test_id'], ['toefl_tests.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -719,6 +731,9 @@ def downgrade():
     op.drop_table('users')
     op.drop_index(op.f('ix_tags_name'), table_name='tags')
     op.drop_table('tags')
+    op.drop_index(op.f('ix_score_labels_name'), table_name='score_labels')
+    op.drop_index(op.f('ix_score_labels_category'), table_name='score_labels')
+    op.drop_table('score_labels')
     op.drop_table('role_permissions')
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')
