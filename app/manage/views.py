@@ -1827,7 +1827,7 @@ def test():
             db.session.add(test)
             db.session.commit()
         label_id = None
-        if gre_form.score_label.data and int(gre_form.score_label.data) > 0:
+        if int(gre_form.score_label.data) > 0:
             label_id = int(gre_form.score_label.data)
         score = GRETestScore(
             user_id=user.id,
@@ -1855,7 +1855,7 @@ def test():
             db.session.add(test)
             db.session.commit()
         label_id = None
-        if toefl_form.score_label.data and int(toefl_form.score_label.data) > 0:
+        if int(toefl_form.score_label.data) > 0:
             label_id = int(toefl_form.score_label.data)
         score = TOEFLTestScore(
             user_id=user.id,
@@ -2058,7 +2058,7 @@ def test_score(test_type, id):
                 db.session.add(test)
                 db.session.commit()
             label_id = None
-            if form.score_label.data and int(form.score_label.data) > 0:
+            if int(form.score_label.data) > 0:
                 label_id = int(form.score_label.data)
             score = GRETestScore(
                 user_id=user.id,
@@ -2098,7 +2098,7 @@ def test_score(test_type, id):
                 db.session.add(test)
                 db.session.commit()
             label_id = None
-            if form.score_label.data and int(form.score_label.data) > 0:
+            if int(form.score_label.data) > 0:
                 label_id = int(form.score_label.data)
             score = TOEFLTestScore(
                 user_id=user.id,
@@ -2202,8 +2202,8 @@ def edit_test_score(test_type, id):
                 db.session.add(test)
                 db.session.commit()
             score.test_id = test.id
-            if form.test_label.data and int(form.test_label.data) > 0:
-                score.label_id = int(form.test_label.data)
+            if int(form.score_label.data) > 0:
+                score.label_id = int(form.score_label.data)
             else:
                 score.label_id = None
             score.v_score = int(form.v_score.data)
@@ -2232,8 +2232,8 @@ def edit_test_score(test_type, id):
                 db.session.add(test)
                 db.session.commit()
             score.test_id = test.id
-            if form.test_label.data and int(form.test_label.data) > 0:
-                score.label_id = int(form.test_label.data)
+            if int(form.score_label.data) > 0:
+                score.label_id = int(form.score_label.data)
             else:
                 score.label_id = None
             score.total_score = int(form.total.data)
