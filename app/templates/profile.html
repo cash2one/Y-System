@@ -168,10 +168,10 @@ function noProfileAvatar(avatarImage) {
                         {% for score in scores %}
                         <div class="item">
                             <div class="right floated content">
-                                <div class="description">{{ score.test.date }}</div>
+                                <div class="description">{% if score.test_id %}{{ score.test.date }}{% endif %}</div>
                             </div>
                             <div class="content">
-                                <div class="header">{% if score.label %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
+                                <div class="header">{% if score.label_id %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -183,10 +183,10 @@ function noProfileAvatar(avatarImage) {
                         {% for score in scores %}
                         <div class="item">
                             <div class="right floated content">
-                                <div class="description">{{ score.test.date }}</div>
+                                <div class="description">{% if score.test_id %}{{ score.test.date }}{% endif %}</div>
                             </div>
                             <div class="content">
-                                <div class="header">{% if score.label %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
+                                <div class="header">{% if score.label_id %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
                             </div>
                         </div>
                         {% endfor %}

@@ -1827,14 +1827,18 @@ def test():
             if user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
                 flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                 return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
-        test = GRETest.query.filter_by(date=gre_form.test_date.data).first()
-        if test is None:
-            test = GRETest(date=gre_form.test_date.data)
-            db.session.add(test)
-            db.session.commit()
+        if label_id is not None and ScoreLabel.query.get(label_id).name == u'目标':
+            test_id = None
+        else:
+            test = GRETest.query.filter_by(date=gre_form.test_date.data).first()
+            if test is None:
+                test = GRETest(date=gre_form.test_date.data)
+                db.session.add(test)
+                db.session.commit()
+            test_id = test.id
         score = GRETestScore(
             user_id=user.id,
-            test_id=test.id,
+            test_id=test_id,
             label_id=label_id,
             v_score=int(gre_form.v_score.data),
             q_score=int(gre_form.q_score.data),
@@ -1858,14 +1862,18 @@ def test():
             if user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
                 flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                 return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
-        test = TOEFLTest.query.filter_by(date=toefl_form.test_date.data).first()
-        if test is None:
-            test = TOEFLTest(date=toefl_form.test_date.data)
-            db.session.add(test)
-            db.session.commit()
+        if label_id is not None and ScoreLabel.query.get(label_id).name == u'目标':
+            test_id = None
+        else:
+            test = TOEFLTest.query.filter_by(date=toefl_form.test_date.data).first()
+            if test is None:
+                test = TOEFLTest(date=toefl_form.test_date.data)
+                db.session.add(test)
+                db.session.commit()
+            test_id = test.id
         score = TOEFLTestScore(
             user_id=user.id,
-            test_id=test.id,
+            test_id=test_id,
             label_id=label_id,
             total_score=int(toefl_form.total.data),
             reading_score=int(toefl_form.reading.data),
@@ -2064,14 +2072,18 @@ def test_score(test_type, id):
                 if user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
                     flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                     return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
-            test = GRETest.query.filter_by(date=form.test_date.data).first()
-            if test is None:
-                test = GRETest(date=form.test_date.data)
-                db.session.add(test)
-                db.session.commit()
+            if label_id is not None and ScoreLabel.query.get(label_id).name == u'目标':
+                test_id = None
+            else:
+                test = GRETest.query.filter_by(date=form.test_date.data).first()
+                if test is None:
+                    test = GRETest(date=form.test_date.data)
+                    db.session.add(test)
+                    db.session.commit()
+                test_id = test.id
             score = GRETestScore(
                 user_id=user.id,
-                test_id=test.id,
+                test_id=test_id,
                 label_id=label_id,
                 v_score=int(form.v_score.data),
                 q_score=int(form.q_score.data),
@@ -2107,14 +2119,18 @@ def test_score(test_type, id):
                 if user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
                     flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                     return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
-            test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
-            if test is None:
-                test = TOEFLTest(date=form.test_date.data)
-                db.session.add(test)
-                db.session.commit()
+            if label_id is not None and ScoreLabel.query.get(label_id).name == u'目标':
+                test_id = None
+            else:
+                test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
+                if test is None:
+                    test = TOEFLTest(date=form.test_date.data)
+                    db.session.add(test)
+                    db.session.commit()
+                test_id = test.id
             score = TOEFLTestScore(
                 user_id=user.id,
-                test_id=test.id,
+                test_id=test_id,
                 label_id=label_id,
                 total_score=int(form.total.data),
                 reading_score=int(form.reading.data),
@@ -2214,12 +2230,16 @@ def edit_test_score(test_type, id):
                 if score.user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
                     flash(u'%s已经拥有“%s”成绩' % (score.user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                     return redirect(url_for('manage.edit_test_score', test_type=test_type, id=score.id))
-            test = GRETest.query.filter_by(date=form.test_date.data).first()
-            if test is None:
-                test = GRETest(date=form.test_date.data)
-                db.session.add(test)
-                db.session.commit()
-            score.test_id = test.id
+            if label_id is not None and ScoreLabel.query.get(label_id).name == u'目标':
+                test_id = None
+            else:
+                test = GRETest.query.filter_by(date=form.test_date.data).first()
+                if test is None:
+                    test = GRETest(date=form.test_date.data)
+                    db.session.add(test)
+                    db.session.commit()
+                test_id = test.id
+            score.test_id = test_id
             score.label_id = label_id
             score.v_score = int(form.v_score.data)
             score.q_score = int(form.q_score.data)
@@ -2247,12 +2267,16 @@ def edit_test_score(test_type, id):
                 if score.user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
                     flash(u'%s已经拥有“%s”成绩' % (score.user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                     return redirect(url_for('manage.edit_test_score', test_type=test_type, id=score.id))
-            test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
-            if test is None:
-                test = TOEFLTest(date=form.test_date.data)
-                db.session.add(test)
-                db.session.commit()
-            score.test_id = test.id
+            if label_id is not None and ScoreLabel.query.get(label_id).name == u'目标':
+                test_id = None
+            else:
+                test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
+                if test is None:
+                    test = TOEFLTest(date=form.test_date.data)
+                    db.session.add(test)
+                    db.session.commit()
+                test_id = test.id
+            score.test_id = test_id
             score.label_id = label_id
             score.total_score = int(form.total.data)
             score.reading_score = int(form.reading.data)
