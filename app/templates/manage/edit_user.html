@@ -956,7 +956,7 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.idNumber = function(value) {
-            if ($('#edit_id_number-id_type').parent().dropdown('get text') === '其它') {
+            if ($('#edit_id_number-id_type').parent().dropdown('get text') === '身份证') {
                 return (Validator.isValid(value, 18));
             } else {
                 return true;

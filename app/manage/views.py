@@ -4467,6 +4467,11 @@ def edit_study_plan(id):
         .first()
     form = EditStudyPlanForm()
     if form.validate_on_submit():
+        user.speed = form.speed.data
+        user.deadline = form.deadline.data
+        db.session.add(user)
+        db.session.commit()
+        # aim scores
         if gre_aim_score is None:
             gre_aim_score = GRETestScore(
                 user_id=user.id,
@@ -4505,6 +4510,13 @@ def edit_study_plan(id):
             toefl_aim_score.modified_by_id = current_user.id
         db.session.add(toefl_aim_score)
         db.session.commit()
+        # supervisor
+        if form.supervisor_email.data:
+            supervisor = User.query.filter_by(email=form.supervisor_email.data.lower(), created=True, activated=True, deleted=False).first()
+            if supervisor is None:
+                flash(u'设计人邮箱不存在：%s' % form.supervisor_email.data.lower(), category='error')
+                return redirect(url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')))
+            supervisor.supervise_user(user=user)
         return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
     if gre_aim_score is not None:
         form.gre_aim_v.data = gre_aim_score.v_score

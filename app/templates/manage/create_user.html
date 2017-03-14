@@ -393,7 +393,7 @@ var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
         $.fn.form.settings.rules.idNumber = function(value) {
-            if ($('#id_type').parent().dropdown('get text') === '其它') {
+            if ($('#id_type').parent().dropdown('get text') === '身份证') {
                 if (Validator.isValid(value, 18)) {
                     if (Validator.getInfo(value, 18).sex === 1) {
                         $('#create-user').form('set values', { gender: '1' });
