@@ -1826,9 +1826,13 @@ def test():
             test = GRETest(date=gre_form.test_date.data)
             db.session.add(test)
             db.session.commit()
+        label_id = None
+        if gre_form.score_label.data and int(gre_form.score_label.data) > 0:
+            label_id = int(gre_form.score_label.data)
         score = GRETestScore(
             user_id=user.id,
             test_id=test.id,
+            label_id=label_id,
             v_score=int(gre_form.v_score.data),
             q_score=int(gre_form.q_score.data),
             aw_score_id=int(gre_form.aw_score.data),
@@ -1850,9 +1854,13 @@ def test():
             test = TOEFLTest(date=toefl_form.test_date.data)
             db.session.add(test)
             db.session.commit()
+        label_id = None
+        if toefl_form.score_label.data and int(toefl_form.score_label.data) > 0:
+            label_id = int(toefl_form.score_label.data)
         score = TOEFLTestScore(
             user_id=user.id,
             test_id=test.id,
+            label_id=label_id,
             total_score=int(toefl_form.total.data),
             reading_score=int(toefl_form.reading.data),
             listening_score=int(toefl_form.listening.data),
@@ -2049,9 +2057,13 @@ def test_score(test_type, id):
                 test = GRETest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
+            label_id = None
+            if form.score_label.data and int(form.score_label.data) > 0:
+                label_id = int(form.score_label.data)
             score = GRETestScore(
                 user_id=user.id,
                 test_id=test.id,
+                label_id=label_id,
                 v_score=int(form.v_score.data),
                 q_score=int(form.q_score.data),
                 aw_score_id=int(form.aw_score.data),
@@ -2085,9 +2097,13 @@ def test_score(test_type, id):
                 test = TOEFLTest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
+            label_id = None
+            if form.score_label.data and int(form.score_label.data) > 0:
+                label_id = int(form.score_label.data)
             score = TOEFLTestScore(
                 user_id=user.id,
                 test_id=test.id,
+                label_id=label_id,
                 total_score=int(form.total.data),
                 reading_score=int(form.reading.data),
                 listening_score=int(form.listening.data),
@@ -2186,6 +2202,10 @@ def edit_test_score(test_type, id):
                 db.session.add(test)
                 db.session.commit()
             score.test_id = test.id
+            if form.test_label.data and int(form.test_label.data) > 0:
+                score.label_id = int(form.test_label.data)
+            else:
+                score.label_id = None
             score.v_score = int(form.v_score.data)
             score.q_score = int(form.q_score.data)
             score.aw_score_id = int(form.aw_score.data)
@@ -2197,6 +2217,8 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
+        if score.label_id:
+            form.score_label.data = unicode(score.label_id)
         form.v_score.data = u'%g' % score.v_score
         form.q_score.data = u'%g' % score.q_score
         form.aw_score.data = unicode(score.aw_score_id)
@@ -2210,6 +2232,10 @@ def edit_test_score(test_type, id):
                 db.session.add(test)
                 db.session.commit()
             score.test_id = test.id
+            if form.test_label.data and int(form.test_label.data) > 0:
+                score.label_id = int(form.test_label.data)
+            else:
+                score.label_id = None
             score.total_score = int(form.total.data)
             score.reading_score = int(form.reading.data)
             score.listening_score = int(form.listening.data)
@@ -2223,6 +2249,8 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新TOEFL考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
+        if score.label_id:
+            form.score_label.data = unicode(score.label_id)
         form.total.data = u'%g' % score.total_score
         form.reading.data = u'%g' % score.reading_score
         form.listening.data = u'%g' % score.listening_score

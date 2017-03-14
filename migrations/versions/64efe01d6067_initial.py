@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 1d19b513b5ac
+Revision ID: 64efe01d6067
 Revises: 
-Create Date: 2017-03-14 17:32:48.773150
+Create Date: 2017-03-14 18:33:39.396965
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1d19b513b5ac'
+revision = '64efe01d6067'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -298,10 +298,10 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('test_id', sa.Integer(), nullable=True),
+    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('v_score', sa.Integer(), nullable=True),
     sa.Column('q_score', sa.Integer(), nullable=True),
     sa.Column('aw_score_id', sa.Integer(), nullable=True),
-    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
@@ -478,12 +478,12 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('test_id', sa.Integer(), nullable=True),
+    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('total_score', sa.Integer(), nullable=True),
     sa.Column('reading_score', sa.Integer(), nullable=True),
     sa.Column('listening_score', sa.Integer(), nullable=True),
     sa.Column('speaking_score', sa.Integer(), nullable=True),
     sa.Column('writing_score', sa.Integer(), nullable=True),
-    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
