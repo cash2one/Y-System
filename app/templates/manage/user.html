@@ -65,7 +65,7 @@
                                     {{ form.birthdate.label() }}
                                     <div class="ui left icon input">
                                         <i class="birthday icon"></i>
-                                        {{ form.birthdate(placeholder='YYYY-MM-DD') }}
+                                        {{ form.birthdate(placeholder='格式：YYYY-MM-DD') }}
                                     </div>
                                 </div>
                                 <div class="eight wide field">
@@ -264,7 +264,7 @@ var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
         $.fn.form.settings.rules.idNumber = function(value) {
-            if ($('#id_type').val() === '1') {
+            if ($('#id_type').parent().dropdown('get text') === '其它') {
                 if (Validator.isValid(value, 18)) {
                     if (Validator.getInfo(value, 18).sex === 1) {
                         $('#create-admin').form('set values', { gender: '1' });

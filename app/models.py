@@ -1436,10 +1436,10 @@ class User(UserMixin, db.Model):
             db.session.delete(employment_record)
         for score_record in self.score_records:
             db.session.delete(score_record)
-        for gre_test_score in self.gre_test_scores:
-            db.session.delete(gre_test_score)
-        for toefl_test_score in self.toefl_test_scores:
-            db.session.delete(toefl_test_score)
+        # for gre_test_score in self.gre_test_scores:
+        #     db.session.delete(gre_test_score)
+        # for toefl_test_score in self.toefl_test_scores:
+        #     db.session.delete(toefl_test_score)
         for purchase in self.purchases:
             db.session.delete(purchase)
         for course_registration in self.course_registrations:

@@ -127,7 +127,7 @@
                                 {{ edit_birthdate_form.birthdate.label() }}
                                 <div class="ui left icon input">
                                     <i class="birthday icon"></i>
-                                    {{ edit_birthdate_form.birthdate(placeholder='YYYY-MM-DD') }}
+                                    {{ edit_birthdate_form.birthdate(placeholder='格式：YYYY-MM-DD') }}
                                 </div>
                             </div>
                             {{ edit_birthdate_form.submit(class='ui primary button') }}
@@ -1002,7 +1002,7 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.idNumber = function(value) {
-            if ($('#edit_id_number-id_type').val() === '1') {
+            if ($('#edit_id_number-id_type').parent().dropdown('get text') === '其它') {
                 return (Validator.isValid(value, 18));
             } else {
                 return true;
@@ -1210,7 +1210,7 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.exceptEducationType = function(value) {
-            if ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1) {
+            if ($.inArray($('#new_education_record-education_type').parent().dropdown('get text'), ['本科', '硕士', '博士']) === -1) {
                 return true;
             } else {
                 return ($('#new_education_record-major').val() !== '');
@@ -1336,7 +1336,7 @@ $(document)
             if (/^[0-9]*$/.test(value)) {
                 return true;
             } else {
-                return ($.inArray($('#new_score_record-score_type').dropdown('get text')[0], ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
+                return ($.inArray($('#new_score_record-score_type').parent().dropdown('get text'), ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
             };
         };
         $.fn.form.settings.rules.scoreWithinLimit = function(value) {
