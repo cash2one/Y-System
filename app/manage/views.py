@@ -4512,6 +4512,8 @@ def edit_study_plan(id):
         db.session.commit()
         # supervisor
         if form.supervisor_email.data:
+            if user.supervised_by:
+                user.supervised_by.unsupervise_user(user=user)
             supervisor = User.query.filter_by(email=form.supervisor_email.data.lower(), created=True, activated=True, deleted=False).first()
             if supervisor is None:
                 flash(u'设计人邮箱不存在：%s' % form.supervisor_email.data.lower(), category='error')
