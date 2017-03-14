@@ -22,7 +22,7 @@
         <div class="row">
             <div class="column">
                 <div class="ui blue dividing header">教育经历</div>
-                {% with records = user.education_records %}{% if records.count() %}<div class="ui relaxed list">
+                {% with records = user.education_records %}{% if records.count() %}<div class="ui relaxed divided list">
                     {% for record in records %}
                     <div class="item">
                         <div class="right floated content">
@@ -36,7 +36,7 @@
                     {% endfor %}
                 </div>{% else %}<div>无</div>{% endif %}{% endwith %}
                 <div class="ui blue dividing header">工作经历</div>
-                {% with records = user.employment_records %}{% if records.count() %}<div class="ui relaxed list">
+                {% with records = user.employment_records %}{% if records.count() %}<div class="ui relaxed divided list">
                     {% for record in records %}
                     <div class="item">
                         <div class="right floated content">
@@ -50,7 +50,7 @@
                     {% endfor %}
                 </div>{% else %}<div>无</div>{% endif %}{% endwith %}
                 <div class="ui blue dividing header">既往成绩</div>
-                {% with scores = user.score_records %}{% if scores.count() %}<div class="ui relaxed list">
+                {% with scores = user.score_records %}{% if scores.count() %}<div class="ui relaxed divided list">
                     {% for score in scores %}
                     <div class="item">
                         <div class="content">
@@ -61,7 +61,7 @@
                     {% endfor %}
                 </div>{% else %}<div>无</div>{% endif %}{% endwith %}
                 <div class="ui blue dividing header">GRE成绩</div>
-                {% with scores = user.gre_test_scores %}{% if scores.count() %}<div class="ui relaxed list">
+                {% with scores = user.gre_test_scores %}{% if scores.count() %}<div class="ui relaxed divided list">
                     {% for score in scores %}
                     <div class="item">
                         <div class="right floated content">
@@ -72,9 +72,9 @@
                         </div>
                     </div>
                     {% endfor %}
-                </div>{% endif %}{% endwith %}
+                </div>{% else %}<div>无</div>{% endif %}{% endwith %}
                 <div class="ui blue dividing header">TOEFL成绩</div>
-                {% with scores = user.toefl_test_scores %}{% if scores.count() %}<div class="ui relaxed list">
+                {% with scores = user.toefl_test_scores %}{% if scores.count() %}<div class="ui relaxed divided list">
                     {% for score in scores %}
                     <div class="item">
                         <div class="right floated content">
@@ -85,18 +85,59 @@
                         </div>
                     </div>
                     {% endfor %}
-                </div>{% endif %}{% endwith %}
+                </div>{% else %}<div>无</div>{% endif %}{% endwith %}
                 <div class="ui blue dividing header">申请信息</div>
-                <div class="ui relaxed list">
+                <div class="ui relaxed divided list">
                     <div class="item">
                         <div class="content">
-                            <div class="header">申请信息</div>
-                            <div class="description">申请方向：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
+                            <div class="header">申请方向</div>
+                            <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">留学中介</div>
+                            <div class="description">{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                 </div>
                 <form id="edit-study-plan" action="{{ url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
+                    <div class="ui blue dividing header">目标成绩</div>
+                    <div class="required field">
+                        <label>GRE目标</label>
+                        <div class="fields">
+                            <div class="four wide field">
+                                {{ form.gre_aim_v(placeholder='V成绩') }}
+                            </div>
+                            <div class="four wide field">
+                                {{ form.gre_aim_q(placeholder='Q成绩') }}
+                            </div>
+                            <div class="eight wide field">
+                                {{ form.gre_aim_aw(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="required field">
+                        <label>TOEFL目标</label>
+                        <div class="fields">
+                            <div class="four wide field">
+                                {{ form.toefl_aim_total(placeholder='TOEFL总分') }}
+                            </div>
+                            <div class="three wide field">
+                                {{ form.toefl_aim_reading(placeholder='TOEFL阅读') }}
+                            </div>
+                            <div class="three wide field">
+                                {{ form.toefl_aim_listening(placeholder='TOEFL听力') }}
+                            </div>
+                            <div class="three wide field">
+                                {{ form.toefl_aim_speaking(placeholder='TOEFL口语') }}
+                            </div>
+                            <div class="three wide field">
+                                {{ form.toefl_aim_writing(placeholder='TOEFL写作') }}
+                            </div>
+                        </div>
+                    </div>
                     <div class="ui blue dividing header">时间参数</div>
                     <div class="fields">
                         <div class="eight wide required field">
@@ -720,12 +761,119 @@ $('.ui.checkbox').checkbox();
 
 $(document)
     .ready(function() {
+        $.fn.form.settings.rules.toefl = function(value) {
+            if (($('#toefl_aim_reading').val() === '') || ($('#toefl_aim_listening').val() === '') || ($('#toefl_aim_speaking').val() === '') || ($('#toefl_aim_writing').val() === '')) {
+                return true;
+            } else {
+                return (Number(value) === Number($('#toefl_aim_reading').val()) + Number($('#toefl_aim_listening').val()) + Number($('#toefl_aim_speaking').val()) + Number($('#toefl_aim_writing').val()));
+            };
+        };
         $('#edit-study-plan')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
+                    gre_aim_v: {
+                        identifier: 'gre_aim_v',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选填写Verbal Reasoning成绩'
+                            },
+                            {
+                                type: 'integer[130..170]',
+                                prompt: '请填写有效的Verbal Reasoning成绩'
+                            }
+                        ]
+                    },
+                    gre_aim_q: {
+                        identifier: 'gre_aim_q',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选填写Quantitative Reasoning成绩'
+                            },
+                            {
+                                type: 'integer[130..170]',
+                                prompt: '请填写有效的Quantitative Reasoning成绩'
+                            }
+                        ]
+                    },
+                    gre_aim_aw: {
+                        identifier: 'gre_aim_aw',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择Analytical Writing成绩'
+                            }
+                        ]
+                    },
+                    toefl_aim_total: {
+                        identifier: 'toefl_aim_total',
+                        rules: [
+                            {
+                                type: 'integer[0..120]',
+                                prompt: '请填写一个有效的TOEFL成绩'
+                            },
+                            {
+                                type: 'toefl',
+                                prompt: 'TOEFL成绩有误'
+                            }
+                        ]
+                    },
+                    toefl_aim_reading: {
+                        identifier: 'toefl_aim_reading',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL阅读成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL阅读成绩'
+                            }
+                        ]
+                    },
+                    toefl_aim_listening: {
+                        identifier: 'toefl_aim_listening',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL听力成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL听力成绩'
+                            }
+                        ]
+                    },
+                    toefl_aim_speaking: {
+                        identifier: 'toefl_aim_speaking',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL口语成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL口语成绩'
+                            }
+                        ]
+                    },
+                    toefl_aim_writing: {
+                        identifier: 'toefl_aim_writing',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写TOEFL写作成绩'
+                            },
+                            {
+                                type: 'integer[0..30]',
+                                prompt: '请填写一个有效的TOEFL写作成绩'
+                            }
+                        ]
+                    },
                     speed: {
                         identifier: 'speed',
                         rules: [

@@ -2232,6 +2232,7 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
+        form.score_label.data = u'0'
         if score.label_id:
             form.score_label.data = unicode(score.label_id)
         form.v_score.data = score.v_score
@@ -2267,6 +2268,7 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新TOEFL考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
+        form.score_label.data = u'0'
         if score.label_id:
             form.score_label.data = unicode(score.label_id)
         form.total.data = score.total_score
@@ -4453,9 +4455,67 @@ def edit_study_plan(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
+    gre_aim_score = GRETestScore.query\
+        .join(ScoreLabel, ScoreLabel.id == GRETestScore.label_id)\
+        .filter(GRETestScore.user_id == user.id)\
+        .filter(ScoreLabel.name == u'目标')\
+        .first()
+    toefl_aim_score = TOEFLTestScore.query\
+        .join(ScoreLabel, ScoreLabel.id == TOEFLTestScore.label_id)\
+        .filter(TOEFLTestScore.user_id == user.id)\
+        .filter(ScoreLabel.name == u'目标')\
+        .first()
     form = EditStudyPlanForm()
     if form.validate_on_submit():
+        if gre_aim_score is None:
+            gre_aim_score = GRETestScore(
+                user_id=user.id,
+                label_id=ScoreLabel.query.filter_by(name=u'目标', category=u'GRE').first().id,
+                v_score=form.gre_aim_v.data,
+                q_score=form.gre_aim_q.data,
+                aw_score_id=int(form.gre_aim_aw.data),
+                modified_by_id=current_user.id
+            )
+        else:
+            gre_aim_score.v_score = form.gre_aim_v.data
+            gre_aim_score.q_score = form.gre_aim_q.data
+            gre_aim_score.aw_score_id = int(form.gre_aim_aw.data)
+            gre_aim_score.modified_at = datetime.utcnow()
+            gre_aim_score.modified_by_id = current_user.id
+        db.session.add(gre_aim_score)
+        db.session.commit()
+        if toefl_aim_score is None:
+            toefl_aim_score = TOEFLTestScore(
+                user_id=user.id,
+                label_id=ScoreLabel.query.filter_by(name=u'目标', category=u'TOEFL').first().id,
+                total_score=form.toefl_aim_total.data,
+                reading_score=form.toefl_aim_reading.data,
+                listening_score=form.toefl_aim_listening.data,
+                speaking_score=form.toefl_aim_speaking.data,
+                writing_score=form.toefl_aim_writing.data,
+                modified_by_id=current_user.id
+            )
+        else:
+            toefl_aim_score.total_score = form.toefl_aim_total.data
+            toefl_aim_score.reading_score = form.toefl_aim_reading.data
+            toefl_aim_score.listening_score = form.toefl_aim_listening.data
+            toefl_aim_score.speaking_score = form.toefl_aim_speaking.data
+            toefl_aim_score.writing_score = form.toefl_aim_writing.data
+            toefl_aim_score.modified_at = datetime.utcnow()
+            toefl_aim_score.modified_by_id = current_user.id
+        db.session.add(toefl_aim_score)
+        db.session.commit()
         return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
+    if gre_aim_score is not None:
+        form.gre_aim_v.data = gre_aim_score.v_score
+        form.gre_aim_q.data = gre_aim_score.q_score
+        form.gre_aim_aw.data = unicode(gre_aim_score.aw_score_id)
+    if toefl_aim_score is not None:
+        form.toefl_aim_total.data = toefl_aim_score.total_score
+        form.toefl_aim_reading.data = toefl_aim_score.reading_score
+        form.toefl_aim_listening.data = toefl_aim_score.listening_score
+        form.toefl_aim_speaking.data = toefl_aim_score.speaking_score
+        form.toefl_aim_writing.data = toefl_aim_score.writing_score
     form.speed.data = user.speed
     form.deadline.data = user.deadline or user.due_date
     if user.supervised_by is not None:

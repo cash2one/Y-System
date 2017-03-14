@@ -892,6 +892,7 @@ class EditStudyPlanForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditStudyPlanForm, self).__init__(*args, **kwargs)
+        self.gre_aim_aw.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
         self.vb_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
         self.vb_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
         self.vb_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']

@@ -337,8 +337,14 @@ function noProfileAvatar(avatarImage) {
                         </div>
                         <div class="item">
                             <div class="content">
-                                <div class="header">申请信息</div>
-                                <div class="description">申请方向：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
+                                <div class="header">申请方向</div>
+                                <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">留学中介</div>
+                                <div class="description">{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
                             </div>
                         </div>
                         <div class="item">
