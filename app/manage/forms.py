@@ -262,7 +262,7 @@ class NewGRETestScoreForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewGRETestScoreForm, self).__init__(*args, **kwargs)
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
-        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class EditGRETestScoreForm(FlaskForm):
@@ -276,7 +276,7 @@ class EditGRETestScoreForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditGRETestScoreForm, self).__init__(*args, **kwargs)
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
-        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class NewTOEFLTestScoreForm(FlaskForm):
@@ -292,7 +292,7 @@ class NewTOEFLTestScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class EditTOEFLTestScoreForm(FlaskForm):
@@ -307,7 +307,7 @@ class EditTOEFLTestScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditTOEFLTestScoreForm, self).__init__(*args, **kwargs)
-        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class NewUserForm(FlaskForm):
