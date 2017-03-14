@@ -12,7 +12,7 @@ from ..models import Relationship, PurposeType, ReferrerType, InvitationType, Ed
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
-from ..models import Test, GREAWScore
+from ..models import Test, GREAWScore, ScoreLabel
 from ..models import iPad, iPadCapacity, iPadState, Room
 from ..models import Course, CourseType
 from ..models import NotaBene
@@ -256,11 +256,13 @@ class NewGRETestScoreForm(FlaskForm):
     q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(NewGRETestScoreForm, self).__init__(*args, **kwargs)
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all()]
 
 
 class EditGRETestScoreForm(FlaskForm):
@@ -268,11 +270,13 @@ class EditGRETestScoreForm(FlaskForm):
     q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(EditGRETestScoreForm, self).__init__(*args, **kwargs)
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all()]
 
 
 class NewTOEFLTestScoreForm(FlaskForm):
@@ -283,7 +287,12 @@ class NewTOEFLTestScoreForm(FlaskForm):
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
     test_date = DateField(u'考试日期', validators=[Required()])
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all()]
 
 
 class EditTOEFLTestScoreForm(FlaskForm):
@@ -293,7 +302,12 @@ class EditTOEFLTestScoreForm(FlaskForm):
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
     test_date = DateField(u'考试日期', validators=[Required()])
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(EditTOEFLTestScoreForm, self).__init__(*args, **kwargs)
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all()]
 
 
 class NewUserForm(FlaskForm):
