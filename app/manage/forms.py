@@ -825,7 +825,6 @@ class EditStudyPlanForm(FlaskForm):
     toefl_aim_listening = StringField(u'Listening', validators=[Length(0, 64)])
     toefl_aim_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
     toefl_aim_writing = StringField(u'Writing', validators=[Length(0, 64)])
-    toefl_aim_test_date = DateField(u'考试日期', validators=[Optional()])
     toefl_1_total = StringField(u'TOEFL', validators=[Length(0, 64)])
     toefl_1_reading = StringField(u'Reading', validators=[Length(0, 64)])
     toefl_1_listening = StringField(u'Listening', validators=[Length(0, 64)])
