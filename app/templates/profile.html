@@ -320,11 +320,11 @@ function noProfileAvatar(avatarImage) {
                 {% with scores = user.score_records %}{% if scores.count() %}<div class="ui vertical segment">
                     <div class="ui header">既往成绩</div>
                     <div class="ui relaxed list">
-                        {% for score_record in user.score_records %}
+                        {% for score in scores %}
                         <div class="item">
                             <div class="content">
-                                <div class="header">{{ score_record.type.name }}</div>
-                                <div class="description">{{ score_record.score_alias }}</div>
+                                <div class="header">{{ score.type.name }}</div>
+                                <div class="description">{{ score.score_alias }}</div>
                             </div>
                         </div>
                         {% endfor %}

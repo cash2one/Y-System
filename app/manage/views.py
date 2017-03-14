@@ -4446,6 +4446,9 @@ def edit_study_plan(id):
     if form.validate_on_submit():
         return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
     form.speed.data = user.speed
+    form.deadline.data = user.deadline or user.due_date
+    if user.supervised_by is not None:
+        form.supervisor_email.data = user.supervised_by.email
     return render_template('manage/edit_study_plan.html', form=form, user=user)
 
 

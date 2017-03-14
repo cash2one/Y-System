@@ -21,226 +21,49 @@
     <div class="ui middle aligned stackable grid container">
         <div class="row">
             <div class="column">
+                <div class="ui blue dividing header">教育经历</div>
+                {% with records = user.education_records %}{% if records.count() %}<div class="ui relaxed list">
+                    {% for record in records %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ record.year }}级</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ record.school }}</div>
+                            <div class="description">{{ record.type.name }} &middot; {% if record.major %}{{ record.major }}{% endif %}{% if record.gpa %} &middot; GPA：{{ record.gpa_alias }}{% endif %}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>{% else %}<div>无</div>{% endif %}{% endwith %}
+                <div class="ui blue dividing header">工作经历</div>
+                {% with records = user.employment_records %}{% if records.count() %}<div class="ui relaxed list">
+                    {% for record in records %}
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="description">{{ record.year }}年</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">{{ record.employer }}</div>
+                            <div class="description">{{ record.position }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>{% else %}<div>无</div>{% endif %}{% endwith %}
+                <div class="ui blue dividing header">既往成绩</div>
+                {% with scores = user.score_records %}{% if scores.count() %}<div class="ui relaxed list">
+                    {% for score in scores %}
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">{{ score.type.name }}</div>
+                            <div class="description">{{ score.score_alias }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>{% else %}<div>无</div>{% endif %}{% endwith %}
+                <div class="ui blue dividing header">GRE成绩</div>
+                <div class="ui blue dividing header">TOEFL成绩</div>
                 <form id="edit-study-plan" action="{{ url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
-                    <div class="ui blue dividing header">基本信息</div>
-                    <div class="fields">
-                        <div class="four wide field">
-                            {{ form.cee_total.label() }}
-                            {{ form.cee_total(placeholder='高考总分') }}
-                        </div>
-                        <div class="four wide field">
-                            {{ form.cee_total_full.label() }}
-                            {{ form.cee_total_full(placeholder='高考总分满分') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.cee_math.label() }}
-                            {{ form.cee_math(placeholder='高考数学') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.cee_math_full.label() }}
-                            {{ form.cee_math_full(placeholder='高考数学满分') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.cee_english.label() }}
-                            {{ form.cee_english(placeholder='高考英语') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ form.cee_english_full.label() }}
-                            {{ form.cee_english_full(placeholder='高考英语满分') }}
-                        </div>
-                    </div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.cet_4.label() }}
-                            {{ form.cet_4(placeholder='大学英语四级') }}
-                        </div>
-                        <div class="eight wide field">
-                            {{ form.cet_6.label() }}
-                            {{ form.cet_6(placeholder='大学英语六级') }}
-                        </div>
-                    </div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.tem_4.label() }}
-                            {{ form.tem_4(placeholder='专业英语四级') }}
-                        </div>
-                        <div class="eight wide field">
-                            {{ form.tem_8.label() }}
-                            {{ form.tem_8(placeholder='专业英语八级') }}
-                        </div>
-                    </div>
-                    <div class="ui blue dividing header">申请信息</div>
-                    <div class="fields">
-                        <div class="eight wide field">
-                            {{ form.application_aim.label() }}
-                            {{ form.application_aim(placeholder='申请方向') }}
-                        </div>
-                        <div class="eight wide field">
-                            {{ form.application_agency.label() }}
-                            {{ form.application_agency(placeholder='留学中介') }}
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>TOEFL初始</label>
-                        <div class="fields">
-                            <div class="four wide field">
-                                {{ form.toefl_initial_total(placeholder='总分') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_initial_reading(placeholder='阅读') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_initial_listening(placeholder='听力') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_initial_speaking(placeholder='口语') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_initial_writing(placeholder='写作') }}
-                            </div>
-                            <div class="four wide field">
-                                <div class="ui date calendar">
-                                    <div class="ui left icon input">
-                                        <i class="calendar icon"></i>
-                                        {{ form.toefl_initial_test_date(placeholder='考试日期：YYYY-MM-DD') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>TOEFL目标</label>
-                        <div class="fields">
-                            <div class="four wide field">
-                                {{ form.toefl_aim_total(placeholder='总分') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_aim_reading(placeholder='阅读') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_aim_listening(placeholder='听力') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_aim_speaking(placeholder='口语') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_aim_writing(placeholder='写作') }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>TOEFL<sub>1</sub></label>
-                        <div class="fields">
-                            <div class="four wide field">
-                                {{ form.toefl_1_total(placeholder='总分') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_1_reading(placeholder='阅读') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_1_listening(placeholder='听力') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_1_speaking(placeholder='口语') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_1_writing(placeholder='写作') }}
-                            </div>
-                            <div class="four wide field">
-                                <div class="ui date calendar">
-                                    <div class="ui left icon input">
-                                        <i class="calendar icon"></i>
-                                        {{ form.toefl_1_test_date(placeholder='考试日期：YYYY-MM-DD') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>TOEFL<sub>2</sub></label>
-                        <div class="fields">
-                            <div class="four wide field">
-                                {{ form.toefl_2_total(placeholder='总分') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_2_reading(placeholder='阅读') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_2_listening(placeholder='听力') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_2_speaking(placeholder='口语') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_2_writing(placeholder='写作') }}
-                            </div>
-                            <div class="four wide field">
-                                <div class="ui date calendar">
-                                    <div class="ui left icon input">
-                                        <i class="calendar icon"></i>
-                                        {{ form.toefl_2_test_date(placeholder='考试日期：YYYY-MM-DD') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>TOEFL<sub>3</sub></label>
-                        <div class="fields">
-                            <div class="four wide field">
-                                {{ form.toefl_3_total(placeholder='总分') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_3_reading(placeholder='阅读') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_3_listening(placeholder='听力') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_3_speaking(placeholder='口语') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_3_writing(placeholder='写作') }}
-                            </div>
-                            <div class="four wide field">
-                                <div class="ui date calendar">
-                                    <div class="ui left icon input">
-                                        <i class="calendar icon"></i>
-                                        {{ form.toefl_3_test_date(placeholder='考试日期：YYYY-MM-DD') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label>TOEFL<sub>4</sub></label>
-                        <div class="fields">
-                            <div class="four wide field">
-                                {{ form.toefl_4_total(placeholder='总分') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_4_reading(placeholder='阅读') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_4_listening(placeholder='听力') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_4_speaking(placeholder='口语') }}
-                            </div>
-                            <div class="two wide field">
-                                {{ form.toefl_4_writing(placeholder='写作') }}
-                            </div>
-                            <div class="four wide field">
-                                <div class="ui date calendar">
-                                    <div class="ui left icon input">
-                                        <i class="calendar icon"></i>
-                                        {{ form.toefl_4_test_date(placeholder='考试日期：YYYY-MM-DD') }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="ui blue dividing header">时间参数</div>
                     <div class="fields">
                         <div class="eight wide required field">
@@ -252,7 +75,7 @@
                             <div id="deadline-wrap" class="ui calendar">
                                 <div class="ui left icon input">
                                     <i class="calendar icon"></i>
-                                    {{ form.deadline(placeholder='YYYY-MM-DD', value=user.due_date) }}
+                                    {{ form.deadline(placeholder='YYYY-MM-DD') }}
                                 </div>
                             </div>
                         </div>
@@ -499,6 +322,7 @@
                             </div>
                         </div>
                     </div>
+                    {% if user.can('预约Y-GRE课程') %}
                     <div class="ui teal dividing header">Y-GRE</div>
                     <div class="field">
                         <label>总论</label>
@@ -803,11 +627,12 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     <div class="ui grey dividing header">其它信息</div>
                     <div class="required field">
-                        {{ form.designer_email.label() }}
+                        {{ form.supervisor_email.label() }}
                         <div class="ui fluid search">
-                            {{ form.designer_email(placeholder='输入设计人姓名/邮箱查询', class='prompt') }}
+                            {{ form.supervisor_email(placeholder='输入设计人姓名/邮箱查询', class='prompt') }}
                             <div class="results"></div>
                         </div>
                     </div>
@@ -862,677 +687,12 @@ $('.ui.checkbox').checkbox();
 
 $(document)
     .ready(function() {
-        $.fn.form.settings.rules.ceeTotalWithinLimit = function(value) {
-            if ($('#cee_total_full').val() === '') {
-                return true
-            } else {
-                return (Number(value) <= Number($('#cee_total_full').val()));
-            };
-        };
-        $.fn.form.settings.rules.ceeMathWithinLimit = function(value) {
-            if ($('#cee_math_full').val() === '') {
-                return true
-            } else {
-                return (Number(value) <= Number($('#cee_math_full').val()));
-            };
-        };
-        $.fn.form.settings.rules.ceeEnglishWithinLimit = function(value) {
-            if ($('#cee_english_full').val() === '') {
-                return true
-            } else {
-                return (Number(value) <= Number($('#cee_english_full').val()));
-            };
-        };
-        $.fn.form.settings.rules.toefl_initial = function(value) {
-            if (($('#toefl_initial_reading').val() === '') || ($('#toefl_initial_listening').val() === '') || ($('#toefl_initial_speaking').val() === '') || ($('#toefl_initial_writing').val() === '')) {
-                return true;
-            } else {
-                return (Number(value) === Number($('#toefl_initial_reading').val()) + Number($('#toefl_initial_listening').val()) + Number($('#toefl_initial_speaking').val()) + Number($('#toefl_initial_writing').val()));
-            };
-        };
-        $.fn.form.settings.rules.toefl_aim = function(value) {
-            if (($('#toefl_aim_reading').val() === '') || ($('#toefl_aim_listening').val() === '') || ($('#toefl_aim_speaking').val() === '') || ($('#toefl_aim_writing').val() === '')) {
-                return true;
-            } else {
-                return (Number(value) === Number($('#toefl_aim_reading').val()) + Number($('#toefl_aim_listening').val()) + Number($('#toefl_aim_speaking').val()) + Number($('#toefl_aim_writing').val()));
-            };
-        };
-        $.fn.form.settings.rules.toefl_1 = function(value) {
-            if (($('#toefl_1_reading').val() === '') || ($('#toefl_1_listening').val() === '') || ($('#toefl_1_speaking').val() === '') || ($('#toefl_1_writing').val() === '')) {
-                return true;
-            } else {
-                return (Number(value) === Number($('#toefl_1_reading').val()) + Number($('#toefl_1_listening').val()) + Number($('#toefl_1_speaking').val()) + Number($('#toefl_1_writing').val()));
-            };
-        };
-        $.fn.form.settings.rules.toefl_2 = function(value) {
-            if (($('#toefl_2_reading').val() === '') || ($('#toefl_2_listening').val() === '') || ($('#toefl_2_speaking').val() === '') || ($('#toefl_2_writing').val() === '')) {
-                return true;
-            } else {
-                return (Number(value) === Number($('#toefl_2_reading').val()) + Number($('#toefl_2_listening').val()) + Number($('#toefl_2_speaking').val()) + Number($('#toefl_2_writing').val()));
-            };
-        };
-        $.fn.form.settings.rules.toefl_3 = function(value) {
-            if (($('#toefl_3_reading').val() === '') || ($('#toefl_3_listening').val() === '') || ($('#toefl_3_speaking').val() === '') || ($('#toefl_3_writing').val() === '')) {
-                return true;
-            } else {
-                return (Number(value) === Number($('#toefl_3_reading').val()) + Number($('#toefl_3_listening').val()) + Number($('#toefl_3_speaking').val()) + Number($('#toefl_3_writing').val()));
-            };
-        };
-        $.fn.form.settings.rules.toefl_4 = function(value) {
-            if (($('#toefl_4_reading').val() === '') || ($('#toefl_4_listening').val() === '') || ($('#toefl_4_speaking').val() === '') || ($('#toefl_4_writing').val() === '')) {
-                return true;
-            } else {
-                return (Number(value) === Number($('#toefl_4_reading').val()) + Number($('#toefl_4_listening').val()) + Number($('#toefl_4_speaking').val()) + Number($('#toefl_4_writing').val()));
-            };
-        };
         $('#edit-study-plan')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
-                    cee_total: {
-                        identifier: 'cee_total',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            },
-                            {
-                                type: 'ceeTotalWithinLimit',
-                                prompt: '分数值超过满分'
-                            }
-                        ]
-                    },
-                    cee_total_full: {
-                        identifier: 'cee_total_full',
-                        depends: 'cee_total',
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            }
-                        ]
-                    },
-                    cee_math: {
-                        identifier: 'cee_math',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            },
-                            {
-                                type: 'ceeMathWithinLimit',
-                                prompt: '分数值超过满分'
-                            }
-                        ]
-                    },
-                    cee_math_full: {
-                        identifier: 'cee_math_full',
-                        depends: 'cee_math',
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            }
-                        ]
-                    },
-                    cee_english: {
-                        identifier: 'cee_english',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            },
-                            {
-                                type: 'ceeEnglishWithinLimit',
-                                prompt: '分数值超过满分'
-                            }
-                        ]
-                    },
-                    cee_english_full: {
-                        identifier: 'cee_english_full',
-                        depends: 'cee_english',
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            }
-                        ]
-                    },
-                    cet_4: {
-                        identifier: 'cet_4',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            }
-                        ]
-                    },
-                    cet_6: {
-                        identifier: 'cet_6',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            }
-                        ]
-                    },
-                    tem_4: {
-                        identifier: 'tem_4',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            }
-                        ]
-                    },
-                    tem_8: {
-                        identifier: 'tem_8',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..]',
-                                prompt: '请填写一个有效的分数'
-                            }
-                        ]
-                    },
-                    toefl_initial_total: {
-                        identifier: 'toefl_initial_total',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..120]',
-                                prompt: '请填写一个有效的TOEFL分数'
-                            },
-                            {
-                                type: 'toefl_initial',
-                                prompt: 'TOEFL分数有误'
-                            }
-                        ]
-                    },
-                    toefl_initial_reading: {
-                        identifier: 'toefl_initial_reading',
-                        depends: 'toefl_initial_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL阅读分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL阅读分数'
-                            }
-                        ]
-                    },
-                    toefl_initial_listening: {
-                        identifier: 'toefl_initial_listening',
-                        depends: 'toefl_initial_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL听力分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL听力分数'
-                            }
-                        ]
-                    },
-                    toefl_initial_speaking: {
-                        identifier: 'toefl_initial_speaking',
-                        depends: 'toefl_initial_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL口语分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL口语分数'
-                            }
-                        ]
-                    },
-                    toefl_initial_writing: {
-                        identifier: 'toefl_initial_writing',
-                        depends: 'toefl_initial_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL写作分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL写作分数'
-                            }
-                        ]
-                    },
-                    toefl_initial_test_date: {
-                        identifier: 'toefl_initial_test_date',
-                        depends: 'toefl_initial_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试日期'
-                            },
-                            {
-                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
-                                prompt: '请填写一个有效的TOEFL考试日期'
-                            }
-                        ]
-                    },
-                    toefl_aim_total: {
-                        identifier: 'toefl_aim_total',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..120]',
-                                prompt: '请填写一个有效的TOEFL分数'
-                            },
-                            {
-                                type: 'toefl_aim',
-                                prompt: 'TOEFL分数有误'
-                            }
-                        ]
-                    },
-                    toefl_aim_reading: {
-                        identifier: 'toefl_aim_reading',
-                        depends: 'toefl_aim_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL阅读分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL阅读分数'
-                            }
-                        ]
-                    },
-                    toefl_aim_listening: {
-                        identifier: 'toefl_aim_listening',
-                        depends: 'toefl_aim_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL听力分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL听力分数'
-                            }
-                        ]
-                    },
-                    toefl_aim_speaking: {
-                        identifier: 'toefl_aim_speaking',
-                        depends: 'toefl_aim_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL口语分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL口语分数'
-                            }
-                        ]
-                    },
-                    toefl_aim_writing: {
-                        identifier: 'toefl_aim_writing',
-                        depends: 'toefl_aim_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL写作分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL写作分数'
-                            }
-                        ]
-                    },
-                    toefl_1_total: {
-                        identifier: 'toefl_1_total',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..120]',
-                                prompt: '请填写一个有效的TOEFL分数'
-                            },
-                            {
-                                type: 'toefl_1',
-                                prompt: 'TOEFL分数有误'
-                            }
-                        ]
-                    },
-                    toefl_1_reading: {
-                        identifier: 'toefl_1_reading',
-                        depends: 'toefl_1_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL阅读分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL阅读分数'
-                            }
-                        ]
-                    },
-                    toefl_1_listening: {
-                        identifier: 'toefl_1_listening',
-                        depends: 'toefl_1_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL听力分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL听力分数'
-                            }
-                        ]
-                    },
-                    toefl_1_speaking: {
-                        identifier: 'toefl_1_speaking',
-                        depends: 'toefl_1_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL口语分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL口语分数'
-                            }
-                        ]
-                    },
-                    toefl_1_writing: {
-                        identifier: 'toefl_1_writing',
-                        depends: 'toefl_1_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL写作分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL写作分数'
-                            }
-                        ]
-                    },
-                    toefl_1_test_date: {
-                        identifier: 'toefl_1_test_date',
-                        depends: 'toefl_1_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试日期'
-                            },
-                            {
-                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
-                                prompt: '请填写一个有效的TOEFL考试日期'
-                            }
-                        ]
-                    },
-                    toefl_2_total: {
-                        identifier: 'toefl_2_total',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..120]',
-                                prompt: '请填写一个有效的TOEFL分数'
-                            },
-                            {
-                                type: 'toefl_2',
-                                prompt: 'TOEFL分数有误'
-                            }
-                        ]
-                    },
-                    toefl_2_reading: {
-                        identifier: 'toefl_2_reading',
-                        depends: 'toefl_2_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL阅读分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL阅读分数'
-                            }
-                        ]
-                    },
-                    toefl_2_listening: {
-                        identifier: 'toefl_2_listening',
-                        depends: 'toefl_2_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL听力分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL听力分数'
-                            }
-                        ]
-                    },
-                    toefl_2_speaking: {
-                        identifier: 'toefl_2_speaking',
-                        depends: 'toefl_2_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL口语分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL口语分数'
-                            }
-                        ]
-                    },
-                    toefl_2_writing: {
-                        identifier: 'toefl_2_writing',
-                        depends: 'toefl_2_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL写作分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL写作分数'
-                            }
-                        ]
-                    },
-                    toefl_2_test_date: {
-                        identifier: 'toefl_2_test_date',
-                        depends: 'toefl_2_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试日期'
-                            },
-                            {
-                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
-                                prompt: '请填写一个有效的TOEFL考试日期'
-                            }
-                        ]
-                    },
-                    toefl_3_total: {
-                        identifier: 'toefl_3_total',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..120]',
-                                prompt: '请填写一个有效的TOEFL分数'
-                            },
-                            {
-                                type: 'toefl_3',
-                                prompt: 'TOEFL分数有误'
-                            }
-                        ]
-                    },
-                    toefl_3_reading: {
-                        identifier: 'toefl_3_reading',
-                        depends: 'toefl_3_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL阅读分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL阅读分数'
-                            }
-                        ]
-                    },
-                    toefl_3_listening: {
-                        identifier: 'toefl_3_listening',
-                        depends: 'toefl_3_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL听力分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL听力分数'
-                            }
-                        ]
-                    },
-                    toefl_3_speaking: {
-                        identifier: 'toefl_3_speaking',
-                        depends: 'toefl_3_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL口语分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL口语分数'
-                            }
-                        ]
-                    },
-                    toefl_3_writing: {
-                        identifier: 'toefl_3_writing',
-                        depends: 'toefl_3_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL写作分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL写作分数'
-                            }
-                        ]
-                    },
-                    toefl_3_test_date: {
-                        identifier: 'toefl_3_test_date',
-                        depends: 'toefl_3_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试日期'
-                            },
-                            {
-                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
-                                prompt: '请填写一个有效的TOEFL考试日期'
-                            }
-                        ]
-                    },
-                    toefl_4_total: {
-                        identifier: 'toefl_4_total',
-                        optional: true,
-                        rules: [
-                            {
-                                type: 'integer[0..120]',
-                                prompt: '请填写一个有效的TOEFL分数'
-                            },
-                            {
-                                type: 'toefl_4',
-                                prompt: 'TOEFL分数有误'
-                            }
-                        ]
-                    },
-                    toefl_4_reading: {
-                        identifier: 'toefl_4_reading',
-                        depends: 'toefl_4_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL阅读分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL阅读分数'
-                            }
-                        ]
-                    },
-                    toefl_4_listening: {
-                        identifier: 'toefl_4_listening',
-                        depends: 'toefl_4_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL听力分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL听力分数'
-                            }
-                        ]
-                    },
-                    toefl_4_speaking: {
-                        identifier: 'toefl_4_speaking',
-                        depends: 'toefl_4_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL口语分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL口语分数'
-                            }
-                        ]
-                    },
-                    toefl_4_writing: {
-                        identifier: 'toefl_4_writing',
-                        depends: 'toefl_4_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL写作分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL写作分数'
-                            }
-                        ]
-                    },
-                    toefl_4_test_date: {
-                        identifier: 'toefl_4_test_date',
-                        depends: 'toefl_4_total',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试日期'
-                            },
-                            {
-                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
-                                prompt: '请填写一个有效的TOEFL考试日期'
-                            }
-                        ]
-                    },
                     speed: {
                         identifier: 'speed',
                         rules: [
@@ -1559,8 +719,8 @@ $(document)
                             }
                         ]
                     },
-                    designer_email: {
-                        identifier: 'designer_email',
+                    supervisor_email: {
+                        identifier: 'supervisor_email',
                         rules: [
                             {
                                 type: 'empty',
