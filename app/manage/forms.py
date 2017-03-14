@@ -799,7 +799,51 @@ class FilteriPadForm(FlaskForm):
 
 
 class EditStudyPlanForm(FlaskForm):
+    # profile
+    # scores
+    cee_total = StringField(u'高考总分', validators=[Length(0, 64)])
+    cee_total_full = StringField(u'高考总分满分', validators=[Length(0, 64)])
+    cee_math = StringField(u'高考数学', validators=[Length(0, 64)])
+    cee_math_full = StringField(u'高考数学满分', validators=[Length(0, 64)])
+    cee_english = StringField(u'高考英语', validators=[Length(0, 64)])
+    cee_english_full = StringField(u'高考英语满分', validators=[Length(0, 64)])
+    cet_4 = StringField(u'CET-4', validators=[Length(0, 64)])
+    cet_6 = StringField(u'CET-6', validators=[Length(0, 64)])
+    tem_4 = StringField(u'TEM-4', validators=[Length(0, 64)])
+    tem_8 = StringField(u'TEM-8', validators=[Length(0, 64)])
+    competition = StringField(u'竞赛成绩', validators=[Length(0, 128)])
+    other_score = StringField(u'其它成绩', validators=[Length(0, 128)])
+    # TOEFL
+    toefl_initial_total = StringField(u'TOEFL', validators=[Length(0, 64)])
+    toefl_initial_reading = StringField(u'Reading', validators=[Length(0, 64)])
+    toefl_initial_listening = StringField(u'Listening', validators=[Length(0, 64)])
+    toefl_initial_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
+    toefl_initial_writing = StringField(u'Writing', validators=[Length(0, 64)])
+    toefl_initial_test_date = DateField(u'考试日期', validators=[Optional()])
+    toefl_aim_total = StringField(u'TOEFL', validators=[Length(0, 64)])
+    toefl_aim_reading = StringField(u'Reading', validators=[Length(0, 64)])
+    toefl_aim_listening = StringField(u'Listening', validators=[Length(0, 64)])
+    toefl_aim_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
+    toefl_aim_writing = StringField(u'Writing', validators=[Length(0, 64)])
+    toefl_aim_test_date = DateField(u'考试日期', validators=[Optional()])
+    toefl_1_total = StringField(u'TOEFL', validators=[Length(0, 64)])
+    toefl_1_reading = StringField(u'Reading', validators=[Length(0, 64)])
+    toefl_1_listening = StringField(u'Listening', validators=[Length(0, 64)])
+    toefl_1_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
+    toefl_1_writing = StringField(u'Writing', validators=[Length(0, 64)])
+    toefl_1_test_date = DateField(u'考试日期', validators=[Optional()])
+    toefl_2_total = StringField(u'TOEFL', validators=[Length(0, 64)])
+    toefl_2_reading = StringField(u'Reading', validators=[Length(0, 64)])
+    toefl_2_listening = StringField(u'Listening', validators=[Length(0, 64)])
+    toefl_2_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
+    toefl_2_writing = StringField(u'Writing', validators=[Length(0, 64)])
+    toefl_2_test_date = DateField(u'考试日期', validators=[Optional()])
+    # application
+    application_aim = StringField(u'申请方向', validators=[Length(0, 128)])
+    application_agency = StringField(u'留学中介', validators=[Length(0, 128)])
+    # plan
     speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
+    deadline = DateField(u'Deadline')
     vb_intro_start_date = DateField(u'开始日期')
     vb_intro_end_date = DateField(u'结束日期')
     vb_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
@@ -860,11 +904,13 @@ class EditStudyPlanForm(FlaskForm):
     y_gre_9_start_date = DateField(u'开始日期')
     y_gre_9_end_date = DateField(u'结束日期')
     y_gre_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_prep_start_date = DateField(u'开始日期')
+    y_gre_prep_end_date = DateField(u'结束日期')
+    y_gre_prep_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     gre_0_date = DateField(u'G<sub>0</sub>')
     gre_1_date = DateField(u'G<sub>1</sub>')
     gre_2_date = DateField(u'G<sub>2</sub>')
     gre_3_date = DateField(u'G<sub>3</sub>')
-    deadline = DateField(u'Deadline')
     designer_email = StringField(u'设计人（邮箱）', validators=[Length(0, 64)])
     submit = SubmitField(u'提交')
 
@@ -890,6 +936,7 @@ class EditStudyPlanForm(FlaskForm):
         self.y_gre_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
         self.y_gre_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
         self.y_gre_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_prep_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
 
     def validate_designer_email(self, field):
         if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:

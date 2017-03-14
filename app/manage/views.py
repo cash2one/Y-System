@@ -4445,6 +4445,7 @@ def edit_study_plan(id):
     form = EditStudyPlanForm()
     if form.validate_on_submit():
         return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
+    form.speed.data = user.speed
     return render_template('manage/edit_study_plan.html', form=form, user=user)
 
 

@@ -25,22 +25,191 @@
                     {{ form.hidden_tag() }}
                     <div class="ui blue dividing header">基本信息</div>
                     <div class="fields">
+                        <div class="four wide field">
+                            {{ form.cee_total.label() }}
+                            {{ form.cee_total(placeholder='高考总分') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.cee_total_full.label() }}
+                            {{ form.cee_total_full(placeholder='高考总分满分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_math.label() }}
+                            {{ form.cee_math(placeholder='高考数学') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_math_full.label() }}
+                            {{ form.cee_math_full(placeholder='高考数学满分') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_english.label() }}
+                            {{ form.cee_english(placeholder='高考英语') }}
+                        </div>
+                        <div class="two wide field">
+                            {{ form.cee_english_full.label() }}
+                            {{ form.cee_english_full(placeholder='高考英语满分') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.cet_4.label() }}
+                            {{ form.cet_4(placeholder='大学英语四级') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.cet_6.label() }}
+                            {{ form.cet_6(placeholder='大学英语六级') }}
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.tem_4.label() }}
+                            {{ form.tem_4(placeholder='专业英语四级') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.tem_8.label() }}
+                            {{ form.tem_8(placeholder='专业英语八级') }}
+                        </div>
+                    </div>
+                    <div class="ui blue dividing header">申请信息</div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            {{ form.application_aim.label() }}
+                            {{ form.application_aim(placeholder='申请方向') }}
+                        </div>
+                        <div class="eight wide field">
+                            {{ form.application_agency.label() }}
+                            {{ form.application_agency(placeholder='留学中介') }}
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>TOEFL初始</label>
+                        <div class="fields">
+                            <div class="four wide field">
+                                {{ form.toefl_initial_total(placeholder='总分') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_initial_reading(placeholder='阅读') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_initial_listening(placeholder='听力') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_initial_speaking(placeholder='口语') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_initial_writing(placeholder='写作') }}
+                            </div>
+                            <div class="four wide field">
+                                <div class="ui date calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.toefl_initial_test_date(placeholder='考试日期：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>TOEFL目标</label>
+                        <div class="fields">
+                            <div class="four wide field">
+                                {{ form.toefl_aim_total(placeholder='总分') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_aim_reading(placeholder='阅读') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_aim_listening(placeholder='听力') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_aim_speaking(placeholder='口语') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_aim_writing(placeholder='写作') }}
+                            </div>
+                            <div class="four wide field">
+                                <div class="ui date calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.toefl_aim_test_date(placeholder='考试日期：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>TOEFL<sub>1</sub></label>
+                        <div class="fields">
+                            <div class="four wide field">
+                                {{ form.toefl_1_total(placeholder='总分') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_1_reading(placeholder='阅读') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_1_listening(placeholder='听力') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_1_speaking(placeholder='口语') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_1_writing(placeholder='写作') }}
+                            </div>
+                            <div class="four wide field">
+                                <div class="ui date calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.toefl_1_test_date(placeholder='考试日期：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>TOEFL<sub>2</sub></label>
+                        <div class="fields">
+                            <div class="four wide field">
+                                {{ form.toefl_2_total(placeholder='总分') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_2_reading(placeholder='阅读') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_2_listening(placeholder='听力') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_2_speaking(placeholder='口语') }}
+                            </div>
+                            <div class="two wide field">
+                                {{ form.toefl_2_writing(placeholder='写作') }}
+                            </div>
+                            <div class="four wide field">
+                                <div class="ui date calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.toefl_2_test_date(placeholder='考试日期：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui blue dividing header">时间参数</div>
+                    <div class="fields">
                         <div class="eight wide required field">
                             {{ form.speed.label() }}
                             {{ form.speed(placeholder='时间系数') }}
                         </div>
                         <div class="eight wide required field">
                             {{ form.deadline.label() }}
-                            <div class="ui date calendar">
+                            <div id="deadline-wrap" class="ui calendar">
                                 <div class="ui left icon input">
                                     <i class="calendar icon"></i>
-                                    {{ form.deadline(placeholder='YYYY-MM-DD') }}
+                                    {{ form.deadline(placeholder='YYYY-MM-DD', value=user.due_date) }}
                                 </div>
                             </div>
                         </div>
                     </div>
                     <a class="ui positive left labeled icon button"><i class="rocket icon"></i>自动生成</a>
-                    <div class="ui blue dividing header">申请信息</div>
                     <div class="ui blue dividing header">VB</div>
                     <div class="field">
                         <label>总论</label>
@@ -523,6 +692,30 @@
                             </div>
                         </div>
                     </div>
+                    <div class="field">
+                        <label>临考</label>
+                        <div class="fields">
+                            <div class="three wide field">
+                                <div id="y-gre-prep-start-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_prep_start_date(placeholder='开始：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide field">
+                                <div id="y-gre-prep-end-date" class="ui calendar">
+                                    <div class="ui left icon input">
+                                        <i class="calendar icon"></i>
+                                        {{ form.y_gre_prep_end_date(placeholder='结束：YYYY-MM-DD') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ten wide field">
+                                {{ form.y_gre_prep_notate_bene(class='ui dropdown') }}
+                            </div>
+                        </div>
+                    </div>
                     <div class="ui blue dividing header">预计GRE考试日期</div>
                     <div class="fields">
                         <div class="four wide field">
@@ -562,7 +755,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="ui blue dividing header">其它信息</div>
+                    <div class="ui grey dividing header">其它信息</div>
                     <div class="required field">
                         {{ form.designer_email.label() }}
                         <div class="ui fluid search">
@@ -596,6 +789,7 @@ $('.message .close')
 $('.ui.checkbox').checkbox();
 
 {{ macros.date_picker_js_snippet() }}
+{{ macros.date_picker_js_snippet(calendar_id='deadline-wrap', min_date=user.activated_at, max_date=user.due_time) }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-intro-start-date', end_id='vb-intro-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-1-start-date', end_id='vb-1-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-2-start-date', end_id='vb-2-end-date') }}
@@ -616,15 +810,149 @@ $('.ui.checkbox').checkbox();
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-7-start-date', end_id='y-gre-7-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-8-start-date', end_id='y-gre-8-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-9-start-date', end_id='y-gre-9-end-date') }}
+{{ macros.date_range_picker_js_snippet(start_id='y-gre-prep-start-date', end_id='y-gre-prep-end-date') }}
 
 $(document)
     .ready(function() {
+        $.fn.form.settings.rules.ceeTotalWithinLimit = function(value) {
+            if ($('#cee_total_full').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#cee_total_full').val()));
+            };
+        };
+        $.fn.form.settings.rules.ceeMathWithinLimit = function(value) {
+            if ($('#cee_math_full').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#cee_math_full').val()));
+            };
+        };
+        $.fn.form.settings.rules.ceeEnglishWithinLimit = function(value) {
+            if ($('#cee_english_full').val() === '') {
+                return true
+            } else {
+                return (Number(value) <= Number($('#cee_english_full').val()));
+            };
+        };
         $('#edit-study-plan')
             .form({
                 onSuccess: submitForm,
                 inline: true,
                 on: 'blur',
                 fields: {
+                    cee_total: {
+                        identifier: 'cee_total',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeTotalWithinLimit',
+                                prompt: '分数值超过满分'
+                            }
+                        ]
+                    },
+                    cee_total_full: {
+                        identifier: 'cee_total_full',
+                        depends: 'cee_total',
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cee_math: {
+                        identifier: 'cee_math',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeMathWithinLimit',
+                                prompt: '分数值超过满分'
+                            }
+                        ]
+                    },
+                    cee_math_full: {
+                        identifier: 'cee_math_full',
+                        depends: 'cee_math',
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cee_english: {
+                        identifier: 'cee_english',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            },
+                            {
+                                type: 'ceeEnglishWithinLimit',
+                                prompt: '分数值超过满分'
+                            }
+                        ]
+                    },
+                    cee_english_full: {
+                        identifier: 'cee_english_full',
+                        depends: 'cee_english',
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cet_4: {
+                        identifier: 'cet_4',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    cet_6: {
+                        identifier: 'cet_6',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    tem_4: {
+                        identifier: 'tem_4',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
+                    tem_8: {
+                        identifier: 'tem_8',
+                        optional: true,
+                        rules: [
+                            {
+                                type: 'integer[0..]',
+                                prompt: '请填写一个有效的分数'
+                            }
+                        ]
+                    },
                     speed: {
                         identifier: 'speed',
                         rules: [

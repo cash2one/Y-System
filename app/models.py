@@ -1769,6 +1769,11 @@ class User(UserMixin, db.Model):
         return datetime(year, month, day, self.activated_at.hour, self.activated_at.minute, self.activated_at.second, self.activated_at.microsecond) + suspended_time
 
     @property
+    def due_date(self):
+        if self.due_time is not None:
+            return date(self.due_time.year, self.due_time.month, self.due_time.day)
+
+    @property
     def overdue(self):
         if self.is_developer or self.is_administrator or self.is_moderator or (not self.activated):
             return False

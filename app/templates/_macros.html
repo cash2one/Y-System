@@ -131,9 +131,11 @@
 {% endmacro %}
 
 
-{% macro date_picker_js_snippet() %}
-$('.ui.date.calendar').calendar({
+{% macro date_picker_js_snippet(calendar_id=None, min_date=None, max_date=None) %}
+$('{% if calendar_id %}#{{ calendar_id }}{% else %}.ui.date.calendar{% endif %}').calendar({
     type: 'date',
+    {% if min_date %}minDate: new Date('{{ min_date }}'),{% endif %}
+    {% if max_date %}maxDate: new Date('{{ max_date }}'),{% endif %}
     ampm: false,
     text: {
         days: ['日', '一', '二', '三', '四', '五', '六'],
