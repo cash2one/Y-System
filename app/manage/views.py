@@ -2211,8 +2211,8 @@ def edit_test_score(test_type, id):
             label_id = None
             if int(form.score_label.data) > 0:
                 label_id = int(form.score_label.data)
-                if user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
-                    flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                if score.user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
+                    flash(u'%s已经拥有“%s”成绩' % (score.user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                     return redirect(url_for('manage.edit_test_score', test_type=test_type, id=score.id))
             test = GRETest.query.filter_by(date=form.test_date.data).first()
             if test is None:
@@ -2244,8 +2244,8 @@ def edit_test_score(test_type, id):
             label_id = None
             if int(form.score_label.data) > 0:
                 label_id = int(form.score_label.data)
-                if user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
-                    flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                if score.user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
+                    flash(u'%s已经拥有“%s”成绩' % (score.user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
                     return redirect(url_for('manage.edit_test_score', test_type=test_type, id=score.id))
             test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
             if test is None:

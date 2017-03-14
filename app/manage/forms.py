@@ -271,7 +271,7 @@ class EditGRETestScoreForm(FlaskForm):
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
     score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'添加')
+    submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(EditGRETestScoreForm, self).__init__(*args, **kwargs)
@@ -303,7 +303,7 @@ class EditTOEFLTestScoreForm(FlaskForm):
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
     test_date = DateField(u'考试日期', validators=[Required()])
     score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
-    submit = SubmitField(u'添加')
+    submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(EditTOEFLTestScoreForm, self).__init__(*args, **kwargs)
