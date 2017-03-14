@@ -131,11 +131,13 @@
                                     {{ gre_form.q_score.label() }}
                                     {{ gre_form.q_score(placeholder='Q成绩') }}
                                 </div>
-                                <div class="four wide required field">
+                                <div class="eight wide required field">
                                     {{ gre_form.aw_score.label() }}
                                     {{ gre_form.aw_score(class='ui dropdown') }}
                                 </div>
-                                <div class="four wide required field">
+                            </div>
+                            <div class="fields">
+                                <div class="eight wide required field">
                                     {{ gre_form.test_date.label() }}
                                     <div class="ui date calendar">
                                         <div class="ui left icon input">
@@ -143,6 +145,10 @@
                                             {{ gre_form.test_date(placeholder='格式：YYYY-MM-DD') }}
                                         </div>
                                     </div>
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ gre_form.score_label.label() }}
+                                    {{ gre_form.score_label(class='ui dropdown') }}
                                 </div>
                             </div>
                             {{ gre_form.submit(class='ui primary button') }}
@@ -184,13 +190,19 @@
                                     {{ toefl_form.writing(placeholder='TOEFL写作') }}
                                 </div>
                             </div>
-                            <div class="required field">
-                                {{ toefl_form.test_date.label() }}
-                                <div class="ui date calendar">
-                                    <div class="ui left icon input">
-                                        <i class="calendar icon"></i>
-                                        {{ toefl_form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ toefl_form.test_date.label() }}
+                                    <div class="ui date calendar">
+                                        <div class="ui left icon input">
+                                            <i class="calendar icon"></i>
+                                            {{ toefl_form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ toefl_form.score_label.label() }}
+                                    {{ toefl_form.score_label(class='ui dropdown') }}
                                 </div>
                             </div>
                             {{ toefl_form.submit(class='ui primary button') }}

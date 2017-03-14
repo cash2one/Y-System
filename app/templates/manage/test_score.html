@@ -94,11 +94,13 @@
                                     {{ form.q_score.label() }}
                                     {{ form.q_score(placeholder='Q成绩') }}
                                 </div>
-                                <div class="four wide required field">
+                                <div class="eight wide required field">
                                     {{ form.aw_score.label() }}
                                     {{ form.aw_score(class='ui dropdown') }}
                                 </div>
-                                <div class="four wide required field">
+                            </div>
+                            <div class="fields">
+                                <div class="eight wide required field">
                                     {{ form.test_date.label() }}
                                     <div class="ui date calendar">
                                         <div class="ui left icon input">
@@ -106,6 +108,10 @@
                                             {{ form.test_date(placeholder='格式：YYYY-MM-DD') }}
                                         </div>
                                     </div>
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ form.score_label.label() }}
+                                    {{ form.score_label(class='ui dropdown') }}
                                 </div>
                             </div>
                             {% endif %}
@@ -132,13 +138,19 @@
                                     {{ form.writing(placeholder='TOEFL写作') }}
                                 </div>
                             </div>
-                            <div class="required field">
-                                {{ form.test_date.label() }}
-                                <div class="ui date calendar">
-                                    <div class="ui left icon input">
-                                        <i class="calendar icon"></i>
-                                        {{ form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                            <div class="fields">
+                                <div class="eight wide required field">
+                                    {{ form.test_date.label() }}
+                                    <div class="ui date calendar">
+                                        <div class="ui left icon input">
+                                            <i class="calendar icon"></i>
+                                            {{ form.test_date(placeholder='格式：YYYY-MM-DD') }}
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="eight wide required field">
+                                    {{ form.score_label.label() }}
+                                    {{ form.score_label(class='ui dropdown') }}
                                 </div>
                             </div>
                             {% endif %}
