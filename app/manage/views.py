@@ -1804,7 +1804,7 @@ def test():
         score = YGRETestScore(
             user_id=user.id,
             test_id=int(y_gre_form.test.data),
-            v_score=int(y_gre_form.v_score.data),
+            v_score=y_gre_form.v_score.data,
             q_score=q_score,
             aw_score_id=aw_score,
             retrieved=y_gre_form.retrieved.data,
@@ -1836,8 +1836,8 @@ def test():
             user_id=user.id,
             test_id=test.id,
             label_id=label_id,
-            v_score=int(gre_form.v_score.data),
-            q_score=int(gre_form.q_score.data),
+            v_score=gre_form.v_score.data,
+            q_score=gre_form.q_score.data,
             aw_score_id=int(gre_form.aw_score.data),
             modified_by_id=current_user.id
         )
@@ -1867,11 +1867,11 @@ def test():
             user_id=user.id,
             test_id=test.id,
             label_id=label_id,
-            total_score=int(toefl_form.total.data),
-            reading_score=int(toefl_form.reading.data),
-            listening_score=int(toefl_form.listening.data),
-            speaking_score=int(toefl_form.speaking.data),
-            writing_score=int(toefl_form.writing.data),
+            total_score=toefl_form.total.data,
+            reading_score=toefl_form.reading.data,
+            listening_score=toefl_form.listening.data,
+            speaking_score=toefl_form.speaking.data,
+            writing_score=toefl_form.writing.data,
             modified_by_id=current_user.id
         )
         db.session.add(score)
@@ -2029,7 +2029,7 @@ def test_score(test_type, id):
             score = YGRETestScore(
                 user_id=user.id,
                 test_id=int(form.test.data),
-                v_score=int(form.v_score.data),
+                v_score=form.v_score.data,
                 q_score=q_score,
                 aw_score_id=aw_score,
                 retrieved=form.retrieved.data,
@@ -2073,8 +2073,8 @@ def test_score(test_type, id):
                 user_id=user.id,
                 test_id=test.id,
                 label_id=label_id,
-                v_score=int(form.v_score.data),
-                q_score=int(form.q_score.data),
+                v_score=form.v_score.data,
+                q_score=form.q_score.data,
                 aw_score_id=int(form.aw_score.data),
                 modified_by_id=current_user.id
             )
@@ -2116,11 +2116,11 @@ def test_score(test_type, id):
                 user_id=user.id,
                 test_id=test.id,
                 label_id=label_id,
-                total_score=int(form.total.data),
-                reading_score=int(form.reading.data),
-                listening_score=int(form.listening.data),
-                speaking_score=int(form.speaking.data),
-                writing_score=int(form.writing.data),
+                total_score=form.total.data,
+                reading_score=form.reading.data,
+                listening_score=form.listening.data,
+                speaking_score=form.speaking.data,
+                writing_score=form.writing.data,
                 modified_by_id=current_user.id
             )
             db.session.add(score)
@@ -2186,7 +2186,7 @@ def edit_test_score(test_type, id):
         form = EditYGRETestScoreForm()
         if form.validate_on_submit():
             score.test_id = int(form.test.data)
-            score.v_score = int(form.v_score.data)
+            score.v_score = form.v_score.data
             if form.q_score.data:
                 score.q_score = int(form.q_score.data)
             if form.aw_score.data:
@@ -2200,7 +2200,7 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新Y-GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(score.test_id)
-        form.v_score.data = u'%g' % score.v_score
+        form.v_score.data = score.v_score
         form.q_score.data = u'%g' % score.q_score
         form.aw_score.data = unicode(score.aw_score_id)
         form.retrieved.data = score.retrieved
@@ -2221,8 +2221,8 @@ def edit_test_score(test_type, id):
                 db.session.commit()
             score.test_id = test.id
             score.label_id = label_id
-            score.v_score = int(form.v_score.data)
-            score.q_score = int(form.q_score.data)
+            score.v_score = form.v_score.data
+            score.q_score = form.q_score.data
             score.aw_score_id = int(form.aw_score.data)
             score.modified_at = datetime.utcnow()
             score.modified_by_id = current_user.id
@@ -2234,8 +2234,8 @@ def edit_test_score(test_type, id):
         form.test_date.data = score.test.date
         if score.label_id:
             form.score_label.data = unicode(score.label_id)
-        form.v_score.data = u'%g' % score.v_score
-        form.q_score.data = u'%g' % score.q_score
+        form.v_score.data = score.v_score
+        form.q_score.data = score.q_score
         form.aw_score.data = unicode(score.aw_score_id)
     if test_type == u'toefl':
         score = TOEFLTestScore.query.get_or_404(id)
@@ -2254,11 +2254,11 @@ def edit_test_score(test_type, id):
                 db.session.commit()
             score.test_id = test.id
             score.label_id = label_id
-            score.total_score = int(form.total.data)
-            score.reading_score = int(form.reading.data)
-            score.listening_score = int(form.listening.data)
-            score.speaking_score = int(form.speaking.data)
-            score.writing_score = int(form.writing.data)
+            score.total_score = form.total.data
+            score.reading_score = form.reading.data
+            score.listening_score = form.listening.data
+            score.speaking_score = form.speaking.data
+            score.writing_score = form.writing.data
             score.modified_at = datetime.utcnow()
             score.modified_by_id = current_user.id
             db.session.add(score)
@@ -2269,11 +2269,11 @@ def edit_test_score(test_type, id):
         form.test_date.data = score.test.date
         if score.label_id:
             form.score_label.data = unicode(score.label_id)
-        form.total.data = u'%g' % score.total_score
-        form.reading.data = u'%g' % score.reading_score
-        form.listening.data = u'%g' % score.listening_score
-        form.speaking.data = u'%g' % score.speaking_score
-        form.writing.data = u'%g' % score.writing_score
+        form.total.data = score.total_score
+        form.reading.data = score.reading_score
+        form.listening.data = score.listening_score
+        form.speaking.data = score.speaking_score
+        form.writing.data = score.writing_score
     return render_template('manage/edit_test_score.html', test_type=test_type, form=form, score=score)
 
 

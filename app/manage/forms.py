@@ -238,7 +238,7 @@ class NewYGRETestScoreForm(FlaskForm):
 
 class EditYGRETestScoreForm(FlaskForm):
     test = SelectField(u'考试', coerce=unicode, validators=[Required()])
-    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     q_score = StringField(u'Quantitative Reasoning')
     aw_score = SelectField(u'Analytical Writing', coerce=unicode)
     retrieved = BooleanField(u'已回收试卷')
@@ -252,8 +252,8 @@ class EditYGRETestScoreForm(FlaskForm):
 
 class NewGRETestScoreForm(FlaskForm):
     email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
-    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    q_score = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
     score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
@@ -266,8 +266,8 @@ class NewGRETestScoreForm(FlaskForm):
 
 
 class EditGRETestScoreForm(FlaskForm):
-    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
-    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    q_score = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
     score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
@@ -807,6 +807,17 @@ class FilteriPadForm(FlaskForm):
 
 
 class EditStudyPlanForm(FlaskForm):
+    # GRE aim
+    gre_aim_v = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    gre_aim_q = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    gre_aim_aw = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    # TOEFL aim
+    toefl_aim_total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
+    toefl_aim_reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_aim_listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_aim_speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_aim_writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    # study plan
     speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
     deadline = DateField(u'Deadline')
     vb_intro_start_date = DateField(u'开始日期', validators=[Optional()])
