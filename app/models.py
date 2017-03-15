@@ -1004,6 +1004,8 @@ class GRETestScore(db.Model):
 
     @property
     def alias2(self):
+        if self.v_score is None or self.q_score is None or self.aw_score is None:
+            return u'N/A'
         return u'Verbal Reasoning：%g · Quantitative Reasoning：%g · Analytical Writing：%s' % (self.v_score, self.q_score, self.aw_score.name)
 
     def __repr__(self):
@@ -1059,7 +1061,9 @@ class TOEFLTestScore(db.Model):
 
     @property
     def alias2(self):
-        return u'总分：%g分（阅读：%g分 · 听力：%g分 · 口语：%g分 · 写作：%g分）' % (self.total_score, self.reading_score, self.listening_score, self.speaking_score, self.writing_score)
+        if self.total_score is None or self.reading_score is None or self.listening_score is None or self.speaking_score is None or self.writing_score is None:
+            return u'N/A'
+        return u'总分：%g分（阅读：%g分 · 听力：%g分 · 口语：%g分 · 写作：%g分）' % (self.total_score, self.reading_score, self.reading_score, self.speaking_score, self.writing_score)
 
     def __repr__(self):
         return '<TOEFL Test Score %r>' % self.alias
