@@ -4560,6 +4560,20 @@ def edit_study_plan(id):
         db.session.add(user)
         db.session.commit()
         # update VB plan
+        if vb_intro_plan is None:
+            vb_intro_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_intro.id,
+                start_date=form.vb_intro_start_date.data,
+                end_date=form.vb_intro_end_date.data,
+                remark=form.vb_intro_remark.data
+            )
+        else:
+            vb_intro_plan.start_date = form.vb_intro_start_date.data
+            vb_intro_plan.end_date = form.vb_intro_end_date.data
+            vb_intro_plan.remark = form.vb_intro_remark.data
+        db.session.add(vb_intro_plan)
+        db.session.commit()
         # update Y-GRE plan
         # update GRE test dates
         if form.gre_0_date.data:
