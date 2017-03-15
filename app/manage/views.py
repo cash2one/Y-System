@@ -4580,8 +4580,8 @@ def edit_study_plan(id):
             vb_intro_plan.remark = form.vb_intro_remark.data
         db.session.add(vb_intro_plan)
         db.session.commit()
-        for nota_bene in vb_intro_plan.notate_bene:
-            vb_intro_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_intro_plan.notate_bene:
+            vb_intro_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_intro_notate_bene.data:
             vb_intro_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 1
@@ -4605,8 +4605,8 @@ def edit_study_plan(id):
             vb_1_plan.remark = form.vb_1_remark.data
         db.session.add(vb_1_plan)
         db.session.commit()
-        for nota_bene in vb_1_plan.notate_bene:
-            vb_1_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_1_plan.notate_bene:
+            vb_1_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_1_notate_bene.data:
             vb_1_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 2
@@ -4630,8 +4630,8 @@ def edit_study_plan(id):
             vb_2_plan.remark = form.vb_2_remark.data
         db.session.add(vb_2_plan)
         db.session.commit()
-        for nota_bene in vb_2_plan.notate_bene:
-            vb_2_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_2_plan.notate_bene:
+            vb_2_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_2_notate_bene.data:
             vb_2_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 3
@@ -4655,8 +4655,8 @@ def edit_study_plan(id):
             vb_3_plan.remark = form.vb_3_remark.data
         db.session.add(vb_3_plan)
         db.session.commit()
-        for nota_bene in vb_3_plan.notate_bene:
-            vb_3_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_3_plan.notate_bene:
+            vb_3_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_3_notate_bene.data:
             vb_3_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 4
@@ -4680,8 +4680,8 @@ def edit_study_plan(id):
             vb_4_plan.remark = form.vb_4_remark.data
         db.session.add(vb_4_plan)
         db.session.commit()
-        for nota_bene in vb_4_plan.notate_bene:
-            vb_4_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_4_plan.notate_bene:
+            vb_4_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_4_notate_bene.data:
             vb_4_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 5
@@ -4705,8 +4705,8 @@ def edit_study_plan(id):
             vb_5_plan.remark = form.vb_5_remark.data
         db.session.add(vb_5_plan)
         db.session.commit()
-        for nota_bene in vb_5_plan.notate_bene:
-            vb_5_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_5_plan.notate_bene:
+            vb_5_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_5_notate_bene.data:
             vb_5_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 6
@@ -4730,8 +4730,8 @@ def edit_study_plan(id):
             vb_6_plan.remark = form.vb_6_remark.data
         db.session.add(vb_6_plan)
         db.session.commit()
-        for nota_bene in vb_6_plan.notate_bene:
-            vb_6_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_6_plan.notate_bene:
+            vb_6_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_6_notate_bene.data:
             vb_6_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 7
@@ -4755,8 +4755,8 @@ def edit_study_plan(id):
             vb_7_plan.remark = form.vb_7_remark.data
         db.session.add(vb_7_plan)
         db.session.commit()
-        for nota_bene in vb_7_plan.notate_bene:
-            vb_7_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_7_plan.notate_bene:
+            vb_7_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_7_notate_bene.data:
             vb_7_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 8
@@ -4780,8 +4780,8 @@ def edit_study_plan(id):
             vb_8_plan.remark = form.vb_8_remark.data
         db.session.add(vb_8_plan)
         db.session.commit()
-        for nota_bene in vb_8_plan.notate_bene:
-            vb_8_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_8_plan.notate_bene:
+            vb_8_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_8_notate_bene.data:
             vb_8_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update VB plan: 9
@@ -4805,8 +4805,8 @@ def edit_study_plan(id):
             vb_9_plan.remark = form.vb_9_remark.data
         db.session.add(vb_9_plan)
         db.session.commit()
-        for nota_bene in vb_9_plan.notate_bene:
-            vb_9_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in vb_9_plan.notate_bene:
+            vb_9_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.vb_9_notate_bene.data:
             vb_9_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: intro
@@ -4830,8 +4830,8 @@ def edit_study_plan(id):
             y_gre_intro_plan.remark = form.y_gre_intro_remark.data
         db.session.add(y_gre_intro_plan)
         db.session.commit()
-        for nota_bene in y_gre_intro_plan.notate_bene:
-            y_gre_intro_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_intro_plan.notate_bene:
+            y_gre_intro_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_intro_notate_bene.data:
             y_gre_intro_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 1
@@ -4855,8 +4855,8 @@ def edit_study_plan(id):
             y_gre_1_plan.remark = form.y_gre_1_remark.data
         db.session.add(y_gre_1_plan)
         db.session.commit()
-        for nota_bene in y_gre_1_plan.notate_bene:
-            y_gre_1_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_1_plan.notate_bene:
+            y_gre_1_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_1_notate_bene.data:
             y_gre_1_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 2
@@ -4880,8 +4880,8 @@ def edit_study_plan(id):
             y_gre_2_plan.remark = form.y_gre_2_remark.data
         db.session.add(y_gre_2_plan)
         db.session.commit()
-        for nota_bene in y_gre_2_plan.notate_bene:
-            y_gre_2_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_2_plan.notate_bene:
+            y_gre_2_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_2_notate_bene.data:
             y_gre_2_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 3
@@ -4905,8 +4905,8 @@ def edit_study_plan(id):
             y_gre_3_plan.remark = form.y_gre_3_remark.data
         db.session.add(y_gre_3_plan)
         db.session.commit()
-        for nota_bene in y_gre_3_plan.notate_bene:
-            y_gre_3_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_3_plan.notate_bene:
+            y_gre_3_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_3_notate_bene.data:
             y_gre_3_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 4
@@ -4930,8 +4930,8 @@ def edit_study_plan(id):
             y_gre_4_plan.remark = form.y_gre_4_remark.data
         db.session.add(y_gre_4_plan)
         db.session.commit()
-        for nota_bene in y_gre_4_plan.notate_bene:
-            y_gre_4_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_4_plan.notate_bene:
+            y_gre_4_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_4_notate_bene.data:
             y_gre_4_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 5
@@ -4955,8 +4955,8 @@ def edit_study_plan(id):
             y_gre_5_plan.remark = form.y_gre_5_remark.data
         db.session.add(y_gre_5_plan)
         db.session.commit()
-        for nota_bene in y_gre_5_plan.notate_bene:
-            y_gre_5_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_5_plan.notate_bene:
+            y_gre_5_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_5_notate_bene.data:
             y_gre_5_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 6
@@ -4980,8 +4980,8 @@ def edit_study_plan(id):
             y_gre_6_plan.remark = form.y_gre_6_remark.data
         db.session.add(y_gre_6_plan)
         db.session.commit()
-        for nota_bene in y_gre_6_plan.notate_bene:
-            y_gre_6_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_6_plan.notate_bene:
+            y_gre_6_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_6_notate_bene.data:
             y_gre_6_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 7
@@ -5005,8 +5005,8 @@ def edit_study_plan(id):
             y_gre_7_plan.remark = form.y_gre_7_remark.data
         db.session.add(y_gre_7_plan)
         db.session.commit()
-        for nota_bene in y_gre_7_plan.notate_bene:
-            y_gre_7_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_7_plan.notate_bene:
+            y_gre_7_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_7_notate_bene.data:
             y_gre_7_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 8
@@ -5030,8 +5030,8 @@ def edit_study_plan(id):
             y_gre_8_plan.remark = form.y_gre_8_remark.data
         db.session.add(y_gre_8_plan)
         db.session.commit()
-        for nota_bene in y_gre_8_plan.notate_bene:
-            y_gre_8_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_8_plan.notate_bene:
+            y_gre_8_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_8_notate_bene.data:
             y_gre_8_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: 9
@@ -5055,8 +5055,8 @@ def edit_study_plan(id):
             y_gre_9_plan.remark = form.y_gre_9_remark.data
         db.session.add(y_gre_9_plan)
         db.session.commit()
-        for nota_bene in y_gre_9_plan.notate_bene:
-            y_gre_9_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_9_plan.notate_bene:
+            y_gre_9_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_9_notate_bene.data:
             y_gre_9_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update Y-GRE plan: prep
@@ -5080,8 +5080,8 @@ def edit_study_plan(id):
             y_gre_prep_plan.remark = form.y_gre_prep_remark.data
         db.session.add(y_gre_prep_plan)
         db.session.commit()
-        for nota_bene in y_gre_prep_plan.notate_bene:
-            y_gre_prep_plan.remove_nota_bene(nota_bene=nota_bene)
+        for item in y_gre_prep_plan.notate_bene:
+            y_gre_prep_plan.remove_nota_bene(nota_bene=item.nota_bene)
         for nota_bene_id in form.y_gre_prep_notate_bene.data:
             y_gre_prep_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update GRE test dates
