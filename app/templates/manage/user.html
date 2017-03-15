@@ -65,7 +65,7 @@
                                     {{ form.birthdate.label() }}
                                     <div class="ui left icon input">
                                         <i class="birthday icon"></i>
-                                        {{ form.birthdate(placeholder='YYYY-MM-DD') }}
+                                        {{ form.birthdate(placeholder='格式：YYYY-MM-DD') }}
                                     </div>
                                 </div>
                                 <div class="eight wide field">
@@ -149,7 +149,7 @@
                             <td>{% if user.vb_course %}<a class="loading-trigger" href="{% if show_search_users %}{{ url_for('manage.course_user', id=user.vb_course.id, next=url_for('manage.user', keyword=request.args.get('keyword'))) }}{% else %}{{ url_for('manage.course_user', id=user.vb_course.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}">{{ user.vb_course.name }}</a>{% else %}无{% endif %}</td>
                             <td>{% if user.y_gre_course %}<a class="loading-trigger" href="{% if show_search_users %}{{ url_for('manage.course_user', id=user.y_gre_course.id, next=url_for('manage.user', keyword=request.args.get('keyword'))) }}{% else %}{{ url_for('manage.course_user', id=user.y_gre_course.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}">{{ user.y_gre_course.name }}</a>{% else %}无{% endif %}</td>
                             {% if user.activated %}
-                            <td>{{ user.last_punch.section.alias2 }}{% if current_user.can('管理学习进度') %}<a class="ui mini icon button loading-trigger" href="{% if show_search_users %}{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', keyword=request.args.get('keyword'))) }}{% else %}{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="refresh icon"></i></a>{% endif %}</td>
+                            <td>{{ user.last_punch.section.alias2 }}{% if current_user.can('管理研修进度') %}<a class="ui mini icon button loading-trigger" href="{% if show_search_users %}{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', keyword=request.args.get('keyword'))) }}{% else %}{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.user', page=pagination.page)) }}{% endif %}"><i class="refresh icon"></i></a>{% endif %}</td>
                             {% else %}
                             <td>N/A</td>
                             {% endif %}
@@ -264,7 +264,7 @@ var Validator = new IDValidator(GB2260);
 $(document)
     .ready(function() {
         $.fn.form.settings.rules.idNumber = function(value) {
-            if ($('#id_type').val() === '1') {
+            if ($('#id_type').parent().dropdown('get text') === '身份证') {
                 if (Validator.isValid(value, 18)) {
                     if (Validator.getInfo(value, 18).sex === 1) {
                         $('#create-admin').form('set values', { gender: '1' });
@@ -341,7 +341,7 @@ $(document)
                                 prompt: '请填写出生日期'
                             },
                             {
-                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
                                 prompt: '请填写一个有效的出生日期'
                             }
                         ]

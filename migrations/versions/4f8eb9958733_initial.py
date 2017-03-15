@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: fc4c160cf487
+Revision ID: 4f8eb9958733
 Revises: 
-Create Date: 2017-03-12 04:24:40.758876
+Create Date: 2017-03-16 02:52:24.614041
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fc4c160cf487'
+revision = '4f8eb9958733'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -167,6 +167,16 @@ def upgrade():
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
     sa.PrimaryKeyConstraint('role_id', 'permission_id')
     )
+    op.create_table('score_labels',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.Unicode(length=64), nullable=True),
+    sa.Column('category', sa.Unicode(length=64), nullable=True),
+    sa.Column('color_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['color_id'], ['colors.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_score_labels_category'), 'score_labels', ['category'], unique=False)
+    op.create_index(op.f('ix_score_labels_name'), 'score_labels', ['name'], unique=False)
     op.create_table('tags',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.Unicode(length=64), nullable=True),
@@ -288,14 +298,15 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('test_id', sa.Integer(), nullable=True),
+    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('v_score', sa.Integer(), nullable=True),
     sa.Column('q_score', sa.Integer(), nullable=True),
     sa.Column('aw_score_id', sa.Integer(), nullable=True),
-    sa.Column('label', sa.Unicode(length=64), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['aw_score_id'], ['gre_aw_scores.id'], ),
+    sa.ForeignKeyConstraint(['label_id'], ['score_labels.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['test_id'], ['gre_tests.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -467,15 +478,16 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('test_id', sa.Integer(), nullable=True),
+    sa.Column('label_id', sa.Integer(), nullable=True),
     sa.Column('total_score', sa.Integer(), nullable=True),
     sa.Column('reading_score', sa.Integer(), nullable=True),
     sa.Column('listening_score', sa.Integer(), nullable=True),
     sa.Column('speaking_score', sa.Integer(), nullable=True),
     sa.Column('writing_score', sa.Integer(), nullable=True),
-    sa.Column('label', sa.Unicode(length=64), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('modified_at', sa.DateTime(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['label_id'], ['score_labels.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['test_id'], ['toefl_tests.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
@@ -585,7 +597,6 @@ def upgrade():
     op.create_table('study_plan_nota_bene',
     sa.Column('study_plan_id', sa.Integer(), nullable=False),
     sa.Column('nota_bene_id', sa.Integer(), nullable=False),
-    sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['nota_bene_id'], ['notate_bene.id'], ),
     sa.ForeignKeyConstraint(['study_plan_id'], ['study_plans.id'], ),
     sa.PrimaryKeyConstraint('study_plan_id', 'nota_bene_id')
@@ -719,6 +730,9 @@ def downgrade():
     op.drop_table('users')
     op.drop_index(op.f('ix_tags_name'), table_name='tags')
     op.drop_table('tags')
+    op.drop_index(op.f('ix_score_labels_name'), table_name='score_labels')
+    op.drop_index(op.f('ix_score_labels_category'), table_name='score_labels')
+    op.drop_table('score_labels')
     op.drop_table('role_permissions')
     op.drop_index(op.f('ix_lessons_name'), table_name='lessons')
     op.drop_table('lessons')

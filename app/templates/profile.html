@@ -54,11 +54,9 @@ function noProfileAvatar(avatarImage) {
                     <div>{{ macros.user_email(user) }}</div>
                 </div>
                 {% if current_user.can('管理') and user.has_tags.count() %}<div class="ui vertical segment">
-                    {% with tags = user.has_tags %}
-                    <div class="ui labels">
+                    {% with tags = user.has_tags %}<div class="ui labels">
                         {% for tag in tags %}<div class="ui {{ tag.tag.color.css_class }} label"><i class="tag icon"></i>{{ tag.tag.name }}</div>{% endfor %}
-                    </div>
-                    {% endwith %}
+                    </div>{% endwith %}
                 </div>{% endif %}
                 {% if not user.is_suspended and user.due_time %}<div class="ui vertical segment">
                     <div id="due-time" class="ui tiny indicating progress">
@@ -72,9 +70,7 @@ function noProfileAvatar(avatarImage) {
                     <div class="ui popup popup-content">{{ moment(user.activated_at).format('YYYY-M-D H:mm:ss') }}</div>
                     <div>上次登录：<span class="popup-trigger" data-variation="inverted">{{ moment(user.last_seen_at).fromNow() }}</span></div>
                     <div class="ui popup popup-content">{{ moment(user.last_seen_at).format('YYYY-M-D H:mm:ss') }}</div>
-                    {% else %}
-                    <div><i class="yellow warning sign icon"></i>该账户尚未激活</div>
-                    {% endif %}
+                    {% else %}<div><i class="yellow warning sign icon"></i>该账户尚未激活</div>{% endif %}
                 </div>
                 {% if current_user.can('管理') %}
                 <div class="ui vertical segment">
@@ -123,6 +119,11 @@ function noProfileAvatar(avatarImage) {
                     {% endif %}
                 </div>
                 <div class="ui vertical segment">
+                    <div class="ui header">研修计划</div>
+                    {% if user.study_plans.count() %}{% endif %}
+                    {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>{% endif %}
+                </div>
+                <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
                     <div id="booking-stats" class="ui seven tiny statistics">
                         <div class="statistic">
@@ -167,10 +168,10 @@ function noProfileAvatar(avatarImage) {
                         {% for score in scores %}
                         <div class="item">
                             <div class="right floated content">
-                                <div class="description">{{ score.test.date }}</div>
+                                <div class="description">{% if score.test_id %}{{ score.test.date }}{% endif %}</div>
                             </div>
                             <div class="content">
-                                <div class="header">{{ score.alias2 }}</div>
+                                <div class="header">{% if score.label_id %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -182,10 +183,10 @@ function noProfileAvatar(avatarImage) {
                         {% for score in scores %}
                         <div class="item">
                             <div class="right floated content">
-                                <div class="description">{{ score.test.date }}</div>
+                                <div class="description">{% if score.test_id %}{{ score.test.date }}{% endif %}</div>
                             </div>
                             <div class="content">
-                                <div class="header">{{ score.alias2 }}</div>
+                                <div class="header">{% if score.label_id %}<div class="ui {{ score.label.color.css_class }} horizontal label">{{ score.label.name }}</div>{% endif %}{{ score.alias2 }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -315,11 +316,11 @@ function noProfileAvatar(avatarImage) {
                 {% with scores = user.score_records %}{% if scores.count() %}<div class="ui vertical segment">
                     <div class="ui header">既往成绩</div>
                     <div class="ui relaxed list">
-                        {% for score_record in user.score_records %}
+                        {% for score in scores %}
                         <div class="item">
                             <div class="content">
-                                <div class="header">{{ score_record.type.name }}</div>
-                                <div class="description">{{ score_record.score_alias }}</div>
+                                <div class="header">{{ score.type.name }}</div>
+                                <div class="description">{{ score.score_alias }}</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -336,8 +337,14 @@ function noProfileAvatar(avatarImage) {
                         </div>
                         <div class="item">
                             <div class="content">
-                                <div class="header">申请信息</div>
-                                <div class="description">申请信息：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
+                                <div class="header">申请方向</div>
+                                <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="content">
+                                <div class="header">留学中介</div>
+                                <div class="description">{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
                             </div>
                         </div>
                         <div class="item">
@@ -667,12 +674,12 @@ $.getJSON(VBProgressUrl, function(data) {
                         .addClass('ui label')
                         .text(data.lessons[lesson_idx].sections[section_idx].name)
                 );
-                {% if current_user.can('管理学习进度') %}
+                {% if current_user.can('管理研修进度') %}
                 if (data.lessons[lesson_idx].sections[section_idx].order === 0) {
                     $('#' + data.lessons[lesson_idx].element_id + '-sections .ui.labels').append(
                         $('<a>')
                             .attr('id', data.lessons[lesson_idx].sections[section_idx].element_id + '-action')
-                            .attr('href', '/manage/punch/{{ user.id }}/' + data.lessons[lesson_idx].sections[section_idx].element_id.split('-').pop() + "?next={{ url_for('main.profile', id=user.id) }}")
+                            .attr('href', '/manage/punch/{{ user.id }}/' + data.lessons[lesson_idx].sections[section_idx].element_id.split('-').pop() + "?next={{ url_for('main.profile_progress', id=user.id) }}")
                             .attr('data-content','标记为已完成')
                             .attr('data-position', 'top center')
                             .attr('data-variation', 'inverted')
@@ -737,10 +744,10 @@ $.getJSON(VBProgressUrl, function(data) {
             .attr('data-position', 'top left')
             .attr('data-variation', 'inverted')
             .popup();
-        {% if current_user.can('管理学习进度') %}
+        {% if current_user.can('管理研修进度') %}
         if (data.punches[punch_idx].section.order === 0) {
             $('#' + data.punches[punch_idx].section.element_id + '-action')
-                .attr('href', '/manage/unpunch/{{ user.id }}/' + data.punches[punch_idx].section.element_id.split('-').pop() + "?next={{ url_for('main.profile', id=user.id) }}")
+                .attr('href', '/manage/unpunch/{{ user.id }}/' + data.punches[punch_idx].section.element_id.split('-').pop() + "?next={{ url_for('main.profile_progress', id=user.id) }}")
                 .attr('data-content','标记为未完成')
                 .attr('data-position', 'top center')
                 .attr('data-variation', 'inverted')

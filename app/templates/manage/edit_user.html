@@ -116,7 +116,7 @@
                                 {{ edit_birthdate_form.birthdate.label() }}
                                 <div class="ui left icon input">
                                     <i class="birthday icon"></i>
-                                    {{ edit_birthdate_form.birthdate(placeholder='YYYY-MM-DD') }}
+                                    {{ edit_birthdate_form.birthdate(placeholder='格式：YYYY-MM-DD') }}
                                 </div>
                             </div>
                             {{ edit_birthdate_form.submit(class='ui primary button') }}
@@ -563,7 +563,7 @@
                         </div>
                         <div class="content">
                             <div class="header">申请信息</div>
-                            <div class="description">申请信息：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
+                            <div class="description">申请方向：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
@@ -947,7 +947,7 @@ $(document)
                                 prompt: '请填写出生日期'
                             },
                             {
-                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
                                 prompt: '请填写一个有效的出生日期'
                             }
                         ]
@@ -956,7 +956,7 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.idNumber = function(value) {
-            if ($('#edit_id_number-id_type').val() === '1') {
+            if ($('#edit_id_number-id_type').parent().dropdown('get text') === '身份证') {
                 return (Validator.isValid(value, 18));
             } else {
                 return true;
@@ -1218,7 +1218,7 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.exceptEducationType = function(value) {
-            if ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1) {
+            if ($.inArray($('#new_education_record-education_type').parent().dropdown('get text'), ['本科', '硕士', '博士']) === -1) {
                 return true;
             } else {
                 return ($('#new_education_record-major').val() !== '');
@@ -1344,7 +1344,7 @@ $(document)
             if (/^[0-9]*$/.test(value)) {
                 return true;
             } else {
-                return ($.inArray($('#new_score_record-score_type').dropdown('get text')[0], ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
+                return ($.inArray($('#new_score_record-score_type').parent().dropdown('get text'), ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
             };
         };
         $.fn.form.settings.rules.scoreWithinLimit = function(value) {

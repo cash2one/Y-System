@@ -20,7 +20,7 @@ class Version:
     Application = 'v1.0.0-dev'
     jQuery = '3.1.1'
     SemanticUI = '2.2.9'
-    SemanticUICalendar = '0.0.6'
+    SemanticUICalendar = '0.0.7'
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
     CountUp = '1.8.1'
@@ -38,6 +38,7 @@ class Color(db.Model):
     name = db.Column(db.Unicode(64), unique=True, index=True)
     css_class = db.Column(db.Unicode(64))
     tags = db.relationship('Tag', backref='color', lazy='dynamic')
+    score_labels = db.relationship('ScoreLabel', backref='color', lazy='dynamic')
 
     @staticmethod
     def insert_colors():
@@ -56,6 +57,7 @@ class Color(db.Model):
             (u'Brown', u'brown', ),
             (u'Grey', u'grey', ),
             (u'Black', u'black', ),
+            (u'Basic', u'basic', ),
         ]
         for entry in colors:
             color = Color.query.filter_by(name=entry[0]).first()
@@ -101,7 +103,8 @@ class Permission(db.Model):
             (u'预约任意课程', True, ),
             (u'管理', False, ),
             (u'管理课程预约', False, ),
-            (u'管理学习进度', False, ),
+            (u'管理研修进度', False, ),
+            (u'管理研修计划', False, ),
             (u'管理iPad借阅', False, ),
             (u'管理预约时段', False, ),
             (u'管理课程', False, ),
@@ -199,9 +202,9 @@ class Role(db.Model):
             (u'Y-GRE 普通', [u'预约', u'预约VB课程', u'预约Y-GRE课程'], ),
             (u'Y-GRE VB×2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程×2'], ),
             (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
-            (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅'], ),
-            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品'], ),
-            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理学习进度', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品', u'管理权限'], ),
+            (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理iPad借阅'], ),
+            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理研修计划', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品'], ),
+            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理研修计划', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品', u'管理权限'], ),
             (u'开发人员', [permission.name for permission in Permission.query.all()], ),
         ]
         for entry in roles:
@@ -897,6 +900,63 @@ class YGRETestScore(db.Model):
         return '<Y-GRE Test Score %r>' % self.alias
 
 
+class ScoreLabel(db.Model):
+    __tablename__ = 'score_labels'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(64), index=True)
+    category = db.Column(db.Unicode(64), index=True)
+    color_id = db.Column(db.Integer, db.ForeignKey('colors.id'))
+    gre_test_scores = db.relationship('GRETestScore', backref='label', lazy='dynamic')
+    toefl_test_scores = db.relationship('TOEFLTestScore', backref='label', lazy='dynamic')
+
+    @property
+    def alias(self):
+        return u'%s - %s' % (self.category, self.name)
+
+    @staticmethod
+    def insert_score_labels():
+        score_labels = [
+            (u'初始', u'GRE', u'Basic', ),
+            (u'目标', u'GRE', u'Basic', ),
+            (u'G0', u'GRE', u'Basic', ),
+            (u'G1', u'GRE', u'Basic', ),
+            (u'G2', u'GRE', u'Basic', ),
+            (u'G3', u'GRE', u'Basic', ),
+            (u'G4', u'GRE', u'Basic', ),
+            (u'G5', u'GRE', u'Basic', ),
+            (u'G6', u'GRE', u'Basic', ),
+            (u'G7', u'GRE', u'Basic', ),
+            (u'G8', u'GRE', u'Basic', ),
+            (u'G9', u'GRE', u'Basic', ),
+            (u'初始', u'TOEFL', u'Basic', ),
+            (u'目标', u'TOEFL', u'Basic', ),
+            (u'T0', u'TOEFL', u'Basic', ),
+            (u'T1', u'TOEFL', u'Basic', ),
+            (u'T2', u'TOEFL', u'Basic', ),
+            (u'T3', u'TOEFL', u'Basic', ),
+            (u'T4', u'TOEFL', u'Basic', ),
+            (u'T5', u'TOEFL', u'Basic', ),
+            (u'T6', u'TOEFL', u'Basic', ),
+            (u'T7', u'TOEFL', u'Basic', ),
+            (u'T8', u'TOEFL', u'Basic', ),
+            (u'T9', u'TOEFL', u'Basic', ),
+        ]
+        for entry in score_labels:
+            score_label = ScoreLabel.query.filter_by(name=entry[0], category=entry[1]).first()
+            if score_label is None:
+                score_label = ScoreLabel(
+                    name=entry[0],
+                    category=entry[1],
+                    color_id=Color.query.filter_by(name=entry[2]).first().id
+                )
+                db.session.add(score_label)
+                print u'导入G/T成绩标签信息', entry[0], entry[1], entry[2]
+        db.session.commit()
+
+    def __repr__(self):
+        return '<Score Label %r>' % self.alias
+
+
 class GRETest(db.Model):
     __tablename__ = 'gre_tests'
     id = db.Column(db.Integer, primary_key=True)
@@ -925,10 +985,10 @@ class GRETestScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('gre_tests.id'))
+    label_id = db.Column(db.Integer, db.ForeignKey('score_labels.id'))
     v_score = db.Column(db.Integer)
     q_score = db.Column(db.Integer)
     aw_score_id = db.Column(db.Integer, db.ForeignKey('gre_aw_scores.id'))
-    label = db.Column(db.Unicode(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -978,12 +1038,12 @@ class TOEFLTestScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('toefl_tests.id'))
+    label_id = db.Column(db.Integer, db.ForeignKey('score_labels.id'))
     total_score = db.Column(db.Integer)
     reading_score = db.Column(db.Integer)
     listening_score = db.Column(db.Integer)
     speaking_score = db.Column(db.Integer)
     writing_score = db.Column(db.Integer)
-    label = db.Column(db.Unicode(64))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -1376,10 +1436,10 @@ class User(UserMixin, db.Model):
             db.session.delete(employment_record)
         for score_record in self.score_records:
             db.session.delete(score_record)
-        for gre_test_score in self.gre_test_scores:
-            db.session.delete(gre_test_score)
-        for toefl_test_score in self.toefl_test_scores:
-            db.session.delete(toefl_test_score)
+        # for gre_test_score in self.gre_test_scores:
+        #     db.session.delete(gre_test_score)
+        # for toefl_test_score in self.toefl_test_scores:
+        #     db.session.delete(toefl_test_score)
         for purchase in self.purchases:
             db.session.delete(purchase)
         for course_registration in self.course_registrations:
@@ -1766,6 +1826,11 @@ class User(UserMixin, db.Model):
         day = self.activated_at.day
         suspended_time = reduce(lambda timedelta1, timedelta2: timedelta1 + timedelta2, [record.end_time - record.start_time for record in self.suspension_records if record.end_time is not None], timedelta(0))
         return datetime(year, month, day, self.activated_at.hour, self.activated_at.minute, self.activated_at.second, self.activated_at.microsecond) + suspended_time
+
+    @property
+    def due_date(self):
+        if self.due_time is not None:
+            return date(self.due_time.year, self.due_time.month, self.due_time.day)
 
     @property
     def overdue(self):
@@ -2339,24 +2404,6 @@ class User(UserMixin, db.Model):
                 .filter(Section.order >= self.last_punch.section.order)\
                 .order_by(Section.order.asc())\
                 .all()
-
-    def add_toefl_test_score(self, test_date, total_score, reading_score, listening_score, speaking_score, writing_score, modified_by):
-        test = TOEFLTest.query.filter_by(date=test_date).first()
-        if test is None:
-            test = TOEFLTest(date=test_date)
-            db.session.add(test)
-            db.session.commit()
-        toefl_test_score = TOEFLTestScore(
-            user_id=self.id,
-            test_id=test.id,
-            total_score=total_score,
-            reading_score=reading_score,
-            listening_score=listening_score,
-            speaking_score=speaking_score,
-            writing_score=writing_score,
-            modified_by_id=modified_by.id
-        )
-        db.session.add(toefl_test_score)
 
     def submitted(self, assignment):
         return self.assignment_scores.filter_by(assignment_id=assignment.id).order_by(AssignmentScore.modified_at.desc()).first()
@@ -4061,7 +4108,6 @@ class StudyPlanNotaBene(db.Model):
     __tablename__ = 'study_plan_nota_bene'
     study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'), primary_key=True)
     nota_bene_id = db.Column(db.Integer, db.ForeignKey('notate_bene.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class StudyPlan(db.Model):
@@ -4084,6 +4130,19 @@ class StudyPlan(db.Model):
     @property
     def alias(self):
         return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
+
+    def add_nota_bene(self, nota_bene):
+        if not self.has_nota_bene(nota_bene):
+            study_plan_nota_bene = StudyPlanNotaBene(study_plan_id=self.id, nota_bene_id=nota_bene.id)
+            db.session.add(study_plan_nota_bene)
+
+    def remove_nota_bene(self, nota_bene):
+        study_plan_nota_bene = self.notate_bene.filter_by(nota_bene_id=nota_bene.id).first()
+        if study_plan_nota_bene:
+            db.session.delete(study_plan_nota_bene)
+
+    def has_nota_bene(self, nota_bene):
+        return self.notate_bene.filter_by(nota_bene_id=nota_bene.id).first() is not None
 
     def __repr__(self):
         return '<Study Plan %r>' % self.alias
