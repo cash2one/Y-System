@@ -5185,6 +5185,113 @@ def edit_study_plan(id):
     # time parameters
     form.speed.data = user.speed
     form.deadline.data = user.deadline or user.due_date
+    # VB plan
+    if vb_intro_plan is not None:
+        form.vb_intro_start_date.data = vb_intro_plan.start_date
+        form.vb_intro_end_date.data = vb_intro_plan.end_date
+        form.vb_intro_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_intro_plan.notate_bene]
+        form.vb_intro_remark.data = vb_intro_plan.remark
+    if vb_1_plan is not None:
+        form.vb_1_start_date.data = vb_1_plan.start_date
+        form.vb_1_end_date.data = vb_1_plan.end_date
+        form.vb_1_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_1_plan.notate_bene]
+        form.vb_1_remark.data = vb_1_plan.remark
+    if vb_2_plan is not None:
+        form.vb_2_start_date.data = vb_2_plan.start_date
+        form.vb_2_end_date.data = vb_2_plan.end_date
+        form.vb_2_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_2_plan.notate_bene]
+        form.vb_2_remark.data = vb_2_plan.remark
+    if vb_3_plan is not None:
+        form.vb_3_start_date.data = vb_3_plan.start_date
+        form.vb_3_end_date.data = vb_3_plan.end_date
+        form.vb_3_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_3_plan.notate_bene]
+        form.vb_3_remark.data = vb_3_plan.remark
+    if vb_4_plan is not None:
+        form.vb_4_start_date.data = vb_4_plan.start_date
+        form.vb_4_end_date.data = vb_4_plan.end_date
+        form.vb_4_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_4_plan.notate_bene]
+        form.vb_4_remark.data = vb_4_plan.remark
+    if vb_5_plan is not None:
+        form.vb_5_start_date.data = vb_5_plan.start_date
+        form.vb_5_end_date.data = vb_5_plan.end_date
+        form.vb_5_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_5_plan.notate_bene]
+        form.vb_5_remark.data = vb_5_plan.remark
+    if vb_6_plan is not None:
+        form.vb_6_start_date.data = vb_6_plan.start_date
+        form.vb_6_end_date.data = vb_6_plan.end_date
+        form.vb_6_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_6_plan.notate_bene]
+        form.vb_6_remark.data = vb_6_plan.remark
+    if vb_7_plan is not None:
+        form.vb_7_start_date.data = vb_7_plan.start_date
+        form.vb_7_end_date.data = vb_7_plan.end_date
+        form.vb_7_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_7_plan.notate_bene]
+        form.vb_7_remark.data = vb_7_plan.remark
+    if vb_8_plan is not None:
+        form.vb_8_start_date.data = vb_8_plan.start_date
+        form.vb_8_end_date.data = vb_8_plan.end_date
+        form.vb_8_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_8_plan.notate_bene]
+        form.vb_8_remark.data = vb_8_plan.remark
+    if vb_9_plan is not None:
+        form.vb_9_start_date.data = vb_9_plan.start_date
+        form.vb_9_end_date.data = vb_9_plan.end_date
+        form.vb_9_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_9_plan.notate_bene]
+        form.vb_9_remark.data = vb_9_plan.remark
+    # Y-GRE plan
+    if y_gre_intro_plan is not None:
+        form.y_gre_intro_start_date.data = y_gre_intro_plan.start_date
+        form.y_gre_intro_end_date.data = y_gre_intro_plan.end_date
+        form.y_gre_intro_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_intro_plan.notate_bene]
+        form.y_gre_intro_remark.data = y_gre_intro_plan.remark
+    if y_gre_1_plan is not None:
+        form.y_gre_1_start_date.data = y_gre_1_plan.start_date
+        form.y_gre_1_end_date.data = y_gre_1_plan.end_date
+        form.y_gre_1_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_1_plan.notate_bene]
+        form.y_gre_1_remark.data = y_gre_1_plan.remark
+    if y_gre_2_plan is not None:
+        form.y_gre_2_start_date.data = y_gre_2_plan.start_date
+        form.y_gre_2_end_date.data = y_gre_2_plan.end_date
+        form.y_gre_2_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_2_plan.notate_bene]
+        form.y_gre_2_remark.data = y_gre_2_plan.remark
+    if y_gre_3_plan is not None:
+        form.y_gre_3_start_date.data = y_gre_3_plan.start_date
+        form.y_gre_3_end_date.data = y_gre_3_plan.end_date
+        form.y_gre_3_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_3_plan.notate_bene]
+        form.y_gre_3_remark.data = y_gre_3_plan.remark
+    if y_gre_4_plan is not None:
+        form.y_gre_4_start_date.data = y_gre_4_plan.start_date
+        form.y_gre_4_end_date.data = y_gre_4_plan.end_date
+        form.y_gre_4_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_4_plan.notate_bene]
+        form.y_gre_4_remark.data = y_gre_4_plan.remark
+    if y_gre_5_plan is not None:
+        form.y_gre_5_start_date.data = y_gre_5_plan.start_date
+        form.y_gre_5_end_date.data = y_gre_5_plan.end_date
+        form.y_gre_5_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_5_plan.notate_bene]
+        form.y_gre_5_remark.data = y_gre_5_plan.remark
+    if y_gre_6_plan is not None:
+        form.y_gre_6_start_date.data = y_gre_6_plan.start_date
+        form.y_gre_6_end_date.data = y_gre_6_plan.end_date
+        form.y_gre_6_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_6_plan.notate_bene]
+        form.y_gre_6_remark.data = y_gre_6_plan.remark
+    if y_gre_7_plan is not None:
+        form.y_gre_7_start_date.data = y_gre_7_plan.start_date
+        form.y_gre_7_end_date.data = y_gre_7_plan.end_date
+        form.y_gre_7_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_7_plan.notate_bene]
+        form.y_gre_7_remark.data = y_gre_7_plan.remark
+    if y_gre_8_plan is not None:
+        form.y_gre_8_start_date.data = y_gre_8_plan.start_date
+        form.y_gre_8_end_date.data = y_gre_8_plan.end_date
+        form.y_gre_8_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_8_plan.notate_bene]
+        form.y_gre_8_remark.data = y_gre_8_plan.remark
+    if y_gre_9_plan is not None:
+        form.y_gre_9_start_date.data = y_gre_9_plan.start_date
+        form.y_gre_9_end_date.data = y_gre_9_plan.end_date
+        form.y_gre_9_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_9_plan.notate_bene]
+        form.y_gre_9_remark.data = y_gre_9_plan.remark
+    if y_gre_prep_plan is not None:
+        form.y_gre_prep_start_date.data = y_gre_prep_plan.start_date
+        form.y_gre_prep_end_date.data = y_gre_prep_plan.end_date
+        form.y_gre_prep_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_prep_plan.notate_bene]
+        form.y_gre_prep_remark.data = y_gre_prep_plan.remark
     # GRE test dates
     if gre_0_score is not None:
         form.gre_0_date.data = gre_0_score.test.date
