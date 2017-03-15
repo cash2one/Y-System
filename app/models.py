@@ -4108,7 +4108,6 @@ class StudyPlanNotaBene(db.Model):
     __tablename__ = 'study_plan_nota_bene'
     study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'), primary_key=True)
     nota_bene_id = db.Column(db.Integer, db.ForeignKey('notate_bene.id'), primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class StudyPlan(db.Model):
@@ -4131,6 +4130,19 @@ class StudyPlan(db.Model):
     @property
     def alias(self):
         return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
+
+    def add_nota_bene(self, nota_bene):
+        if not self.has_nota_bene(nota_bene):
+            study_plan_nota_bene = StudyPlanNotaBene(study_plan_id=self.id, nota_bene_id=nota_bene.id)
+            db.session.add(study_plan_nota_bene)
+
+    def remove_nota_bene(self, nota_bene):
+        study_plan_nota_bene = self.notate_bene.filter_by(nota_bene_id=nota_bene.id).first()
+        if study_plan_nota_bene:
+            db.session.delete(study_plan_nota_bene)
+
+    def has_nota_bene(self, nota_bene):
+        return self.notate_bene.filter_by(nota_bene_id=nota_bene.id).first() is not None
 
     def __repr__(self):
         return '<Study Plan %r>' % self.alias

@@ -4559,22 +4559,531 @@ def edit_study_plan(id):
         user.deadline = form.deadline.data
         db.session.add(user)
         db.session.commit()
-        # update VB plan
+        # update VB plan: intro
+        vb_intro_start_date = None
+        if form.vb_intro_start_date.data:
+            vb_intro_start_date = form.vb_intro_start_date.data
+        vb_intro_end_date = None
+        if form.vb_intro_end_date.data:
+            vb_intro_end_date = form.vb_intro_end_date.data
         if vb_intro_plan is None:
             vb_intro_plan = StudyPlan(
                 user_id=user.id,
                 lesson_id=vb_intro.id,
-                start_date=form.vb_intro_start_date.data,
-                end_date=form.vb_intro_end_date.data,
+                start_date=vb_intro_start_date,
+                end_date=vb_intro_end_date,
                 remark=form.vb_intro_remark.data
             )
         else:
-            vb_intro_plan.start_date = form.vb_intro_start_date.data
-            vb_intro_plan.end_date = form.vb_intro_end_date.data
+            vb_intro_plan.start_date = vb_intro_start_date
+            vb_intro_plan.end_date = vb_intro_end_date
             vb_intro_plan.remark = form.vb_intro_remark.data
         db.session.add(vb_intro_plan)
         db.session.commit()
-        # update Y-GRE plan
+        for nota_bene in vb_intro_plan.notate_bene:
+            vb_intro_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_intro_notate_bene.data:
+            vb_intro_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 1
+        vb_1_start_date = None
+        if form.vb_1_start_date.data:
+            vb_1_start_date = form.vb_1_start_date.data
+        vb_1_end_date = None
+        if form.vb_1_end_date.data:
+            vb_1_end_date = form.vb_1_end_date.data
+        if vb_1_plan is None:
+            vb_1_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_1.id,
+                start_date=vb_1_start_date,
+                end_date=vb_1_end_date,
+                remark=form.vb_1_remark.data
+            )
+        else:
+            vb_1_plan.start_date = vb_1_start_date
+            vb_1_plan.end_date = vb_1_end_date
+            vb_1_plan.remark = form.vb_1_remark.data
+        db.session.add(vb_1_plan)
+        db.session.commit()
+        for nota_bene in vb_1_plan.notate_bene:
+            vb_1_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_1_notate_bene.data:
+            vb_1_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 2
+        vb_2_start_date = None
+        if form.vb_2_start_date.data:
+            vb_2_start_date = form.vb_2_start_date.data
+        vb_2_end_date = None
+        if form.vb_2_end_date.data:
+            vb_2_end_date = form.vb_2_end_date.data
+        if vb_2_plan is None:
+            vb_2_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_2.id,
+                start_date=vb_2_start_date,
+                end_date=vb_2_end_date,
+                remark=form.vb_2_remark.data
+            )
+        else:
+            vb_2_plan.start_date = vb_2_start_date
+            vb_2_plan.end_date = vb_2_end_date
+            vb_2_plan.remark = form.vb_2_remark.data
+        db.session.add(vb_2_plan)
+        db.session.commit()
+        for nota_bene in vb_2_plan.notate_bene:
+            vb_2_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_2_notate_bene.data:
+            vb_2_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 3
+        vb_3_start_date = None
+        if form.vb_3_start_date.data:
+            vb_3_start_date = form.vb_3_start_date.data
+        vb_3_end_date = None
+        if form.vb_3_end_date.data:
+            vb_3_end_date = form.vb_3_end_date.data
+        if vb_3_plan is None:
+            vb_3_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_3.id,
+                start_date=vb_3_start_date,
+                end_date=vb_3_end_date,
+                remark=form.vb_3_remark.data
+            )
+        else:
+            vb_3_plan.start_date = vb_3_start_date
+            vb_3_plan.end_date = vb_3_end_date
+            vb_3_plan.remark = form.vb_3_remark.data
+        db.session.add(vb_3_plan)
+        db.session.commit()
+        for nota_bene in vb_3_plan.notate_bene:
+            vb_3_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_3_notate_bene.data:
+            vb_3_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 4
+        vb_4_start_date = None
+        if form.vb_4_start_date.data:
+            vb_4_start_date = form.vb_4_start_date.data
+        vb_4_end_date = None
+        if form.vb_4_end_date.data:
+            vb_4_end_date = form.vb_4_end_date.data
+        if vb_4_plan is None:
+            vb_4_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_4.id,
+                start_date=vb_4_start_date,
+                end_date=vb_4_end_date,
+                remark=form.vb_4_remark.data
+            )
+        else:
+            vb_4_plan.start_date = vb_4_start_date
+            vb_4_plan.end_date = vb_4_end_date
+            vb_4_plan.remark = form.vb_4_remark.data
+        db.session.add(vb_4_plan)
+        db.session.commit()
+        for nota_bene in vb_4_plan.notate_bene:
+            vb_4_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_4_notate_bene.data:
+            vb_4_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 5
+        vb_5_start_date = None
+        if form.vb_5_start_date.data:
+            vb_5_start_date = form.vb_5_start_date.data
+        vb_5_end_date = None
+        if form.vb_5_end_date.data:
+            vb_5_end_date = form.vb_5_end_date.data
+        if vb_5_plan is None:
+            vb_5_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_5.id,
+                start_date=vb_5_start_date,
+                end_date=vb_5_end_date,
+                remark=form.vb_5_remark.data
+            )
+        else:
+            vb_5_plan.start_date = vb_5_start_date
+            vb_5_plan.end_date = vb_5_end_date
+            vb_5_plan.remark = form.vb_5_remark.data
+        db.session.add(vb_5_plan)
+        db.session.commit()
+        for nota_bene in vb_5_plan.notate_bene:
+            vb_5_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_5_notate_bene.data:
+            vb_5_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 6
+        vb_6_start_date = None
+        if form.vb_6_start_date.data:
+            vb_6_start_date = form.vb_6_start_date.data
+        vb_6_end_date = None
+        if form.vb_6_end_date.data:
+            vb_6_end_date = form.vb_6_end_date.data
+        if vb_6_plan is None:
+            vb_6_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_6.id,
+                start_date=vb_6_start_date,
+                end_date=vb_6_end_date,
+                remark=form.vb_6_remark.data
+            )
+        else:
+            vb_6_plan.start_date = vb_6_start_date
+            vb_6_plan.end_date = vb_6_end_date
+            vb_6_plan.remark = form.vb_6_remark.data
+        db.session.add(vb_6_plan)
+        db.session.commit()
+        for nota_bene in vb_6_plan.notate_bene:
+            vb_6_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_6_notate_bene.data:
+            vb_6_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 7
+        vb_7_start_date = None
+        if form.vb_7_start_date.data:
+            vb_7_start_date = form.vb_7_start_date.data
+        vb_7_end_date = None
+        if form.vb_7_end_date.data:
+            vb_7_end_date = form.vb_7_end_date.data
+        if vb_7_plan is None:
+            vb_7_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_7.id,
+                start_date=vb_7_start_date,
+                end_date=vb_7_end_date,
+                remark=form.vb_7_remark.data
+            )
+        else:
+            vb_7_plan.start_date = vb_7_start_date
+            vb_7_plan.end_date = vb_7_end_date
+            vb_7_plan.remark = form.vb_7_remark.data
+        db.session.add(vb_7_plan)
+        db.session.commit()
+        for nota_bene in vb_7_plan.notate_bene:
+            vb_7_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_7_notate_bene.data:
+            vb_7_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 8
+        vb_8_start_date = None
+        if form.vb_8_start_date.data:
+            vb_8_start_date = form.vb_8_start_date.data
+        vb_8_end_date = None
+        if form.vb_8_end_date.data:
+            vb_8_end_date = form.vb_8_end_date.data
+        if vb_8_plan is None:
+            vb_8_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_8.id,
+                start_date=vb_8_start_date,
+                end_date=vb_8_end_date,
+                remark=form.vb_8_remark.data
+            )
+        else:
+            vb_8_plan.start_date = vb_8_start_date
+            vb_8_plan.end_date = vb_8_end_date
+            vb_8_plan.remark = form.vb_8_remark.data
+        db.session.add(vb_8_plan)
+        db.session.commit()
+        for nota_bene in vb_8_plan.notate_bene:
+            vb_8_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_8_notate_bene.data:
+            vb_8_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 9
+        vb_9_start_date = None
+        if form.vb_9_start_date.data:
+            vb_9_start_date = form.vb_9_start_date.data
+        vb_9_end_date = None
+        if form.vb_9_end_date.data:
+            vb_9_end_date = form.vb_9_end_date.data
+        if vb_9_plan is None:
+            vb_9_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_9.id,
+                start_date=vb_9_start_date,
+                end_date=vb_9_end_date,
+                remark=form.vb_9_remark.data
+            )
+        else:
+            vb_9_plan.start_date = vb_9_start_date
+            vb_9_plan.end_date = vb_9_end_date
+            vb_9_plan.remark = form.vb_9_remark.data
+        db.session.add(vb_9_plan)
+        db.session.commit()
+        for nota_bene in vb_9_plan.notate_bene:
+            vb_9_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.vb_9_notate_bene.data:
+            vb_9_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: intro
+        y_gre_intro_start_date = None
+        if form.y_gre_intro_start_date.data:
+            y_gre_intro_start_date = form.y_gre_intro_start_date.data
+        y_gre_intro_end_date = None
+        if form.y_gre_intro_end_date.data:
+            y_gre_intro_end_date = form.y_gre_intro_end_date.data
+        if y_gre_intro_plan is None:
+            y_gre_intro_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_intro.id,
+                start_date=y_gre_intro_start_date,
+                end_date=y_gre_intro_end_date,
+                remark=form.y_gre_intro_remark.data
+            )
+        else:
+            y_gre_intro_plan.start_date = y_gre_intro_start_date
+            y_gre_intro_plan.end_date = y_gre_intro_end_date
+            y_gre_intro_plan.remark = form.y_gre_intro_remark.data
+        db.session.add(y_gre_intro_plan)
+        db.session.commit()
+        for nota_bene in y_gre_intro_plan.notate_bene:
+            y_gre_intro_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_intro_notate_bene.data:
+            y_gre_intro_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 1
+        y_gre_1_start_date = None
+        if form.y_gre_1_start_date.data:
+            y_gre_1_start_date = form.y_gre_1_start_date.data
+        y_gre_1_end_date = None
+        if form.y_gre_1_end_date.data:
+            y_gre_1_end_date = form.y_gre_1_end_date.data
+        if y_gre_1_plan is None:
+            y_gre_1_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_1.id,
+                start_date=y_gre_1_start_date,
+                end_date=y_gre_1_end_date,
+                remark=form.y_gre_1_remark.data
+            )
+        else:
+            y_gre_1_plan.start_date = y_gre_1_start_date
+            y_gre_1_plan.end_date = y_gre_1_end_date
+            y_gre_1_plan.remark = form.y_gre_1_remark.data
+        db.session.add(y_gre_1_plan)
+        db.session.commit()
+        for nota_bene in y_gre_1_plan.notate_bene:
+            y_gre_1_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_1_notate_bene.data:
+            y_gre_1_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 2
+        y_gre_2_start_date = None
+        if form.y_gre_2_start_date.data:
+            y_gre_2_start_date = form.y_gre_2_start_date.data
+        y_gre_2_end_date = None
+        if form.y_gre_2_end_date.data:
+            y_gre_2_end_date = form.y_gre_2_end_date.data
+        if y_gre_2_plan is None:
+            y_gre_2_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_2.id,
+                start_date=y_gre_2_start_date,
+                end_date=y_gre_2_end_date,
+                remark=form.y_gre_2_remark.data
+            )
+        else:
+            y_gre_2_plan.start_date = y_gre_2_start_date
+            y_gre_2_plan.end_date = y_gre_2_end_date
+            y_gre_2_plan.remark = form.y_gre_2_remark.data
+        db.session.add(y_gre_2_plan)
+        db.session.commit()
+        for nota_bene in y_gre_2_plan.notate_bene:
+            y_gre_2_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_2_notate_bene.data:
+            y_gre_2_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 3
+        y_gre_3_start_date = None
+        if form.y_gre_3_start_date.data:
+            y_gre_3_start_date = form.y_gre_3_start_date.data
+        y_gre_3_end_date = None
+        if form.y_gre_3_end_date.data:
+            y_gre_3_end_date = form.y_gre_3_end_date.data
+        if y_gre_3_plan is None:
+            y_gre_3_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_3.id,
+                start_date=y_gre_3_start_date,
+                end_date=y_gre_3_end_date,
+                remark=form.y_gre_3_remark.data
+            )
+        else:
+            y_gre_3_plan.start_date = y_gre_3_start_date
+            y_gre_3_plan.end_date = y_gre_3_end_date
+            y_gre_3_plan.remark = form.y_gre_3_remark.data
+        db.session.add(y_gre_3_plan)
+        db.session.commit()
+        for nota_bene in y_gre_3_plan.notate_bene:
+            y_gre_3_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_3_notate_bene.data:
+            y_gre_3_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 4
+        y_gre_4_start_date = None
+        if form.y_gre_4_start_date.data:
+            y_gre_4_start_date = form.y_gre_4_start_date.data
+        y_gre_4_end_date = None
+        if form.y_gre_4_end_date.data:
+            y_gre_4_end_date = form.y_gre_4_end_date.data
+        if y_gre_4_plan is None:
+            y_gre_4_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_4.id,
+                start_date=y_gre_4_start_date,
+                end_date=y_gre_4_end_date,
+                remark=form.y_gre_4_remark.data
+            )
+        else:
+            y_gre_4_plan.start_date = y_gre_4_start_date
+            y_gre_4_plan.end_date = y_gre_4_end_date
+            y_gre_4_plan.remark = form.y_gre_4_remark.data
+        db.session.add(y_gre_4_plan)
+        db.session.commit()
+        for nota_bene in y_gre_4_plan.notate_bene:
+            y_gre_4_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_4_notate_bene.data:
+            y_gre_4_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 5
+        y_gre_5_start_date = None
+        if form.y_gre_5_start_date.data:
+            y_gre_5_start_date = form.y_gre_5_start_date.data
+        y_gre_5_end_date = None
+        if form.y_gre_5_end_date.data:
+            y_gre_5_end_date = form.y_gre_5_end_date.data
+        if y_gre_5_plan is None:
+            y_gre_5_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_5.id,
+                start_date=y_gre_5_start_date,
+                end_date=y_gre_5_end_date,
+                remark=form.y_gre_5_remark.data
+            )
+        else:
+            y_gre_5_plan.start_date = y_gre_5_start_date
+            y_gre_5_plan.end_date = y_gre_5_end_date
+            y_gre_5_plan.remark = form.y_gre_5_remark.data
+        db.session.add(y_gre_5_plan)
+        db.session.commit()
+        for nota_bene in y_gre_5_plan.notate_bene:
+            y_gre_5_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_5_notate_bene.data:
+            y_gre_5_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 6
+        y_gre_6_start_date = None
+        if form.y_gre_6_start_date.data:
+            y_gre_6_start_date = form.y_gre_6_start_date.data
+        y_gre_6_end_date = None
+        if form.y_gre_6_end_date.data:
+            y_gre_6_end_date = form.y_gre_6_end_date.data
+        if y_gre_6_plan is None:
+            y_gre_6_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_6.id,
+                start_date=y_gre_6_start_date,
+                end_date=y_gre_6_end_date,
+                remark=form.y_gre_6_remark.data
+            )
+        else:
+            y_gre_6_plan.start_date = y_gre_6_start_date
+            y_gre_6_plan.end_date = y_gre_6_end_date
+            y_gre_6_plan.remark = form.y_gre_6_remark.data
+        db.session.add(y_gre_6_plan)
+        db.session.commit()
+        for nota_bene in y_gre_6_plan.notate_bene:
+            y_gre_6_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_6_notate_bene.data:
+            y_gre_6_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 7
+        y_gre_7_start_date = None
+        if form.y_gre_7_start_date.data:
+            y_gre_7_start_date = form.y_gre_7_start_date.data
+        y_gre_7_end_date = None
+        if form.y_gre_7_end_date.data:
+            y_gre_7_end_date = form.y_gre_7_end_date.data
+        if y_gre_7_plan is None:
+            y_gre_7_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_7.id,
+                start_date=y_gre_7_start_date,
+                end_date=y_gre_7_end_date,
+                remark=form.y_gre_7_remark.data
+            )
+        else:
+            y_gre_7_plan.start_date = y_gre_7_start_date
+            y_gre_7_plan.end_date = y_gre_7_end_date
+            y_gre_7_plan.remark = form.y_gre_7_remark.data
+        db.session.add(y_gre_7_plan)
+        db.session.commit()
+        for nota_bene in y_gre_7_plan.notate_bene:
+            y_gre_7_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_7_notate_bene.data:
+            y_gre_7_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 8
+        y_gre_8_start_date = None
+        if form.y_gre_8_start_date.data:
+            y_gre_8_start_date = form.y_gre_8_start_date.data
+        y_gre_8_end_date = None
+        if form.y_gre_8_end_date.data:
+            y_gre_8_end_date = form.y_gre_8_end_date.data
+        if y_gre_8_plan is None:
+            y_gre_8_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_8.id,
+                start_date=y_gre_8_start_date,
+                end_date=y_gre_8_end_date,
+                remark=form.y_gre_8_remark.data
+            )
+        else:
+            y_gre_8_plan.start_date = y_gre_8_start_date
+            y_gre_8_plan.end_date = y_gre_8_end_date
+            y_gre_8_plan.remark = form.y_gre_8_remark.data
+        db.session.add(y_gre_8_plan)
+        db.session.commit()
+        for nota_bene in y_gre_8_plan.notate_bene:
+            y_gre_8_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_8_notate_bene.data:
+            y_gre_8_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 9
+        y_gre_9_start_date = None
+        if form.y_gre_9_start_date.data:
+            y_gre_9_start_date = form.y_gre_9_start_date.data
+        y_gre_9_end_date = None
+        if form.y_gre_9_end_date.data:
+            y_gre_9_end_date = form.y_gre_9_end_date.data
+        if y_gre_9_plan is None:
+            y_gre_9_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_9.id,
+                start_date=y_gre_9_start_date,
+                end_date=y_gre_9_end_date,
+                remark=form.y_gre_9_remark.data
+            )
+        else:
+            y_gre_9_plan.start_date = y_gre_9_start_date
+            y_gre_9_plan.end_date = y_gre_9_end_date
+            y_gre_9_plan.remark = form.y_gre_9_remark.data
+        db.session.add(y_gre_9_plan)
+        db.session.commit()
+        for nota_bene in y_gre_9_plan.notate_bene:
+            y_gre_9_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_9_notate_bene.data:
+            y_gre_9_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: prep
+        y_gre_prep_start_date = None
+        if form.y_gre_prep_start_date.data:
+            y_gre_prep_start_date = form.y_gre_prep_start_date.data
+        y_gre_prep_end_date = None
+        if form.y_gre_prep_end_date.data:
+            y_gre_prep_end_date = form.y_gre_prep_end_date.data
+        if y_gre_prep_plan is None:
+            y_gre_prep_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_prep.id,
+                start_date=y_gre_prep_start_date,
+                end_date=y_gre_prep_end_date,
+                remark=form.y_gre_prep_remark.data
+            )
+        else:
+            y_gre_prep_plan.start_date = y_gre_prep_start_date
+            y_gre_prep_plan.end_date = y_gre_prep_end_date
+            y_gre_prep_plan.remark = form.y_gre_prep_remark.data
+        db.session.add(y_gre_prep_plan)
+        db.session.commit()
+        for nota_bene in y_gre_prep_plan.notate_bene:
+            y_gre_prep_plan.remove_nota_bene(nota_bene=nota_bene)
+        for nota_bene_id in form.y_gre_prep_notate_bene.data:
+            y_gre_prep_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
         # update GRE test dates
         if form.gre_0_date.data:
             gre_0_test = GRETest.query.filter_by(date=form.gre_0_date.data).first()
