@@ -50,7 +50,7 @@ from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
 from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, ScoreLabel, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, Room
-from ..models import NotaBene
+from ..models import StudyPlan, NotaBene
 from ..models import Announcement
 from ..models import Product, Purchase
 from ..models import Feed
@@ -4455,16 +4455,56 @@ def edit_study_plan(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    gre_aim_score = GRETestScore.query\
-        .join(ScoreLabel, ScoreLabel.id == GRETestScore.label_id)\
-        .filter(GRETestScore.user_id == user.id)\
-        .filter(ScoreLabel.name == u'目标')\
-        .first()
-    toefl_aim_score = TOEFLTestScore.query\
-        .join(ScoreLabel, ScoreLabel.id == TOEFLTestScore.label_id)\
-        .filter(TOEFLTestScore.user_id == user.id)\
-        .filter(ScoreLabel.name == u'目标')\
-        .first()
+    # retrieve aim scores
+    gre_aim_score_label = ScoreLabel.query.filter_by(name=u'目标', category=u'GRE').first()
+    gre_aim_score = user.gre_test_scores.filter_by(label_id=gre_aim_score_label.id).first()
+    toefl_aim_score_label = ScoreLabel.query.filter_by(name=u'目标', category=u'TOEFL').first()
+    toefl_aim_score = user.toefl_test_scores.filter_by(label_id=toefl_aim_score_label.id).first()
+    # retrieve VB plan
+    vb_intro = Lesson.query.filter_by(name=u'VB总论').first()
+    vb_intro_plan = user.study_plans.filter_by(lesson_id=vb_intro.id).first()
+    vb_1 = Lesson.query.filter_by(name=u'L1').first()
+    vb_1_plan = user.study_plans.filter_by(lesson_id=vb_1.id).first()
+    vb_2 = Lesson.query.filter_by(name=u'L2').first()
+    vb_2_plan = user.study_plans.filter_by(lesson_id=vb_2.id).first()
+    vb_3 = Lesson.query.filter_by(name=u'L3').first()
+    vb_3_plan = user.study_plans.filter_by(lesson_id=vb_3.id).first()
+    vb_4 = Lesson.query.filter_by(name=u'L4').first()
+    vb_4_plan = user.study_plans.filter_by(lesson_id=vb_4.id).first()
+    vb_5 = Lesson.query.filter_by(name=u'L5').first()
+    vb_5_plan = user.study_plans.filter_by(lesson_id=vb_5.id).first()
+    vb_6 = Lesson.query.filter_by(name=u'L6').first()
+    vb_6_plan = user.study_plans.filter_by(lesson_id=vb_6.id).first()
+    vb_7 = Lesson.query.filter_by(name=u'L7').first()
+    vb_7_plan = user.study_plans.filter_by(lesson_id=vb_7.id).first()
+    vb_8 = Lesson.query.filter_by(name=u'L8').first()
+    vb_8_plan = user.study_plans.filter_by(lesson_id=vb_8.id).first()
+    vb_9 = Lesson.query.filter_by(name=u'L9').first()
+    vb_9_plan = user.study_plans.filter_by(lesson_id=vb_9.id).first()
+    # retrieve GRE plan
+    y_gre_intro = Lesson.query.filter_by(name=u'Y-GRE总论').first()
+    y_gre_intro_plan = user.study_plans.filter_by(lesson_id=y_gre_intro.id).first()
+    y_gre_1 = Lesson.query.filter_by(name=u'1st').first()
+    y_gre_1_plan = user.study_plans.filter_by(lesson_id=y_gre_1.id).first()
+    y_gre_2 = Lesson.query.filter_by(name=u'2nd').first()
+    y_gre_2_plan = user.study_plans.filter_by(lesson_id=y_gre_2.id).first()
+    y_gre_3 = Lesson.query.filter_by(name=u'3rd').first()
+    y_gre_3_plan = user.study_plans.filter_by(lesson_id=y_gre_3.id).first()
+    y_gre_4 = Lesson.query.filter_by(name=u'4th').first()
+    y_gre_4_plan = user.study_plans.filter_by(lesson_id=y_gre_4.id).first()
+    y_gre_5 = Lesson.query.filter_by(name=u'5th').first()
+    y_gre_5_plan = user.study_plans.filter_by(lesson_id=y_gre_5.id).first()
+    y_gre_6 = Lesson.query.filter_by(name=u'6th').first()
+    y_gre_6_plan = user.study_plans.filter_by(lesson_id=y_gre_6.id).first()
+    y_gre_7 = Lesson.query.filter_by(name=u'7th').first()
+    y_gre_7_plan = user.study_plans.filter_by(lesson_id=y_gre_7.id).first()
+    y_gre_8 = Lesson.query.filter_by(name=u'8th').first()
+    y_gre_8_plan = user.study_plans.filter_by(lesson_id=y_gre_8.id).first()
+    y_gre_9 = Lesson.query.filter_by(name=u'9th').first()
+    y_gre_9_plan = user.study_plans.filter_by(lesson_id=y_gre_9.id).first()
+    y_gre_prep = Lesson.query.filter_by(name=u'Y-GRE临考').first()
+    y_gre_prep_plan = user.study_plans.filter_by(lesson_id=y_gre_prep.id).first()
+    # retrieve GRE test dates
     gre_0_score_label = ScoreLabel.query.filter_by(name=u'G0', category=u'GRE').first()
     gre_0_score = user.gre_test_scores.filter_by(label_id=gre_0_score_label.id).first()
     gre_1_score_label = ScoreLabel.query.filter_by(name=u'G1', category=u'GRE').first()
