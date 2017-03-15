@@ -12,9 +12,10 @@ from ..models import Relationship, PurposeType, ReferrerType, InvitationType, Ed
 from ..models import Period
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScoreGrade
-from ..models import Test, GREAWScore
+from ..models import Test, GREAWScore, ScoreLabel
 from ..models import iPad, iPadCapacity, iPadState, Room
 from ..models import Course, CourseType
+from ..models import NotaBene
 from ..models import Announcement, AnnouncementType
 from ..models import Product
 
@@ -162,12 +163,12 @@ class iPadSerialForm(FlaskForm):
 
 
 class PunchSectionForm(FlaskForm):
-    section = SelectField(u'学习进度', coerce=unicode, validators=[Required()])
+    section = SelectField(u'研修进度', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'下一步')
 
     def __init__(self, user, *args, **kwargs):
         super(PunchSectionForm, self).__init__(*args, **kwargs)
-        self.section.choices = [(u'', u'选择学习进度')] + [(unicode(section.id), section.alias2) for section in user.next_punch]
+        self.section.choices = [(u'', u'选择研修进度')] + [(unicode(section.id), section.alias2) for section in user.next_punch]
 
 
 class ConfirmPunchForm(FlaskForm):
@@ -237,7 +238,7 @@ class NewYGRETestScoreForm(FlaskForm):
 
 class EditYGRETestScoreForm(FlaskForm):
     test = SelectField(u'考试', coerce=unicode, validators=[Required()])
-    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
+    v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     q_score = StringField(u'Quantitative Reasoning')
     aw_score = SelectField(u'Analytical Writing', coerce=unicode)
     retrieved = BooleanField(u'已回收试卷')
@@ -251,27 +252,31 @@ class EditYGRETestScoreForm(FlaskForm):
 
 class NewGRETestScoreForm(FlaskForm):
     email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
-    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
-    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    q_score = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
 
     def __init__(self, *args, **kwargs):
         super(NewGRETestScoreForm, self).__init__(*args, **kwargs)
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class EditGRETestScoreForm(FlaskForm):
-    v_score = StringField(u'Verbal Reasoning', validators=[Required()])
-    q_score = StringField(u'Quantitative Reasoning', validators=[Required()])
+    v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    q_score = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
     test_date = DateField(u'考试日期', validators=[Required()])
-    submit = SubmitField(u'添加')
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
         super(EditGRETestScoreForm, self).__init__(*args, **kwargs)
         self.aw_score.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'GRE').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class NewTOEFLTestScoreForm(FlaskForm):
@@ -282,7 +287,12 @@ class NewTOEFLTestScoreForm(FlaskForm):
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
     test_date = DateField(u'考试日期', validators=[Required()])
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
+
+    def __init__(self, *args, **kwargs):
+        super(NewTOEFLTestScoreForm, self).__init__(*args, **kwargs)
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class EditTOEFLTestScoreForm(FlaskForm):
@@ -292,7 +302,12 @@ class EditTOEFLTestScoreForm(FlaskForm):
     speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
     test_date = DateField(u'考试日期', validators=[Required()])
-    submit = SubmitField(u'添加')
+    score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditTOEFLTestScoreForm, self).__init__(*args, **kwargs)
+        self.score_label.choices = [(u'', u'选择标签')] + [(u'0', u'无')] + [(unicode(score_label.id), score_label.name) for score_label in ScoreLabel.query.filter_by(category=u'TOEFL').order_by(ScoreLabel.id.asc()).all() if score_label.name not in [u'目标']]
 
 
 class NewUserForm(FlaskForm):
@@ -353,21 +368,16 @@ class NewUserForm(FlaskForm):
     cet_6 = StringField(u'CET-6', validators=[Length(0, 64)])
     tem_4 = StringField(u'TEM-4', validators=[Length(0, 64)])
     tem_8 = StringField(u'TEM-8', validators=[Length(0, 64)])
-    toefl_total = StringField(u'TOEFL', validators=[Length(0, 64)])
-    toefl_reading = StringField(u'Reading', validators=[Length(0, 64)])
-    toefl_listening = StringField(u'Listening', validators=[Length(0, 64)])
-    toefl_speaking = StringField(u'Speaking', validators=[Length(0, 64)])
-    toefl_writing = StringField(u'Writing', validators=[Length(0, 64)])
-    toefl_test_date = DateField(u'考试日期', validators=[Optional()])
     competition = StringField(u'竞赛成绩', validators=[Length(0, 128)])
     other_score = StringField(u'其它成绩', validators=[Length(0, 128)])
     # registration
     purposes = SelectMultipleField(u'研修目的', coerce=unicode)
     other_purpose = StringField(u'其它研修目的', validators=[Length(0, 64)])
-    application_aim = StringField(u'申请方向', validators=[Length(0, 64)])
     referrers = SelectMultipleField(u'了解渠道', coerce=unicode)
     other_referrer = StringField(u'其它了解渠道', validators=[Length(0, 64)])
     inviter_email = StringField(u'同学推荐（邮箱）', validators=[Length(0, 64)])
+    application_aim = StringField(u'申请方向', validators=[Length(0, 128)])
+    application_agency = StringField(u'留学中介', validators=[Length(0, 128)])
     products = SelectMultipleField(u'研修产品', coerce=unicode, validators=[Required()])
     role = SelectField(u'用户权限', coerce=unicode, validators=[Required()])
     vb_course = SelectField(u'VB班', coerce=unicode, validators=[Required()])
@@ -554,8 +564,9 @@ class EditPurposeForm(FlaskForm):
         self.purposes.choices = [(u'', u'选择研修目的')] + [(unicode(purpose_type.id), purpose_type.name) for purpose_type in PurposeType.query.order_by(PurposeType.id.asc()).all() if purpose_type.name != u'其它']
 
 
-class EditApplicationAimForm(FlaskForm):
-    application_aim = StringField(u'申请方向', validators=[Length(0, 64)])
+class EditApplicationForm(FlaskForm):
+    application_aim = StringField(u'申请方向', validators=[Length(0, 128)])
+    application_agency = StringField(u'留学中介', validators=[Length(0, 128)])
     submit = SubmitField(u'更新')
 
 
@@ -793,6 +804,161 @@ class FilteriPadForm(FlaskForm):
         super(FilteriPadForm, self).__init__(*args, **kwargs)
         self.vb_lessons.choices = [(u'', u'选择VB内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'VB']
         self.y_gre_lessons.choices = [(u'', u'选择Y-GRE内容')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.order_by(Lesson.id.asc()).all() if lesson.include_video and lesson.type.name == u'Y-GRE']
+
+
+class EditStudyPlanForm(FlaskForm):
+    # GRE aim
+    gre_aim_v = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    gre_aim_q = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
+    gre_aim_aw = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    # TOEFL aim
+    toefl_aim_total = IntegerField(u'TOEFL总分', validators=[Required(), NumberRange(min=0, max=120)])
+    toefl_aim_reading = IntegerField(u'Reading', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_aim_listening = IntegerField(u'Listening', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_aim_speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
+    toefl_aim_writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
+    # study plan
+    speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
+    deadline = DateField(u'Deadline')
+    vb_intro_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_intro_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_intro_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_1_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_1_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_1_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_1_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_2_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_2_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_2_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_2_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_3_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_3_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_3_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_3_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_4_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_4_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_4_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_4_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_5_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_5_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_5_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_5_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_6_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_6_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_6_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_6_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_7_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_7_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_7_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_7_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_8_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_8_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_8_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_8_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    vb_9_start_date = DateField(u'开始日期', validators=[Optional()])
+    vb_9_end_date = DateField(u'结束日期', validators=[Optional()])
+    vb_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    vb_9_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_intro_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_intro_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_intro_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_1_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_1_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_1_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_1_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_2_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_2_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_2_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_2_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_3_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_3_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_3_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_3_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_4_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_4_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_4_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_4_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_5_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_5_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_5_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_5_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_6_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_6_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_6_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_6_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_7_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_7_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_7_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_7_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_8_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_8_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_8_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_8_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_9_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_9_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_9_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    y_gre_prep_start_date = DateField(u'开始日期', validators=[Optional()])
+    y_gre_prep_end_date = DateField(u'结束日期', validators=[Optional()])
+    y_gre_prep_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
+    y_gre_prep_remark = TextAreaField(u'修订与备注', validators=[Optional()])
+    gre_0_date = DateField(u'G<sub>0</sub>', validators=[Optional()])
+    gre_1_date = DateField(u'G<sub>1</sub>', validators=[Optional()])
+    gre_2_date = DateField(u'G<sub>2</sub>', validators=[Optional()])
+    gre_3_date = DateField(u'G<sub>3</sub>', validators=[Optional()])
+    supervisor_email = StringField(u'设计人（邮箱）', validators=[Length(0, 64)])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditStudyPlanForm, self).__init__(*args, **kwargs)
+        self.gre_aim_aw.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
+        self.vb_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.y_gre_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_prep_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+
+    def validate_supervisor_email(self, field):
+        if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:
+            raise ValidationError(u'设计人邮箱不存在：%s' % field.data)
+
+
+class NewNotaBeneForm(FlaskForm):
+    body = StringField(u'Nota Bene', validators=[Required(), Length(1, 128)])
+    nota_bene_type = SelectField(u'N.B.类型', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewNotaBeneForm, self).__init__(*args, **kwargs)
+        self.nota_bene_type.choices = [(u'', u'选择N.B.类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class EditNotaBeneForm(FlaskForm):
+    body = StringField(u'Nota Bene', validators=[Required(), Length(1, 128)])
+    nota_bene_type = SelectField(u'N.B.类型', coerce=unicode, validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditNotaBeneForm, self).__init__(*args, **kwargs)
+        self.nota_bene_type.choices = [(u'', u'选择N.B.类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
 
 
 class NewAnnouncementForm(FlaskForm):

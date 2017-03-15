@@ -33,19 +33,39 @@ def make_shell_context():
     return dict(app=app, db=db)
 
 
-manager.add_command("shell", Shell(make_context=make_shell_context))
+manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
 
 @manager.command
 def cleanup():
-    """Run cleanup tasks."""
-    db.drop_all()
+    '''Run cleanup tasks.'''
+    if app.debug:
+        from config import basedir
+        from shutil import rmtree
+        db_files = [
+            'ysys-dev.sqlite',
+            'migrations',
+        ]
+        for db_file in db_files:
+            full_db_file = os.path.join(basedir, db_file)
+            if os.path.exists(full_db_file):
+                if os.path.isfile(full_db_file):
+                    os.remove(full_db_file)
+                elif os.path.isdir(full_db_file):
+                    rmtree(full_db_file)
+                print 'remove', full_db_file
+        db.drop_all()
+    else:
+        confirm = raw_input(u'Are you sure to clean up the database? [Y/n]: ')
+        if confirm == u'Y':
+            db.drop_all()
+            print '---> All data are deleted.'
 
 
 @manager.command
 def deploy():
-    """Run deployment tasks."""
+    '''Run deployment tasks.'''
     from flask_migrate import upgrade
     from app.models import Color
     from app.models import Permission
@@ -66,6 +86,7 @@ def deploy():
     from app.models import Tag
     from app.models import EducationType
     from app.models import ScoreType
+    from app.models import ScoreLabel
     from app.models import Product
     from app.models import Course
     from app.models import Period
@@ -76,6 +97,7 @@ def deploy():
     from app.models import iPadContent
     from app.models import Assignment
     from app.models import Test
+    from app.models import NotaBene
     from app.models import AnnouncementType
 
     # migrate database to latest revision
@@ -101,6 +123,7 @@ def deploy():
     Tag.insert_tags()
     EducationType.insert_education_types()
     ScoreType.insert_score_types()
+    ScoreLabel.insert_score_labels()
     Product.insert_products()
     Course.insert_courses()
     Period.insert_periods()
@@ -111,12 +134,13 @@ def deploy():
     iPadContent.insert_ipad_contents()
     Assignment.insert_assignments()
     Test.insert_tests()
+    NotaBene.insert_notate_bene()
     AnnouncementType.insert_announcement_types()
 
 
 @manager.command
 def backup():
-    """Run backup tasks."""
+    '''Run backup tasks.'''
     pass
 
 

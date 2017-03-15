@@ -22,13 +22,15 @@ from .forms import EditNameForm, EditGenderForm, EditBirthdateForm, EditIDNumber
 from .forms import EditEmailForm, EditMobileForm, EditAddressForm, EditQQForm, EditWeChatForm
 from .forms import EditEmergencyContactNameForm, EditEmergencyContactRelationshipForm, EditEmergencyContactMobileForm
 from .forms import EditPurposeForm, EditReferrerForm
-from .forms import EditApplicationAimForm
+from .forms import EditApplicationForm
 from .forms import EditWorkInSameFieldForm, EditDeformityForm
 from .forms import EditVBCourseForm, EditYGRECourseForm
 from .forms import NewCourseForm, EditCourseForm
 from .forms import NewGroupForm, NewGroupMemberForm
 from .forms import NewTagForm, EditTagForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
+from .forms import EditStudyPlanForm
+from .forms import NewNotaBeneForm, EditNotaBeneForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
 from .forms import NewRoleForm, EditRoleForm
@@ -46,8 +48,9 @@ from ..models import Punch
 from ..models import Period, Schedule
 from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
-from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
+from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, ScoreLabel, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, Room
+from ..models import StudyPlan, NotaBene
 from ..models import Announcement
 from ..models import Product, Purchase
 from ..models import Feed
@@ -935,7 +938,7 @@ def rental_return_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3.html', user=user, section=section, form=form)
@@ -980,7 +983,7 @@ def rental_return_step_3_alt(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.rental'))
     return render_template('manage/rental_return_step_3_alt.html', user=user, section=section, form=form)
@@ -1063,7 +1066,7 @@ def rental_exchange_step_3(rental_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(url_for('manage.rental_exchange_step_4', rental_id=rental_id, next=request.args.get('next')))
     return render_template('manage/rental_exchange_step_3.html', rental=rental, section=section, form=form)
@@ -1198,7 +1201,7 @@ def rental_exchange_step_6_lesson(rental_id, lesson_id, ipad_id):
 
 @manage.route('/punch/edit/step-1/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def edit_punch_step_1(user_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1212,7 +1215,7 @@ def edit_punch_step_1(user_id):
 
 @manage.route('/punch/edit/step-2/<int:user_id>/<int:lesson_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def edit_punch_step_2(user_id, lesson_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1226,7 +1229,7 @@ def edit_punch_step_2(user_id, lesson_id):
 
 @manage.route('/punch/edit/step-3/<int:user_id>/<int:section_id>', methods=['GET', 'POST'])
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def edit_punch_step_3(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1236,7 +1239,7 @@ def edit_punch_step_3(user_id, section_id):
     if form.validate_on_submit():
         user.punch(section=section)
         flash(u'已保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category='success')
-        add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+        add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
         add_feed(user=current_user._get_current_object(), event=u'保存%s的进度信息为：%s' % (user.name_alias, section.alias2), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.user'))
     return render_template('manage/edit_punch_step_3.html', user=user, section=section, form=form)
@@ -1244,7 +1247,7 @@ def edit_punch_step_3(user_id, section_id):
 
 @manage.route('/punch/<int:user_id>/<int:section_id>')
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def punch(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1252,14 +1255,14 @@ def punch(user_id, section_id):
     section = Section.query.get_or_404(section_id)
     user.punch(section=section)
     flash(u'已为%s标记进度：%s' % (user.name_alias, section.alias2), category='success')
-    add_feed(user=user, event=u'学习进度打卡：%s' % section.alias2, category=u'punch')
+    add_feed(user=user, event=u'研修进度打卡：%s' % section.alias2, category=u'punch')
     add_feed(user=current_user._get_current_object(), event=u'为%s标记进度：%s' % (user.name_alias, section.alias2), category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
 @manage.route('/unpunch/<int:user_id>/<int:section_id>')
 @login_required
-@permission_required(u'管理学习进度')
+@permission_required(u'管理研修进度')
 def unpunch(user_id, section_id):
     user = User.query.get_or_404(user_id)
     if not user.created or user.deleted:
@@ -1801,7 +1804,7 @@ def test():
         score = YGRETestScore(
             user_id=user.id,
             test_id=int(y_gre_form.test.data),
-            v_score=int(y_gre_form.v_score.data),
+            v_score=y_gre_form.v_score.data,
             q_score=q_score,
             aw_score_id=aw_score,
             retrieved=y_gre_form.retrieved.data,
@@ -1818,6 +1821,12 @@ def test():
         if user is None:
             flash(u'用户邮箱不存在：%s' % gre_form.email.data.lower(), category='error')
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
+        label_id = None
+        if int(gre_form.score_label.data) > 0:
+            label_id = int(gre_form.score_label.data)
+            if user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
+                flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
         test = GRETest.query.filter_by(date=gre_form.test_date.data).first()
         if test is None:
             test = GRETest(date=gre_form.test_date.data)
@@ -1826,8 +1835,9 @@ def test():
         score = GRETestScore(
             user_id=user.id,
             test_id=test.id,
-            v_score=int(gre_form.v_score.data),
-            q_score=int(gre_form.q_score.data),
+            label_id=label_id,
+            v_score=gre_form.v_score.data,
+            q_score=gre_form.q_score.data,
             aw_score_id=int(gre_form.aw_score.data),
             modified_by_id=current_user.id
         )
@@ -1842,6 +1852,12 @@ def test():
         if user is None:
             flash(u'用户邮箱不存在：%s' % toefl_form.email.data.lower(), category='error')
             return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
+        label_id = None
+        if int(toefl_form.score_label.data) > 0:
+            label_id = int(toefl_form.score_label.data)
+            if user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
+                flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                return redirect(url_for('manage.test', page=request.args.get('page', 1, type=int)))
         test = TOEFLTest.query.filter_by(date=toefl_form.test_date.data).first()
         if test is None:
             test = TOEFLTest(date=toefl_form.test_date.data)
@@ -1850,11 +1866,12 @@ def test():
         score = TOEFLTestScore(
             user_id=user.id,
             test_id=test.id,
-            total_score=int(toefl_form.total.data),
-            reading_score=int(toefl_form.reading.data),
-            listening_score=int(toefl_form.listening.data),
-            speaking_score=int(toefl_form.speaking.data),
-            writing_score=int(toefl_form.writing.data),
+            label_id=label_id,
+            total_score=toefl_form.total.data,
+            reading_score=toefl_form.reading.data,
+            listening_score=toefl_form.listening.data,
+            speaking_score=toefl_form.speaking.data,
+            writing_score=toefl_form.writing.data,
             modified_by_id=current_user.id
         )
         db.session.add(score)
@@ -2012,7 +2029,7 @@ def test_score(test_type, id):
             score = YGRETestScore(
                 user_id=user.id,
                 test_id=int(form.test.data),
-                v_score=int(form.v_score.data),
+                v_score=form.v_score.data,
                 q_score=q_score,
                 aw_score_id=aw_score,
                 retrieved=form.retrieved.data,
@@ -2041,6 +2058,12 @@ def test_score(test_type, id):
             if user is None:
                 flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+            label_id = None
+            if int(form.score_label.data) > 0:
+                label_id = int(form.score_label.data)
+                if user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
+                    flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                    return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             test = GRETest.query.filter_by(date=form.test_date.data).first()
             if test is None:
                 test = GRETest(date=form.test_date.data)
@@ -2049,8 +2072,9 @@ def test_score(test_type, id):
             score = GRETestScore(
                 user_id=user.id,
                 test_id=test.id,
-                v_score=int(form.v_score.data),
-                q_score=int(form.q_score.data),
+                label_id=label_id,
+                v_score=form.v_score.data,
+                q_score=form.q_score.data,
                 aw_score_id=int(form.aw_score.data),
                 modified_by_id=current_user.id
             )
@@ -2077,6 +2101,12 @@ def test_score(test_type, id):
             if user is None:
                 flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
                 return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
+            label_id = None
+            if int(form.score_label.data) > 0:
+                label_id = int(form.score_label.data)
+                if user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
+                    flash(u'%s已经拥有“%s”成绩' % (user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                    return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
             test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
             if test is None:
                 test = TOEFLTest(date=form.test_date.data)
@@ -2085,11 +2115,12 @@ def test_score(test_type, id):
             score = TOEFLTestScore(
                 user_id=user.id,
                 test_id=test.id,
-                total_score=int(form.total.data),
-                reading_score=int(form.reading.data),
-                listening_score=int(form.listening.data),
-                speaking_score=int(form.speaking.data),
-                writing_score=int(form.writing.data),
+                label_id=label_id,
+                total_score=form.total.data,
+                reading_score=form.reading.data,
+                listening_score=form.listening.data,
+                speaking_score=form.speaking.data,
+                writing_score=form.writing.data,
                 modified_by_id=current_user.id
             )
             db.session.add(score)
@@ -2155,7 +2186,7 @@ def edit_test_score(test_type, id):
         form = EditYGRETestScoreForm()
         if form.validate_on_submit():
             score.test_id = int(form.test.data)
-            score.v_score = int(form.v_score.data)
+            score.v_score = form.v_score.data
             if form.q_score.data:
                 score.q_score = int(form.q_score.data)
             if form.aw_score.data:
@@ -2169,7 +2200,7 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新Y-GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=int(form.test.data)))
         form.test.data = unicode(score.test_id)
-        form.v_score.data = u'%g' % score.v_score
+        form.v_score.data = score.v_score
         form.q_score.data = u'%g' % score.q_score
         form.aw_score.data = unicode(score.aw_score_id)
         form.retrieved.data = score.retrieved
@@ -2177,14 +2208,21 @@ def edit_test_score(test_type, id):
         score = GRETestScore.query.get_or_404(id)
         form = EditGRETestScoreForm()
         if form.validate_on_submit():
+            label_id = None
+            if int(form.score_label.data) > 0:
+                label_id = int(form.score_label.data)
+                if score.user.gre_test_scores.filter_by(label_id=label_id).first() is not None:
+                    flash(u'%s已经拥有“%s”成绩' % (score.user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                    return redirect(url_for('manage.edit_test_score', test_type=test_type, id=score.id))
             test = GRETest.query.filter_by(date=form.test_date.data).first()
             if test is None:
                 test = GRETest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
             score.test_id = test.id
-            score.v_score = int(form.v_score.data)
-            score.q_score = int(form.q_score.data)
+            score.label_id = label_id
+            score.v_score = form.v_score.data
+            score.q_score = form.q_score.data
             score.aw_score_id = int(form.aw_score.data)
             score.modified_at = datetime.utcnow()
             score.modified_by_id = current_user.id
@@ -2194,24 +2232,34 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新GRE考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
-        form.v_score.data = u'%g' % score.v_score
-        form.q_score.data = u'%g' % score.q_score
+        form.score_label.data = u'0'
+        if score.label_id:
+            form.score_label.data = unicode(score.label_id)
+        form.v_score.data = score.v_score
+        form.q_score.data = score.q_score
         form.aw_score.data = unicode(score.aw_score_id)
     if test_type == u'toefl':
         score = TOEFLTestScore.query.get_or_404(id)
         form = EditTOEFLTestScoreForm()
         if form.validate_on_submit():
+            label_id = None
+            if int(form.score_label.data) > 0:
+                label_id = int(form.score_label.data)
+                if score.user.toefl_test_scores.filter_by(label_id=label_id).first() is not None:
+                    flash(u'%s已经拥有“%s”成绩' % (score.user.name_alias, ScoreLabel.query.get(label_id).name), category='error')
+                    return redirect(url_for('manage.edit_test_score', test_type=test_type, id=score.id))
             test = TOEFLTest.query.filter_by(date=form.test_date.data).first()
             if test is None:
                 test = TOEFLTest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
             score.test_id = test.id
-            score.total_score = int(form.total.data)
-            score.reading_score = int(form.reading.data)
-            score.listening_score = int(form.listening.data)
-            score.speaking_score = int(form.speaking.data)
-            score.writing_score = int(form.writing.data)
+            score.label_id = label_id
+            score.total_score = form.total.data
+            score.reading_score = form.reading.data
+            score.listening_score = form.listening.data
+            score.speaking_score = form.speaking.data
+            score.writing_score = form.writing.data
             score.modified_at = datetime.utcnow()
             score.modified_by_id = current_user.id
             db.session.add(score)
@@ -2220,11 +2268,14 @@ def edit_test_score(test_type, id):
             add_feed(user=current_user._get_current_object(), event=u'更新TOEFL考试记录：%s' % score.alias, category=u'manage')
             return redirect(url_for('manage.test_score', test_type=test_type, id=test.id))
         form.test_date.data = score.test.date
-        form.total.data = u'%g' % score.total_score
-        form.reading.data = u'%g' % score.reading_score
-        form.listening.data = u'%g' % score.listening_score
-        form.speaking.data = u'%g' % score.speaking_score
-        form.writing.data = u'%g' % score.writing_score
+        form.score_label.data = u'0'
+        if score.label_id:
+            form.score_label.data = unicode(score.label_id)
+        form.total.data = score.total_score
+        form.reading.data = score.reading_score
+        form.listening.data = score.listening_score
+        form.speaking.data = score.speaking_score
+        form.writing.data = score.writing_score
     return render_template('manage/edit_test_score.html', test_type=test_type, form=form, score=score)
 
 
@@ -2719,7 +2770,8 @@ def create_user():
             emergency_contact_name=form.emergency_contact_name.data,
             emergency_contact_relationship_id=int(form.emergency_contact_relationship.data),
             emergency_contact_mobile=form.emergency_contact_mobile.data,
-            application_aim=form.application_aim.data
+            application_aim=form.application_aim.data,
+            application_agency=form.application_agency.data
         )
         db.session.add(user)
         db.session.commit()
@@ -2830,16 +2882,6 @@ def create_user():
             user.add_score_record(
                 score_type=ScoreType.query.filter_by(name=u'专业英语八级').first(),
                 score=form.tem_8.data
-            )
-        if form.toefl_total.data:
-            user.add_toefl_test_score(
-                test_date=form.toefl_test_date.data,
-                total_score=int(form.toefl_total.data),
-                reading_score=int(form.toefl_reading.data),
-                listening_score=int(form.toefl_listening.data),
-                speaking_score=int(form.toefl_speaking.data),
-                writing_score=int(form.toefl_writing.data),
-                modified_by=current_user._get_current_object()
             )
         if form.competition.data:
             user.add_score_record(
@@ -3049,20 +3091,6 @@ def create_user_confirm(id):
             )
         flash(u'已添加既往成绩：%s' % score_type.name, category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    # TOEFL
-    new_toefl_test_score_form = EditTOEFLTestScoreForm(prefix='new_toefl_test_score')
-    if new_toefl_test_score_form.submit.data and new_toefl_test_score_form.validate_on_submit():
-        user.add_toefl_test_score(
-            test_date=new_toefl_test_score_form.test_date.data,
-            total_score=int(new_toefl_test_score_form.total.data),
-            reading_score=int(new_toefl_test_score_form.reading.data),
-            listening_score=int(new_toefl_test_score_form.listening.data),
-            speaking_score=int(new_toefl_test_score_form.speaking.data),
-            writing_score=int(new_toefl_test_score_form.writing.data),
-            modified_by=current_user._get_current_object()
-        )
-        flash(u'已添加TOEFL成绩', category='success')
-        return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
     # purpose
     edit_purpose_form = EditPurposeForm(prefix='edit_purpose')
     if edit_purpose_form.submit.data and edit_purpose_form.validate_on_submit():
@@ -3081,14 +3109,16 @@ def create_user_confirm(id):
             edit_purpose_form.purposes.data.append(unicode(purpose.type_id))
         else:
             edit_purpose_form.other_purpose.data = purpose.remark
-    # application aim
-    edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
-    if edit_application_aim_form.submit.data and edit_application_aim_form.validate_on_submit():
-        user.application_aim = edit_application_aim_form.application_aim.data
+    # application
+    edit_application_form = EditApplicationForm(prefix='edit_application')
+    if edit_application_form.submit.data and edit_application_form.validate_on_submit():
+        user.application_aim = edit_application_form.application_aim.data
+        user.application_agency = edit_application_form.application_agency.data
         db.session.add(user)
-        flash(u'已更新申请方向', category='success')
+        flash(u'已更新申请信息', category='success')
         return redirect(url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')))
-    edit_application_aim_form.application_aim.data = user.application_aim
+    edit_application_form.application_aim.data = user.application_aim
+    edit_application_form.application_agency.data = user.application_agency
     # referrer
     edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
     if edit_referrer_form.submit.data and edit_referrer_form.validate_on_submit():
@@ -3196,9 +3226,8 @@ def create_user_confirm(id):
         new_education_record_form=new_education_record_form,
         new_employment_record_form=new_employment_record_form,
         new_score_record_form=new_score_record_form,
-        new_toefl_test_score_form=new_toefl_test_score_form,
         edit_purpose_form=edit_purpose_form,
-        edit_application_aim_form=edit_application_aim_form,
+        edit_application_form=edit_application_form,
         edit_referrer_form=edit_referrer_form,
         new_inviter_form=new_inviter_form,
         new_purchase_form=new_purchase_form,
@@ -3470,15 +3499,17 @@ def edit_user(id):
             edit_purpose_form.purposes.data.append(unicode(purpose.type_id))
         else:
             edit_purpose_form.other_purpose.data = purpose.remark
-    # application aim
-    edit_application_aim_form = EditApplicationAimForm(prefix='edit_application_aim')
-    if edit_application_aim_form.submit.data and edit_application_aim_form.validate_on_submit():
-        user.application_aim = edit_application_aim_form.application_aim.data
+    # application
+    edit_application_form = EditApplicationForm(prefix='edit_application')
+    if edit_application_form.submit.data and edit_application_form.validate_on_submit():
+        user.application_aim = edit_application_form.application_aim.data
+        user.application_agency = edit_application_form.application_agency.data
         db.session.add(user)
-        flash(u'已更新申请方向', category='success')
-        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新申请方向为“%s”' % (user.name_alias, edit_application_aim_form.application_aim.data), category=u'manage')
+        flash(u'已更新申请信息', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：更新申请信息为“%s %s”' % (user.name_alias, edit_application_form.application_aim.data, edit_application_form.application_agency.data), category=u'manage')
         return redirect(url_for('manage.edit_user', id=user.id, next=request.args.get('next')))
-    edit_application_aim_form.application_aim.data = user.application_aim
+    edit_application_form.application_aim.data = user.application_aim
+    edit_application_form.application_agency.data = user.application_agency
     # referrer
     edit_referrer_form = EditReferrerForm(prefix='edit_referrer')
     if edit_referrer_form.submit.data and edit_referrer_form.validate_on_submit():
@@ -3563,7 +3594,7 @@ def edit_user(id):
         new_employment_record_form=new_employment_record_form,
         new_score_record_form=new_score_record_form,
         edit_purpose_form=edit_purpose_form,
-        edit_application_aim_form=edit_application_aim_form,
+        edit_application_form=edit_application_form,
         edit_referrer_form=edit_referrer_form,
         new_inviter_form=new_inviter_form,
         new_purchase_form=new_purchase_form,
@@ -3606,16 +3637,6 @@ def remove_score_record(id):
     flash(u'已删除既往成绩：%s' % score_record.type.name, category='success')
     if user.created:
         add_feed(user=current_user._get_current_object(), event=u'编辑“%s”的资料：删除既往成绩“%s”' % (user.name_alias, score_record.type.name), category=u'manage')
-    return redirect(request.args.get('next') or url_for('manage.user'))
-
-
-@manage.route('/user/toefl-test-score/remove/<int:id>')
-@login_required
-@permission_required(u'管理用户')
-def remove_toefl_test_score(id):
-    toefl_test_score = TOEFLTestScore.query.get_or_404(id)
-    db.session.delete(toefl_test_score)
-    flash(u'已删除TOEFL成绩', category='success')
     return redirect(request.args.get('next') or url_for('manage.user'))
 
 
@@ -4425,6 +4446,964 @@ def ipad_contents_data():
         'ipads': [ipad.to_json() for ipad in ipads],
         'ipad_contents': [ipad_content.to_json() for ipad_content in ipad_contents],
     })
+
+
+@manage.route('/study-plan/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理研修计划')
+def edit_study_plan(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    # retrieve aim scores
+    gre_aim_score_label = ScoreLabel.query.filter_by(name=u'目标', category=u'GRE').first()
+    gre_aim_score = user.gre_test_scores.filter_by(label_id=gre_aim_score_label.id).first()
+    toefl_aim_score_label = ScoreLabel.query.filter_by(name=u'目标', category=u'TOEFL').first()
+    toefl_aim_score = user.toefl_test_scores.filter_by(label_id=toefl_aim_score_label.id).first()
+    # retrieve VB plan
+    vb_intro = Lesson.query.filter_by(name=u'VB总论').first()
+    vb_intro_plan = user.study_plans.filter_by(lesson_id=vb_intro.id).first()
+    vb_1 = Lesson.query.filter_by(name=u'L1').first()
+    vb_1_plan = user.study_plans.filter_by(lesson_id=vb_1.id).first()
+    vb_2 = Lesson.query.filter_by(name=u'L2').first()
+    vb_2_plan = user.study_plans.filter_by(lesson_id=vb_2.id).first()
+    vb_3 = Lesson.query.filter_by(name=u'L3').first()
+    vb_3_plan = user.study_plans.filter_by(lesson_id=vb_3.id).first()
+    vb_4 = Lesson.query.filter_by(name=u'L4').first()
+    vb_4_plan = user.study_plans.filter_by(lesson_id=vb_4.id).first()
+    vb_5 = Lesson.query.filter_by(name=u'L5').first()
+    vb_5_plan = user.study_plans.filter_by(lesson_id=vb_5.id).first()
+    vb_6 = Lesson.query.filter_by(name=u'L6').first()
+    vb_6_plan = user.study_plans.filter_by(lesson_id=vb_6.id).first()
+    vb_7 = Lesson.query.filter_by(name=u'L7').first()
+    vb_7_plan = user.study_plans.filter_by(lesson_id=vb_7.id).first()
+    vb_8 = Lesson.query.filter_by(name=u'L8').first()
+    vb_8_plan = user.study_plans.filter_by(lesson_id=vb_8.id).first()
+    vb_9 = Lesson.query.filter_by(name=u'L9').first()
+    vb_9_plan = user.study_plans.filter_by(lesson_id=vb_9.id).first()
+    # retrieve GRE plan
+    y_gre_intro = Lesson.query.filter_by(name=u'Y-GRE总论').first()
+    y_gre_intro_plan = user.study_plans.filter_by(lesson_id=y_gre_intro.id).first()
+    y_gre_1 = Lesson.query.filter_by(name=u'1st').first()
+    y_gre_1_plan = user.study_plans.filter_by(lesson_id=y_gre_1.id).first()
+    y_gre_2 = Lesson.query.filter_by(name=u'2nd').first()
+    y_gre_2_plan = user.study_plans.filter_by(lesson_id=y_gre_2.id).first()
+    y_gre_3 = Lesson.query.filter_by(name=u'3rd').first()
+    y_gre_3_plan = user.study_plans.filter_by(lesson_id=y_gre_3.id).first()
+    y_gre_4 = Lesson.query.filter_by(name=u'4th').first()
+    y_gre_4_plan = user.study_plans.filter_by(lesson_id=y_gre_4.id).first()
+    y_gre_5 = Lesson.query.filter_by(name=u'5th').first()
+    y_gre_5_plan = user.study_plans.filter_by(lesson_id=y_gre_5.id).first()
+    y_gre_6 = Lesson.query.filter_by(name=u'6th').first()
+    y_gre_6_plan = user.study_plans.filter_by(lesson_id=y_gre_6.id).first()
+    y_gre_7 = Lesson.query.filter_by(name=u'7th').first()
+    y_gre_7_plan = user.study_plans.filter_by(lesson_id=y_gre_7.id).first()
+    y_gre_8 = Lesson.query.filter_by(name=u'8th').first()
+    y_gre_8_plan = user.study_plans.filter_by(lesson_id=y_gre_8.id).first()
+    y_gre_9 = Lesson.query.filter_by(name=u'9th').first()
+    y_gre_9_plan = user.study_plans.filter_by(lesson_id=y_gre_9.id).first()
+    y_gre_prep = Lesson.query.filter_by(name=u'Y-GRE临考').first()
+    y_gre_prep_plan = user.study_plans.filter_by(lesson_id=y_gre_prep.id).first()
+    # retrieve GRE test dates
+    gre_0_score_label = ScoreLabel.query.filter_by(name=u'G0', category=u'GRE').first()
+    gre_0_score = user.gre_test_scores.filter_by(label_id=gre_0_score_label.id).first()
+    gre_1_score_label = ScoreLabel.query.filter_by(name=u'G1', category=u'GRE').first()
+    gre_1_score = user.gre_test_scores.filter_by(label_id=gre_1_score_label.id).first()
+    gre_2_score_label = ScoreLabel.query.filter_by(name=u'G2', category=u'GRE').first()
+    gre_2_score = user.gre_test_scores.filter_by(label_id=gre_2_score_label.id).first()
+    gre_3_score_label = ScoreLabel.query.filter_by(name=u'G3', category=u'GRE').first()
+    gre_3_score = user.gre_test_scores.filter_by(label_id=gre_3_score_label.id).first()
+    form = EditStudyPlanForm()
+    if form.validate_on_submit():
+        # update aim scores
+        if gre_aim_score is None:
+            gre_aim_score = GRETestScore(
+                user_id=user.id,
+                label_id=ScoreLabel.query.filter_by(name=u'目标', category=u'GRE').first().id,
+                v_score=form.gre_aim_v.data,
+                q_score=form.gre_aim_q.data,
+                aw_score_id=int(form.gre_aim_aw.data),
+                modified_by_id=current_user.id
+            )
+        else:
+            gre_aim_score.v_score = form.gre_aim_v.data
+            gre_aim_score.q_score = form.gre_aim_q.data
+            gre_aim_score.aw_score_id = int(form.gre_aim_aw.data)
+            gre_aim_score.modified_at = datetime.utcnow()
+            gre_aim_score.modified_by_id = current_user.id
+        db.session.add(gre_aim_score)
+        db.session.commit()
+        if toefl_aim_score is None:
+            toefl_aim_score = TOEFLTestScore(
+                user_id=user.id,
+                label_id=ScoreLabel.query.filter_by(name=u'目标', category=u'TOEFL').first().id,
+                total_score=form.toefl_aim_total.data,
+                reading_score=form.toefl_aim_reading.data,
+                listening_score=form.toefl_aim_listening.data,
+                speaking_score=form.toefl_aim_speaking.data,
+                writing_score=form.toefl_aim_writing.data,
+                modified_by_id=current_user.id
+            )
+        else:
+            toefl_aim_score.total_score = form.toefl_aim_total.data
+            toefl_aim_score.reading_score = form.toefl_aim_reading.data
+            toefl_aim_score.listening_score = form.toefl_aim_listening.data
+            toefl_aim_score.speaking_score = form.toefl_aim_speaking.data
+            toefl_aim_score.writing_score = form.toefl_aim_writing.data
+            toefl_aim_score.modified_at = datetime.utcnow()
+            toefl_aim_score.modified_by_id = current_user.id
+        db.session.add(toefl_aim_score)
+        db.session.commit()
+        # update time parameters
+        user.speed = form.speed.data
+        user.deadline = form.deadline.data
+        db.session.add(user)
+        db.session.commit()
+        # update VB plan: intro
+        vb_intro_start_date = None
+        if form.vb_intro_start_date.data:
+            vb_intro_start_date = form.vb_intro_start_date.data
+        vb_intro_end_date = None
+        if form.vb_intro_end_date.data:
+            vb_intro_end_date = form.vb_intro_end_date.data
+        if vb_intro_plan is None:
+            vb_intro_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_intro.id,
+                start_date=vb_intro_start_date,
+                end_date=vb_intro_end_date,
+                remark=form.vb_intro_remark.data
+            )
+        else:
+            vb_intro_plan.start_date = vb_intro_start_date
+            vb_intro_plan.end_date = vb_intro_end_date
+            vb_intro_plan.remark = form.vb_intro_remark.data
+        db.session.add(vb_intro_plan)
+        db.session.commit()
+        for item in vb_intro_plan.notate_bene:
+            vb_intro_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_intro_notate_bene.data:
+            vb_intro_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 1
+        vb_1_start_date = None
+        if form.vb_1_start_date.data:
+            vb_1_start_date = form.vb_1_start_date.data
+        vb_1_end_date = None
+        if form.vb_1_end_date.data:
+            vb_1_end_date = form.vb_1_end_date.data
+        if vb_1_plan is None:
+            vb_1_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_1.id,
+                start_date=vb_1_start_date,
+                end_date=vb_1_end_date,
+                remark=form.vb_1_remark.data
+            )
+        else:
+            vb_1_plan.start_date = vb_1_start_date
+            vb_1_plan.end_date = vb_1_end_date
+            vb_1_plan.remark = form.vb_1_remark.data
+        db.session.add(vb_1_plan)
+        db.session.commit()
+        for item in vb_1_plan.notate_bene:
+            vb_1_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_1_notate_bene.data:
+            vb_1_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 2
+        vb_2_start_date = None
+        if form.vb_2_start_date.data:
+            vb_2_start_date = form.vb_2_start_date.data
+        vb_2_end_date = None
+        if form.vb_2_end_date.data:
+            vb_2_end_date = form.vb_2_end_date.data
+        if vb_2_plan is None:
+            vb_2_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_2.id,
+                start_date=vb_2_start_date,
+                end_date=vb_2_end_date,
+                remark=form.vb_2_remark.data
+            )
+        else:
+            vb_2_plan.start_date = vb_2_start_date
+            vb_2_plan.end_date = vb_2_end_date
+            vb_2_plan.remark = form.vb_2_remark.data
+        db.session.add(vb_2_plan)
+        db.session.commit()
+        for item in vb_2_plan.notate_bene:
+            vb_2_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_2_notate_bene.data:
+            vb_2_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 3
+        vb_3_start_date = None
+        if form.vb_3_start_date.data:
+            vb_3_start_date = form.vb_3_start_date.data
+        vb_3_end_date = None
+        if form.vb_3_end_date.data:
+            vb_3_end_date = form.vb_3_end_date.data
+        if vb_3_plan is None:
+            vb_3_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_3.id,
+                start_date=vb_3_start_date,
+                end_date=vb_3_end_date,
+                remark=form.vb_3_remark.data
+            )
+        else:
+            vb_3_plan.start_date = vb_3_start_date
+            vb_3_plan.end_date = vb_3_end_date
+            vb_3_plan.remark = form.vb_3_remark.data
+        db.session.add(vb_3_plan)
+        db.session.commit()
+        for item in vb_3_plan.notate_bene:
+            vb_3_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_3_notate_bene.data:
+            vb_3_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 4
+        vb_4_start_date = None
+        if form.vb_4_start_date.data:
+            vb_4_start_date = form.vb_4_start_date.data
+        vb_4_end_date = None
+        if form.vb_4_end_date.data:
+            vb_4_end_date = form.vb_4_end_date.data
+        if vb_4_plan is None:
+            vb_4_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_4.id,
+                start_date=vb_4_start_date,
+                end_date=vb_4_end_date,
+                remark=form.vb_4_remark.data
+            )
+        else:
+            vb_4_plan.start_date = vb_4_start_date
+            vb_4_plan.end_date = vb_4_end_date
+            vb_4_plan.remark = form.vb_4_remark.data
+        db.session.add(vb_4_plan)
+        db.session.commit()
+        for item in vb_4_plan.notate_bene:
+            vb_4_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_4_notate_bene.data:
+            vb_4_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 5
+        vb_5_start_date = None
+        if form.vb_5_start_date.data:
+            vb_5_start_date = form.vb_5_start_date.data
+        vb_5_end_date = None
+        if form.vb_5_end_date.data:
+            vb_5_end_date = form.vb_5_end_date.data
+        if vb_5_plan is None:
+            vb_5_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_5.id,
+                start_date=vb_5_start_date,
+                end_date=vb_5_end_date,
+                remark=form.vb_5_remark.data
+            )
+        else:
+            vb_5_plan.start_date = vb_5_start_date
+            vb_5_plan.end_date = vb_5_end_date
+            vb_5_plan.remark = form.vb_5_remark.data
+        db.session.add(vb_5_plan)
+        db.session.commit()
+        for item in vb_5_plan.notate_bene:
+            vb_5_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_5_notate_bene.data:
+            vb_5_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 6
+        vb_6_start_date = None
+        if form.vb_6_start_date.data:
+            vb_6_start_date = form.vb_6_start_date.data
+        vb_6_end_date = None
+        if form.vb_6_end_date.data:
+            vb_6_end_date = form.vb_6_end_date.data
+        if vb_6_plan is None:
+            vb_6_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_6.id,
+                start_date=vb_6_start_date,
+                end_date=vb_6_end_date,
+                remark=form.vb_6_remark.data
+            )
+        else:
+            vb_6_plan.start_date = vb_6_start_date
+            vb_6_plan.end_date = vb_6_end_date
+            vb_6_plan.remark = form.vb_6_remark.data
+        db.session.add(vb_6_plan)
+        db.session.commit()
+        for item in vb_6_plan.notate_bene:
+            vb_6_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_6_notate_bene.data:
+            vb_6_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 7
+        vb_7_start_date = None
+        if form.vb_7_start_date.data:
+            vb_7_start_date = form.vb_7_start_date.data
+        vb_7_end_date = None
+        if form.vb_7_end_date.data:
+            vb_7_end_date = form.vb_7_end_date.data
+        if vb_7_plan is None:
+            vb_7_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_7.id,
+                start_date=vb_7_start_date,
+                end_date=vb_7_end_date,
+                remark=form.vb_7_remark.data
+            )
+        else:
+            vb_7_plan.start_date = vb_7_start_date
+            vb_7_plan.end_date = vb_7_end_date
+            vb_7_plan.remark = form.vb_7_remark.data
+        db.session.add(vb_7_plan)
+        db.session.commit()
+        for item in vb_7_plan.notate_bene:
+            vb_7_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_7_notate_bene.data:
+            vb_7_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 8
+        vb_8_start_date = None
+        if form.vb_8_start_date.data:
+            vb_8_start_date = form.vb_8_start_date.data
+        vb_8_end_date = None
+        if form.vb_8_end_date.data:
+            vb_8_end_date = form.vb_8_end_date.data
+        if vb_8_plan is None:
+            vb_8_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_8.id,
+                start_date=vb_8_start_date,
+                end_date=vb_8_end_date,
+                remark=form.vb_8_remark.data
+            )
+        else:
+            vb_8_plan.start_date = vb_8_start_date
+            vb_8_plan.end_date = vb_8_end_date
+            vb_8_plan.remark = form.vb_8_remark.data
+        db.session.add(vb_8_plan)
+        db.session.commit()
+        for item in vb_8_plan.notate_bene:
+            vb_8_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_8_notate_bene.data:
+            vb_8_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update VB plan: 9
+        vb_9_start_date = None
+        if form.vb_9_start_date.data:
+            vb_9_start_date = form.vb_9_start_date.data
+        vb_9_end_date = None
+        if form.vb_9_end_date.data:
+            vb_9_end_date = form.vb_9_end_date.data
+        if vb_9_plan is None:
+            vb_9_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=vb_9.id,
+                start_date=vb_9_start_date,
+                end_date=vb_9_end_date,
+                remark=form.vb_9_remark.data
+            )
+        else:
+            vb_9_plan.start_date = vb_9_start_date
+            vb_9_plan.end_date = vb_9_end_date
+            vb_9_plan.remark = form.vb_9_remark.data
+        db.session.add(vb_9_plan)
+        db.session.commit()
+        for item in vb_9_plan.notate_bene:
+            vb_9_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.vb_9_notate_bene.data:
+            vb_9_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: intro
+        y_gre_intro_start_date = None
+        if form.y_gre_intro_start_date.data:
+            y_gre_intro_start_date = form.y_gre_intro_start_date.data
+        y_gre_intro_end_date = None
+        if form.y_gre_intro_end_date.data:
+            y_gre_intro_end_date = form.y_gre_intro_end_date.data
+        if y_gre_intro_plan is None:
+            y_gre_intro_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_intro.id,
+                start_date=y_gre_intro_start_date,
+                end_date=y_gre_intro_end_date,
+                remark=form.y_gre_intro_remark.data
+            )
+        else:
+            y_gre_intro_plan.start_date = y_gre_intro_start_date
+            y_gre_intro_plan.end_date = y_gre_intro_end_date
+            y_gre_intro_plan.remark = form.y_gre_intro_remark.data
+        db.session.add(y_gre_intro_plan)
+        db.session.commit()
+        for item in y_gre_intro_plan.notate_bene:
+            y_gre_intro_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_intro_notate_bene.data:
+            y_gre_intro_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 1
+        y_gre_1_start_date = None
+        if form.y_gre_1_start_date.data:
+            y_gre_1_start_date = form.y_gre_1_start_date.data
+        y_gre_1_end_date = None
+        if form.y_gre_1_end_date.data:
+            y_gre_1_end_date = form.y_gre_1_end_date.data
+        if y_gre_1_plan is None:
+            y_gre_1_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_1.id,
+                start_date=y_gre_1_start_date,
+                end_date=y_gre_1_end_date,
+                remark=form.y_gre_1_remark.data
+            )
+        else:
+            y_gre_1_plan.start_date = y_gre_1_start_date
+            y_gre_1_plan.end_date = y_gre_1_end_date
+            y_gre_1_plan.remark = form.y_gre_1_remark.data
+        db.session.add(y_gre_1_plan)
+        db.session.commit()
+        for item in y_gre_1_plan.notate_bene:
+            y_gre_1_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_1_notate_bene.data:
+            y_gre_1_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 2
+        y_gre_2_start_date = None
+        if form.y_gre_2_start_date.data:
+            y_gre_2_start_date = form.y_gre_2_start_date.data
+        y_gre_2_end_date = None
+        if form.y_gre_2_end_date.data:
+            y_gre_2_end_date = form.y_gre_2_end_date.data
+        if y_gre_2_plan is None:
+            y_gre_2_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_2.id,
+                start_date=y_gre_2_start_date,
+                end_date=y_gre_2_end_date,
+                remark=form.y_gre_2_remark.data
+            )
+        else:
+            y_gre_2_plan.start_date = y_gre_2_start_date
+            y_gre_2_plan.end_date = y_gre_2_end_date
+            y_gre_2_plan.remark = form.y_gre_2_remark.data
+        db.session.add(y_gre_2_plan)
+        db.session.commit()
+        for item in y_gre_2_plan.notate_bene:
+            y_gre_2_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_2_notate_bene.data:
+            y_gre_2_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 3
+        y_gre_3_start_date = None
+        if form.y_gre_3_start_date.data:
+            y_gre_3_start_date = form.y_gre_3_start_date.data
+        y_gre_3_end_date = None
+        if form.y_gre_3_end_date.data:
+            y_gre_3_end_date = form.y_gre_3_end_date.data
+        if y_gre_3_plan is None:
+            y_gre_3_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_3.id,
+                start_date=y_gre_3_start_date,
+                end_date=y_gre_3_end_date,
+                remark=form.y_gre_3_remark.data
+            )
+        else:
+            y_gre_3_plan.start_date = y_gre_3_start_date
+            y_gre_3_plan.end_date = y_gre_3_end_date
+            y_gre_3_plan.remark = form.y_gre_3_remark.data
+        db.session.add(y_gre_3_plan)
+        db.session.commit()
+        for item in y_gre_3_plan.notate_bene:
+            y_gre_3_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_3_notate_bene.data:
+            y_gre_3_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 4
+        y_gre_4_start_date = None
+        if form.y_gre_4_start_date.data:
+            y_gre_4_start_date = form.y_gre_4_start_date.data
+        y_gre_4_end_date = None
+        if form.y_gre_4_end_date.data:
+            y_gre_4_end_date = form.y_gre_4_end_date.data
+        if y_gre_4_plan is None:
+            y_gre_4_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_4.id,
+                start_date=y_gre_4_start_date,
+                end_date=y_gre_4_end_date,
+                remark=form.y_gre_4_remark.data
+            )
+        else:
+            y_gre_4_plan.start_date = y_gre_4_start_date
+            y_gre_4_plan.end_date = y_gre_4_end_date
+            y_gre_4_plan.remark = form.y_gre_4_remark.data
+        db.session.add(y_gre_4_plan)
+        db.session.commit()
+        for item in y_gre_4_plan.notate_bene:
+            y_gre_4_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_4_notate_bene.data:
+            y_gre_4_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 5
+        y_gre_5_start_date = None
+        if form.y_gre_5_start_date.data:
+            y_gre_5_start_date = form.y_gre_5_start_date.data
+        y_gre_5_end_date = None
+        if form.y_gre_5_end_date.data:
+            y_gre_5_end_date = form.y_gre_5_end_date.data
+        if y_gre_5_plan is None:
+            y_gre_5_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_5.id,
+                start_date=y_gre_5_start_date,
+                end_date=y_gre_5_end_date,
+                remark=form.y_gre_5_remark.data
+            )
+        else:
+            y_gre_5_plan.start_date = y_gre_5_start_date
+            y_gre_5_plan.end_date = y_gre_5_end_date
+            y_gre_5_plan.remark = form.y_gre_5_remark.data
+        db.session.add(y_gre_5_plan)
+        db.session.commit()
+        for item in y_gre_5_plan.notate_bene:
+            y_gre_5_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_5_notate_bene.data:
+            y_gre_5_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 6
+        y_gre_6_start_date = None
+        if form.y_gre_6_start_date.data:
+            y_gre_6_start_date = form.y_gre_6_start_date.data
+        y_gre_6_end_date = None
+        if form.y_gre_6_end_date.data:
+            y_gre_6_end_date = form.y_gre_6_end_date.data
+        if y_gre_6_plan is None:
+            y_gre_6_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_6.id,
+                start_date=y_gre_6_start_date,
+                end_date=y_gre_6_end_date,
+                remark=form.y_gre_6_remark.data
+            )
+        else:
+            y_gre_6_plan.start_date = y_gre_6_start_date
+            y_gre_6_plan.end_date = y_gre_6_end_date
+            y_gre_6_plan.remark = form.y_gre_6_remark.data
+        db.session.add(y_gre_6_plan)
+        db.session.commit()
+        for item in y_gre_6_plan.notate_bene:
+            y_gre_6_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_6_notate_bene.data:
+            y_gre_6_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 7
+        y_gre_7_start_date = None
+        if form.y_gre_7_start_date.data:
+            y_gre_7_start_date = form.y_gre_7_start_date.data
+        y_gre_7_end_date = None
+        if form.y_gre_7_end_date.data:
+            y_gre_7_end_date = form.y_gre_7_end_date.data
+        if y_gre_7_plan is None:
+            y_gre_7_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_7.id,
+                start_date=y_gre_7_start_date,
+                end_date=y_gre_7_end_date,
+                remark=form.y_gre_7_remark.data
+            )
+        else:
+            y_gre_7_plan.start_date = y_gre_7_start_date
+            y_gre_7_plan.end_date = y_gre_7_end_date
+            y_gre_7_plan.remark = form.y_gre_7_remark.data
+        db.session.add(y_gre_7_plan)
+        db.session.commit()
+        for item in y_gre_7_plan.notate_bene:
+            y_gre_7_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_7_notate_bene.data:
+            y_gre_7_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 8
+        y_gre_8_start_date = None
+        if form.y_gre_8_start_date.data:
+            y_gre_8_start_date = form.y_gre_8_start_date.data
+        y_gre_8_end_date = None
+        if form.y_gre_8_end_date.data:
+            y_gre_8_end_date = form.y_gre_8_end_date.data
+        if y_gre_8_plan is None:
+            y_gre_8_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_8.id,
+                start_date=y_gre_8_start_date,
+                end_date=y_gre_8_end_date,
+                remark=form.y_gre_8_remark.data
+            )
+        else:
+            y_gre_8_plan.start_date = y_gre_8_start_date
+            y_gre_8_plan.end_date = y_gre_8_end_date
+            y_gre_8_plan.remark = form.y_gre_8_remark.data
+        db.session.add(y_gre_8_plan)
+        db.session.commit()
+        for item in y_gre_8_plan.notate_bene:
+            y_gre_8_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_8_notate_bene.data:
+            y_gre_8_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: 9
+        y_gre_9_start_date = None
+        if form.y_gre_9_start_date.data:
+            y_gre_9_start_date = form.y_gre_9_start_date.data
+        y_gre_9_end_date = None
+        if form.y_gre_9_end_date.data:
+            y_gre_9_end_date = form.y_gre_9_end_date.data
+        if y_gre_9_plan is None:
+            y_gre_9_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_9.id,
+                start_date=y_gre_9_start_date,
+                end_date=y_gre_9_end_date,
+                remark=form.y_gre_9_remark.data
+            )
+        else:
+            y_gre_9_plan.start_date = y_gre_9_start_date
+            y_gre_9_plan.end_date = y_gre_9_end_date
+            y_gre_9_plan.remark = form.y_gre_9_remark.data
+        db.session.add(y_gre_9_plan)
+        db.session.commit()
+        for item in y_gre_9_plan.notate_bene:
+            y_gre_9_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_9_notate_bene.data:
+            y_gre_9_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update Y-GRE plan: prep
+        y_gre_prep_start_date = None
+        if form.y_gre_prep_start_date.data:
+            y_gre_prep_start_date = form.y_gre_prep_start_date.data
+        y_gre_prep_end_date = None
+        if form.y_gre_prep_end_date.data:
+            y_gre_prep_end_date = form.y_gre_prep_end_date.data
+        if y_gre_prep_plan is None:
+            y_gre_prep_plan = StudyPlan(
+                user_id=user.id,
+                lesson_id=y_gre_prep.id,
+                start_date=y_gre_prep_start_date,
+                end_date=y_gre_prep_end_date,
+                remark=form.y_gre_prep_remark.data
+            )
+        else:
+            y_gre_prep_plan.start_date = y_gre_prep_start_date
+            y_gre_prep_plan.end_date = y_gre_prep_end_date
+            y_gre_prep_plan.remark = form.y_gre_prep_remark.data
+        db.session.add(y_gre_prep_plan)
+        db.session.commit()
+        for item in y_gre_prep_plan.notate_bene:
+            y_gre_prep_plan.remove_nota_bene(nota_bene=item.nota_bene)
+        for nota_bene_id in form.y_gre_prep_notate_bene.data:
+            y_gre_prep_plan.add_nota_bene(nota_bene=NotaBene.query.get(int(nota_bene_id)))
+        # update GRE test dates
+        if form.gre_0_date.data:
+            gre_0_test = GRETest.query.filter_by(date=form.gre_0_date.data).first()
+            if gre_0_test is None:
+                gre_0_test = GRETest(date=form.gre_0_date.data)
+                db.session.add(gre_0_test)
+                db.session.commit()
+            if gre_0_score is None:
+                gre_0_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_0_test.id,
+                    label_id=gre_0_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_0_score.test_id = gre_0_test.id
+                gre_0_score.modified_by_id = current_user.id
+                gre_0_score.modified_at = datetime.utcnow()
+            db.session.add(gre_0_score)
+            db.session.commit()
+        if form.gre_1_date.data:
+            gre_1_test = GRETest.query.filter_by(date=form.gre_1_date.data).first()
+            if gre_1_test is None:
+                gre_1_test = GRETest(date=form.gre_1_date.data)
+                db.session.add(gre_1_test)
+                db.session.commit()
+            if gre_1_score is None:
+                gre_1_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_1_test.id,
+                    label_id=gre_1_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_1_score.test_id = gre_1_test.id
+                gre_1_score.modified_by_id = current_user.id
+                gre_1_score.modified_at = datetime.utcnow()
+            db.session.add(gre_1_score)
+            db.session.commit()
+        if form.gre_2_date.data:
+            gre_2_test = GRETest.query.filter_by(date=form.gre_2_date.data).first()
+            if gre_2_test is None:
+                gre_2_test = GRETest(date=form.gre_2_date.data)
+                db.session.add(gre_2_test)
+                db.session.commit()
+            if gre_2_score is None:
+                gre_2_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_2_test.id,
+                    label_id=gre_2_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_2_score.test_id = gre_2_test.id
+                gre_2_score.modified_by_id = current_user.id
+                gre_2_score.modified_at = datetime.utcnow()
+            db.session.add(gre_2_score)
+            db.session.commit()
+        if form.gre_3_date.data:
+            gre_3_test = GRETest.query.filter_by(date=form.gre_3_date.data).first()
+            if gre_3_test is None:
+                gre_3_test = GRETest(date=form.gre_3_date.data)
+                db.session.add(gre_3_test)
+                db.session.commit()
+            if gre_3_score is None:
+                gre_3_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_3_test.id,
+                    label_id=gre_3_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_3_score.test_id = gre_3_test.id
+                gre_3_score.modified_by_id = current_user.id
+                gre_3_score.modified_at = datetime.utcnow()
+            db.session.add(gre_3_score)
+            db.session.commit()
+        # update supervisor
+        if form.supervisor_email.data:
+            if user.supervised_by:
+                user.supervised_by.unsupervise_user(user=user)
+            supervisor = User.query.filter_by(email=form.supervisor_email.data.lower(), created=True, activated=True, deleted=False).first()
+            if supervisor is None:
+                flash(u'设计人邮箱不存在：%s' % form.supervisor_email.data.lower(), category='error')
+                return redirect(url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')))
+            supervisor.supervise_user(user=user)
+        flash(u'已更新%s的研修计划' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新%s的研修计划' % user.name_alias, category=u'manage')
+        return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
+    # aim scores
+    if gre_aim_score is not None:
+        form.gre_aim_v.data = gre_aim_score.v_score
+        form.gre_aim_q.data = gre_aim_score.q_score
+        form.gre_aim_aw.data = unicode(gre_aim_score.aw_score_id)
+    if toefl_aim_score is not None:
+        form.toefl_aim_total.data = toefl_aim_score.total_score
+        form.toefl_aim_reading.data = toefl_aim_score.reading_score
+        form.toefl_aim_listening.data = toefl_aim_score.listening_score
+        form.toefl_aim_speaking.data = toefl_aim_score.speaking_score
+        form.toefl_aim_writing.data = toefl_aim_score.writing_score
+    # time parameters
+    form.speed.data = user.speed
+    form.deadline.data = user.deadline or user.due_date
+    # VB plan
+    if vb_intro_plan is not None:
+        form.vb_intro_start_date.data = vb_intro_plan.start_date
+        form.vb_intro_end_date.data = vb_intro_plan.end_date
+        form.vb_intro_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_intro_plan.notate_bene]
+        form.vb_intro_remark.data = vb_intro_plan.remark
+    if vb_1_plan is not None:
+        form.vb_1_start_date.data = vb_1_plan.start_date
+        form.vb_1_end_date.data = vb_1_plan.end_date
+        form.vb_1_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_1_plan.notate_bene]
+        form.vb_1_remark.data = vb_1_plan.remark
+    if vb_2_plan is not None:
+        form.vb_2_start_date.data = vb_2_plan.start_date
+        form.vb_2_end_date.data = vb_2_plan.end_date
+        form.vb_2_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_2_plan.notate_bene]
+        form.vb_2_remark.data = vb_2_plan.remark
+    if vb_3_plan is not None:
+        form.vb_3_start_date.data = vb_3_plan.start_date
+        form.vb_3_end_date.data = vb_3_plan.end_date
+        form.vb_3_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_3_plan.notate_bene]
+        form.vb_3_remark.data = vb_3_plan.remark
+    if vb_4_plan is not None:
+        form.vb_4_start_date.data = vb_4_plan.start_date
+        form.vb_4_end_date.data = vb_4_plan.end_date
+        form.vb_4_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_4_plan.notate_bene]
+        form.vb_4_remark.data = vb_4_plan.remark
+    if vb_5_plan is not None:
+        form.vb_5_start_date.data = vb_5_plan.start_date
+        form.vb_5_end_date.data = vb_5_plan.end_date
+        form.vb_5_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_5_plan.notate_bene]
+        form.vb_5_remark.data = vb_5_plan.remark
+    if vb_6_plan is not None:
+        form.vb_6_start_date.data = vb_6_plan.start_date
+        form.vb_6_end_date.data = vb_6_plan.end_date
+        form.vb_6_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_6_plan.notate_bene]
+        form.vb_6_remark.data = vb_6_plan.remark
+    if vb_7_plan is not None:
+        form.vb_7_start_date.data = vb_7_plan.start_date
+        form.vb_7_end_date.data = vb_7_plan.end_date
+        form.vb_7_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_7_plan.notate_bene]
+        form.vb_7_remark.data = vb_7_plan.remark
+    if vb_8_plan is not None:
+        form.vb_8_start_date.data = vb_8_plan.start_date
+        form.vb_8_end_date.data = vb_8_plan.end_date
+        form.vb_8_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_8_plan.notate_bene]
+        form.vb_8_remark.data = vb_8_plan.remark
+    if vb_9_plan is not None:
+        form.vb_9_start_date.data = vb_9_plan.start_date
+        form.vb_9_end_date.data = vb_9_plan.end_date
+        form.vb_9_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_9_plan.notate_bene]
+        form.vb_9_remark.data = vb_9_plan.remark
+    # Y-GRE plan
+    if y_gre_intro_plan is not None:
+        form.y_gre_intro_start_date.data = y_gre_intro_plan.start_date
+        form.y_gre_intro_end_date.data = y_gre_intro_plan.end_date
+        form.y_gre_intro_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_intro_plan.notate_bene]
+        form.y_gre_intro_remark.data = y_gre_intro_plan.remark
+    if y_gre_1_plan is not None:
+        form.y_gre_1_start_date.data = y_gre_1_plan.start_date
+        form.y_gre_1_end_date.data = y_gre_1_plan.end_date
+        form.y_gre_1_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_1_plan.notate_bene]
+        form.y_gre_1_remark.data = y_gre_1_plan.remark
+    if y_gre_2_plan is not None:
+        form.y_gre_2_start_date.data = y_gre_2_plan.start_date
+        form.y_gre_2_end_date.data = y_gre_2_plan.end_date
+        form.y_gre_2_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_2_plan.notate_bene]
+        form.y_gre_2_remark.data = y_gre_2_plan.remark
+    if y_gre_3_plan is not None:
+        form.y_gre_3_start_date.data = y_gre_3_plan.start_date
+        form.y_gre_3_end_date.data = y_gre_3_plan.end_date
+        form.y_gre_3_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_3_plan.notate_bene]
+        form.y_gre_3_remark.data = y_gre_3_plan.remark
+    if y_gre_4_plan is not None:
+        form.y_gre_4_start_date.data = y_gre_4_plan.start_date
+        form.y_gre_4_end_date.data = y_gre_4_plan.end_date
+        form.y_gre_4_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_4_plan.notate_bene]
+        form.y_gre_4_remark.data = y_gre_4_plan.remark
+    if y_gre_5_plan is not None:
+        form.y_gre_5_start_date.data = y_gre_5_plan.start_date
+        form.y_gre_5_end_date.data = y_gre_5_plan.end_date
+        form.y_gre_5_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_5_plan.notate_bene]
+        form.y_gre_5_remark.data = y_gre_5_plan.remark
+    if y_gre_6_plan is not None:
+        form.y_gre_6_start_date.data = y_gre_6_plan.start_date
+        form.y_gre_6_end_date.data = y_gre_6_plan.end_date
+        form.y_gre_6_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_6_plan.notate_bene]
+        form.y_gre_6_remark.data = y_gre_6_plan.remark
+    if y_gre_7_plan is not None:
+        form.y_gre_7_start_date.data = y_gre_7_plan.start_date
+        form.y_gre_7_end_date.data = y_gre_7_plan.end_date
+        form.y_gre_7_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_7_plan.notate_bene]
+        form.y_gre_7_remark.data = y_gre_7_plan.remark
+    if y_gre_8_plan is not None:
+        form.y_gre_8_start_date.data = y_gre_8_plan.start_date
+        form.y_gre_8_end_date.data = y_gre_8_plan.end_date
+        form.y_gre_8_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_8_plan.notate_bene]
+        form.y_gre_8_remark.data = y_gre_8_plan.remark
+    if y_gre_9_plan is not None:
+        form.y_gre_9_start_date.data = y_gre_9_plan.start_date
+        form.y_gre_9_end_date.data = y_gre_9_plan.end_date
+        form.y_gre_9_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_9_plan.notate_bene]
+        form.y_gre_9_remark.data = y_gre_9_plan.remark
+    if y_gre_prep_plan is not None:
+        form.y_gre_prep_start_date.data = y_gre_prep_plan.start_date
+        form.y_gre_prep_end_date.data = y_gre_prep_plan.end_date
+        form.y_gre_prep_notate_bene.data = [unicode(item.nota_bene_id) for item in y_gre_prep_plan.notate_bene]
+        form.y_gre_prep_remark.data = y_gre_prep_plan.remark
+    # GRE test dates
+    if gre_0_score is not None:
+        form.gre_0_date.data = gre_0_score.test.date
+    if gre_1_score is not None:
+        form.gre_1_date.data = gre_1_score.test.date
+    if gre_2_score is not None:
+        form.gre_2_date.data = gre_2_score.test.date
+    if gre_3_score is not None:
+        form.gre_3_date.data = gre_3_score.test.date
+    # supervisor
+    if user.supervised_by is not None:
+        form.supervisor_email.data = user.supervised_by.email
+    return render_template('manage/edit_study_plan.html', form=form, user=user)
+
+
+@manage.route('/nota-bene', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理NB')
+def nota_bene():
+    form = NewNotaBeneForm()
+    if form.validate_on_submit():
+        nota_bene = NotaBene(
+            body=form.body.data,
+            type_id=int(form.nota_bene_type.data),
+            modified_by_id=current_user.id
+        )
+        db.session.add(nota_bene)
+        flash(u'已添加N.B.模板：%s' % form.body.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加N.B.模板：%s' % form.body.data, category=u'manage')
+        return redirect(url_for('manage.nota_bene', page=request.args.get('page', 1, type=int)))
+    show_vb_notate_bene = True
+    show_y_gre_notate_bene = False
+    if current_user.is_authenticated:
+        show_vb_notate_bene = bool(request.cookies.get('show_vb_notate_bene', '1'))
+        show_y_gre_notate_bene = bool(request.cookies.get('show_y_gre_notate_bene', ''))
+    if show_vb_notate_bene:
+        query = NotaBene.query\
+            .join(CourseType, CourseType.id == NotaBene.type_id)\
+            .filter(CourseType.name == u'VB')\
+            .filter(NotaBene.deleted == False)
+    if show_y_gre_notate_bene:
+        query = NotaBene.query\
+            .join(CourseType, CourseType.id == NotaBene.type_id)\
+            .filter(CourseType.name == u'Y-GRE')\
+            .filter(NotaBene.deleted == False)
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    notate_bene = pagination.items
+    return render_template('manage/nota_bene.html',
+        form=form,
+        show_vb_notate_bene=show_vb_notate_bene,
+        show_y_gre_notate_bene=show_y_gre_notate_bene,
+        notate_bene=notate_bene,
+        pagination=pagination
+    )
+
+
+@manage.route('/nota-bene/vb')
+@login_required
+@permission_required(u'管理NB')
+def vb_notate_bene():
+    resp = make_response(redirect(url_for('manage.nota_bene')))
+    resp.set_cookie('show_vb_notate_bene', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_notate_bene', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/nota-bene/y-gre')
+@login_required
+@permission_required(u'管理NB')
+def y_gre_notate_bene():
+    resp = make_response(redirect(url_for('manage.nota_bene')))
+    resp.set_cookie('show_vb_notate_bene', '', max_age=30*24*60*60)
+    resp.set_cookie('show_y_gre_notate_bene', '1', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/nota-bene/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理NB')
+def edit_nota_bene(id):
+    nota_bene = NotaBene.query.get_or_404(id)
+    if nota_bene.deleted:
+        abort(404)
+    form = EditNotaBeneForm()
+    if form.validate_on_submit():
+        nota_bene.body = form.body.data
+        nota_bene.type_id = int(form.nota_bene_type.data)
+        nota_bene.modified_at = datetime.utcnow()
+        nota_bene.modified_by_id = current_user.id
+        db.session.add(nota_bene)
+        flash(u'已更新N.B.模板：%s' % form.body.data, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新N.B.模板：%s' % form.body.data, category=u'manage')
+        return redirect(request.args.get('next') or url_for('manage.nota_bene'))
+    form.body.data = nota_bene.body
+    form.nota_bene_type.data = unicode(nota_bene.type_id)
+    return render_template('manage/edit_nota_bene.html', form=form, nota_bene=nota_bene)
+
+
+@manage.route('/nota-bene/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理NB')
+def delete_nota_bene(id):
+    nota_bene = NotaBene.query.get_or_404(id)
+    if nota_bene.deleted:
+        abort(404)
+    nota_bene.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除N.B.模板：%s' % nota_bene.body, category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除N.B.模板：%s' % nota_bene.body, category=u'manage')
+    return redirect(request.args.get('next') or url_for('manage.nota_bene'))
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])

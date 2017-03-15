@@ -25,4 +25,4 @@ def send_email(recipient, subject, template, **kwargs):
 
 def send_emails(recipients, subject, template, **kwargs):
     send_async_emails.delay([msg_to_dict(recipient=recipient, subject=subject, template=template, **kwargs) for recipient in recipients])
-    add_sys_feed(event=u'群发邮件“%s”至：%s' % (subject, u'、'.join(recipients)), category=u'email')
+    add_sys_feed(event=u'群发%s封邮件“%s”至：%s' % (len(recipients), subject, u'、'.join(recipients)), category=u'email')

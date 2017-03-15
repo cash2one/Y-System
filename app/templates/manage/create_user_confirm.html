@@ -127,7 +127,7 @@
                                 {{ edit_birthdate_form.birthdate.label() }}
                                 <div class="ui left icon input">
                                     <i class="birthday icon"></i>
-                                    {{ edit_birthdate_form.birthdate(placeholder='YYYY-MM-DD') }}
+                                    {{ edit_birthdate_form.birthdate(placeholder='格式：YYYY-MM-DD') }}
                                 </div>
                             </div>
                             {{ edit_birthdate_form.submit(class='ui primary button') }}
@@ -476,53 +476,6 @@
                         </div>
                     </div>
                 </form>
-                <div class="ui blue dividing header">TOEFL成绩</div>
-                {% if user.toefl_test_scores.count() %}
-                <div class="ui relaxed divided list">
-                    {% for toefl_test_score in user.toefl_test_scores %}
-                    <div class="item">
-                        <div class="right floated content">
-                            <a class="ui mini negative button loading-trigger" href="{{ url_for('manage.remove_toefl_test_score', id=toefl_test_score.id, next=url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next'))) }}">删除</a>
-                        </div>
-                        <div class="content">
-                            <div class="header">日期：{{ toefl_test_score.test.date }}</div>
-                            <div class="description">{{ toefl_test_score.alias2 }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                <form id="new-toefl-test-score" action="{{ url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui mini form">
-                    {{ new_toefl_test_score_form.hidden_tag() }}
-                    <div class="fields">
-                        <div class="four wide field">
-                            {{ new_toefl_test_score_form.total(placeholder='TOEFL总分') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ new_toefl_test_score_form.reading(placeholder='TOEFL阅读') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ new_toefl_test_score_form.listening(placeholder='TOEFL听力') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ new_toefl_test_score_form.speaking(placeholder='TOEFL口语') }}
-                        </div>
-                        <div class="two wide field">
-                            {{ new_toefl_test_score_form.writing(placeholder='TOEFL写作') }}
-                        </div>
-                        <div class="three wide field">
-                            <div class="ui date calendar">
-                                <div class="ui left icon input">
-                                    <i class="calendar icon"></i>
-                                    {{ new_toefl_test_score_form.test_date(placeholder='考试日期') }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="one wide field">
-                            {{ new_toefl_test_score_form.submit(class='ui primary mini button') }}
-                        </div>
-                    </div>
-                </form>
                 <div class="ui teal dividing header">报名信息</div>
                 <div class="ui relaxed divided list">
                     <div class="item">
@@ -532,15 +485,6 @@
                         <div class="content">
                             <div class="header">研修目的</div>
                             <div class="description">{{ user.purposes_alias }}</div>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="right floated content">
-                            <div id="edit-application-aim-trigger" class="ui mini button">编辑</div>
-                        </div>
-                        <div class="content">
-                            <div class="header">申请方向</div>
-                            <div class="description">{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
@@ -559,6 +503,15 @@
                         <div class="content">
                             <div class="header">推荐人</div>
                             <div class="description">{{ user.inviters }}</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div id="edit-application-trigger" class="ui mini button">编辑</div>
+                        </div>
+                        <div class="content">
+                            <div class="header">申请信息</div>
+                            <div class="description">申请方向：{% if user.application_aim %}{{ user.application_aim }}{% else %}无{% endif %} &middot; 留学中介：{% if user.application_agency %}{{ user.application_agency }}{% else %}无{% endif %}</div>
                         </div>
                     </div>
                     <div class="item">
@@ -616,20 +569,6 @@
                         </form>
                     </div>
                 </div>
-                <div id="edit-application-aim-modal" class="ui modal">
-                    <i class="close icon"></i>
-                    <div class="header"><i class="edit icon"></i>编辑申请方向</div>
-                    <div class="content">
-                        <form id="edit-application-aim" action="{{ url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
-                            {{ edit_application_aim_form.hidden_tag() }}
-                            <div class="field">
-                                {{ edit_application_aim_form.application_aim.label() }}
-                                {{ edit_application_aim_form.application_aim(placeholder='申请方向') }}
-                            </div>
-                            {{ edit_application_aim_form.submit(class='ui primary button') }}
-                        </form>
-                    </div>
-                </div>
                 <div id="edit-referrer-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="edit icon"></i>编辑了解渠道</div>
@@ -683,6 +622,26 @@
                                 </div>
                             </div>
                             {{ new_inviter_form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div id="edit-application-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="edit icon"></i>编辑申请信息</div>
+                    <div class="content">
+                        <form id="edit-application" action="{{ url_for('manage.create_user_confirm', id=user.id, next=request.args.get('next')) }}" method="POST" class="ui form">
+                            {{ edit_application_form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="eight wide field">
+                                    {{ edit_application_form.application_aim.label() }}
+                                    {{ edit_application_form.application_aim(placeholder='申请方向') }}
+                                </div>
+                                <div class="eight wide field">
+                                    {{ edit_application_form.application_agency.label() }}
+                                    {{ edit_application_form.application_agency(placeholder='留学中介') }}
+                                </div>
+                            </div>
+                            {{ edit_application_form.submit(class='ui primary button') }}
                         </form>
                     </div>
                 </div>
@@ -928,9 +887,9 @@ $('#edit-purpose-trigger')
     })
 ;
 
-$('#edit-application-aim-trigger')
+$('#edit-application-trigger')
     .on('click', function() {
-        $('#edit-application-aim-modal').modal({ autofocus: false }).modal('show');
+        $('#edit-application-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
@@ -1034,7 +993,7 @@ $(document)
                                 prompt: '请填写出生日期'
                             },
                             {
-                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
+                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
                                 prompt: '请填写一个有效的出生日期'
                             }
                         ]
@@ -1043,7 +1002,7 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.idNumber = function(value) {
-            if ($('#edit_id_number-id_type').val() === '1') {
+            if ($('#edit_id_number-id_type').parent().dropdown('get text') === '身份证') {
                 return (Validator.isValid(value, 18));
             } else {
                 return true;
@@ -1251,7 +1210,7 @@ $(document)
             })
         ;
         $.fn.form.settings.rules.exceptEducationType = function(value) {
-            if ($.inArray($('#new_education_record-education_type').dropdown('get text')[0], ['本科', '硕士', '博士']) === -1) {
+            if ($.inArray($('#new_education_record-education_type').parent().dropdown('get text'), ['本科', '硕士', '博士']) === -1) {
                 return true;
             } else {
                 return ($('#new_education_record-major').val() !== '');
@@ -1377,7 +1336,7 @@ $(document)
             if (/^[0-9]*$/.test(value)) {
                 return true;
             } else {
-                return ($.inArray($('#new_score_record-score_type').dropdown('get text')[0], ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
+                return ($.inArray($('#new_score_record-score_type').parent().dropdown('get text'), ['高考总分', '高考数学', '高考英语', '大学英语四级', '大学英语六级', '专业英语四级', '专业英语八级']) === -1);
             };
         };
         $.fn.form.settings.rules.scoreWithinLimit = function(value) {
@@ -1431,100 +1390,6 @@ $(document)
                                 type: 'integer[0..]',
                                 prompt: '请填写一个有效的成绩'
                             },
-                        ]
-                    }
-                }
-            })
-        ;
-        $.fn.form.settings.rules.toefl = function(value) {
-            if (($('#new_toefl_test_score-reading').val() === '') || ($('#new_toefl_test_score-listening').val() === '') || ($('#new_toefl_test_score-speaking').val() === '') || ($('#new_toefl_test_score-writing').val() === '')) {
-                return true;
-            } else {
-                return (Number(value) === Number($('#new_toefl_test_score-reading').val()) + Number($('#new_toefl_test_score-listening').val()) + Number($('#new_toefl_test_score-speaking').val()) + Number($('#new_toefl_test_score-writing').val()));
-            };
-        };
-        $('#new-toefl-test-score')
-            .form({
-                onSuccess: submitForm,
-                inline: true,
-                on: 'blur',
-                fields: {
-                    total: {
-                        identifier: 'new_toefl_test_score-total',
-                        rules: [
-                            {
-                                type: 'integer[0..120]',
-                                prompt: '请填写一个有效的TOEFL分数'
-                            },
-                            {
-                                type: 'toefl',
-                                prompt: 'TOEFL分数有误'
-                            }
-                        ]
-                    },
-                    reading: {
-                        identifier: 'new_toefl_test_score-reading',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL阅读分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL阅读分数'
-                            }
-                        ]
-                    },
-                    listening: {
-                        identifier: 'new_toefl_test_score-listening',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL听力分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL听力分数'
-                            }
-                        ]
-                    },
-                    speaking: {
-                        identifier: 'new_toefl_test_score-speaking',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL口语分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL口语分数'
-                            }
-                        ]
-                    },
-                    writing: {
-                        identifier: 'new_toefl_test_score-writing',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请填写TOEFL写作分数'
-                            },
-                            {
-                                type: 'integer[0..30]',
-                                prompt: '请填写一个有效的TOEFL写作分数'
-                            }
-                        ]
-                    },
-                    test_date: {
-                        identifier: 'new_toefl_test_score-test_date',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择TOEFL考试日期'
-                            },
-                            {
-                                type: 'regExp[(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)]',
-                                prompt: '请填写一个有效的TOEFL考试日期'
-                            }
                         ]
                     }
                 }

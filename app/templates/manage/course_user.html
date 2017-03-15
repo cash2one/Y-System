@@ -51,7 +51,7 @@
                             <td>
                                 {% if user.activated %}
                                 {{ user.last_punch.section.alias2 }}
-                                {% if current_user.can('管理学习进度') %}
+                                {% if current_user.can('管理研修进度') %}
                                 <a class="ui mini icon button loading-trigger" href="{{ url_for('manage.edit_punch_step_1', user_id=user.id, next=url_for('manage.course_user', id=course.id, page=pagination.page)) }}"><i class="refresh icon"></i></a>
                                 {% endif %}
                                 {% else %}
