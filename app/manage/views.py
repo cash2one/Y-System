@@ -4465,12 +4465,16 @@ def edit_study_plan(id):
         .filter(TOEFLTestScore.user_id == user.id)\
         .filter(ScoreLabel.name == u'目标')\
         .first()
+    gre_0_score_label = ScoreLabel.query.filter_by(name=u'G0', category=u'GRE').first()
+    gre_0_score = user.gre_test_scores.filter_by(label_id=gre_0_score_label.id).first()
+    gre_1_score_label = ScoreLabel.query.filter_by(name=u'G1', category=u'GRE').first()
+    gre_1_score = user.gre_test_scores.filter_by(label_id=gre_1_score_label.id).first()
+    gre_2_score_label = ScoreLabel.query.filter_by(name=u'G2', category=u'GRE').first()
+    gre_2_score = user.gre_test_scores.filter_by(label_id=gre_2_score_label.id).first()
+    gre_3_score_label = ScoreLabel.query.filter_by(name=u'G3', category=u'GRE').first()
+    gre_3_score = user.gre_test_scores.filter_by(label_id=gre_3_score_label.id).first()
     form = EditStudyPlanForm()
     if form.validate_on_submit():
-        user.speed = form.speed.data
-        user.deadline = form.deadline.data
-        db.session.add(user)
-        db.session.commit()
         # aim scores
         if gre_aim_score is None:
             gre_aim_score = GRETestScore(
@@ -4510,16 +4514,20 @@ def edit_study_plan(id):
             toefl_aim_score.modified_by_id = current_user.id
         db.session.add(toefl_aim_score)
         db.session.commit()
-        # study plan
-        # GRE dates
+        # time parameters
+        user.speed = form.speed.data
+        user.deadline = form.deadline.data
+        db.session.add(user)
+        db.session.commit()
+        # VB
+        # Y-GRE
+        # GRE test dates
         if form.gre_0_date.data:
             gre_0_test = GRETest.query.filter_by(date=form.gre_0_date.data).first()
             if gre_0_test is None:
                 gre_0_test = GRETest(date=form.gre_0_date.data)
                 db.session.add(gre_0_test)
                 db.session.commit()
-            gre_0_score_label = ScoreLabel.query.filter_by(name=u'G0', category=u'GRE').first()
-            gre_0_score = user.gre_test_scores.filter_by(label_id=gre_0_score_label.id).first()
             if gre_0_score is None:
                 gre_0_score = GRETestScore(
                     user_id=user.id,
@@ -4539,8 +4547,6 @@ def edit_study_plan(id):
                 gre_1_test = GRETest(date=form.gre_1_date.data)
                 db.session.add(gre_1_test)
                 db.session.commit()
-            gre_1_score_label = ScoreLabel.query.filter_by(name=u'G1', category=u'GRE').first()
-            gre_1_score = user.gre_test_scores.filter_by(label_id=gre_1_score_label.id).first()
             if gre_1_score is None:
                 gre_1_score = GRETestScore(
                     user_id=user.id,
@@ -4560,8 +4566,6 @@ def edit_study_plan(id):
                 gre_2_test = GRETest(date=form.gre_2_date.data)
                 db.session.add(gre_2_test)
                 db.session.commit()
-            gre_2_score_label = ScoreLabel.query.filter_by(name=u'G2', category=u'GRE').first()
-            gre_2_score = user.gre_test_scores.filter_by(label_id=gre_2_score_label.id).first()
             if gre_2_score is None:
                 gre_2_score = GRETestScore(
                     user_id=user.id,
@@ -4581,8 +4585,6 @@ def edit_study_plan(id):
                 gre_3_test = GRETest(date=form.gre_3_date.data)
                 db.session.add(gre_3_test)
                 db.session.commit()
-            gre_3_score_label = ScoreLabel.query.filter_by(name=u'G3', category=u'GRE').first()
-            gre_3_score = user.gre_test_scores.filter_by(label_id=gre_3_score_label.id).first()
             if gre_3_score is None:
                 gre_3_score = GRETestScore(
                     user_id=user.id,
