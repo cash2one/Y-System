@@ -5170,6 +5170,8 @@ def edit_study_plan(id):
                 flash(u'设计人邮箱不存在：%s' % form.supervisor_email.data.lower(), category='error')
                 return redirect(url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')))
             supervisor.supervise_user(user=user)
+        flash(u'已更新%s的研修计划' % user.name_alias, category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新%s的研修计划' % user.name_alias, category=u'manage')
         return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
     # aim scores
     if gre_aim_score is not None:
