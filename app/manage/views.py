@@ -4475,7 +4475,7 @@ def edit_study_plan(id):
     gre_3_score = user.gre_test_scores.filter_by(label_id=gre_3_score_label.id).first()
     form = EditStudyPlanForm()
     if form.validate_on_submit():
-        # aim scores
+        # update aim scores
         if gre_aim_score is None:
             gre_aim_score = GRETestScore(
                 user_id=user.id,
@@ -4514,14 +4514,14 @@ def edit_study_plan(id):
             toefl_aim_score.modified_by_id = current_user.id
         db.session.add(toefl_aim_score)
         db.session.commit()
-        # time parameters
+        # update time parameters
         user.speed = form.speed.data
         user.deadline = form.deadline.data
         db.session.add(user)
         db.session.commit()
-        # VB
-        # Y-GRE
-        # GRE test dates
+        # update VB plan
+        # update Y-GRE plan
+        # update GRE test dates
         if form.gre_0_date.data:
             gre_0_test = GRETest.query.filter_by(date=form.gre_0_date.data).first()
             if gre_0_test is None:
@@ -4598,7 +4598,7 @@ def edit_study_plan(id):
                 gre_3_score.modified_at = datetime.utcnow()
             db.session.add(gre_3_score)
             db.session.commit()
-        # supervisor
+        # update supervisor
         if form.supervisor_email.data:
             if user.supervised_by:
                 user.supervised_by.unsupervise_user(user=user)
@@ -4608,6 +4608,7 @@ def edit_study_plan(id):
                 return redirect(url_for('manage.edit_study_plan', id=user.id, next=request.args.get('next')))
             supervisor.supervise_user(user=user)
         return redirect(request.args.get('next') or url_for('main.profile_overview', id=user.id))
+    # aim scores
     if gre_aim_score is not None:
         form.gre_aim_v.data = gre_aim_score.v_score
         form.gre_aim_q.data = gre_aim_score.q_score
@@ -4618,8 +4619,19 @@ def edit_study_plan(id):
         form.toefl_aim_listening.data = toefl_aim_score.listening_score
         form.toefl_aim_speaking.data = toefl_aim_score.speaking_score
         form.toefl_aim_writing.data = toefl_aim_score.writing_score
+    # time parameters
     form.speed.data = user.speed
     form.deadline.data = user.deadline or user.due_date
+    # GRE test dates
+    if gre_0_score is not None:
+        form.gre_0_date.data = gre_0_score.test.date
+    if gre_1_score is not None:
+        form.gre_1_date.data = gre_1_score.test.date
+    if gre_2_score is not None:
+        form.gre_2_date.data = gre_2_score.test.date
+    if gre_3_score is not None:
+        form.gre_3_date.data = gre_3_score.test.date
+    # supervisor
     if user.supervised_by is not None:
         form.supervisor_email.data = user.supervised_by.email
     return render_template('manage/edit_study_plan.html', form=form, user=user)
