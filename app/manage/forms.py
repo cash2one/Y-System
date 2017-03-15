@@ -58,7 +58,7 @@ class NewScheduleForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(NewScheduleForm, self).__init__(*args, **kwargs)
         self.date.choices = [(u'', u'选择日期')] + [(NextDayString(x, short=True), NextDayString(x), ) for x in range(30)]
-        self.period.choices = [(u'', u'选择时段')] + [(unicode(period.id), period.alias3) for period in Period.query.order_by(Period.id.asc()).all() if (period.show and not period.deleted)]
+        self.period.choices = [(u'', u'选择时段')] + [(unicode(period.id), period.alias3) for period in Period.query.filter_by(show=True, deleted=False).order_by(Period.id.asc()).all()]
 
 
 class NewPeriodForm(FlaskForm):
@@ -914,27 +914,27 @@ class EditStudyPlanForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditStudyPlanForm, self).__init__(*args, **kwargs)
         self.gre_aim_aw.choices = [(u'', u'选择AW成绩')] + [(unicode(aw_score.id), aw_score.name) for aw_score in GREAWScore.query.order_by(GREAWScore.id.desc()).all()]
-        self.vb_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.vb_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
-        self.y_gre_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
-        self.y_gre_prep_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.vb_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.vb_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'VB']
+        self.y_gre_intro_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_1_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_2_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_3_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_4_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_5_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_6_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_7_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_8_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_9_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
+        self.y_gre_prep_notate_bene.choices = [(u'', u'选择N.B.')] + [(unicode(nota_bene.id), nota_bene.body) for nota_bene in NotaBene.query.filter_by(deleted=False).order_by(NotaBene.id.asc()).all() if nota_bene.type.name == u'Y-GRE']
 
     def validate_supervisor_email(self, field):
         if field.data and User.query.filter_by(email=field.data, created=True, activated=True, deleted=False).first() is None:

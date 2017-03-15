@@ -1754,8 +1754,9 @@ class User(UserMixin, db.Model):
         return u' · '.join([referrer.type.name for referrer in self.referrers if referrer.type.name != u'其它'] + [referrer.remark for referrer in self.referrers if referrer.type.name == u'其它'])
 
     def add_purchase(self, product, quantity=1):
-        purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
-        db.session.add(purchase)
+        if not product.deleted:
+            purchase = Purchase(user_id=self.id, product_id=product.id, quantity=quantity)
+            db.session.add(purchase)
 
     def update_group_registration_purchase(self, quantity):
         purchase = Purchase.query.filter_by(user_id=self.id, product_id=Product.query.filter_by(name=u'团报优惠').first().id).first()
@@ -1964,7 +1965,7 @@ class User(UserMixin, db.Model):
         return self.registered_groups.filter_by(organizer_id=organizer.id).first() is not None
 
     def register_course(self, course):
-        if not self.is_registering_course(course):
+        if not self.is_registering_course(course) and not course.deleted:
             course_registration = CourseRegistration(user_id=self.id, course_id=course.id)
         else:
             course_registration = self.course_registrations.filter_by(course_id=course.id).first()
@@ -4136,7 +4137,7 @@ class StudyPlan(db.Model):
         return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
 
     def add_nota_bene(self, nota_bene):
-        if not self.has_nota_bene(nota_bene):
+        if not self.has_nota_bene(nota_bene) and not nota_bene.deleted:
             study_plan_nota_bene = StudyPlanNotaBene(study_plan_id=self.id, nota_bene_id=nota_bene.id)
             db.session.add(study_plan_nota_bene)
 
