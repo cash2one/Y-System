@@ -4510,6 +4510,92 @@ def edit_study_plan(id):
             toefl_aim_score.modified_by_id = current_user.id
         db.session.add(toefl_aim_score)
         db.session.commit()
+        # study plan
+        # GRE dates
+        if form.gre_0_date.data:
+            gre_0_test = GRETest.query.filter_by(date=form.gre_0_date.data).first()
+            if gre_0_test is None:
+                gre_0_test = GRETest(date=form.gre_0_date.data)
+                db.session.add(gre_0_test)
+                db.session.commit()
+            gre_0_score_label = ScoreLabel.query.filter_by(name=u'G0', category=u'GRE').first()
+            gre_0_score = user.gre_test_scores.filter_by(label_id=gre_0_score_label.id).first()
+            if gre_0_score is None:
+                gre_0_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_0_test.id,
+                    label_id=gre_0_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_0_score.test_id = gre_0_test.id
+                gre_0_score.modified_by_id = current_user.id
+                gre_0_score.modified_at = datetime.utcnow()
+            db.session.add(gre_0_score)
+            db.session.commit()
+        if form.gre_1_date.data:
+            gre_1_test = GRETest.query.filter_by(date=form.gre_1_date.data).first()
+            if gre_1_test is None:
+                gre_1_test = GRETest(date=form.gre_1_date.data)
+                db.session.add(gre_1_test)
+                db.session.commit()
+            gre_1_score_label = ScoreLabel.query.filter_by(name=u'G1', category=u'GRE').first()
+            gre_1_score = user.gre_test_scores.filter_by(label_id=gre_1_score_label.id).first()
+            if gre_1_score is None:
+                gre_1_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_1_test.id,
+                    label_id=gre_1_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_1_score.test_id = gre_1_test.id
+                gre_1_score.modified_by_id = current_user.id
+                gre_1_score.modified_at = datetime.utcnow()
+            db.session.add(gre_1_score)
+            db.session.commit()
+        if form.gre_2_date.data:
+            gre_2_test = GRETest.query.filter_by(date=form.gre_2_date.data).first()
+            if gre_2_test is None:
+                gre_2_test = GRETest(date=form.gre_2_date.data)
+                db.session.add(gre_2_test)
+                db.session.commit()
+            gre_2_score_label = ScoreLabel.query.filter_by(name=u'G2', category=u'GRE').first()
+            gre_2_score = user.gre_test_scores.filter_by(label_id=gre_2_score_label.id).first()
+            if gre_2_score is None:
+                gre_2_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_2_test.id,
+                    label_id=gre_2_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_2_score.test_id = gre_2_test.id
+                gre_2_score.modified_by_id = current_user.id
+                gre_2_score.modified_at = datetime.utcnow()
+            db.session.add(gre_2_score)
+            db.session.commit()
+        if form.gre_3_date.data:
+            gre_3_test = GRETest.query.filter_by(date=form.gre_3_date.data).first()
+            if gre_3_test is None:
+                gre_3_test = GRETest(date=form.gre_3_date.data)
+                db.session.add(gre_3_test)
+                db.session.commit()
+            gre_3_score_label = ScoreLabel.query.filter_by(name=u'G3', category=u'GRE').first()
+            gre_3_score = user.gre_test_scores.filter_by(label_id=gre_3_score_label.id).first()
+            if gre_3_score is None:
+                gre_3_score = GRETestScore(
+                    user_id=user.id,
+                    test_id=gre_3_test.id,
+                    label_id=gre_3_score_label.id,
+                    modified_by_id=current_user.id
+                )
+            else:
+                gre_3_score.test_id = gre_3_test.id
+                gre_3_score.modified_by_id = current_user.id
+                gre_3_score.modified_at = datetime.utcnow()
+            db.session.add(gre_3_score)
+            db.session.commit()
         # supervisor
         if form.supervisor_email.data:
             if user.supervised_by:
