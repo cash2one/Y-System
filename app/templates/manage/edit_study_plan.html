@@ -1180,6 +1180,7 @@ $(document)
                             }
                         ]
                     },
+                    {% if user.can('预约Y-GRE课程') %}
                     y_gre_intro_start_date: {
                         identifier: 'y_gre_intro_start_date',
                         depends: 'y_gre_intro_end_date',
@@ -1540,6 +1541,7 @@ $(document)
                             }
                         ]
                     },
+                    {% endif %}
                     supervisor_email: {
                         identifier: 'supervisor_email',
                         rules: [
