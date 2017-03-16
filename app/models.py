@@ -4144,20 +4144,21 @@ class StudyPlan(db.Model):
 
     @property
     def start_date_alias(self):
-        if not self.available:
-            return u'N/A'
-        return self.start_date.strftime('%Y-%m-%d')
+        if self.available:
+            return self.start_date.strftime('%Y-%m-%d')
+        return u'N/A'
 
     @property
     def end_date_alias(self):
-        if not self.available:
-            return u'N/A'
-        return self.end_date.strftime('%Y-%m-%d')
+        if self.available:
+            return self.end_date.strftime('%Y-%m-%d')
+        return u'N/A'
 
     @property
     def intensity(self):
-        if not self.available:
-            return u'N/A'
+        if self.available:
+            tdelta = self.end_date - self.start_date
+            return u'%g 小时/天' % (self.lesson.hour.total_seconds() / 3600.0 / (tdelta.days + 1))
         return u'N/A'
 
     def add_nota_bene(self, nota_bene):
