@@ -169,7 +169,7 @@ def profile_overview_data(id):
             'vb': user.last_vb_punch_json,
             'y_gre': user.last_y_gre_punch_json,
         },
-        'study_plans': {
+        'study_plan': {
             'vb': [study_plan.to_json() for study_plan in user.study_plans if study_plan.lesson.type.name == u'VB'],
             'y_gre': [study_plan.to_json() for study_plan in user.study_plans if study_plan.lesson.type.name == u'Y-GRE'],
         },

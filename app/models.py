@@ -4137,16 +4137,28 @@ class StudyPlan(db.Model):
         return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
 
     @property
-    def start_date_alias(self):
+    def available(self):
         if self.start_date is None or self.end_date is None:
+            return False
+        return True
+
+    @property
+    def start_date_alias(self):
+        if not self.available:
             return u'N/A'
         return self.start_date.strftime('%Y-%m-%d')
 
     @property
     def end_date_alias(self):
-        if self.start_date is None or self.end_date is None:
+        if not self.available:
             return u'N/A'
         return self.end_date.strftime('%Y-%m-%d')
+
+    @property
+    def intensity(self):
+        if not self.available:
+            return u'N/A'
+        return u'N/A'
 
     def add_nota_bene(self, nota_bene):
         if not self.has_nota_bene(nota_bene) and not nota_bene.deleted:
@@ -4165,11 +4177,14 @@ class StudyPlan(db.Model):
         entry_json = {
             'user': self.user.name,
             'lesson': self.lesson.name,
+            'available': self.available,
             'start_date': self.start_date_alias,
             'end_date': self.end_date_alias,
+            'intensity': self.intensity,
             'remark': self.remark,
             'notate_bene': [item.nota_bene.to_json() for item in self.notate_bene],
             'feedbacks': [feedback.to_json() for feedback in self.feedbacks],
+            'element_id': u'study-plan-%s' % self.id,
         }
         return entry_json
 
