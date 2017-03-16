@@ -4136,6 +4136,18 @@ class StudyPlan(db.Model):
     def alias(self):
         return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
 
+    @property
+    def start_date_alias(self):
+        if self.start_date is None or self.end_date is None:
+            return u'N/A'
+        return self.start_date.strftime('%Y-%m-%d')
+
+    @property
+    def end_date_alias(self):
+        if self.start_date is None or self.end_date is None:
+            return u'N/A'
+        return self.end_date.strftime('%Y-%m-%d')
+
     def add_nota_bene(self, nota_bene):
         if not self.has_nota_bene(nota_bene) and not nota_bene.deleted:
             study_plan_nota_bene = StudyPlanNotaBene(study_plan_id=self.id, nota_bene_id=nota_bene.id)
@@ -4151,10 +4163,10 @@ class StudyPlan(db.Model):
 
     def to_json(self):
         entry_json = {
-            'user': self.user.to_json(),
-            'lesson': self.lesson.to_json(),
-            'start_date': self.start_date,
-            'end_date': self.end_date,
+            'user': self.user.name,
+            'lesson': self.lesson.name,
+            'start_date': self.start_date_alias,
+            'end_date': self.end_date_alias,
             'remark': self.remark,
             'notate_bene': [item.nota_bene.to_json() for item in self.notate_bene],
             'feedbacks': [feedback.to_json() for feedback in self.feedbacks],

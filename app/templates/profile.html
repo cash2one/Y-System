@@ -118,9 +118,11 @@ function noProfileAvatar(avatarImage) {
                     </div>
                     {% endif %}
                 </div>
-                <div class="ui vertical segment">
+                <div id="study-plan" class="ui vertical segment loading">
                     <div class="ui header">研修计划</div>
-                    {% if user.study_plans.count() %}{% endif %}
+                    {% if user.study_plans.count() %}<div id="vb-study-plan" class="ui items"></div>
+                    {% if user.can('预约Y-GRE课程') %}<div id="y-gre-study-plan" class="ui items"></div>{% endif %}
+                    {% else %}<div>N/A</div>{% endif %}
                     {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>{% endif %}
                 </div>
                 <div class="ui vertical segment">
@@ -567,6 +569,7 @@ var VBProgressCountUp = new CountUp('vb-progress-data', 0, 0, 0, 2.5, countUpOpt
 var overviewDataUrl = "{{ url_for('main.profile_overview_data', id=user.id) }}";
 $.getJSON(overviewDataUrl, function(data) {
     $('#progress').removeClass('loading');
+    $('#study-plan').removeClass('loading');
     if (data.progress.vb.value > 0) {
         $('#vb-progress').removeClass('disabled');
         $('#last-vb-punch').text(function() {
