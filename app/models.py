@@ -609,14 +609,14 @@ class Booking(db.Model):
         return 0
 
     def to_json(self):
-        booking_json = {
+        entry_json = {
             'user': self.user.to_json(),
             'schedule': self.schedule.to_json(),
             'state': self.state.name,
             'timestamp': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'token': self.token,
         }
-        return booking_json
+        return entry_json
 
 
 class Rental(db.Model):
@@ -673,13 +673,13 @@ class Punch(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_json(self):
-        punch_json = {
+        entry_json = {
             'user': self.user.name,
             'section': self.section.to_json(),
             'milestone': self.milestone,
             'punched_at': self.timestamp.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
-        return punch_json
+        return entry_json
 
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user.name, self.section.alias)
@@ -741,7 +741,7 @@ class AssignmentScore(db.Model):
         return u'%s %s %s' % (self.user.name_alias, self.assignment.name, self.grade.name)
 
     def to_json(self):
-        assignment_score_json = {
+        entry_json = {
             'user': self.user.name,
             'assignment': self.assignment.to_json(),
             'grade': self.grade.name,
@@ -750,7 +750,7 @@ class AssignmentScore(db.Model):
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
         }
-        return assignment_score_json
+        return entry_json
 
     def __repr__(self):
         return '<Assignment Score %r>' % self.alias
@@ -786,7 +786,7 @@ class VBTestScore(db.Model):
         db.session.add(self)
 
     def to_json(self):
-        vb_test_score_json = {
+        entry_json = {
             'user': self.user.name,
             'test': self.test.to_json(),
             'score': self.score,
@@ -797,7 +797,7 @@ class VBTestScore(db.Model):
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
         }
-        return vb_test_score_json
+        return entry_json
 
     def __repr__(self):
         return '<VB Test Score %r>' % self.alias
@@ -880,7 +880,7 @@ class YGRETestScore(db.Model):
         db.session.add(self)
 
     def to_json(self):
-        y_gre_test_score_json = {
+        entry_json = {
             'user': self.user.name,
             'test': self.test.to_json(),
             'v_score': self.v_score,
@@ -894,7 +894,7 @@ class YGRETestScore(db.Model):
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
         }
-        return y_gre_test_score_json
+        return entry_json
 
     def __repr__(self):
         return '<Y-GRE Test Score %r>' % self.alias
@@ -2508,7 +2508,7 @@ class User(UserMixin, db.Model):
         self.__initial_punch()
 
     def to_json(self):
-        user_json = {
+        entry_json = {
             'name': self.name,
             'email': self.email,
             'name_alias': self.name_alias,
@@ -2518,25 +2518,25 @@ class User(UserMixin, db.Model):
             'last_seen_at': self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'url': self.url,
         }
-        return user_json
+        return entry_json
 
     def to_json_suggestion(self, suggest_email=False, include_role=True, include_url=False):
-        user_json_suggestion = {}
+        entry_json = {}
         if suggest_email:
-            user_json_suggestion['title'] = self.email
+            entry_json['title'] = self.email
             if include_role:
-                user_json_suggestion['description'] = u'%s [%s]' % (self.name, self.role.name)
+                entry_json['description'] = u'%s [%s]' % (self.name, self.role.name)
             else:
-                user_json_suggestion['description'] = self.name
+                entry_json['description'] = self.name
         else:
-            user_json_suggestion['title'] = self.name
+            entry_json['title'] = self.name
             if include_role:
-                user_json_suggestion['description'] = u'%s [%s]' % (self.email, self.role.name)
+                entry_json['description'] = u'%s [%s]' % (self.email, self.role.name)
             else:
-                user_json_suggestion['description'] = self.email
+                entry_json['description'] = self.email
         if include_url:
-            user_json_suggestion['url'] = self.url
-        return user_json_suggestion
+            entry_json['url'] = self.url
+        return entry_json
 
     @staticmethod
     def insert_admin():
@@ -3045,7 +3045,7 @@ class Period(db.Model):
         return u'%s：%s - %s' % (self.name, self.start_time_str, self.end_time_str)
 
     def to_json(self):
-        period_json = {
+        entry_json = {
             'name': self.name,
             'start_time': self.start_time_str,
             'end_time': self.end_time_str,
@@ -3057,7 +3057,7 @@ class Period(db.Model):
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
         }
-        return period_json
+        return entry_json
 
     @staticmethod
     def insert_periods():
@@ -3233,7 +3233,7 @@ class Schedule(db.Model):
             .count()
 
     def to_json(self):
-        schedule_json = {
+        entry_json = {
             'date': self.date,
             'period': self.period.to_json(),
             'quota': self.quota,
@@ -3241,7 +3241,7 @@ class Schedule(db.Model):
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
         }
-        return schedule_json
+        return entry_json
 
     def __repr__(self):
         return '<Schedule %r>' % self.date
@@ -3332,12 +3332,12 @@ class iPadContent(db.Model):
     lesson_id = db.Column(db.Integer, db.ForeignKey('lessons.id'), primary_key=True, index=True)
 
     def to_json(self):
-        ipad_content_json = {
+        entry_json = {
             'ipad': self.ipad.alias,
             'lesson': self.lesson.name,
             'element_id': 'ipad-%s-lesson-%s' % (self.ipad_id, self.lesson_id),
         }
-        return ipad_content_json
+        return entry_json
 
     @staticmethod
     def insert_ipad_contents():
@@ -3524,7 +3524,7 @@ class iPad(db.Model):
             .count()
 
     def to_json(self):
-        ipad_json = {
+        entry_json = {
             'id': self.id,
             'serial': self.serial,
             'alias': self.alias,
@@ -3534,24 +3534,24 @@ class iPad(db.Model):
             'modified_by': self.modified_by.name,
         }
         if self.state.name == u'待机':
-            ipad_json['maintain_url'] = url_for('manage.set_ipad_state_maintain', id=self.id, next=url_for('manage.summary'))
-            ipad_json['charge_url'] = url_for('manage.set_ipad_state_charge', id=self.id, next=url_for('manage.summary'))
+            entry_json['maintain_url'] = url_for('manage.set_ipad_state_maintain', id=self.id, next=url_for('manage.summary'))
+            entry_json['charge_url'] = url_for('manage.set_ipad_state_charge', id=self.id, next=url_for('manage.summary'))
         if self.state.name == u'维护':
-            ipad_json['standby_url'] = url_for('manage.set_ipad_state_standby', id=self.id, next=url_for('manage.summary'))
-            ipad_json['charge_url'] = url_for('manage.set_ipad_state_charge', id=self.id, next=url_for('manage.summary'))
+            entry_json['standby_url'] = url_for('manage.set_ipad_state_standby', id=self.id, next=url_for('manage.summary'))
+            entry_json['charge_url'] = url_for('manage.set_ipad_state_charge', id=self.id, next=url_for('manage.summary'))
         if self.state.name == u'充电':
-            ipad_json['standby_url'] = url_for('manage.set_ipad_state_standby', id=self.id, next=url_for('manage.summary'))
-            ipad_json['maintain_url'] = url_for('manage.set_ipad_state_maintain', id=self.id, next=url_for('manage.summary'))
+            entry_json['standby_url'] = url_for('manage.set_ipad_state_standby', id=self.id, next=url_for('manage.summary'))
+            entry_json['maintain_url'] = url_for('manage.set_ipad_state_maintain', id=self.id, next=url_for('manage.summary'))
         if self.state.name == u'借出':
-            ipad_json['now_rented_by'] = self.now_rented_by.to_json()
-            ipad_json['battery_life'] = {
+            entry_json['now_rented_by'] = self.now_rented_by.to_json()
+            entry_json['battery_life'] = {
                 'percent': self.current_battery_life,
                 'level': self.current_battery_life_level,
             }
-            ipad_json['overtime'] = self.current_rental.is_overtime
-            ipad_json['return_url'] = url_for('manage.rental_return_step_1', next=url_for('manage.summary'))
-            ipad_json['exchange_url'] = url_for('manage.rental_exchange_step_1', rental_id=self.current_rental.id, next=url_for('manage.summary'))
-        return ipad_json
+            entry_json['overtime'] = self.current_rental.is_overtime
+            entry_json['return_url'] = url_for('manage.rental_return_step_1', next=url_for('manage.summary'))
+            entry_json['exchange_url'] = url_for('manage.rental_exchange_step_1', rental_id=self.current_rental.id, next=url_for('manage.summary'))
+        return entry_json
 
     @staticmethod
     def insert_ipads():
@@ -3665,7 +3665,7 @@ class Lesson(db.Model):
             .filter(iPadContent.lesson_id == self.id)
 
     def to_json(self):
-        lesson_json = {
+        entry_json = {
             'name': self.name,
             'alias': self.alias,
             'abbr': self.abbr,
@@ -3680,7 +3680,7 @@ class Lesson(db.Model):
             'tests': [test.to_json() for test in self.tests],
             'element_id': '%s-lesson-%s' % (self.type.alias, self.id),
         }
-        return lesson_json
+        return entry_json
 
     @staticmethod
     def insert_lessons():
@@ -3766,7 +3766,7 @@ class Section(db.Model):
         return self.name
 
     def to_json(self):
-        section_json = {
+        entry_json = {
             'name': self.name,
             'alias': self.alias,
             'alias2': self.alias2,
@@ -3776,7 +3776,7 @@ class Section(db.Model):
             'order': self.order,
             'element_id': '%s-lesson-%s-section-%s' % (self.lesson.type.alias, self.lesson.id, self.id),
         }
-        return section_json
+        return entry_json
 
     @staticmethod
     def insert_sections():
@@ -3984,14 +3984,14 @@ class Assignment(db.Model):
             .filter(User.deleted == False)
 
     def to_json(self):
-        assignment_json = {
+        entry_json = {
             'name': self.name,
             'alias': self.alias,
             'lesson': self.lesson.name,
             'course_type': self.lesson.type.name,
             'element_id': '%s-lesson-%s-assignment-%s' % (self.lesson.type.alias, self.lesson.id, self.id),
         }
-        return assignment_json
+        return entry_json
 
     @staticmethod
     def insert_assignments():
@@ -4067,14 +4067,14 @@ class Test(db.Model):
                 .filter(User.deleted == False)
 
     def to_json(self):
-        test_json = {
+        entry_json = {
             'name': self.name,
             'alias': self.alias,
             'lesson': self.lesson.name,
             'course_type': self.lesson.type.name,
             'element_id': '%s-lesson-%s-test-%s' % (self.lesson.type.alias, self.lesson.id, self.id),
         }
-        return test_json
+        return entry_json
 
     @staticmethod
     def insert_tests():
@@ -4136,6 +4136,33 @@ class StudyPlan(db.Model):
     def alias(self):
         return u'%s %s %s %s' % (self.user.name_alias, self.lesson.alias, self.start_date, self.end_date)
 
+    @property
+    def available(self):
+        if self.start_date is None or self.end_date is None:
+            return False
+        return True
+
+    @property
+    def start_date_alias(self):
+        if self.available:
+            return self.start_date.strftime('%Y/%m/%d')
+
+    @property
+    def end_date_alias(self):
+        if self.available:
+            return self.end_date.strftime('%Y/%m/%d')
+
+    @property
+    def days(self):
+        if self.available:
+            tdelta = self.end_date - self.start_date
+            return tdelta.days + 1
+
+    @property
+    def intensity(self):
+        if self.available:
+            return u'%.2g 小时/天' % (self.lesson.hour.total_seconds() / 3600.0 / self.days)
+
     def add_nota_bene(self, nota_bene):
         if not self.has_nota_bene(nota_bene) and not nota_bene.deleted:
             study_plan_nota_bene = StudyPlanNotaBene(study_plan_id=self.id, nota_bene_id=nota_bene.id)
@@ -4148,6 +4175,21 @@ class StudyPlan(db.Model):
 
     def has_nota_bene(self, nota_bene):
         return self.notate_bene.filter_by(nota_bene_id=nota_bene.id).first() is not None
+
+    def to_json(self):
+        entry_json = {
+            'user': self.user.name,
+            'lesson': self.lesson.name,
+            'start_date': self.start_date_alias,
+            'end_date': self.end_date_alias,
+            'days': self.days,
+            'intensity': self.intensity,
+            'remark': self.remark,
+            'notate_bene': [item.nota_bene.to_json() for item in self.notate_bene],
+            'feedbacks': [feedback.to_json() for feedback in self.feedbacks],
+            'element_id': u'study-plan-%s' % self.id,
+        }
+        return entry_json
 
     def __repr__(self):
         return '<Study Plan %r>' % self.alias
@@ -4179,6 +4221,16 @@ class NotaBene(db.Model):
         self.deleted = True
         self.ping(modified_by=modified_by)
         db.session.add(self)
+
+    def to_json(self):
+        entry_json = {
+            'body': self.body,
+            'type': self.type.name,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return entry_json
 
     @staticmethod
     def insert_notate_bene():
@@ -4226,6 +4278,16 @@ class Feedback(db.Model):
     @property
     def alias(self):
         return u'%s %s %s' % (self.study_plan.alias, self.body)
+
+    def to_json(self):
+        entry_json = {
+            'body': self.body,
+            'body_html': self.body_html,
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'modified_by': self.modified_by.name,
+        }
+        return entry_json
 
     @staticmethod
     def on_changed_body_html(target, value, oldvalue, initiator):
