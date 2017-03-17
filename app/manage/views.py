@@ -5322,7 +5322,96 @@ def generate_study_plan(id):
         start_date = request.json.get('start_date')
         deadline = request.json.get('deadline')
         speed = request.json.get('speed')
-    study_plan = {}
+    study_plan = {
+        'vb': {
+            'intro': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '1': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '2': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '3': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '4': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '5': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '6': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '7': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '8': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '9': {
+                'start_date': None,
+                'end_date': None,
+            },
+        },
+        'y_gre': {
+            'intro': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '1': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '2': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '3': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '4': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '5': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '6': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '7': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '8': {
+                'start_date': None,
+                'end_date': None,
+            },
+            '9': {
+                'start_date': None,
+                'end_date': None,
+            },
+            'prep': {
+                'start_date': None,
+                'end_date': None,
+            },
+        },
+    }
     return jsonify(study_plan)
 
 
