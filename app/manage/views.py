@@ -5311,6 +5311,21 @@ def edit_study_plan(id):
     return render_template('manage/edit_study_plan.html', form=form, user=user)
 
 
+@manage.route('/study-plan/generate/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理研修计划')
+def generate_study_plan(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    if request.json is not None:
+        start_date = request.json.get('start_date')
+        deadline = request.json.get('deadline')
+        speed = request.json.get('speed')
+    study_plan = {}
+    return jsonify(study_plan)
+
+
 @manage.route('/nota-bene', methods=['GET', 'POST'])
 @login_required
 @permission_required(u'管理NB')
