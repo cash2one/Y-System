@@ -4145,12 +4145,12 @@ class StudyPlan(db.Model):
     @property
     def start_date_alias(self):
         if self.available:
-            return self.start_date.strftime('%Y/%m/%d')
+            return self.start_date.strftime('%Y-%m-%d')
 
     @property
     def end_date_alias(self):
         if self.available:
-            return self.end_date.strftime('%Y/%m/%d')
+            return self.end_date.strftime('%Y-%m-%d')
 
     @property
     def days(self):

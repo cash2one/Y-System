@@ -173,7 +173,7 @@ function noProfileAvatar(avatarImage) {
                         </thead>
                         <tbody></tbody>
                     </table>
-                    {% else %}<div>N/A</div>{% endif %}
+                    {% endif %}
                     {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>{% endif %}
                 </div>
                 {% with scores = user.gre_test_scores %}{% if scores.count() %}<div class="ui vertical segment">
@@ -605,7 +605,7 @@ $.getJSON(overviewDataUrl, function(data) {
                 .attr('id', data.study_plan.vb[study_plan_idx].element_id)
                 .addClass('top aligned')
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].lesson))
-                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].start_date + ' - ' + data.study_plan.vb[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].start_date + ' ~ ' + data.study_plan.vb[study_plan_idx].end_date))
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].days + ' 天'))
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].intensity))
                 .append($('<td>'))
@@ -642,7 +642,7 @@ $.getJSON(overviewDataUrl, function(data) {
                 .attr('id', data.study_plan.y_gre[study_plan_idx].element_id)
                 .addClass('top aligned')
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].lesson))
-                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].start_date + ' - ' + data.study_plan.y_gre[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].start_date + ' ~ ' + data.study_plan.y_gre[study_plan_idx].end_date))
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].days + ' 天'))
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].intensity))
                 .append($('<td>'))
