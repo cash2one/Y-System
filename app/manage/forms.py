@@ -818,8 +818,9 @@ class EditStudyPlanForm(FlaskForm):
     toefl_aim_speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     toefl_aim_writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
     # study plan
-    speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
+    start_date = DateField(u'开始日期')
     deadline = DateField(u'Deadline')
+    speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
     vb_intro_start_date = DateField(u'开始日期', validators=[Optional()])
     vb_intro_end_date = DateField(u'结束日期', validators=[Optional()])
     vb_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)

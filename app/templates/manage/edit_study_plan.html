@@ -140,11 +140,16 @@
                     </div>
                     <div class="ui blue dividing header">时间参数</div>
                     <div class="fields">
-                        <div class="eight wide required field">
-                            {{ form.speed.label() }}
-                            {{ form.speed(placeholder='时间系数') }}
+                        <div class="four wide required field">
+                            {{ form.start_date.label() }}
+                            <div id="start-date-wrap" class="ui calendar">
+                                <div class="ui left icon input">
+                                    <i class="calendar icon"></i>
+                                    {{ form.start_date(placeholder='格式：YYYY-MM-DD') }}
+                                </div>
+                            </div>
                         </div>
-                        <div class="eight wide required field">
+                        <div class="four wide required field">
                             {{ form.deadline.label() }}
                             <div id="deadline-wrap" class="ui calendar">
                                 <div class="ui left icon input">
@@ -152,6 +157,10 @@
                                     {{ form.deadline(placeholder='格式：YYYY-MM-DD') }}
                                 </div>
                             </div>
+                        </div>
+                        <div class="eight wide required field">
+                            {{ form.speed.label() }}
+                            {{ form.speed(placeholder='时间系数') }}
                         </div>
                     </div>
                     <div id="set-form-button" class="ui positive left labeled icon button"><i class="rocket icon"></i>自动生成</div>
@@ -800,7 +809,7 @@ $('.message .close')
 $('.ui.checkbox').checkbox();
 
 {{ macros.date_picker_js_snippet() }}
-{{ macros.date_picker_js_snippet(calendar_id='deadline-wrap', min_date=user.activated_at, max_date=user.due_time) }}
+{{ macros.date_range_picker_js_snippet(start_id='start-date-wrap', end_id='deadline-wrap') }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-intro-start-date', end_id='vb-intro-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-1-start-date', end_id='vb-1-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-2-start-date', end_id='vb-2-end-date') }}
@@ -938,16 +947,16 @@ $(document)
                             }
                         ]
                     },
-                    speed: {
-                        identifier: 'speed',
+                    start_date: {
+                        identifier: 'start_date',
                         rules: [
                             {
                                 type: 'empty',
-                                prompt: '请填写时间系数'
+                                prompt: '请填写开始日期'
                             },
                             {
-                                type: 'number',
-                                prompt: '请填写一个有效的时间系数'
+                                type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
+                                prompt: '请填写一个有效的开始日期'
                             }
                         ]
                     },
@@ -961,6 +970,19 @@ $(document)
                             {
                                 type: 'regExp[/(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)/]',
                                 prompt: '请填写一个有效的DDL日期'
+                            }
+                        ]
+                    },
+                    speed: {
+                        identifier: 'speed',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请填写时间系数'
+                            },
+                            {
+                                type: 'number',
+                                prompt: '请填写一个有效的时间系数'
                             }
                         ]
                     },

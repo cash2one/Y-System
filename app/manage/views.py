@@ -4555,8 +4555,8 @@ def edit_study_plan(id):
         db.session.add(toefl_aim_score)
         db.session.commit()
         # update time parameters
-        user.speed = form.speed.data
         user.deadline = form.deadline.data
+        user.speed = form.speed.data
         db.session.add(user)
         db.session.commit()
         # update VB plan: intro
@@ -5185,10 +5185,12 @@ def edit_study_plan(id):
         form.toefl_aim_speaking.data = toefl_aim_score.speaking_score
         form.toefl_aim_writing.data = toefl_aim_score.writing_score
     # time parameters
-    form.speed.data = user.speed
+    form.start_date.data = date.today()
     form.deadline.data = user.deadline or user.due_date
+    form.speed.data = user.speed
     # VB plan
     if vb_intro_plan is not None:
+        form.start_date.data = vb_intro_plan.start_date
         form.vb_intro_start_date.data = vb_intro_plan.start_date
         form.vb_intro_end_date.data = vb_intro_plan.end_date
         form.vb_intro_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_intro_plan.notate_bene]
