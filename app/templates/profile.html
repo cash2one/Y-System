@@ -165,7 +165,8 @@ function noProfileAvatar(avatarImage) {
                             <tr>
                                 <th>任务</th>
                                 <th>计划</th>
-                                <th>Intensity</th>
+                                <th>天数</th>
+                                <th>强度</th>
                                 <th>修订/备注</th>
                                 <th>N.B.</th>
                             </tr>
@@ -598,23 +599,22 @@ $.getJSON(overviewDataUrl, function(data) {
             }
         });
     };
-    for (vb_study_plan_idx in data.study_plan.vb) {
-        if (data.study_plan.vb[vb_study_plan_idx].available) {
-            $('#study-plan table tbody').append(
-                $('<tr>')
-                    .attr('id', data.study_plan.vb[vb_study_plan_idx].element_id)
-                    .addClass('top aligned')
-                    .append($('<td>').addClass('single line').text(data.study_plan.vb[vb_study_plan_idx].lesson))
-                    .append($('<td>').addClass('single line').text(data.study_plan.vb[vb_study_plan_idx].start_date + ' - ' + data.study_plan.vb[vb_study_plan_idx].end_date))
-                    .append($('<td>').addClass('single line').text(data.study_plan.vb[vb_study_plan_idx].intensity))
-                    .append($('<td>'))
-                    .append($('<td>').addClass('nota-bene'))
-            );
-            if (data.study_plan.vb[vb_study_plan_idx].notate_bene.length > 0) {
-                $('#' + data.study_plan.vb[vb_study_plan_idx].element_id + ' td.nota-bene').append($('<div>').addClass('ui list'));
-                for (nota_bene_idx in data.study_plan.vb[vb_study_plan_idx].notate_bene) {
-                    $('#' + data.study_plan.vb[vb_study_plan_idx].element_id + ' td.nota-bene div.ui.list').append($('<div>').addClass('item').text(data.study_plan.vb[vb_study_plan_idx].notate_bene[nota_bene_idx].body));
-                };
+    for (study_plan_idx in data.study_plan.vb) {
+        $('#study-plan table tbody').append(
+            $('<tr>')
+                .attr('id', data.study_plan.vb[study_plan_idx].element_id)
+                .addClass('top aligned')
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].lesson))
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].start_date + ' - ' + data.study_plan.vb[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].days + ' 天'))
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].intensity))
+                .append($('<td>'))
+                .append($('<td>').addClass('nota-bene'))
+        );
+        if (data.study_plan.vb[study_plan_idx].notate_bene.length > 0) {
+            $('#' + data.study_plan.vb[study_plan_idx].element_id + ' td.nota-bene').append($('<div>').addClass('ui list'));
+            for (nota_bene_idx in data.study_plan.vb[study_plan_idx].notate_bene) {
+                $('#' + data.study_plan.vb[study_plan_idx].element_id + ' td.nota-bene div.ui.list').append($('<div>').addClass('item').text(data.study_plan.vb[study_plan_idx].notate_bene[nota_bene_idx].body));
             };
         };
     };
@@ -636,23 +636,22 @@ $.getJSON(overviewDataUrl, function(data) {
             }
         });
     };
-    for (y_gre_study_plan_idx in data.study_plan.y_gre) {
-        if (data.study_plan.y_gre[y_gre_study_plan_idx].available) {
-            $('#study-plan table tbody').append(
-                $('<tr>')
-                    .attr('id', data.study_plan.y_gre[y_gre_study_plan_idx].element_id)
-                    .addClass('top aligned')
-                    .append($('<td>').addClass('single line').text(data.study_plan.y_gre[y_gre_study_plan_idx].lesson))
-                    .append($('<td>').addClass('single line').text(data.study_plan.y_gre[y_gre_study_plan_idx].start_date + ' - ' + data.study_plan.y_gre[y_gre_study_plan_idx].end_date))
-                    .append($('<td>').addClass('single line').text(data.study_plan.y_gre[y_gre_study_plan_idx].intensity))
-                    .append($('<td>'))
-                    .append($('<td>').addClass('nota-bene'))
-            );
-            if (data.study_plan.y_gre[y_gre_study_plan_idx].notate_bene.length > 0) {
-                $('#' + data.study_plan.y_gre[y_gre_study_plan_idx].element_id + ' td.nota-bene').append($('<div>').addClass('ui list'));
-                for (nota_bene_idx in data.study_plan.y_gre[y_gre_study_plan_idx].notate_bene) {
-                    $('#' + data.study_plan.y_gre[y_gre_study_plan_idx].element_id + ' td.nota-bene div.ui.list').append($('<div>').addClass('item').text(data.study_plan.y_gre[y_gre_study_plan_idx].notate_bene[nota_bene_idx].body));
-                };
+    for (study_plan_idx in data.study_plan.y_gre) {
+        $('#study-plan table tbody').append(
+            $('<tr>')
+                .attr('id', data.study_plan.y_gre[study_plan_idx].element_id)
+                .addClass('top aligned')
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].lesson))
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].start_date + ' - ' + data.study_plan.y_gre[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].days + ' 天'))
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].intensity))
+                .append($('<td>'))
+                .append($('<td>').addClass('nota-bene'))
+        );
+        if (data.study_plan.y_gre[study_plan_idx].notate_bene.length > 0) {
+            $('#' + data.study_plan.y_gre[study_plan_idx].element_id + ' td.nota-bene').append($('<div>').addClass('ui list'));
+            for (nota_bene_idx in data.study_plan.y_gre[study_plan_idx].notate_bene) {
+                $('#' + data.study_plan.y_gre[study_plan_idx].element_id + ' td.nota-bene div.ui.list').append($('<div>').addClass('item').text(data.study_plan.y_gre[study_plan_idx].notate_bene[nota_bene_idx].body));
             };
         };
     };

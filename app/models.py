@@ -4145,21 +4145,23 @@ class StudyPlan(db.Model):
     @property
     def start_date_alias(self):
         if self.available:
-            return self.start_date.strftime('%Y-%m-%d')
-        return u'N/A'
+            return self.start_date.strftime('%Y/%m/%d')
 
     @property
     def end_date_alias(self):
         if self.available:
-            return self.end_date.strftime('%Y-%m-%d')
-        return u'N/A'
+            return self.end_date.strftime('%Y/%m/%d')
+
+    @property
+    def days(self):
+        if self.available:
+            tdelta = self.end_date - self.start_date
+            return tdelta.days + 1
 
     @property
     def intensity(self):
         if self.available:
-            tdelta = self.end_date - self.start_date
-            return u'%g 小时/天' % (self.lesson.hour.total_seconds() / 3600.0 / (tdelta.days + 1))
-        return u'N/A'
+            return u'%.2g 小时/天' % (self.lesson.hour.total_seconds() / 3600.0 / self.days)
 
     def add_nota_bene(self, nota_bene):
         if not self.has_nota_bene(nota_bene) and not nota_bene.deleted:
@@ -4178,9 +4180,9 @@ class StudyPlan(db.Model):
         entry_json = {
             'user': self.user.name,
             'lesson': self.lesson.name,
-            'available': self.available,
             'start_date': self.start_date_alias,
             'end_date': self.end_date_alias,
+            'days': self.days,
             'intensity': self.intensity,
             'remark': self.remark,
             'notate_bene': [item.nota_bene.to_json() for item in self.notate_bene],
