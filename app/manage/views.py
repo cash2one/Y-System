@@ -5311,106 +5311,59 @@ def edit_study_plan(id):
     return render_template('manage/edit_study_plan.html', form=form, user=user)
 
 
-@manage.route('/study-plan/generate/<int:id>', methods=['GET', 'POST'])
+@manage.route('/study-plan/generate/<int:id>')
 @login_required
 @permission_required(u'管理研修计划')
 def generate_study_plan(id):
     user = User.query.get_or_404(id)
     if not user.created or user.deleted:
         abort(404)
-    if request.json is not None:
-        start_date = request.json.get('start_date')
-        deadline = request.json.get('deadline')
-        speed = request.json.get('speed')
+    start_date = request.args.get('start_date')
+    deadline = request.args.get('deadline')
+    speed = request.args.get('speed')
     study_plan = {
-        'vb': {
-            'intro': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '1': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '2': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '3': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '4': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '5': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '6': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '7': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '8': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '9': {
-                'start_date': None,
-                'end_date': None,
-            },
-        },
-        'y_gre': {
-            'intro': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '1': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '2': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '3': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '4': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '5': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '6': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '7': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '8': {
-                'start_date': None,
-                'end_date': None,
-            },
-            '9': {
-                'start_date': None,
-                'end_date': None,
-            },
-            'prep': {
-                'start_date': None,
-                'end_date': None,
-            },
-        },
+        'vb_intro_start_date': start_date,
+        'vb_intro_end_date': u'',
+        'vb_1_start_date': u'',
+        'vb_1_end_date': u'',
+        'vb_2_start_date': u'',
+        'vb_2_end_date': u'',
+        'vb_3_start_date': u'',
+        'vb_3_end_date': u'',
+        'vb_4_start_date': u'',
+        'vb_4_end_date': u'',
+        'vb_5_start_date': u'',
+        'vb_5_end_date': u'',
+        'vb_6_start_date': u'',
+        'vb_6_end_date': u'',
+        'vb_7_start_date': u'',
+        'vb_7_end_date': u'',
+        'vb_8_start_date': u'',
+        'vb_8_end_date': u'',
+        'vb_9_start_date': u'',
+        'vb_9_end_date': u'',
+        'y_gre_intro_start_date': u'',
+        'y_gre_intro_end_date': u'',
+        'y_gre_1_start_date': u'',
+        'y_gre_1_end_date': u'',
+        'y_gre_2_start_date': u'',
+        'y_gre_2_end_date': u'',
+        'y_gre_3_start_date': u'',
+        'y_gre_3_end_date': u'',
+        'y_gre_4_start_date': u'',
+        'y_gre_4_end_date': u'',
+        'y_gre_5_start_date': u'',
+        'y_gre_5_end_date': u'',
+        'y_gre_6_start_date': u'',
+        'y_gre_6_end_date': u'',
+        'y_gre_7_start_date': u'',
+        'y_gre_7_end_date': u'',
+        'y_gre_8_start_date': u'',
+        'y_gre_8_end_date': u'',
+        'y_gre_9_start_date': u'',
+        'y_gre_9_end_date': u'',
+        'y_gre_prep_start_date': u'',
+        'y_gre_prep_end_date': u'',
     }
     return jsonify(study_plan)
 

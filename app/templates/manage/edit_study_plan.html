@@ -1637,48 +1637,54 @@ $(document)
 
 $('#set-form-button')
     .on('click', function () {
-        $('#edit-study-plan').form('set value', 'vb_intro_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_intro_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_1_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_1_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_2_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_2_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_3_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_3_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_4_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_4_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_5_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_5_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_6_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_6_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_7_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_7_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_8_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_8_end_date', '');
-        $('#edit-study-plan').form('set value', 'vb_9_start_date', '');
-        $('#edit-study-plan').form('set value', 'vb_9_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_intro_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_intro_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_1_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_1_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_2_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_2_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_3_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_3_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_4_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_4_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_5_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_5_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_6_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_6_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_7_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_7_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_8_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_8_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_9_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_9_end_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_prep_start_date', '');
-        $('#edit-study-plan').form('set value', 'y_gre_prep_end_date', '');
+        $.getJSON("{{ url_for('manage.generate_study_plan', id=user.id) }}", {
+            'start_date': $('#edit-study-plan').form('get value', 'start_date'),
+            'deadline': $('#edit-study-plan').form('get value', 'deadline'),
+            'speed': Number($('#edit-study-plan').form('get value', 'speed')),
+        }, function(data) {
+            $('#edit-study-plan').form('set value', 'vb_intro_start_date', data.vb_intro_start_date);
+            $('#edit-study-plan').form('set value', 'vb_intro_end_date', data.vb_intro_end_date);
+            $('#edit-study-plan').form('set value', 'vb_1_start_date', data.vb_1_start_date);
+            $('#edit-study-plan').form('set value', 'vb_1_end_date', data.vb_1_end_date);
+            $('#edit-study-plan').form('set value', 'vb_2_start_date', data.vb_2_start_date);
+            $('#edit-study-plan').form('set value', 'vb_2_end_date', data.vb_2_end_date);
+            $('#edit-study-plan').form('set value', 'vb_3_start_date', data.vb_3_start_date);
+            $('#edit-study-plan').form('set value', 'vb_3_end_date', data.vb_3_end_date);
+            $('#edit-study-plan').form('set value', 'vb_4_start_date', data.vb_4_start_date);
+            $('#edit-study-plan').form('set value', 'vb_4_end_date', data.vb_4_end_date);
+            $('#edit-study-plan').form('set value', 'vb_5_start_date', data.vb_5_start_date);
+            $('#edit-study-plan').form('set value', 'vb_5_end_date', data.vb_5_end_date);
+            $('#edit-study-plan').form('set value', 'vb_6_start_date', data.vb_6_start_date);
+            $('#edit-study-plan').form('set value', 'vb_6_end_date', data.vb_6_end_date);
+            $('#edit-study-plan').form('set value', 'vb_7_start_date', data.vb_7_start_date);
+            $('#edit-study-plan').form('set value', 'vb_7_end_date', data.vb_7_end_date);
+            $('#edit-study-plan').form('set value', 'vb_8_start_date', data.vb_8_start_date);
+            $('#edit-study-plan').form('set value', 'vb_8_end_date', data.vb_8_end_date);
+            $('#edit-study-plan').form('set value', 'vb_9_start_date', data.vb_9_start_date);
+            $('#edit-study-plan').form('set value', 'vb_9_end_date', data.vb_9_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_intro_start_date', data.y_gre_intro_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_intro_end_date', data.y_gre_intro_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_1_start_date', data.y_gre_1_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_1_end_date', data.y_gre_1_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_2_start_date', data.y_gre_2_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_2_end_date', data.y_gre_2_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_3_start_date', data.y_gre_3_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_3_end_date', data.y_gre_3_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_4_start_date', data.y_gre_4_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_4_end_date', data.y_gre_4_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_5_start_date', data.y_gre_5_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_5_end_date', data.y_gre_5_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_6_start_date', data.y_gre_6_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_6_end_date', data.y_gre_6_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_7_start_date', data.y_gre_7_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_7_end_date', data.y_gre_7_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_8_start_date', data.y_gre_8_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_8_end_date', data.y_gre_8_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_9_start_date', data.y_gre_9_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_9_end_date', data.y_gre_9_end_date);
+            $('#edit-study-plan').form('set value', 'y_gre_prep_start_date', data.y_gre_prep_start_date);
+            $('#edit-study-plan').form('set value', 'y_gre_prep_end_date', data.y_gre_prep_end_date);
+        });
     })
 ;
 
