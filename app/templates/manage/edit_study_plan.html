@@ -155,7 +155,7 @@
                         </div>
                     </div>
                     <a class="ui positive left labeled icon button"><i class="rocket icon"></i>自动生成</a>
-                    <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id) }}"><i class="undo icon"></i>重置</a>
+                    <div id="reset-form-button" class="ui left labeled icon button"><i class="undo icon"></i>重置</div>
                     <div class="ui blue dividing header">VB</div>
                     <div class="field">
                         <label>总论</label>
@@ -1610,6 +1610,12 @@ $(document)
                 }
             })
         ;
+    })
+;
+
+$('#reset-form-button')
+    .on('click', function () {
+        $('#edit-study-plan').form('reset');
     })
 ;
 
