@@ -5320,7 +5320,7 @@ def generate_study_plan(id):
         abort(404)
     start_date = request.args.get('start_date')
     deadline = request.args.get('deadline')
-    speed = request.args.get('speed')
+    speed = float(request.args.get('speed'))
     study_plan = {
         'vb_intro_start_date': start_date,
         'vb_intro_end_date': u'',

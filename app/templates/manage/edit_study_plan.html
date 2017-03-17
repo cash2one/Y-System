@@ -1640,7 +1640,7 @@ $('#set-form-button')
         $.getJSON("{{ url_for('manage.generate_study_plan', id=user.id) }}", {
             'start_date': $('#edit-study-plan').form('get value', 'start_date'),
             'deadline': $('#edit-study-plan').form('get value', 'deadline'),
-            'speed': Number($('#edit-study-plan').form('get value', 'speed')),
+            'speed': $('#edit-study-plan').form('get value', 'speed')
         }, function(data) {
             $('#edit-study-plan').form('set value', 'vb_intro_start_date', data.vb_intro_start_date);
             $('#edit-study-plan').form('set value', 'vb_intro_end_date', data.vb_intro_end_date);
