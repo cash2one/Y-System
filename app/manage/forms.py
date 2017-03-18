@@ -3,7 +3,7 @@
 from datetime import date, time, timedelta
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, DateField, SelectField, SelectMultipleField, SubmitField
-from wtforms.validators import Required, NumberRange, Length, Email, Optional
+from wtforms.validators import Required, Optional, NumberRange, Length, Email
 from wtforms import ValidationError
 from ..models import Color
 from ..models import Permission, Role, User, Tag
