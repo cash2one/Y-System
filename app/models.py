@@ -18,12 +18,12 @@ from . import db, login_manager
 
 class Version:
     Application = 'v1.0.0-dev'
-    jQuery = '3.1.1'
+    jQuery = '3.2.0'
     SemanticUI = '2.2.9'
     SemanticUICalendar = '0.0.7'
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
-    CountUp = '1.8.1'
+    CountUp = '1.8.2'
     ECharts = '3.4.0'
 
 
