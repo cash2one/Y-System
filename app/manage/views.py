@@ -5360,7 +5360,8 @@ def generate_study_plan(id):
             for lesson in Lesson.query\
                 .filter(Lesson.priority >= 1)\
                 .order_by(Lesson.priority.desc())\
-                .order_by(Lesson.id.asc())\
+                .order_by(Lesson.type_id.asc())\
+                .order_by(Lesson.order.asc())\
                 .all():
                 if int(lesson.least_accumulated_seconds / 3600.0 / intensity / speed * 7) < total_days:
                     priority = lesson.priority
@@ -5370,7 +5371,8 @@ def generate_study_plan(id):
                 current_date = start_date - timedelta(days=1)
                 for lesson in Lesson.query\
                     .filter(Lesson.priority >= priority)\
-                    .order_by(Lesson.id.asc())\
+                    .order_by(Lesson.type_id.asc())\
+                    .order_by(Lesson.order.asc())\
                     .all():
                     start_date = current_date + timedelta(days=1)
                     end_date = current_date + timedelta(days=int(lesson.hour.total_seconds() / 3600.0 / intensity / speed * 7))
