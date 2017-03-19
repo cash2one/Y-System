@@ -51,7 +51,7 @@
                     </div>
                 </div>
                 <div class="two fields">
-                    <div class="inline field">
+                    <div class="inline required field">
                         <div class="ui checkbox">
                             {{ form.accept_tos() }}
                             {{ form.accept_tos.label() }}
@@ -82,7 +82,6 @@ $(document)
     .ready(function() {
         $('#activate')
             .form({
-                onSuccess: submitForm,
                 fields: {
                     email: {
                         identifier: 'email',

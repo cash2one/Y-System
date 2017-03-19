@@ -119,11 +119,6 @@ function noProfileAvatar(avatarImage) {
                     {% endif %}
                 </div>
                 <div class="ui vertical segment">
-                    <div class="ui header">研修计划</div>
-                    {% if user.study_plans.count() %}{% endif %}
-                    {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>{% endif %}
-                </div>
-                <div class="ui vertical segment">
                     <div class="ui header">预约统计</div>
                     <div id="booking-stats" class="ui seven tiny statistics">
                         <div class="statistic">
@@ -156,12 +151,29 @@ function noProfileAvatar(avatarImage) {
                         </div>
                     </div>
                 </div>
-                {% if user.gre_verbal_prediction %}
-                <div class="ui vertical segment">
+                {% if user.gre_verbal_prediction %}<div class="ui vertical segment">
                     <div class="ui header">分数预测<div class="ui label">Beta</div></div>
                     <div>GRE Verbal：{{ user.gre_verbal_prediction }}</div>
+                </div>{% endif %}
+                <div id="study-plan" class="ui vertical segment loading">
+                    <div class="ui header">研修计划</div>
+                    {% if user.study_plans.count() %}
+                    <table class="ui very basic selectable celled table">
+                        <thead>
+                            <tr>
+                                <th>任务</th>
+                                <th>计划</th>
+                                <th>天数</th>
+                                <th>强度</th>
+                                <th>修订/备注</th>
+                                <th>N.B.</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    {% endif %}
+                    {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>{% endif %}
                 </div>
-                {% endif %}
                 {% with scores = user.gre_test_scores %}{% if scores.count() %}<div class="ui vertical segment">
                     <div class="ui header">GRE成绩</div>
                     <div class="ui relaxed list">
@@ -210,6 +222,72 @@ function noProfileAvatar(avatarImage) {
                     </div>
                     {% if pagination %}{{ macros.pagination_widget(pagination, 'main.profile_overview', id=user.id) }}{% endif %}
                 </div>
+                {% endif %}
+                {% if show_profile_progress %}
+                <div id="vb" class="ui vertical segment loading">
+                    <div id="last-vb-punch" class="ui header disabled">VB进度：<span>N/A</span></div>
+                    <div id="vb-progress-bar" class="ui progress disabled">
+                        <div class="bar">
+                            <div class="progress">0%</div>
+                        </div>
+                    </div>
+                    <table class="ui very basic selectable celled table">
+                        <thead>
+                            <tr>
+                                <th>课程</th>
+                                <th>内容</th>
+                                <th>作业</th>
+                                <th>考试</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vb-lessons"></tbody>
+                    </table>
+                </div>
+                {% if user.can('预约Y-GRE课程') %}
+                <div id="y-gre" class="ui vertical segment loading">
+                    <div id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>N/A</span></div>
+                    <div id="y-gre-progress-bar" class="ui progress disabled">
+                        <div class="bar">
+                            <div class="progress">0%</div>
+                        </div>
+                    </div>
+                    <table class="ui very basic selectable celled table">
+                        <thead>
+                            <tr>
+                                <th>课程</th>
+                                <th>内容</th>
+                                <th>考试</th>
+                            </tr>
+                        </thead>
+                        <tbody id="y-gre-lessons"></tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% endif %}
+                {% if show_profile_bookings %}
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>时段</th>
+                            <th>状态</th>
+                            <th>预约状态</th>
+                            <th>预约码</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
+                            <td>{{ booking.schedule.period.type.name }}</td>
+                            <td>{% if booking.schedule.unstarted %}<div class="ui teal label">{{ booking.schedule.time_state }}</div>{% endif %}{% if booking.schedule.started %}<div class="ui red label">{{ booking.schedule.time_state }}</div>{% endif %}{% if booking.schedule.ended %}<div class="ui label">{{ booking.schedule.time_state }}</div>{% endif %}{{ moment(booking.schedule.period.start_time_utc).format('H:mm') }} - {{ moment(booking.schedule.period.end_time_utc).format('H:mm') }}</td>
+                            <td>{% if booking.valid %}<i class="checked calendar icon"></i>{% endif %}{% if booking.waited %}<i class="wait icon"></i>{% endif %}{% if booking.canceled %}<i class="remove from calendar icon"></i>{% endif %}{% if booking.kept %}<i class="smile icon"></i>{% endif %}{% if booking.late %}<i class="meh icon"></i>{% endif %}{% if booking.missed %}<i class="frown icon"></i>{% endif %}{% if booking.invalid %}<i class="delete icon"></i>{% endif %}{{ booking.state.name }}{% if booking.waited %}<div class="ui teal circular label">{{ booking.queue_position }}</div>{% endif %}</td>
+                            <td>{% if booking.valid %}<i id="booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}" class="large blue qrcode link icon"></i><div id="booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}" class="ui flowing popup top left transition hidden"><img class="ui small image" src="{{ qrcode(booking.token) }}"></div>{% else %}N/A{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'main.profile', id=user.id) }}{% endif %}
                 {% endif %}
                 {% if show_profile_archive and current_user.can('管理') %}
                 <div class="ui vertical segment">
@@ -423,72 +501,6 @@ function noProfileAvatar(avatarImage) {
                     <a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_user', id=user.id, next=url_for('main.profile_archive', id=user.id)) }}"><i class="edit icon"></i>编辑</a>
                 </div>{% endif %}
                 {% endif %}
-                {% if show_profile_progress %}
-                <div id="vb" class="ui vertical segment loading">
-                    <div id="last-vb-punch" class="ui header disabled">VB进度：<span>N/A</span></div>
-                    <div id="vb-progress-bar" class="ui progress disabled">
-                        <div class="bar">
-                            <div class="progress">0%</div>
-                        </div>
-                    </div>
-                    <table class="ui very basic selectable celled table">
-                        <thead>
-                            <tr>
-                                <th>课程</th>
-                                <th>内容</th>
-                                <th>作业</th>
-                                <th>考试</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vb-lessons"></tbody>
-                    </table>
-                </div>
-                {% if user.can('预约Y-GRE课程') %}
-                <div id="y-gre" class="ui vertical segment loading">
-                    <div id="last-y-gre-punch" class="ui header disabled">Y-GRE进度：<span>N/A</span></div>
-                    <div id="y-gre-progress-bar" class="ui progress disabled">
-                        <div class="bar">
-                            <div class="progress">0%</div>
-                        </div>
-                    </div>
-                    <table class="ui very basic selectable celled table">
-                        <thead>
-                            <tr>
-                                <th>课程</th>
-                                <th>内容</th>
-                                <th>考试</th>
-                            </tr>
-                        </thead>
-                        <tbody id="y-gre-lessons"></tbody>
-                    </table>
-                </div>
-                {% endif %}
-                {% endif %}
-                {% if show_profile_bookings %}
-                <table class="ui very basic sortable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>日期</th>
-                            <th>时段</th>
-                            <th>状态</th>
-                            <th>预约状态</th>
-                            <th>预约码</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for booking in bookings %}
-                        <tr>
-                            <td>{{ moment(booking.schedule.date).format('YYYY-M-D ddd') }}</td>
-                            <td>{{ booking.schedule.period.type.name }}</td>
-                            <td>{% if booking.schedule.unstarted %}<div class="ui teal label">{{ booking.schedule.time_state }}</div>{% endif %}{% if booking.schedule.started %}<div class="ui red label">{{ booking.schedule.time_state }}</div>{% endif %}{% if booking.schedule.ended %}<div class="ui label">{{ booking.schedule.time_state }}</div>{% endif %}{{ moment(booking.schedule.period.start_time_utc).format('H:mm') }} - {{ moment(booking.schedule.period.end_time_utc).format('H:mm') }}</td>
-                            <td>{% if booking.valid %}<i class="checked calendar icon"></i>{% endif %}{% if booking.waited %}<i class="wait icon"></i>{% endif %}{% if booking.canceled %}<i class="remove from calendar icon"></i>{% endif %}{% if booking.kept %}<i class="smile icon"></i>{% endif %}{% if booking.late %}<i class="meh icon"></i>{% endif %}{% if booking.missed %}<i class="frown icon"></i>{% endif %}{% if booking.invalid %}<i class="delete icon"></i>{% endif %}{{ booking.state.name }}{% if booking.waited %}<div class="ui teal circular label">{{ booking.queue_position }}</div>{% endif %}</td>
-                            <td>{% if booking.valid %}<i id="booking-qr-code-click-{{ booking.user_id }}-{{ booking.schedule_id }}" class="large blue qrcode link icon"></i><div id="booking-qr-code-{{ booking.user_id }}-{{ booking.schedule_id }}" class="ui flowing popup top left transition hidden"><img class="ui small image" src="{{ qrcode(booking.token) }}"></div>{% else %}N/A{% endif %}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% if pagination %}{{ macros.pagination_widget(pagination, 'main.profile', id=user.id) }}{% endif %}
-                {% endif %}
             </div>
         </div>
     </div>
@@ -567,6 +579,7 @@ var VBProgressCountUp = new CountUp('vb-progress-data', 0, 0, 0, 2.5, countUpOpt
 var overviewDataUrl = "{{ url_for('main.profile_overview_data', id=user.id) }}";
 $.getJSON(overviewDataUrl, function(data) {
     $('#progress').removeClass('loading');
+    $('#study-plan').removeClass('loading');
     if (data.progress.vb.value > 0) {
         $('#vb-progress').removeClass('disabled');
         $('#last-vb-punch').text(function() {
@@ -583,6 +596,25 @@ $.getJSON(overviewDataUrl, function(data) {
                 VBProgressCountUp.update(percent);
             }
         });
+    };
+    for (study_plan_idx in data.study_plan.vb) {
+        $('#study-plan table tbody').append(
+            $('<tr>')
+                .attr('id', data.study_plan.vb[study_plan_idx].element_id)
+                .addClass('top aligned')
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].lesson))
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].start_date + ' ~ ' + data.study_plan.vb[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].days + ' 天'))
+                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].intensity))
+                .append($('<td>'))
+                .append($('<td>').addClass('nota-bene'))
+        );
+        if (data.study_plan.vb[study_plan_idx].notate_bene.length > 0) {
+            $('#' + data.study_plan.vb[study_plan_idx].element_id + ' td.nota-bene').append($('<div>').addClass('ui list'));
+            for (nota_bene_idx in data.study_plan.vb[study_plan_idx].notate_bene) {
+                $('#' + data.study_plan.vb[study_plan_idx].element_id + ' td.nota-bene div.ui.list').append($('<div>').addClass('item').text(data.study_plan.vb[study_plan_idx].notate_bene[nota_bene_idx].body));
+            };
+        };
     };
     {% if user.can('预约Y-GRE课程') %}
     if (data.progress.y_gre.value > 0) {
@@ -601,6 +633,25 @@ $.getJSON(overviewDataUrl, function(data) {
                 YGREProgressCountUp.update(percent);
             }
         });
+    };
+    for (study_plan_idx in data.study_plan.y_gre) {
+        $('#study-plan table tbody').append(
+            $('<tr>')
+                .attr('id', data.study_plan.y_gre[study_plan_idx].element_id)
+                .addClass('top aligned')
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].lesson))
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].start_date + ' ~ ' + data.study_plan.y_gre[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].days + ' 天'))
+                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].intensity))
+                .append($('<td>'))
+                .append($('<td>').addClass('nota-bene'))
+        );
+        if (data.study_plan.y_gre[study_plan_idx].notate_bene.length > 0) {
+            $('#' + data.study_plan.y_gre[study_plan_idx].element_id + ' td.nota-bene').append($('<div>').addClass('ui list'));
+            for (nota_bene_idx in data.study_plan.y_gre[study_plan_idx].notate_bene) {
+                $('#' + data.study_plan.y_gre[study_plan_idx].element_id + ' td.nota-bene div.ui.list').append($('<div>').addClass('item').text(data.study_plan.y_gre[study_plan_idx].notate_bene[nota_bene_idx].body));
+            };
+        };
     };
     {% endif %}
 });
