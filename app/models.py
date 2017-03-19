@@ -18,12 +18,12 @@ from . import db, login_manager
 
 class Version:
     Application = 'v1.0.0-dev'
-    jQuery = '3.1.1'
+    jQuery = '3.2.0'
     SemanticUI = '2.2.9'
     SemanticUICalendar = '0.0.7'
     FontAwesome = '4.7.0'
     MomentJS = '2.17.1'
-    CountUp = '1.8.1'
+    CountUp = '1.8.2'
     ECharts = '3.4.0'
 
 
@@ -3471,7 +3471,7 @@ class iPad(db.Model):
 
     @property
     def video_playback_alias(self):
-        return u'%g 小时' % (self.video_playback.total_seconds() / 3600)
+        return u'%g 小时' % (self.video_playback.total_seconds() / 3600.0)
 
     @property
     def current_battery_life(self):
@@ -3645,8 +3645,12 @@ class Lesson(db.Model):
     @property
     def hour_alias(self):
         if self.hour.total_seconds():
-            return u'%g 小时' % (self.hour.total_seconds() / 3600)
+            return u'%g 小时' % (self.hour.total_seconds() / 3600.0)
         return u'N/A'
+
+    @property
+    def least_accumulated_seconds(self):
+        return sum([lesson.hour.total_seconds() for lesson in Lesson.query.filter(Lesson.priority >= self.priority).all()])
 
     @property
     def occupied_ipads_alias(self):
@@ -3705,7 +3709,7 @@ class Lesson(db.Model):
             (u'1st', u'Y-GRE', 30, 17, 2, True, False, ),
             (u'2nd', u'Y-GRE', 30, 17, 3, True, False, ),
             (u'3rd', u'Y-GRE', 50, 17, 4, True, False, ),
-            (u'AW总论', u'Y-GRE', 3, 17, 5, True, False, ),
+            (u'AW总论', u'Y-GRE', 3, 0, 5, True, False, ),
             (u'4th', u'Y-GRE', 30, 10, 6, True, False, ),
             (u'5th', u'Y-GRE', 40, 9, 7, True, False, ),
             (u'6th', u'Y-GRE', 40, 8, 8, True, False, ),
@@ -3713,7 +3717,7 @@ class Lesson(db.Model):
             (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
             (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
             (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
-            (u'Y-GRE临考', u'Y-GRE', 80, 0, 12, False, False, ),
+            (u'Y-GRE临考', u'Y-GRE', 80, 17, 12, False, False, ),
         ]
         for entry in lessons:
             lesson = Lesson.query.filter_by(name=entry[0]).first()

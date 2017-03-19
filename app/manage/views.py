@@ -4555,8 +4555,8 @@ def edit_study_plan(id):
         db.session.add(toefl_aim_score)
         db.session.commit()
         # update time parameters
-        user.speed = form.speed.data
         user.deadline = form.deadline.data
+        user.speed = form.speed.data
         db.session.add(user)
         db.session.commit()
         # update VB plan: intro
@@ -5185,10 +5185,13 @@ def edit_study_plan(id):
         form.toefl_aim_speaking.data = toefl_aim_score.speaking_score
         form.toefl_aim_writing.data = toefl_aim_score.writing_score
     # time parameters
-    form.speed.data = user.speed
+    form.start_date.data = date.today()
     form.deadline.data = user.deadline or user.due_date
+    form.speed.data = user.speed
+    form.intensity.data = 10.0
     # VB plan
     if vb_intro_plan is not None:
+        form.start_date.data = vb_intro_plan.start_date
         form.vb_intro_start_date.data = vb_intro_plan.start_date
         form.vb_intro_end_date.data = vb_intro_plan.end_date
         form.vb_intro_notate_bene.data = [unicode(item.nota_bene_id) for item in vb_intro_plan.notate_bene]
@@ -5307,6 +5310,95 @@ def edit_study_plan(id):
     if user.supervised_by is not None:
         form.supervisor_email.data = user.supervised_by.email
     return render_template('manage/edit_study_plan.html', form=form, user=user)
+
+
+@manage.route('/study-plan/generate/<int:id>')
+@login_required
+@permission_required(u'管理研修计划')
+def generate_study_plan(id):
+    user = User.query.get_or_404(id)
+    if not user.created or user.deleted:
+        abort(404)
+    start_date = request.args.get('start_date')
+    deadline = request.args.get('deadline')
+    speed = request.args.get('speed')
+    intensity = request.args.get('intensity')
+    study_plan = {
+        'valid': False,
+    }
+    if start_date and deadline and speed and intensity:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        deadline = datetime.strptime(deadline, '%Y-%m-%d').date()
+        speed = float(speed)
+        intensity = float(intensity)
+        tdelta = deadline - start_date
+        total_days = tdelta.days + 1
+        study_plan['valid'] = True
+        study_plan[u'VB总论'] = u''
+        study_plan[u'L1'] = u''
+        study_plan[u'L2'] = u''
+        study_plan[u'L3'] = u''
+        study_plan[u'L4'] = u''
+        study_plan[u'L5'] = u''
+        study_plan[u'L6'] = u''
+        study_plan[u'L7'] = u''
+        study_plan[u'L8'] = u''
+        study_plan[u'L9'] = u''
+        if user.can(u'预约Y-GRE课程'):
+            study_plan[u'Y-GRE总论'] = u''
+            study_plan[u'1st'] = u''
+            study_plan[u'2nd'] = u''
+            study_plan[u'3rd'] = u''
+            study_plan[u'4th'] = u''
+            study_plan[u'5th'] = u''
+            study_plan[u'6th'] = u''
+            study_plan[u'7th'] = u''
+            study_plan[u'8th'] = u''
+            study_plan[u'9th'] = u''
+            study_plan[u'Y-GRE临考'] = u''
+            priority = None
+            for lesson in Lesson.query\
+                .filter(Lesson.priority >= 1)\
+                .order_by(Lesson.priority.desc())\
+                .order_by(Lesson.type_id.asc())\
+                .order_by(Lesson.order.asc())\
+                .all():
+                if int(lesson.least_accumulated_seconds / 3600.0 / intensity / speed * 7) < total_days:
+                    priority = lesson.priority
+                else:
+                    break
+            if priority is not None:
+                current_date = start_date - timedelta(days=1)
+                for lesson in Lesson.query\
+                    .filter(Lesson.priority >= priority)\
+                    .order_by(Lesson.type_id.asc())\
+                    .order_by(Lesson.order.asc())\
+                    .all():
+                    start_date = current_date + timedelta(days=1)
+                    end_date = current_date + timedelta(days=int(lesson.hour.total_seconds() / 3600.0 / intensity / speed * 7))
+                    study_plan[lesson.name] = {
+                        'start_date': start_date.strftime('%Y-%m-%d'),
+                        'end_date': end_date.strftime('%Y-%m-%d'),
+                    }
+                    current_date = end_date
+        else:
+            current_date = start_date - timedelta(days=1)
+            for lesson in Lesson.query\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'VB')\
+                .filter(Lesson.priority >= 1)\
+                .order_by(Lesson.order.asc())\
+                .all():
+                start_date = current_date + timedelta(days=1)
+                end_date = current_date + timedelta(days=int(lesson.hour.total_seconds() / 3600.0 / intensity / speed * 7))
+                if end_date > deadline:
+                    break
+                study_plan[lesson.name] = {
+                    'start_date': start_date.strftime('%Y-%m-%d'),
+                    'end_date': end_date.strftime('%Y-%m-%d'),
+                }
+                current_date = end_date
+    return jsonify(study_plan)
 
 
 @manage.route('/nota-bene', methods=['GET', 'POST'])

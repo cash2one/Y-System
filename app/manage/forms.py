@@ -3,7 +3,7 @@
 from datetime import date, time, timedelta
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, IntegerField, FloatField, DateField, SelectField, SelectMultipleField, SubmitField
-from wtforms.validators import Required, NumberRange, Length, Email, Optional
+from wtforms.validators import Required, Optional, NumberRange, Length, Email
 from wtforms import ValidationError
 from ..models import Color
 from ..models import Permission, Role, User, Tag
@@ -818,8 +818,11 @@ class EditStudyPlanForm(FlaskForm):
     toefl_aim_speaking = IntegerField(u'Speaking', validators=[Required(), NumberRange(min=0, max=30)])
     toefl_aim_writing = IntegerField(u'Writing', validators=[Required(), NumberRange(min=0, max=30)])
     # study plan
-    speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
+    start_date = DateField(u'开始日期')
     deadline = DateField(u'Deadline')
+    speed = FloatField(u'时间系数', validators=[Required()])
+    intensity = FloatField(u'强度', validators=[Optional()])
+    # VB
     vb_intro_start_date = DateField(u'开始日期', validators=[Optional()])
     vb_intro_end_date = DateField(u'结束日期', validators=[Optional()])
     vb_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
@@ -860,6 +863,7 @@ class EditStudyPlanForm(FlaskForm):
     vb_9_end_date = DateField(u'结束日期', validators=[Optional()])
     vb_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_9_remark = TextAreaField(u'修订/备注', validators=[Optional()])
+    # Y-GRE
     y_gre_intro_start_date = DateField(u'开始日期', validators=[Optional()])
     y_gre_intro_end_date = DateField(u'结束日期', validators=[Optional()])
     y_gre_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
@@ -904,10 +908,12 @@ class EditStudyPlanForm(FlaskForm):
     y_gre_prep_end_date = DateField(u'结束日期', validators=[Optional()])
     y_gre_prep_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_prep_remark = TextAreaField(u'修订/备注', validators=[Optional()])
+    # GRE
     gre_0_date = DateField(u'G<sub>0</sub>', validators=[Optional()])
     gre_1_date = DateField(u'G<sub>1</sub>', validators=[Optional()])
     gre_2_date = DateField(u'G<sub>2</sub>', validators=[Optional()])
     gre_3_date = DateField(u'G<sub>3</sub>', validators=[Optional()])
+    # supervisor
     supervisor_email = StringField(u'设计人（邮箱）', validators=[Length(0, 64)])
     submit = SubmitField(u'提交')
 

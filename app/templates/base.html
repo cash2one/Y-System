@@ -119,7 +119,6 @@
                     <div class="header">开发人员</div>
                     <a class="item loading-trigger" href="{{ url_for('manage.role') }}"><i class="spy icon"></i>角色管理</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.booking_permissions') }}"><i class="checkmark box icon"></i>权限管理</a>
-                    <a class="item loading-trigger" href="{{ url_for('manage.all_feeds') }}"><i class="database icon"></i>系统日志</a>
                     {% endif %}
                 </div>
             </div>
@@ -128,6 +127,11 @@
                 <div class="menu">
                     <a class="item loading-trigger" href="{{ url_for('manage.ipad_contents') }}"><i class="table icon"></i>iPad内容排布表</a>
                     <a class="item loading-trigger" href="{{ url_for('manage.analytics') }}"><i class="line chart icon"></i>访客分析</a>
+                    {% if current_user.is_developer%}
+                    <div class="divider"></div>
+                    <div class="header">开发人员</div>
+                    <a class="item loading-trigger" href="{{ url_for('manage.all_feeds') }}"><i class="database icon"></i>系统日志</a>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
@@ -322,7 +326,6 @@
                             <div class="header">开发人员</div>
                             <a class="item loading-trigger" href="{{ url_for('manage.role') }}"><i class="spy icon"></i>角色管理</a>
                             <a class="item loading-trigger" href="{{ url_for('manage.booking_permissions') }}"><i class="checkmark box icon"></i>权限管理</a>
-                            <a class="item loading-trigger" href="{{ url_for('manage.all_feeds') }}"><i class="database icon"></i>系统日志</a>
                             {% endif %}
                         </div>
                     </div>
@@ -331,6 +334,11 @@
                         <div class="menu">
                             <a class="item loading-trigger" href="{{ url_for('manage.ipad_contents') }}"><i class="table icon"></i>iPad内容排布表</a>
                             <a class="item loading-trigger" href="{{ url_for('manage.analytics') }}"><i class="line chart icon"></i>访客分析</a>
+                            {% if current_user.is_developer%}
+                            <div class="divider"></div>
+                            <div class="header">开发人员</div>
+                            <a class="item loading-trigger" href="{{ url_for('manage.all_feeds') }}"><i class="database icon"></i>系统日志</a>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}

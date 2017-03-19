@@ -151,12 +151,10 @@ function noProfileAvatar(avatarImage) {
                         </div>
                     </div>
                 </div>
-                {% if user.gre_verbal_prediction %}
-                <div class="ui vertical segment">
+                {% if user.gre_verbal_prediction %}<div class="ui vertical segment">
                     <div class="ui header">分数预测<div class="ui label">Beta</div></div>
                     <div>GRE Verbal：{{ user.gre_verbal_prediction }}</div>
-                </div>
-                {% endif %}
+                </div>{% endif %}
                 <div id="study-plan" class="ui vertical segment loading">
                     <div class="ui header">研修计划</div>
                     {% if user.study_plans.count() %}
