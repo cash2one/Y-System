@@ -5188,6 +5188,7 @@ def edit_study_plan(id):
     form.start_date.data = date.today()
     form.deadline.data = user.deadline or user.due_date
     form.speed.data = user.speed
+    form.intensity.data = 10.0
     # VB plan
     if vb_intro_plan is not None:
         form.start_date.data = vb_intro_plan.start_date
@@ -5321,59 +5322,80 @@ def generate_study_plan(id):
     start_date = request.args.get('start_date')
     deadline = request.args.get('deadline')
     speed = request.args.get('speed')
+    intensity = request.args.get('intensity')
     study_plan = {
-        'start_date': start_date,
-        'deadline': deadline,
-        'speed': speed,
+        'valid': False,
     }
-    if start_date and deadline and speed:
+    if start_date and deadline and speed and intensity:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         deadline = datetime.strptime(deadline, '%Y-%m-%d').date()
         speed = float(speed)
-        study_plan = {
-            'vb_intro_start_date': start_date,
-            'vb_intro_end_date': u'',
-            'vb_1_start_date': u'',
-            'vb_1_end_date': u'',
-            'vb_2_start_date': u'',
-            'vb_2_end_date': u'',
-            'vb_3_start_date': u'',
-            'vb_3_end_date': u'',
-            'vb_4_start_date': u'',
-            'vb_4_end_date': u'',
-            'vb_5_start_date': u'',
-            'vb_5_end_date': u'',
-            'vb_6_start_date': u'',
-            'vb_6_end_date': u'',
-            'vb_7_start_date': u'',
-            'vb_7_end_date': u'',
-            'vb_8_start_date': u'',
-            'vb_8_end_date': u'',
-            'vb_9_start_date': u'',
-            'vb_9_end_date': u'',
-            'y_gre_intro_start_date': u'',
-            'y_gre_intro_end_date': u'',
-            'y_gre_1_start_date': u'',
-            'y_gre_1_end_date': u'',
-            'y_gre_2_start_date': u'',
-            'y_gre_2_end_date': u'',
-            'y_gre_3_start_date': u'',
-            'y_gre_3_end_date': u'',
-            'y_gre_4_start_date': u'',
-            'y_gre_4_end_date': u'',
-            'y_gre_5_start_date': u'',
-            'y_gre_5_end_date': u'',
-            'y_gre_6_start_date': u'',
-            'y_gre_6_end_date': u'',
-            'y_gre_7_start_date': u'',
-            'y_gre_7_end_date': u'',
-            'y_gre_8_start_date': u'',
-            'y_gre_8_end_date': u'',
-            'y_gre_9_start_date': u'',
-            'y_gre_9_end_date': u'',
-            'y_gre_prep_start_date': u'',
-            'y_gre_prep_end_date': u'',
-        }
+        intensity = float(intensity)
+        tdelta = deadline - start_date
+        total_days = tdelta.days + 1
+        study_plan['valid'] = True
+        study_plan[u'VB总论'] = u''
+        study_plan[u'L1'] = u''
+        study_plan[u'L2'] = u''
+        study_plan[u'L3'] = u''
+        study_plan[u'L4'] = u''
+        study_plan[u'L5'] = u''
+        study_plan[u'L6'] = u''
+        study_plan[u'L7'] = u''
+        study_plan[u'L8'] = u''
+        study_plan[u'L9'] = u''
+        if user.can(u'预约Y-GRE课程'):
+            study_plan[u'Y-GRE总论'] = u''
+            study_plan[u'1st'] = u''
+            study_plan[u'2nd'] = u''
+            study_plan[u'3rd'] = u''
+            study_plan[u'4th'] = u''
+            study_plan[u'5th'] = u''
+            study_plan[u'6th'] = u''
+            study_plan[u'7th'] = u''
+            study_plan[u'8th'] = u''
+            study_plan[u'9th'] = u''
+            study_plan[u'Y-GRE临考'] = u''
+            priority = None
+            for lesson in Lesson.query\
+                .filter(Lesson.priority >= 1)\
+                .order_by(Lesson.priority.desc())\
+                .order_by(Lesson.id.asc())\
+                .all():
+                if int(lesson.least_accumulated_seconds / 3600.0 / intensity / speed * 7) < total_days:
+                    priority = lesson.priority
+                else:
+                    break
+            if priority is not None:
+                current_date = start_date - timedelta(days=1)
+                for lesson in Lesson.query\
+                    .filter(Lesson.priority >= priority)\
+                    .order_by(Lesson.id.asc())\
+                    .all():
+                    start_date = current_date + timedelta(days=1)
+                    end_date = current_date + timedelta(days=int(lesson.hour.total_seconds() / 3600.0 / intensity / speed * 7))
+                    study_plan[lesson.name] = {
+                        'start_date': start_date.strftime('%Y-%m-%d'),
+                        'end_date': end_date.strftime('%Y-%m-%d'),
+                    }
+                    current_date = end_date
+        else:
+            current_date = start_date - timedelta(days=1)
+            for lesson in Lesson.query\
+                .join(CourseType, CourseType.id == Lesson.type_id)\
+                .filter(CourseType.name == u'VB')\
+                .filter(Lesson.priority >= 1)\
+                .order_by(Lesson.order.asc())\
+                .all():
+                start_date = current_date + timedelta(days=1)
+                end_date = current_date + timedelta(days=int(lesson.hour.total_seconds() / 3600.0 / intensity / speed * 7))
+                if end_date > deadline:
+                    break
+                study_plan[lesson.name] = {
+                    'start_date': start_date.strftime('%Y-%m-%d'),
+                    'end_date': end_date.strftime('%Y-%m-%d'),
+                }
+                current_date = end_date
     return jsonify(study_plan)
 
 

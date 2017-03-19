@@ -820,7 +820,9 @@ class EditStudyPlanForm(FlaskForm):
     # study plan
     start_date = DateField(u'开始日期')
     deadline = DateField(u'Deadline')
-    speed = StringField(u'时间系数', validators=[Required(), Length(0, 64)])
+    speed = FloatField(u'时间系数', validators=[Required()])
+    intensity = FloatField(u'强度', validators=[Optional()])
+    # VB
     vb_intro_start_date = DateField(u'开始日期', validators=[Optional()])
     vb_intro_end_date = DateField(u'结束日期', validators=[Optional()])
     vb_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
@@ -861,6 +863,7 @@ class EditStudyPlanForm(FlaskForm):
     vb_9_end_date = DateField(u'结束日期', validators=[Optional()])
     vb_9_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     vb_9_remark = TextAreaField(u'修订/备注', validators=[Optional()])
+    # Y-GRE
     y_gre_intro_start_date = DateField(u'开始日期', validators=[Optional()])
     y_gre_intro_end_date = DateField(u'结束日期', validators=[Optional()])
     y_gre_intro_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
@@ -905,10 +908,12 @@ class EditStudyPlanForm(FlaskForm):
     y_gre_prep_end_date = DateField(u'结束日期', validators=[Optional()])
     y_gre_prep_notate_bene = SelectMultipleField(u'N.B.', coerce=unicode)
     y_gre_prep_remark = TextAreaField(u'修订/备注', validators=[Optional()])
+    # GRE
     gre_0_date = DateField(u'G<sub>0</sub>', validators=[Optional()])
     gre_1_date = DateField(u'G<sub>1</sub>', validators=[Optional()])
     gre_2_date = DateField(u'G<sub>2</sub>', validators=[Optional()])
     gre_3_date = DateField(u'G<sub>3</sub>', validators=[Optional()])
+    # supervisor
     supervisor_email = StringField(u'设计人（邮箱）', validators=[Length(0, 64)])
     submit = SubmitField(u'提交')
 

@@ -158,9 +158,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="eight wide required field">
+                        <div class="four wide required field">
                             {{ form.speed.label() }}
                             {{ form.speed(placeholder='时间系数') }}
+                        </div>
+                        <div class="four wide field">
+                            {{ form.intensity.label() }}
+                            <div class="ui right labeled input">
+                                {{ form.intensity(placeholder='用于自动生成') }}
+                                <div class="ui label">小时/周</div>
+                            </div>
                         </div>
                     </div>
                     <div id="set-form-button" class="ui positive left labeled icon button"><i class="rocket icon"></i>自动生成</div>
@@ -820,6 +827,7 @@ $('.ui.checkbox').checkbox();
 {{ macros.date_range_picker_js_snippet(start_id='vb-7-start-date', end_id='vb-7-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-8-start-date', end_id='vb-8-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='vb-9-start-date', end_id='vb-9-end-date') }}
+{% if user.can('预约Y-GRE课程') %}
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-intro-start-date', end_id='y-gre-intro-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-1-start-date', end_id='y-gre-1-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-2-start-date', end_id='y-gre-2-end-date') }}
@@ -831,6 +839,7 @@ $('.ui.checkbox').checkbox();
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-8-start-date', end_id='y-gre-8-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-9-start-date', end_id='y-gre-9-end-date') }}
 {{ macros.date_range_picker_js_snippet(start_id='y-gre-prep-start-date', end_id='y-gre-prep-end-date') }}
+{% endif %}
 
 $(document)
     .ready(function() {
@@ -1640,60 +1649,64 @@ $('#set-form-button')
         var start_date = $('#edit-study-plan').form('get value', 'start_date');
         var deadline = $('#edit-study-plan').form('get value', 'deadline');
         var speed = $('#edit-study-plan').form('get value', 'speed');
-        if (re.test(start_date) && re.test(deadline) && Number(speed) > 0) {
+        var intensity = $('#edit-study-plan').form('get value', 'intensity');
+        if (re.test(start_date) && re.test(deadline) && Number(speed) > 0 && Number(intensity) > 0) {
             $.getJSON("{{ url_for('manage.generate_study_plan', id=user.id) }}", {
                 'start_date': start_date,
                 'deadline': deadline,
-                'speed': speed
+                'speed': speed,
+                'intensity': intensity
             }, function(data) {
-                $('#edit-study-plan').form('set values', {
-                    'vb_intro_start_date': data.vb_intro_start_date,
-                    'vb_intro_end_date': data.vb_intro_end_date,
-                    'vb_1_start_date': data.vb_1_start_date,
-                    'vb_1_end_date': data.vb_1_end_date,
-                    'vb_2_start_date': data.vb_2_start_date,
-                    'vb_2_end_date': data.vb_2_end_date,
-                    'vb_3_start_date': data.vb_3_start_date,
-                    'vb_3_end_date': data.vb_3_end_date,
-                    'vb_4_start_date': data.vb_4_start_date,
-                    'vb_4_end_date': data.vb_4_end_date,
-                    'vb_5_start_date': data.vb_5_start_date,
-                    'vb_5_end_date': data.vb_5_end_date,
-                    'vb_6_start_date': data.vb_6_start_date,
-                    'vb_6_end_date': data.vb_6_end_date,
-                    'vb_7_start_date': data.vb_7_start_date,
-                    'vb_7_end_date': data.vb_7_end_date,
-                    'vb_8_start_date': data.vb_8_start_date,
-                    'vb_8_end_date': data.vb_8_end_date,
-                    'vb_9_start_date': data.vb_9_start_date,
-                    'vb_9_end_date': data.vb_9_end_date
-                });
-                {% if user.can('预约Y-GRE课程') %}
-                $('#edit-study-plan').form('set values', {
-                    'y_gre_intro_start_date': data.y_gre_intro_start_date,
-                    'y_gre_intro_end_date': data.y_gre_intro_end_date,
-                    'y_gre_1_start_date': data.y_gre_1_start_date,
-                    'y_gre_1_end_date': data.y_gre_1_end_date,
-                    'y_gre_2_start_date': data.y_gre_2_start_date,
-                    'y_gre_2_end_date': data.y_gre_2_end_date,
-                    'y_gre_3_start_date': data.y_gre_3_start_date,
-                    'y_gre_3_end_date': data.y_gre_3_end_date,
-                    'y_gre_4_start_date': data.y_gre_4_start_date,
-                    'y_gre_4_end_date': data.y_gre_4_end_date,
-                    'y_gre_5_start_date': data.y_gre_5_start_date,
-                    'y_gre_5_end_date': data.y_gre_5_end_date,
-                    'y_gre_6_start_date': data.y_gre_6_start_date,
-                    'y_gre_6_end_date': data.y_gre_6_end_date,
-                    'y_gre_7_start_date': data.y_gre_7_start_date,
-                    'y_gre_7_end_date': data.y_gre_7_end_date,
-                    'y_gre_8_start_date': data.y_gre_8_start_date,
-                    'y_gre_8_end_date': data.y_gre_8_end_date,
-                    'y_gre_9_start_date': data.y_gre_9_start_date,
-                    'y_gre_9_end_date': data.y_gre_9_end_date,
-                    'y_gre_prep_start_date': data.y_gre_prep_start_date,
-                    'y_gre_prep_end_date': data.y_gre_prep_end_date
-                });
-                {% endif %}
+                if (data.valid) {
+                    $('#edit-study-plan').form('set values', {
+                        'vb_intro_start_date': data['VB总论'].start_date,
+                        'vb_intro_end_date': data['VB总论'].end_date,
+                        'vb_1_start_date': data['L1'].start_date,
+                        'vb_1_end_date': data['L1'].end_date,
+                        'vb_2_start_date': data['L2'].start_date,
+                        'vb_2_end_date': data['L2'].end_date,
+                        'vb_3_start_date': data['L3'].start_date,
+                        'vb_3_end_date': data['L3'].end_date,
+                        'vb_4_start_date': data['L4'].start_date,
+                        'vb_4_end_date': data['L4'].end_date,
+                        'vb_5_start_date': data['L5'].start_date,
+                        'vb_5_end_date': data['L5'].end_date,
+                        'vb_6_start_date': data['L6'].start_date,
+                        'vb_6_end_date': data['L6'].end_date,
+                        'vb_7_start_date': data['L7'].start_date,
+                        'vb_7_end_date': data['L7'].end_date,
+                        'vb_8_start_date': data['L8'].start_date,
+                        'vb_8_end_date': data['L8'].end_date,
+                        'vb_9_start_date': data['L9'].start_date,
+                        'vb_9_end_date': data['L9'].end_date
+                    });
+                    {% if user.can('预约Y-GRE课程') %}
+                    $('#edit-study-plan').form('set values', {
+                        'y_gre_intro_start_date': data['Y-GRE总论'].start_date,
+                        'y_gre_intro_end_date': data['Y-GRE总论'].end_date,
+                        'y_gre_1_start_date': data['1st'].start_date,
+                        'y_gre_1_end_date': data['1st'].end_date,
+                        'y_gre_2_start_date': data['2nd'].start_date,
+                        'y_gre_2_end_date': data['2nd'].end_date,
+                        'y_gre_3_start_date': data['3rd'].start_date,
+                        'y_gre_3_end_date': data['3rd'].end_date,
+                        'y_gre_4_start_date': data['4th'].start_date,
+                        'y_gre_4_end_date': data['4th'].end_date,
+                        'y_gre_5_start_date': data['5th'].start_date,
+                        'y_gre_5_end_date': data['5th'].end_date,
+                        'y_gre_6_start_date': data['6th'].start_date,
+                        'y_gre_6_end_date': data['6th'].end_date,
+                        'y_gre_7_start_date': data['7th'].start_date,
+                        'y_gre_7_end_date': data['7th'].end_date,
+                        'y_gre_8_start_date': data['8th'].start_date,
+                        'y_gre_8_end_date': data['8th'].end_date,
+                        'y_gre_9_start_date': data['9th'].start_date,
+                        'y_gre_9_end_date': data['9th'].end_date,
+                        'y_gre_prep_start_date': data['Y-GRE临考'].start_date,
+                        'y_gre_prep_end_date': data['Y-GRE临考'].end_date
+                    });
+                    {% endif %}
+                };
             });
         };
     })
