@@ -131,7 +131,7 @@
                                     {{ gre_form.q_score.label() }}
                                     {{ gre_form.q_score(placeholder='Q成绩') }}
                                 </div>
-                                <div class="eight wide required field">
+                                <div class="eight wide field">
                                     {{ gre_form.aw_score.label() }}
                                     {{ gre_form.aw_score(class='ui dropdown') }}
                                 </div>
@@ -431,15 +431,6 @@ $(document)
                             {
                                 type: 'integer[130..170]',
                                 prompt: '请填写有效的Quantitative Reasoning成绩'
-                            }
-                        ]
-                    },
-                    aw_score: {
-                        identifier: 'gre-aw_score',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择Analytical Writing成绩'
                             }
                         ]
                     },

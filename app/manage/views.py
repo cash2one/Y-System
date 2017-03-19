@@ -1832,13 +1832,16 @@ def test():
             test = GRETest(date=gre_form.test_date.data)
             db.session.add(test)
             db.session.commit()
+        aw_score_id = None
+        if gre_form.aw_score.data:
+            aw_score_id = int(gre_form.aw_score.data)
         score = GRETestScore(
             user_id=user.id,
             test_id=test.id,
             label_id=label_id,
             v_score=gre_form.v_score.data,
             q_score=gre_form.q_score.data,
-            aw_score_id=int(gre_form.aw_score.data),
+            aw_score_id=aw_score_id,
             modified_by_id=current_user.id
         )
         db.session.add(score)
@@ -2069,13 +2072,16 @@ def test_score(test_type, id):
                 test = GRETest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
+            aw_score_id = None
+            if form.aw_score.data:
+                aw_score_id = int(form.aw_score.data)
             score = GRETestScore(
                 user_id=user.id,
                 test_id=test.id,
                 label_id=label_id,
                 v_score=form.v_score.data,
                 q_score=form.q_score.data,
-                aw_score_id=int(form.aw_score.data),
+                aw_score_id=aw_score_id,
                 modified_by_id=current_user.id
             )
             db.session.add(score)
@@ -2219,11 +2225,14 @@ def edit_test_score(test_type, id):
                 test = GRETest(date=form.test_date.data)
                 db.session.add(test)
                 db.session.commit()
+            aw_score_id = None
+            if form.aw_score.data:
+                aw_score_id = int(form.aw_score.data)
             score.test_id = test.id
             score.label_id = label_id
             score.v_score = form.v_score.data
             score.q_score = form.q_score.data
-            score.aw_score_id = int(form.aw_score.data)
+            score.aw_score_id = aw_score_id
             score.modified_at = datetime.utcnow()
             score.modified_by_id = current_user.id
             db.session.add(score)
@@ -2237,7 +2246,8 @@ def edit_test_score(test_type, id):
             form.score_label.data = unicode(score.label_id)
         form.v_score.data = score.v_score
         form.q_score.data = score.q_score
-        form.aw_score.data = unicode(score.aw_score_id)
+        if score.aw_score_id:
+            form.aw_score.data = unicode(score.aw_score_id)
     if test_type == u'toefl':
         score = TOEFLTestScore.query.get_or_404(id)
         form = EditTOEFLTestScoreForm()

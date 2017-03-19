@@ -82,7 +82,7 @@
                             {{ form.q_score.label() }}
                             {{ form.q_score(placeholder='Q成绩') }}
                         </div>
-                        <div class="eight wide required field">
+                        <div class="eight wide field">
                             {{ form.aw_score.label() }}
                             {{ form.aw_score(class='ui dropdown') }}
                         </div>
@@ -267,15 +267,6 @@ $(document)
                             {
                                 type: 'integer[130..170]',
                                 prompt: '请填写有效的Quantitative Reasoning成绩'
-                            }
-                        ]
-                    },
-                    aw_score: {
-                        identifier: 'aw_score',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择Analytical Writing成绩'
                             }
                         ]
                     },
