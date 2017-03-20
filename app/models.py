@@ -2620,56 +2620,58 @@ class User(UserMixin, db.Model):
                     line_num = 0
                     for entry in reader:
                         if line_num >= 1:
-                            if entry[5] is not None:
-                                entry[5] = datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S.%f')
-                            if entry[7] is not None:
-                                entry[7] = datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S.%f')
-                            if entry[8] is not None:
-                                entry[8] = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S.%f')
-                            if entry[11] is not None:
-                                entry[11] = IDType.query.filter_by(name=entry[11]).first().id
-                            if entry[13] is not None:
-                                entry[13] = Gender.query.filter_by(name=entry[13]).first().id
-                            if entry[14] is not None:
-                                entry[14] = datetime.strptime(entry[14], '%Y-%m-%d').date()
-                            if entry[21] is not None:
-                                entry[21] = Relationship.query.filter_by(name=entry[21]).first().id
-                            if entry[27] is not None:
-                                entry[27] = datetime.strptime(entry[27], '%Y-%m-%d').date()
-                            user = User(
-                                email=entry[0],
-                                confirmed=bool(int(entry[1])),
-                                role_id=Role.query.filter_by(name=entry[2]).first().id,
-                                password_hash=str(entry[3]),
-                                created=bool(int(entry[4])),
-                                created_at=entry[5],
-                                activated=bool(int(entry[6])),
-                                activated_at=entry[7],
-                                last_seen_at=entry[8],
-                                deleted=bool(int(entry[9])),
-                                name=entry[10],
-                                id_type_id=entry[11],
-                                id_number=entry[12],
-                                gender_id=entry[13],
-                                birthdate=entry[14],
-                                mobile=entry[15],
-                                wechat=entry[16],
-                                qq=entry[17],
-                                address=entry[18],
-                                emergency_contact_name=entry[19],
-                                emergency_contact_mobile=entry[20],
-                                emergency_contact_relationship_id=entry[21],
-                                worked_in_same_field=bool(int(entry[22])),
-                                deformity=bool(int(entry[23])),
-                                application_aim=entry[24],
-                                application_agency=entry[25],
-                                speed=float(entry[26]),
-                                deadline=entry[27]
-                            )
-                            db.session.add(user)
+                            user = User.query.filter_by(email=entry[0]).first()
+                            if user is None:
+                                if entry[5] is not None:
+                                    entry[5] = datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S.%f')
+                                if entry[7] is not None:
+                                    entry[7] = datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S.%f')
+                                if entry[8] is not None:
+                                    entry[8] = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S.%f')
+                                if entry[11] is not None:
+                                    entry[11] = IDType.query.filter_by(name=entry[11]).first().id
+                                if entry[13] is not None:
+                                    entry[13] = Gender.query.filter_by(name=entry[13]).first().id
+                                if entry[14] is not None:
+                                    entry[14] = datetime.strptime(entry[14], '%Y-%m-%d').date()
+                                if entry[21] is not None:
+                                    entry[21] = Relationship.query.filter_by(name=entry[21]).first().id
+                                if entry[27] is not None:
+                                    entry[27] = datetime.strptime(entry[27], '%Y-%m-%d').date()
+                                user = User(
+                                    email=entry[0],
+                                    confirmed=bool(int(entry[1])),
+                                    role_id=Role.query.filter_by(name=entry[2]).first().id,
+                                    password_hash=str(entry[3]),
+                                    created=bool(int(entry[4])),
+                                    created_at=entry[5],
+                                    activated=bool(int(entry[6])),
+                                    activated_at=entry[7],
+                                    last_seen_at=entry[8],
+                                    deleted=bool(int(entry[9])),
+                                    name=entry[10],
+                                    id_type_id=entry[11],
+                                    id_number=entry[12],
+                                    gender_id=entry[13],
+                                    birthdate=entry[14],
+                                    mobile=entry[15],
+                                    wechat=entry[16],
+                                    qq=entry[17],
+                                    address=entry[18],
+                                    emergency_contact_name=entry[19],
+                                    emergency_contact_mobile=entry[20],
+                                    emergency_contact_relationship_id=entry[21],
+                                    worked_in_same_field=bool(int(entry[22])),
+                                    deformity=bool(int(entry[23])),
+                                    application_aim=entry[24],
+                                    application_agency=entry[25],
+                                    speed=float(entry[26]),
+                                    deadline=entry[27]
+                                )
+                                db.session.add(user)
+                                print u'导入用户信息', entry[2], entry[10], entry[0]
                         line_num += 1
                     db.session.commit()
-                    print u'---> Insert entries from file: %s' % csvfile
 
     @staticmethod
     def backup_entries(data, basedir):
