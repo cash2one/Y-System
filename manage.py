@@ -156,25 +156,25 @@ def deploy():
         User.insert_entries(data=data, basedir=basedir)
 
         from app.models import Tag
-        Tag.insert_entries(data=data, basedir=basedir)
+        Tag.insert_entries(data='initial', basedir=basedir)
 
         from app.models import Product
-        Product.insert_entries(data=data, basedir=basedir)
+        Product.insert_entries(data='initial', basedir=basedir)
 
         from app.models import Course
-        Course.insert_entries(data=data, basedir=basedir)
+        Course.insert_entries(data='initial', basedir=basedir)
 
         from app.models import Period
-        Period.insert_entries(data=data, basedir=basedir)
+        Period.insert_entries(data='initial', basedir=basedir)
 
         from app.models import iPad
-        iPad.insert_entries(data=data, basedir=basedir)
+        iPad.insert_entries(data='initial', basedir=basedir)
 
         from app.models import iPadContent
-        iPadContent.insert_entries(data=data, basedir=basedir)
+        iPadContent.insert_entries(data='initial', basedir=basedir)
 
         from app.models import NotaBene
-        NotaBene.insert_entries(data=data, basedir=basedir)
+        NotaBene.insert_entries(data='initial', basedir=basedir)
     else:
         print u'---> Invalid data identifier: %s' % data
 

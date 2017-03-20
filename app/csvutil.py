@@ -6,7 +6,7 @@ import cStringIO
 
 
 def from_str(value):
-    if value = '':
+    if value == '':
         value = None
     return value
 
