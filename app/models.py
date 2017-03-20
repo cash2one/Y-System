@@ -18,11 +18,11 @@ from . import db, login_manager
 
 class Version:
     Application = 'v1.0.0-dev'
-    jQuery = '3.2.0'
+    jQuery = '3.1.1'
     SemanticUI = '2.2.9'
     SemanticUICalendar = '0.0.7'
     FontAwesome = '4.7.0'
-    MomentJS = '2.17.1'
+    MomentJS = '2.18.0'
     CountUp = '1.8.2'
     ECharts = '3.4.0'
 
@@ -41,35 +41,34 @@ class Color(db.Model):
     score_labels = db.relationship('ScoreLabel', backref='color', lazy='dynamic')
 
     @staticmethod
-    def insert_colors(data):
-        if data == u'initial':
-            colors = [
-                (u'Default', u'', ),
-                (u'Red', u'red', ),
-                (u'Orange', u'orange', ),
-                (u'Yellow', u'yellow', ),
-                (u'Olive', u'olive', ),
-                (u'Green', u'green', ),
-                (u'Teal', u'teal', ),
-                (u'Blue', u'blue', ),
-                (u'Violet', u'violet', ),
-                (u'Purple', u'purple', ),
-                (u'Pink', u'pink', ),
-                (u'Brown', u'brown', ),
-                (u'Grey', u'grey', ),
-                (u'Black', u'black', ),
-                (u'Basic', u'basic', ),
-            ]
-            for entry in colors:
-                color = Color.query.filter_by(name=entry[0]).first()
-                if color is None:
-                    color = Color(
-                        name=entry[0],
-                        css_class=entry[1]
-                    )
-                    db.session.add(color)
-                    print u'导入颜色信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'Default', u'', ),
+            (u'Red', u'red', ),
+            (u'Orange', u'orange', ),
+            (u'Yellow', u'yellow', ),
+            (u'Olive', u'olive', ),
+            (u'Green', u'green', ),
+            (u'Teal', u'teal', ),
+            (u'Blue', u'blue', ),
+            (u'Violet', u'violet', ),
+            (u'Purple', u'purple', ),
+            (u'Pink', u'pink', ),
+            (u'Brown', u'brown', ),
+            (u'Grey', u'grey', ),
+            (u'Black', u'black', ),
+            (u'Basic', u'basic', ),
+        ]
+        for entry in entries:
+            color = Color.query.filter_by(name=entry[0]).first()
+            if color is None:
+                color = Color(
+                    name=entry[0],
+                    css_class=entry[1]
+                )
+                db.session.add(color)
+                print u'导入颜色信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Color %r>' % self.name
@@ -95,46 +94,45 @@ class Permission(db.Model):
     )
 
     @staticmethod
-    def insert_permissions(data):
-        if data == u'initial':
-            permissions = [
-                (u'预约', True, ),
-                (u'预约VB课程', True, ),
-                (u'预约Y-GRE课程', True, ),
-                (u'预约VB课程×2', True, ),
-                (u'预约任意课程', True, ),
-                (u'管理', False, ),
-                (u'管理课程预约', False, ),
-                (u'管理研修进度', False, ),
-                (u'管理研修计划', False, ),
-                (u'管理iPad借阅', False, ),
-                (u'管理预约时段', False, ),
-                (u'管理课程', False, ),
-                (u'管理作业', False, ),
-                (u'管理考试', False, ),
-                (u'管理用户', False, ),
-                (u'管理团报', False, ),
-                (u'管理班级', False, ),
-                (u'管理用户标签', False, ),
-                (u'管理iPad设备', False, ),
-                (u'管理NB', False, ),
-                (u'管理反馈', False, ),
-                (u'管理通知', False, ),
-                (u'管理站内信', False, ),
-                (u'管理产品', False, ),
-                (u'管理权限', False, ),
-                (u'开发权限', False, ),
-            ]
-            for entry in permissions:
-                permission = Permission.query.filter_by(name=entry[0]).first()
-                if permission is None:
-                    permission = Permission(
-                        name=entry[0],
-                        check_overdue=entry[1]
-                    )
-                    db.session.add(permission)
-                    print u'导入用户权限信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'预约', True, ),
+            (u'预约VB课程', True, ),
+            (u'预约Y-GRE课程', True, ),
+            (u'预约VB课程×2', True, ),
+            (u'预约任意课程', True, ),
+            (u'管理', False, ),
+            (u'管理课程预约', False, ),
+            (u'管理研修进度', False, ),
+            (u'管理研修计划', False, ),
+            (u'管理iPad借阅', False, ),
+            (u'管理预约时段', False, ),
+            (u'管理课程', False, ),
+            (u'管理作业', False, ),
+            (u'管理考试', False, ),
+            (u'管理用户', False, ),
+            (u'管理团报', False, ),
+            (u'管理班级', False, ),
+            (u'管理用户标签', False, ),
+            (u'管理iPad设备', False, ),
+            (u'管理NB', False, ),
+            (u'管理反馈', False, ),
+            (u'管理通知', False, ),
+            (u'管理站内信', False, ),
+            (u'管理产品', False, ),
+            (u'管理权限', False, ),
+            (u'开发权限', False, ),
+        ]
+        for entry in entries:
+            permission = Permission.query.filter_by(name=entry[0]).first()
+            if permission is None:
+                permission = Permission(
+                    name=entry[0],
+                    check_overdue=entry[1]
+                )
+                db.session.add(permission)
+                print u'导入用户权限信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Permission %r>' % self.name
@@ -197,32 +195,31 @@ class Role(db.Model):
         return len(self.permissions)
 
     @staticmethod
-    def insert_roles(data):
-        if data == u'initial':
-            roles = [
-                (u'挂起', [], ),
-                (u'单VB', [u'预约', u'预约VB课程'], ),
-                (u'Y-GRE 普通', [u'预约', u'预约VB课程', u'预约Y-GRE课程'], ),
-                (u'Y-GRE VB×2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程×2'], ),
-                (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
-                (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理iPad借阅'], ),
-                (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理研修计划', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品'], ),
-                (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理研修计划', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品', u'管理权限'], ),
-                (u'开发人员', [permission.name for permission in Permission.query.all()], ),
-            ]
-            for entry in roles:
-                role = Role.query.filter_by(name=entry[0]).first()
-                if role is None:
-                    role = Role(name=entry[0])
-                    db.session.add(role)
-                    db.session.commit()
-                    print u'导入用户角色信息', entry[0]
-                for sub_entry in entry[1]:
-                    permission = Permission.query.filter_by(name=sub_entry).first()
-                    if not role.has_permission(permission=permission):
-                        role.add_permission(permission=permission)
-                        print u'赋予权限', entry[0], sub_entry
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'挂起', [], ),
+            (u'单VB', [u'预约', u'预约VB课程'], ),
+            (u'Y-GRE 普通', [u'预约', u'预约VB课程', u'预约Y-GRE课程'], ),
+            (u'Y-GRE VB×2', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约VB课程×2'], ),
+            (u'Y-GRE A权限', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'], ),
+            (u'志愿者', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理iPad借阅'], ),
+            (u'协管员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理研修计划', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品'], ),
+            (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理研修计划', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品', u'管理权限'], ),
+            (u'开发人员', [permission.name for permission in Permission.query.all()], ),
+        ]
+        for entry in entries:
+            role = Role.query.filter_by(name=entry[0]).first()
+            if role is None:
+                role = Role(name=entry[0])
+                db.session.add(role)
+                db.session.commit()
+                print u'导入用户角色信息', entry[0]
+            for sub_entry in entry[1]:
+                permission = Permission.query.filter_by(name=sub_entry).first()
+                if not role.has_permission(permission=permission):
+                    role.add_permission(permission=permission)
+                    print u'赋予权限', entry[0], sub_entry
+        db.session.commit()
 
     def __repr__(self):
         return '<Role %r>' % self.name
@@ -235,19 +232,18 @@ class IDType(db.Model):
     users = db.relationship('User', backref='id_type', lazy='dynamic')
 
     @staticmethod
-    def insert_id_types(data):
-        if data == u'initial':
-            id_types = [
-                (u'身份证', ),
-                (u'其它', ),
-            ]
-            for entry in id_types:
-                id_type = IDType.query.filter_by(name=entry[0]).first()
-                if id_type is None:
-                    id_type = IDType(name=entry[0])
-                    db.session.add(id_type)
-                    print u'导入ID类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'身份证', ),
+            (u'其它', ),
+        ]
+        for entry in entries:
+            id_type = IDType.query.filter_by(name=entry[0]).first()
+            if id_type is None:
+                id_type = IDType(name=entry[0])
+                db.session.add(id_type)
+                print u'导入ID类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<ID Type %r>' % self.name
@@ -260,19 +256,18 @@ class Gender(db.Model):
     users = db.relationship('User', backref='gender', lazy='dynamic')
 
     @staticmethod
-    def insert_genders(data):
-        if data == u'initial':
-            genders = [
-                (u'男', ),
-                (u'女', ),
-            ]
-            for entry in genders:
-                gender = Gender.query.filter_by(name=entry[0]).first()
-                if gender is None:
-                    gender = Gender(name=entry[0])
-                    db.session.add(gender)
-                    print u'导入性别类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'男', ),
+            (u'女', ),
+        ]
+        for entry in entries:
+            gender = Gender.query.filter_by(name=entry[0]).first()
+            if gender is None:
+                gender = Gender(name=entry[0])
+                db.session.add(gender)
+                print u'导入性别类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Gender %r>' % self.name
@@ -285,28 +280,27 @@ class Relationship(db.Model):
     users = db.relationship('User', backref='relationship', lazy='dynamic')
 
     @staticmethod
-    def insert_relationships(data):
-        if data == u'initial':
-            relationships = [
-                (u'朋友', ),
-                (u'同学', ),
-                (u'同事', ),
-                (u'恋人', ),
-                (u'父母', ),
-                (u'配偶', ),
-                (u'子女', ),
-                (u'兄弟', ),
-                (u'兄妹', ),
-                (u'姊妹', ),
-                (u'姊弟', ),
-            ]
-            for entry in relationships:
-                relationship = Relationship.query.filter_by(name=entry[0]).first()
-                if relationship is None:
-                    relationship = Relationship(name=entry[0])
-                    db.session.add(relationship)
-                    print u'导入关系类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'朋友', ),
+            (u'同学', ),
+            (u'同事', ),
+            (u'恋人', ),
+            (u'父母', ),
+            (u'配偶', ),
+            (u'子女', ),
+            (u'兄弟', ),
+            (u'兄妹', ),
+            (u'姊妹', ),
+            (u'姊弟', ),
+        ]
+        for entry in entries:
+            relationship = Relationship.query.filter_by(name=entry[0]).first()
+            if relationship is None:
+                relationship = Relationship(name=entry[0])
+                db.session.add(relationship)
+                print u'导入关系类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Relationship %r>' % self.name
@@ -333,25 +327,24 @@ class PurposeType(db.Model):
     )
 
     @staticmethod
-    def insert_purpose_types(data):
-        if data == u'initial':
-            purpose_types = [
-                (u'词源爱好者', ),
-                (u'GRE', ),
-                (u'TOEFL', ),
-                (u'GMAT', ),
-                (u'IELTS', ),
-                (u'考研', ),
-                (u'四六级', ),
-                (u'其它', ),
-            ]
-            for entry in purpose_types:
-                purpose_type = PurposeType.query.filter_by(name=entry[0]).first()
-                if purpose_type is None:
-                    purpose_type = PurposeType(name=entry[0])
-                    db.session.add(purpose_type)
-                    print u'导入研修目的类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'词源爱好者', ),
+            (u'GRE', ),
+            (u'TOEFL', ),
+            (u'GMAT', ),
+            (u'IELTS', ),
+            (u'考研', ),
+            (u'四六级', ),
+            (u'其它', ),
+        ]
+        for entry in entries:
+            purpose_type = PurposeType.query.filter_by(name=entry[0]).first()
+            if purpose_type is None:
+                purpose_type = PurposeType(name=entry[0])
+                db.session.add(purpose_type)
+                print u'导入研修目的类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Purpose Type %r>' % self.name
@@ -378,24 +371,23 @@ class ReferrerType(db.Model):
     )
 
     @staticmethod
-    def insert_referrer_types(data):
-        if data == u'initial':
-            referrer_types = [
-                (u'讲座', ),
-                (u'博客', ),
-                (u'微博', ),
-                (u'微信', ),
-                (u'人人', ),
-                (u'传单', ),
-                (u'其它', ),
-            ]
-            for entry in referrer_types:
-                referrer_type = ReferrerType.query.filter_by(name=entry[0]).first()
-                if referrer_type is None:
-                    referrer_type = ReferrerType(name=entry[0])
-                    db.session.add(referrer_type)
-                    print u'导入来源类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'讲座', ),
+            (u'博客', ),
+            (u'微博', ),
+            (u'微信', ),
+            (u'人人', ),
+            (u'传单', ),
+            (u'其它', ),
+        ]
+        for entry in entries:
+            referrer_type = ReferrerType.query.filter_by(name=entry[0]).first()
+            if referrer_type is None:
+                referrer_type = ReferrerType(name=entry[0])
+                db.session.add(referrer_type)
+                print u'导入来源类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Purpose Type %r>' % self.name
@@ -470,24 +462,23 @@ class BookingState(db.Model):
     bookings = db.relationship('Booking', backref='state', lazy='dynamic')
 
     @staticmethod
-    def insert_booking_states(data):
-        if data == u'initial':
-            booking_states = [
-                (u'预约', ),
-                (u'排队', ),
-                (u'失效', ),
-                (u'赴约', ),
-                (u'迟到', ),
-                (u'爽约', ),
-                (u'取消', ),
-            ]
-            for entry in booking_states:
-                booking_state = BookingState.query.filter_by(name=entry[0]).first()
-                if booking_state is None:
-                    booking_state = BookingState(name=entry[0])
-                    db.session.add(booking_state)
-                    print u'导入预约状态信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'预约', ),
+            (u'排队', ),
+            (u'失效', ),
+            (u'赴约', ),
+            (u'迟到', ),
+            (u'爽约', ),
+            (u'取消', ),
+        ]
+        for entry in entries:
+            booking_state = BookingState.query.filter_by(name=entry[0]).first()
+            if booking_state is None:
+                booking_state = BookingState(name=entry[0])
+                db.session.add(booking_state)
+                print u'导入预约状态信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Booking State %r>' % self.name
@@ -701,31 +692,30 @@ class AssignmentScoreGrade(db.Model):
     assignment_scores = db.relationship('AssignmentScore', backref='grade', lazy='dynamic')
 
     @staticmethod
-    def insert_assignment_score_grades(data):
-        if data == u'initial':
-            assignment_score_grades = [
-                (u'完成', ),
-                (u'A+', ),
-                (u'A', ),
-                (u'A-', ),
-                (u'B+', ),
-                (u'B', ),
-                (u'B-', ),
-                (u'C+', ),
-                (u'C', ),
-                (u'C-', ),
-                (u'D+', ),
-                (u'D', ),
-                (u'D-', ),
-                (u'F', ),
-            ]
-            for entry in assignment_score_grades:
-                assignment_score_grade = AssignmentScoreGrade.query.filter_by(name=entry[0]).first()
-                if assignment_score_grade is None:
-                    assignment_score_grade = AssignmentScoreGrade(name=entry[0])
-                    db.session.add(assignment_score_grade)
-                    print u'导入作业成绩类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'完成', ),
+            (u'A+', ),
+            (u'A', ),
+            (u'A-', ),
+            (u'B+', ),
+            (u'B', ),
+            (u'B-', ),
+            (u'C+', ),
+            (u'C', ),
+            (u'C-', ),
+            (u'D+', ),
+            (u'D', ),
+            (u'D-', ),
+            (u'F', ),
+        ]
+        for entry in entries:
+            assignment_score_grade = AssignmentScoreGrade.query.filter_by(name=entry[0]).first()
+            if assignment_score_grade is None:
+                assignment_score_grade = AssignmentScoreGrade(name=entry[0])
+                db.session.add(assignment_score_grade)
+                print u'导入作业成绩类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Assignment Score Grade %r>' % self.name
@@ -822,16 +812,15 @@ class GREAWScore(db.Model):
     gre_test_scores = db.relationship('GRETestScore', backref='aw_score', lazy='dynamic')
 
     @staticmethod
-    def insert_gre_aw_scores(data):
-        if data == u'initial':
-            gre_aw_scores = [(unicode(x/2.0), x/2.0, ) for x in range(0, 13)]
-            for entry in gre_aw_scores:
-                gre_aw_score = GREAWScore.query.filter_by(name=entry[0]).first()
-                if gre_aw_score is None:
-                    gre_aw_score = GREAWScore(name=entry[0], value=entry[1])
-                    db.session.add(gre_aw_score)
-                    print u'导入GRE AW成绩类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [(unicode(x/2.0), x/2.0, ) for x in range(0, 13)]
+        for entry in entries:
+            gre_aw_score = GREAWScore.query.filter_by(name=entry[0]).first()
+            if gre_aw_score is None:
+                gre_aw_score = GREAWScore(name=entry[0], value=entry[1])
+                db.session.add(gre_aw_score)
+                print u'导入GRE AW成绩类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<GRE Analytical Writing Score %r>' % self.name
@@ -925,45 +914,44 @@ class ScoreLabel(db.Model):
         return u'%s - %s' % (self.category, self.name)
 
     @staticmethod
-    def insert_score_labels(data):
-        if data == u'initial':
-            score_labels = [
-                (u'初始', u'GRE', u'Basic', ),
-                (u'目标', u'GRE', u'Basic', ),
-                (u'G0', u'GRE', u'Basic', ),
-                (u'G1', u'GRE', u'Basic', ),
-                (u'G2', u'GRE', u'Basic', ),
-                (u'G3', u'GRE', u'Basic', ),
-                (u'G4', u'GRE', u'Basic', ),
-                (u'G5', u'GRE', u'Basic', ),
-                (u'G6', u'GRE', u'Basic', ),
-                (u'G7', u'GRE', u'Basic', ),
-                (u'G8', u'GRE', u'Basic', ),
-                (u'G9', u'GRE', u'Basic', ),
-                (u'初始', u'TOEFL', u'Basic', ),
-                (u'目标', u'TOEFL', u'Basic', ),
-                (u'T0', u'TOEFL', u'Basic', ),
-                (u'T1', u'TOEFL', u'Basic', ),
-                (u'T2', u'TOEFL', u'Basic', ),
-                (u'T3', u'TOEFL', u'Basic', ),
-                (u'T4', u'TOEFL', u'Basic', ),
-                (u'T5', u'TOEFL', u'Basic', ),
-                (u'T6', u'TOEFL', u'Basic', ),
-                (u'T7', u'TOEFL', u'Basic', ),
-                (u'T8', u'TOEFL', u'Basic', ),
-                (u'T9', u'TOEFL', u'Basic', ),
-            ]
-            for entry in score_labels:
-                score_label = ScoreLabel.query.filter_by(name=entry[0], category=entry[1]).first()
-                if score_label is None:
-                    score_label = ScoreLabel(
-                        name=entry[0],
-                        category=entry[1],
-                        color_id=Color.query.filter_by(name=entry[2]).first().id
-                    )
-                    db.session.add(score_label)
-                    print u'导入G/T成绩标签信息', entry[0], entry[1], entry[2]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'初始', u'GRE', u'Basic', ),
+            (u'目标', u'GRE', u'Basic', ),
+            (u'G0', u'GRE', u'Basic', ),
+            (u'G1', u'GRE', u'Basic', ),
+            (u'G2', u'GRE', u'Basic', ),
+            (u'G3', u'GRE', u'Basic', ),
+            (u'G4', u'GRE', u'Basic', ),
+            (u'G5', u'GRE', u'Basic', ),
+            (u'G6', u'GRE', u'Basic', ),
+            (u'G7', u'GRE', u'Basic', ),
+            (u'G8', u'GRE', u'Basic', ),
+            (u'G9', u'GRE', u'Basic', ),
+            (u'初始', u'TOEFL', u'Basic', ),
+            (u'目标', u'TOEFL', u'Basic', ),
+            (u'T0', u'TOEFL', u'Basic', ),
+            (u'T1', u'TOEFL', u'Basic', ),
+            (u'T2', u'TOEFL', u'Basic', ),
+            (u'T3', u'TOEFL', u'Basic', ),
+            (u'T4', u'TOEFL', u'Basic', ),
+            (u'T5', u'TOEFL', u'Basic', ),
+            (u'T6', u'TOEFL', u'Basic', ),
+            (u'T7', u'TOEFL', u'Basic', ),
+            (u'T8', u'TOEFL', u'Basic', ),
+            (u'T9', u'TOEFL', u'Basic', ),
+        ]
+        for entry in entries:
+            score_label = ScoreLabel.query.filter_by(name=entry[0], category=entry[1]).first()
+            if score_label is None:
+                score_label = ScoreLabel(
+                    name=entry[0],
+                    category=entry[1],
+                    color_id=Color.query.filter_by(name=entry[2]).first().id
+                )
+                db.session.add(score_label)
+                print u'导入G/T成绩标签信息', entry[0], entry[1], entry[2]
+        db.session.commit()
 
     def __repr__(self):
         return '<Score Label %r>' % self.alias
@@ -1094,19 +1082,18 @@ class InvitationType(db.Model):
     invitations = db.relationship('Invitation', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_invitation_types(data):
-        if data == u'initial':
-            invitation_types = [
-                (u'积分', ),
-                (u'提成', ),
-            ]
-            for entry in invitation_types:
-                invitation_type = InvitationType.query.filter_by(name=entry[0]).first()
-                if invitation_type is None:
-                    invitation_type = InvitationType(name=entry[0])
-                    db.session.add(invitation_type)
-                    print u'导入邀请类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'积分', ),
+            (u'提成', ),
+        ]
+        for entry in entries:
+            invitation_type = InvitationType.query.filter_by(name=entry[0]).first()
+            if invitation_type is None:
+                invitation_type = InvitationType(name=entry[0])
+                db.session.add(invitation_type)
+                print u'导入邀请类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Invitation Type %r>' % self.name
@@ -2552,7 +2539,7 @@ class User(UserMixin, db.Model):
         return entry_json
 
     @staticmethod
-    def insert_users(data):
+    def insert_entries(data):
         if data == u'initial':
             admin = User.query.filter_by(email=current_app.config['YSYS_ADMIN']).first()
             if admin is None:
@@ -2574,7 +2561,7 @@ class User(UserMixin, db.Model):
                 print u'初始化系统管理员信息'
 
     @staticmethod
-    def backup_users(data):
+    def backup_entries(data):
         pass
 
     def __repr__(self):
@@ -2640,9 +2627,9 @@ class Tag(db.Model):
             .filter(User.deleted == False)
 
     @staticmethod
-    def insert_tags(data):
+    def insert_entries(data):
         if data == u'initial':
-            tags = [
+            entries = [
                 (u'未缴全款', u'Red', True, ),
                 (u'北大', u'Red', True, ),
                 (u'清华', u'Purple', True, ),
@@ -2655,7 +2642,7 @@ class Tag(db.Model):
                 (u'3rd', u'Green', True, ),
                 (u'6th', u'Green', True, ),
             ]
-            for entry in tags:
+            for entry in entries:
                 tag = Tag.query.filter_by(name=entry[0]).first()
                 if tag is None:
                     tag = Tag(
@@ -2678,21 +2665,20 @@ class EducationType(db.Model):
     education_records = db.relationship('EducationRecord', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_education_types(data):
-        if data == u'initial':
-            education_types = [
-                (u'高中', ),
-                (u'本科', ),
-                (u'硕士', ),
-                (u'博士', ),
-            ]
-            for entry in education_types:
-                education_type = EducationType.query.filter_by(name=entry[0]).first()
-                if education_type is None:
-                    education_type = EducationType(name=entry[0])
-                    db.session.add(education_type)
-                    print u'导入学历类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'高中', ),
+            (u'本科', ),
+            (u'硕士', ),
+            (u'博士', ),
+        ]
+        for entry in entries:
+            education_type = EducationType.query.filter_by(name=entry[0]).first()
+            if education_type is None:
+                education_type = EducationType(name=entry[0])
+                db.session.add(education_type)
+                print u'导入学历类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Education Type %r>' % self.name
@@ -2758,26 +2744,25 @@ class ScoreType(db.Model):
     score_records = db.relationship('ScoreRecord', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_score_types(data):
-        if data == u'initial':
-            score_types = [
-                (u'高考总分', ),
-                (u'高考数学', ),
-                (u'高考英语', ),
-                (u'大学英语四级', ),
-                (u'大学英语六级', ),
-                (u'专业英语四级', ),
-                (u'专业英语八级', ),
-                (u'竞赛', ),
-                (u'其它', ),
-            ]
-            for entry in score_types:
-                score_type = ScoreType.query.filter_by(name=entry[0]).first()
-                if score_type is None:
-                    score_type = ScoreType(name=entry[0])
-                    db.session.add(score_type)
-                    print u'导入既往成绩类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'高考总分', ),
+            (u'高考数学', ),
+            (u'高考英语', ),
+            (u'大学英语四级', ),
+            (u'大学英语六级', ),
+            (u'专业英语四级', ),
+            (u'专业英语八级', ),
+            (u'竞赛', ),
+            (u'其它', ),
+        ]
+        for entry in entries:
+            score_type = ScoreType.query.filter_by(name=entry[0]).first()
+            if score_type is None:
+                score_type = ScoreType(name=entry[0])
+                db.session.add(score_type)
+                print u'导入既往成绩类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Score Record Type %r>' % self.name
@@ -2870,9 +2855,9 @@ class Product(db.Model):
         return sum([purchase.quantity for purchase in self.purchases if purchase.user.created and purchase.user.activated and not purchase.user.deleted])
 
     @staticmethod
-    def insert_products(data):
+    def insert_entries(data):
         if data == u'initial':
-            products = [
+            entries = [
                 (u'VB基本技术费', 6800.0, True, False, ),
                 (u'Y-GRE基本技术费', 6800.0, True, False, ),
                 (u'联报优惠', -1000.0, True, False, ),
@@ -2887,7 +2872,7 @@ class Product(db.Model):
                 (u'按月延长有效期', 1000.0, True, True, ),
                 (u'一次性延长2年有效期', 3000.0, True, True, ),
             ]
-            for entry in products:
+            for entry in entries:
                 product = Product.query.filter_by(name=entry[0]).first()
                 if product is None:
                     product = Product(
@@ -2919,19 +2904,18 @@ class CourseType(db.Model):
         return self.name.lower()
 
     @staticmethod
-    def insert_course_types(data):
-        if data == u'initial':
-            course_types = [
-                (u'VB', ),
-                (u'Y-GRE', ),
-            ]
-            for entry in course_types:
-                course_type = CourseType.query.filter_by(name=entry[0]).first()
-                if course_type is None:
-                    course_type = CourseType(name=entry[0])
-                    db.session.add(course_type)
-                    print u'导入课程类型信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'VB', ),
+            (u'Y-GRE', ),
+        ]
+        for entry in entries:
+            course_type = CourseType.query.filter_by(name=entry[0]).first()
+            if course_type is None:
+                course_type = CourseType(name=entry[0])
+                db.session.add(course_type)
+                print u'导入课程类型信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Course Type %r>' % self.name
@@ -2980,12 +2964,12 @@ class Course(db.Model):
             .filter(User.deleted == False)
 
     @staticmethod
-    def insert_courses(data):
+    def insert_entries(data):
         import xlrd
         data = xlrd.open_workbook(os.path.join('data', data, 'courses.xlsx'))
         table = data.sheet_by_index(0)
-        courses = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in courses:
+        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+        for entry in entries:
             course = Course.query.filter_by(name=entry[0]).first()
             if course is None:
                 course = Course(
@@ -3085,9 +3069,9 @@ class Period(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_periods(data):
+    def insert_entries(data):
         if data == u'initial':
-            periods = [
+            entries = [
                 (u'（淡季）VB上午', time(9, 0), time(15, 0), u'VB', ),
                 (u'（淡季）VB下午', time(15, 0), time(21, 0), u'VB', ),
                 (u'（旺季）VB时段1', time(8, 0), time(11, 30), u'VB', ),
@@ -3099,7 +3083,7 @@ class Period(db.Model):
                 (u'（旺季）Y-GRE上午', time(8, 0), time(15, 0), u'Y-GRE', ),
                 (u'（旺季）Y-GRE下午', time(15, 0), time(22, 0), u'Y-GRE', ),
             ]
-            for entry in periods:
+            for entry in entries:
                 period = Period.query.filter_by(name=entry[0]).first()
                 if period is None:
                     period = Period(
@@ -3280,22 +3264,21 @@ class iPadCapacity(db.Model):
     ipads = db.relationship('iPad', backref='capacity', lazy='dynamic')
 
     @staticmethod
-    def insert_ipad_capacities(data):
-        if data == u'initial':
-            ipad_capacities = [
-                (u'16GB', ),
-                (u'32GB', ),
-                (u'64GB', ),
-                (u'128GB', ),
-                (u'256GB', ),
-            ]
-            for entry in ipad_capacities:
-                ipad_capacity = iPadCapacity.query.filter_by(name=entry[0]).first()
-                if ipad_capacity is None:
-                    ipad_capacity = iPadCapacity(name=entry[0])
-                    db.session.add(ipad_capacity)
-                    print u'导入iPad容量信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'16GB', ),
+            (u'32GB', ),
+            (u'64GB', ),
+            (u'128GB', ),
+            (u'256GB', ),
+        ]
+        for entry in entries:
+            ipad_capacity = iPadCapacity.query.filter_by(name=entry[0]).first()
+            if ipad_capacity is None:
+                ipad_capacity = iPadCapacity(name=entry[0])
+                db.session.add(ipad_capacity)
+                print u'导入iPad容量信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<iPad Capacity %r>' % self.name
@@ -3308,23 +3291,22 @@ class iPadState(db.Model):
     ipads = db.relationship('iPad', backref='state', lazy='dynamic')
 
     @staticmethod
-    def insert_ipad_states(data):
-        if data == u'initial':
-            ipad_states = [
-                (u'待机', ),
-                (u'借出', ),
-                (u'候补', ),
-                (u'维护', ),
-                (u'充电', ),
-                (u'退役', ),
-            ]
-            for entry in ipad_states:
-                ipad_state = iPadState.query.filter_by(name=entry[0]).first()
-                if ipad_state is None:
-                    ipad_state = iPadState(name=entry[0])
-                    db.session.add(ipad_state)
-                    print u'导入iPad状态信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'待机', ),
+            (u'借出', ),
+            (u'候补', ),
+            (u'维护', ),
+            (u'充电', ),
+            (u'退役', ),
+        ]
+        for entry in entries:
+            ipad_state = iPadState.query.filter_by(name=entry[0]).first()
+            if ipad_state is None:
+                ipad_state = iPadState(name=entry[0])
+                db.session.add(ipad_state)
+                print u'导入iPad状态信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<iPad State %r>' % self.name
@@ -3337,19 +3319,19 @@ class Room(db.Model):
     ipads = db.relationship('iPad', backref='room', lazy='dynamic')
 
     @staticmethod
-    def insert_rooms(data):
-        if data == u'initial':
-            rooms = [
-                (u'1103', ),
-                (u'1707', ),
-            ]
-            for entry in rooms:
-                room = Room.query.filter_by(name=entry[0]).first()
-                if room is None:
-                    room = Room(name=entry[0])
-                    db.session.add(room)
-                    print u'导入房间信息', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'1103', ),
+            (u'1702', ),
+            (u'1707', ),
+        ]
+        for entry in entries:
+            room = Room.query.filter_by(name=entry[0]).first()
+            if room is None:
+                room = Room(name=entry[0])
+                db.session.add(room)
+                print u'导入房间信息', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<Room %r>' % self.name
@@ -3369,13 +3351,13 @@ class iPadContent(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_ipad_contents(data):
+    def insert_entries(data):
         import xlrd
         data = xlrd.open_workbook(os.path.join('data', data, 'ipad-contents.xlsx'))
         table = data.sheet_by_index(0)
         lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in table.row_values(0) if Lesson.query.filter_by(name=value).first()]
-        ipad_contents = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in ipad_contents:
+        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+        for entry in entries:
             ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
             for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
                 if exist_lesson:
@@ -3583,12 +3565,12 @@ class iPad(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_ipads(data):
+    def insert_entries(data):
         import xlrd
         data = xlrd.open_workbook(os.path.join('data', data, 'ipads.xlsx'))
         table = data.sheet_by_index(0)
-        ipads = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in ipads:
+        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+        for entry in entries:
             if isinstance(entry[3], float):
                 entry[3] = int(entry[3])
             ipad = iPad.query.filter_by(serial=entry[1]).first()
@@ -3716,54 +3698,53 @@ class Lesson(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_lessons(data):
-        if data == u'initial':
-            lessons = [
-                (u'词典使用', u'VB', 0, 0, 0, False, False, ),
-                (u'VB总论', u'VB', 20, 16, 1, True, False, ),
-                (u'L1', u'VB', 8, 15, 2, True, False, ),
-                (u'L2', u'VB', 8, 14, 3, True, False, ),
-                (u'L3', u'VB', 8, 13, 4, True, False, ),
-                (u'L4', u'VB', 8, 12, 5, True, False, ),
-                (u'L5', u'VB', 8, 11, 6, True, False, ),
-                (u'L6', u'VB', 10, 7, 7, True, False, ),
-                (u'L7', u'VB', 10, 6, 8, True, False, ),
-                (u'L8', u'VB', 10, 5, 9, True, False, ),
-                (u'L9', u'VB', 10, 4, 10, True, False, ),
-                (u'L10', u'VB', 0, 0, 11, False, False, ),
-                (u'L11', u'VB', 10, -1, 12, True, True, ),
-                (u'L12', u'VB', 10, -1, 13, True, True, ),
-                (u'L13', u'VB', 10, -1, 14, True, True, ),
-                (u'L14', u'VB', 10, -1, 15, True, True, ),
-                (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, True, False, ),
-                (u'1st', u'Y-GRE', 30, 17, 2, True, False, ),
-                (u'2nd', u'Y-GRE', 30, 17, 3, True, False, ),
-                (u'3rd', u'Y-GRE', 50, 17, 4, True, False, ),
-                (u'AW总论', u'Y-GRE', 3, 0, 5, True, False, ),
-                (u'4th', u'Y-GRE', 30, 10, 6, True, False, ),
-                (u'5th', u'Y-GRE', 40, 9, 7, True, False, ),
-                (u'6th', u'Y-GRE', 40, 8, 8, True, False, ),
-                (u'7th', u'Y-GRE', 30, 3, 9, True, False, ),
-                (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
-                (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
-                (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
-                (u'Y-GRE临考', u'Y-GRE', 80, 17, 12, False, False, ),
-            ]
-            for entry in lessons:
-                lesson = Lesson.query.filter_by(name=entry[0]).first()
-                if lesson is None:
-                    lesson = Lesson(
-                        name=entry[0],
-                        type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                        hour=timedelta(hours=entry[2]),
-                        priority=entry[3],
-                        order=entry[4],
-                        include_video=entry[5],
-                        advanced=entry[6]
-                    )
-                    db.session.add(lesson)
-                    print u'导入课程信息', entry[0], entry[1]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'词典使用', u'VB', 0, 0, 0, False, False, ),
+            (u'VB总论', u'VB', 20, 16, 1, True, False, ),
+            (u'L1', u'VB', 8, 15, 2, True, False, ),
+            (u'L2', u'VB', 8, 14, 3, True, False, ),
+            (u'L3', u'VB', 8, 13, 4, True, False, ),
+            (u'L4', u'VB', 8, 12, 5, True, False, ),
+            (u'L5', u'VB', 8, 11, 6, True, False, ),
+            (u'L6', u'VB', 10, 7, 7, True, False, ),
+            (u'L7', u'VB', 10, 6, 8, True, False, ),
+            (u'L8', u'VB', 10, 5, 9, True, False, ),
+            (u'L9', u'VB', 10, 4, 10, True, False, ),
+            (u'L10', u'VB', 0, 0, 11, False, False, ),
+            (u'L11', u'VB', 10, -1, 12, True, True, ),
+            (u'L12', u'VB', 10, -1, 13, True, True, ),
+            (u'L13', u'VB', 10, -1, 14, True, True, ),
+            (u'L14', u'VB', 10, -1, 15, True, True, ),
+            (u'Y-GRE总论', u'Y-GRE', 10, 17, 1, True, False, ),
+            (u'1st', u'Y-GRE', 30, 17, 2, True, False, ),
+            (u'2nd', u'Y-GRE', 30, 17, 3, True, False, ),
+            (u'3rd', u'Y-GRE', 50, 17, 4, True, False, ),
+            (u'AW总论', u'Y-GRE', 3, 0, 5, True, False, ),
+            (u'4th', u'Y-GRE', 30, 10, 6, True, False, ),
+            (u'5th', u'Y-GRE', 40, 9, 7, True, False, ),
+            (u'6th', u'Y-GRE', 40, 8, 8, True, False, ),
+            (u'7th', u'Y-GRE', 30, 3, 9, True, False, ),
+            (u'8th', u'Y-GRE', 30, 2, 10, True, False, ),
+            (u'9th', u'Y-GRE', 30, 1, 11, True, False, ),
+            (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
+            (u'Y-GRE临考', u'Y-GRE', 80, 17, 12, False, False, ),
+        ]
+        for entry in entries:
+            lesson = Lesson.query.filter_by(name=entry[0]).first()
+            if lesson is None:
+                lesson = Lesson(
+                    name=entry[0],
+                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                    hour=timedelta(hours=entry[2]),
+                    priority=entry[3],
+                    order=entry[4],
+                    include_video=entry[5],
+                    advanced=entry[6]
+                )
+                db.session.add(lesson)
+                print u'导入课程信息', entry[0], entry[1]
+        db.session.commit()
 
     def __repr__(self):
         return '<Lesson %r>' % self.alias
@@ -3813,180 +3794,179 @@ class Section(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_sections(data):
-        if data == u'initial':
-            sections = [
-                (u'词典使用', u'词典使用', 0, ),
-                (u'Day 1-1', u'VB总论', 1, ),
-                (u'Day 1-2', u'VB总论', 2, ),
-                (u'Day 1-3', u'VB总论', 3, ),
-                (u'Day 1-4', u'VB总论', 4, ),
-                (u'Day 2-1', u'VB总论', 5, ),
-                (u'Day 2-2', u'VB总论', 6, ),
-                (u'Day 2-3', u'VB总论', 7, ),
-                (u'Day 2-4', u'VB总论', 8, ),
-                (u'Day 3-1', u'VB总论', 9, ),
-                (u'Day 3-2', u'VB总论', 10, ),
-                (u'Day 3-3', u'VB总论', 11, ),
-                (u'Day 3-4', u'VB总论', 12, ),
-                (u'Day 4-1', u'VB总论', 13, ),
-                (u'Day 4-2', u'VB总论', 14, ),
-                (u'Day 4-3', u'VB总论', 15, ),
-                (u'Day 4-4', u'VB总论', 16, ),
-                (u'1.1', u'L1', 17, ),
-                (u'1.2', u'L1', 18, ),
-                (u'1.3', u'L1', 19, ),
-                (u'1.4', u'L1', 20, ),
-                (u'1.5', u'L1', 21, ),
-                (u'1.6', u'L1', 22, ),
-                (u'1.7', u'L1', 23, ),
-                (u'1.8', u'L1', 24, ),
-                (u'2.1', u'L2', 25, ),
-                (u'2.2', u'L2', 26, ),
-                (u'2.3', u'L2', 27, ),
-                (u'2.4', u'L2', 28, ),
-                (u'2.5', u'L2', 29, ),
-                (u'2.6', u'L2', 30, ),
-                (u'2.7', u'L2', 31, ),
-                (u'2.8', u'L2', 32, ),
-                (u'3.1', u'L3', 33, ),
-                (u'3.2', u'L3', 34, ),
-                (u'3.3', u'L3', 35, ),
-                (u'3.4', u'L3', 36, ),
-                (u'3.5', u'L3', 37, ),
-                (u'3.6', u'L3', 38, ),
-                (u'3.7', u'L3', 39, ),
-                (u'3.8', u'L3', 40, ),
-                (u'4.1', u'L4', 41, ),
-                (u'4.2', u'L4', 42, ),
-                (u'4.3', u'L4', 43, ),
-                (u'4.4', u'L4', 44, ),
-                (u'4.5', u'L4', 45, ),
-                (u'4.6', u'L4', 46, ),
-                (u'4.7', u'L4', 47, ),
-                (u'4.8', u'L4', 48, ),
-                (u'5.1', u'L5', 49, ),
-                (u'5.2', u'L5', 50, ),
-                (u'5.3', u'L5', 51, ),
-                (u'5.4', u'L5', 52, ),
-                (u'5.5', u'L5', 53, ),
-                (u'5.6', u'L5', 54, ),
-                (u'5.7', u'L5', 55, ),
-                (u'5.8', u'L5', 56, ),
-                (u'6.1', u'L6', 57, ),
-                (u'6.2', u'L6', 58, ),
-                (u'6.3', u'L6', 59, ),
-                (u'6.4', u'L6', 60, ),
-                (u'6.5', u'L6', 61, ),
-                (u'6.6', u'L6', 62, ),
-                (u'6.7', u'L6', 63, ),
-                (u'6.8', u'L6', 64, ),
-                (u'7.1', u'L7', 65, ),
-                (u'7.2', u'L7', 66, ),
-                (u'7.3', u'L7', 67, ),
-                (u'7.4', u'L7', 68, ),
-                (u'7.5', u'L7', 69, ),
-                (u'7.6', u'L7', 70, ),
-                (u'7.7', u'L7', 71, ),
-                (u'7.8', u'L7', 72, ),
-                (u'8.1', u'L8', 73, ),
-                (u'8.2', u'L8', 74, ),
-                (u'8.3', u'L8', 75, ),
-                (u'8.4', u'L8', 76, ),
-                (u'8.5', u'L8', 77, ),
-                (u'8.6', u'L8', 78, ),
-                (u'8.7', u'L8', 79, ),
-                (u'8.8', u'L8', 80, ),
-                (u'8.9', u'L8', 81, ),
-                (u'9.1', u'L9', 82, ),
-                (u'9.2', u'L9', 83, ),
-                (u'9.3', u'L9', 84, ),
-                (u'9.4', u'L9', 85, ),
-                (u'9.5', u'L9', 86, ),
-                (u'9.6', u'L9', 87, ),
-                (u'9.7', u'L9', 88, ),
-                (u'9.8', u'L9', 89, ),
-                (u'9.9', u'L9', 90, ),
-                (u'L10', u'L10', 91, ),
-                (u'11.1', u'L11', 92, ),
-                (u'11.2', u'L11', 93, ),
-                (u'11.3', u'L11', 94, ),
-                (u'11.4', u'L11', 95, ),
-                (u'11.5', u'L11', 96, ),
-                (u'11.6', u'L11', 97, ),
-                (u'11.7', u'L11', 98, ),
-                (u'11.8', u'L11', 99, ),
-                (u'11.9', u'L11', 100, ),
-                (u'11.10', u'L11', 101, ),
-                (u'11.11', u'L11', 102, ),
-                (u'11.12', u'L11', 103, ),
-                (u'12.1', u'L12', 104, ),
-                (u'12.2', u'L12', 105, ),
-                (u'12.3', u'L12', 106, ),
-                (u'12.4', u'L12', 107, ),
-                (u'12.5', u'L12', 108, ),
-                (u'12.6', u'L12', 109, ),
-                (u'12.7', u'L12', 110, ),
-                (u'12.8', u'L12', 111, ),
-                (u'12.9', u'L12', 112, ),
-                (u'12.10', u'L12', 113, ),
-                (u'12.11', u'L12', 114, ),
-                (u'12.12', u'L12', 115, ),
-                (u'13.1', u'L13', 116, ),
-                (u'13.2', u'L13', 117, ),
-                (u'13.3', u'L13', 118, ),
-                (u'13.4', u'L13', 119, ),
-                (u'13.5', u'L13', 120, ),
-                (u'13.6', u'L13', 121, ),
-                (u'13.7', u'L13', 122, ),
-                (u'13.8', u'L13', 123, ),
-                (u'13.9', u'L13', 124, ),
-                (u'13.10', u'L13', 125, ),
-                (u'13.11', u'L13', 126, ),
-                (u'13.12', u'L13', 127, ),
-                (u'14.1', u'L14', 128, ),
-                (u'14.2', u'L14', 129, ),
-                (u'14.3', u'L14', 130, ),
-                (u'14.4', u'L14', 131, ),
-                (u'14.5', u'L14', 132, ),
-                (u'14.6', u'L14', 133, ),
-                (u'14.7', u'L14', 134, ),
-                (u'14.8', u'L14', 135, ),
-                (u'14.9', u'L14', 136, ),
-                (u'14.10', u'L14', 137, ),
-                (u'14.11', u'L14', 138, ),
-                (u'14.12', u'L14', 139, ),
-                (u'Y-GRE总论', u'Y-GRE总论', 1, ),
-                (u'1st', u'1st', 2, ),
-                (u'2nd', u'2nd', 3, ),
-                (u'3rd', u'3rd', 4, ),
-                (u'AW总论', u'AW总论', 5, ),
-                (u'4th', u'4th', 6, ),
-                (u'5th', u'5th', 7, ),
-                (u'6th', u'6th', 8, ),
-                (u'7th', u'7th', 9, ),
-                (u'8th', u'8th', 10, ),
-                (u'9th', u'9th', 11, ),
-                (u'Test', u'Test', -1, ),
-                (u'OG V', u'Y-GRE临考', 0, ),
-                (u'OG Q', u'Y-GRE临考', 0, ),
-                (u'OG AW', u'Y-GRE临考', 0, ),
-                (u'Issue', u'Y-GRE临考', 0, ),
-                (u'Argument', u'Y-GRE临考', 0, ),
-                (u'V150', u'Y-GRE临考', 0, ),
-                (u'Magoosh V', u'Y-GRE临考', 0, ),
-            ]
-            for entry in sections:
-                section = Section.query.filter_by(name=entry[0]).first()
-                if section is None:
-                    section = Section(
-                        name=entry[0],
-                        lesson_id=Lesson.query.filter_by(name=entry[1]).first().id,
-                        order=entry[2]
-                    )
-                    db.session.add(section)
-                    print u'导入节信息', entry[0], entry[1]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'词典使用', u'词典使用', 0, ),
+            (u'Day 1-1', u'VB总论', 1, ),
+            (u'Day 1-2', u'VB总论', 2, ),
+            (u'Day 1-3', u'VB总论', 3, ),
+            (u'Day 1-4', u'VB总论', 4, ),
+            (u'Day 2-1', u'VB总论', 5, ),
+            (u'Day 2-2', u'VB总论', 6, ),
+            (u'Day 2-3', u'VB总论', 7, ),
+            (u'Day 2-4', u'VB总论', 8, ),
+            (u'Day 3-1', u'VB总论', 9, ),
+            (u'Day 3-2', u'VB总论', 10, ),
+            (u'Day 3-3', u'VB总论', 11, ),
+            (u'Day 3-4', u'VB总论', 12, ),
+            (u'Day 4-1', u'VB总论', 13, ),
+            (u'Day 4-2', u'VB总论', 14, ),
+            (u'Day 4-3', u'VB总论', 15, ),
+            (u'Day 4-4', u'VB总论', 16, ),
+            (u'1.1', u'L1', 17, ),
+            (u'1.2', u'L1', 18, ),
+            (u'1.3', u'L1', 19, ),
+            (u'1.4', u'L1', 20, ),
+            (u'1.5', u'L1', 21, ),
+            (u'1.6', u'L1', 22, ),
+            (u'1.7', u'L1', 23, ),
+            (u'1.8', u'L1', 24, ),
+            (u'2.1', u'L2', 25, ),
+            (u'2.2', u'L2', 26, ),
+            (u'2.3', u'L2', 27, ),
+            (u'2.4', u'L2', 28, ),
+            (u'2.5', u'L2', 29, ),
+            (u'2.6', u'L2', 30, ),
+            (u'2.7', u'L2', 31, ),
+            (u'2.8', u'L2', 32, ),
+            (u'3.1', u'L3', 33, ),
+            (u'3.2', u'L3', 34, ),
+            (u'3.3', u'L3', 35, ),
+            (u'3.4', u'L3', 36, ),
+            (u'3.5', u'L3', 37, ),
+            (u'3.6', u'L3', 38, ),
+            (u'3.7', u'L3', 39, ),
+            (u'3.8', u'L3', 40, ),
+            (u'4.1', u'L4', 41, ),
+            (u'4.2', u'L4', 42, ),
+            (u'4.3', u'L4', 43, ),
+            (u'4.4', u'L4', 44, ),
+            (u'4.5', u'L4', 45, ),
+            (u'4.6', u'L4', 46, ),
+            (u'4.7', u'L4', 47, ),
+            (u'4.8', u'L4', 48, ),
+            (u'5.1', u'L5', 49, ),
+            (u'5.2', u'L5', 50, ),
+            (u'5.3', u'L5', 51, ),
+            (u'5.4', u'L5', 52, ),
+            (u'5.5', u'L5', 53, ),
+            (u'5.6', u'L5', 54, ),
+            (u'5.7', u'L5', 55, ),
+            (u'5.8', u'L5', 56, ),
+            (u'6.1', u'L6', 57, ),
+            (u'6.2', u'L6', 58, ),
+            (u'6.3', u'L6', 59, ),
+            (u'6.4', u'L6', 60, ),
+            (u'6.5', u'L6', 61, ),
+            (u'6.6', u'L6', 62, ),
+            (u'6.7', u'L6', 63, ),
+            (u'6.8', u'L6', 64, ),
+            (u'7.1', u'L7', 65, ),
+            (u'7.2', u'L7', 66, ),
+            (u'7.3', u'L7', 67, ),
+            (u'7.4', u'L7', 68, ),
+            (u'7.5', u'L7', 69, ),
+            (u'7.6', u'L7', 70, ),
+            (u'7.7', u'L7', 71, ),
+            (u'7.8', u'L7', 72, ),
+            (u'8.1', u'L8', 73, ),
+            (u'8.2', u'L8', 74, ),
+            (u'8.3', u'L8', 75, ),
+            (u'8.4', u'L8', 76, ),
+            (u'8.5', u'L8', 77, ),
+            (u'8.6', u'L8', 78, ),
+            (u'8.7', u'L8', 79, ),
+            (u'8.8', u'L8', 80, ),
+            (u'8.9', u'L8', 81, ),
+            (u'9.1', u'L9', 82, ),
+            (u'9.2', u'L9', 83, ),
+            (u'9.3', u'L9', 84, ),
+            (u'9.4', u'L9', 85, ),
+            (u'9.5', u'L9', 86, ),
+            (u'9.6', u'L9', 87, ),
+            (u'9.7', u'L9', 88, ),
+            (u'9.8', u'L9', 89, ),
+            (u'9.9', u'L9', 90, ),
+            (u'L10', u'L10', 91, ),
+            (u'11.1', u'L11', 92, ),
+            (u'11.2', u'L11', 93, ),
+            (u'11.3', u'L11', 94, ),
+            (u'11.4', u'L11', 95, ),
+            (u'11.5', u'L11', 96, ),
+            (u'11.6', u'L11', 97, ),
+            (u'11.7', u'L11', 98, ),
+            (u'11.8', u'L11', 99, ),
+            (u'11.9', u'L11', 100, ),
+            (u'11.10', u'L11', 101, ),
+            (u'11.11', u'L11', 102, ),
+            (u'11.12', u'L11', 103, ),
+            (u'12.1', u'L12', 104, ),
+            (u'12.2', u'L12', 105, ),
+            (u'12.3', u'L12', 106, ),
+            (u'12.4', u'L12', 107, ),
+            (u'12.5', u'L12', 108, ),
+            (u'12.6', u'L12', 109, ),
+            (u'12.7', u'L12', 110, ),
+            (u'12.8', u'L12', 111, ),
+            (u'12.9', u'L12', 112, ),
+            (u'12.10', u'L12', 113, ),
+            (u'12.11', u'L12', 114, ),
+            (u'12.12', u'L12', 115, ),
+            (u'13.1', u'L13', 116, ),
+            (u'13.2', u'L13', 117, ),
+            (u'13.3', u'L13', 118, ),
+            (u'13.4', u'L13', 119, ),
+            (u'13.5', u'L13', 120, ),
+            (u'13.6', u'L13', 121, ),
+            (u'13.7', u'L13', 122, ),
+            (u'13.8', u'L13', 123, ),
+            (u'13.9', u'L13', 124, ),
+            (u'13.10', u'L13', 125, ),
+            (u'13.11', u'L13', 126, ),
+            (u'13.12', u'L13', 127, ),
+            (u'14.1', u'L14', 128, ),
+            (u'14.2', u'L14', 129, ),
+            (u'14.3', u'L14', 130, ),
+            (u'14.4', u'L14', 131, ),
+            (u'14.5', u'L14', 132, ),
+            (u'14.6', u'L14', 133, ),
+            (u'14.7', u'L14', 134, ),
+            (u'14.8', u'L14', 135, ),
+            (u'14.9', u'L14', 136, ),
+            (u'14.10', u'L14', 137, ),
+            (u'14.11', u'L14', 138, ),
+            (u'14.12', u'L14', 139, ),
+            (u'Y-GRE总论', u'Y-GRE总论', 1, ),
+            (u'1st', u'1st', 2, ),
+            (u'2nd', u'2nd', 3, ),
+            (u'3rd', u'3rd', 4, ),
+            (u'AW总论', u'AW总论', 5, ),
+            (u'4th', u'4th', 6, ),
+            (u'5th', u'5th', 7, ),
+            (u'6th', u'6th', 8, ),
+            (u'7th', u'7th', 9, ),
+            (u'8th', u'8th', 10, ),
+            (u'9th', u'9th', 11, ),
+            (u'Test', u'Test', -1, ),
+            (u'OG V', u'Y-GRE临考', 0, ),
+            (u'OG Q', u'Y-GRE临考', 0, ),
+            (u'OG AW', u'Y-GRE临考', 0, ),
+            (u'Issue', u'Y-GRE临考', 0, ),
+            (u'Argument', u'Y-GRE临考', 0, ),
+            (u'V150', u'Y-GRE临考', 0, ),
+            (u'Magoosh V', u'Y-GRE临考', 0, ),
+        ]
+        for entry in entries:
+            section = Section.query.filter_by(name=entry[0]).first()
+            if section is None:
+                section = Section(
+                    name=entry[0],
+                    lesson_id=Lesson.query.filter_by(name=entry[1]).first().id,
+                    order=entry[2]
+                )
+                db.session.add(section)
+                print u'导入节信息', entry[0], entry[1]
+        db.session.commit()
 
     def __repr__(self):
         return '<Section %r>' % self.alias
@@ -4029,33 +4009,32 @@ class Assignment(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_assignments(data):
-        if data == u'initial':
-            assignments = [
-                (u'L1', u'L1', ),
-                (u'L2', u'L2', ),
-                (u'R1-2', u'L2', ),
-                (u'L3', u'L3', ),
-                (u'L4', u'L4', ),
-                (u'R3-4', u'L4', ),
-                (u'L5', u'L5', ),
-                (u'L6', u'L6', ),
-                (u'R5-6', u'L6', ),
-                (u'L7', u'L7', ),
-                (u'L8', u'L8', ),
-                (u'R7-8', u'L8', ),
-                (u'R9-10', u'L10', ),
-            ]
-            for entry in assignments:
-                assignment = Assignment.query.filter_by(name=entry[0]).first()
-                if assignment is None:
-                    assignment = Assignment(
-                        name=entry[0],
-                        lesson_id=Lesson.query.filter_by(name=entry[1]).first().id
-                    )
-                    db.session.add(assignment)
-                    print u'导入作业信息', entry[0], entry[1]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'L1', u'L1', ),
+            (u'L2', u'L2', ),
+            (u'R1-2', u'L2', ),
+            (u'L3', u'L3', ),
+            (u'L4', u'L4', ),
+            (u'R3-4', u'L4', ),
+            (u'L5', u'L5', ),
+            (u'L6', u'L6', ),
+            (u'R5-6', u'L6', ),
+            (u'L7', u'L7', ),
+            (u'L8', u'L8', ),
+            (u'R7-8', u'L8', ),
+            (u'R9-10', u'L10', ),
+        ]
+        for entry in entries:
+            assignment = Assignment.query.filter_by(name=entry[0]).first()
+            if assignment is None:
+                assignment = Assignment(
+                    name=entry[0],
+                    lesson_id=Lesson.query.filter_by(name=entry[1]).first().id
+                )
+                db.session.add(assignment)
+                print u'导入作业信息', entry[0], entry[1]
+        db.session.commit()
 
     def __repr__(self):
         return '<Assignment %r>' % self.alias
@@ -4113,34 +4092,33 @@ class Test(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_tests(data):
-        if data == u'initial':
-            tests = [
-                (u'Test 1-5', u'L5', ),
-                (u'Test 6-9', u'L9', ),
-                (u'入学测试', u'Y-GRE总论', ),
-                (u'Test 1', u'1st', ),
-                (u'Test 2', u'2nd', ),
-                (u'Test 3', u'3rd', ),
-                (u'Exam-1', u'3rd', ),
-                (u'Test 4', u'4th', ),
-                (u'Test 5', u'5th', ),
-                (u'Test 6', u'6th', ),
-                (u'Exam-2', u'6th', ),
-                (u'Test 7', u'7th', ),
-                (u'PPII-1', u'Y-GRE临考', ),
-                (u'PPII-2', u'Y-GRE临考', ),
-            ]
-            for entry in tests:
-                test = Test.query.filter_by(name=entry[0]).first()
-                if test is None:
-                    test = Test(
-                        name=entry[0],
-                        lesson_id=Lesson.query.filter_by(name=entry[1]).first().id
-                    )
-                    db.session.add(test)
-                    print u'导入考试信息', entry[0], entry[1]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'Test 1-5', u'L5', ),
+            (u'Test 6-9', u'L9', ),
+            (u'入学测试', u'Y-GRE总论', ),
+            (u'Test 1', u'1st', ),
+            (u'Test 2', u'2nd', ),
+            (u'Test 3', u'3rd', ),
+            (u'Exam-1', u'3rd', ),
+            (u'Test 4', u'4th', ),
+            (u'Test 5', u'5th', ),
+            (u'Test 6', u'6th', ),
+            (u'Exam-2', u'6th', ),
+            (u'Test 7', u'7th', ),
+            (u'PPII-1', u'Y-GRE临考', ),
+            (u'PPII-2', u'Y-GRE临考', ),
+        ]
+        for entry in entries:
+            test = Test.query.filter_by(name=entry[0]).first()
+            if test is None:
+                test = Test(
+                    name=entry[0],
+                    lesson_id=Lesson.query.filter_by(name=entry[1]).first().id
+                )
+                db.session.add(test)
+                print u'导入考试信息', entry[0], entry[1]
+        db.session.commit()
 
     def __repr__(self):
         return '<Test %r>' % self.alias
@@ -4270,12 +4248,12 @@ class NotaBene(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_notate_bene(data):
+    def insert_entries(data):
         import xlrd
         data = xlrd.open_workbook(os.path.join('data', data, 'notate-bene.xlsx'))
         table = data.sheet_by_index(0)
-        notate_bene = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in notate_bene:
+        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
+        for entry in entries:
             nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
             if nota_bene is None:
                 nota_bene = NotaBene(
@@ -4346,24 +4324,23 @@ class AnnouncementType(db.Model):
     announcements = db.relationship('Announcement', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_announcement_types(data):
-        if data == u'initial':
-            announcement_types = [
-                (u'登录通知', ),
-                (u'用户主页通知', ),
-                (u'管理主页通知', ),
-                (u'预约VB通知', ),
-                (u'预约Y-GRE通知', ),
-                (u'用户邮件通知', ),
-                (u'管理邮件通知', ),
-            ]
-            for entry in announcement_types:
-                announcement_type = AnnouncementType.query.filter_by(name=entry[0]).first()
-                if announcement_type is None:
-                    announcement_type = AnnouncementType(name=entry[0])
-                    db.session.add(announcement_type)
-                    print u'导入通知类型', entry[0]
-            db.session.commit()
+    def insert_entries():
+        entries = [
+            (u'登录通知', ),
+            (u'用户主页通知', ),
+            (u'管理主页通知', ),
+            (u'预约VB通知', ),
+            (u'预约Y-GRE通知', ),
+            (u'用户邮件通知', ),
+            (u'管理邮件通知', ),
+        ]
+        for entry in entries:
+            announcement_type = AnnouncementType.query.filter_by(name=entry[0]).first()
+            if announcement_type is None:
+                announcement_type = AnnouncementType(name=entry[0])
+                db.session.add(announcement_type)
+                print u'导入通知类型', entry[0]
+        db.session.commit()
 
     def __repr__(self):
         return '<AnnouncementType %r>' % self.name

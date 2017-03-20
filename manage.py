@@ -39,7 +39,9 @@ manager.add_command('db', MigrateCommand)
 
 @manager.command
 def cleanup():
-    '''Run cleanup tasks.'''
+    '''
+    Run cleanup tasks.
+    '''
     if app.debug:
         from config import basedir
         from shutil import rmtree
@@ -65,88 +67,123 @@ def cleanup():
 
 @manager.command
 def deploy():
-    '''Run deployment tasks.'''
-    from flask_migrate import upgrade
-    from app.models import Color
-    from app.models import Permission
-    from app.models import Role
-    from app.models import IDType
-    from app.models import Gender
-    from app.models import Relationship
-    from app.models import PurposeType
-    from app.models import ReferrerType
-    from app.models import BookingState
-    from app.models import AssignmentScoreGrade
-    from app.models import GREAWScore
-    from app.models import InvitationType
-    from app.models import CourseType
-    from app.models import Lesson
-    from app.models import Section
-    from app.models import User
-    from app.models import Tag
-    from app.models import EducationType
-    from app.models import ScoreType
-    from app.models import ScoreLabel
-    from app.models import Product
-    from app.models import Course
-    from app.models import Period
-    from app.models import iPadCapacity
-    from app.models import iPadState
-    from app.models import Room
-    from app.models import iPad
-    from app.models import iPadContent
-    from app.models import Assignment
-    from app.models import Test
-    from app.models import NotaBene
-    from app.models import AnnouncementType
+    '''
+    Run deployment tasks.
+    '''
 
     # migrate database to latest revision
+    from flask_migrate import upgrade
     upgrade()
 
     # insert data
+    from app.models import Color
+    Color.insert_entries()
+
+    from app.models import Permission
+    Permission.insert_entries()
+
+    from app.models import Role
+    Role.insert_entries()
+
+    from app.models import IDType
+    IDType.insert_entries()
+
+    from app.models import Gender
+    Gender.insert_entries()
+
+    from app.models import Relationship
+    Relationship.insert_entries()
+
+    from app.models import PurposeType
+    PurposeType.insert_entries()
+
+    from app.models import ReferrerType
+    ReferrerType.insert_entries()
+
+    from app.models import BookingState
+    BookingState.insert_entries()
+
+    from app.models import AssignmentScoreGrade
+    AssignmentScoreGrade.insert_entries()
+
+    from app.models import GREAWScore
+    GREAWScore.insert_entries()
+
+    from app.models import ScoreLabel
+    ScoreLabel.insert_entries()
+
+    from app.models import InvitationType
+    InvitationType.insert_entries()
+
+    from app.models import EducationType
+    EducationType.insert_entries()
+
+    from app.models import ScoreType
+    ScoreType.insert_entries()
+
+    from app.models import CourseType
+    CourseType.insert_entries()
+
+    from app.models import iPadCapacity
+    iPadCapacity.insert_entries()
+
+    from app.models import iPadState
+    iPadState.insert_entries()
+
+    from app.models import Room
+    Room.insert_entries()
+
+    from app.models import Lesson
+    Lesson.insert_entries()
+
+    from app.models import Section
+    Section.insert_entries()
+
+    from app.models import Assignment
+    Assignment.insert_entries()
+
+    from app.models import Test
+    Test.insert_entries()
+
+    from app.models import AnnouncementType
+    AnnouncementType.insert_entries()
+
     from config import basedir
-    data = raw_input(u'Enter data identifier (e.g.: initial): ')
+    data = raw_input(u'Enter data identifier (e.g.: initial or 20170701): ')
     datadir = os.path.join(basedir, 'data', data)
     if os.path.exists(datadir):
-        Color.insert_colors(data=data)
-        Permission.insert_permissions(data=data)
-        Role.insert_roles(data=data)
-        IDType.insert_id_types(data=data)
-        Gender.insert_genders(data=data)
-        Relationship.insert_relationships(data=data)
-        PurposeType.insert_purpose_types(data=data)
-        ReferrerType.insert_referrer_types(data=data)
-        BookingState.insert_booking_states(data=data)
-        AssignmentScoreGrade.insert_assignment_score_grades(data=data)
-        GREAWScore.insert_gre_aw_scores(data=data)
-        InvitationType.insert_invitation_types(data=data)
-        CourseType.insert_course_types(data=data)
-        Lesson.insert_lessons(data=data)
-        Section.insert_sections(data=data)
-        User.insert_users(data=data)
-        Tag.insert_tags(data=data)
-        EducationType.insert_education_types(data=data)
-        ScoreType.insert_score_types(data=data)
-        ScoreLabel.insert_score_labels(data=data)
-        Product.insert_products(data=data)
-        Course.insert_courses(data=data)
-        Period.insert_periods(data=data)
-        iPadCapacity.insert_ipad_capacities(data=data)
-        iPadState.insert_ipad_states(data=data)
-        Room.insert_rooms(data=data)
-        iPad.insert_ipads(data=data)
-        iPadContent.insert_ipad_contents(data=data)
-        Assignment.insert_assignments(data=data)
-        Test.insert_tests(data=data)
-        NotaBene.insert_notate_bene(data=data)
-        AnnouncementType.insert_announcement_types(data=data)
+        from app.models import User
+        User.insert_entries(data=data)
+
+        from app.models import Tag
+        Tag.insert_entries(data=data)
+
+        from app.models import Product
+        Product.insert_entries(data=data)
+
+        from app.models import Course
+        Course.insert_entries(data=data)
+
+        from app.models import Period
+        Period.insert_entries(data=data)
+
+        from app.models import iPad
+        iPad.insert_entries(data=data)
+
+        from app.models import iPadContent
+        iPadContent.insert_entries(data=data)
+
+        from app.models import NotaBene
+        NotaBene.insert_entries(data=data)
     else:
         print '---> Invalid data identifier: %s' % data
 
 
 @manager.command
 def backup():
-    '''Run backup tasks.'''
+    '''
+    Run backup tasks.
+    '''
     pass
 
 
