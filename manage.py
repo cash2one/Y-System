@@ -11,7 +11,7 @@ import os
 
 
 if os.path.exists('.env'):
-    print('Importing environment from .env...')
+    print u'Importing environment from . env ...'
     for line in open('.env'):
         var = line.strip().split('=')
         if len(var) == 2:
@@ -39,7 +39,9 @@ manager.add_command('db', MigrateCommand)
 
 @manager.command
 def cleanup():
-    '''Run cleanup tasks.'''
+    '''
+    Run cleanup tasks.
+    '''
     if app.debug:
         from config import basedir
         from shutil import rmtree
@@ -54,94 +56,160 @@ def cleanup():
                     os.remove(full_db_file)
                 elif os.path.isdir(full_db_file):
                     rmtree(full_db_file)
-                print 'remove', full_db_file
+                print u'---> Remove %s' %  full_db_file
         db.drop_all()
     else:
         confirm = raw_input(u'Are you sure to clean up the database? [Y/n]: ')
         if confirm == u'Y':
             db.drop_all()
-            print '---> All data are deleted.'
+            print u'---> All data are deleted.'
 
 
 @manager.command
 def deploy():
-    '''Run deployment tasks.'''
-    from flask_migrate import upgrade
-    from app.models import Color
-    from app.models import Permission
-    from app.models import Role
-    from app.models import IDType
-    from app.models import Gender
-    from app.models import Relationship
-    from app.models import PurposeType
-    from app.models import ReferrerType
-    from app.models import BookingState
-    from app.models import AssignmentScoreGrade
-    from app.models import GREAWScore
-    from app.models import InvitationType
-    from app.models import CourseType
-    from app.models import Lesson
-    from app.models import Section
-    from app.models import User
-    from app.models import Tag
-    from app.models import EducationType
-    from app.models import ScoreType
-    from app.models import ScoreLabel
-    from app.models import Product
-    from app.models import Course
-    from app.models import Period
-    from app.models import iPadCapacity
-    from app.models import iPadState
-    from app.models import Room
-    from app.models import iPad
-    from app.models import iPadContent
-    from app.models import Assignment
-    from app.models import Test
-    from app.models import NotaBene
-    from app.models import AnnouncementType
+    '''
+    Run deployment tasks.
+    '''
 
     # migrate database to latest revision
+    from flask_migrate import upgrade
     upgrade()
 
-    # insert initial data
-    Color.insert_colors()
-    Permission.insert_permissions()
-    Role.insert_roles()
-    IDType.insert_id_types()
-    Gender.insert_genders()
-    Relationship.insert_relationships()
-    PurposeType.insert_purpose_types()
-    ReferrerType.insert_referrer_types()
-    BookingState.insert_booking_states()
-    AssignmentScoreGrade.insert_assignment_score_grades()
-    GREAWScore.insert_gre_aw_scores()
-    InvitationType.insert_invitation_types()
-    CourseType.insert_course_types()
-    Lesson.insert_lessons()
-    Section.insert_sections()
-    User.insert_admin()
-    Tag.insert_tags()
-    EducationType.insert_education_types()
-    ScoreType.insert_score_types()
-    ScoreLabel.insert_score_labels()
-    Product.insert_products()
-    Course.insert_courses()
-    Period.insert_periods()
-    iPadCapacity.insert_ipad_capacities()
-    iPadState.insert_ipad_states()
-    Room.insert_rooms()
-    iPad.insert_ipads()
-    iPadContent.insert_ipad_contents()
-    Assignment.insert_assignments()
-    Test.insert_tests()
-    NotaBene.insert_notate_bene()
-    AnnouncementType.insert_announcement_types()
+    # insert data
+    from app.models import Color
+    Color.insert_entries()
+
+    from app.models import Permission
+    Permission.insert_entries()
+
+    from app.models import Role
+    Role.insert_entries()
+
+    from app.models import IDType
+    IDType.insert_entries()
+
+    from app.models import Gender
+    Gender.insert_entries()
+
+    from app.models import Relationship
+    Relationship.insert_entries()
+
+    from app.models import PurposeType
+    PurposeType.insert_entries()
+
+    from app.models import ReferrerType
+    ReferrerType.insert_entries()
+
+    from app.models import BookingState
+    BookingState.insert_entries()
+
+    from app.models import AssignmentScoreGrade
+    AssignmentScoreGrade.insert_entries()
+
+    from app.models import GREAWScore
+    GREAWScore.insert_entries()
+
+    from app.models import ScoreLabel
+    ScoreLabel.insert_entries()
+
+    from app.models import InvitationType
+    InvitationType.insert_entries()
+
+    from app.models import EducationType
+    EducationType.insert_entries()
+
+    from app.models import ScoreType
+    ScoreType.insert_entries()
+
+    from app.models import CourseType
+    CourseType.insert_entries()
+
+    from app.models import iPadCapacity
+    iPadCapacity.insert_entries()
+
+    from app.models import iPadState
+    iPadState.insert_entries()
+
+    from app.models import Room
+    Room.insert_entries()
+
+    from app.models import Lesson
+    Lesson.insert_entries()
+
+    from app.models import Section
+    Section.insert_entries()
+
+    from app.models import Assignment
+    Assignment.insert_entries()
+
+    from app.models import Test
+    Test.insert_entries()
+
+    from app.models import AnnouncementType
+    AnnouncementType.insert_entries()
+
+    from config import basedir
+    data = raw_input(u'Enter data identifier (e.g.: initial or 20160422): ')
+    datadir = os.path.join(basedir, 'data', data)
+    if os.path.exists(datadir):
+        from app.models import User
+        User.insert_entries(data=data, basedir=basedir)
+
+        from app.models import UserCreation
+        UserCreation.insert_entries(data=data, basedir=basedir)
+
+        from app.models import Punch
+        Punch.insert_entries(data=data, basedir=basedir)
+
+        from app.models import Tag
+        Tag.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import Product
+        Product.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import Course
+        Course.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import Period
+        Period.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import iPad
+        iPad.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import iPadContent
+        iPadContent.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import NotaBene
+        NotaBene.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import Feed
+        Feed.insert_entries(data=data, basedir=basedir)
+    else:
+        print u'---> Invalid data identifier: %s' % data
 
 
 @manager.command
 def backup():
-    '''Run backup tasks.'''
-    pass
+    '''
+    Run backup tasks.
+    '''
+    from config import basedir
+    data = raw_input(u'Enter data identifier (e.g.: backup or 20160422): ')
+    datadir = os.path.join(basedir, 'data', data)
+    if not os.path.exists(datadir):
+        os.makedirs(datadir)
+
+    from app.models import User
+    User.backup_entries(data=data, basedir=basedir)
+
+    from app.models import UserCreation
+    UserCreation.backup_entries(data=data, basedir=basedir)
+
+    from app.models import Punch
+    Punch.backup_entries(data=data, basedir=basedir)
+
+    from app.models import Feed
+    Feed.backup_entries(data=data, basedir=basedir)
 
 
 if __name__ == '__main__':

@@ -60,12 +60,12 @@ $('.loading-trigger')
     })
 ;
 
-// popup
+// popup item
+$('.popup-item').popup();
+
+// popup trigger
 $('.popup-trigger')
     .popup({
         popup: '.popup-content'
     })
 ;
-
-// menu popup
-$('.menu-popup-trigger').popup();

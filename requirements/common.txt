@@ -11,4 +11,3 @@ Flask-Script==2.0.5
 Flask-SQLAlchemy==2.2
 Flask-WTF==0.14.2
 flower==0.9.1
-xlutils==2.0.0

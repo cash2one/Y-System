@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="tags icon"></i>用户标签列表</h3>
-                <div id="new-tag-trigger" class="ui right floated positive circular icon button" data-content="新建用户标签" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-tag-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建用户标签" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-tag-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建用户标签</div>
@@ -57,7 +57,7 @@
                         {% for tag in tags %}
                         <tr{% if tag.valid_tagged_users.count() > 1 %} class="top aligned"{% endif %}>
                             <td>{% if tag.pinned and current_user.is_developer %}<i class="pin icon"></i>{% endif %}<i class="{{ tag.color.css_class }} tag icon"></i>{{ tag.name }}</td>
-                            <td>{% if tag.valid_tagged_users.count() %}<a class="user loading-trigger" href="{{ url_for('manage.tag_user', id=tag.id) }}" data-content="查看被标记的用户" data-position="top center" data-variation="inverted">{{ tag.valid_tagged_users.count() }} 人</a>{% else %}0 人{% endif %}</td>
+                            <td>{% if tag.valid_tagged_users.count() %}<a class="popup-item loading-trigger" href="{{ url_for('manage.tag_user', id=tag.id) }}" data-content="查看被标记的用户" data-position="top center" data-variation="inverted">{{ tag.valid_tagged_users.count() }} 人</a>{% else %}0 人{% endif %}</td>
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_tag', id=tag.id, next=url_for('manage.tag', page=pagination.page)) }}"><i class="edit icon"></i></a>
@@ -112,7 +112,6 @@ $('#delete-hide-trigger-{{ tag.id }}')
 ;
 {% endif %}{% endfor %}
 
-$('#new-tag-trigger').popup();
 $('#new-tag-trigger')
     .on('click', function() {
         $('#new-tag-modal').modal({ autofocus: false }).modal('show');

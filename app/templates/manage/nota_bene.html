@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="sticky note outline icon"></i>N.B.模板列表</h3>
-                <div id="new-nota-bene-trigger" class="ui right floated positive circular icon button" data-content="新建N.B.模板" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-nota-bene-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建N.B.模板" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-nota-bene-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建N.B.模板</div>
@@ -120,7 +120,6 @@ $('#delete-hide-trigger-{{ nota_bene.id }}')
 ;
 {% endfor %}
 
-$('#new-nota-bene-trigger').popup()
 $('#new-nota-bene-trigger')
     .on('click', function() {
         $('#new-nota-bene-modal').modal({ autofocus: false }).modal('show');

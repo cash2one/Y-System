@@ -34,13 +34,13 @@ EN_2_CN = {
 def NextDayString(days, short=False):
     day = date.today() + timedelta(days=1) * days
     if short:
-        return day.strftime(u'%Y-%m-%d')
-    return day.strftime(u'%Y-%m-%d') + u' ' + EN_2_CN[day.strftime(u'%a')]
+        return day.isoformat()
+    return day.isoformat() + u' ' + EN_2_CN[day.strftime(u'%a')]
 
 
 def NextHalfHourString(halfHours, startHour=6):
     t = time(startHour + halfHours/2, (halfHours % 2) * 30)
-    return t.strftime(u'%H:%M')
+    return t.strftime('%H:%M')
 
 
 class SearchForm(FlaskForm):
@@ -254,7 +254,7 @@ class NewGRETestScoreForm(FlaskForm):
     email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     q_score = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
-    aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode)
     test_date = DateField(u'考试日期', validators=[Required()])
     score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'添加')
@@ -268,7 +268,7 @@ class NewGRETestScoreForm(FlaskForm):
 class EditGRETestScoreForm(FlaskForm):
     v_score = IntegerField(u'Verbal Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
     q_score = IntegerField(u'Quantitative Reasoning', validators=[Required(), NumberRange(min=130, max=170)])
-    aw_score = SelectField(u'Analytical Writing', coerce=unicode, validators=[Required()])
+    aw_score = SelectField(u'Analytical Writing', coerce=unicode)
     test_date = DateField(u'考试日期', validators=[Required()])
     score_label = SelectField(u'标签', coerce=unicode, validators=[Required()])
     submit = SubmitField(u'提交')

@@ -12,17 +12,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
 from flask_login import UserMixin, AnonymousUserMixin
-from app.exceptions import ValidationError
 from . import db, login_manager
+from .csvutil import UnicodeReader, UnicodeWriter
 
 
 class Version:
     Application = 'v1.0.0-dev'
-    jQuery = '3.2.0'
+    jQuery = '3.1.1'
     SemanticUI = '2.2.9'
     SemanticUICalendar = '0.0.7'
     FontAwesome = '4.7.0'
-    MomentJS = '2.17.1'
+    MomentJS = '2.18.0'
     CountUp = '1.8.2'
     ECharts = '3.4.0'
 
@@ -41,8 +41,8 @@ class Color(db.Model):
     score_labels = db.relationship('ScoreLabel', backref='color', lazy='dynamic')
 
     @staticmethod
-    def insert_colors():
-        colors = [
+    def insert_entries():
+        entries = [
             (u'Default', u'', ),
             (u'Red', u'red', ),
             (u'Orange', u'orange', ),
@@ -59,7 +59,7 @@ class Color(db.Model):
             (u'Black', u'black', ),
             (u'Basic', u'basic', ),
         ]
-        for entry in colors:
+        for entry in entries:
             color = Color.query.filter_by(name=entry[0]).first()
             if color is None:
                 color = Color(
@@ -94,8 +94,8 @@ class Permission(db.Model):
     )
 
     @staticmethod
-    def insert_permissions():
-        permissions = [
+    def insert_entries():
+        entries = [
             (u'预约', True, ),
             (u'预约VB课程', True, ),
             (u'预约Y-GRE课程', True, ),
@@ -123,7 +123,7 @@ class Permission(db.Model):
             (u'管理权限', False, ),
             (u'开发权限', False, ),
         ]
-        for entry in permissions:
+        for entry in entries:
             permission = Permission.query.filter_by(name=entry[0]).first()
             if permission is None:
                 permission = Permission(
@@ -195,8 +195,8 @@ class Role(db.Model):
         return len(self.permissions)
 
     @staticmethod
-    def insert_roles():
-        roles = [
+    def insert_entries():
+        entries = [
             (u'挂起', [], ),
             (u'单VB', [u'预约', u'预约VB课程'], ),
             (u'Y-GRE 普通', [u'预约', u'预约VB课程', u'预约Y-GRE课程'], ),
@@ -207,7 +207,7 @@ class Role(db.Model):
             (u'管理员', [u'预约', u'预约VB课程', u'预约Y-GRE课程', u'预约任意课程'] + [u'管理', u'管理课程预约', u'管理研修进度', u'管理研修计划', u'管理iPad借阅', u'管理预约时段', u'管理课程', u'管理作业', u'管理考试', u'管理用户', u'管理团报', u'管理班级', u'管理用户标签', u'管理iPad设备', u'管理NB', u'管理反馈', u'管理通知', u'管理站内信', u'管理产品', u'管理权限'], ),
             (u'开发人员', [permission.name for permission in Permission.query.all()], ),
         ]
-        for entry in roles:
+        for entry in entries:
             role = Role.query.filter_by(name=entry[0]).first()
             if role is None:
                 role = Role(name=entry[0])
@@ -232,12 +232,12 @@ class IDType(db.Model):
     users = db.relationship('User', backref='id_type', lazy='dynamic')
 
     @staticmethod
-    def insert_id_types():
-        id_types = [
+    def insert_entries():
+        entries = [
             (u'身份证', ),
             (u'其它', ),
         ]
-        for entry in id_types:
+        for entry in entries:
             id_type = IDType.query.filter_by(name=entry[0]).first()
             if id_type is None:
                 id_type = IDType(name=entry[0])
@@ -256,12 +256,12 @@ class Gender(db.Model):
     users = db.relationship('User', backref='gender', lazy='dynamic')
 
     @staticmethod
-    def insert_genders():
-        genders = [
+    def insert_entries():
+        entries = [
             (u'男', ),
             (u'女', ),
         ]
-        for entry in genders:
+        for entry in entries:
             gender = Gender.query.filter_by(name=entry[0]).first()
             if gender is None:
                 gender = Gender(name=entry[0])
@@ -280,8 +280,8 @@ class Relationship(db.Model):
     users = db.relationship('User', backref='relationship', lazy='dynamic')
 
     @staticmethod
-    def insert_relationships():
-        relationships = [
+    def insert_entries():
+        entries = [
             (u'朋友', ),
             (u'同学', ),
             (u'同事', ),
@@ -294,7 +294,7 @@ class Relationship(db.Model):
             (u'姊妹', ),
             (u'姊弟', ),
         ]
-        for entry in relationships:
+        for entry in entries:
             relationship = Relationship.query.filter_by(name=entry[0]).first()
             if relationship is None:
                 relationship = Relationship(name=entry[0])
@@ -327,8 +327,8 @@ class PurposeType(db.Model):
     )
 
     @staticmethod
-    def insert_purpose_types():
-        purpose_types = [
+    def insert_entries():
+        entries = [
             (u'词源爱好者', ),
             (u'GRE', ),
             (u'TOEFL', ),
@@ -338,7 +338,7 @@ class PurposeType(db.Model):
             (u'四六级', ),
             (u'其它', ),
         ]
-        for entry in purpose_types:
+        for entry in entries:
             purpose_type = PurposeType.query.filter_by(name=entry[0]).first()
             if purpose_type is None:
                 purpose_type = PurposeType(name=entry[0])
@@ -371,8 +371,8 @@ class ReferrerType(db.Model):
     )
 
     @staticmethod
-    def insert_referrer_types():
-        referrer_types = [
+    def insert_entries():
+        entries = [
             (u'讲座', ),
             (u'博客', ),
             (u'微博', ),
@@ -381,7 +381,7 @@ class ReferrerType(db.Model):
             (u'传单', ),
             (u'其它', ),
         ]
-        for entry in referrer_types:
+        for entry in entries:
             referrer_type = ReferrerType.query.filter_by(name=entry[0]).first()
             if referrer_type is None:
                 referrer_type = ReferrerType(name=entry[0])
@@ -462,8 +462,8 @@ class BookingState(db.Model):
     bookings = db.relationship('Booking', backref='state', lazy='dynamic')
 
     @staticmethod
-    def insert_booking_states():
-        booking_states = [
+    def insert_entries():
+        entries = [
             (u'预约', ),
             (u'排队', ),
             (u'失效', ),
@@ -472,7 +472,7 @@ class BookingState(db.Model):
             (u'爽约', ),
             (u'取消', ),
         ]
-        for entry in booking_states:
+        for entry in entries:
             booking_state = BookingState.query.filter_by(name=entry[0]).first()
             if booking_state is None:
                 booking_state = BookingState(name=entry[0])
@@ -681,6 +681,52 @@ class Punch(db.Model):
         }
         return entry_json
 
+    def to_csv(self):
+        entry_csv = [
+            self.user.email,
+            self.section.name,
+            str(int(self.milestone)),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'punches.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        punch = Punch(
+                            user_id=User.query.filter_by(email=entry[0]).first().id,
+                            section_id=Section.query.filter_by(name=entry[1]).first().id,
+                            milestone = bool(int(entry[2])),
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(punch)
+                        print u'导入进度打卡信息', entry[0], entry[1], entry[2], entry[3]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'punches.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'user_email',
+                'section',
+                'milestone',
+                'timestamp',
+            ])
+            for entry in Punch.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
+
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user.name, self.section.alias)
 
@@ -692,8 +738,8 @@ class AssignmentScoreGrade(db.Model):
     assignment_scores = db.relationship('AssignmentScore', backref='grade', lazy='dynamic')
 
     @staticmethod
-    def insert_assignment_score_grades():
-        assignment_score_grades = [
+    def insert_entries():
+        entries = [
             (u'完成', ),
             (u'A+', ),
             (u'A', ),
@@ -709,7 +755,7 @@ class AssignmentScoreGrade(db.Model):
             (u'D-', ),
             (u'F', ),
         ]
-        for entry in assignment_score_grades:
+        for entry in entries:
             assignment_score_grade = AssignmentScoreGrade.query.filter_by(name=entry[0]).first()
             if assignment_score_grade is None:
                 assignment_score_grade = AssignmentScoreGrade(name=entry[0])
@@ -812,9 +858,9 @@ class GREAWScore(db.Model):
     gre_test_scores = db.relationship('GRETestScore', backref='aw_score', lazy='dynamic')
 
     @staticmethod
-    def insert_gre_aw_scores():
-        gre_aw_scores = [(unicode(x/2.0), x/2.0, ) for x in range(0, 13)]
-        for entry in gre_aw_scores:
+    def insert_entries():
+        entries = [(unicode(x/2.0), x/2.0, ) for x in range(0, 13)]
+        for entry in entries:
             gre_aw_score = GREAWScore.query.filter_by(name=entry[0]).first()
             if gre_aw_score is None:
                 gre_aw_score = GREAWScore(name=entry[0], value=entry[1])
@@ -914,8 +960,8 @@ class ScoreLabel(db.Model):
         return u'%s - %s' % (self.category, self.name)
 
     @staticmethod
-    def insert_score_labels():
-        score_labels = [
+    def insert_entries():
+        entries = [
             (u'初始', u'GRE', u'Basic', ),
             (u'目标', u'GRE', u'Basic', ),
             (u'G0', u'GRE', u'Basic', ),
@@ -941,7 +987,7 @@ class ScoreLabel(db.Model):
             (u'T8', u'TOEFL', u'Basic', ),
             (u'T9', u'TOEFL', u'Basic', ),
         ]
-        for entry in score_labels:
+        for entry in entries:
             score_label = ScoreLabel.query.filter_by(name=entry[0], category=entry[1]).first()
             if score_label is None:
                 score_label = ScoreLabel(
@@ -1082,12 +1128,12 @@ class InvitationType(db.Model):
     invitations = db.relationship('Invitation', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_invitation_types():
-        invitation_types = [
+    def insert_entries():
+        entries = [
             (u'积分', ),
             (u'提成', ),
         ]
-        for entry in invitation_types:
+        for entry in entries:
             invitation_type = InvitationType.query.filter_by(name=entry[0]).first()
             if invitation_type is None:
                 invitation_type = InvitationType(name=entry[0])
@@ -1127,6 +1173,49 @@ class UserCreation(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_csv(self):
+        entry_csv = [
+            self.creator.email,
+            self.user.email,
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'user_creations.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        user_creation = UserCreation(
+                            creator_id=User.query.filter_by(email=entry[0]).first().id,
+                            user_id=User.query.filter_by(email=entry[1]).first().id,
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(user_creation)
+                        print u'导入用户创建人信息', entry[0], entry[1], entry[2]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'user_creations.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'creator_email',
+                'user_email',
+                'timestamp',
+            ])
+            for entry in UserCreation.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
 
 class GroupRegistration(db.Model):
@@ -1440,10 +1529,6 @@ class User(UserMixin, db.Model):
             db.session.delete(employment_record)
         for score_record in self.score_records:
             db.session.delete(score_record)
-        # for gre_test_score in self.gre_test_scores:
-        #     db.session.delete(gre_test_score)
-        # for toefl_test_score in self.toefl_test_scores:
-        #     db.session.delete(toefl_test_score)
         for purchase in self.purchases:
             db.session.delete(purchase)
         for course_registration in self.course_registrations:
@@ -1835,7 +1920,7 @@ class User(UserMixin, db.Model):
     @property
     def due_date(self):
         if self.due_time is not None:
-            return date(self.due_time.year, self.due_time.month, self.due_time.day)
+            return self.due_time.date()
 
     @property
     def overdue(self):
@@ -2538,26 +2623,185 @@ class User(UserMixin, db.Model):
             entry_json['url'] = self.url
         return entry_json
 
+    def to_csv(self):
+        created_at = ''
+        if self.created_at is not None:
+            created_at = self.created_at.strftime('%Y-%m-%dT%H:%M:%S')
+        activated_at = ''
+        if self.activated_at is not None:
+            activated_at = self.activated_at.strftime('%Y-%m-%dT%H:%M:%S')
+        last_seen_at = ''
+        if self.last_seen_at is not None:
+            last_seen_at = self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%S')
+        id_type = ''
+        if self.id_type_id is not None:
+            id_type = self.id_type.name
+        gender = ''
+        if self.gender_id is not None:
+            gender = self.gender.name
+        birthdate = ''
+        if self.birthdate is not None:
+            birthdate = self.birthdate.isoformat()
+        emergency_contact_relationship = ''
+        if self.emergency_contact_relationship_id is not None:
+            emergency_contact_relationship = self.relationship.name
+        deadline = ''
+        if self.deadline is not None:
+            deadline = self.deadline.isoformat()
+        entry_csv = [
+            self.email,
+            str(int(self.confirmed)),
+            self.role.name,
+            self.password_hash,
+            str(int(self.created)),
+            created_at,
+            str(int(self.activated)),
+            activated_at,
+            last_seen_at,
+            str(int(self.deleted)),
+            self.name,
+            id_type,
+            self.id_number,
+            gender,
+            birthdate,
+            self.mobile,
+            self.wechat,
+            self.qq,
+            self.address,
+            self.emergency_contact_name,
+            self.emergency_contact_mobile,
+            emergency_contact_relationship,
+            str(int(self.worked_in_same_field)),
+            str(int(self.deformity)),
+            self.application_aim,
+            self.application_agency,
+            str(self.speed),
+            deadline,
+        ]
+        return entry_csv
+
     @staticmethod
-    def insert_admin():
-        admin = User.query.filter_by(email=current_app.config['YSYS_ADMIN']).first()
-        if admin is None:
-            admin = User(
-                email=current_app.config['YSYS_ADMIN'],
-                confirmed=True,
-                role_id=Role.query.filter_by(name=u'开发人员').first().id,
-                password=os.getenv('YSYS_ADMIN_PASSWORD'),
-                activated=True,
-                activated_at=datetime.utcnow(),
-                last_seen_at=datetime.utcnow(),
-                name=u'SysOp'
-            )
-            db.session.add(admin)
-            db.session.commit()
-            admin.create_user(user=admin)
-            admin.__initial_punch()
-            db.session.commit()
-            print u'初始化系统管理员信息'
+    def insert_entries(data, basedir):
+        if data == u'initial':
+            admin = User.query.filter_by(email=current_app.config['YSYS_ADMIN']).first()
+            if admin is None:
+                admin = User(
+                    email=current_app.config['YSYS_ADMIN'],
+                    confirmed=True,
+                    role_id=Role.query.filter_by(name=u'开发人员').first().id,
+                    password=os.getenv('YSYS_ADMIN_PASSWORD'),
+                    activated=True,
+                    activated_at=datetime.utcnow(),
+                    last_seen_at=datetime.utcnow(),
+                    name=u'SysOp'
+                )
+                db.session.add(admin)
+                db.session.commit()
+                admin.create_user(user=admin)
+                admin.__initial_punch()
+                db.session.commit()
+                print u'初始化系统管理员信息'
+        else:
+            csvfile = os.path.join(basedir, 'data', data, 'users.csv')
+            if os.path.exists(csvfile):
+                with open(csvfile, 'r') as f:
+                    reader = UnicodeReader(f)
+                    line_num = 0
+                    for entry in reader:
+                        if line_num >= 1:
+                            user = User.query.filter_by(email=entry[0]).first()
+                            if user is None:
+                                if entry[5] is not None:
+                                    entry[5] = datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S')
+                                if entry[7] is not None:
+                                    entry[7] = datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S')
+                                if entry[8] is not None:
+                                    entry[8] = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S')
+                                if entry[11] is not None:
+                                    entry[11] = IDType.query.filter_by(name=entry[11]).first().id
+                                if entry[13] is not None:
+                                    entry[13] = Gender.query.filter_by(name=entry[13]).first().id
+                                if entry[14] is not None:
+                                    entry[14] = datetime.strptime(entry[14], '%Y-%m-%d').date()
+                                if entry[21] is not None:
+                                    entry[21] = Relationship.query.filter_by(name=entry[21]).first().id
+                                if entry[27] is not None:
+                                    entry[27] = datetime.strptime(entry[27], '%Y-%m-%d').date()
+                                user = User(
+                                    email=entry[0],
+                                    confirmed=bool(int(entry[1])),
+                                    role_id=Role.query.filter_by(name=entry[2]).first().id,
+                                    password_hash=str(entry[3]),
+                                    created=bool(int(entry[4])),
+                                    created_at=entry[5],
+                                    activated=bool(int(entry[6])),
+                                    activated_at=entry[7],
+                                    last_seen_at=entry[8],
+                                    deleted=bool(int(entry[9])),
+                                    name=entry[10],
+                                    id_type_id=entry[11],
+                                    id_number=entry[12],
+                                    gender_id=entry[13],
+                                    birthdate=entry[14],
+                                    mobile=entry[15],
+                                    wechat=entry[16],
+                                    qq=entry[17],
+                                    address=entry[18],
+                                    emergency_contact_name=entry[19],
+                                    emergency_contact_mobile=entry[20],
+                                    emergency_contact_relationship_id=entry[21],
+                                    worked_in_same_field=bool(int(entry[22])),
+                                    deformity=bool(int(entry[23])),
+                                    application_aim=entry[24],
+                                    application_agency=entry[25],
+                                    speed=float(entry[26]),
+                                    deadline=entry[27]
+                                )
+                                db.session.add(user)
+                                print u'导入用户信息', entry[2], entry[10], entry[0]
+                        line_num += 1
+                    db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'users.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'email',
+                'confirmed',
+                'role',
+                'password_hash',
+                'created',
+                'created_at',
+                'activated',
+                'activated_at',
+                'last_seen_at',
+                'deleted',
+                'name',
+                'id_type',
+                'id_number',
+                'gender',
+                'birthdate',
+                'mobile',
+                'wechat',
+                'qq',
+                'address',
+                'emergency_contact_name',
+                'emergency_contact_mobile',
+                'emergency_contact_relationship',
+                'worked_in_same_field',
+                'deformity',
+                'application_aim',
+                'application_agency',
+                'speed',
+                'deadline',
+            ])
+            for entry in User.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<User %r, %r>' % (self.name, self.email)
@@ -2622,31 +2866,32 @@ class Tag(db.Model):
             .filter(User.deleted == False)
 
     @staticmethod
-    def insert_tags():
-        tags = [
-            (u'未缴全款', u'Red', True, ),
-            (u'北大', u'Red', True, ),
-            (u'清华', u'Purple', True, ),
-            (u'一本', u'Blue', True, ),
-            (u'非一本', u'Grey', True, ),
-            (u'GPA90+', u'Teal', True, ),
-            (u'竞赛', u'Teal', True, ),
-            (u'六级600+', u'Teal', True, ),
-            (u'高考数学135+', u'Teal', True, ),
-            (u'3rd', u'Green', True, ),
-            (u'6th', u'Green', True, ),
-        ]
-        for entry in tags:
-            tag = Tag.query.filter_by(name=entry[0]).first()
-            if tag is None:
-                tag = Tag(
-                    name=entry[0],
-                    color_id=Color.query.filter_by(name=entry[1]).first().id,
-                    pinned=entry[2]
-                )
-                db.session.add(tag)
-                print u'导入用户标签信息', entry[0], entry[1]
-        db.session.commit()
+    def insert_entries(data, basedir):
+        if data == u'initial':
+            entries = [
+                (u'未缴全款', u'Red', True, ),
+                (u'北大', u'Red', True, ),
+                (u'清华', u'Purple', True, ),
+                (u'一本', u'Blue', True, ),
+                (u'非一本', u'Grey', True, ),
+                (u'GPA90+', u'Teal', True, ),
+                (u'竞赛', u'Teal', True, ),
+                (u'六级600+', u'Teal', True, ),
+                (u'高考数学135+', u'Teal', True, ),
+                (u'3rd', u'Green', True, ),
+                (u'6th', u'Green', True, ),
+            ]
+            for entry in entries:
+                tag = Tag.query.filter_by(name=entry[0]).first()
+                if tag is None:
+                    tag = Tag(
+                        name=entry[0],
+                        color_id=Color.query.filter_by(name=entry[1]).first().id,
+                        pinned=entry[2]
+                    )
+                    db.session.add(tag)
+                    print u'导入用户标签信息', entry[0], entry[1]
+            db.session.commit()
 
     def __repr__(self):
         return '<Tag %r>' % self.name
@@ -2659,14 +2904,14 @@ class EducationType(db.Model):
     education_records = db.relationship('EducationRecord', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_education_types():
-        education_types = [
+    def insert_entries():
+        entries = [
             (u'高中', ),
             (u'本科', ),
             (u'硕士', ),
             (u'博士', ),
         ]
-        for entry in education_types:
+        for entry in entries:
             education_type = EducationType.query.filter_by(name=entry[0]).first()
             if education_type is None:
                 education_type = EducationType(name=entry[0])
@@ -2738,8 +2983,8 @@ class ScoreType(db.Model):
     score_records = db.relationship('ScoreRecord', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_score_types():
-        score_types = [
+    def insert_entries():
+        entries = [
             (u'高考总分', ),
             (u'高考数学', ),
             (u'高考英语', ),
@@ -2750,7 +2995,7 @@ class ScoreType(db.Model):
             (u'竞赛', ),
             (u'其它', ),
         ]
-        for entry in score_types:
+        for entry in entries:
             score_type = ScoreType.query.filter_by(name=entry[0]).first()
             if score_type is None:
                 score_type = ScoreType(name=entry[0])
@@ -2849,33 +3094,36 @@ class Product(db.Model):
         return sum([purchase.quantity for purchase in self.purchases if purchase.user.created and purchase.user.activated and not purchase.user.deleted])
 
     @staticmethod
-    def insert_products():
-        products = [
-            (u'VB基本技术费', 6800.0, True, False, ),
-            (u'Y-GRE基本技术费', 6800.0, True, False, ),
-            (u'联报优惠', -1000.0, True, False, ),
-            (u'在校生减免', -800.0, True, False, ),
-            (u'本校减免', -500.0, True, False, ),
-            (u'团报优惠', -200.0, True, True, ),
-            (u'AW费用', 800.0, True, False, ),
-            (u'Q费用', 800.0, True, False, ),
-            (u'Y-GRE多轮费用', 2000.0, True, False, ),
-            (u'按月延长有效期', 1000.0, True, True, ),
-            (u'一次性延长2年有效期', 3000.0, True, True, ),
-        ]
-        for entry in products:
-            product = Product.query.filter_by(name=entry[0]).first()
-            if product is None:
-                product = Product(
-                    name=entry[0],
-                    price=entry[1],
-                    available=entry[2],
-                    pinned=entry[3],
-                    modified_by_id=User.query.get(1).id
-                )
-                db.session.add(product)
-                print u'导入课程类型信息', entry[0]
-        db.session.commit()
+    def insert_entries(data, basedir):
+        if data == u'initial':
+            entries = [
+                (u'VB基本技术费', 6800.0, True, False, ),
+                (u'Y-GRE基本技术费', 6800.0, True, False, ),
+                (u'联报优惠', -1000.0, True, False, ),
+                (u'VB在校生减免', -800.0, True, False, ),
+                (u'Y-GRE在校生减免', -800.0, True, False, ),
+                (u'VB本校减免', -500.0, True, False, ),
+                (u'Y-GRE本校减免', -500.0, True, False, ),
+                (u'团报优惠', -200.0, True, True, ),
+                (u'AW费用', 800.0, True, False, ),
+                (u'Q费用', 800.0, True, False, ),
+                (u'Y-GRE多轮费用', 2000.0, True, False, ),
+                (u'按月延长有效期', 1000.0, True, True, ),
+                (u'一次性延长2年有效期', 3000.0, True, True, ),
+            ]
+            for entry in entries:
+                product = Product.query.filter_by(name=entry[0]).first()
+                if product is None:
+                    product = Product(
+                        name=entry[0],
+                        price=entry[1],
+                        available=entry[2],
+                        pinned=entry[3],
+                        modified_by_id=User.query.get(1).id
+                    )
+                    db.session.add(product)
+                    print u'导入课程类型信息', entry[0]
+            db.session.commit()
 
     def __repr__(self):
         return '<Product %r>' % self.alias
@@ -2895,12 +3143,12 @@ class CourseType(db.Model):
         return self.name.lower()
 
     @staticmethod
-    def insert_course_types():
-        course_types = [
+    def insert_entries():
+        entries = [
             (u'VB', ),
             (u'Y-GRE', ),
         ]
-        for entry in course_types:
+        for entry in entries:
             course_type = CourseType.query.filter_by(name=entry[0]).first()
             if course_type is None:
                 course_type = CourseType(name=entry[0])
@@ -2955,22 +3203,26 @@ class Course(db.Model):
             .filter(User.deleted == False)
 
     @staticmethod
-    def insert_courses():
-        import xlrd
-        data = xlrd.open_workbook('data/initial/courses.xlsx')
-        table = data.sheet_by_index(0)
-        courses = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in courses:
-            course = Course.query.filter_by(name=entry[0]).first()
-            if course is None:
-                course = Course(
-                    name=entry[0],
-                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                    modified_by_id=User.query.get(1).id
-                )
-                db.session.add(course)
-                print u'导入课程信息', entry[0], entry[1]
-        db.session.commit()
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'courses.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        if data == u'initial':
+                            course = Course(
+                                name=entry[0],
+                                type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                                modified_by_id=User.query.get(1).id
+                            )
+                            db.session.add(course)
+                            print u'导入课程信息', entry[0], entry[1]
+                        else:
+                            pass
+                    line_num += 1
+                db.session.commit()
 
     def __repr__(self):
         return '<Course %r>' % self.name
@@ -3060,32 +3312,33 @@ class Period(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_periods():
-        periods = [
-            (u'（淡季）VB上午', time(9, 0), time(15, 0), u'VB', ),
-            (u'（淡季）VB下午', time(15, 0), time(21, 0), u'VB', ),
-            (u'（旺季）VB时段1', time(8, 0), time(11, 30), u'VB', ),
-            (u'（旺季）VB时段2', time(11, 30), time(15, 0), u'VB', ),
-            (u'（旺季）VB时段3', time(15, 0), time(18, 30), u'VB', ),
-            (u'（旺季）VB时段4', time(18, 30), time(22, 0), u'VB', ),
-            (u'（淡季）Y-GRE上午', time(9, 0), time(15, 0), u'Y-GRE', ),
-            (u'（淡季）Y-GRE下午', time(15, 0), time(21, 0), u'Y-GRE', ),
-            (u'（旺季）Y-GRE上午', time(8, 0), time(15, 0), u'Y-GRE', ),
-            (u'（旺季）Y-GRE下午', time(15, 0), time(22, 0), u'Y-GRE', ),
-        ]
-        for entry in periods:
-            period = Period.query.filter_by(name=entry[0]).first()
-            if period is None:
-                period = Period(
-                    name=entry[0],
-                    start_time=entry[1],
-                    end_time=entry[2],
-                    type_id=CourseType.query.filter_by(name=entry[3]).first().id,
-                    modified_by_id=User.query.get(1).id
-                )
-                db.session.add(period)
-                print u'导入时段信息', entry[0], entry[1], entry[2], entry[3]
-        db.session.commit()
+    def insert_entries(data, basedir):
+        if data == u'initial':
+            entries = [
+                (u'（淡季）VB上午', time(9, 0), time(15, 0), u'VB', ),
+                (u'（淡季）VB下午', time(15, 0), time(21, 0), u'VB', ),
+                (u'（旺季）VB时段1', time(8, 0), time(11, 30), u'VB', ),
+                (u'（旺季）VB时段2', time(11, 30), time(15, 0), u'VB', ),
+                (u'（旺季）VB时段3', time(15, 0), time(18, 30), u'VB', ),
+                (u'（旺季）VB时段4', time(18, 30), time(22, 0), u'VB', ),
+                (u'（淡季）Y-GRE上午', time(9, 0), time(15, 0), u'Y-GRE', ),
+                (u'（淡季）Y-GRE下午', time(15, 0), time(21, 0), u'Y-GRE', ),
+                (u'（旺季）Y-GRE上午', time(8, 0), time(15, 0), u'Y-GRE', ),
+                (u'（旺季）Y-GRE下午', time(15, 0), time(22, 0), u'Y-GRE', ),
+            ]
+            for entry in entries:
+                period = Period.query.filter_by(name=entry[0]).first()
+                if period is None:
+                    period = Period(
+                        name=entry[0],
+                        start_time=entry[1],
+                        end_time=entry[2],
+                        type_id=CourseType.query.filter_by(name=entry[3]).first().id,
+                        modified_by_id=User.query.get(1).id
+                    )
+                    db.session.add(period)
+                    print u'导入时段信息', entry[0], entry[1], entry[2], entry[3]
+            db.session.commit()
 
     def __repr__(self):
         return '<Period %r>' % self.alias
@@ -3254,15 +3507,15 @@ class iPadCapacity(db.Model):
     ipads = db.relationship('iPad', backref='capacity', lazy='dynamic')
 
     @staticmethod
-    def insert_ipad_capacities():
-        ipad_capacities = [
+    def insert_entries():
+        entries = [
             (u'16GB', ),
             (u'32GB', ),
             (u'64GB', ),
             (u'128GB', ),
             (u'256GB', ),
         ]
-        for entry in ipad_capacities:
+        for entry in entries:
             ipad_capacity = iPadCapacity.query.filter_by(name=entry[0]).first()
             if ipad_capacity is None:
                 ipad_capacity = iPadCapacity(name=entry[0])
@@ -3281,8 +3534,8 @@ class iPadState(db.Model):
     ipads = db.relationship('iPad', backref='state', lazy='dynamic')
 
     @staticmethod
-    def insert_ipad_states():
-        ipad_states = [
+    def insert_entries():
+        entries = [
             (u'待机', ),
             (u'借出', ),
             (u'候补', ),
@@ -3290,7 +3543,7 @@ class iPadState(db.Model):
             (u'充电', ),
             (u'退役', ),
         ]
-        for entry in ipad_states:
+        for entry in entries:
             ipad_state = iPadState.query.filter_by(name=entry[0]).first()
             if ipad_state is None:
                 ipad_state = iPadState(name=entry[0])
@@ -3309,12 +3562,13 @@ class Room(db.Model):
     ipads = db.relationship('iPad', backref='room', lazy='dynamic')
 
     @staticmethod
-    def insert_rooms():
-        rooms = [
+    def insert_entries():
+        entries = [
             (u'1103', ),
+            (u'1702', ),
             (u'1707', ),
         ]
-        for entry in rooms:
+        for entry in entries:
             room = Room.query.filter_by(name=entry[0]).first()
             if room is None:
                 room = Room(name=entry[0])
@@ -3340,24 +3594,31 @@ class iPadContent(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_ipad_contents():
-        import xlrd
-        data = xlrd.open_workbook('data/initial/ipad-contents.xlsx')
-        table = data.sheet_by_index(0)
-        lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in table.row_values(0) if Lesson.query.filter_by(name=value).first()]
-        ipad_contents = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in ipad_contents:
-            ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
-            for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
-                if exist_lesson:
-                    if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
-                        ipad_content = iPadContent(
-                            ipad_id=ipad_id,
-                            lesson_id=lesson_id,
-                        )
-                        db.session.add(ipad_content)
-                        print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
-        db.session.commit()
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'ipad-contents.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if data == 'initial' and line_num == 0:
+                        lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in entry[1:] if Lesson.query.filter_by(name=value).first() is not None]
+                    if line_num >= 1:
+                        if data == 'initial':
+                            ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
+                            for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
+                                if exist_lesson:
+                                    if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
+                                        ipad_content = iPadContent(
+                                            ipad_id=ipad_id,
+                                            lesson_id=lesson_id,
+                                        )
+                                        db.session.add(ipad_content)
+                                        print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
+                        else:
+                            pass
+                    line_num += 1
+                db.session.commit()
 
 
 class iPad(db.Model):
@@ -3554,27 +3815,29 @@ class iPad(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_ipads():
-        import xlrd
-        data = xlrd.open_workbook('data/initial/ipads.xlsx')
-        table = data.sheet_by_index(0)
-        ipads = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in ipads:
-            if isinstance(entry[3], float):
-                entry[3] = int(entry[3])
-            ipad = iPad.query.filter_by(serial=entry[1]).first()
-            if ipad is None:
-                ipad = iPad(
-                    serial=entry[1].upper(),
-                    alias=entry[0],
-                    capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
-                    room_id=Room.query.filter_by(name=unicode(str(entry[3]))).first().id,
-                    state_id=iPadState.query.filter_by(name=entry[4]).first().id,
-                    modified_by_id=User.query.get(1).id
-                )
-                print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
-                db.session.add(ipad)
-        db.session.commit()
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'ipads.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        if data == u'initial':
+                            ipad = iPad(
+                                serial=entry[1].upper(),
+                                alias=entry[0],
+                                capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
+                                room_id=Room.query.filter_by(name=entry[3]).first().id,
+                                state_id=iPadState.query.filter_by(name=entry[4]).first().id,
+                                modified_by_id=User.query.get(1).id
+                            )
+                            print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
+                            db.session.add(ipad)
+                        else:
+                            pass
+                    line_num += 1
+                db.session.commit()
 
     def __repr__(self):
         return '<iPad %r, %r>' % (self.alias, self.serial)
@@ -3687,8 +3950,8 @@ class Lesson(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_lessons():
-        lessons = [
+    def insert_entries():
+        entries = [
             (u'词典使用', u'VB', 0, 0, 0, False, False, ),
             (u'VB总论', u'VB', 20, 16, 1, True, False, ),
             (u'L1', u'VB', 8, 15, 2, True, False, ),
@@ -3719,7 +3982,7 @@ class Lesson(db.Model):
             (u'Test', u'Y-GRE', 0, 0, -1, True, False, ),
             (u'Y-GRE临考', u'Y-GRE', 80, 17, 12, False, False, ),
         ]
-        for entry in lessons:
+        for entry in entries:
             lesson = Lesson.query.filter_by(name=entry[0]).first()
             if lesson is None:
                 lesson = Lesson(
@@ -3783,8 +4046,8 @@ class Section(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_sections():
-        sections = [
+    def insert_entries():
+        entries = [
             (u'词典使用', u'词典使用', 0, ),
             (u'Day 1-1', u'VB总论', 1, ),
             (u'Day 1-2', u'VB总论', 2, ),
@@ -3945,7 +4208,7 @@ class Section(db.Model):
             (u'V150', u'Y-GRE临考', 0, ),
             (u'Magoosh V', u'Y-GRE临考', 0, ),
         ]
-        for entry in sections:
+        for entry in entries:
             section = Section.query.filter_by(name=entry[0]).first()
             if section is None:
                 section = Section(
@@ -3998,8 +4261,8 @@ class Assignment(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_assignments():
-        assignments = [
+    def insert_entries():
+        entries = [
             (u'L1', u'L1', ),
             (u'L2', u'L2', ),
             (u'R1-2', u'L2', ),
@@ -4014,7 +4277,7 @@ class Assignment(db.Model):
             (u'R7-8', u'L8', ),
             (u'R9-10', u'L10', ),
         ]
-        for entry in assignments:
+        for entry in entries:
             assignment = Assignment.query.filter_by(name=entry[0]).first()
             if assignment is None:
                 assignment = Assignment(
@@ -4081,8 +4344,8 @@ class Test(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_tests():
-        tests = [
+    def insert_entries():
+        entries = [
             (u'Test 1-5', u'L5', ),
             (u'Test 6-9', u'L9', ),
             (u'入学测试', u'Y-GRE总论', ),
@@ -4098,7 +4361,7 @@ class Test(db.Model):
             (u'PPII-1', u'Y-GRE临考', ),
             (u'PPII-2', u'Y-GRE临考', ),
         ]
-        for entry in tests:
+        for entry in entries:
             test = Test.query.filter_by(name=entry[0]).first()
             if test is None:
                 test = Test(
@@ -4149,12 +4412,12 @@ class StudyPlan(db.Model):
     @property
     def start_date_alias(self):
         if self.available:
-            return self.start_date.strftime('%Y-%m-%d')
+            return self.start_date.isoformat()
 
     @property
     def end_date_alias(self):
         if self.available:
-            return self.end_date.strftime('%Y-%m-%d')
+            return self.end_date.isoformat()
 
     @property
     def days(self):
@@ -4237,22 +4500,26 @@ class NotaBene(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_notate_bene():
-        import xlrd
-        data = xlrd.open_workbook('data/initial/notate-bene.xlsx')
-        table = data.sheet_by_index(0)
-        notate_bene = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in notate_bene:
-            nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
-            if nota_bene is None:
-                nota_bene = NotaBene(
-                    body=entry[0],
-                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                    modified_by_id=User.query.get(1).id
-                )
-                db.session.add(nota_bene)
-                print u'导入Nota Bene信息', entry[0], entry[1]
-        db.session.commit()
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'notate-bene.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        if data == u'initial':
+                            nota_bene = NotaBene(
+                                body=entry[0],
+                                type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                                modified_by_id=User.query.get(1).id
+                            )
+                            db.session.add(nota_bene)
+                            print u'导入Nota Bene信息', entry[0], entry[1]
+                        else:
+                            pass
+                    line_num += 1
+                db.session.commit()
 
     def __repr__(self):
         return '<Nota Bene %r>' % self.body
@@ -4313,8 +4580,8 @@ class AnnouncementType(db.Model):
     announcements = db.relationship('Announcement', backref='type', lazy='dynamic')
 
     @staticmethod
-    def insert_announcement_types():
-        announcement_types = [
+    def insert_entries():
+        entries = [
             (u'登录通知', ),
             (u'用户主页通知', ),
             (u'管理主页通知', ),
@@ -4323,7 +4590,7 @@ class AnnouncementType(db.Model):
             (u'用户邮件通知', ),
             (u'管理邮件通知', ),
         ]
-        for entry in announcement_types:
+        for entry in entries:
             announcement_type = AnnouncementType.query.filter_by(name=entry[0]).first()
             if announcement_type is None:
                 announcement_type = AnnouncementType(name=entry[0])
@@ -4417,6 +4684,52 @@ class Feed(db.Model):
     event = db.Column(db.UnicodeText)
     category = db.Column(db.Unicode(64), index=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_csv(self):
+        entry_csv = [
+            self.user.email,
+            self.event,
+            self.category,
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'feeds.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        feed = Feed(
+                            user_id=User.query.filter_by(email=entry[0]).first().id,
+                            event=entry[1],
+                            category=entry[2],
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(feed)
+                        print u'导入日志信息', entry[0], entry[1], entry[2], entry[3]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'feeds.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'user_email',
+                'event',
+                'category',
+                'timestamp',
+            ])
+            for entry in Feed.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<Feed %r, %r, %r>' % (self.user.name_alias, self.event, self.category, self.timestamp)

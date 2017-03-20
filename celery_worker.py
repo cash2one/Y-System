@@ -11,7 +11,7 @@ import os
 
 
 if os.path.exists('.env'):
-    print('Importing environment from .env...')
+    print u'Importing environment from . env ...'
     for line in open('.env'):
         var = line.strip().split('=')
         if len(var) == 2:

@@ -131,7 +131,7 @@
                                     {{ gre_form.q_score.label() }}
                                     {{ gre_form.q_score(placeholder='Q成绩') }}
                                 </div>
-                                <div class="eight wide required field">
+                                <div class="eight wide field">
                                     {{ gre_form.aw_score.label() }}
                                     {{ gre_form.aw_score(class='ui dropdown') }}
                                 </div>
@@ -230,7 +230,7 @@
                             <td>{% if show_gre_tests or show_toefl_tests %}{{ test.date }}{% else %}{{ test.name }}{% endif %}</td>
                             <td>{% if test_type == 'gre' %}GRE{% elif test_type == 'toefl' %}TOEFL{% else %}{{ test.lesson.type.name }}{% endif %}</td>
                             <td>{% if test_type in ['gre', 'toefl'] %}N/A{% else %}{{ test.lesson.name }}{% endif %}</td>
-                            <td>{% if test.finished_by_alias.count() %}<a class="score loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=test.id) }}" data-content="查看{{ test.finished_by_alias.count() }}条考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
+                            <td>{% if test.finished_by_alias.count() %}<a class="score popup-item loading-trigger" href="{{ url_for('manage.test_score', test_type=test_type, id=test.id) }}" data-content="查看{{ test.finished_by_alias.count() }}条考试记录" data-position="top center" data-variation="inverted">{{ test.finished_by_alias.count() }} 条</a>{% else %}0 条{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -260,23 +260,18 @@ $('.ui.checkbox').checkbox();
 
 $('.ui.sortable.table').tablesort();
 
-$('td a.score.loading-trigger').popup();
-
-$('#new-vb-score-trigger').popup();
 $('#new-vb-score-trigger')
     .on('click', function() {
         $('#new-vb-score-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
-$('#new-y-gre-score-trigger').popup();
 $('#new-y-gre-score-trigger')
     .on('click', function() {
         $('#new-y-gre-score-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
-$('#new-gre-score-trigger').popup();
 $('#new-gre-score-trigger')
     .on('click', function() {
         $('#new-gre-score-modal').modal({ autofocus: false }).modal('show');
@@ -284,7 +279,6 @@ $('#new-gre-score-trigger')
     })
 ;
 
-$('#new-toefl-score-trigger').popup();
 $('#new-toefl-score-trigger')
     .on('click', function() {
         $('#new-toefl-score-modal').modal({ autofocus: false }).modal('show');
@@ -431,15 +425,6 @@ $(document)
                             {
                                 type: 'integer[130..170]',
                                 prompt: '请填写有效的Quantitative Reasoning成绩'
-                            }
-                        ]
-                    },
-                    aw_score: {
-                        identifier: 'gre-aw_score',
-                        rules: [
-                            {
-                                type: 'empty',
-                                prompt: '请选择Analytical Writing成绩'
                             }
                         ]
                     },

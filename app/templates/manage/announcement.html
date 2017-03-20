@@ -22,7 +22,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="announcement icon"></i>通知列表</h3>
-                <div id="new-announcement-trigger" class="ui right floated positive circular icon button" data-content="新建通知" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-announcement-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建通知" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-announcement-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建通知</div>
@@ -142,7 +142,6 @@ $('#delete-hide-trigger-{{ announcement.id }}')
 ;
 {% endfor %}
 
-$('#new-announcement-trigger').popup();
 $('#new-announcement-trigger')
     .on('click', function() {
         $('#new-announcement-modal').modal({ autofocus: false }).modal('show');
