@@ -153,28 +153,28 @@ def deploy():
     datadir = os.path.join(basedir, 'data', data)
     if os.path.exists(datadir):
         from app.models import User
-        User.insert_entries(data=data)
+        User.insert_entries(data=data, basedir=basedir)
 
         from app.models import Tag
-        Tag.insert_entries(data=data)
+        Tag.insert_entries(data=data, basedir=basedir)
 
         from app.models import Product
-        Product.insert_entries(data=data)
+        Product.insert_entries(data=data, basedir=basedir)
 
         from app.models import Course
-        Course.insert_entries(data=data)
+        Course.insert_entries(data=data, basedir=basedir)
 
         from app.models import Period
-        Period.insert_entries(data=data)
+        Period.insert_entries(data=data, basedir=basedir)
 
         from app.models import iPad
-        iPad.insert_entries(data=data)
+        iPad.insert_entries(data=data, basedir=basedir)
 
         from app.models import iPadContent
-        iPadContent.insert_entries(data=data)
+        iPadContent.insert_entries(data=data, basedir=basedir)
 
         from app.models import NotaBene
-        NotaBene.insert_entries(data=data)
+        NotaBene.insert_entries(data=data, basedir=basedir)
     else:
         print '---> Invalid data identifier: %s' % data
 

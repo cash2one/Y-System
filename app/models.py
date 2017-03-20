@@ -12,8 +12,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
 from flask_login import UserMixin, AnonymousUserMixin
-from app.exceptions import ValidationError
 from . import db, login_manager
+from .csvutil import UnicodeReader, UnicodeWriter
 
 
 class Version:
@@ -2539,7 +2539,7 @@ class User(UserMixin, db.Model):
         return entry_json
 
     @staticmethod
-    def insert_entries(data):
+    def insert_entries(data, basedir):
         if data == u'initial':
             admin = User.query.filter_by(email=current_app.config['YSYS_ADMIN']).first()
             if admin is None:
@@ -2627,7 +2627,7 @@ class Tag(db.Model):
             .filter(User.deleted == False)
 
     @staticmethod
-    def insert_entries(data):
+    def insert_entries(data, basedir):
         if data == u'initial':
             entries = [
                 (u'未缴全款', u'Red', True, ),
@@ -2855,7 +2855,7 @@ class Product(db.Model):
         return sum([purchase.quantity for purchase in self.purchases if purchase.user.created and purchase.user.activated and not purchase.user.deleted])
 
     @staticmethod
-    def insert_entries(data):
+    def insert_entries(data, basedir):
         if data == u'initial':
             entries = [
                 (u'VB基本技术费', 6800.0, True, False, ),
@@ -2964,22 +2964,23 @@ class Course(db.Model):
             .filter(User.deleted == False)
 
     @staticmethod
-    def insert_entries(data):
-        import xlrd
-        data = xlrd.open_workbook(os.path.join('data', data, 'courses.xlsx'))
-        table = data.sheet_by_index(0)
-        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in entries:
-            course = Course.query.filter_by(name=entry[0]).first()
-            if course is None:
-                course = Course(
-                    name=entry[0],
-                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                    modified_by_id=User.query.get(1).id
-                )
-                db.session.add(course)
-                print u'导入课程信息', entry[0], entry[1]
-        db.session.commit()
+    def insert_entries(data, basedir):
+        with open(os.path.join(basedir, 'data', data, 'courses.csv'), 'r') as f:
+            reader = UnicodeReader(f)
+            line_num = 0
+            for entry in reader:
+                if line_num >= 1:
+                    course = Course.query.filter_by(name=entry[0]).first()
+                    if course is None:
+                        course = Course(
+                            name=entry[0],
+                            type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                            modified_by_id=User.query.get(1).id
+                        )
+                        db.session.add(course)
+                        print u'导入课程信息', entry[0], entry[1]
+                line_num += 1
+            db.session.commit()
 
     def __repr__(self):
         return '<Course %r>' % self.name
@@ -3069,7 +3070,7 @@ class Period(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_entries(data):
+    def insert_entries(data, basedir):
         if data == u'initial':
             entries = [
                 (u'（淡季）VB上午', time(9, 0), time(15, 0), u'VB', ),
@@ -3351,24 +3352,26 @@ class iPadContent(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_entries(data):
-        import xlrd
-        data = xlrd.open_workbook(os.path.join('data', data, 'ipad-contents.xlsx'))
-        table = data.sheet_by_index(0)
-        lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in table.row_values(0) if Lesson.query.filter_by(name=value).first()]
-        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in entries:
-            ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
-            for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
-                if exist_lesson:
-                    if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
-                        ipad_content = iPadContent(
-                            ipad_id=ipad_id,
-                            lesson_id=lesson_id,
-                        )
-                        db.session.add(ipad_content)
-                        print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
-        db.session.commit()
+    def insert_entries(data, basedir):
+        with open(os.path.join(basedir, 'data', data, 'ipad-contents.csv'), 'r') as f:
+            reader = UnicodeReader(f)
+            line_num = 0
+            for entry in reader:
+                if line_num == 0:
+                    lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in entry[1:] if Lesson.query.filter_by(name=value).first() is not None]
+                if line_num >= 1:
+                    ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
+                    for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
+                        if exist_lesson:
+                            if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
+                                ipad_content = iPadContent(
+                                    ipad_id=ipad_id,
+                                    lesson_id=lesson_id,
+                                )
+                                db.session.add(ipad_content)
+                                print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
+                line_num += 1
+            db.session.commit()
 
 
 class iPad(db.Model):
@@ -3565,27 +3568,26 @@ class iPad(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_entries(data):
-        import xlrd
-        data = xlrd.open_workbook(os.path.join('data', data, 'ipads.xlsx'))
-        table = data.sheet_by_index(0)
-        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in entries:
-            if isinstance(entry[3], float):
-                entry[3] = int(entry[3])
-            ipad = iPad.query.filter_by(serial=entry[1]).first()
-            if ipad is None:
-                ipad = iPad(
-                    serial=entry[1].upper(),
-                    alias=entry[0],
-                    capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
-                    room_id=Room.query.filter_by(name=unicode(str(entry[3]))).first().id,
-                    state_id=iPadState.query.filter_by(name=entry[4]).first().id,
-                    modified_by_id=User.query.get(1).id
-                )
-                print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
-                db.session.add(ipad)
-        db.session.commit()
+    def insert_entries(data, basedir):
+        with open(os.path.join(basedir, 'data', data, 'ipads.csv'), 'r') as f:
+            reader = UnicodeReader(f)
+            line_num = 0
+            for entry in reader:
+                if line_num >= 1:
+                    ipad = iPad.query.filter_by(serial=entry[1]).first()
+                    if ipad is None:
+                        ipad = iPad(
+                            serial=entry[1].upper(),
+                            alias=entry[0],
+                            capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
+                            room_id=Room.query.filter_by(name=entry[3]).first().id,
+                            state_id=iPadState.query.filter_by(name=entry[4]).first().id,
+                            modified_by_id=User.query.get(1).id
+                        )
+                        print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
+                        db.session.add(ipad)
+                line_num += 1
+            db.session.commit()
 
     def __repr__(self):
         return '<iPad %r, %r>' % (self.alias, self.serial)
@@ -4248,22 +4250,23 @@ class NotaBene(db.Model):
         return entry_json
 
     @staticmethod
-    def insert_entries(data):
-        import xlrd
-        data = xlrd.open_workbook(os.path.join('data', data, 'notate-bene.xlsx'))
-        table = data.sheet_by_index(0)
-        entries = [table.row_values(row) for row in range(table.nrows) if row >= 1]
-        for entry in entries:
-            nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
-            if nota_bene is None:
-                nota_bene = NotaBene(
-                    body=entry[0],
-                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                    modified_by_id=User.query.get(1).id
-                )
-                db.session.add(nota_bene)
-                print u'导入Nota Bene信息', entry[0], entry[1]
-        db.session.commit()
+    def insert_entries(data, basedir):
+        with open(os.path.join(basedir, 'data', data, 'notate-bene.csv'), 'r') as f:
+            reader = UnicodeReader(f)
+            line_num = 0
+            for entry in reader:
+                if line_num >= 1:
+                    nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
+                    if nota_bene is None:
+                        nota_bene = NotaBene(
+                            body=entry[0],
+                            type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                            modified_by_id=User.query.get(1).id
+                        )
+                        db.session.add(nota_bene)
+                        print u'导入Nota Bene信息', entry[0], entry[1]
+                line_num += 1
+            db.session.commit()
 
     def __repr__(self):
         return '<Nota Bene %r>' % self.body
