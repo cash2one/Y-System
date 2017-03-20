@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="checkmark box icon"></i>权限列表</h3>
-                <div id="new-permission-trigger" class="ui right floated positive circular icon button" data-content="新建权限" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-permission-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建权限" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-permission-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建权限</div>
@@ -131,7 +131,6 @@ $('#delete-hide-trigger-{{ permission.id }}')
 ;
 {% endif %}{% endfor %}
 
-$('#new-permission-trigger').popup();
 $('#new-permission-trigger')
     .on('click', function() {
         $('#new-permission-modal').modal({ autofocus: false }).modal('show');

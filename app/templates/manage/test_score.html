@@ -22,7 +22,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="write icon"></i>考试记录</h3>
-                <div id="new-score-trigger" class="ui right floated positive circular icon button" data-content="新建{% if test_type == 'vb' %}VB{% endif %}{% if test_type == 'y_gre' %}Y-GRE{% endif %}{% if test_type == 'gre' %}GRE{% endif %}{% if test_type == 'toefl' %}TOEFL{% endif %}考试记录" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-score-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建{% if test_type == 'vb' %}VB{% endif %}{% if test_type == 'y_gre' %}Y-GRE{% endif %}{% if test_type == 'gre' %}GRE{% endif %}{% if test_type == 'toefl' %}TOEFL{% endif %}考试记录" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-score-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建{% if test_type == 'vb' %}VB{% endif %}{% if test_type == 'y_gre' %}Y-GRE{% endif %}{% if test_type == 'gre' %}GRE{% endif %}{% if test_type == 'toefl' %}TOEFL{% endif %}考试记录</div>
@@ -287,7 +287,6 @@ $('#delete-hide-trigger-{{ score.id }}')
 ;
 {% endfor %}
 
-$('#new-score-trigger').popup();
 $('#new-score-trigger')
     .on('click', function() {
         $('#new-score-modal').modal({ autofocus: false }).modal('show');

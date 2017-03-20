@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="shop icon"></i>产品列表</h3>
-                <div id="new-product-trigger" class="ui right floated positive circular icon button" data-content="新建产品" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-product-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建产品" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-product-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建产品</div>
@@ -73,7 +73,7 @@
                         <tr>
                             <td>{% if product.pinned and current_user.is_developer %}<i class="pin icon"></i>{% endif %}{{ product.name }}</td>
                             <td><i class="fa fa-rmb"></i> {{ product.price_alias }}</td>
-                            <td>{% if product.sales_volume %}<a class="purchase loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id) }}" data-content="查看购买记录" data-position="top center" data-variation="inverted">{{ product.sales_volume }}</a>{% else %}0{% endif %}</td>
+                            <td>{% if product.sales_volume %}<a class="popup-item loading-trigger" href="{{ url_for('manage.product_purchase', id=product.id) }}" data-content="查看购买记录" data-position="top center" data-variation="inverted">{{ product.sales_volume }}</a>{% else %}0{% endif %}</td>
                             <td{% if product.available %} class="active"{% endif %}>{% if product.available %}可选{% else %}不可选{% endif %}</td>
                             <td>
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(product.modified_at).fromNow() }}</div>
@@ -122,8 +122,6 @@ $('.ui.checkbox').checkbox();
 
 $('.ui.sortable.table').tablesort();
 
-$('td .purchase.loading-trigger').popup();
-
 {% for product in products %}{% if not product.pinned or current_user.is_developer %}
 $('#delete-trigger-{{ product.id }}')
     .on('click', function() {
@@ -137,7 +135,6 @@ $('#delete-hide-trigger-{{ product.id }}')
 ;
 {% endif %}{% endfor %}
 
-$('#new-product-trigger').popup();
 $('#new-product-trigger')
     .on('click', function() {
         $('#new-product-modal').modal({ autofocus: false }).modal('show');

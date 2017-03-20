@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="spy icon"></i>角色列表</h3>
-                <div id="new-role-trigger" class="ui right floated positive circular icon button" data-content="新建角色" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-role-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建角色" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-role-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建角色</div>
@@ -158,7 +158,6 @@ $('#delete-hide-trigger-{{ role.id }}')
 ;
 {% endif %}{% endfor %}
 
-$('#new-role-trigger').popup();
 $('#new-role-trigger')
     .on('click', function() {
         $('#new-role-modal').modal({ autofocus: false }).modal('show');

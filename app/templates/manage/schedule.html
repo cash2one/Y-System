@@ -26,7 +26,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="clock icon"></i>预约时段列表</h3>
-                <div id="new-schedule-trigger" class="ui right floated positive circular icon button" data-content="新建预约时段" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-schedule-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建预约时段" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-schedule-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建预约时段</div>
@@ -148,7 +148,6 @@ $('.ui.checkbox').checkbox();
 
 $('.ui.sortable.table').tablesort();
 
-$('#new-schedule-trigger').popup();
 $('#new-schedule-trigger')
     .on('click', function() {
         $('#new-schedule-modal').modal({ autofocus: false }).modal('show');
