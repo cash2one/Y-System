@@ -149,7 +149,7 @@ def deploy():
     AnnouncementType.insert_entries()
 
     from config import basedir
-    data = raw_input(u'Enter data identifier (e.g.: initial or 20170701): ')
+    data = raw_input(u'Enter data identifier (e.g.: initial or 20160422): ')
     datadir = os.path.join(basedir, 'data', data)
     if os.path.exists(datadir):
         from app.models import User
@@ -184,7 +184,13 @@ def backup():
     '''
     Run backup tasks.
     '''
-    pass
+    from config import basedir
+    data = raw_input(u'Enter data identifier (e.g.: backup or 20160422): ')
+    datadir = os.path.join(basedir, 'data', data)
+    if not os.path.exists(datadir):
+        os.makedirs(datadir)
+    from app.models import User
+    User.backup_entries(data=data, basedir=basedir)
 
 
 if __name__ == '__main__':

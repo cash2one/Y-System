@@ -451,13 +451,8 @@ def set_booking_state_canceled(user_id, schedule_id):
 
 
 def time_now(utcOffset=0):
-    hour = datetime.utcnow().hour + utcOffset
-    if hour >= 24:
-        hour -= 24
-    minute = datetime.utcnow().minute
-    second = datetime.utcnow().second
-    microsecond = datetime.utcnow().microsecond
-    return time(hour, minute, second, microsecond)
+    t = datetime.utcnow() + timedelta(hours=utcOffset)
+    return t.time()
 
 
 @manage.route('/booking/set-state/missed/all')
@@ -1387,8 +1382,8 @@ def edit_period(id):
         add_feed(user=current_user._get_current_object(), event=u'更新时段模板：%s' % form.name.data, category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.period'))
     form.name.data = period.name
-    form.start_time.data = period.start_time.strftime(u'%H:%M')
-    form.end_time.data = period.end_time.strftime(u'%H:%M')
+    form.start_time.data = period.start_time.strftime('%H:%M')
+    form.end_time.data = period.end_time.strftime('%H:%M')
     form.period_type.data = unicode(period.type_id)
     form.show.data = period.show
     return render_template('manage/edit_period.html', form=form, period=period)
@@ -2749,13 +2744,6 @@ def search_user_results():
     resp.set_cookie('show_developers', '', max_age=30*24*60*60)
     resp.set_cookie('show_search_users', '1', max_age=30*24*60*60)
     return resp
-
-
-def get_gender_id(id_number):
-    if int(id_number[16]) % 2 == 1:
-        return Gender.query.filter_by(name=u'男').first().id
-    else:
-        return Gender.query.filter_by(name=u'女').first().id
 
 
 @manage.route('/user/create', methods=['GET', 'POST'])
@@ -5387,8 +5375,8 @@ def generate_study_plan(id):
                     start_date = current_date + timedelta(days=1)
                     end_date = current_date + timedelta(days=int(lesson.hour.total_seconds() / 3600.0 / intensity / speed * 7))
                     study_plan[lesson.name] = {
-                        'start_date': start_date.strftime('%Y-%m-%d'),
-                        'end_date': end_date.strftime('%Y-%m-%d'),
+                        'start_date': start_date.isoformat(),
+                        'end_date': end_date.isoformat(),
                     }
                     current_date = end_date
         else:
@@ -5404,8 +5392,8 @@ def generate_study_plan(id):
                 if end_date > deadline:
                     break
                 study_plan[lesson.name] = {
-                    'start_date': start_date.strftime('%Y-%m-%d'),
-                    'end_date': end_date.strftime('%Y-%m-%d'),
+                    'start_date': start_date.isoformat(),
+                    'end_date': end_date.isoformat(),
                 }
                 current_date = end_date
     return jsonify(study_plan)

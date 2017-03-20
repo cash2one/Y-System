@@ -1440,10 +1440,6 @@ class User(UserMixin, db.Model):
             db.session.delete(employment_record)
         for score_record in self.score_records:
             db.session.delete(score_record)
-        # for gre_test_score in self.gre_test_scores:
-        #     db.session.delete(gre_test_score)
-        # for toefl_test_score in self.toefl_test_scores:
-        #     db.session.delete(toefl_test_score)
         for purchase in self.purchases:
             db.session.delete(purchase)
         for course_registration in self.course_registrations:
@@ -1835,7 +1831,7 @@ class User(UserMixin, db.Model):
     @property
     def due_date(self):
         if self.due_time is not None:
-            return date(self.due_time.year, self.due_time.month, self.due_time.day)
+            return self.due_time.date()
 
     @property
     def overdue(self):
@@ -2538,6 +2534,39 @@ class User(UserMixin, db.Model):
             entry_json['url'] = self.url
         return entry_json
 
+    def to_csv(self):
+        entry_csv = [
+            self.email,
+            str(int(self.confirmed)),
+            self.role.name,
+            self.password_hash,
+            str(int(self.created)),
+            self.created_at.isoformat(),
+            str(int(self.activated)),
+            self.activated_at.isoformat(),
+            self.last_seen_at.isoformat(),
+            str(int(self.deleted)),
+            self.name,
+            self.id_type.name,
+            self.id_number,
+            self.gender.name,
+            self.birthdate.isoformat(),
+            self.mobile,
+            self.wechat,
+            self.qq,
+            self.address,
+            self.emergency_contact_name,
+            self.emergency_contact_mobile,
+            self.emergency_contact_relationship.name,
+            str(int(self.worked_in_same_field)),
+            str(int(self.deformity)),
+            self.application_aim,
+            self.application_agency,
+            str(self.speed),
+            self.deadline.isoformat(),
+        ]
+        return entry_csv
+
     @staticmethod
     def insert_entries(data, basedir):
         if data == u'initial':
@@ -2559,10 +2588,52 @@ class User(UserMixin, db.Model):
                 admin.__initial_punch()
                 db.session.commit()
                 print u'初始化系统管理员信息'
+        else:
+            csvfile = os.path.join(basedir, 'data', data, 'users.csv')
+            if os.path.exists(csvfile):
+                # '%Y-%m-%dT%H:%M:%S.%f'
+                pass
 
     @staticmethod
-    def backup_entries(data):
-        pass
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'users.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'email',
+                'confirmed',
+                'role',
+                'password_hash',
+                'created',
+                'created_at',
+                'activated',
+                'activated_at',
+                'last_seen_at',
+                'deleted',
+                'name',
+                'id_type',
+                'id_number',
+                'gender',
+                'birthdate',
+                'mobile',
+                'wechat',
+                'qq',
+                'address',
+                'emergency_contact_name',
+                'emergency_contact_mobile',
+                'emergency_contact_relationship',
+                'worked_in_same_field',
+                'deformity',
+                'application_aim',
+                'application_agency',
+                'speed',
+                'deadline',
+            ])
+            for entry in User.query.all():
+                writer.writerow(entry.to_csv())
+            print '---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<User %r, %r>' % (self.name, self.email)
@@ -2965,22 +3036,24 @@ class Course(db.Model):
 
     @staticmethod
     def insert_entries(data, basedir):
-        with open(os.path.join(basedir, 'data', data, 'courses.csv'), 'r') as f:
-            reader = UnicodeReader(f)
-            line_num = 0
-            for entry in reader:
-                if line_num >= 1:
-                    course = Course.query.filter_by(name=entry[0]).first()
-                    if course is None:
-                        course = Course(
-                            name=entry[0],
-                            type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                            modified_by_id=User.query.get(1).id
-                        )
-                        db.session.add(course)
-                        print u'导入课程信息', entry[0], entry[1]
-                line_num += 1
-            db.session.commit()
+        csvfile = os.path.join(basedir, 'data', data, 'courses.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        course = Course.query.filter_by(name=entry[0]).first()
+                        if course is None:
+                            course = Course(
+                                name=entry[0],
+                                type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                                modified_by_id=User.query.get(1).id
+                            )
+                            db.session.add(course)
+                            print u'导入课程信息', entry[0], entry[1]
+                    line_num += 1
+                db.session.commit()
 
     def __repr__(self):
         return '<Course %r>' % self.name
@@ -3353,25 +3426,27 @@ class iPadContent(db.Model):
 
     @staticmethod
     def insert_entries(data, basedir):
-        with open(os.path.join(basedir, 'data', data, 'ipad-contents.csv'), 'r') as f:
-            reader = UnicodeReader(f)
-            line_num = 0
-            for entry in reader:
-                if line_num == 0:
-                    lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in entry[1:] if Lesson.query.filter_by(name=value).first() is not None]
-                if line_num >= 1:
-                    ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
-                    for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
-                        if exist_lesson:
-                            if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
-                                ipad_content = iPadContent(
-                                    ipad_id=ipad_id,
-                                    lesson_id=lesson_id,
-                                )
-                                db.session.add(ipad_content)
-                                print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
-                line_num += 1
-            db.session.commit()
+        csvfile = os.path.join(basedir, 'data', data, 'ipad-contents.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num == 0:
+                        lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in entry[1:] if Lesson.query.filter_by(name=value).first() is not None]
+                    if line_num >= 1:
+                        ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
+                        for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
+                            if exist_lesson:
+                                if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
+                                    ipad_content = iPadContent(
+                                        ipad_id=ipad_id,
+                                        lesson_id=lesson_id,
+                                    )
+                                    db.session.add(ipad_content)
+                                    print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
+                    line_num += 1
+                db.session.commit()
 
 
 class iPad(db.Model):
@@ -3569,25 +3644,27 @@ class iPad(db.Model):
 
     @staticmethod
     def insert_entries(data, basedir):
-        with open(os.path.join(basedir, 'data', data, 'ipads.csv'), 'r') as f:
-            reader = UnicodeReader(f)
-            line_num = 0
-            for entry in reader:
-                if line_num >= 1:
-                    ipad = iPad.query.filter_by(serial=entry[1]).first()
-                    if ipad is None:
-                        ipad = iPad(
-                            serial=entry[1].upper(),
-                            alias=entry[0],
-                            capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
-                            room_id=Room.query.filter_by(name=entry[3]).first().id,
-                            state_id=iPadState.query.filter_by(name=entry[4]).first().id,
-                            modified_by_id=User.query.get(1).id
-                        )
-                        print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
-                        db.session.add(ipad)
-                line_num += 1
-            db.session.commit()
+        csvfile = os.path.join(basedir, 'data', data, 'ipads.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        ipad = iPad.query.filter_by(serial=entry[1]).first()
+                        if ipad is None:
+                            ipad = iPad(
+                                serial=entry[1].upper(),
+                                alias=entry[0],
+                                capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
+                                room_id=Room.query.filter_by(name=entry[3]).first().id,
+                                state_id=iPadState.query.filter_by(name=entry[4]).first().id,
+                                modified_by_id=User.query.get(1).id
+                            )
+                            print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
+                            db.session.add(ipad)
+                    line_num += 1
+                db.session.commit()
 
     def __repr__(self):
         return '<iPad %r, %r>' % (self.alias, self.serial)
@@ -4162,12 +4239,12 @@ class StudyPlan(db.Model):
     @property
     def start_date_alias(self):
         if self.available:
-            return self.start_date.strftime('%Y-%m-%d')
+            return self.start_date.isoformat()
 
     @property
     def end_date_alias(self):
         if self.available:
-            return self.end_date.strftime('%Y-%m-%d')
+            return self.end_date.isoformat()
 
     @property
     def days(self):
@@ -4251,22 +4328,24 @@ class NotaBene(db.Model):
 
     @staticmethod
     def insert_entries(data, basedir):
-        with open(os.path.join(basedir, 'data', data, 'notate-bene.csv'), 'r') as f:
-            reader = UnicodeReader(f)
-            line_num = 0
-            for entry in reader:
-                if line_num >= 1:
-                    nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
-                    if nota_bene is None:
-                        nota_bene = NotaBene(
-                            body=entry[0],
-                            type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                            modified_by_id=User.query.get(1).id
-                        )
-                        db.session.add(nota_bene)
-                        print u'导入Nota Bene信息', entry[0], entry[1]
-                line_num += 1
-            db.session.commit()
+        csvfile = os.path.join(basedir, 'data', data, 'notate-bene.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
+                        if nota_bene is None:
+                            nota_bene = NotaBene(
+                                body=entry[0],
+                                type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                                modified_by_id=User.query.get(1).id
+                            )
+                            db.session.add(nota_bene)
+                            print u'导入Nota Bene信息', entry[0], entry[1]
+                    line_num += 1
+                db.session.commit()
 
     def __repr__(self):
         return '<Nota Bene %r>' % self.body

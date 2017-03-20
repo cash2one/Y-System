@@ -34,13 +34,13 @@ EN_2_CN = {
 def NextDayString(days, short=False):
     day = date.today() + timedelta(days=1) * days
     if short:
-        return day.strftime(u'%Y-%m-%d')
-    return day.strftime(u'%Y-%m-%d') + u' ' + EN_2_CN[day.strftime(u'%a')]
+        return day.isoformat()
+    return day.isoformat() + u' ' + EN_2_CN[day.strftime(u'%a')]
 
 
 def NextHalfHourString(halfHours, startHour=6):
     t = time(startHour + halfHours/2, (halfHours % 2) * 30)
-    return t.strftime(u'%H:%M')
+    return t.strftime('%H:%M')
 
 
 class SearchForm(FlaskForm):
