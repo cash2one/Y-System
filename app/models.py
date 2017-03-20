@@ -703,7 +703,7 @@ class Punch(db.Model):
                             user_id=User.query.filter_by(email=entry[0]).first().id,
                             section_id=Section.query.filter_by(name=entry[1]).first().id,
                             milestone = bool(int(entry[2])),
-                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S.%f')
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
                         )
                         db.session.add(punch)
                         print u'导入进度打卡信息', entry[0], entry[1], entry[2], entry[3]
@@ -1194,7 +1194,7 @@ class UserCreation(db.Model):
                         user_creation = UserCreation(
                             creator_id=User.query.filter_by(email=entry[0]).first().id,
                             user_id=User.query.filter_by(email=entry[1]).first().id,
-                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S.%f')
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
                         )
                         db.session.add(user_creation)
                         print u'导入用户创建人信息', entry[0], entry[1], entry[2]
@@ -2712,11 +2712,11 @@ class User(UserMixin, db.Model):
                             user = User.query.filter_by(email=entry[0]).first()
                             if user is None:
                                 if entry[5] is not None:
-                                    entry[5] = datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S.%f')
+                                    entry[5] = datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S')
                                 if entry[7] is not None:
-                                    entry[7] = datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S.%f')
+                                    entry[7] = datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S')
                                 if entry[8] is not None:
-                                    entry[8] = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S.%f')
+                                    entry[8] = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S')
                                 if entry[11] is not None:
                                     entry[11] = IDType.query.filter_by(name=entry[11]).first().id
                                 if entry[13] is not None:
@@ -4707,7 +4707,7 @@ class Feed(db.Model):
                             user_id=User.query.filter_by(email=entry[0]).first().id,
                             event=entry[1],
                             category=entry[2],
-                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S.%f')
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
                         )
                         db.session.add(feed)
                         print u'导入日志信息', entry[0], entry[1], entry[2], entry[3]
