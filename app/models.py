@@ -686,7 +686,7 @@ class Punch(db.Model):
             self.user.email,
             self.section.name,
             str(int(self.milestone)),
-            self.timestamp.isoformat(),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
         ]
         return entry_csv
 
@@ -1178,7 +1178,7 @@ class UserCreation(db.Model):
         entry_csv = [
             self.creator.email,
             self.user.email,
-            self.timestamp.isoformat(),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
         ]
         return entry_csv
 
@@ -2626,13 +2626,13 @@ class User(UserMixin, db.Model):
     def to_csv(self):
         created_at = ''
         if self.created_at is not None:
-            created_at = self.created_at.isoformat()
+            created_at = self.created_at.strftime('%Y-%m-%dT%H:%M:%S')
         activated_at = ''
         if self.activated_at is not None:
-            activated_at = self.activated_at.isoformat()
+            activated_at = self.activated_at.strftime('%Y-%m-%dT%H:%M:%S')
         last_seen_at = ''
         if self.last_seen_at is not None:
-            last_seen_at = self.last_seen_at.isoformat()
+            last_seen_at = self.last_seen_at.strftime('%Y-%m-%dT%H:%M:%S')
         id_type = ''
         if self.id_type_id is not None:
             id_type = self.id_type.name
@@ -4690,7 +4690,7 @@ class Feed(db.Model):
             self.user.email,
             self.event,
             self.category,
-            self.timestamp.isoformat(),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
         ]
         return entry_csv
 
