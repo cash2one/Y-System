@@ -3122,8 +3122,7 @@ class Course(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        course = Course.query.filter_by(name=entry[0]).first()
-                        if course is None:
+                        if data == u'initial':
                             course = Course(
                                 name=entry[0],
                                 type_id=CourseType.query.filter_by(name=entry[1]).first().id,
@@ -3131,6 +3130,8 @@ class Course(db.Model):
                             )
                             db.session.add(course)
                             print u'导入课程信息', entry[0], entry[1]
+                        else:
+                            pass
                     line_num += 1
                 db.session.commit()
 
@@ -3511,19 +3512,22 @@ class iPadContent(db.Model):
                 reader = UnicodeReader(f)
                 line_num = 0
                 for entry in reader:
-                    if line_num == 0:
+                    if data == 'initial' and line_num == 0:
                         lesson_ids = [Lesson.query.filter_by(name=value).first().id for value in entry[1:] if Lesson.query.filter_by(name=value).first() is not None]
                     if line_num >= 1:
-                        ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
-                        for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
-                            if exist_lesson:
-                                if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
-                                    ipad_content = iPadContent(
-                                        ipad_id=ipad_id,
-                                        lesson_id=lesson_id,
-                                    )
-                                    db.session.add(ipad_content)
-                                    print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
+                        if data == 'initial':
+                            ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
+                            for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
+                                if exist_lesson:
+                                    if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
+                                        ipad_content = iPadContent(
+                                            ipad_id=ipad_id,
+                                            lesson_id=lesson_id,
+                                        )
+                                        db.session.add(ipad_content)
+                                        print u'导入iPad内容信息', entry[0], Lesson.query.get(lesson_id).name
+                        else:
+                            pass
                     line_num += 1
                 db.session.commit()
 
@@ -3730,8 +3734,7 @@ class iPad(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        ipad = iPad.query.filter_by(serial=entry[1]).first()
-                        if ipad is None:
+                        if data == u'initial':
                             ipad = iPad(
                                 serial=entry[1].upper(),
                                 alias=entry[0],
@@ -3742,6 +3745,8 @@ class iPad(db.Model):
                             )
                             print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
                             db.session.add(ipad)
+                        else:
+                            pass
                     line_num += 1
                 db.session.commit()
 
@@ -4414,8 +4419,7 @@ class NotaBene(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        nota_bene = NotaBene.query.filter_by(body=entry[0]).first()
-                        if nota_bene is None:
+                        if data == u'initial':
                             nota_bene = NotaBene(
                                 body=entry[0],
                                 type_id=CourseType.query.filter_by(name=entry[1]).first().id,
@@ -4423,6 +4427,8 @@ class NotaBene(db.Model):
                             )
                             db.session.add(nota_bene)
                             print u'导入Nota Bene信息', entry[0], entry[1]
+                        else:
+                            pass
                     line_num += 1
                 db.session.commit()
 
