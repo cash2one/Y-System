@@ -56,13 +56,13 @@ def cleanup():
                     os.remove(full_db_file)
                 elif os.path.isdir(full_db_file):
                     rmtree(full_db_file)
-                print 'remove', full_db_file
+                print u'---> Remove %s' %  full_db_file
         db.drop_all()
     else:
         confirm = raw_input(u'Are you sure to clean up the database? [Y/n]: ')
         if confirm == u'Y':
             db.drop_all()
-            print '---> All data are deleted.'
+            print u'---> All data are deleted.'
 
 
 @manager.command
@@ -176,7 +176,7 @@ def deploy():
         from app.models import NotaBene
         NotaBene.insert_entries(data=data, basedir=basedir)
     else:
-        print '---> Invalid data identifier: %s' % data
+        print u'---> Invalid data identifier: %s' % data
 
 
 @manager.command

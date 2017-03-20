@@ -2535,35 +2535,59 @@ class User(UserMixin, db.Model):
         return entry_json
 
     def to_csv(self):
+        created_at = ''
+        if self.created_at is not None:
+            created_at = self.created_at.isoformat()
+        activated_at = ''
+        if self.activated_at is not None:
+            activated_at = self.activated_at.isoformat()
+        last_seen_at = ''
+        if self.last_seen_at is not None:
+            last_seen_at = self.last_seen_at.isoformat()
+        id_type = ''
+        if self.id_type_id is not None:
+            id_type = self.id_type.name
+        gender = ''
+        if self.gender_id is not None:
+            gender = self.gender.name
+        birthdate = ''
+        if self.birthdate is not None:
+            birthdate = self.birthdate.isoformat()
+        emergency_contact_relationship = ''
+        if self.emergency_contact_relationship_id is not None:
+            emergency_contact_relationship = self.relationship.name
+        deadline = ''
+        if self.deadline is not None:
+            deadline = self.deadline.isoformat()
         entry_csv = [
             self.email,
             str(int(self.confirmed)),
             self.role.name,
             self.password_hash,
             str(int(self.created)),
-            self.created_at.isoformat(),
+            created_at,
             str(int(self.activated)),
-            self.activated_at.isoformat(),
-            self.last_seen_at.isoformat(),
+            activated_at,
+            last_seen_at,
             str(int(self.deleted)),
             self.name,
-            self.id_type.name,
+            id_type,
             self.id_number,
-            self.gender.name,
-            self.birthdate.isoformat(),
+            gender,
+            birthdate,
             self.mobile,
             self.wechat,
             self.qq,
             self.address,
             self.emergency_contact_name,
             self.emergency_contact_mobile,
-            self.emergency_contact_relationship.name,
+            emergency_contact_relationship,
             str(int(self.worked_in_same_field)),
             str(int(self.deformity)),
             self.application_aim,
             self.application_agency,
             str(self.speed),
-            self.deadline.isoformat(),
+            deadline,
         ]
         return entry_csv
 
@@ -2591,8 +2615,55 @@ class User(UserMixin, db.Model):
         else:
             csvfile = os.path.join(basedir, 'data', data, 'users.csv')
             if os.path.exists(csvfile):
-                # '%Y-%m-%dT%H:%M:%S.%f'
-                pass
+                with open(csvfile, 'r') as f:
+                    reader = UnicodeReader(f)
+                    line_num = 0
+                    for entry in reader:
+                        if line_num >= 1:
+                            if entry[5] is not None:
+                                created_at = datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S.%f')
+                            if entry[7] is not None:
+                                activated_at = datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S.%f')
+                            if entry[8] is not None:
+                                last_seen_at = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S.%f')
+                            if entry[14] is not None:
+                                birthdate = datetime.strptime(entry[14], '%Y-%m-%d').date()
+                            if entry[27] is not None:
+                                deadline = datetime.strptime(entry[27], '%Y-%m-%d').date()
+                            user = User(
+                                email=entry[0],
+                                confirmed=bool(int(entry[1])),
+                                role_id=Role.query.filter_by(name=entry[2]).first().id,
+                                password_hash=str(entry[3]),
+                                created=bool(int(entry[4])),
+                                created_at=created_at,
+                                activated=bool(int(entry[6])),
+                                activated_at=activated_at,
+                                last_seen_at=last_seen_at,
+                                deleted=bool(int(entry[4])),
+                                name=entry[10],
+                                id_type_id=IDType.query.filter_by(name=entry[11]).first().id,
+                                id_number=entry[12],
+                                gender_id=Gender.query.filter_by(name=entry[13]).first().id,
+                                birthdate=birthdate,
+                                mobile=entry[15],
+                                wechat=entry[16],
+                                qq=entry[17],
+                                address=entry[18],
+                                emergency_contact_name=entry[19],
+                                emergency_contact_mobile=entry[20],
+                                emergency_contact_relationship_id=Relationship.query.filter_by(name=entry[21]).first().id,
+                                worked_in_same_field=bool(int(entry[22])),
+                                deformity=bool(int(entry[23])),
+                                application_aim=entry[24],
+                                application_agency=entry[25],
+                                speed=float(entry[26]),
+                                deadline=deadline
+                            )
+                            db.session.add(user)
+                        line_num += 1
+                    db.session.commit()
+                    print u'---> Insert entries from file: %s' % csvfile
 
     @staticmethod
     def backup_entries(data, basedir):
@@ -2633,7 +2704,7 @@ class User(UserMixin, db.Model):
             ])
             for entry in User.query.all():
                 writer.writerow(entry.to_csv())
-            print '---> Write file: %s' % csvfile
+            print u'---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<User %r, %r>' % (self.name, self.email)

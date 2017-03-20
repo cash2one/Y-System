@@ -5,6 +5,18 @@ import codecs
 import cStringIO
 
 
+def from_str(value):
+    if value = '':
+        value = None
+    return value
+
+
+def to_str(value):
+    if value is None:
+        value = ''
+    return value
+
+
 class UTF8Recoder:
     '''
     Iterator that reads an encoded stream and reencodes the input to UTF-8
@@ -31,7 +43,7 @@ class UnicodeReader:
 
     def next(self):
         row = self.reader.next()
-        return [unicode(s, 'utf-8') for s in row]
+        return [from_str(unicode(s, 'utf-8')) for s in row]
 
     def __iter__(self):
         return self
@@ -51,7 +63,7 @@ class UnicodeWriter:
         self.encoder = codecs.getincrementalencoder(encoding)()
 
     def writerow(self, row):
-        self.writer.writerow([s.encode('utf-8') for s in row])
+        self.writer.writerow([to_str(s).encode('utf-8') for s in row])
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode('utf-8')
