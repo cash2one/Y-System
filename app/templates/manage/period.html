@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="tasks icon"></i>时段模板列表</h3>
-                <div id="new-period-trigger" class="ui right floated positive circular icon button" data-content="新建时段模板" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-period-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建时段模板" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-period-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建时段模板</div>
@@ -148,7 +148,6 @@ $('#delete-hide-trigger-{{ period.id }}')
 ;
 {% endfor %}
 
-$('#new-period-trigger').popup()
 $('#new-period-trigger')
     .on('click', function() {
         $('#new-period-modal').modal({ autofocus: false }).modal('show');

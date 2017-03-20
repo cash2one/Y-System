@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="retweet icon"></i>iPad借阅记录</h3>
-                <a id="rental-rent-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.rental', page=pagination.page)) }}" data-content="借出iPad" data-position="top center" data-variation="inverted"><i class="upload icon"></i></a>
+                <a class="ui right floated positive circular icon button popup-item loading-trigger" href="{{ url_for('manage.rental_rent_step_1', next=url_for('manage.rental', page=pagination.page)) }}" data-content="借出iPad" data-position="top center" data-variation="inverted"><i class="upload icon"></i></a>
                 <div class="ui secondary stackable menu">
                     <a class="item {% if show_today_rentals %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_rentals') }}">当日记录</a>
                     <a class="item {% if show_today_rentals_1103 %}active {% endif %}loading-trigger" href="{{ url_for('manage.today_rentals_1103') }}">当日记录 [1103]</a>
@@ -101,7 +101,5 @@ $('.message .close')
 ;
 
 $('.ui.sortable.table').tablesort();
-
-$('#rental-rent-trigger').popup();
 </script>
 {% endblock %}

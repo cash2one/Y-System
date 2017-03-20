@@ -88,7 +88,7 @@
                     </div>
                 </div>
                 {% else %}
-                <a id="create-user-trigger" class="ui right floated positive circular icon button loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}" data-content="新建学生用户" data-position="top center" data-variation="inverted"><i class="add user icon"></i></a>
+                <a class="ui right floated positive circular icon button popup-item loading-trigger" href="{{ url_for('manage.create_user', next=url_for('manage.user', page=pagination.page)) }}" data-content="新建学生用户" data-position="top center" data-variation="inverted"><i class="add user icon"></i></a>
                 {% endif %}
                 {% endif %}
                 <div class="ui secondary stackable menu">
@@ -227,7 +227,6 @@ $('.message .close')
 $('.ui.sortable.table').tablesort();
 
 {% if current_user.can('管理用户') %}
-$('#create-user-trigger').popup();
 {% for user in users %}{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
 {% if user.activated %}
 $('#suspend-trigger-{{ user.id }}')
@@ -377,7 +376,7 @@ $(document)
 
 $(document)
     .ready(function() {
-        $('#search-user').form({ onSuccess: submitForm });
+        $('#search-user').form();
     })
 ;
 $('.ui.search')

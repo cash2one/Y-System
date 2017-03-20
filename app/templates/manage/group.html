@@ -21,7 +21,7 @@
         <div class="row">
             <div class="column">
                 <h3 class="ui header"><i class="users icon"></i>团报列表</h3>
-                <div id="new-group-trigger" class="ui right floated positive circular icon button" data-content="发起团报" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-group-trigger" class="ui right floated positive circular icon button popup-item" data-content="发起团报" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-group-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>发起团报</div>
@@ -152,7 +152,6 @@ $('#remove-member-hide-trigger-{{ group_registration.member.id }}')
 {% endfor %}
 {% endfor %}
 
-$('#new-group-trigger').popup();
 $('#new-group-trigger')
     .on('click', function() {
         $('#new-group-modal').modal({ autofocus: false }).modal('show');

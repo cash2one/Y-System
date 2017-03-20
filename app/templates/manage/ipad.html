@@ -28,7 +28,7 @@
                     </div>
                 </h3>
                 {% if current_user.can('管理iPad设备') %}
-                <div id="new-ipad-trigger" class="ui right floated positive circular icon button" data-content="新建iPad" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-ipad-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建iPad" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
                 <div id="new-ipad-modal" class="ui modal">
                     <i class="close icon"></i>
                     <div class="header"><i class="add circle icon"></i>新建iPad</div>
@@ -131,11 +131,11 @@
                             <td><code>{{ ipad.serial }}</code></td>
                             <td>{{ ipad.capacity.name }}</td>
                             <td>{{ ipad.video_playback_alias }}</td>
-                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}<div class="ui circular labels">{% for lesson in lessons %}<a class="ui blue label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}{% endwith %}</td>
-                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}<div class="ui circular labels">{% for lesson in lessons %}<a class="ui teal label loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_vb_lessons %}{% if lessons.count() %}<div class="ui circular labels">{% for lesson in lessons %}<a class="ui blue label popup-item loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}{% endwith %}</td>
+                            <td>{% with lessons = ipad.has_y_gre_lessons %}{% if lessons.count() %}<div class="ui circular labels">{% for lesson in lessons %}<a class="ui teal label popup-item loading-trigger" href="{{ url_for('manage.filter_ipad_results', keyword=lesson.id) }}" data-content="查询含有“{{ lesson.name }}”的iPad" data-position="top center" data-variation="inverted">{{ lesson.abbr }}</a>{% endfor %}</div>{% else %}无{% endif %}{% endwith %}</td>
                             <td class="single line">
                                 {% if ipad.state.name == '借出' %}
-                                <div class="ui orange mini button rented" style="cursor: not-allowed;" data-content="{{ ipad.now_rented_by.name_alias }}" data-position="top left" data-variation="inverted">
+                                <div class="ui orange mini button popup-item" style="cursor: not-allowed;" data-content="{{ ipad.now_rented_by.name_alias }}" data-position="top left" data-variation="inverted">
                                     <i class="user icon"></i>
                                     {{ ipad.state.name }}
                                 </div>
@@ -227,10 +227,6 @@ $('.message .close')
 
 $('.ui.sortable.table').tablesort();
 
-$('td .ui.label').popup();
-
-$('div .rented').popup();
-
 {% if current_user.can('管理iPad设备') %}
 {% for ipad in ipads %}
 $('#delete-trigger-{{ ipad.id }}')
@@ -245,7 +241,6 @@ $('#delete-hide-trigger-{{ ipad.id }}')
 ;
 {% endfor %}
 
-$('#new-ipad-trigger').popup();
 $('#new-ipad-trigger')
     .on('click', function() {
         $('#new-ipad-modal').modal({ autofocus: false }).modal('show');
@@ -330,7 +325,7 @@ $(document)
 
 $(document)
     .ready(function() {
-        $('#filter-ipad').form({ onSuccess: submitForm });
+        $('#filter-ipad').form();
     })
 ;
 </script>
