@@ -155,6 +155,12 @@ def deploy():
         from app.models import User
         User.insert_entries(data=data, basedir=basedir)
 
+        from app.models import UserCreation
+        UserCreation.insert_entries(data=data, basedir=basedir)
+
+        from app.models import Punch
+        Punch.insert_entries(data=data, basedir=basedir)
+
         from app.models import Tag
         Tag.insert_entries(data='initial', basedir=basedir)
 
@@ -175,6 +181,9 @@ def deploy():
 
         from app.models import NotaBene
         NotaBene.insert_entries(data='initial', basedir=basedir)
+
+        from app.models import Feed
+        Feed.insert_entries(data=data, basedir=basedir)
     else:
         print u'---> Invalid data identifier: %s' % data
 
@@ -189,8 +198,18 @@ def backup():
     datadir = os.path.join(basedir, 'data', data)
     if not os.path.exists(datadir):
         os.makedirs(datadir)
+
     from app.models import User
     User.backup_entries(data=data, basedir=basedir)
+
+    from app.models import UserCreation
+    UserCreation.backup_entries(data=data, basedir=basedir)
+
+    from app.models import Punch
+    Punch.backup_entries(data=data, basedir=basedir)
+
+    from app.models import Feed
+    Feed.backup_entries(data=data, basedir=basedir)
 
 
 if __name__ == '__main__':

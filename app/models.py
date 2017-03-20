@@ -681,6 +681,52 @@ class Punch(db.Model):
         }
         return entry_json
 
+    def to_csv(self):
+        entry_csv = [
+            self.user.email,
+            self.section.name,
+            str(int(self.milestone)),
+            self.timestamp.isoformat(),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'punches.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        punch = Punch(
+                            user_id=User.query.filter_by(email=entry[0]).first().id,
+                            section_id=Section.query.filter_by(name=entry[1]).first().id,
+                            milestone = bool(int(entry[2])),
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S.%f')
+                        )
+                        db.session.add(punch)
+                        print u'导入进度打卡信息', entry[0], entry[1], entry[2], entry[3]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'punches.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'user_email',
+                'section',
+                'milestone',
+                'timestamp',
+            ])
+            for entry in Punch.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
+
     def __repr__(self):
         return '<Punch %r, %r>' % (self.user.name, self.section.alias)
 
@@ -1127,6 +1173,49 @@ class UserCreation(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_csv(self):
+        entry_csv = [
+            self.creator.email,
+            self.user.email,
+            self.timestamp.isoformat(),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'user_creations.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        user_creation = UserCreation(
+                            creator_id=User.query.filter_by(email=entry[0]).first().id,
+                            user_id=User.query.filter_by(email=entry[1]).first().id,
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S.%f')
+                        )
+                        db.session.add(user_creation)
+                        print u'导入用户创建人信息', entry[0], entry[1], entry[2]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'user_creations.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'creator_email',
+                'user_email',
+                'timestamp',
+            ])
+            for entry in UserCreation.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
 
 class GroupRegistration(db.Model):
@@ -4595,6 +4684,52 @@ class Feed(db.Model):
     event = db.Column(db.UnicodeText)
     category = db.Column(db.Unicode(64), index=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_csv(self):
+        entry_csv = [
+            self.user.email,
+            self.event,
+            self.category,
+            self.timestamp.isoformat(),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'feeds.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        feed = Feed(
+                            user_id=User.query.filter_by(email=entry[0]).first().id,
+                            event=entry[1],
+                            category=entry[2],
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S.%f')
+                        )
+                        db.session.add(feed)
+                        print u'导入日志信息', entry[0], entry[1], entry[2], entry[3]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'feeds.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'user_email',
+                'event',
+                'category',
+                'timestamp',
+            ])
+            for entry in Feed.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<Feed %r, %r, %r>' % (self.user.name_alias, self.event, self.category, self.timestamp)
