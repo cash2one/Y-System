@@ -36,8 +36,8 @@ function noProfileAvatar(avatarImage) {
         <div class="row">
             <div class="four wide column">
                 <div class="ui basic vertical segment">
-                    <a id="avatar" class="popup-item" href="//cn.gravatar.com/emails/" target="_blank" data-position="top center" data-variation="inverted" data-content="通过Gravatar设置头像">
-                        <img class="ui centered medium rounded image" src="{{ user.avatar(size=300) }}" onerror="noProfileAvatar(this)">
+                    <a id="avatar" href="//cn.gravatar.com/emails/" target="_blank">
+                        <img class="ui centered medium rounded image popup-item" src="{{ user.avatar(size=300) }}" onerror="noProfileAvatar(this)" data-position="top center" data-variation="inverted" data-content="通过Gravatar设置头像">
                     </a>
                 </div>
                 <div class="ui vertical segment">

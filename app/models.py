@@ -18,7 +18,7 @@ from .csvutil import UnicodeReader, UnicodeWriter
 
 class Version:
     Application = 'v1.0.0-dev'
-    jQuery = '3.1.1'
+    jQuery = '3.2.1'
     SemanticUI = '2.2.9'
     SemanticUICalendar = '0.0.7'
     FontAwesome = '4.7.0'
