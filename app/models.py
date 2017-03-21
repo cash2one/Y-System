@@ -699,14 +699,18 @@ class Punch(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        punch = Punch(
-                            user_id=User.query.filter_by(email=entry[0]).first().id,
-                            section_id=Section.query.filter_by(name=entry[1]).first().id,
-                            milestone = bool(int(entry[2])),
-                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
-                        )
-                        db.session.add(punch)
-                        print u'导入进度打卡信息', entry[0], entry[1], entry[2], entry[3]
+                        user = User.query.filter_by(email=entry[0]).first()
+                        section = Section.query.filter_by(name=entry[1]).first()
+                        punch = Punch.query.filter_by(user_id=user.id, section_id=section.id).first()
+                        if punch is None:
+                            punch = Punch(
+                                user_id=user.id,
+                                section_id=section.id,
+                                milestone = bool(int(entry[2])),
+                                timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                            )
+                            db.session.add(punch)
+                            print u'导入进度打卡信息', entry[0], entry[1], entry[2], entry[3]
                     line_num += 1
                 db.session.commit()
 
@@ -1191,13 +1195,17 @@ class UserCreation(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        user_creation = UserCreation(
-                            creator_id=User.query.filter_by(email=entry[0]).first().id,
-                            user_id=User.query.filter_by(email=entry[1]).first().id,
-                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
-                        )
-                        db.session.add(user_creation)
-                        print u'导入用户创建人信息', entry[0], entry[1], entry[2]
+                        creator = User.query.filter_by(email=entry[0]).first()
+                        user = User.query.filter_by(email=entry[1]).first()
+                        user_creation = UserCreation.query.filter_by(creator_id=creator.id, user_id=user.id).first()
+                        if user_creation is None:
+                            user_creation = UserCreation(
+                                creator_id=creator.id,
+                                user_id=user.id,
+                                timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
+                            )
+                            db.session.add(user_creation)
+                            print u'导入用户创建人信息', entry[0], entry[1], entry[2]
                     line_num += 1
                 db.session.commit()
 
@@ -3212,13 +3220,15 @@ class Course(db.Model):
                 for entry in reader:
                     if line_num >= 1:
                         if data == u'initial':
-                            course = Course(
-                                name=entry[0],
-                                type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                                modified_by_id=User.query.get(1).id
-                            )
-                            db.session.add(course)
-                            print u'导入课程信息', entry[0], entry[1]
+                            course = Course.query.filter_by(name=entry[0]).first()
+                            if course is None:
+                                course = Course(
+                                    name=entry[0],
+                                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                                    modified_by_id=User.query.get(1).id
+                                )
+                                db.session.add(course)
+                                print u'导入课程信息', entry[0], entry[1]
                         else:
                             pass
                     line_num += 1
@@ -3608,7 +3618,8 @@ class iPadContent(db.Model):
                             ipad_id = iPad.query.filter_by(alias=entry[0]).first().id
                             for exist_lesson, lesson_id in zip(entry[1:], lesson_ids):
                                 if exist_lesson:
-                                    if iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first() is None:
+                                    ipad_content = iPadContent.query.filter_by(ipad_id=ipad_id, lesson_id=lesson_id).first()
+                                    if ipad_content is None:
                                         ipad_content = iPadContent(
                                             ipad_id=ipad_id,
                                             lesson_id=lesson_id,
@@ -3824,16 +3835,18 @@ class iPad(db.Model):
                 for entry in reader:
                     if line_num >= 1:
                         if data == u'initial':
-                            ipad = iPad(
-                                serial=entry[1].upper(),
-                                alias=entry[0],
-                                capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
-                                room_id=Room.query.filter_by(name=entry[3]).first().id,
-                                state_id=iPadState.query.filter_by(name=entry[4]).first().id,
-                                modified_by_id=User.query.get(1).id
-                            )
-                            print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
-                            db.session.add(ipad)
+                            ipad = iPad.query.filter_by(serial=entry[1].upper()).first()
+                            if ipad is None:
+                                ipad = iPad(
+                                    serial=entry[1].upper(),
+                                    alias=entry[0],
+                                    capacity_id=iPadCapacity.query.filter_by(name=entry[2]).first().id,
+                                    room_id=Room.query.filter_by(name=entry[3]).first().id,
+                                    state_id=iPadState.query.filter_by(name=entry[4]).first().id,
+                                    modified_by_id=User.query.get(1).id
+                                )
+                                print u'导入iPad信息', entry[1], entry[0], entry[2], entry[3], entry[4]
+                                db.session.add(ipad)
                         else:
                             pass
                     line_num += 1
@@ -4531,6 +4544,7 @@ class Feedback(db.Model):
     study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'))
     body = db.Column(db.UnicodeText)
     body_html = db.Column(db.UnicodeText)
+    read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
