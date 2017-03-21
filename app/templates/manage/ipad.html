@@ -217,7 +217,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -230,25 +230,25 @@ $('.ui.sortable.table').tablesort();
 {% if current_user.can('管理iPad设备') %}
 {% for ipad in ipads %}
 $('#delete-trigger-{{ ipad.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ ipad.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ ipad.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ ipad.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
 $('#new-ipad-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-ipad-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-ipad')
             .form({
                 inline: true,
@@ -324,7 +324,7 @@ $(document)
 {% endif %}
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#filter-ipad').form();
     })
 ;

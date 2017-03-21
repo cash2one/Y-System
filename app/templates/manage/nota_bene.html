@@ -95,7 +95,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -109,25 +109,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for nota_bene in notate_bene %}
 $('#delete-trigger-{{ nota_bene.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ nota_bene.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ nota_bene.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ nota_bene.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
 $('#new-nota-bene-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-nota-bene-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-nota-bene')
             .form({
                 inline: true,

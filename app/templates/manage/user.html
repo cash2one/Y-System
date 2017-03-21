@@ -216,7 +216,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -230,24 +230,24 @@ $('.ui.sortable.table').tablesort();
 {% for user in users %}{% if (not current_user.is_moderator and not user.is_superior_than(user=current_user)) or (current_user.is_moderator and (user.id == current_user.id or current_user.is_superior_than(user=user))) %}
 {% if user.activated %}
 $('#suspend-trigger-{{ user.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#suspend-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#suspend-hide-trigger-{{ user.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#suspend-modal-{{ user.id }}').modal('hide');
     })
 ;
 {% endif %}
 {% if user.id != current_user.id %}
 $('#delete-trigger-{{ user.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ user.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ user.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ user.id }}').modal('hide');
     })
 ;
@@ -255,13 +255,13 @@ $('#delete-hide-trigger-{{ user.id }}')
 {% endif %}{% endfor %}
 {% if current_user.can('管理权限') %}
 $('#create-admin-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#create-admin-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 var Validator = new IDValidator(GB2260);
 $(document)
-    .ready(function() {
+    .ready(function () {
         $.fn.form.settings.rules.idNumber = function(value) {
             if ($('#id_type').parent().dropdown('get text') === '身份证') {
                 if (Validator.isValid(value, 18)) {
@@ -375,7 +375,7 @@ $(document)
 {% endif %}
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#search-user').form();
     })
 ;

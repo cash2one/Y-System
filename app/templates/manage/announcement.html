@@ -117,7 +117,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/editor/wangEditor.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -131,25 +131,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for announcement in announcements %}
 $('#delete-trigger-{{ announcement.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ announcement.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ announcement.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ announcement.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
 $('#new-announcement-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-announcement-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-announcement')
             .form({
                 inline: true,

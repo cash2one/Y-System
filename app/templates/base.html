@@ -452,6 +452,11 @@
     <!-- Customized JS -->
     {% block customized_scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='assets/js/customize.js') }}"></script>
+    <script type="text/javascript">
+        $.getJSON("{{ url_for('main.unread_messages_count') }}", function (data) {
+            // body...
+        })
+    </script>
     {% endblock %}
 
     {% endblock %}

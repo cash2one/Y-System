@@ -262,7 +262,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -276,26 +276,26 @@ $('.ui.sortable.table').tablesort();
 
 {% for score in scores %}
 $('#delete-trigger-{{ score.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ score.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ score.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ score.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
 $('#new-score-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-score-modal').modal({ autofocus: false }).modal('show');
         {% if test_type in ['gre', 'toefl'] %}{{ macros.date_picker_js_snippet() }}{% endif %}
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         {% if test_type == 'toefl' %}
         $.fn.form.settings.rules.toefl = function(value) {
             if (($('#reading').val() === '') || ($('#listening').val() === '') || ($('#speaking').val() === '') || ($('#writing').val() === '')) {

@@ -109,7 +109,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -123,25 +123,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for score in scores %}
 $('#delete-trigger-{{ score.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ score.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ score.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ score.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
 $('#new-score-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-score-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-score')
             .form({
                 inline: true,

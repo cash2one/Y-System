@@ -50,7 +50,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -70,8 +70,8 @@ function updateiPads(updateProgressBar) {
         };
         $('#page-loading-progress').progress({
             total: data.ipads.length + data.ipad_contents.length,
-            onSuccess: function() {
-                $('#page-loading-progress').fadeOut(1000, function() {
+            onSuccess: function () {
+                $('#page-loading-progress').fadeOut(1000, function () {
                     $('#page-loading-progress').remove();
                 });
             }
@@ -119,7 +119,7 @@ function updateiPads(updateProgressBar) {
     });
 };
 updateiPads(true);
-setInterval(function() {
+setInterval(function () {
     updateiPads(false);
 }, 15000);
 </script>

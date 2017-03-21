@@ -375,7 +375,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -391,7 +391,7 @@ $('.ui.checkbox').checkbox();
 
 var Validator = new IDValidator(GB2260);
 $(document)
-    .ready(function() {
+    .ready(function () {
         $.fn.form.settings.rules.idNumber = function(value) {
             if ($('#id_type').parent().dropdown('get text') === '身份证') {
                 if (Validator.isValid(value, 18)) {

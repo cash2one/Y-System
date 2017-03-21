@@ -117,7 +117,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -129,23 +129,23 @@ $('.ui.sortable.table').tablesort();
 
 {% for group in groups %}
 $('#delete-trigger-{{ group.organizer.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ group.organizer.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ group.organizer.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ group.organizer.id }}').modal('hide');
     })
 ;
 {% for group_registration in group.organizer.organized_groups %}
 $('#remove-member-trigger-{{ group_registration.member.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#remove-member-modal-{{ group_registration.member.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#remove-member-hide-trigger-{{ group_registration.member.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#remove-member-modal-{{ group_registration.member.id }}').modal('hide');
     })
 ;
@@ -153,13 +153,13 @@ $('#remove-member-hide-trigger-{{ group_registration.member.id }}')
 {% endfor %}
 
 $('#new-group-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-group-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-group')
             .form({
                 inline: true,
