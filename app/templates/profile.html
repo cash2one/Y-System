@@ -687,7 +687,7 @@ $.getJSON(VBProgressUrl, function (data) {
     $('#vb').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-vb-punch').removeClass('disabled');
-        $('#last-vb-punch span').text(function (){
+        $('#last-vb-punch span').text(function () {
             if (data.last_punch) {
                 return data.last_punch.section.alias;
             } else {
@@ -848,7 +848,7 @@ $.getJSON(YGREProgressUrl, function (data) {
     $('#y-gre').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-y-gre-punch').removeClass('disabled');
-        $('#last-y-gre-punch span').text(function (){
+        $('#last-y-gre-punch span').text(function () {
             if (data.last_punch) {
                 return data.last_punch.section.alias;
             } else {
