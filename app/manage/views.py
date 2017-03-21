@@ -5503,11 +5503,24 @@ def delete_nota_bene(id):
 def feedback():
     form = NewFeedbackForm()
     if form.validate_on_submit():
-        feedback = Feedback()
+        user = User.query.filter_by(email=form.email.data.lower(), created=True, activated=True, deleted=False).first()
+        if user is None:
+            flash(u'用户邮箱不存在：%s' % form.email.data.lower(), category='error')
+            return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
+        lesson = Lesson.query.get_or_404(int(form.lesson.data))
+        study_plan = StudyPlan.query.filter_by(user_id=user.id, lesson_id=lesson.id).first()
+        if study_plan is None:
+            flash(u'“%s”尚未创建“%s”的研修计划' % (user.name_alias, lesson.alias), category='error')
+            return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
+        feedback = Feedback(
+            study_plan_id=study_plan.id,
+            body_html=form.body.data,
+            modified_by_id=current_user.id
+        )
         db.session.add(feedback)
         db.session.commit()
-        flash(u'', category='success')
-        add_feed(user=current_user._get_current_object(), event=u'', category=u'manage')
+        flash(u'已向“%s”添加“%s”的反馈' % (user.name_alias, lesson.alias), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'向“%s”添加“%s”的反馈' % (user.name_alias, lesson.alias), category=u'manage')
         return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
     query = Feedback.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)

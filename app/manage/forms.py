@@ -975,7 +975,7 @@ class NewFeedbackForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(NewFeedbackForm, self).__init__(*args, **kwargs)
-        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), lesson.name) for lesson in Lesson.query.filter(Lesson.priority >= 1).order_by(Lesson.id.asc()).all()]
+        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.priority >= 1).order_by(Lesson.id.asc()).all()]
 
 
 class EditFeedbackForm(FlaskForm):
