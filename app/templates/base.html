@@ -101,6 +101,7 @@
                     {% if current_user.can('管理课程') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_lessons') }}"><i class="book icon"></i>课程管理</a>{% endif %}
                     {% if current_user.can('管理作业') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_assignments') }}"><i class="file text outline icon"></i>作业管理</a>{% endif %}
                     {% if current_user.can('管理考试') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_tests') }}"><i class="pencil icon"></i>考试管理</a>{% endif %}
+                    {% if current_user.can('管理反馈') %}<a class="item loading-trigger" href=""><i class="treatment icon"></i>反馈管理</a>{% endif %}
                 </div>
             </div>
             <div class="ui dropdown item">
@@ -209,6 +210,7 @@
                 {% if current_user.can('管理课程') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_lessons') }}"><i class="book icon"></i>课程管理</a>{% endif %}
                 {% if current_user.can('管理作业') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_assignments') }}"><i class="file text icon"></i>作业管理</a>{% endif %}
                 {% if current_user.can('管理考试') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_tests') }}"><i class="pencil icon"></i>考试管理</a>{% endif %}
+                {% if current_user.can('管理反馈') %}<a class="item loading-trigger" href=""><i class="treatment icon"></i>反馈管理</a>{% endif %}
             </div>
         </div>
         <div class="item">
@@ -308,6 +310,7 @@
                             {% if current_user.can('管理课程') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_lessons') }}"><i class="book icon"></i>课程管理</a>{% endif %}
                             {% if current_user.can('管理作业') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_assignments') }}"><i class="file text outline icon"></i>作业管理</a>{% endif %}
                             {% if current_user.can('管理考试') %}<a class="item loading-trigger" href="{{ url_for('manage.vb_tests') }}"><i class="pencil icon"></i>考试管理</a>{% endif %}
+                            {% if current_user.can('管理反馈') %}<a class="item loading-trigger" href=""><i class="treatment icon"></i>反馈管理</a>{% endif %}
                         </div>
                     </div>
                     <div class="ui dropdown item">

@@ -31,6 +31,7 @@ from .forms import NewTagForm, EditTagForm
 from .forms import NewiPadForm, EditiPadForm, FilteriPadForm
 from .forms import EditStudyPlanForm
 from .forms import NewNotaBeneForm, EditNotaBeneForm
+from .forms import NewFeedbackForm, EditFeedbackForm
 from .forms import NewAnnouncementForm, EditAnnouncementForm
 from .forms import NewProductForm, EditProductForm
 from .forms import NewRoleForm, EditRoleForm
@@ -50,7 +51,7 @@ from ..models import Lesson, Section
 from ..models import Assignment, AssignmentScore, AssignmentScoreGrade
 from ..models import Test, VBTestScore, YGRETestScore, GREAWScore, ScoreLabel, GRETest, GRETestScore, TOEFLTest, TOEFLTestScore
 from ..models import iPad, iPadState, iPadContent, Room
-from ..models import StudyPlan, NotaBene
+from ..models import StudyPlan, NotaBene, Feedback
 from ..models import Announcement
 from ..models import Product, Purchase
 from ..models import Feed
@@ -5494,6 +5495,31 @@ def delete_nota_bene(id):
     flash(u'已删除N.B.模板：%s' % nota_bene.body, category='success')
     add_feed(user=current_user._get_current_object(), event=u'删除N.B.模板：%s' % nota_bene.body, category=u'manage')
     return redirect(request.args.get('next') or url_for('manage.nota_bene'))
+
+
+@manage.route('/feedback', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理反馈')
+def feedback():
+    form = NewFeedbackForm()
+    if form.validate_on_submit():
+        feedback = Feedback()
+        db.session.add(feedback)
+        db.session.commit()
+        flash(u'', category='success')
+        add_feed(user=current_user._get_current_object(), event=u'', category=u'manage')
+        return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
+    query = Feedback.query.filter_by(deleted=False)
+    page = request.args.get('page', 1, type=int)
+    pagination = query\
+        .order_by(Feedback.modified_at.desc())\
+        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    feedbacks = pagination.items
+    return render_template('manage/announcement.html',
+        form=form,
+        feedbacks=feedbacks,
+        pagination=pagination
+    )
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])
