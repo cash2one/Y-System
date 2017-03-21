@@ -48,7 +48,7 @@
 {{ super() }}
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -59,7 +59,7 @@ $('.message .close')
 $('.ui.checkbox').checkbox();
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#edit-permission')
             .form({
                 inline: true,

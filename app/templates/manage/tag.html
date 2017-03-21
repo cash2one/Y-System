@@ -87,7 +87,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -101,25 +101,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for tag in tags %}{% if (not tag.pinned or current_user.is_developer) and tag.valid_tagged_users.count() == 0 %}
 $('#delete-trigger-{{ tag.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ tag.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ tag.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ tag.id }}').modal('hide');
     })
 ;
 {% endif %}{% endfor %}
 
 $('#new-tag-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-tag-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-tag')
             .form({
                 inline: true,

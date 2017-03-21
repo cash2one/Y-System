@@ -50,7 +50,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -63,48 +63,47 @@ $('.ui.sortable.table').tablesort();
 $('#page-loading-progress').progress();
 
 function updateiPads(updateProgressBar) {
-    var url = "{{ url_for('manage.ipad_contents_data') }}";
-    $.getJSON(url, function(data) {
+    $.getJSON("{{ url_for('manage.ipad_contents_data') }}", function (data) {
         if (updateProgressBar) {
             $('#ipad-contents').removeClass('loading');
         };
         $('#page-loading-progress').progress({
             total: data.ipads.length + data.ipad_contents.length,
-            onSuccess: function() {
-                $('#page-loading-progress').fadeOut(1000, function() {
+            onSuccess: function () {
+                $('#page-loading-progress').fadeOut(1000, function () {
                     $('#page-loading-progress').remove();
                 });
             }
         });
         for (var i in data.ipads ) {
-            $('#ipad-' + data.ipads[i].id)
+            $('#' + data.ipads[i].element_id)
                 .removeClass('warning disabled')
                 .removeAttr('data-content')
                 .removeAttr('data-position')
                 .removeAttr('data-variation')
                 .popup('destroy');
             if (data.ipads[i].state === '借出') {
-                $('#ipad-' + data.ipads[i].id)
+                $('#' + data.ipads[i].element_id)
                     .addClass('warning')
                     .attr('data-content', data.ipads[i].now_rented_by.name_alias)
                     .attr('data-position', 'top left')
                     .attr('data-variation', 'inverted')
                     .popup();
             } else if (data.ipads[i].state !== '待机') {
-                $('#ipad-' + data.ipads[i].id).addClass('disabled');
+                $('#' + data.ipads[i].element_id).addClass('disabled');
             };
             if (data.ipads[i].state === '待机') {
-                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="clock icon"></i>' + data.ipads[i].alias);
+                $('#' + data.ipads[i].element_id + '-label').html('<i class="clock icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '借出') {
-                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="orange user icon"></i>' + data.ipads[i].alias);
+                $('#' + data.ipads[i].element_id + '-label').html('<i class="orange user icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '候补') {
-                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="grey cube icon"></i>' + data.ipads[i].alias);
+                $('#' + data.ipads[i].element_id + '-label').html('<i class="grey cube icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '维护') {
-                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="red configure icon"></i>' + data.ipads[i].alias);
+                $('#' + data.ipads[i].element_id + '-label').html('<i class="red configure icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '充电') {
-                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="green plug icon"></i>' + data.ipads[i].alias);
+                $('#' + data.ipads[i].element_id + '-label').html('<i class="green plug icon"></i>' + data.ipads[i].alias);
             } else if (data.ipads[i].state === '退役') {
-                $('#ipad-' + data.ipads[i].id + '-label').html('<i class="olive recycle icon"></i>' + data.ipads[i].alias);
+                $('#' + data.ipads[i].element_id + '-label').html('<i class="olive recycle icon"></i>' + data.ipads[i].alias);
             };
             if (updateProgressBar) {
                 $('#page-loading-progress').progress('increment');
@@ -119,7 +118,7 @@ function updateiPads(updateProgressBar) {
     });
 };
 updateiPads(true);
-setInterval(function() {
+setInterval(function () {
     updateiPads(false);
 }, 15000);
 </script>

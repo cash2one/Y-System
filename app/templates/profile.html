@@ -27,7 +27,7 @@ function noProfileAvatar(avatarImage) {
 
 {% block page_content %}
 <div class="ui vertical stripe segment">
-    {% if show_profile_progress %}
+    {% if show_profile_overview or show_profile_progress %}
     <div id="page-loading-progress" class="ui top attached blue inverted progress">
         <div class="bar"></div>
     </div>
@@ -36,8 +36,8 @@ function noProfileAvatar(avatarImage) {
         <div class="row">
             <div class="four wide column">
                 <div class="ui basic vertical segment">
-                    <a id="avatar" class="popup-item" href="//cn.gravatar.com/emails/" target="_blank" data-position="top center" data-variation="inverted" data-content="通过Gravatar设置头像">
-                        <img class="ui centered medium rounded image" src="{{ user.avatar(size=300) }}" onerror="noProfileAvatar(this)">
+                    <a href="//cn.gravatar.com/" target="_blank">
+                        <img id="avatar" class="ui centered medium rounded image popup-item" src="{{ user.avatar(size=300) }}" onerror="noProfileAvatar(this)" data-position="top center" data-variation="inverted" data-content="通过Gravatar设置头像">
                     </a>
                 </div>
                 <div class="ui vertical segment">
@@ -543,7 +543,7 @@ function noProfileAvatar(avatarImage) {
 {% if show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -551,7 +551,7 @@ $('.message .close')
     })
 ;
 
-$('#avatar img').transition('pulse');
+$('#avatar').transition('pulse');
 
 {% if not user.is_suspended and user.due_time %}
 $('#due-time').progress({
@@ -564,6 +564,16 @@ $('#due-time').progress({
 {% endif %}
 
 {% if show_profile_overview %}
+// progress bar
+$('#page-loading-progress').progress({
+    total: 1,
+    onSuccess: function () {
+        $('#page-loading-progress').fadeOut(1000, function () {
+            $('#page-loading-progress').remove();
+        });
+    }
+});
+
 var countUpOptions = {
     useEasing: true,
     useGrouping: true,
@@ -575,12 +585,12 @@ var countUpOptions = {
 var VBProgressCountUp = new CountUp('vb-progress-data', 0, 0, 0, 2.5, countUpOptions);
 {% if user.can('预约Y-GRE课程') %}var YGREProgressCountUp = new CountUp('y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);{% endif %}
 var overviewDataUrl = "{{ url_for('main.profile_overview_data', id=user.id) }}";
-$.getJSON(overviewDataUrl, function(data) {
+$.getJSON(overviewDataUrl, function (data) {
     $('#progress').removeClass('loading');
     $('#study-plan').removeClass('loading');
     if (data.progress.vb.value > 0) {
         $('#vb-progress').removeClass('disabled');
-        $('#last-vb-punch').text(function() {
+        $('#last-vb-punch').text(function () {
             if (data.last_punch.vb) {
                 return data.last_punch.vb.section.alias;
             } else {
@@ -601,7 +611,7 @@ $.getJSON(overviewDataUrl, function(data) {
                 .attr('id', data.study_plan.vb[study_plan_idx].element_id)
                 .addClass('top aligned')
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].lesson))
-                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].start_date + ' ~ ' + data.study_plan.vb[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').html(data.study_plan.vb[study_plan_idx].start_date + ' <i class="blue long arrow right fitted icon"></i> ' + data.study_plan.vb[study_plan_idx].end_date))
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].days + ' 天'))
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].intensity))
                 .append($('<td>'))
@@ -617,7 +627,7 @@ $.getJSON(overviewDataUrl, function(data) {
     {% if user.can('预约Y-GRE课程') %}
     if (data.progress.y_gre.value > 0) {
         $('#y-gre-progress').removeClass('disabled');
-        $('#last-y-gre-punch').text(function() {
+        $('#last-y-gre-punch').text(function () {
             if (data.last_punch.y_gre) {
                 return data.last_punch.y_gre.section.alias;
             } else {
@@ -638,7 +648,7 @@ $.getJSON(overviewDataUrl, function(data) {
                 .attr('id', data.study_plan.y_gre[study_plan_idx].element_id)
                 .addClass('top aligned')
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].lesson))
-                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].start_date + ' ~ ' + data.study_plan.y_gre[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').html(data.study_plan.y_gre[study_plan_idx].start_date + ' <i class="teal long arrow right fitted icon"></i> ' + data.study_plan.y_gre[study_plan_idx].end_date))
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].days + ' 天'))
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].intensity))
                 .append($('<td>'))
@@ -652,6 +662,7 @@ $.getJSON(overviewDataUrl, function(data) {
         };
     };
     {% endif %}
+    $('#page-loading-progress').progress('increment');
 });
 
 if ($(window).width() < 768) {
@@ -663,8 +674,8 @@ if ($(window).width() < 768) {
 // progress bar
 $('#page-loading-progress').progress({
     total: {% if user.can('预约Y-GRE课程') %}2{% else %}1{% endif %},
-    onSuccess: function() {
-        $('#page-loading-progress').fadeOut(1000, function() {
+    onSuccess: function () {
+        $('#page-loading-progress').fadeOut(1000, function () {
             $('#page-loading-progress').remove();
         });
     }
@@ -672,11 +683,11 @@ $('#page-loading-progress').progress({
 
 // VB progress
 var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
-$.getJSON(VBProgressUrl, function(data) {
+$.getJSON(VBProgressUrl, function (data) {
     $('#vb').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-vb-punch').removeClass('disabled');
-        $('#last-vb-punch span').text(function (){
+        $('#last-vb-punch span').text(function () {
             if (data.last_punch) {
                 return data.last_punch.section.alias;
             } else {
@@ -833,11 +844,11 @@ $.getJSON(VBProgressUrl, function(data) {
 {% if user.can('预约Y-GRE课程') %}
 // Y-GRE progress
 var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
-$.getJSON(YGREProgressUrl, function(data) {
+$.getJSON(YGREProgressUrl, function (data) {
     $('#y-gre').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-y-gre-punch').removeClass('disabled');
-        $('#last-y-gre-punch span').text(function (){
+        $('#last-y-gre-punch span').text(function () {
             if (data.last_punch) {
                 return data.last_punch.section.alias;
             } else {

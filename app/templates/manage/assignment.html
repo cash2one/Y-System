@@ -85,7 +85,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -96,13 +96,13 @@ $('.message .close')
 $('.ui.sortable.table').tablesort();
 
 $('#new-score-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-score-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-score')
             .form({
                 inline: true,

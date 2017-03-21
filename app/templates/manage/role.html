@@ -133,7 +133,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -147,25 +147,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for role in roles %}{% if role.users.count() == 0 %}
 $('#delete-trigger-{{ role.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ role.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ role.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ role.id }}').modal('hide');
     })
 ;
 {% endif %}{% endfor %}
 
 $('#new-role-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-role-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-role')
             .form({
                 inline: true,

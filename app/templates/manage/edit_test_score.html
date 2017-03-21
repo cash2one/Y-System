@@ -157,7 +157,7 @@
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.js"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -170,7 +170,7 @@ $('.message .close')
 $('.ui.checkbox').checkbox();
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         {% if test_type == 'toefl' %}
         $.fn.form.settings.rules.toefl = function(value) {
             if (($('#reading').val() === '') || ($('#listening').val() === '') || ($('#speaking').val() === '') || ($('#writing').val() === '')) {
