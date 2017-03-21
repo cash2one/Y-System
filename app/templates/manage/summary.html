@@ -348,8 +348,7 @@ var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-9-total', 0, 0, 0, 2.5, countU
 var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
 var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
 function updateStats(updateProgressBar) {
-    var url = "{{ url_for('manage.summary_statistics') }}";
-    $.getJSON(url, function (data) {
+    $.getJSON("{{ url_for('manage.summary_statistics') }}", function (data) {
         if (updateProgressBar) {
             $('#stats').removeClass('loading');
         };
@@ -442,8 +441,7 @@ setInterval(function () {
 
 // update iPad info
 function updateCards(updateProgressBar) {
-    var url = "{{ url_for('manage.summary_room', room_id=room_id) }}";
-    $.getJSON(url, function (data) {
+    $.getJSON("{{ url_for('manage.summary_room', room_id=room_id) }}", function (data) {
         $('.ipad.card').remove();
         if (data.ipads.length > 0) {
             $('#ipads-loader').remove();
