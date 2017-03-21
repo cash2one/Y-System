@@ -5528,7 +5528,7 @@ def feedback():
         .order_by(Feedback.modified_at.desc())\
         .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     feedbacks = pagination.items
-    return render_template('manage/announcement.html',
+    return render_template('manage/feedback.html',
         form=form,
         feedbacks=feedbacks,
         pagination=pagination
