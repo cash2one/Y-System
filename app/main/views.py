@@ -11,6 +11,7 @@ from ..models import CourseType, Lesson, Section, Punch
 from ..models import Assignment, Test
 from ..models import Schedule, Booking
 from ..models import Feed
+from ..models import StudyPlan, Feedback
 from ..notify import get_announcements
 from ..decorators import permission_required
 
@@ -226,4 +227,75 @@ def profile_progress_y_gre(id):
         'lessons': [lesson.to_json() for lesson in lessons],
         'punches': [punch.to_json() for punch in user.y_gre_punches],
         'test_scores': [score.to_json() for score in user.y_gre_test_scores_alias],
+    })
+
+
+@main.route('/inbox')
+@login_required
+def inbox():
+    show_unread_messages = True
+    show_all_messages = False
+    if current_user.is_authenticated:
+        show_unread_messages = bool(request.cookies.get('show_unread_messages', '1'))
+        show_all_messages = bool(request.cookies.get('show_all_messages', ''))
+    if show_unread_messages:
+        query = Feedback.query\
+            .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
+            .filter(StudyPlan.user_id == current_user.id)\
+            .filter(Feedback.unread == True)\
+            .order_by(Feedback.modified_at.desc())
+    unread_num = Feedback.query\
+        .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
+        .filter(StudyPlan.user_id == current_user.id)\
+        .filter(Feedback.unread == True)\
+        .count()
+    if show_all_messages:
+        query = Feedback.query\
+            .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
+            .filter(StudyPlan.user_id == current_user.id)\
+            .order_by(Feedback.modified_at.desc())
+    all_num = Feedback.query\
+        .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
+        .filter(StudyPlan.user_id == current_user.id)\
+        .count()
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    messages = pagination.items
+    return render_template('inbox.html',
+        show_unread_messages=show_unread_messages,
+        unread_num=unread_num,
+        show_all_messages=show_all_messages,
+        all_num=all_num,
+        pagination=pagination,
+        messages=messages
+    )
+
+
+@main.route('/inbox/unread')
+@login_required
+def unread_messages():
+    resp = make_response(redirect(url_for('main.inbox')))
+    resp.set_cookie('show_unread_messages', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_all_messages', '', max_age=30*24*60*60)
+    return resp
+
+
+@main.route('/inbox/all')
+@login_required
+def all_messages():
+    resp = make_response(redirect(url_for('main.inbox')))
+    resp.set_cookie('show_unread_messages', '', max_age=30*24*60*60)
+    resp.set_cookie('show_all_messages', '1', max_age=30*24*60*60)
+    return resp
+
+
+@main.route('/inbox/unread/count')
+@login_required
+def unread_messages_count():
+    return jsonify({
+        'count': Feedback.query\
+            .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
+            .filter(StudyPlan.user_id == current_user.id)\
+            .filter(Feedback.unread == True)\
+            .count(),
     })

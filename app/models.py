@@ -3797,13 +3797,13 @@ class iPad(db.Model):
 
     def to_json(self):
         entry_json = {
-            'id': self.id,
             'serial': self.serial,
             'alias': self.alias,
             'capacity': self.capacity.name,
             'state': self.state.name,
             'modified_at': self.modified_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'modified_by': self.modified_by.name,
+            'element_id': 'ipad-%s' % self.id,
         }
         if self.state.name == u'待机':
             entry_json['maintain_url'] = url_for('manage.set_ipad_state_maintain', id=self.id, next=url_for('manage.summary'))
@@ -4544,7 +4544,7 @@ class Feedback(db.Model):
     study_plan_id = db.Column(db.Integer, db.ForeignKey('study_plans.id'))
     body = db.Column(db.UnicodeText)
     body_html = db.Column(db.UnicodeText)
-    read = db.Column(db.Boolean, default=False)
+    unread = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))

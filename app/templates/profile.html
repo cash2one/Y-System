@@ -27,7 +27,7 @@ function noProfileAvatar(avatarImage) {
 
 {% block page_content %}
 <div class="ui vertical stripe segment">
-    {% if show_profile_progress %}
+    {% if show_profile_overview or show_profile_progress %}
     <div id="page-loading-progress" class="ui top attached blue inverted progress">
         <div class="bar"></div>
     </div>
@@ -564,6 +564,16 @@ $('#due-time').progress({
 {% endif %}
 
 {% if show_profile_overview %}
+// progress bar
+$('#page-loading-progress').progress({
+    total: 1,
+    onSuccess: function() {
+        $('#page-loading-progress').fadeOut(1000, function() {
+            $('#page-loading-progress').remove();
+        });
+    }
+});
+
 var countUpOptions = {
     useEasing: true,
     useGrouping: true,
@@ -601,7 +611,7 @@ $.getJSON(overviewDataUrl, function(data) {
                 .attr('id', data.study_plan.vb[study_plan_idx].element_id)
                 .addClass('top aligned')
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].lesson))
-                .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].start_date + ' ~ ' + data.study_plan.vb[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').html(data.study_plan.vb[study_plan_idx].start_date + ' <i class="blue long arrow right fitted icon"></i> ' + data.study_plan.vb[study_plan_idx].end_date))
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].days + ' 天'))
                 .append($('<td>').addClass('single line').text(data.study_plan.vb[study_plan_idx].intensity))
                 .append($('<td>'))
@@ -638,7 +648,7 @@ $.getJSON(overviewDataUrl, function(data) {
                 .attr('id', data.study_plan.y_gre[study_plan_idx].element_id)
                 .addClass('top aligned')
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].lesson))
-                .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].start_date + ' ~ ' + data.study_plan.y_gre[study_plan_idx].end_date))
+                .append($('<td>').addClass('single line').html(data.study_plan.y_gre[study_plan_idx].start_date + ' <i class="teal long arrow right fitted icon"></i> ' + data.study_plan.y_gre[study_plan_idx].end_date))
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].days + ' 天'))
                 .append($('<td>').addClass('single line').text(data.study_plan.y_gre[study_plan_idx].intensity))
                 .append($('<td>'))
@@ -652,6 +662,7 @@ $.getJSON(overviewDataUrl, function(data) {
         };
     };
     {% endif %}
+    $('#page-loading-progress').progress('increment');
 });
 
 if ($(window).width() < 768) {

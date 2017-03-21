@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}收件箱{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="inbox icon"></i>收件箱</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui internally celled stackable grid container">
+        <div class="row">
+            <div class="four wide column">
+                <div class="ui secondary vertical fluid menu">
+                    <a class="{% if show_unread_messages %}active {% endif %}item" href="{{ url_for('main.unread_messages') }}">未读<div class="ui blue label">{{ unread_num }}</div></a>
+                    <a class="{% if show_all_messages %}active {% endif %}item" href="{{ url_for('main.all_messages') }}">全部<div class="ui label">{{ all_num }}</div></a>
+                </div>
+            </div>
+            <div class="twelve wide column">
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'main.inbox') }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function() {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+</script>
+{% endblock %}

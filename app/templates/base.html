@@ -140,7 +140,7 @@
             {% block following_menu_auth %}
             <div class="right menu">
                 {% if current_user.is_authenticated %}
-                <a class="item popup-item loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed blue empty circular label"></div></a>
+                <a class="item popup-item loading-trigger" href="{{ url_for('main.inbox') }}" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed blue empty circular label"></div></a>
                 <div class="ui dropdown item popup-item" data-content="研修档案与设置" data-position="bottom center" data-variation="inverted">
                     <img class="ui small-avatar image" src="{{ current_user.avatar(size=40, default='404') }}" onerror="noAvatar(this)">
                     <i class="less-relaxed dropdown icon"></i>
@@ -184,7 +184,7 @@
         {% if current_user.is_authenticated %}
         {% if current_user.is_developer %}<div class="disabled item">{{ Version.Application }}</div>{% endif %}
         <a class="item loading-trigger" href="{{ current_user.url }}"><i class="user circle outline icon"></i>{% if current_user.can('管理') %}{{ current_user.name }} [{{ current_user.role.name }}]{% else %}{{ current_user.name }}{% endif %}</a>
-        <a class="item loading-trigger" href="#"><i class="mail icon"></i>无未读消息</a>
+        <a class="item loading-trigger" href="{{ url_for('main.inbox') }}"><i class="mail icon"></i>无未读消息</a>
         {% if current_user.can('管理') %}<a class="item loading-trigger" href="{{ url_for('manage.summary_room_1103_ipads') }}"><i class="dashboard icon"></i>系统实况</a>{% endif %}
         {% else %}
         <a class="item loading-trigger" href="{{ url_for('main.index') }}"><i class="home icon"></i>首页</a>
@@ -347,7 +347,7 @@
                     {% block menu_auth %}
                     <div class="right menu">
                         {% if current_user.is_authenticated %}
-                        <a class="item popup-item loading-trigger" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed yellow empty circular label"></div></a>
+                        <a class="item popup-item loading-trigger" href="{{ url_for('main.inbox') }}" data-content="无未读消息" data-position="bottom center" data-variation="inverted"><i class="fa fa-envelope"></i><div class="ui less-relaxed yellow empty circular label"></div></a>
                         <div class="ui dropdown item popup-item" data-content="研修档案与设置" data-position="bottom center" data-variation="inverted">
                             <img class="ui small-avatar image" src="{{ current_user.avatar(size=40, default='404') }}" onerror="noAvatar(this)">
                             <i class="less-relaxed dropdown icon"></i>

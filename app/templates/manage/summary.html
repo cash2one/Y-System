@@ -452,7 +452,7 @@ function updateCards(updateProgressBar) {
             $('#ipads-container')
                 .append(
                     $('<div>')
-                        .attr('id', 'ipad-' + i)
+                        .attr('id', data.ipads[i].element_id)
                         .addClass('ipad card')
                         .append(
                             $('<div>')
@@ -466,7 +466,7 @@ function updateCards(updateProgressBar) {
                                         )
                                         .append(
                                             $('<span>')
-                                                .attr('id', 'ipad-state-' + i)
+                                                .attr('id', data.ipads[i].element_id + '-state')
                                                 .addClass('right floated')
                                         )
                                 )
@@ -486,7 +486,7 @@ function updateCards(updateProgressBar) {
                         )
                         .append(
                             $('<div>')
-                                .attr('id', 'ipad-content-' + i)
+                                .attr('id', data.ipads[i].element_id + '-content')
                                 .addClass('center aligned content')
                                 .append(
                                     $('<div>')
@@ -507,7 +507,7 @@ function updateCards(updateProgressBar) {
                                 .addClass('content')
                                 .append(
                                     $('<div>')
-                                        .attr('id', 'ipad-battery-' + i)
+                                        .attr('id', data.ipads[i].element_id + '-battery')
                                         .addClass('ui indicating progress disabled')
                                         .append(
                                             $('<div>')
@@ -526,7 +526,7 @@ function updateCards(updateProgressBar) {
                         )
                         .append(
                             $('<div>')
-                                .attr('id', 'ipad-extra-' + i)
+                                .attr('id', data.ipads[i].element_id + '-extra')
                                 .addClass('extra content')
                                 .append(
                                     $('<span>')
@@ -535,11 +535,10 @@ function updateCards(updateProgressBar) {
                         )
                 );
             if (data.ipads[i].state === '待机') {
-                // $('#ipad-' + i).addClass('grey');
-                $('#ipad-state-' + i).html('<i class="clock icon"></i>' + data.ipads[i].state);
-                $('#ipad-content-' + i + ' .statistic').addClass('grey');
-                $('#ipad-content-' + i + ' .value').html('<i class="clock icon"></i>');
-                $('#ipad-extra-' + i)
+                $('#' + data.ipads[i].element_id + '-state').html('<i class="clock icon"></i>' + data.ipads[i].state);
+                $('#' + data.ipads[i].element_id + '-content .statistic').addClass('grey');
+                $('#' + data.ipads[i].element_id + '-content .value').html('<i class="clock icon"></i>');
+                $('#' + data.ipads[i].element_id + '-extra')
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
@@ -569,17 +568,17 @@ function updateCards(updateProgressBar) {
                     );
             } else if (data.ipads[i].state === '借出') {
                 if (data.ipads[i].battery_life.percent === 0) {
-                    $('#ipad-battery-' + i).removeClass('indicating disabled').addClass('red').progress({
+                    $('#' + data.ipads[i].element_id + '-battery').removeClass('indicating disabled').addClass('red').progress({
                         percent: data.ipads[i].battery_life.percent,
                         text: { active: '电量已耗尽' }
                     });
                 } else if (data.ipads[i].battery_life.percent <= 20) {
-                    $('#ipad-battery-' + i).removeClass('indicating disabled').addClass('yellow').progress({
+                    $('#' + data.ipads[i].element_id + '-battery').removeClass('indicating disabled').addClass('yellow').progress({
                         percent: data.ipads[i].battery_life.percent,
                         text: { active: '电量低：{percent}%' }
                     });
                 } else {
-                    $('#ipad-battery-' + i).removeClass('disabled').progress({
+                    $('#' + data.ipads[i].element_id + '-battery').removeClass('disabled').progress({
                         percent: data.ipads[i].battery_life.percent,
                         text: {
                             active: '剩余电量：{percent}%',
@@ -587,7 +586,7 @@ function updateCards(updateProgressBar) {
                         }
                     });
                 };
-                $('#ipad-extra-' + i)
+                $('#' + data.ipads[i].element_id + '-extra')
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
@@ -616,9 +615,9 @@ function updateCards(updateProgressBar) {
                             )
                     );
                 if (data.ipads[i].now_rented_by.last_punch.section.course_type == 'VB') {
-                    $('#ipad-' + i).addClass('blue');
-                    $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('blue');
-                    $('#ipad-state-' + i).append(
+                    $('#' + data.ipads[i].element_id).addClass('blue');
+                    $('#' + data.ipads[i].element_id + '-extra .ui.dropdown .upload.icon').addClass('blue');
+                    $('#' + data.ipads[i].element_id + '-state').append(
                         $('<a>')
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
@@ -629,13 +628,13 @@ function updateCards(updateProgressBar) {
                             .popup('destroy')
                             .popup()
                     );
-                    $('#ipad-content-' + i + ' .statistic').addClass('blue');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.section.alias);
+                    $('#' + data.ipads[i].element_id + '-content .statistic').addClass('blue');
+                    $('#' + data.ipads[i].element_id + '-content .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
+                    $('#' + data.ipads[i].element_id + '-content .label').text(data.ipads[i].now_rented_by.last_punch.section.alias);
                 } else if (data.ipads[i].now_rented_by.last_punch.section.course_type == 'Y-GRE') {
-                    $('#ipad-' + i).addClass('teal');
-                    $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('teal');
-                    $('#ipad-state-' + i).append(
+                    $('#' + data.ipads[i].element_id).addClass('teal');
+                    $('#' + data.ipads[i].element_id + '-extra .ui.dropdown .upload.icon').addClass('teal');
+                    $('#' + data.ipads[i].element_id + '-state').append(
                         $('<a>')
                             .attr('href', data.ipads[i].now_rented_by.url)
                             .attr('target', '_blank')
@@ -647,27 +646,27 @@ function updateCards(updateProgressBar) {
                             .popup('destroy')
                             .popup()
                     );
-                    $('#ipad-content-' + i + ' .statistic').addClass('teal');
-                    $('#ipad-content-' + i + ' .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
-                    $('#ipad-content-' + i + ' .label').text(data.ipads[i].now_rented_by.last_punch.section.lesson);
+                    $('#' + data.ipads[i].element_id + '-content .statistic').addClass('teal');
+                    $('#' + data.ipads[i].element_id + '-content .value').text(data.ipads[i].now_rented_by.last_punch.section.course_type);
+                    $('#' + data.ipads[i].element_id + '-content .label').text(data.ipads[i].now_rented_by.last_punch.section.lesson);
                 } else {
-                    $('#ipad-' + i).addClass('yellow');
-                    $('#ipad-extra-' + i + ' .ui.dropdown .upload.icon').addClass('yellow');
-                    $('#ipad-state-' + i).html('<i class="upload icon"></i>' + data.ipads[i].state);
-                    $('#ipad-content-' + i + ' .statistic').addClass('yellow');
-                    $('#ipad-content-' + i + ' .value').html('<i class="upload icon"></i>');
+                    $('#' + data.ipads[i].element_id).addClass('yellow');
+                    $('#' + data.ipads[i].element_id + '-extra .ui.dropdown .upload.icon').addClass('yellow');
+                    $('#' + data.ipads[i].element_id + '-state').html('<i class="upload icon"></i>' + data.ipads[i].state);
+                    $('#' + data.ipads[i].element_id + '-content .statistic').addClass('yellow');
+                    $('#' + data.ipads[i].element_id + '-content .value').html('<i class="upload icon"></i>');
                 };
             } else if (data.ipads[i].state === '候补') {
-                $('#ipad-' + i).addClass('grey');
-                $('#ipad-state-' + i).html('<i class="cube icon"></i>' + data.ipads[i].state);
-                $('#ipad-content-' + i + ' .statistic').addClass('grey');
-                $('#ipad-content-' + i + ' .value').html('<i class="cube icon"></i>');
+                $('#' + data.ipads[i].element_id).addClass('grey');
+                $('#' + data.ipads[i].element_id + '-state').html('<i class="cube icon"></i>' + data.ipads[i].state);
+                $('#' + data.ipads[i].element_id + '-content .statistic').addClass('grey');
+                $('#' + data.ipads[i].element_id + '-content .value').html('<i class="cube icon"></i>');
             } else if (data.ipads[i].state === '维护') {
-                $('#ipad-' + i).addClass('red');
-                $('#ipad-state-' + i).html('<i class="configure icon"></i>' + data.ipads[i].state);
-                $('#ipad-content-' + i + ' .statistic').addClass('red');
-                $('#ipad-content-' + i + ' .value').html('<i class="configure icon"></i>');
-                $('#ipad-extra-' + i)
+                $('#' + data.ipads[i].element_id).addClass('red');
+                $('#' + data.ipads[i].element_id + '-state').html('<i class="configure icon"></i>' + data.ipads[i].state);
+                $('#' + data.ipads[i].element_id + '-content .statistic').addClass('red');
+                $('#' + data.ipads[i].element_id + '-content .value').html('<i class="configure icon"></i>');
+                $('#' + data.ipads[i].element_id + '-extra')
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
@@ -696,11 +695,11 @@ function updateCards(updateProgressBar) {
                             )
                     );
             } else if (data.ipads[i].state === '充电') {
-                $('#ipad-' + i).addClass('green');
-                $('#ipad-state-' + i).html('<i class="plug icon"></i>' + data.ipads[i].state);
-                $('#ipad-content-' + i + ' .statistic').addClass('green');
-                $('#ipad-content-' + i + ' .value').html('<i class="plug icon"></i>');
-                $('#ipad-extra-' + i)
+                $('#' + data.ipads[i].element_id).addClass('green');
+                $('#' + data.ipads[i].element_id + '-state').html('<i class="plug icon"></i>' + data.ipads[i].state);
+                $('#' + data.ipads[i].element_id + '-content .statistic').addClass('green');
+                $('#' + data.ipads[i].element_id + '-content .value').html('<i class="plug icon"></i>');
+                $('#' + data.ipads[i].element_id + '-extra')
                     .append(
                         $('<div>')
                             .addClass('right floated ui simple dropdown')
@@ -729,10 +728,10 @@ function updateCards(updateProgressBar) {
                             )
                     );
             } else if (data.ipads[i].state === '退役') {
-                $('#ipad-' + i).addClass('olive');
-                $('#ipad-state-' + i).html('<i class="recycle icon"></i>' + data.ipads[i].state);
-                $('#ipad-content-' + i + ' .statistic').addClass('olive');
-                $('#ipad-content-' + i + ' .value').html('<i class="recycle icon"></i>');
+                $('#' + data.ipads[i].element_id).addClass('olive');
+                $('#' + data.ipads[i].element_id + '-state').html('<i class="recycle icon"></i>' + data.ipads[i].state);
+                $('#' + data.ipads[i].element_id + '-content .statistic').addClass('olive');
+                $('#' + data.ipads[i].element_id + '-content .value').html('<i class="recycle icon"></i>');
             };
             if (updateProgressBar) {
                 $('#page-loading-progress').progress('increment');
