@@ -585,7 +585,7 @@ var countUpOptions = {
 var VBProgressCountUp = new CountUp('vb-progress-data', 0, 0, 0, 2.5, countUpOptions);
 {% if user.can('预约Y-GRE课程') %}var YGREProgressCountUp = new CountUp('y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);{% endif %}
 var overviewDataUrl = "{{ url_for('main.profile_overview_data', id=user.id) }}";
-$.getJSON(overviewDataUrl, function(data) {
+$.getJSON(overviewDataUrl, function (data) {
     $('#progress').removeClass('loading');
     $('#study-plan').removeClass('loading');
     if (data.progress.vb.value > 0) {
@@ -683,7 +683,7 @@ $('#page-loading-progress').progress({
 
 // VB progress
 var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
-$.getJSON(VBProgressUrl, function(data) {
+$.getJSON(VBProgressUrl, function (data) {
     $('#vb').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-vb-punch').removeClass('disabled');
@@ -844,7 +844,7 @@ $.getJSON(VBProgressUrl, function(data) {
 {% if user.can('预约Y-GRE课程') %}
 // Y-GRE progress
 var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
-$.getJSON(YGREProgressUrl, function(data) {
+$.getJSON(YGREProgressUrl, function (data) {
     $('#y-gre').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-y-gre-punch').removeClass('disabled');

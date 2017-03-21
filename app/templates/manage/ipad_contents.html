@@ -64,7 +64,7 @@ $('#page-loading-progress').progress();
 
 function updateiPads(updateProgressBar) {
     var url = "{{ url_for('manage.ipad_contents_data') }}";
-    $.getJSON(url, function(data) {
+    $.getJSON(url, function (data) {
         if (updateProgressBar) {
             $('#ipad-contents').removeClass('loading');
         };
