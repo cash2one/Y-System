@@ -290,7 +290,7 @@
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/countup.js/{{ Version.CountUp }}/countUp.min.js"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -301,8 +301,8 @@ $('.message .close')
 // progress bar
 $('#page-loading-progress').progress({
     total: 20 + {{ ipads_num }},
-    onSuccess: function() {
-        $('#page-loading-progress').fadeOut(1000, function() {
+    onSuccess: function () {
+        $('#page-loading-progress').fadeOut(1000, function () {
             $('#page-loading-progress').remove();
         });
     }
@@ -348,8 +348,7 @@ var VBL4_10TotalCountUp = new CountUp('stat-vb-l4-9-total', 0, 0, 0, 2.5, countU
 var YGRECountUp = new CountUp('stat-y-gre', 0, 0, 0, 2.5, countUpOptions);
 var YGRETotalCountUp = new CountUp('stat-y-gre-total', 0, 0, 0, 2.5, countUpOptions);
 function updateStats(updateProgressBar) {
-    var url = "{{ url_for('manage.summary_statistics') }}";
-    $.getJSON(url, function(data) {
+    $.getJSON("{{ url_for('manage.summary_statistics') }}", function (data) {
         if (updateProgressBar) {
             $('#stats').removeClass('loading');
         };
@@ -436,14 +435,13 @@ function updateStats(updateProgressBar) {
     });
 };
 updateStats(true);
-setInterval(function() {
+setInterval(function () {
     updateStats(false);
 }, 15000);
 
 // update iPad info
 function updateCards(updateProgressBar) {
-    var url = "{{ url_for('manage.summary_room', room_id=room_id) }}";
-    $.getJSON(url, function(data) {
+    $.getJSON("{{ url_for('manage.summary_room', room_id=room_id) }}", function (data) {
         $('.ipad.card').remove();
         if (data.ipads.length > 0) {
             $('#ipads-loader').remove();
@@ -740,7 +738,7 @@ function updateCards(updateProgressBar) {
     });
 };
 updateCards(true);
-setInterval(function() {
+setInterval(function () {
     updateCards(false);
 }, 15000);
 </script>

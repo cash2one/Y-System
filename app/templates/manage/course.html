@@ -112,7 +112,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -126,25 +126,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for course in courses %}
 $('#delete-trigger-{{ course.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ course.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ course.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ course.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
 $('#new-course-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-course-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-course')
             .form({
                 inline: true,

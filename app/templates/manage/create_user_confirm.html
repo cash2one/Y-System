@@ -789,7 +789,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/IDValidator/GB2260.min.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -804,145 +804,145 @@ $('.ui.checkbox').checkbox();
 {{ macros.year_picker_js_snippet() }}
 
 $('#edit-name-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-name-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-gender-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-gender-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-birthdate-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-birthdate-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-id-number-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-id-number-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-tag-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-tag-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-email-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-email-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-mobile-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-mobile-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-address-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-address-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-qq-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-qq-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-wechat-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-wechat-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-emergency-contact-name-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-emergency-contact-name-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-emergency-contact-relationship-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-emergency-contact-relationship-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-emergency-contact-mobile-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-emergency-contact-mobile-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-purpose-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-purpose-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-application-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-application-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-referrer-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-referrer-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-inviter-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-inviter-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-purchase-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-purchase-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-role-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-role-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-vb-course-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-vb-course-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#edit-y-gre-course-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#edit-y-gre-course-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $('#delete-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal').modal('hide');
     })
 ;
 
 var Validator = new IDValidator(GB2260);
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#edit-name')
             .form({
                 inline: true,

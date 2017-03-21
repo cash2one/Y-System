@@ -1,15 +1,15 @@
 // customize.js
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         // fix menu when passed
         $('.masthead')
             .visibility({
                 once: false,
-                onBottomPassed: function() {
+                onBottomPassed: function () {
                     $('.fixed.menu').transition('fade in');
                 },
-                onBottomPassedReverse: function() {
+                onBottomPassedReverse: function () {
                     $('.fixed.menu').transition('fade out');
                 }
             })
@@ -33,7 +33,7 @@ $('#wechat-qr-code-click')
 // footer copyright
 $('#copyright')
     .html(
-         function(){
+         function () {
              var date = new Date();
              return '<i class="fa fa-copyright fa-fw"></i> 2011-' +  date.getFullYear() + ' 云英语 版权所有';
          }

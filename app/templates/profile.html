@@ -543,7 +543,7 @@ function noProfileAvatar(avatarImage) {
 {% if show_profile_bookings %}<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>{% endif %}
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -567,8 +567,8 @@ $('#due-time').progress({
 // progress bar
 $('#page-loading-progress').progress({
     total: 1,
-    onSuccess: function() {
-        $('#page-loading-progress').fadeOut(1000, function() {
+    onSuccess: function () {
+        $('#page-loading-progress').fadeOut(1000, function () {
             $('#page-loading-progress').remove();
         });
     }
@@ -585,12 +585,12 @@ var countUpOptions = {
 var VBProgressCountUp = new CountUp('vb-progress-data', 0, 0, 0, 2.5, countUpOptions);
 {% if user.can('预约Y-GRE课程') %}var YGREProgressCountUp = new CountUp('y-gre-progress-data', 0, 0, 0, 2.5, countUpOptions);{% endif %}
 var overviewDataUrl = "{{ url_for('main.profile_overview_data', id=user.id) }}";
-$.getJSON(overviewDataUrl, function(data) {
+$.getJSON(overviewDataUrl, function (data) {
     $('#progress').removeClass('loading');
     $('#study-plan').removeClass('loading');
     if (data.progress.vb.value > 0) {
         $('#vb-progress').removeClass('disabled');
-        $('#last-vb-punch').text(function() {
+        $('#last-vb-punch').text(function () {
             if (data.last_punch.vb) {
                 return data.last_punch.vb.section.alias;
             } else {
@@ -627,7 +627,7 @@ $.getJSON(overviewDataUrl, function(data) {
     {% if user.can('预约Y-GRE课程') %}
     if (data.progress.y_gre.value > 0) {
         $('#y-gre-progress').removeClass('disabled');
-        $('#last-y-gre-punch').text(function() {
+        $('#last-y-gre-punch').text(function () {
             if (data.last_punch.y_gre) {
                 return data.last_punch.y_gre.section.alias;
             } else {
@@ -674,8 +674,8 @@ if ($(window).width() < 768) {
 // progress bar
 $('#page-loading-progress').progress({
     total: {% if user.can('预约Y-GRE课程') %}2{% else %}1{% endif %},
-    onSuccess: function() {
-        $('#page-loading-progress').fadeOut(1000, function() {
+    onSuccess: function () {
+        $('#page-loading-progress').fadeOut(1000, function () {
             $('#page-loading-progress').remove();
         });
     }
@@ -683,11 +683,11 @@ $('#page-loading-progress').progress({
 
 // VB progress
 var VBProgressUrl = "{{ url_for('main.profile_progress_vb', id=user.id) }}";
-$.getJSON(VBProgressUrl, function(data) {
+$.getJSON(VBProgressUrl, function (data) {
     $('#vb').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-vb-punch').removeClass('disabled');
-        $('#last-vb-punch span').text(function (){
+        $('#last-vb-punch span').text(function () {
             if (data.last_punch) {
                 return data.last_punch.section.alias;
             } else {
@@ -844,11 +844,11 @@ $.getJSON(VBProgressUrl, function(data) {
 {% if user.can('预约Y-GRE课程') %}
 // Y-GRE progress
 var YGREProgressUrl = "{{ url_for('main.profile_progress_y_gre', id=user.id) }}";
-$.getJSON(YGREProgressUrl, function(data) {
+$.getJSON(YGREProgressUrl, function (data) {
     $('#y-gre').removeClass('loading');
     if (data.progress.value > 0) {
         $('#last-y-gre-punch').removeClass('disabled');
-        $('#last-y-gre-punch span').text(function (){
+        $('#last-y-gre-punch span').text(function () {
             if (data.last_punch) {
                 return data.last_punch.section.alias;
             } else {

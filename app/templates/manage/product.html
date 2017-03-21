@@ -110,7 +110,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -124,25 +124,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for product in products %}{% if not product.pinned or current_user.is_developer %}
 $('#delete-trigger-{{ product.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ product.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ product.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ product.id }}').modal('hide');
     })
 ;
 {% endif %}{% endfor %}
 
 $('#new-product-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-product-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-product')
             .form({
                 inline: true,

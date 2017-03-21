@@ -805,7 +805,7 @@
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/{{ Version.SemanticUICalendar }}/calendar.min.js"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -842,7 +842,7 @@ $('.ui.checkbox').checkbox();
 {% endif %}
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $.fn.form.settings.rules.toefl = function(value) {
             if (($('#toefl_aim_reading').val() === '') || ($('#toefl_aim_listening').val() === '') || ($('#toefl_aim_speaking').val() === '') || ($('#toefl_aim_writing').val() === '')) {
                 return true;
@@ -1657,7 +1657,7 @@ $('#set-form-button')
                 'deadline': deadline,
                 'speed': speed,
                 'intensity': intensity
-            }, function(data) {
+            }, function (data) {
                 if (data.valid) {
                     $('#edit-study-plan').form('set values', {
                         'vb_intro_start_date': data['VB总论'].start_date,

@@ -106,7 +106,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -120,25 +120,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for permission in permissions %}{% if permission.roles.count() == 0 %}
 $('#delete-trigger-{{ permission.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ permission.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ permission.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ permission.id }}').modal('hide');
     })
 ;
 {% endif %}{% endfor %}
 
 $('#new-permission-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-permission-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-permission')
             .form({
                 inline: true,

@@ -123,7 +123,7 @@
 <script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
 <script type="text/javascript">
 $('.message .close')
-    .on('click', function() {
+    .on('click', function () {
         $(this)
             .closest('.message')
             .transition('fade')
@@ -137,25 +137,25 @@ $('.ui.sortable.table').tablesort();
 
 {% for period in periods %}
 $('#delete-trigger-{{ period.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ period.id }}').modal({ autofocus: false }).modal('show');
     })
 ;
 $('#delete-hide-trigger-{{ period.id }}')
-    .on('click', function() {
+    .on('click', function () {
         $('#delete-modal-{{ period.id }}').modal('hide');
     })
 ;
 {% endfor %}
 
 $('#new-period-trigger')
-    .on('click', function() {
+    .on('click', function () {
         $('#new-period-modal').modal({ autofocus: false }).modal('show');
     })
 ;
 
 $(document)
-    .ready(function() {
+    .ready(function () {
         $('#new-period')
             .form({
                 inline: true,
