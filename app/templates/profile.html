@@ -171,7 +171,7 @@ function noProfileAvatar(avatarImage) {
                         </thead>
                         <tbody></tbody>
                     </table>
-                    {% endif %}
+                    {% else %}<div>N/A</div>{% endif %}
                     {% if current_user.can('管理研修计划') %}<a class="ui left labeled icon button loading-trigger" href="{{ url_for('manage.edit_study_plan', id=user.id, next=url_for('main.profile_overview', id=user.id)) }}"><i class="edit icon"></i>编辑</a>{% endif %}
                 </div>
                 {% with scores = user.gre_test_scores %}{% if scores.count() %}<div class="ui vertical segment">

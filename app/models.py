@@ -585,6 +585,72 @@ class SuspensionRecord(db.Model):
             seconds = remaining_seconds % 60
             return u'共 %s天 %s小时 %s分钟 %s秒' % (duration.days, hours, minutes, seconds)
 
+    def to_csv(self):
+        end_time = ''
+        if self.end_time is not None:
+            end_time = self.end_time.strftime('%Y-%m-%dT%H:%M:%S')
+        entry_csv = [
+            str(self.id),
+            str(self.user_id),
+            self.original_role.name,
+            self.start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+            end_time,
+            str(int(self.current)),
+            self.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            self.modified_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            str(self.modified_by_id),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'suspension_records.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        if entry[4] is not None:
+                            entry[4] = datetime.strptime(entry[4], '%Y-%m-%dT%H:%M:%S')
+                        suspension_record = SuspensionRecord(
+                            id=int(entry[0]),
+                            user_id=int(entry[1]),
+                            original_role_id=Role.query.filter_by(name=entry[2]).first().id,
+                            start_time=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S'),
+                            end_time=entry[4],
+                            current=bool(int(entry[5])),
+                            created_at=datetime.strptime(entry[6], '%Y-%m-%dT%H:%M:%S'),
+                            modified_at=datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S'),
+                            modified_by_id=int(entry[8]),
+                        )
+                        db.session.add(suspension_record)
+                        print u'导入购买信息', entry[1], entry[2], entry[3], entry[4]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'suspension_records.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'id',
+                'user_id',
+                'original_role',
+                'start_time',
+                'end_time',
+                'current'
+                'created_at',
+                'modified_at',
+                'modified_by_id',
+            ])
+            for entry in SuspensionRecord.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
+
     def __repr__(self):
         return '<Suspension Record %r, %r, %r>' % (self.user.name, self.start_time, self.end_time)
 
@@ -3244,7 +3310,7 @@ class Product(db.Model):
             str(int(self.pinned)),
             self.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
             self.modified_at.strftime('%Y-%m-%dT%H:%M:%S'),
-            self.modified_by.email,
+            str(self.modified_by_id),
             str(int(self.deleted)),
         ]
         return entry_csv
@@ -3288,22 +3354,19 @@ class Product(db.Model):
                     line_num = 0
                     for entry in reader:
                         if line_num >= 1:
-                            product = Product.query.get(int(entry[0]))
-                            if product is None:
-                                modified_by = User.query.filter_by(email=entry[7]).first()
-                                product = Product(
-                                    id=int(entry[0]),
-                                    name=entry[1],
-                                    price=float(entry[2]),
-                                    available=bool(int(entry[3])),
-                                    pinned=bool(int(entry[4])),
-                                    created_at=datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S'),
-                                    modified_at=datetime.strptime(entry[6], '%Y-%m-%dT%H:%M:%S'),
-                                    modified_by_id=modified_by.id,
-                                    deleted=bool(int(entry[8]))
-                                )
-                                db.session.add(product)
-                                print u'导入产品信息', entry[1], entry[2]
+                            product = Product(
+                                id=int(entry[0]),
+                                name=entry[1],
+                                price=float(entry[2]),
+                                available=bool(int(entry[3])),
+                                pinned=bool(int(entry[4])),
+                                created_at=datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S'),
+                                modified_at=datetime.strptime(entry[6], '%Y-%m-%dT%H:%M:%S'),
+                                modified_by_id=int(entry[7]),
+                                deleted=bool(int(entry[8]))
+                            )
+                            db.session.add(product)
+                            print u'导入产品信息', entry[1], entry[2]
                         line_num += 1
                     db.session.commit()
 
@@ -3322,7 +3385,7 @@ class Product(db.Model):
                 'pinned',
                 'created_at',
                 'modified_at',
-                'modified_by',
+                'modified_by_id',
                 'deleted',
             ])
             for entry in Product.query.all():
