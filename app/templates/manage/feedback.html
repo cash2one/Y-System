@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}反馈管理{% endblock %}
+
+{% block customized_styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='assets/editor/wangEditor.min.css') }}">
+{% include '_style_common.html' %}
+{% endblock %}
+
+{% block page_masthead %}
+<div class="ui text container">
+    {{ macros.message_widget() }}
+    <h1 class="ui inverted header"><i class="treatment icon"></i>反馈管理</h1>
+</div>
+{% endblock %}
+
+{% block page_content %}
+<div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+        <div class="row">
+            <div class="column">
+                <h3 class="ui header"><i class="treatment icon"></i>反馈列表</h3>
+                <div id="new-feedback-trigger" class="ui right floated positive circular icon button popup-item" data-content="新建反馈" data-position="top center" data-variation="inverted"><i class="add icon"></i></div>
+                <div id="new-feedback-modal" class="ui modal">
+                    <i class="close icon"></i>
+                    <div class="header"><i class="add circle icon"></i>新建反馈</div>
+                    <div class="content">
+                        <form id="new-feedback" action="{{ url_for('manage.feedback') }}" method="POST" class="ui form">
+                            {{ form.hidden_tag() }}
+                            <div class="fields">
+                                <div class="twelve wide required field">
+                                    {{ form.email.label() }}
+                                    <div class="ui fluid search">
+                                        {{ form.email(placeholder='输入姓名/邮箱查询', class='prompt') }}
+                                        <div class="results"></div>
+                                    </div>
+                                </div>
+                                <div class="four wide required field">
+                                    {{ form.lesson.label() }}
+                                    {{ form.lesson(class='ui dropdown') }}
+                                </div>
+                            </div>
+                            <div class="required field">
+                                {{ form.body.label() }}
+                                {{ form.body(placeholder='反馈内容') }}
+                            </div>
+                            {{ form.submit(class='ui primary button') }}
+                        </form>
+                    </div>
+                </div>
+                <div class="ui secondary stackable menu">
+                    <a class="item active loading-trigger" href="{{ url_for('manage.feedback', page=pagination.page) }}">全部</a>
+                </div>
+                <table class="ui very basic sortable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>课程</th>
+                            <th>反馈内容</th>
+                            <th>状态</th>
+                            <th>上次操作</th>
+                            <th>操作人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feedback in feedbacks %}
+                        <tr class="top aligned">
+                            <td class="single line">{{ macros.user_popup(feedback.study_plan.user, feedback.study_plan.user_id == current_user.id) }}</td>
+                            <td class="single line">{{ feedback.study_plan.lesson.alias }}</td>
+                            <td>{{ feedback.body_html | safe }}</td>
+                            {% if feedback.unread %}<td class="active">未读</td>{% else %}<td>已读</td>{% endif %}
+                            <td class="single line">
+                                <div class="popup-trigger" data-variation="inverted">{{ moment(feedback.modified_at).fromNow() }}</div>
+                                <div class="ui popup popup-content">{{ moment(feedback.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
+                            </td>
+                            <td class="single line">{{ macros.user_popup(feedback.modified_by, feedback.modified_by_id == current_user.id) }}</td>
+                            <td>
+                                <div class="ui mini icon buttons">
+                                    <a class="ui button loading-trigger" href="{{ url_for('manage.edit_feedback', id=feedback.id, next=url_for('manage.feedback', page=pagination.page)) }}"><i class="edit icon"></i></a>
+                                    <div id="delete-trigger-{{ feedback.id }}" class="ui negative button"><i class="trash outline icon"></i></div>
+                                </div>
+                                <div id="delete-modal-{{ feedback.id }}" class="ui modal">
+                                    <div class="header"><i class="warning sign icon"></i>确定要删除“{{ feedback.study_plan.user.name_alias }}”的“{{ feedback.study_plan.lesson.alias }}”研修反馈？</div>
+                                    <div class="actions">
+                                        <a class="ui negative left labeled icon button loading-trigger" href="{{ url_for('manage.delete_feedback', id=feedback.id, next=url_for('manage.feedback', page=pagination.page)) }}"><i class="trash outline icon"></i>删除</a>
+                                        <div id="delete-hide-trigger-{{ feedback.id }}" class="ui black button">保留</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.feedback') }}{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customized_scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='assets/js/tablesort.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='assets/editor/wangEditor.min.js') }}"></script>
+<script type="text/javascript">
+$('.message .close')
+    .on('click', function () {
+        $(this)
+            .closest('.message')
+            .transition('fade')
+        ;
+    })
+;
+
+$('.ui.checkbox').checkbox();
+
+$('.ui.sortable.table').tablesort();
+
+{% for feedback in feedbacks %}
+$('#delete-trigger-{{ feedback.id }}')
+    .on('click', function () {
+        $('#delete-modal-{{ feedback.id }}').modal({ autofocus: false }).modal('show');
+    })
+;
+$('#delete-hide-trigger-{{ feedback.id }}')
+    .on('click', function () {
+        $('#delete-modal-{{ feedback.id }}').modal('hide');
+    })
+;
+{% endfor %}
+
+$('#new-feedback-trigger')
+    .on('click', function () {
+        $('#new-feedback-modal').modal({ autofocus: false }).modal('show');
+    })
+;
+
+$(document)
+    .ready(function () {
+        $('#new-feedback')
+            .form({
+                inline: true,
+                on: 'blur',
+                fields: {
+                    email: {
+                        identifier: 'email',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入用户邮箱'
+                            },
+                            {
+                                type: 'email',
+                                prompt: '请输入有效的用户邮箱'
+                            }
+                        ]
+                    },
+                    lesson: {
+                        identifier: 'lesson',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请选择课程'
+                            }
+                        ]
+                    },
+                    body: {
+                        identifier: 'body',
+                        rules: [
+                            {
+                                type: 'empty',
+                                prompt: '请输入反馈内容'
+                            }
+                        ]
+                    }
+                }
+            })
+        ;
+    })
+;
+
+$('.ui.search')
+    .search({
+        apiSettings: {
+            url: "{% if current_user.is_developer %}{{ url_for('manage.suggest_email_dev') }}{% else %}{{ url_for('manage.suggest_email') }}{% endif %}?keyword={query}"
+        },
+        showNoResults: false
+    })
+;
+
+// editor
+var editor = new wangEditor('body');
+editor.config.menus = [
+    'source',
+    '|',
+    'bold',
+    'underline',
+    'italic',
+    'strikethrough',
+    'forecolor',
+    '|',
+    'quote',
+    'unorderlist',
+    'orderlist',
+    '|',
+    'eraser',
+    'undo',
+    'redo',
+ ];
+editor.create();
+</script>
+{% endblock %}
