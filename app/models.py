@@ -315,7 +315,7 @@ class Purpose(db.Model):
 
     def to_csv(self):
         entry_csv = [
-            self.user.email,
+            str(self.user_id),
             self.type.name,
             self.remark,
             self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
@@ -331,18 +331,14 @@ class Purpose(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        user = User.query.filter_by(email=entry[0]).first()
-                        purpose_type = PurposeType.query.filter_by(name=entry[1]).first()
-                        purpose = Purpose.query.filter_by(user_id=user.id, type_id=purpose_type.id).first()
-                        if purpose is None:
-                            purpose = Purpose(
-                                user_id=user.id,
-                                type_id=purpose_type.id,
-                                remark=entry[2],
-                                timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
-                            )
-                            db.session.add(purpose)
-                            print u'导入研修目的信息', entry[0], entry[1], entry[2], entry[3]
+                        purpose = Purpose(
+                            user_id=int(entry[0]),
+                            type_id=PurposeType.query.filter_by(name=entry[1]).first().id,
+                            remark=entry[2],
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(purpose)
+                        print u'导入研修目的信息', entry[0], entry[1], entry[2], entry[3]
                     line_num += 1
                 db.session.commit()
 
@@ -354,7 +350,7 @@ class Purpose(db.Model):
         with open(csvfile, 'w') as f:
             writer = UnicodeWriter(f)
             writer.writerow([
-                'user_email',
+                'user_id',
                 'type',
                 'remark',
                 'timestamp',
@@ -406,6 +402,52 @@ class Referrer(db.Model):
     type_id = db.Column(db.Integer, db.ForeignKey('referrer_types.id'), primary_key=True)
     remark = db.Column(db.UnicodeText)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_csv(self):
+        entry_csv = [
+            str(self.user_id),
+            self.type.name,
+            self.remark,
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'referrers.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        referrer = Referrer(
+                            user_id=int(entry[0]),
+                            type_id=ReferrerType.query.filter_by(name=entry[1]).first().id,
+                            remark=entry[2],
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(referrer)
+                        print u'导入来源信息', entry[0], entry[1], entry[2], entry[3]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'referrers.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'user_id',
+                'type',
+                'remark',
+                'timestamp',
+            ])
+            for entry in Referrer.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
 
 class ReferrerType(db.Model):
@@ -462,6 +504,55 @@ class Purchase(db.Model):
     @property
     def total_alias(self):
         return u'%g' % self.total
+
+    def to_csv(self):
+        entry_csv = [
+            str(self.id),
+            str(self.user_id),
+            str(self.product_id),
+            str(self.quantity),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'purchases.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        purchase = Purchase(
+                            id=int(entry[0]),
+                            user_id=int(entry[1]),
+                            product_id=int(entry[2]),
+                            quantity=int(entry[3]),
+                            timestamp=datetime.strptime(entry[4], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(purchase)
+                        print u'导入购买信息', entry[1], entry[2], entry[3], entry[4]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'purchases.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'id',
+                'user_id',
+                'product_id',
+                'quantity',
+                'timestamp',
+            ])
+            for entry in Purchase.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<Purchase %r, %r>' % (self.user.name, self.alias)
@@ -733,7 +824,7 @@ class Punch(db.Model):
 
     def to_csv(self):
         entry_csv = [
-            self.user.email,
+            str(self.user_id),
             self.section.name,
             str(int(self.milestone)),
             self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
@@ -749,18 +840,14 @@ class Punch(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        user = User.query.filter_by(email=entry[0]).first()
-                        section = Section.query.filter_by(name=entry[1]).first()
-                        punch = Punch.query.filter_by(user_id=user.id, section_id=section.id).first()
-                        if punch is None:
-                            punch = Punch(
-                                user_id=user.id,
-                                section_id=section.id,
-                                milestone=bool(int(entry[2])),
-                                timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
-                            )
-                            db.session.add(punch)
-                            print u'导入进度打卡信息', entry[0], entry[1], entry[2], entry[3]
+                        punch = Punch(
+                            user_id=int(entry[0]),
+                            section_id=Section.query.filter_by(name=entry[1]).first().id,
+                            milestone=bool(int(entry[2])),
+                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(punch)
+                        print u'导入进度打卡信息', entry[0], entry[1], entry[2], entry[3]
                     line_num += 1
                 db.session.commit()
 
@@ -772,7 +859,7 @@ class Punch(db.Model):
         with open(csvfile, 'w') as f:
             writer = UnicodeWriter(f)
             writer.writerow([
-                'user_email',
+                'user_id',
                 'section',
                 'milestone',
                 'timestamp',
@@ -1230,8 +1317,8 @@ class UserCreation(db.Model):
 
     def to_csv(self):
         entry_csv = [
-            self.creator.email,
-            self.user.email,
+            str(self.creator_id),
+            str(self.user_id),
             self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
         ]
         return entry_csv
@@ -1245,17 +1332,13 @@ class UserCreation(db.Model):
                 line_num = 0
                 for entry in reader:
                     if line_num >= 1:
-                        creator = User.query.filter_by(email=entry[0]).first()
-                        user = User.query.filter_by(email=entry[1]).first()
-                        user_creation = UserCreation.query.filter_by(creator_id=creator.id, user_id=user.id).first()
-                        if user_creation is None:
-                            user_creation = UserCreation(
-                                creator_id=creator.id,
-                                user_id=user.id,
-                                timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
-                            )
-                            db.session.add(user_creation)
-                            print u'导入用户创建人信息', entry[0], entry[1], entry[2]
+                        user_creation = UserCreation(
+                            creator_id=int(entry[0]),
+                            user_id=int(entry[1]),
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(user_creation)
+                        print u'导入用户创建人信息', entry[0], entry[1], entry[2]
                     line_num += 1
                 db.session.commit()
 
@@ -1267,8 +1350,8 @@ class UserCreation(db.Model):
         with open(csvfile, 'w') as f:
             writer = UnicodeWriter(f)
             writer.writerow([
-                'creator_email',
-                'user_email',
+                'creator_id',
+                'user_id',
                 'timestamp',
             ])
             for entry in UserCreation.query.all():
@@ -2707,6 +2790,7 @@ class User(UserMixin, db.Model):
         if self.deadline is not None:
             deadline = self.deadline.isoformat()
         entry_csv = [
+            str(self.id),
             self.email,
             str(int(self.confirmed)),
             self.role.name,
@@ -2767,56 +2851,55 @@ class User(UserMixin, db.Model):
                     line_num = 0
                     for entry in reader:
                         if line_num >= 1:
-                            user = User.query.filter_by(email=entry[0]).first()
-                            if user is None:
-                                if entry[5] is not None:
-                                    entry[5] = datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S')
-                                if entry[7] is not None:
-                                    entry[7] = datetime.strptime(entry[7], '%Y-%m-%dT%H:%M:%S')
-                                if entry[8] is not None:
-                                    entry[8] = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S')
-                                if entry[11] is not None:
-                                    entry[11] = IDType.query.filter_by(name=entry[11]).first().id
-                                if entry[13] is not None:
-                                    entry[13] = Gender.query.filter_by(name=entry[13]).first().id
-                                if entry[14] is not None:
-                                    entry[14] = datetime.strptime(entry[14], '%Y-%m-%d').date()
-                                if entry[21] is not None:
-                                    entry[21] = Relationship.query.filter_by(name=entry[21]).first().id
-                                if entry[27] is not None:
-                                    entry[27] = datetime.strptime(entry[27], '%Y-%m-%d').date()
-                                user = User(
-                                    email=entry[0],
-                                    confirmed=bool(int(entry[1])),
-                                    role_id=Role.query.filter_by(name=entry[2]).first().id,
-                                    password_hash=str(entry[3]),
-                                    created=bool(int(entry[4])),
-                                    created_at=entry[5],
-                                    activated=bool(int(entry[6])),
-                                    activated_at=entry[7],
-                                    last_seen_at=entry[8],
-                                    deleted=bool(int(entry[9])),
-                                    name=entry[10],
-                                    id_type_id=entry[11],
-                                    id_number=entry[12],
-                                    gender_id=entry[13],
-                                    birthdate=entry[14],
-                                    mobile=entry[15],
-                                    wechat=entry[16],
-                                    qq=entry[17],
-                                    address=entry[18],
-                                    emergency_contact_name=entry[19],
-                                    emergency_contact_mobile=entry[20],
-                                    emergency_contact_relationship_id=entry[21],
-                                    worked_in_same_field=bool(int(entry[22])),
-                                    deformity=bool(int(entry[23])),
-                                    application_aim=entry[24],
-                                    application_agency=entry[25],
-                                    speed=float(entry[26]),
-                                    deadline=entry[27]
-                                )
-                                db.session.add(user)
-                                print u'导入用户信息', entry[2], entry[10], entry[0]
+                            if entry[6] is not None:
+                                entry[6] = datetime.strptime(entry[6], '%Y-%m-%dT%H:%M:%S')
+                            if entry[8] is not None:
+                                entry[8] = datetime.strptime(entry[8], '%Y-%m-%dT%H:%M:%S')
+                            if entry[9] is not None:
+                                entry[9] = datetime.strptime(entry[9], '%Y-%m-%dT%H:%M:%S')
+                            if entry[12] is not None:
+                                entry[12] = IDType.query.filter_by(name=entry[12]).first().id
+                            if entry[14] is not None:
+                                entry[14] = Gender.query.filter_by(name=entry[14]).first().id
+                            if entry[15] is not None:
+                                entry[15] = datetime.strptime(entry[15], '%Y-%m-%d').date()
+                            if entry[22] is not None:
+                                entry[22] = Relationship.query.filter_by(name=entry[22]).first().id
+                            if entry[28] is not None:
+                                entry[28] = datetime.strptime(entry[28], '%Y-%m-%d').date()
+                            user = User(
+                                id=int(entry[0]),
+                                email=entry[1],
+                                confirmed=bool(int(entry[2])),
+                                role_id=Role.query.filter_by(name=entry[3]).first().id,
+                                password_hash=str(entry[4]),
+                                created=bool(int(entry[5])),
+                                created_at=entry[6],
+                                activated=bool(int(entry[7])),
+                                activated_at=entry[8],
+                                last_seen_at=entry[9],
+                                deleted=bool(int(entry[10])),
+                                name=entry[11],
+                                id_type_id=entry[12],
+                                id_number=entry[13],
+                                gender_id=entry[14],
+                                birthdate=entry[15],
+                                mobile=entry[16],
+                                wechat=entry[17],
+                                qq=entry[18],
+                                address=entry[19],
+                                emergency_contact_name=entry[20],
+                                emergency_contact_mobile=entry[21],
+                                emergency_contact_relationship_id=entry[22],
+                                worked_in_same_field=bool(int(entry[23])),
+                                deformity=bool(int(entry[24])),
+                                application_aim=entry[25],
+                                application_agency=entry[26],
+                                speed=float(entry[27]),
+                                deadline=entry[28]
+                            )
+                            db.session.add(user)
+                            print u'导入用户信息', entry[3], entry[11], entry[1]
                         line_num += 1
                     db.session.commit()
 
@@ -2828,6 +2911,7 @@ class User(UserMixin, db.Model):
         with open(csvfile, 'w') as f:
             writer = UnicodeWriter(f)
             writer.writerow([
+                'id',
                 'email',
                 'confirmed',
                 'role',
@@ -3151,6 +3235,20 @@ class Product(db.Model):
     def sales_volume(self):
         return sum([purchase.quantity for purchase in self.purchases if purchase.user.created and purchase.user.activated and not purchase.user.deleted])
 
+    def to_csv(self):
+        entry_csv = [
+            str(self.id),
+            self.name,
+            str(self.price),
+            str(int(self.available)),
+            str(int(self.pinned)),
+            self.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            self.modified_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            self.modified_by.email,
+            str(int(self.deleted)),
+        ]
+        return entry_csv
+
     @staticmethod
     def insert_entries(data, basedir):
         if data == u'initial':
@@ -3180,8 +3278,56 @@ class Product(db.Model):
                         modified_by_id=User.query.get(1).id
                     )
                     db.session.add(product)
-                    print u'导入课程类型信息', entry[0]
+                    print u'导入产品信息', entry[0], entry[1]
             db.session.commit()
+        else:
+            csvfile = os.path.join(basedir, 'data', data, 'products.csv')
+            if os.path.exists(csvfile):
+                with open(csvfile, 'r') as f:
+                    reader = UnicodeReader(f)
+                    line_num = 0
+                    for entry in reader:
+                        if line_num >= 1:
+                            product = Product.query.get(int(entry[0]))
+                            if product is None:
+                                modified_by = User.query.filter_by(email=entry[7]).first()
+                                product = Product(
+                                    id=int(entry[0]),
+                                    name=entry[1],
+                                    price=float(entry[2]),
+                                    available=bool(int(entry[3])),
+                                    pinned=bool(int(entry[4])),
+                                    created_at=datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S'),
+                                    modified_at=datetime.strptime(entry[6], '%Y-%m-%dT%H:%M:%S'),
+                                    modified_by_id=modified_by.id,
+                                    deleted=bool(int(entry[8]))
+                                )
+                                db.session.add(product)
+                                print u'导入产品信息', entry[1], entry[2]
+                        line_num += 1
+                    db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'products.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'id',
+                'name',
+                'price',
+                'available',
+                'pinned',
+                'created_at',
+                'modified_at',
+                'modified_by',
+                'deleted',
+            ])
+            for entry in Product.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<Product %r>' % self.alias
@@ -4755,7 +4901,8 @@ class Feed(db.Model):
 
     def to_csv(self):
         entry_csv = [
-            self.user.email,
+            str(self.id),
+            str(self.user_id),
             self.event,
             self.category,
             self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
@@ -4772,13 +4919,14 @@ class Feed(db.Model):
                 for entry in reader:
                     if line_num >= 1:
                         feed = Feed(
-                            user_id=User.query.filter_by(email=entry[0]).first().id,
-                            event=entry[1],
-                            category=entry[2],
-                            timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                            id=int(entry[0]),
+                            user_id=int(entry[1]),
+                            event=entry[2],
+                            category=entry[3],
+                            timestamp=datetime.strptime(entry[4], '%Y-%m-%dT%H:%M:%S')
                         )
                         db.session.add(feed)
-                        print u'导入日志信息', entry[0], entry[1], entry[2], entry[3]
+                        print u'导入日志信息', entry[1], entry[2], entry[3], entry[4]
                     line_num += 1
                 db.session.commit()
 
@@ -4790,7 +4938,8 @@ class Feed(db.Model):
         with open(csvfile, 'w') as f:
             writer = UnicodeWriter(f)
             writer.writerow([
-                'user_email',
+                'id',
+                'user_id',
                 'event',
                 'category',
                 'timestamp',
