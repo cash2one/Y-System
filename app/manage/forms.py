@@ -914,7 +914,7 @@ class EditStudyPlanForm(FlaskForm):
     gre_2_date = DateField(u'G<sub>2</sub>', validators=[Optional()])
     gre_3_date = DateField(u'G<sub>3</sub>', validators=[Optional()])
     # supervisor
-    supervisor_email = StringField(u'设计人（邮箱）', validators=[Length(0, 64)])
+    supervisor_email = StringField(u'设计人（邮箱）', validators=[Required(), Length(0, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
     submit = SubmitField(u'提交')
 
     def __init__(self, *args, **kwargs):
@@ -965,6 +965,28 @@ class EditNotaBeneForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(EditNotaBeneForm, self).__init__(*args, **kwargs)
         self.nota_bene_type.choices = [(u'', u'选择N.B.类型')] + [(unicode(course_type.id), course_type.name) for course_type in CourseType.query.order_by(CourseType.id.asc()).all()]
+
+
+class NewFeedbackForm(FlaskForm):
+    email = StringField(u'用户（邮箱）', validators=[Required(), Length(1, 64), Email(message=u'请输入一个有效的电子邮箱地址')])
+    lesson = SelectField(u'课程', coerce=unicode, validators=[Required()])
+    body = TextAreaField(u'反馈内容', validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(NewFeedbackForm, self).__init__(*args, **kwargs)
+        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.priority >= 1).order_by(Lesson.id.asc()).all()]
+
+
+class EditFeedbackForm(FlaskForm):
+    user = StringField(u'用户（邮箱）')
+    lesson = SelectField(u'课程', coerce=unicode, validators=[Required()])
+    body = TextAreaField(u'反馈内容', validators=[Required()])
+    submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditFeedbackForm, self).__init__(*args, **kwargs)
+        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.priority >= 1).order_by(Lesson.id.asc()).all()]
 
 
 class NewAnnouncementForm(FlaskForm):

@@ -4564,6 +4564,10 @@ class Feedback(db.Model):
     def alias(self):
         return u'%s %s %s' % (self.study_plan.alias, self.body)
 
+    def mark_read(self):
+        self.unread = False
+        db.session.add(self)
+
     def to_json(self):
         entry_json = {
             'body': self.body,

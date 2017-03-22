@@ -36,7 +36,11 @@ def vb():
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     announcements = get_announcements(type_name=u'预约VB通知', user=current_user._get_current_object())
-    return render_template('book/vb.html', schedules=schedules, pagination=pagination, announcements=announcements)
+    return render_template('book/vb.html',
+        pagination=pagination,
+        schedules=schedules,
+        announcements=announcements
+    )
 
 
 @book.route('/vb/book/<int:id>')
@@ -184,7 +188,11 @@ def y_gre():
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     schedules = pagination.items
     announcements = get_announcements(type_name=u'预约Y-GRE通知', user=current_user._get_current_object())
-    return render_template('book/y_gre.html', schedules=schedules, pagination=pagination, announcements=announcements)
+    return render_template('book/y_gre.html',
+        pagination=pagination,
+        schedules=schedules,
+        announcements=announcements
+    )
 
 
 @book.route('/y-gre/book/<int:id>')
