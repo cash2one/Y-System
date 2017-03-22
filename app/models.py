@@ -661,6 +661,49 @@ class CourseRegistration(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_csv(self):
+        entry_csv = [
+            str(self.user_id),
+            str(self.course_id),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'course_registrations.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        course_registration = CourseRegistration(
+                            user_id=int(entry[0]),
+                            course_id=int(entry[1]),
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(course_registration)
+                        print u'导入课程注册信息', entry[0], entry[1], entry[2]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'course_registrations.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'user_id',
+                'course_id',
+                'timestamp',
+            ])
+            for entry in CourseRegistration.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
+
 
 class BookingState(db.Model):
     __tablename__ = 'booking_states'
@@ -3469,6 +3512,19 @@ class Course(db.Model):
             .filter(User.created == True)\
             .filter(User.deleted == False)
 
+    def to_csv(self):
+        entry_csv = [
+            str(self.id),
+            self.name,
+            self.type.name,
+            str(int(self.show)),
+            self.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            self.modified_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            str(self.modified_by_id),
+            str(int(self.deleted)),
+        ]
+        return entry_csv
+
     @staticmethod
     def insert_entries(data, basedir):
         csvfile = os.path.join(basedir, 'data', data, 'courses.csv')
@@ -3479,19 +3535,49 @@ class Course(db.Model):
                 for entry in reader:
                     if line_num >= 1:
                         if data == u'initial':
-                            course = Course.query.filter_by(name=entry[0]).first()
-                            if course is None:
-                                course = Course(
-                                    name=entry[0],
-                                    type_id=CourseType.query.filter_by(name=entry[1]).first().id,
-                                    modified_by_id=User.query.get(1).id
-                                )
-                                db.session.add(course)
-                                print u'导入课程信息', entry[0], entry[1]
+                            course = Course(
+                                name=entry[0],
+                                type_id=CourseType.query.filter_by(name=entry[1]).first().id,
+                                modified_by_id=User.query.get(1).id
+                            )
+                            db.session.add(course)
+                            print u'导入课程信息', entry[0], entry[1]
                         else:
-                            pass
+                            course = Course(
+                                id=int(entry[0]),
+                                name=entry[1],
+                                type_id=CourseType.query.filter_by(name=entry[2]).first().id,
+                                show=bool(int(entry[3])),
+                                created_at=datetime.strptime(entry[4], '%Y-%m-%dT%H:%M:%S'),
+                                modified_at=datetime.strptime(entry[5], '%Y-%m-%dT%H:%M:%S'),
+                                modified_by_id=int(entry[6]),
+                                deleted=bool(int(entry[7]))
+                            )
+                            db.session.add(course)
+                            print u'导入课程信息', entry[1], entry[2]
                     line_num += 1
                 db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'courses.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'id',
+                'name',
+                'type',
+                'show',
+                'created_at',
+                'modified_at',
+                'modified_by_id',
+                'deleted',
+            ])
+            for entry in Course.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
     def __repr__(self):
         return '<Course %r>' % self.name
@@ -3864,7 +3950,7 @@ class iPadContent(db.Model):
 
     @staticmethod
     def insert_entries(data, basedir):
-        csvfile = os.path.join(basedir, 'data', data, 'ipad-contents.csv')
+        csvfile = os.path.join(basedir, 'data', data, 'ipad_contents.csv')
         if os.path.exists(csvfile):
             with open(csvfile, 'r') as f:
                 reader = UnicodeReader(f)
@@ -4773,7 +4859,7 @@ class NotaBene(db.Model):
 
     @staticmethod
     def insert_entries(data, basedir):
-        csvfile = os.path.join(basedir, 'data', data, 'notate-bene.csv')
+        csvfile = os.path.join(basedir, 'data', data, 'notate_bene.csv')
         if os.path.exists(csvfile):
             with open(csvfile, 'r') as f:
                 reader = UnicodeReader(f)
