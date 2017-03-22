@@ -68,7 +68,7 @@
                     <tbody>
                         {% for feedback in feedbacks %}
                         <tr class="top aligned">
-                            <td class="single line">{{ macros.user_popup(feedback.study_plan.user, feedback.study_plan.user_id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup(feedback.study_plan.user, feedback.study_plan.user.id == current_user.id) }}</td>
                             <td class="single line">{{ feedback.study_plan.lesson.alias }}</td>
                             <td>{{ feedback.body_html | safe }}</td>
                             {% if feedback.unread %}<td class="active">未读</td>{% else %}<td>已读</td>{% endif %}
@@ -76,7 +76,7 @@
                                 <div class="popup-trigger" data-variation="inverted">{{ moment(feedback.modified_at).fromNow() }}</div>
                                 <div class="ui popup popup-content">{{ moment(feedback.modified_at).format('YYYY-M-D H:mm:ss') }}</div>
                             </td>
-                            <td class="single line">{{ macros.user_popup(feedback.modified_by, feedback.modified_by_id == current_user.id) }}</td>
+                            <td class="single line">{{ macros.user_popup(feedback.modified_by, feedback.modified_by.id == current_user.id) }}</td>
                             <td>
                                 <div class="ui mini icon buttons">
                                     <a class="ui button loading-trigger" href="{{ url_for('manage.edit_feedback', id=feedback.id, next=url_for('manage.feedback', page=pagination.page)) }}"><i class="edit icon"></i></a>

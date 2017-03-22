@@ -979,8 +979,13 @@ class NewFeedbackForm(FlaskForm):
 
 
 class EditFeedbackForm(FlaskForm):
+    lesson = SelectField(u'课程', coerce=unicode, validators=[Required()])
     body = TextAreaField(u'反馈内容', validators=[Required()])
     submit = SubmitField(u'提交')
+
+    def __init__(self, *args, **kwargs):
+        super(EditFeedbackForm, self).__init__(*args, **kwargs)
+        self.lesson.choices = [(u'', u'选择课程')] + [(unicode(lesson.id), lesson.alias) for lesson in Lesson.query.filter(Lesson.priority >= 1).order_by(Lesson.id.asc()).all()]
 
 
 class NewAnnouncementForm(FlaskForm):

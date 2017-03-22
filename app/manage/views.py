@@ -5544,14 +5544,21 @@ def edit_feedback(id):
         abort(404)
     form = EditFeedbackForm()
     if form.validate_on_submit():
+        lesson = Lesson.query.get_or_404(int(form.lesson.data))
+        study_plan = StudyPlan.query.filter_by(user_id=feedback.study_plan.user_id, lesson_id=lesson.id).first()
+        if study_plan is None:
+            flash(u'尚未创建“%s”的“%s”研修计划' % (feedback.study_plan.user.name_alias, lesson.alias), category='error')
+            return redirect(url_for('manage.edit_feedback', id=feedback.id, page=request.args.get('page', 1, type=int)))
+        feedback.study_plan_id = study_plan.id
         feedback.body_html = form.body.data
         feedback.modified_at = datetime.utcnow()
         feedback.modified_by_id = current_user.id
         db.session.add(feedback)
         db.session.commit()
-        flash(u'已更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, feedback.study_plan.lesson.alias), category='success')
-        add_feed(user=current_user._get_current_object(), event=u'更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, feedback.study_plan.lesson.alias), category=u'manage')
+        flash(u'已更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, lesson.alias), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, lesson.alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.feedback'))
+    form.lesson.data = unicode(feedback.study_plan.lesson.id)
     form.body.data = feedback.body_html
     return render_template('manage/edit_feedback.html', form=form, feedback=feedback)
 

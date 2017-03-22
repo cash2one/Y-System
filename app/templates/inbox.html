@@ -26,6 +26,18 @@
                 </div>
             </div>
             <div class="twelve wide column">
+                <div class="ui divided items">
+                    {% for message in messages %}
+                    <div class="item">
+                        <div class="content">
+                            <div class="header">研修反馈：{{ message.study_plan.lesson.alias }}</div>
+                            <div class="meta"><i class="clock icon"></i>{{ moment(message.modified_at).fromNow() }}</div>
+                            <div class="description">{{ message.body_html | safe }}</div>
+                            <div class="extra">发信人：{{ message.modified_by.name }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
                 {% if pagination %}{{ macros.pagination_widget(pagination, 'main.inbox') }}{% endif %}
             </div>
         </div>
