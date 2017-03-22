@@ -1,0 +1,16 @@
+亲爱的{{ user.name }}：
+
+您好！
+
+{{ feedback.body }}
+
+此致
+
+敬礼！
+
+{{ feedback.modified_by.name }}
+{{ feedback.modified_by.email }}
+
+云英语团队
+
+温馨提示：请不要回复本邮件。
