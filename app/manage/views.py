@@ -5510,7 +5510,7 @@ def feedback():
         lesson = Lesson.query.get_or_404(int(form.lesson.data))
         study_plan = StudyPlan.query.filter_by(user_id=user.id, lesson_id=lesson.id).first()
         if study_plan is None:
-            flash(u'“%s”尚未创建“%s”的研修计划' % (user.name_alias, lesson.alias), category='error')
+            flash(u'尚未创建“%s”的“%s”研修计划' % (user.name_alias, lesson.alias), category='error')
             return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
         feedback = Feedback(
             study_plan_id=study_plan.id,
@@ -5519,8 +5519,8 @@ def feedback():
         )
         db.session.add(feedback)
         db.session.commit()
-        flash(u'已向“%s”添加“%s”的反馈' % (user.name_alias, lesson.alias), category='success')
-        add_feed(user=current_user._get_current_object(), event=u'向“%s”添加“%s”的反馈' % (user.name_alias, lesson.alias), category=u'manage')
+        flash(u'已添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category=u'manage')
         return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
     query = Feedback.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
@@ -5533,6 +5533,40 @@ def feedback():
         feedbacks=feedbacks,
         pagination=pagination
     )
+
+
+@manage.route('/feedback/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(u'管理反馈')
+def edit_feedback(id):
+    feedback = Feedback.query.get_or_404(id)
+    if feedback.deleted:
+        abort(404)
+    form = EditFeedbackForm()
+    if form.validate_on_submit():
+        feedback.body_html = form.body.data
+        feedback.modified_at = datetime.utcnow()
+        feedback.modified_by_id = current_user.id
+        db.session.add(feedback)
+        db.session.commit()
+        flash(u'已更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, feedback.study_plan.lesson.alias), category='success')
+        add_feed(user=current_user._get_current_object(), event=u'更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, feedback.study_plan.lesson.alias), category=u'manage')
+        return redirect(request.args.get('next') or url_for('manage.feedback'))
+    form.body.data = feedback.body_html
+    return render_template('manage/edit_feedback.html', form=form, feedback=feedback)
+
+
+@manage.route('/feedback/delete/<int:id>')
+@login_required
+@permission_required(u'管理反馈')
+def delete_feedback(id):
+    feedback = Feedback.query.get_or_404(id)
+    if feedback.deleted:
+        abort(404)
+    feedback.safe_delete(modified_by=current_user._get_current_object())
+    flash(u'已删除“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, feedback.study_plan.lesson.alias), category='success')
+    add_feed(user=current_user._get_current_object(), event=u'删除“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, feedback.study_plan.lesson.alias), category=u'manage')
+    return redirect(request.args.get('next') or url_for('manage.feedback'))
 
 
 @manage.route('/announcement', methods=['GET', 'POST'])
