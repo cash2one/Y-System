@@ -5546,6 +5546,7 @@ def feedback():
         )
         db.session.add(feedback)
         db.session.commit()
+        send_email(user.email, u'研修反馈：%s' % lesson.alias, 'manage/mail/feedback', user=user, feedback=feedback)
         flash(u'已添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category='success')
         add_feed(user=current_user._get_current_object(), event=u'添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category=u'manage')
         return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
@@ -5626,6 +5627,7 @@ def edit_feedback(id):
         feedback.modified_by_id = current_user.id
         db.session.add(feedback)
         db.session.commit()
+        send_email(feedback.study_plan.user.email, u'研修反馈：%s' % lesson.alias, 'manage/mail/feedback', user=feedback.study_plan.user, feedback=feedback)
         flash(u'已更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, lesson.alias), category='success')
         add_feed(user=current_user._get_current_object(), event=u'更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, lesson.alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.feedback'))
