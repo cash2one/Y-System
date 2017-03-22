@@ -155,8 +155,20 @@ def deploy():
         from app.models import User
         User.insert_entries(data=data, basedir=basedir)
 
+        from app.models import Invitation
+        Invitation.insert_entries(data=data, basedir=basedir)
+
+        from app.models import Reception
+        Reception.insert_entries(data=data, basedir=basedir)
+
+        from app.models import Supervision
+        Supervision.insert_entries(data=data, basedir=basedir)
+
         from app.models import UserCreation
         UserCreation.insert_entries(data=data, basedir=basedir)
+
+        from app.models import GroupRegistration
+        GroupRegistration.insert_entries(data=data, basedir=basedir)
 
         from app.models import Purpose
         Purpose.insert_entries(data=data, basedir=basedir)
@@ -217,8 +229,20 @@ def backup():
     from app.models import User
     User.backup_entries(data=data, basedir=basedir)
 
+    from app.models import Invitation
+    Invitation.backup_entries(data=data, basedir=basedir)
+
+    from app.models import Reception
+    Reception.backup_entries(data=data, basedir=basedir)
+
+    from app.models import Supervision
+    Supervision.backup_entries(data=data, basedir=basedir)
+
     from app.models import UserCreation
     UserCreation.backup_entries(data=data, basedir=basedir)
+
+    from app.models import GroupRegistration
+    GroupRegistration.backup_entries(data=data, basedir=basedir)
 
     from app.models import Purpose
     Purpose.backup_entries(data=data, basedir=basedir)

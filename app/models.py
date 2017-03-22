@@ -1403,6 +1403,55 @@ class Invitation(db.Model):
     paid_off = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_csv(self):
+        entry_csv = [
+            str(self.inviter_id),
+            str(self.user_id),
+            self.type.name,
+            str(int(self.paid_off)),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'invitations.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        invitation = Invitation(
+                            inviter_id=int(entry[0]),
+                            user_id=int(entry[1]),
+                            type_id=InvitationType.query.filter_by(name=entry[2]).first().id,
+                            paid_off=bool(int(entry[3])),
+                            timestamp=datetime.strptime(entry[4], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(invitation)
+                        print u'导入用户创建人信息', entry[0], entry[1], entry[4]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'invitations.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'inviter_id',
+                'user_id',
+                'type',
+                'paid_off',
+                'timestamp',
+            ])
+            for entry in Invitation.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
+
 
 class Reception(db.Model):
     __tablename__ = 'receptions'
@@ -1410,12 +1459,98 @@ class Reception(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_csv(self):
+        entry_csv = [
+            str(self.receptionist_id),
+            str(self.user_id),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'receptions.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        reception = Reception(
+                            receptionist_id=int(entry[0]),
+                            user_id=int(entry[1]),
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(reception)
+                        print u'导入接待人信息', entry[0], entry[1], entry[2]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'receptions.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'receptionist_id',
+                'user_id',
+                'timestamp',
+            ])
+            for entry in Reception.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
+
 
 class Supervision(db.Model):
     __tablename__ = 'user_supervisions'
     supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_csv(self):
+        entry_csv = [
+            str(self.supervisor_id),
+            str(self.user_id),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'supervisions.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        supervision = Supervision(
+                            supervisor_id=int(entry[0]),
+                            user_id=int(entry[1]),
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(supervision)
+                        print u'导入设计人信息', entry[0], entry[1], entry[2]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'supervisions.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'supervisor_id',
+                'user_id',
+                'timestamp',
+            ])
+            for entry in Supervision.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
 
 class UserCreation(db.Model):
@@ -1473,6 +1608,49 @@ class GroupRegistration(db.Model):
     organizer_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     member_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_csv(self):
+        entry_csv = [
+            str(self.organizer_id),
+            str(self.member_id),
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'group_registrations.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        group_registration = GroupRegistration(
+                            organizer_id=int(entry[0]),
+                            member_id=int(entry[1]),
+                            timestamp=datetime.strptime(entry[2], '%Y-%m-%dT%H:%M:%S')
+                        )
+                        db.session.add(group_registration)
+                        print u'导入团报信息', entry[0], entry[1], entry[2]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'group_registrations.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'organizer_id',
+                'member_id',
+                'timestamp',
+            ])
+            for entry in GroupRegistration.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
 
 
 class UserTag(db.Model):
