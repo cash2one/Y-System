@@ -51,9 +51,9 @@
                     </div>
                 </div>
                 <div class="ui secondary stackable menu">
-                    <a class="item active loading-trigger" href="{{ url_for('manage.feedback', page=pagination.page) }}">全部</a>
+                    <a class="item {% if show_all_feedbacks %}active {% endif %}loading-trigger" href="{{ url_for('manage.feedback', page=pagination.page) }}">全部</a>
                     <div class="item">
-                        <form id="search-user" action="{{ url_for('manage.feedback') }}" method="POST" class="ui form">
+                        <form id="search-feedback" action="{{ url_for('manage.feedback') }}" method="POST" class="ui form">
                             {{ search_form.hidden_tag() }}
                             <div class="field">
                                 <div class="ui search">
@@ -108,7 +108,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if pagination %}{{ macros.pagination_widget(pagination, 'manage.feedback') }}{% endif %}
+                {% if pagination %}{% if show_feedback_results %}{{ macros.pagination_widget(pagination, 'manage.feedback', keyword=request.args.get('keyword')) }}{% else %}{{ macros.pagination_widget(pagination, 'manage.feedback') }}{% endif %}{% endif %}
             </div>
         </div>
     </div>
@@ -193,6 +193,7 @@ $(document)
                 }
             })
         ;
+        $('#new-feedback').form();
     })
 ;
 

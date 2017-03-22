@@ -21,8 +21,8 @@
         <div class="row">
             <div class="four wide column">
                 <div class="ui secondary vertical fluid menu">
-                    <a class="{% if show_unread_messages %}active {% endif %}item" href="{{ url_for('main.unread_messages') }}">未读<div class="ui blue label">{{ unread_num }}</div></a>
-                    <a class="{% if show_all_messages %}active {% endif %}item" href="{{ url_for('main.all_messages') }}">全部<div class="ui label">{{ all_num }}</div></a>
+                    <a class="item {% if show_unread_messages %}active {% endif %}loading-trigger" href="{{ url_for('main.unread_messages') }}">未读<div class="ui {% if show_unread_messages %}blue {% endif %}label">{{ unread_num }}</div></a>
+                    <a class="item {% if show_all_messages %}active {% endif %}loading-trigger" href="{{ url_for('main.all_messages') }}">全部<div class="ui {% if show_all_messages %}blue {% endif %}label">{{ all_num }}</div></a>
                 </div>
             </div>
             <div class="twelve wide column">

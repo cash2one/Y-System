@@ -5549,7 +5549,6 @@ def feedback():
         flash(u'已添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category='success')
         add_feed(user=current_user._get_current_object(), event=u'添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category=u'manage')
         return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
-    # search form
     search_form = SearchForm(prefix='search')
     if search_form.validate_on_submit():
         keyword = search_form.keyword.data
@@ -5560,11 +5559,23 @@ def feedback():
         show_all_feedbacks = bool(request.cookies.get('show_all_feedbacks', '1'))
         show_search_feedbacks = bool(request.cookies.get('show_search_feedbacks', ''))
     if show_all_feedbacks:
-        query = Feedback.query.filter_by(deleted=False)
+        query = Feedback.query\
+            .filter(Feedback.deleted == False)\
+            .order_by(Feedback.modified_at.desc())
+    if show_search_feedbacks:
+        keyword = request.args.get('keyword')
+        user = User.query.filter_by(email=keyword, created=True, activated=True, deleted=False).first()
+        if user is not None:
+            query = Feedback.query\
+                .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
+                .filter(StudyPlan.user_id == user.id)\
+                .filter(Feedback.deleted == False)\
+                .order_by(Feedback.modified_at.desc())
+            search_form.keyword.data = keyword
+        else:
+            return redirect(url_for('manage.all_feedbacks'))
     page = request.args.get('page', 1, type=int)
-    pagination = query\
-        .order_by(Feedback.modified_at.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     feedbacks = pagination.items
     return render_template('manage/feedback.html',
         form=form,
@@ -5664,11 +5675,11 @@ def announcement():
         flash(u'已添加通知：“%s”' % form.title.data, category='success')
         add_feed(user=current_user._get_current_object(), event=u'添加通知：“%s”' % form.title.data, category=u'manage')
         return redirect(url_for('manage.announcement', page=request.args.get('page', 1, type=int)))
-    query = Announcement.query.filter_by(deleted=False)
+    query = Announcement.query\
+        .filter(Announcement.deleted == False)\
+        .order_by(Announcement.modified_at.desc())
     page = request.args.get('page', 1, type=int)
-    pagination = query\
-        .order_by(Announcement.modified_at.desc())\
-        .paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
+    pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     announcements = pagination.items
     return render_template('manage/announcement.html',
         form=form,
