@@ -313,6 +313,56 @@ class Purpose(db.Model):
     remark = db.Column(db.UnicodeText)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_csv(self):
+        entry_csv = [
+            self.user.email,
+            self.type.name,
+            self.remark,
+            self.timestamp.strftime('%Y-%m-%dT%H:%M:%S'),
+        ]
+        return entry_csv
+
+    @staticmethod
+    def insert_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'purposes.csv')
+        if os.path.exists(csvfile):
+            with open(csvfile, 'r') as f:
+                reader = UnicodeReader(f)
+                line_num = 0
+                for entry in reader:
+                    if line_num >= 1:
+                        user = User.query.filter_by(email=entry[0]).first()
+                        purpose_type = PurposeType.query.filter_by(name=entry[1]).first()
+                        purpose = Purpose.query.filter_by(user_id=user.id, type_id=purpose_type.id).first()
+                        if purpose is None:
+                            purpose = Purpose(
+                                user_id=user.id,
+                                type_id=purpose_type.id,
+                                remark=entry[2],
+                                timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
+                            )
+                            db.session.add(purpose)
+                            print u'导入研修目的信息', entry[0], entry[1], entry[2], entry[3]
+                    line_num += 1
+                db.session.commit()
+
+    @staticmethod
+    def backup_entries(data, basedir):
+        csvfile = os.path.join(basedir, 'data', data, 'purposes.csv')
+        if os.path.exists(csvfile):
+            os.remove(csvfile)
+        with open(csvfile, 'w') as f:
+            writer = UnicodeWriter(f)
+            writer.writerow([
+                'user_email',
+                'type',
+                'remark',
+                'timestamp',
+            ])
+            for entry in Purpose.query.all():
+                writer.writerow(entry.to_csv())
+            print u'---> Write file: %s' % csvfile
+
 
 class PurposeType(db.Model):
     __tablename__ = 'purpose_types'
@@ -706,7 +756,7 @@ class Punch(db.Model):
                             punch = Punch(
                                 user_id=user.id,
                                 section_id=section.id,
-                                milestone = bool(int(entry[2])),
+                                milestone=bool(int(entry[2])),
                                 timestamp=datetime.strptime(entry[3], '%Y-%m-%dT%H:%M:%S')
                             )
                             db.session.add(punch)

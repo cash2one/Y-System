@@ -158,6 +158,9 @@ def deploy():
         from app.models import UserCreation
         UserCreation.insert_entries(data=data, basedir=basedir)
 
+        from app.models import Purpose
+        Purpose.insert_entries(data=data, basedir=basedir)
+
         from app.models import Punch
         Punch.insert_entries(data=data, basedir=basedir)
 
@@ -204,6 +207,9 @@ def backup():
 
     from app.models import UserCreation
     UserCreation.backup_entries(data=data, basedir=basedir)
+
+    from app.models import Purpose
+    Purpose.backup_entries(data=data, basedir=basedir)
 
     from app.models import Punch
     Punch.backup_entries(data=data, basedir=basedir)
