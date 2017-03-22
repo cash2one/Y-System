@@ -266,11 +266,11 @@ def booking():
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     bookings = pagination.items
     return render_template('manage/booking.html',
-        bookings=bookings,
         show_today_bookings=show_today_bookings,
         show_future_bookings=show_future_bookings,
         show_history_bookings=show_history_bookings,
-        pagination=pagination
+        pagination=pagination,
+        bookings=bookings
     )
 
 
@@ -541,12 +541,12 @@ def rental():
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     rentals = pagination.items
     return render_template('manage/rental.html',
-        rentals=rentals,
         show_today_rentals=show_today_rentals,
         show_today_rentals_1103=show_today_rentals_1103,
         show_today_rentals_1707=show_today_rentals_1707,
         show_history_rentals=show_history_rentals,
-        pagination=pagination
+        pagination=pagination,
+        rentals=rentals
     )
 
 
@@ -1315,8 +1315,8 @@ def period():
         form=form,
         show_vb_periods=show_vb_periods,
         show_y_gre_periods=show_y_gre_periods,
-        periods=periods,
-        pagination=pagination
+        pagination=pagination,
+        periods=periods
     )
 
 
@@ -1453,11 +1453,11 @@ def schedule():
     schedules = pagination.items
     return render_template('manage/schedule.html',
         form=form,
-        schedules=schedules,
         show_today_schedules=show_today_schedules,
         show_future_schedules=show_future_schedules,
         show_history_schedules=show_history_schedules,
-        pagination=pagination
+        pagination=pagination,
+        schedules=schedules
     )
 
 
@@ -1596,10 +1596,10 @@ def lesson():
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     lessons = pagination.items
     return render_template('manage/lesson.html',
-        lessons=lessons,
         show_vb_lessons=show_vb_lessons,
         show_y_gre_lessons=show_y_gre_lessons,
-        pagination=pagination
+        pagination=pagination,
+        lessons=lessons
     )
 
 
@@ -1666,10 +1666,10 @@ def assignment():
     assignments = pagination.items
     return render_template('manage/assignment.html',
         form=form,
-        assignments=assignments,
         show_vb_assignments=show_vb_assignments,
         show_y_gre_assignments=show_y_gre_assignments,
-        pagination=pagination
+        pagination=pagination,
+        assignments=assignments
     )
 
 
@@ -1728,7 +1728,12 @@ def assignment_score(id):
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     scores = pagination.items
-    return render_template('manage/assignment_score.html', form=form, assignment=assignment, scores=scores, pagination=pagination)
+    return render_template('manage/assignment_score.html',
+        form=form,
+        assignment=assignment,
+        pagination=pagination,
+        scores=scores
+    )
 
 
 @manage.route('/assignment/score/edit/<int:id>', methods=['GET', 'POST'])
@@ -1917,13 +1922,13 @@ def test():
         y_gre_form=y_gre_form,
         gre_form=gre_form,
         toefl_form=toefl_form,
-        tests=tests,
         show_vb_tests=show_vb_tests,
         show_y_gre_tests=show_y_gre_tests,
         show_gre_tests=show_gre_tests,
         show_toefl_tests=show_toefl_tests,
         test_type=test_type,
-        pagination=pagination
+        pagination=pagination,
+        tests=tests
     )
 
 
@@ -2141,7 +2146,13 @@ def test_score(test_type, id):
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     scores = pagination.items
-    return render_template('manage/test_score.html', test_type=test_type, form=form, test=test, scores=scores, pagination=pagination)
+    return render_template('manage/test_score.html',
+        test_type=test_type,
+        form=form,
+        test=test,
+        pagination=pagination,
+        scores=scores
+    )
 
 
 @manage.route('/test/paper/toggle-retrieve/<test_type>/<int:id>')
@@ -2542,7 +2553,6 @@ def user():
     return render_template('manage/user.html',
         form=form,
         search_form=search_form,
-        users=users,
         show_activated_users=show_activated_users,
         activated_users_num=activated_users_num,
         show_unactivated_users=show_unactivated_users,
@@ -2563,7 +2573,8 @@ def user():
         developers_num=developers_num,
         show_search_users=show_search_users,
         search_results_num=search_results_num,
-        pagination=pagination
+        pagination=pagination,
+        users=users
     )
 
 
@@ -3753,10 +3764,10 @@ def course():
     courses = pagination.items
     return render_template('manage/course.html',
         form=form,
-        courses=courses,
         show_vb_courses=show_vb_courses,
         show_y_gre_courses=show_y_gre_courses,
-        pagination=pagination
+        pagination=pagination,
+        courses=courses
     )
 
 
@@ -3797,7 +3808,11 @@ def course_user(id):
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/course_user.html', course=course, users=users, pagination=pagination)
+    return render_template('manage/course_user.html',
+        course=course,
+        pagination=pagination,
+        users=users
+    )
 
 
 @manage.route('/course/toggle-show/<int:id>')
@@ -3881,7 +3896,11 @@ def group():
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     groups = pagination.items
-    return render_template('manage/group.html', form=form, groups=groups, pagination=pagination)
+    return render_template('manage/group.html',
+        form=form,
+        pagination=pagination,
+        groups=groups
+    )
 
 
 @manage.route('/group/delete/<int:id>')
@@ -3975,7 +3994,11 @@ def tag():
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     tags = pagination.items
-    return render_template('manage/tag.html', form=form, tags=tags, pagination=pagination)
+    return render_template('manage/tag.html',
+        form=form,
+        pagination=pagination,
+        tags=tags
+    )
 
 
 @manage.route('/tag/<int:id>')
@@ -3993,7 +4016,11 @@ def tag_user(id):
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     users = pagination.items
-    return render_template('manage/tag_user.html', tag=tag, users=users, pagination=pagination)
+    return render_template('manage/tag_user.html',
+        tag=tag,
+        pagination=pagination,
+        users=users
+    )
 
 
 @manage.route('/tag/edit/<int:id>', methods=['GET', 'POST'])
@@ -4153,7 +4180,6 @@ def ipad():
     return render_template('manage/ipad.html',
         form=form,
         filter_form=filter_form,
-        ipads=ipads,
         show_ipad_all=show_ipad_all,
         all_num=all_num,
         show_ipad_maintain=show_ipad_maintain,
@@ -4168,7 +4194,8 @@ def ipad():
         others_num=others_num,
         show_ipad_filter=show_ipad_filter,
         filter_results_num=filter_results_num,
-        pagination=pagination
+        pagination=pagination,
+        ipads=ipads
     )
 
 
@@ -5437,8 +5464,8 @@ def nota_bene():
         form=form,
         show_vb_notate_bene=show_vb_notate_bene,
         show_y_gre_notate_bene=show_y_gre_notate_bene,
-        notate_bene=notate_bene,
-        pagination=pagination
+        pagination=pagination,
+        notate_bene=notate_bene
     )
 
 
@@ -5522,7 +5549,18 @@ def feedback():
         flash(u'已添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category='success')
         add_feed(user=current_user._get_current_object(), event=u'添加“%s”的“%s”研修反馈' % (user.name_alias, lesson.alias), category=u'manage')
         return redirect(url_for('manage.feedback', page=request.args.get('page', 1, type=int)))
-    query = Feedback.query.filter_by(deleted=False)
+    # search form
+    search_form = SearchForm(prefix='search')
+    if search_form.validate_on_submit():
+        keyword = search_form.keyword.data
+        return redirect(url_for('manage.search_feedback_results', keyword=keyword))
+    show_all_feedbacks = True
+    show_search_feedbacks = False
+    if current_user.is_authenticated:
+        show_all_feedbacks = bool(request.cookies.get('show_all_feedbacks', '1'))
+        show_search_feedbacks = bool(request.cookies.get('show_search_feedbacks', ''))
+    if show_all_feedbacks:
+        query = Feedback.query.filter_by(deleted=False)
     page = request.args.get('page', 1, type=int)
     pagination = query\
         .order_by(Feedback.modified_at.desc())\
@@ -5530,9 +5568,30 @@ def feedback():
     feedbacks = pagination.items
     return render_template('manage/feedback.html',
         form=form,
-        feedbacks=feedbacks,
-        pagination=pagination
+        search_form=search_form,
+        pagination=pagination,
+        feedbacks=feedbacks
     )
+
+
+@manage.route('/feedback/all')
+@login_required
+@permission_required(u'管理反馈')
+def all_feedbacks():
+    resp = make_response(redirect(url_for('manage.feedback')))
+    resp.set_cookie('show_all_feedbacks', '1', max_age=30*24*60*60)
+    resp.set_cookie('show_search_feedbacks', '', max_age=30*24*60*60)
+    return resp
+
+
+@manage.route('/feedback/search/results')
+@login_required
+@permission_required(u'管理反馈')
+def search_feedback_results():
+    resp = make_response(redirect(url_for('manage.feedback', keyword=request.args.get('keyword'))))
+    resp.set_cookie('show_all_feedbacks', '', max_age=30*24*60*60)
+    resp.set_cookie('show_search_feedbacks', '1', max_age=30*24*60*60)
+    return resp
 
 
 @manage.route('/feedback/edit/<int:id>', methods=['GET', 'POST'])
@@ -5551,6 +5610,7 @@ def edit_feedback(id):
             return redirect(url_for('manage.edit_feedback', id=feedback.id, page=request.args.get('page', 1, type=int)))
         feedback.study_plan_id = study_plan.id
         feedback.body_html = form.body.data
+        feedback.unread = True
         feedback.modified_at = datetime.utcnow()
         feedback.modified_by_id = current_user.id
         db.session.add(feedback)
@@ -5558,6 +5618,7 @@ def edit_feedback(id):
         flash(u'已更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, lesson.alias), category='success')
         add_feed(user=current_user._get_current_object(), event=u'更新“%s”的“%s”研修反馈' % (feedback.study_plan.user.name_alias, lesson.alias), category=u'manage')
         return redirect(request.args.get('next') or url_for('manage.feedback'))
+    form.user.data = feedback.study_plan.user.name_alias
     form.lesson.data = unicode(feedback.study_plan.lesson.id)
     form.body.data = feedback.body_html
     return render_template('manage/edit_feedback.html', form=form, feedback=feedback)
@@ -5611,8 +5672,8 @@ def announcement():
     announcements = pagination.items
     return render_template('manage/announcement.html',
         form=form,
-        announcements=announcements,
-        pagination=pagination
+        pagination=pagination,
+        announcements=announcements
     )
 
 
@@ -5713,7 +5774,11 @@ def product():
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     products = pagination.items
-    return render_template('manage/product.html', form=form, products=products, pagination=pagination)
+    return render_template('manage/product.html',
+        form=form,
+        pagination=pagination,
+        products=products
+    )
 
 
 @manage.route('/product/toggle-availability/<int:id>')
@@ -5793,7 +5858,11 @@ def product_purchase(id):
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     purchases = pagination.items
-    return render_template('manage/product_purchase.html', product=product, purchases=purchases, pagination=pagination)
+    return render_template('manage/product_purchase.html',
+        product=product,
+        pagination=pagination,
+        purchases=purchases
+    )
 
 
 @manage.route('/role', methods=['GET', 'POST'])
@@ -5819,7 +5888,11 @@ def role():
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     roles = pagination.items
-    return render_template('manage/role.html', form=form, roles=roles, pagination=pagination)
+    return render_template('manage/role.html',
+        form=form,
+        pagination=pagination,
+        roles=roles
+    )
 
 
 @manage.route('/role/edit/<int:id>', methods=['GET', 'POST'])
@@ -5910,12 +5983,12 @@ def permission():
     permissions = pagination.items
     return render_template('manage/permission.html',
         form=form,
-        permissions=permissions,
         show_booking_permissions=show_booking_permissions,
         show_manage_permissions=show_manage_permissions,
         show_develop_permissions=show_develop_permissions,
         show_other_permissions=show_other_permissions,
-        pagination=pagination
+        pagination=pagination,
+        permissions=permissions
     )
 
 
@@ -6076,8 +6149,8 @@ def feed():
         show_manage_feeds=show_manage_feeds,
         show_access_feeds=show_access_feeds,
         show_email_feeds=show_email_feeds,
-        feeds=feeds,
-        pagination=pagination
+        pagination=pagination,
+        feeds=feeds
     )
 
 

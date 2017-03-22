@@ -12,7 +12,7 @@
 {% block page_masthead %}
 <div class="ui text container">
     {{ macros.message_widget() }}
-    <h1 class="ui inverted header"><i class="edit icon"></i>编辑{{ feedback.study_plan.user.name_alias }}的研修反馈</h1>
+    <h1 class="ui inverted header"><i class="edit icon"></i>编辑反馈</h1>
 </div>
 {% endblock %}
 
@@ -23,9 +23,15 @@
             <div class="column">
                 <form id="edit-feedback" action="{{ url_for('manage.edit_feedback', id=feedback.id, next=request.args.get('next')) }}" method="POST" class="ui form">
                     {{ form.hidden_tag() }}
-                    <div class="required field">
-                        {{ form.lesson.label() }}
-                        {{ form.lesson(class='ui dropdown') }}
+                    <div class="fields">
+                        <div class="twelve wide required field">
+                            {{ form.user.label() }}
+                            {{ form.user(placeholder='用户', readonly='') }}
+                        </div>
+                        <div class="four wide required field">
+                            {{ form.lesson.label() }}
+                            {{ form.lesson(class='ui dropdown') }}
+                        </div>
                     </div>
                     <div class="required field">
                         {{ form.body.label() }}

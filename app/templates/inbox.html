@@ -26,6 +26,7 @@
                 </div>
             </div>
             <div class="twelve wide column">
+                {% if messages %}
                 <div class="ui divided items">
                     {% for message in messages %}
                     <div class="item">
@@ -39,6 +40,7 @@
                     {% endfor %}
                 </div>
                 {% if pagination %}{{ macros.pagination_widget(pagination, 'main.inbox') }}{% endif %}
+                {% endif %}
             </div>
         </div>
     </div>

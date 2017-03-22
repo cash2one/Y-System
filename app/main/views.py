@@ -102,9 +102,9 @@ def profile(id):
         show_profile_progress=show_profile_progress,
         show_profile_bookings=show_profile_bookings,
         show_profile_archive=show_profile_archive,
+        pagination=pagination,
         feeds=feeds,
         bookings=bookings,
-        pagination=pagination,
         announcements=announcements
     )
 
@@ -243,24 +243,30 @@ def inbox():
             .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
             .filter(StudyPlan.user_id == current_user.id)\
             .filter(Feedback.unread == True)\
+            .filter(Feedback.deleted == False)\
             .order_by(Feedback.modified_at.desc())
     unread_num = Feedback.query\
         .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
         .filter(StudyPlan.user_id == current_user.id)\
         .filter(Feedback.unread == True)\
+        .filter(Feedback.deleted == False)\
         .count()
     if show_all_messages:
         query = Feedback.query\
             .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
             .filter(StudyPlan.user_id == current_user.id)\
+            .filter(Feedback.deleted == False)\
             .order_by(Feedback.modified_at.desc())
     all_num = Feedback.query\
         .join(StudyPlan, StudyPlan.id == Feedback.study_plan_id)\
         .filter(StudyPlan.user_id == current_user.id)\
+        .filter(Feedback.deleted == False)\
         .count()
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page, per_page=current_app.config['RECORD_PER_PAGE'], error_out=False)
     messages = pagination.items
+    for message in messages:
+        message.mark_read()
     return render_template('inbox.html',
         show_unread_messages=show_unread_messages,
         unread_num=unread_num,

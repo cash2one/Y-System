@@ -52,6 +52,20 @@
                 </div>
                 <div class="ui secondary stackable menu">
                     <a class="item active loading-trigger" href="{{ url_for('manage.feedback', page=pagination.page) }}">全部</a>
+                    <div class="item">
+                        <form id="search-user" action="{{ url_for('manage.feedback') }}" method="POST" class="ui form">
+                            {{ search_form.hidden_tag() }}
+                            <div class="field">
+                                <div class="ui search">
+                                    <div class="ui transparent left icon input">
+                                        {{ search_form.keyword(placeholder='输入姓名/邮箱查询用户', class='prompt') }}
+                                        <i class="search icon"></i>
+                                    </div>
+                                    <div class="results"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <table class="ui very basic sortable selectable celled table">
                     <thead>

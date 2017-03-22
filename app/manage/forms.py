@@ -979,6 +979,7 @@ class NewFeedbackForm(FlaskForm):
 
 
 class EditFeedbackForm(FlaskForm):
+    user = StringField(u'用户（邮箱）')
     lesson = SelectField(u'课程', coerce=unicode, validators=[Required()])
     body = TextAreaField(u'反馈内容', validators=[Required()])
     submit = SubmitField(u'提交')
